@@ -144,6 +144,7 @@ struct App {
     explored: std::collections::BTreeSet<String>, // first words of things typed
     unhinged: bool,                                // personality: the trapped god (true) or the plain paperclip
     onboarding: Option<u8>,                        // the first-run setup's step (0 = waiting for a name)
+    moments: std::collections::HashMap<&'static str, Instant>, // when each game last got a live comment
 }
 
 /// (id, counter, how many). Titles and quips live in the "achievements" section.
@@ -238,6 +239,7 @@ impl App {
             explored: Default::default(),
             unhinged: true,
             onboarding: None,
+            moments: Default::default(),
         };
         if let Some(game) = play {
             app.arcade.open(&game);
@@ -320,6 +322,25 @@ impl App {
                 }
                 *best = n;
                 Reply::say(lines::pick("game_highscore").replace("{score}", &n.to_string())).mood(Mood::Party)
+            }
+            Time(key, secs) => {
+                // best times: lower is better
+                let best = self.highscores.entry(key).or_insert(u32::MAX);
+                if secs >= *best {
+                    return;
+                }
+                *best = secs;
+                Reply::say(lines::pick("game_highscore").replace("{score}", &format!("{secs} s"))).mood(Mood::Party)
+            }
+            Moment(g, kind) => {
+                // live comments on big moments, but not every few seconds
+                let pool = if g == "chess" { format!("chess_{kind}") } else { format!("game_moment_{g}_{kind}") };
+                let now = Instant::now();
+                if lines::all(&pool).is_empty() || self.moments.get(g).is_some_and(|t| now.duration_since(*t) < Duration::from_secs(20)) {
+                    return;
+                }
+                self.moments.insert(g, now);
+                lines::reply(&pool)
             }
         };
         self.pipe_up(r);
@@ -1143,7 +1164,7 @@ impl App {
             // during setup, the first thing typed is the user's name
             let cmd = if self.onboarding == Some(0) { format!("onboard name {cmd}") } else { cmd };
             self.run(ctx, &cmd);
-            self.focus_input = true;
+            self.focus_input = !self.arcade.wants_focus(); // a game just opened: the keyboard is the game's
         }
         if let Some(a) = clicked {
             self.act(ctx, a);
@@ -1172,7 +1193,8 @@ impl eframe::App for App {
             // a classic teal desktop behind the transparent window, so the picture isn't see-through
             ui.painter().rect_filled(ui.max_rect(), 0.0, Color32::from_rgb(0, 128, 128));
         }
-        for o in self.arcade.show(&ctx) {
+        let near = ctx.input(|i| i.viewport().outer_rect);
+        for o in self.arcade.show(&ctx, &self.highscores, near) {
             self.game_event(o);
         }
         if self.screenshot.is_some() && self.arcade.is_open() {
@@ -1816,26 +1838,26 @@ fn draw_hat(p: &egui::Painter, tf: &dyn Fn(f32, f32) -> Pos2, hat: &str, t: f32)
 }
 
 fn setup_style(ctx: &egui::Context) {
-    // prefer a Tahoma-like system font for the classic look; fall back to egui's own
-    let candidates = [
-        "/usr/share/fonts/TTF/tahoma.ttf",
-        "C:\\Windows\\Fonts\\tahoma.ttf",
-        "/usr/share/fonts/TTF/DejaVuSans.ttf",
-        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-        "/usr/share/fonts/liberation/LiberationSans-Regular.ttf",
-    ];
-    if let Some(bytes) = candidates.iter().find_map(|p| std::fs::read(p).ok()) {
-        let mut fonts = egui::FontDefinitions::default();
-        fonts.font_data.insert("classic".into(), std::sync::Arc::new(egui::FontData::from_owned(bytes)));
-        fonts.families.entry(egui::FontFamily::Proportional).or_default().insert(0, "classic".into());
-        ctx.set_fonts(fonts);
+    // Wine's free Tahoma look-alike (LGPL, app/assets/fonts) gives the classic look on every system;
+    // egui's own fonts stay behind it for emoji and symbols
+    let mut fonts = egui::FontDefinitions::default();
+    for (name, bytes) in [("classic", &include_bytes!("../assets/fonts/wine-tahoma.ttf")[..]), ("classic-bold", &include_bytes!("../assets/fonts/wine-tahoma-bold.ttf")[..])] {
+        fonts.font_data.insert(name.into(), std::sync::Arc::new(egui::FontData::from_static(bytes)));
     }
+    let fallback = fonts.families.get(&egui::FontFamily::Proportional).cloned().unwrap_or_default();
+    fonts.families.entry(egui::FontFamily::Proportional).or_default().insert(0, "classic".into());
+    fonts.families.insert(egui::FontFamily::Name("bold".into()), std::iter::once("classic-bold".to_string()).chain(fallback.iter().cloned()).collect());
+    // chess pieces and other symbols from one font on every system (Windows' Tahoma has no chess glyphs)
+    let glyphs = ["emoji-icon-font", "NotoEmoji-Regular", "classic"].iter().filter(|n| fonts.font_data.contains_key(**n)).map(|n| n.to_string()).collect();
+    fonts.families.insert(egui::FontFamily::Name("glyphs".into()), glyphs);
+    ctx.set_fonts(fonts);
     let mut v = egui::Visuals::light();
-    let gray = Color32::from_rgb(212, 208, 200);
+    // the same 98 grey as the arcade windows (games::win98::FACE)
+    let gray = Color32::from_rgb(192, 192, 192);
     for (wv, fill) in [
         (&mut v.widgets.inactive, gray),
-        (&mut v.widgets.hovered, Color32::from_rgb(228, 225, 218)),
-        (&mut v.widgets.active, Color32::from_rgb(190, 186, 178)),
+        (&mut v.widgets.hovered, Color32::from_rgb(208, 208, 208)),
+        (&mut v.widgets.active, Color32::from_rgb(176, 176, 176)),
     ] {
         wv.bg_fill = fill;
         wv.weak_bg_fill = fill;

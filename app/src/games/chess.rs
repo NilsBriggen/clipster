@@ -454,7 +454,9 @@ impl Game for Chess {
         self.think.is_some()
     }
 
-    fn ui(&mut self, ui: &mut Ui, r: Rect, input: bool, out: &mut Vec<Outcome>) {
+    fn ui(&mut self, ui: &mut Ui, r: Rect, f: &mut super::Frame) {
+        let input = f.input;
+        let out = &mut *f.out;
         // Clipster's turn: think on a thread so the window never freezes
         if self.vs_clipster() && !self.pos.white && self.end.is_none() {
             match &self.think {

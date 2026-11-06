@@ -154,7 +154,9 @@ impl Game for Hang {
         false
     }
 
-    fn ui(&mut self, ui: &mut Ui, r: Rect, input: bool, out: &mut Vec<Outcome>) {
+    fn ui(&mut self, ui: &mut Ui, r: Rect, f: &mut super::Frame) {
+        let input = f.input;
+        let out = &mut *f.out;
         let over = self.won() || self.lost();
         if input {
             let typed: Vec<char> = ui.input(|i| i.events.iter().filter_map(|e| if let Event::Text(t) = e { Some(t.clone()) } else { None }).flat_map(|t| t.chars().collect::<Vec<_>>()).collect());

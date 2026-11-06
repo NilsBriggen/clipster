@@ -252,8 +252,10 @@ impl Game for Hunt {
         self.started.is_some() && self.took.is_none()
     }
 
-    fn ui(&mut self, ui: &mut Ui, r: Rect, input: bool, out: &mut Vec<Outcome>) {
-        self.now = ui.input(|i| i.time);
+    fn ui(&mut self, ui: &mut Ui, r: Rect, f: &mut super::Frame) {
+        let (input, now) = (f.input, f.time);
+        let out = &mut *f.out;
+        self.now = now;
         // the top strip: bugs left, Reset, time
         let top = Rect::from_min_size(r.min, vec2(r.width(), TOP));
         win98::panel(ui.painter(), top, win98::FACE, false);

@@ -9,16 +9,20 @@ mod hangman;
 mod paperjam;
 mod win98;
 
-use eframe::egui::{self, pos2, vec2, Event, Rect, Sense, Ui, Vec2};
+use eframe::egui::{self, pos2, vec2, Event, Pos2, Rect, Sense, Ui, Vec2};
+use std::collections::BTreeMap;
+use std::time::Instant;
 use win98::{EDGE, MENU_H, PAD, STATUS_H, TITLE_H};
 
 /// What happened in a game, so Clipster can comment and keep high scores.
 #[derive(Clone, Debug, PartialEq)]
 pub enum Outcome {
     Start(&'static str),
-    Score(&'static str, u32), // a finished round's score
+    Score(&'static str, u32), // a finished round's score (higher is better)
     Won(&'static str),
     Lost(&'static str),
+    Time(String, u32), // a finished round's time in seconds, under a best-time key like "bughunt-expert" (lower is better)
+    Moment(&'static str, &'static str), // something worth a comment mid-game: (game, what), e.g. ("paperjam", "quad")
 }
 
 /// (command name, window title)
@@ -30,6 +34,39 @@ pub const NAMES: &[(&str, &str)] = &[
     ("chess", "Chess"),
     ("hangman", "Hangman"),
 ];
+
+/// What a game gets from the arcade every frame.
+pub struct Frame<'a> {
+    /// Keys and mouse are for the game (no menu or dialog in front of it).
+    pub input: bool,
+    /// Real seconds since the last frame, at most 0.1; 0 while paused or waiting for the window to get focus.
+    /// Games use this, never egui's dt (which is wrong in a second window).
+    pub dt: f32,
+    /// Game time in seconds: the sum of `dt`, so it stops while paused.
+    pub time: f64,
+    /// The saved best for `Game::best_key` (a score, or a time for best-time games).
+    pub best: Option<u32>,
+    pub out: &'a mut Vec<Outcome>,
+}
+
+/// Fixed-step time for real-time games, so they play the same at 60, 144 or 240 frames per second.
+#[derive(Default)]
+pub struct Steps {
+    acc: f32,
+}
+
+impl Steps {
+    pub const HZ: f32 = 120.0;
+    pub const DT: f32 = 1.0 / Self::HZ;
+
+    /// How many steps of `Steps::DT` seconds to simulate for `dt` seconds of real time.
+    pub fn take(&mut self, dt: f32) -> u32 {
+        self.acc += dt;
+        let n = (self.acc * Self::HZ).floor();
+        self.acc -= n * Self::DT;
+        (n as u32).min(24) // after a long hiccup, don't fast-forward through a whole second
+    }
+}
 
 /// What every game does. The Arcade draws the Win98 window around it.
 trait Game {
@@ -47,10 +84,18 @@ trait Game {
     fn status(&self) -> String;
     /// The round is decided (won, lost, game over): any key or click starts the next one.
     fn finished(&self) -> bool;
-    /// True while something moves on its own and the window must repaint every frame.
+    /// True while something moves on its own: the window repaints every frame, and losing focus pauses it.
     fn live(&self) -> bool;
-    /// Draw into `r` and, when `input` is true, react to the mouse and keyboard. Push what happened onto `out`.
-    fn ui(&mut self, ui: &mut Ui, r: Rect, input: bool, out: &mut Vec<Outcome>);
+    /// Where its best is saved (`name` = the game's command name). Best-time games add the difficulty.
+    fn best_key(&self, name: &str) -> String {
+        name.to_string()
+    }
+    /// The game reads typed letters, so P can't mean pause (Esc still does).
+    fn takes_text(&self) -> bool {
+        false
+    }
+    /// Draw into `r` and, when `f.input` is true, react to the mouse and keyboard. Push what happened onto `f.out`.
+    fn ui(&mut self, ui: &mut Ui, r: Rect, f: &mut Frame);
 }
 
 fn make(name: &str) -> Box<dyn Game> {
@@ -70,7 +115,14 @@ pub struct Arcade {
     menu: bool,
     pending: Vec<Outcome>,
     sent: Vec2,
-    done: Option<f64>, // when the open game's round ended
+    done: Option<f64>, // game time when the open game's round ended
+    paused: bool,
+    focused: bool,               // the game window had keyboard focus last frame
+    opened: Option<Instant>,     // when the open game's window was created
+    fresh: bool,                 // opened since the last frame: focus it, place it
+    place: Option<Pos2>,         // where its window opened
+    last: Option<Instant>,       // the arcade's clock
+    time: f64,
 }
 
 impl Arcade {
@@ -81,6 +133,11 @@ impl Arcade {
                 self.open = Some((n, make(n)));
                 self.menu = false;
                 self.done = None;
+                self.paused = false;
+                self.focused = false;
+                self.opened = Some(Instant::now());
+                self.fresh = true;
+                self.place = None;
                 self.pending.push(Outcome::Start(n));
                 true
             }
@@ -92,25 +149,67 @@ impl Arcade {
         self.open.is_some()
     }
 
-    /// Call every frame. Draws the open game's window and reports what happened in it.
-    pub fn show(&mut self, ctx: &egui::Context) -> Vec<Outcome> {
+    /// A game window was just opened and should get the keyboard (so Clipster shouldn't grab it).
+    pub fn wants_focus(&self) -> bool {
+        self.fresh
+    }
+
+    /// Call every frame. Draws the open game's window next to `near` (Clipster's window) and reports what happened.
+    /// `best` = Clipster's saved high scores and best times.
+    pub fn show(&mut self, ctx: &egui::Context, best: &BTreeMap<String, u32>, near: Option<Rect>) -> Vec<Outcome> {
         let mut out = std::mem::take(&mut self.pending);
-        let Arcade { open: Some((name, game)), menu, sent, done, .. } = self else { return out };
-        let title = NAMES.iter().find(|(n, _)| n == name).map(|(_, t)| *t).unwrap_or(name);
+        let now = Instant::now();
+        let real = self.last.map_or(0.0, |l| now.duration_since(l).as_secs_f32()).min(0.1);
+        self.last = Some(now);
+        let Some((name, game)) = self.open.as_mut() else { return out };
+        let name: &'static str = name;
+        let title = NAMES.iter().find(|(n, _)| *n == name).map(|(_, t)| *t).unwrap_or(name);
         let size = game.size() + vec2(2.0 * (EDGE + PAD), 2.0 * (EDGE + PAD) + TITLE_H + MENU_H + STATUS_H);
-        let resized = *sent != size;
-        *sent = size;
+        let resized = self.sent != size;
+        self.sent = size;
+        let embedded = ctx.embed_viewports();
+        if self.place.is_none() {
+            // beside Clipster (left of him if there's room, else right), never under his balloon
+            let monitor = ctx.input(|i| i.viewport().monitor_size).unwrap_or(vec2(1920.0, 1080.0));
+            self.place = Some(match near {
+                Some(c) if c.min.x > size.x + 24.0 => pos2(c.min.x - size.x - 16.0, (c.max.y - size.y).clamp(0.0, (monitor.y - size.y).max(0.0))),
+                Some(c) => pos2((c.max.x + 16.0).min((monitor.x - size.x).max(0.0)), (c.max.y - size.y).clamp(0.0, (monitor.y - size.y).max(0.0))),
+                None => pos2(((monitor.x - size.x) / 2.0).max(0.0), ((monitor.y - size.y) / 2.0).max(0.0)),
+            });
+        }
+        let fresh = std::mem::take(&mut self.fresh);
+        let since_open = self.opened.map_or(9.0, |t| now.duration_since(t).as_secs_f32());
+        let mut state = State { menu: &mut self.menu, done: &mut self.done, paused: &mut self.paused, focused: &mut self.focused, time: &mut self.time, real, since_open, fresh, embedded };
+        let key = game.best_key(name);
+        let best = best.get(&key).copied();
+        let close = if embedded {
+            // screenshot mode: draw the window straight onto the picture, without egui's own window frame
+            egui::Area::new(egui::Id::unique("clipster-arcade-embedded"))
+                .fixed_pos(pos2(0.0, 0.0))
+                .show(ctx, |ui| window(ui, title, size, game.as_mut(), &mut state, best, &mut out))
+                .inner
+        } else {
+            let mut builder = egui::ViewportBuilder::default().with_title(title).with_inner_size(size).with_decorations(false).with_resizable(false);
+            if let Some(p) = self.place {
+                builder = builder.with_position(p);
+            }
+            ctx.show_viewport_immediate(egui::ViewportId::from_hash_of("clipster-arcade"), builder, |ui, _| {
+                if resized {
+                    ui.ctx().send_viewport_cmd(egui::ViewportCommand::InnerSize(size));
+                }
+                if fresh {
+                    ui.ctx().send_viewport_cmd(egui::ViewportCommand::Focus); // keys go to the game, not to Clipster
+                }
+                let close = window(ui, title, size, game.as_mut(), &mut state, best, &mut out) || ui.input(|i| i.viewport().close_requested());
+                if game.live() && !*state.paused {
+                    ui.ctx().request_repaint(); // this window's own frames: without it egui's timing in here is wrong
+                }
+                close
+            })
+        };
         if game.live() {
             ctx.request_repaint();
         }
-        let builder = egui::ViewportBuilder::default().with_title(title).with_inner_size(size).with_decorations(false).with_resizable(false);
-        let close = ctx.show_viewport_immediate(egui::ViewportId::from_hash_of("clipster-arcade"), builder, |ui, class| {
-            let embedded = class == egui::ViewportClass::EmbeddedWindow;
-            if resized && !embedded {
-                ui.ctx().send_viewport_cmd(egui::ViewportCommand::InnerSize(size));
-            }
-            window(ui, title, size, game.as_mut(), menu, done, embedded, &mut out) || ui.input(|i| i.viewport().close_requested())
-        });
         if close {
             self.open = None;
         }
@@ -118,43 +217,86 @@ impl Arcade {
     }
 }
 
+/// The arcade's per-window state, lent to `window` for one frame.
+struct State<'a> {
+    menu: &'a mut bool,
+    done: &'a mut Option<f64>,
+    paused: &'a mut bool,
+    focused: &'a mut bool,
+    time: &'a mut f64,
+    real: f32,
+    since_open: f32,
+    fresh: bool,
+    embedded: bool,
+}
+
 /// The 98 window: title bar, Game menu, the game itself, status bar. Returns true when it should close.
-#[allow(clippy::too_many_arguments)]
-fn window(ui: &mut Ui, title: &str, size: Vec2, game: &mut dyn Game, menu: &mut bool, done: &mut Option<f64>, embedded: bool, out: &mut Vec<Outcome>) -> bool {
-    if !embedded {
+fn window(ui: &mut Ui, title: &str, size: Vec2, game: &mut dyn Game, st: &mut State, best: Option<u32>, out: &mut Vec<Outcome>) -> bool {
+    if !st.embedded {
         ui.painter().rect_filled(ui.max_rect(), 0.0, win98::FACE);
     }
     let (win, _) = ui.allocate_exact_size(size, Sense::hover());
     win98::panel(ui.painter(), win, win98::FACE, true);
     let inner = win.shrink(EDGE);
     let bar = Rect::from_min_size(inner.min, vec2(inner.width(), TITLE_H));
-    let mut close = win98::title_bar(ui, bar, title, !embedded);
+    let mut close = win98::title_bar(ui, bar, title, !st.embedded);
     let row = Rect::from_min_size(pos2(inner.min.x, bar.max.y), vec2(inner.width(), MENU_H));
-    let label = win98::menu_label(ui, row.min + vec2(2.0, 1.0), "Game", *menu);
+    let label = win98::menu_label(ui, row.min + vec2(2.0, 1.0), "Game", *st.menu);
     let toggled = label.clicked();
     let area = Rect::from_min_size(pos2(inner.min.x + PAD, row.max.y + PAD), game.size());
-    game.ui(ui, area, !*menu, out);
-    if !*menu && ui.input(|i| i.key_pressed(egui::Key::F2)) {
+
+    // focus: wait for it after opening (so the countdown doesn't run while the keys still go elsewhere),
+    // and pause a running game when it's lost
+    let has_focus = st.embedded || ui.input(|i| i.viewport().focused).unwrap_or(true);
+    let waiting = !has_focus && st.since_open < 1.5 && !st.fresh;
+    if *st.focused && !has_focus && game.live() && !game.finished() {
+        *st.paused = true;
+    }
+    *st.focused = has_focus;
+    let pause_key = ui.input(|i| i.key_pressed(egui::Key::Escape) || (!game.takes_text() && i.key_pressed(egui::Key::P)));
+    if pause_key && !*st.menu && game.live() && !game.finished() {
+        *st.paused = !*st.paused;
+    }
+    if !game.live() {
+        *st.paused = false; // nothing runs on its own: nothing to pause
+    }
+    let running = !*st.menu && !*st.paused && !waiting;
+    let dt = if running { st.real } else { 0.0 };
+    *st.time += dt as f64;
+    let mut f = Frame { input: !*st.menu && !*st.paused, dt, time: *st.time, best, out };
+    game.ui(ui, area, &mut f);
+    if !*st.menu && !*st.paused && ui.input(|i| i.key_pressed(egui::Key::F2)) {
         game.new_round();
     }
     // a decided round restarts on any key or a click in the game, after a short pause so the losing press doesn't count
-    let now = ui.input(|i| i.time);
     if game.finished() {
-        let since = *done.get_or_insert(now);
+        let since = *st.done.get_or_insert(*st.time);
         let pressed = ui.input(|i| {
-            i.events.iter().any(|e| matches!(e, Event::Key { pressed: true, repeat: false, .. }))
+            i.events.iter().any(|e| matches!(e, Event::Key { pressed: true, repeat: false, key, .. } if *key != egui::Key::Escape))
                 || (i.pointer.any_click() && i.pointer.interact_pos().is_some_and(|p| area.contains(p)))
         });
-        if !*menu && pressed && now - since > 0.8 {
+        if !*st.menu && pressed && *st.time - since > 0.8 {
             game.new_round();
-            *done = None;
+            *st.done = None;
         }
     } else {
-        *done = None;
+        *st.done = None;
+    }
+    if *st.paused {
+        let lines = [String::from("Paused."), String::from("Take your time. I'll hold everything right where it is.")];
+        match win98::dialog(ui, area, "Paused", win98::Icon::Pause, &lines, &["Resume", "New game", "Close"]) {
+            Some(0) => *st.paused = false,
+            Some(1) => {
+                game.new_round();
+                *st.paused = false;
+            }
+            Some(_) => close = true,
+            None => {}
+        }
     }
     win98::status_bar(ui.painter(), Rect::from_min_max(pos2(inner.min.x, inner.max.y - STATUS_H), inner.max), &game.status());
 
-    if *menu {
+    if *st.menu {
         let levels = game.levels();
         let h = 20.0;
         let rows = 2.0 + levels.len() as f32;
@@ -162,13 +304,13 @@ fn window(ui: &mut Ui, title: &str, size: Vec2, game: &mut dyn Game, menu: &mut 
         let drop = Rect::from_min_size(pos2(label.rect.min.x, row.max.y - 1.0), vec2(170.0, rows * h + gaps * 6.0 + 6.0));
         win98::panel(ui.painter(), drop, win98::FACE, true);
         let mut y = drop.min.y + 3.0;
-        let item = |ui: &mut Ui, text: &str, on: bool, y: &mut f32| {
-            let hit = win98::menu_item(ui, Rect::from_min_size(pos2(drop.min.x + 3.0, *y), vec2(drop.width() - 6.0, h)), text, on);
+        let item = |ui: &mut Ui, text: &str, key: &str, on: bool, y: &mut f32| {
+            let hit = win98::menu_item(ui, Rect::from_min_size(pos2(drop.min.x + 3.0, *y), vec2(drop.width() - 6.0, h)), text, key, on);
             *y += h;
             hit
         };
         let mut picked = false;
-        if item(ui, "New            F2", false, &mut y) {
+        if item(ui, "New", "F2", false, &mut y) {
             game.new_round();
             picked = true;
         }
@@ -177,7 +319,7 @@ fn window(ui: &mut Ui, title: &str, size: Vec2, game: &mut dyn Game, menu: &mut 
         if !levels.is_empty() {
             let now = game.level();
             for (i, l) in levels.iter().enumerate() {
-                if item(ui, l, i == now, &mut y) {
+                if item(ui, l, "", i == now, &mut y) {
                     game.set_level(i);
                     picked = true;
                 }
@@ -185,15 +327,15 @@ fn window(ui: &mut Ui, title: &str, size: Vec2, game: &mut dyn Game, menu: &mut 
             win98::separator(ui.painter(), y + 2.0, drop.min.x + 3.0, drop.max.x - 3.0);
             y += 6.0;
         }
-        if item(ui, "Close", false, &mut y) {
+        if item(ui, "Close", "", false, &mut y) {
             close = true;
         }
         let clicked_away = ui.input(|i| i.pointer.primary_clicked() || i.key_pressed(egui::Key::Escape));
         if picked || close || (clicked_away && !toggled) {
-            *menu = false;
+            *st.menu = false;
         }
     } else if toggled {
-        *menu = true;
+        *st.menu = true;
     }
     close
 }
@@ -232,6 +374,16 @@ mod tests {
         let flat = wire([1.0; 3]);
         assert!(flat.iter().all(|p| (p.y + 2.0).abs() < 0.01), "straight wire stays on one line");
         assert_eq!(flat.len(), bent.len(), "hangman's eyes index into the wire");
+    }
+
+    #[test]
+    fn fixed_steps_add_up_whatever_the_frame_rate() {
+        for fps in [60.0, 144.0, 240.0, 33.0] {
+            let mut s = Steps::default();
+            let n: u32 = (0..(fps as usize * 3)).map(|_| s.take(1.0 / fps)).sum();
+            assert!((n as f32 - 3.0 * Steps::HZ).abs() <= 1.0, "{fps} fps gave {n} steps in 3 s");
+        }
+        assert_eq!(Steps::default().take(5.0), 24, "a long hiccup doesn't fast-forward");
     }
 
     #[test]

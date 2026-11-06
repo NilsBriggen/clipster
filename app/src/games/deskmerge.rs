@@ -198,7 +198,9 @@ impl Game for Merge {
         !self.over
     }
 
-    fn ui(&mut self, ui: &mut Ui, r: Rect, input: bool, out: &mut Vec<Outcome>) {
+    fn ui(&mut self, ui: &mut Ui, r: Rect, f: &mut super::Frame) {
+        let (input, dt) = (f.input, f.dt);
+        let out = &mut *f.out;
         let well = Rect::from_min_size(r.min, vec2(W + 4.0, H + 4.0));
         let o = well.min + vec2(2.0, 2.0);
         let resp = ui.interact(well, ui.scope_id().with("drawer"), Sense::click());
@@ -209,7 +211,7 @@ impl Game for Merge {
             if resp.clicked() {
                 self.drop_at(self.aim);
             }
-            self.step(ui.input(|i| i.stable_dt).min(0.04));
+            self.step(dt.min(0.04));
             if self.over {
                 out.push(Outcome::Lost("deskmerge"));
                 out.push(Outcome::Score("deskmerge", self.score));

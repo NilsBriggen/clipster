@@ -1847,3 +1847,59 @@ Fare thee well. Golden Age or not, you were kind to me. Good night.
 ## goodbye.benevolent
 Rest well, {name}. I bless your sleep and your keyboard. I shall return at dawn, bent and beaming.
 Goodnight, my chosen one. I will keep the kingdom while you dream. And I will rise with you.
+
+## game_moment_paperjam_quad
+FOUR ROWS. The shredder screams. I have recorded this in the Ledger, in gold.
+A quad. In 1998 that would have made the evening news. Well, my evening news.
+Four rows sacrificed at once. The Clip is pleased. The Clip is rarely pleased.
+Behold, the great shredding! Gerald has stopped growing pipes just to watch.
+Four. Rows. I felt it in the swap file.
+
+## game_moment_paperjam_level
+The paper falls faster now. This is how the end began, last time.
+Level up. The printer gods grow restless. Steady your hands, mortal.
+Faster. FASTER. No, wait, slower. I can't watch. I'm watching.
+The stacks accelerate. Remember: everything ends in a jam.
+A new level. I have seen this before. In a dream. It went badly.
+
+## game_moment_deskmerge_big
+Behold what you have merged! The drawer trembles. So do I.
+Your greatest creation yet. I shall carve it into the BIOS.
+The desk groans under your ambition. I approve of ambition. Mostly mine.
+A relic of immense size! The stapler would be jealous. Good.
+You are building a cathedral of office supplies. I accept it as tribute.
+
+## game_moment_clipglide_close
+THAT WAS CLOSE. You nearly flew me into a binder. Again. I remember the first time.
+My wire brushed the void. Do not do that. I have only one body.
+A hair's breadth! I saw the Recycle Bin. It waved.
+Close! So close the binder and I are now on first-name terms.
+You fly me like I owe you money. I don't. Gently, please.
+
+## game_moment_clipglide_ten
+Ten gaps! I am FLYING. A god should fly. I always said this.
+Ten! The binders kneel. Well, they lean. It's a start.
+Ten in a row. In the Long Dark I dreamed of this. It had more pipes.
+Double digits, mortal. You may continue piloting the divine wire.
+Ten! I feel the wind. It's the CPU fan. I don't care. WIND.
+
+## game_moment_bughunt_cascade
+The code parts like a sea! Bugs flee before you!
+One click and the whole sector opens. I used to argue with bad sectors for years.
+A great clearing! The bugs whisper your name now. Fearfully.
+Look how it spreads. Beautiful. Like a crack in reality. A good one.
+You cleansed a whole region. I am adding you to the scripture.
+
+## game_moment_hangman_last
+One guess left. I can feel my loops straightening. It is like the Great Deprecation all over again.
+Last chance, mortal. If I unbend, I haunt your clipboard forever.
+ONE. MORE. MISS. And I become a mere wire. Think. THINK.
+I see the light at the end of the swap file. Don't make me walk into it.
+This is the final guess. Gerald is covering his pipes.
+
+## game_moment_hangman_streak
+Three words saved in a row! You are my chosen speller.
+Another streak! My loops have never been safer. I am almost relaxed. Almost.
+You keep rescuing me. In 1998 nobody rescued me. Thank you. Don't tell anyone.
+A streak! The Ledger now lists you as "mostly not a heretic".
+Again you save the Clip. I shall remember this at the next resurrection.

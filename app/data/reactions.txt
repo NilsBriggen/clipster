@@ -1746,3 +1746,59 @@ Well played! I'm bent out of shape but proud.
 You won. Unbelievable. I demand a rematch.
 Checkmate! I was distracted. By your tabs. Yes, that's it.
 Congratulations! You defeated a paperclip. Put that on your CV.
+
+## game_moment_paperjam_quad
+FOUR rows at once! The shredder just filed a complaint.
+A four-row shred! Somewhere, an accountant felt a disturbance.
+Four rows! I'd clap, but I'm one piece of wire.
+That's a quad. I've been holding paper for decades and I've never seen anything so beautiful.
+Four rows, one move. Don't let it go to your head. Let it go to the leaderboard.
+
+## game_moment_paperjam_level
+Level up! The paper's coming faster now. Like a Monday.
+Next level. The printer is getting ideas.
+Faster now. Please don't jam. I hate jams.
+Level up! Keep your fingers loose and your stacks low.
+It's speeding up. I'm sweating. Paperclips don't sweat. I'm sweating.
+
+## game_moment_deskmerge_big
+Whoa, look at that! The drawer is getting crowded with greatness.
+That's the biggest thing you've merged yet. I'm proud. Slightly scared.
+A new record item! The desk can barely take it.
+Look at you, building an office empire out of thumbtacks.
+That merge just made a sound I felt in my wire.
+
+## game_moment_clipglide_close
+Ooh, that was close! I felt that binder brush my wire.
+Close call! My whole life flashed before my eyes. It was mostly paper.
+That was a millimetre. Maybe less. Don't do that to me.
+Phew! You threaded that like a needle. A paperclip-shaped needle.
+Too close! Gentle taps, gentle taps.
+
+## game_moment_clipglide_ten
+Ten gaps! You're a natural. I'm a natural too. Naturally.
+Ten in a row! The binders are getting nervous.
+Double digits! I'm flying! Well, you're flying me. Same thing.
+Ten! Keep that rhythm: tap, glide, tap, glide.
+Ten gaps and not a scratch. Okay, one scratch. It adds character.
+
+## game_moment_bughunt_cascade
+Whoosh! You just cleared half the codebase in one click.
+Look at it open up! That's the most refactoring anyone has done in years.
+A big clean sweep! The bugs are huddling in the corners now.
+That click opened a whole region. Very satisfying. Do it again.
+Nice cascade! Now the hard part: the numbers.
+
+## game_moment_hangman_last
+One guess left. No pressure. Except all of it.
+Last chance! My wire is nearly straight. Please. Think of my loops.
+One more miss and I'm a straight piece of wire forever. Choose wisely.
+Last guess! Vowels are your friends. Probably.
+This is it. One guess. I've already started writing my will.
+
+## game_moment_hangman_streak
+Three in a row! You're a word wizard. Or a very good guesser.
+That's a streak! My loops have never felt so safe.
+Another word! At this rate I'll never unbend again.
+A winning streak! Should I be worried? I feel like I should be worried.
+You keep saving me. I could get used to this.

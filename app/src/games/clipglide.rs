@@ -194,14 +194,16 @@ impl Game for Glide {
         true
     }
 
-    fn ui(&mut self, ui: &mut Ui, r: Rect, input: bool, out: &mut Vec<Outcome>) {
+    fn ui(&mut self, ui: &mut Ui, r: Rect, f: &mut super::Frame) {
+        let (input, dt) = (f.input, f.dt);
+        let out = &mut *f.out;
         let resp = ui.interact(r, ui.scope_id().with("glide"), Sense::click());
         if input {
             let key = ui.input(|i| i.key_pressed(Key::Space) || i.key_pressed(Key::ArrowUp) || i.key_pressed(Key::W));
             if key || resp.clicked() {
                 self.flap();
             }
-            if self.update(ui.input(|i| i.stable_dt).min(0.05)) {
+            if self.update(dt.min(0.05)) {
                 out.push(Outcome::Lost("clipglide"));
                 out.push(Outcome::Score("clipglide", self.score));
             }

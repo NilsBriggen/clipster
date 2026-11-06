@@ -234,7 +234,9 @@ impl Game for Jam {
         !self.over && !self.paused
     }
 
-    fn ui(&mut self, ui: &mut Ui, r: Rect, input: bool, out: &mut Vec<Outcome>) {
+    fn ui(&mut self, ui: &mut Ui, r: Rect, f: &mut super::Frame) {
+        let (input, dt) = (f.input, f.dt);
+        let out = &mut *f.out;
         let was_over = self.over;
         if input {
             ui.input(|i| {
@@ -260,7 +262,7 @@ impl Game for Jam {
                     self.hard_drop();
                 }
             });
-            self.tick(ui.input(|i| i.stable_dt).min(0.05));
+            self.tick(dt.min(0.05));
         }
         if self.over && !was_over {
             out.push(Outcome::Lost("paperjam"));
