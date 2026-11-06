@@ -32,7 +32,10 @@ Screenshot mode needs an unlocked desktop session. While the screen is locked, t
 
 Packaging (what the release workflow runs): `cargo install cargo-packager --locked`, then `cargo packager --release --formats appimage` (Linux) or `--formats wix` (Windows, downloads WiX 3 itself). Output goes to `app/dist/`. Config lives in `[package.metadata.packager]` in `app/Cargo.toml`, and the icons are in `app/assets/`.
 
-Releasing: bump `version` in `app/Cargo.toml`, commit, then push a `v<version>` tag. `.github/workflows/release.yml` builds both packages and publishes the GitHub release. Running it by hand only builds artifacts. `.github/workflows/ci.yml` builds and tests on Ubuntu **and Windows** for every push. It's the only Windows check, since `cargo check --target x86_64-pc-windows-msvc` fails locally: `ring` needs MSVC.
+Releasing:
+1. Bump `version` in `app/Cargo.toml`.
+2. **Write the release description**: a `## <version> (<date>)` section at the top of `CHANGELOG.md`, in the same shape as 0.1.0 (a short intro, Highlights, Install with the exact file names, Known limitations). Every release gets one. The release job publishes that section and fails without it, so auto-generated notes are never the description.
+3. Commit, then push a `v<version>` tag. `.github/workflows/release.yml` builds both packages and publishes the GitHub release. Running it by hand only builds artifacts. `.github/workflows/ci.yml` builds and tests on Ubuntu **and Windows** for every push. It's the only Windows check, since `cargo check --target x86_64-pc-windows-msvc` fails locally: `ring` needs MSVC.
 
 Environment: if `DISPLAY` is set, `main()` removes `WAYLAND_DISPLAY` to force XWayland, because Wayland won't let the window stay on top or move itself. Set `CLIPSTER_WAYLAND=1` to stay on native Wayland.
 

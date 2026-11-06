@@ -54,11 +54,21 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v5
+      # the release description is this version's section of CHANGELOG.md; no section, no release
+      - name: Release description from CHANGELOG.md
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          awk -v v="$version" '/^## /{p = ($2 == v)} p' CHANGELOG.md | tail -n +2 > notes.md
+          if ! grep -q '[^[:space:]]' notes.md; then
+            echo "::error::CHANGELOG.md has no '## $version' section. Write the release description there first."
+            exit 1
+          fi
       - uses: actions/download-artifact@v5
         with:
           path: dist
           merge-multiple: true
       - name: Create the GitHub release
-        run: gh release create "$GITHUB_REF_NAME" dist/* --repo "$GITHUB_REPOSITORY" --title "Clipster $GITHUB_REF_NAME" --generate-notes
+        run: gh release create "$GITHUB_REF_NAME" dist/* --repo "$GITHUB_REPOSITORY" --title "Clipster $GITHUB_REF_NAME" --notes-file notes.md
         env:
           GH_TOKEN: ${{ github.token }}
