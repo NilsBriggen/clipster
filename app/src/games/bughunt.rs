@@ -1,14 +1,30 @@
 //! Bug Hunt: bugs hide in a grid of code tiles. Numbers tell how many bugs are next door.
 
-use super::{win98, Game, Outcome};
-use eframe::egui::{pos2, vec2, Align2, Color32, Id, Painter, Pos2, Rect, Sense, Shape, Stroke, Ui, Vec2};
+use super::{win98, Frame, Game, Outcome};
+use eframe::egui::{pos2, vec2, Align2, Color32, Id, Painter, PointerButton, Pos2, Rect, Sense, Shape, Stroke, Ui, Vec2};
 use rand::seq::SliceRandom;
+use std::collections::VecDeque;
 
-/// (name, columns, rows, bugs)
-pub const LEVELS: [(&str, usize, usize, usize); 3] = [("Beginner", 9, 9, 10), ("Intermediate", 16, 14, 36), ("Expert", 24, 16, 72)];
-const CELL: f32 = 20.0;
-const TOP: f32 = 36.0;
-const MIN_W: f32 = 330.0;
+/// (name, columns, rows, bugs, tile size)
+pub const LEVELS: [(&str, usize, usize, usize, f32); 3] = [("Beginner", 9, 9, 10, 28.0), ("Intermediate", 16, 14, 36, 24.0), ("Expert", 24, 16, 72, 22.0)];
+static LEVEL_NAMES: [&str; 3] = [LEVELS[0].0, LEVELS[1].0, LEVELS[2].0];
+const TOP: f32 = 38.0; // the counters and the New button
+const RIPPLE: f64 = 0.3; // seconds a big opening takes to spread out
+
+const OPEN: Color32 = Color32::from_rgb(218, 218, 214);
+const LINE: Color32 = Color32::from_rgb(170, 170, 166);
+const HIT: Color32 = Color32::from_rgb(222, 46, 46);
+/// Bold ink for 1..8 bugs next door.
+const INK: [Color32; 8] = [
+    Color32::from_rgb(0, 124, 108),
+    Color32::from_rgb(48, 70, 204),
+    Color32::from_rgb(196, 30, 92),
+    Color32::from_rgb(110, 40, 168),
+    Color32::from_rgb(178, 80, 0),
+    Color32::from_rgb(56, 118, 16),
+    Color32::from_rgb(104, 58, 28),
+    Color32::from_rgb(48, 48, 48),
+];
 
 #[derive(Clone, Copy, Default, Debug)]
 pub struct Cell {
@@ -79,27 +95,31 @@ impl Grid {
     }
 
     /// Open a tile. The first one is always safe. Empty tiles open their whole empty patch.
-    pub fn reveal(&mut self, i: usize) {
+    /// Returns what opened with its ring (steps out from the click), nearest first.
+    pub fn reveal(&mut self, i: usize) -> Vec<(usize, u32)> {
         if self.state != State::Playing || self.cells[i].flag || self.cells[i].open {
-            return;
+            return vec![];
         }
         if !self.placed {
             self.place(i);
         }
+        self.cells[i].open = true;
         if self.cells[i].bug {
-            self.cells[i].open = true;
             self.hit = Some(i);
             self.state = State::Lost;
-            return;
+            return vec![(i, 0)];
         }
-        let mut todo = vec![i];
-        while let Some(c) = todo.pop() {
-            if self.cells[c].open || self.cells[c].flag {
-                continue;
-            }
-            self.cells[c].open = true;
+        let mut opened = vec![];
+        let mut todo = VecDeque::from([(i, 0)]);
+        while let Some((c, ring)) = todo.pop_front() {
+            opened.push((c, ring));
             if self.cells[c].near == 0 {
-                todo.extend(self.around(c).into_iter().filter(|&n| !self.cells[n].open));
+                for n in self.around(c) {
+                    if !self.cells[n].open && !self.cells[n].flag {
+                        self.cells[n].open = true;
+                        todo.push_back((n, ring + 1));
+                    }
+                }
             }
         }
         if self.cells.iter().all(|c| c.bug || c.open) {
@@ -108,20 +128,19 @@ impl Grid {
                 c.flag = c.bug;
             }
         }
+        opened
     }
 
     /// Clicking an open number whose sticky notes are all placed opens the rest around it.
-    pub fn chord(&mut self, i: usize) {
+    pub fn chord(&mut self, i: usize) -> Vec<(usize, u32)> {
         let c = self.cells[i];
-        if !c.open || c.near == 0 {
-            return;
-        }
         let around = self.around(i);
-        if around.iter().filter(|&&n| self.cells[n].flag).count() == c.near as usize {
-            for n in around {
-                self.reveal(n);
-            }
+        if !c.open || c.near == 0 || around.iter().filter(|&&n| self.cells[n].flag).count() != c.near as usize {
+            return vec![];
         }
+        let mut opened: Vec<(usize, u32)> = around.into_iter().flat_map(|n| self.reveal(n)).map(|(c, r)| (c, r + 1)).collect();
+        opened.sort_by_key(|&(_, r)| r);
+        opened
     }
 
     pub fn flag(&mut self, i: usize) {
@@ -133,6 +152,17 @@ impl Grid {
     pub fn left(&self) -> i32 {
         self.bugs as i32 - self.cells.iter().filter(|c| c.flag).count() as i32
     }
+
+    /// The covered, un-noted tiles a press on `i` pushes in: itself, or its neighbours when it's an open number.
+    fn pressed(&self, i: usize) -> Vec<usize> {
+        let c = self.cells[i];
+        let down = |n: &usize| !self.cells[*n].open && !self.cells[*n].flag;
+        if c.open && c.near > 0 {
+            self.around(i).into_iter().filter(down).collect()
+        } else {
+            [i].into_iter().filter(down).collect()
+        }
+    }
 }
 
 pub struct Hunt {
@@ -141,90 +171,160 @@ pub struct Hunt {
     started: Option<f64>,
     took: Option<f64>,
     now: f64,
+    shown: Vec<f64>, // when each tile's face appears: cascades ripple out, a lost round's bugs pop in
+    armed: bool,     // the left button went down on the board and is still held
+    confetti: win98::Confetti,
+    result: Option<(bool, Option<u32>)>, // at the end: a new best time?, the best to show
 }
 
 impl Hunt {
     pub fn new() -> Self {
-        let (_, w, h, n) = LEVELS[0];
-        Hunt { grid: Grid::new(w, h, n), level: 0, started: None, took: None, now: 0.0 }
+        let mut h = Hunt { grid: Grid::new(1, 1, 0), level: 0, started: None, took: None, now: 0.0, shown: vec![], armed: false, confetti: win98::Confetti::default(), result: None };
+        h.new_round();
+        h
     }
+
     fn seconds(&self) -> u32 {
         self.took.or(self.started.map(|s| self.now - s)).unwrap_or(0.0) as u32
     }
+
+    fn tile(&self) -> f32 {
+        LEVELS[self.level].4
+    }
+
+    /// When everything has popped into view and the result can show.
+    fn settled(&self) -> f64 {
+        self.shown.iter().copied().fold(0.0, f64::max) + 0.4
+    }
+
+    /// A left click on tile `i`: open it, or open around a satisfied number.
+    fn click(&mut self, i: usize, out: &mut Vec<Outcome>) {
+        let opened = if self.grid.cells[i].open { self.grid.chord(i) } else { self.grid.reveal(i) };
+        if self.started.is_none() && self.grid.placed {
+            self.started = Some(self.now);
+        }
+        let far = opened.iter().map(|&(_, r)| r).max().unwrap_or(0);
+        let step = if far > 0 { (RIPPLE / far as f64).min(0.04) } else { 0.0 };
+        for &(c, ring) in &opened {
+            self.shown[c] = self.now + ring as f64 * step;
+        }
+        if opened.len() >= 20 {
+            out.push(Outcome::Moment("bughunt", "cascade"));
+        }
+    }
+
+    /// The round was just decided: stop the clock, report it, and line up the lost bugs to pop in.
+    fn finish(&mut self, best: Option<u32>, out: &mut Vec<Outcome>) {
+        self.took = Some(self.started.map_or(0.0, |s| self.now - s));
+        let secs = self.seconds();
+        if self.grid.state == State::Won {
+            out.push(Outcome::Won("bughunt"));
+            out.push(Outcome::Time(self.best_key("bughunt"), secs));
+            self.result = Some((best.is_none_or(|b| secs < b), Some(best.map_or(secs, |b| b.min(secs)))));
+            return;
+        }
+        out.push(Outcome::Lost("bughunt"));
+        self.result = Some((false, best));
+        let (hit, w) = (self.grid.hit.unwrap_or(0), self.grid.w);
+        let dist = |i: usize| vec2((i % w) as f32 - (hit % w) as f32, (i / w) as f32 - (hit / w) as f32).length();
+        let mut rest: Vec<usize> = (0..self.grid.cells.len()).filter(|&i| i != hit && self.grid.cells[i].bug && !self.grid.cells[i].flag).collect();
+        rest.sort_by(|a, b| dist(*a).total_cmp(&dist(*b)));
+        let step = (1.0 / rest.len().max(1) as f64).min(0.07);
+        for (k, i) in rest.into_iter().enumerate() {
+            self.shown[i] = self.now + 0.35 + k as f64 * step;
+        }
+    }
 }
 
-/// A little beetle.
-fn bug(p: &Painter, c: Pos2) {
-    let ink = Color32::from_rgb(40, 30, 30);
-    for s in [-1.0, 1.0] {
-        for k in [-3.0, 0.0, 3.0] {
-            p.line_segment([c + vec2(0.0, k), c + vec2(s * 6.5, k + k * 0.4 - 0.5)], Stroke::new(1.2, ink));
+/// A 1-pixel frame: top/left in `tl`, bottom/right in `br`.
+fn frame(p: &Painter, r: Rect, tl: Color32, br: Color32) {
+    p.rect_filled(Rect::from_min_max(r.min, pos2(r.max.x, r.min.y + 1.0)), 0.0, tl);
+    p.rect_filled(Rect::from_min_max(r.min, pos2(r.min.x + 1.0, r.max.y)), 0.0, tl);
+    p.rect_filled(Rect::from_min_max(pos2(r.min.x, r.max.y - 1.0), r.max), 0.0, br);
+    p.rect_filled(Rect::from_min_max(pos2(r.max.x - 1.0, r.min.y), r.max), 0.0, br);
+}
+
+/// A covered tile: a plain raised 98 tile.
+fn covered(p: &Painter, r: Rect, hover: bool) {
+    p.rect_filled(r, 0.0, if hover { Color32::from_rgb(208, 208, 208) } else { win98::FACE });
+    frame(p, r, win98::LIGHT, win98::SHADOW);
+    frame(p, r.shrink(1.0), win98::SOFT, Color32::from_rgb(160, 160, 160));
+}
+
+/// An opened tile: flat, with the grid line on its top and left (its neighbours draw the others).
+fn opened(p: &Painter, r: Rect, fill: Color32) {
+    p.rect_filled(r, 0.0, fill);
+    p.rect_filled(Rect::from_min_size(r.min, vec2(r.width(), 1.0)), 0.0, LINE);
+    p.rect_filled(Rect::from_min_size(r.min, vec2(1.0, r.height())), 0.0, LINE);
+}
+
+/// A beetle, `s` = 1 for a 28-pixel tile.
+fn beetle(p: &Painter, c: Pos2, s: f32) {
+    let ink = Color32::from_rgb(28, 22, 36);
+    let shell = Color32::from_rgb(72, 58, 128);
+    let at = |x: f32, y: f32| c + vec2(x, y) * s;
+    let leg = Stroke::new(1.3 * s.max(0.8), ink);
+    for m in [-1.0, 1.0] {
+        for (a, b, f) in [((2.5, -2.0), (5.5, -4.5), (7.0, -7.5)), ((3.0, 1.0), (6.5, 0.5), (8.0, 3.0)), ((2.5, 4.0), (5.5, 6.0), (6.5, 9.0))] {
+            p.add(Shape::line(vec![at(m * a.0, a.1), at(m * b.0, b.1), at(m * f.0, f.1)], leg));
         }
-        p.line_segment([c + vec2(s * 1.0, -5.0), c + vec2(s * 3.5, -8.0)], Stroke::new(1.0, ink));
+        p.add(Shape::line(vec![at(m * 1.0, -7.0), at(m * 2.5, -9.5), at(m * 5.0, -10.5)], Stroke::new(1.0 * s.max(0.8), ink)));
     }
-    p.add(Shape::ellipse_filled(c + vec2(0.0, 1.0), vec2(4.2, 5.2), Color32::from_rgb(70, 50, 40)));
-    p.circle_filled(c + vec2(0.0, -4.5), 2.4, ink);
-    p.line_segment([c + vec2(0.0, -2.0), c + vec2(0.0, 6.0)], Stroke::new(0.8, Color32::from_rgb(140, 110, 90)));
+    p.circle_filled(at(0.0, -6.0), 2.7 * s, ink);
+    p.add(Shape::ellipse_filled(at(0.0, 1.5), vec2(5.2, 6.6) * s, ink));
+    p.add(Shape::ellipse_filled(at(0.0, 1.6), vec2(4.3, 5.7) * s, shell));
+    p.add(Shape::ellipse_filled(at(0.0, -3.0), vec2(3.6, 1.6) * s, ink)); // the neck shield
+    p.line_segment([at(0.0, -1.5), at(0.0, 7.6)], Stroke::new(1.0 * s.max(0.8), ink)); // where the wing cases meet
+    p.add(Shape::ellipse_filled(at(-2.2, 0.5), vec2(0.9, 2.2) * s, Color32::from_rgba_unmultiplied(200, 190, 255, 150)));
 }
 
 /// A yellow sticky note with a folded corner.
 fn note(p: &Painter, r: Rect, wrong: bool) {
-    let n = Rect::from_center_size(r.center(), vec2(13.0, 13.0));
-    p.add(Shape::convex_polygon(vec![n.left_top(), n.right_top(), pos2(n.max.x, n.max.y - 4.0), pos2(n.max.x - 4.0, n.max.y), n.left_bottom()], Color32::from_rgb(255, 232, 90), Stroke::new(1.0, Color32::from_rgb(170, 140, 30))));
-    p.add(Shape::convex_polygon(vec![pos2(n.max.x, n.max.y - 4.0), pos2(n.max.x - 4.0, n.max.y - 4.0), pos2(n.max.x - 4.0, n.max.y)], Color32::from_rgb(220, 190, 50), Stroke::NONE));
-    for k in [4.0, 7.0] {
-        p.line_segment([pos2(n.min.x + 2.5, n.min.y + k), pos2(n.max.x - 3.0, n.min.y + k)], Stroke::new(1.0, Color32::from_rgb(120, 110, 160)));
+    let s = (r.width() * 0.56).round();
+    let n = Rect::from_min_size((r.center() - vec2(s, s) / 2.0).round(), vec2(s, s));
+    let fold = (s * 0.3).round();
+    p.rect_filled(n.translate(vec2(1.0, 1.0)), 0.0, Color32::from_black_alpha(60));
+    let body = vec![n.left_top(), n.right_top(), pos2(n.max.x, n.max.y - fold), pos2(n.max.x - fold, n.max.y), n.left_bottom()];
+    p.add(Shape::convex_polygon(body, Color32::from_rgb(255, 224, 72), Stroke::NONE));
+    p.rect_filled(Rect::from_min_size(n.min, vec2(s, 3.0)), 0.0, Color32::from_rgb(240, 196, 40)); // the sticky strip
+    p.add(Shape::convex_polygon(vec![pos2(n.max.x, n.max.y - fold), pos2(n.max.x - fold, n.max.y - fold), pos2(n.max.x - fold, n.max.y)], Color32::from_rgb(214, 172, 30), Stroke::NONE));
+    for k in [0.48, 0.7] {
+        let y = n.min.y + (s * k).round();
+        p.rect_filled(Rect::from_min_max(pos2(n.min.x + 3.0, y), pos2(n.max.x - fold - 1.0, y + 1.0)), 0.0, Color32::from_rgb(70, 84, 170));
     }
     if wrong {
-        let s = Stroke::new(2.0, Color32::from_rgb(200, 30, 30));
-        p.line_segment([n.left_top(), n.right_bottom()], s);
-        p.line_segment([n.right_top(), n.left_bottom()], s);
+        let x = Stroke::new(2.0, Color32::from_rgb(210, 20, 20));
+        p.line_segment([n.left_top(), n.right_bottom()], x);
+        p.line_segment([n.right_top(), n.left_bottom()], x);
     }
 }
 
-const INK: [Color32; 8] = [
-    Color32::from_rgb(110, 40, 160),
-    Color32::from_rgb(0, 120, 110),
-    Color32::from_rgb(210, 90, 0),
-    Color32::from_rgb(40, 50, 140),
-    Color32::from_rgb(110, 70, 50),
-    Color32::from_rgb(190, 30, 100),
-    Color32::from_rgb(20, 20, 20),
-    Color32::from_rgb(110, 110, 110),
-];
-
-/// A closed tile: a raised 98 button with a couple of "syntax-coloured" code dashes on it.
-fn code_tile(p: &Painter, r: Rect, i: usize, pressed: bool) {
-    p.rect_filled(r, 0.0, win98::FACE);
-    if pressed {
-        p.rect_stroke(r, 0.0, Stroke::new(1.0, win98::SHADOW), eframe::egui::StrokeKind::Inside);
-        return;
-    }
-    win98::bevel(p, r, true);
-    let h = (i.wrapping_mul(2654435761)) >> 7;
-    let colors = [Color32::from_rgb(70, 90, 170), Color32::from_rgb(60, 140, 120), Color32::from_rgb(160, 90, 150), Color32::from_rgb(150, 150, 150)];
-    let x0 = r.min.x + 4.0 + (h % 3) as f32;
-    let w1 = 3.0 + (h % 5) as f32;
-    let w2 = 2.0 + (h / 5 % 5) as f32;
-    p.rect_filled(Rect::from_min_size(pos2(x0, r.min.y + 7.0), vec2(w1, 1.5)), 0.0, colors[h % 4].gamma_multiply(0.7));
-    p.rect_filled(Rect::from_min_size(pos2(x0 + w1 + 2.0, r.min.y + 7.0), vec2(w2, 1.5)), 0.0, colors[(h / 4 + 1) % 4].gamma_multiply(0.7));
-    p.rect_filled(Rect::from_min_size(pos2(x0 + 3.0, r.min.y + 12.0), vec2(w2 + 3.0, 1.5)), 0.0, colors[(h / 16 + 2) % 4].gamma_multiply(0.7));
+/// A little clock for the time counter.
+fn clock(p: &Painter, c: Pos2) {
+    p.circle_filled(c, 6.0, Color32::from_rgb(250, 250, 236));
+    p.circle_stroke(c, 6.0, Stroke::new(1.2, win98::TEXT));
+    p.line_segment([c, c + vec2(0.0, -4.0)], Stroke::new(1.2, win98::TEXT));
+    p.line_segment([c, c + vec2(3.0, 0.0)], Stroke::new(1.2, win98::TEXT));
 }
 
 impl Game for Hunt {
     fn size(&self) -> Vec2 {
-        vec2((self.grid.w as f32 * CELL + 6.0).max(MIN_W), TOP + 6.0 + self.grid.h as f32 * CELL + 6.0)
+        let t = self.tile();
+        vec2(self.grid.w as f32 * t + 4.0, TOP + self.grid.h as f32 * t + 4.0)
     }
 
     fn new_round(&mut self) {
-        let (_, w, h, n) = LEVELS[self.level];
+        let (_, w, h, n, _) = LEVELS[self.level];
         self.grid = Grid::new(w, h, n);
+        self.shown = vec![0.0; w * h];
         self.started = None;
         self.took = None;
+        self.armed = false;
+        self.result = None;
     }
 
     fn levels(&self) -> &'static [&'static str] {
-        &["Beginner", "Intermediate", "Expert"]
+        &LEVEL_NAMES
     }
     fn level(&self) -> usize {
         self.level
@@ -234,13 +334,17 @@ impl Game for Hunt {
         self.new_round();
     }
 
+    fn best_key(&self, name: &str) -> String {
+        format!("{name}-{}", LEVELS[self.level].0.to_lowercase())
+    }
+
     fn status(&self) -> String {
-        let (name, w, h, n) = LEVELS[self.level];
+        let (name, _, _, n, _) = LEVELS[self.level];
         match self.grid.state {
-            State::Won => format!("All {n} bugs squashed in {} s. Ship it! Any key or click: new round.", self.seconds()),
-            State::Lost => "A bug crashed the build. Press any key or click to try again.".into(),
-            State::Playing if !self.grid.placed => format!("{name}: {w}×{h}, {n} bugs. Click a tile to start."),
-            State::Playing => "Left-click opens code, right-click sticks a note.".into(),
+            State::Won => format!("Squashed in {} s. Click to play again.", self.seconds()),
+            State::Lost => "The build crashed. Click to try again.".into(),
+            State::Playing if !self.grid.placed => format!("{name}: {n} bugs. Click any tile."),
+            State::Playing => "Right-click sticks a note on a bug.".into(),
         }
     }
 
@@ -249,79 +353,117 @@ impl Game for Hunt {
     }
 
     fn live(&self) -> bool {
-        self.started.is_some() && self.took.is_none()
+        (self.started.is_some() && !self.finished()) || (self.finished() && self.now < self.settled()) || self.confetti.active()
     }
 
-    fn ui(&mut self, ui: &mut Ui, r: Rect, f: &mut super::Frame) {
-        let (input, now) = (f.input, f.time);
-        let out = &mut *f.out;
-        self.now = now;
-        // the top strip: bugs left, Reset, time
-        let top = Rect::from_min_size(r.min, vec2(r.width(), TOP));
-        win98::panel(ui.painter(), top, win98::FACE, false);
-        ui.painter().text(pos2(top.min.x + 10.0, top.center().y), Align2::LEFT_CENTER, format!("Bugs left: {}", self.grid.left()), win98::font(13.0), win98::TEXT);
-        ui.painter().text(pos2(top.max.x - 10.0, top.center().y), Align2::RIGHT_CENTER, format!("Time: {}", self.seconds()), win98::font(13.0), win98::TEXT);
-        if win98::button(ui, Rect::from_center_size(top.center(), vec2(64.0, 24.0)), Id::unique("bug-reset"), "Reset", true).clicked() && input {
+    fn ui(&mut self, ui: &mut Ui, r: Rect, f: &mut Frame) {
+        self.now = f.time;
+        let t = self.tile();
+        let p = ui.painter().clone();
+
+        // the top bar: bugs left, New, time
+        let mid = r.min.y + TOP / 2.0 - 2.0;
+        let bugs = Rect::from_min_size(pos2(r.min.x, mid - 13.0), vec2(62.0, 26.0));
+        win98::field(&p, bugs, &self.grid.left().to_string());
+        beetle(&p, pos2(bugs.min.x + 14.0, bugs.center().y + 1.0), 0.6);
+        let time = Rect::from_min_size(pos2(r.max.x - 62.0, mid - 13.0), vec2(62.0, 26.0));
+        win98::field(&p, time, &self.seconds().min(999).to_string());
+        clock(&p, pos2(time.min.x + 13.0, time.center().y));
+        let nb = Rect::from_min_size(pos2((r.center().x - 38.0).round(), mid - 13.0), vec2(76.0, 26.0));
+        let new = win98::button(ui, nb, Id::unique("bughunt-new"), "", true);
+        let push = if new.is_pointer_button_down_on() { vec2(1.0, 1.0) } else { Vec2::ZERO };
+        beetle(&p, pos2(nb.min.x + 21.0, nb.center().y + 1.0) + push, 0.6);
+        p.text(pos2(nb.min.x + 35.0, nb.center().y) + push, Align2::LEFT_CENTER, "New", win98::font(13.0), win98::TEXT);
+        if new.clicked() && f.input {
             self.new_round();
         }
 
-        let gw = self.grid.w as f32 * CELL + 6.0;
-        let well = Rect::from_min_size(pos2(r.center().x - gw / 2.0, top.max.y + 6.0), vec2(gw, self.grid.h as f32 * CELL + 6.0));
-        win98::bevel(ui.painter(), well, false);
-        win98::bevel(ui.painter(), well.shrink(1.0), false);
-        let o = well.min + vec2(3.0, 3.0);
-        let field = Rect::from_min_size(o, vec2(self.grid.w as f32 * CELL, self.grid.h as f32 * CELL));
-        let resp = ui.interact(field, ui.scope_id().with("bug-field"), Sense::click());
+        // the board
+        let well = Rect::from_min_size(pos2(r.min.x, r.min.y + TOP), vec2(self.grid.w as f32 * t + 4.0, self.grid.h as f32 * t + 4.0));
+        win98::bevel(&p, well, false);
+        let o = well.min + vec2(2.0, 2.0);
+        let board = Rect::from_min_size(o, vec2(self.grid.w as f32 * t, self.grid.h as f32 * t));
+        let resp = ui.interact(board, ui.scope_id().with("bughunt-board"), Sense::click());
+        let (w, h) = (self.grid.w, self.grid.h);
         let at = |pos: Pos2| -> Option<usize> {
-            let v = pos - o;
-            let (x, y) = ((v.x / CELL).floor() as i32, (v.y / CELL).floor() as i32);
-            (x >= 0 && y >= 0 && (x as usize) < self.grid.w && (y as usize) < self.grid.h).then(|| y as usize * self.grid.w + x as usize)
+            let v = (pos - o) / t;
+            (v.x >= 0.0 && v.y >= 0.0 && (v.x as usize) < w && (v.y as usize) < h).then(|| v.y as usize * w + v.x as usize)
         };
-        let hover = resp.hover_pos().and_then(at);
+        let (pos, down, released, right) = ui.input(|i| (i.pointer.latest_pos(), i.pointer.primary_down(), i.pointer.primary_released(), i.pointer.button_pressed(PointerButton::Secondary)));
+        let under = pos.and_then(at);
+        let playing = f.input && !self.finished();
         let before = self.grid.state;
-        if input {
-            if let Some(i) = resp.interact_pointer_pos().and_then(at) {
-                if resp.clicked() {
-                    if self.grid.cells[i].open {
-                        self.grid.chord(i);
-                    } else {
-                        self.grid.reveal(i);
-                    }
-                    if self.started.is_none() && self.grid.placed {
-                        self.started = Some(self.now);
-                    }
-                } else if resp.secondary_clicked() {
+        if playing {
+            // like a real button: the press shows, the release (still over the board) acts
+            if resp.is_pointer_button_down_on() && down {
+                self.armed = true;
+            }
+            if (self.armed && released) || resp.clicked() {
+                if let Some(i) = under {
+                    self.click(i, f.out);
+                }
+            }
+            if right {
+                if let Some(i) = under {
                     self.grid.flag(i);
                 }
             }
         }
-        if before == State::Playing && self.grid.state != State::Playing {
-            self.took = Some(self.started.map_or(0.0, |s| self.now - s));
-            out.push(if self.grid.state == State::Won { Outcome::Won("bughunt") } else { Outcome::Lost("bughunt") });
+        if !playing || !down {
+            self.armed = false;
         }
+        if before == State::Playing && self.grid.state != State::Playing {
+            self.finish(f.best, f.out);
+            if self.grid.state == State::Won {
+                let n = if self.result.is_some_and(|(new, _)| new) { 90 } else { 50 };
+                self.confetti.burst(pos2(board.center().x, board.min.y + board.height() * 0.4), n);
+            }
+        }
+        self.confetti.update(f.dt);
 
-        let p = ui.painter();
-        let pressing = input && resp.is_pointer_button_down_on() && ui.input(|i| i.pointer.primary_down());
-        let over = self.grid.state != State::Playing;
+        let pressed = match under {
+            Some(i) if self.armed && down => self.grid.pressed(i),
+            _ => vec![],
+        };
+        let hover = under.filter(|_| playing && resp.hovered() && !down);
+        let lost = self.grid.state == State::Lost;
+        let digits = win98::bold((t * 0.62).round());
         for (i, c) in self.grid.cells.iter().enumerate() {
-            let cr = Rect::from_min_size(o + vec2((i % self.grid.w) as f32 * CELL, (i / self.grid.w) as f32 * CELL), vec2(CELL, CELL));
-            let shown = c.open || (over && c.bug && !c.flag);
-            if shown {
-                let bg = if self.grid.hit == Some(i) { Color32::from_rgb(255, 150, 120) } else { Color32::from_rgb(250, 250, 242) };
-                p.rect_filled(cr, 0.0, bg);
-                p.rect_stroke(cr, 0.0, Stroke::new(1.0, Color32::from_rgb(200, 200, 196)), eframe::egui::StrokeKind::Inside);
+            let cr = Rect::from_min_size(o + vec2((i % w) as f32 * t, (i / w) as f32 * t), vec2(t, t));
+            let age = (self.now - self.shown[i]) as f32;
+            if (c.open || (lost && c.bug && !c.flag)) && age >= 0.0 {
+                opened(&p, cr, if self.grid.hit == Some(i) { HIT } else { OPEN });
                 if c.bug {
-                    bug(p, cr.center());
+                    let pop = if age < 0.08 { 0.5 + age / 0.08 * 0.7 } else if age < 0.16 { 1.2 - (age - 0.08) / 0.08 * 0.2 } else { 1.0 };
+                    beetle(&p, cr.center(), t / 28.0 * pop);
                 } else if c.near > 0 {
-                    p.text(cr.center(), Align2::CENTER_CENTER, c.near.to_string(), eframe::egui::FontId::monospace(14.0), INK[c.near as usize - 1]);
+                    p.text(cr.center(), Align2::CENTER_CENTER, c.near.to_string(), digits.clone(), INK[c.near as usize - 1]);
                 }
+                if age < 0.15 && !c.bug {
+                    p.rect_filled(cr.shrink(1.0), 0.0, Color32::WHITE.gamma_multiply(0.7 * (1.0 - age / 0.15)));
+                }
+            } else if pressed.contains(&i) {
+                opened(&p, cr, OPEN);
             } else {
-                code_tile(p, cr, i, pressing && hover == Some(i) && !c.flag);
+                covered(&p, cr, hover == Some(i));
                 if c.flag {
-                    note(p, cr, over && !c.bug);
+                    note(&p, cr, lost && !c.bug);
                 }
             }
         }
+
+        if self.finished() && self.now >= self.settled() {
+            let (new, best) = self.result.unwrap_or((false, None));
+            let best = best.map_or("none yet".to_string(), |b| format!("{b} s"));
+            let won = self.grid.state == State::Won;
+            let first = if !won { "The build crashed!" } else if new { "New best time!" } else { "All bugs squashed!" };
+            let lines = [first.to_string(), format!("Time: {} s", self.seconds()), format!("Best: {best}")];
+            let icon = if !won { win98::Icon::Warning } else if new { win98::Icon::Trophy } else { win98::Icon::Info };
+            if win98::dialog(ui, r, "Bug Hunt", icon, &lines, &["New game"]).is_some() {
+                self.new_round();
+            }
+        }
+        self.confetti.draw(&p.with_clip_rect(r));
     }
 }
 
@@ -354,6 +496,7 @@ mod tests {
             g.reveal(i);
             assert_ne!(g.state, State::Lost);
             assert!(!g.cells[i].bug && g.cells[i].open && g.cells[i].near == 0);
+            assert!(g.around(i).iter().all(|&n| !g.cells[n].bug), "and so are its neighbours");
             assert_eq!(g.cells.iter().filter(|c| c.bug).count(), 10);
         }
         // even when there's barely any room, the clicked tile itself is safe
@@ -371,5 +514,64 @@ mod tests {
         assert_eq!(g.left(), 1);
         g.reveal(0);
         assert_eq!(g.state, State::Playing, "a noted tile can't be opened by accident");
+    }
+
+    #[test]
+    fn cascades_open_ring_by_ring() {
+        let mut g = Grid::new(9, 9, 1);
+        g.set_bugs(&[80]);
+        let opened = g.reveal(40); // the middle
+        assert_eq!(opened.len(), 80);
+        assert!(opened.windows(2).all(|p| p[0].1 <= p[1].1), "nearest first");
+        for (i, ring) in opened {
+            let (dx, dy) = ((i % 9) as i32 - 4, (i / 9) as i32 - 4);
+            assert_eq!(ring, dx.unsigned_abs().max(dy.unsigned_abs()), "tile {i} opens on its own ring");
+        }
+    }
+
+    #[test]
+    fn chording_opens_exactly_the_unflagged_neighbours() {
+        // bugs round the edge (but one corner) and one inside: every inner tile shows a number, so nothing floods
+        let mut g = Grid::new(5, 5, 16);
+        let mut bugs: Vec<usize> = (0..24).filter(|i| i % 5 == 0 || i % 5 == 4 || i / 5 == 0 || i / 5 == 4).collect();
+        bugs.push(6);
+        g.set_bugs(&bugs);
+        g.reveal(12);
+        assert_eq!(g.cells[12].near, 1);
+        assert!(g.chord(12).is_empty(), "no note yet: nothing happens");
+        g.flag(6);
+        let mut opened: Vec<usize> = g.chord(12).into_iter().map(|(i, _)| i).collect();
+        opened.sort();
+        assert_eq!(opened, vec![7, 8, 11, 13, 16, 17, 18]);
+        let open: Vec<usize> = (0..25).filter(|&i| g.cells[i].open).collect();
+        assert_eq!(open, vec![7, 8, 11, 12, 13, 16, 17, 18]);
+        assert_eq!(g.state, State::Playing);
+        assert_eq!(g.pressed(12), Vec::<usize>::new(), "nothing left to press around it");
+    }
+
+    #[test]
+    fn best_times_are_kept_per_difficulty() {
+        let mut h = Hunt::new();
+        let keys: Vec<String> = (0..3)
+            .map(|i| {
+                h.set_level(i);
+                h.best_key("bughunt")
+            })
+            .collect();
+        assert_eq!(keys, ["bughunt-beginner", "bughunt-intermediate", "bughunt-expert"]);
+    }
+
+    #[test]
+    fn a_big_win_reports_the_cascade_and_the_time() {
+        let mut h = Hunt::new();
+        h.grid.set_bugs(&[80]);
+        let mut out = vec![];
+        h.click(0, &mut out);
+        assert_eq!(out, [Outcome::Moment("bughunt", "cascade")]);
+        assert_eq!(h.grid.state, State::Won);
+        h.finish(Some(30), &mut out);
+        assert!(out.contains(&Outcome::Won("bughunt")));
+        assert!(out.contains(&Outcome::Time("bughunt-beginner".into(), 0)));
+        assert_eq!(h.result, Some((true, Some(0))), "a new best time");
     }
 }
