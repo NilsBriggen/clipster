@@ -252,7 +252,7 @@ impl Glide {
             let width = self.rng.range(52.0, 61.0);
             let x = (TOWER_W - width) / 2.0 + self.rng.range(-jitter, jitter);
             let seed = self.rng.next();
-            let look = if seed % 3 == 0 { Look::Pages } else { Look::Spine };
+            let look = if seed.is_multiple_of(3) { Look::Pages } else { Look::Spine };
             color += 1 + (seed >> 8) as usize % (BINDERS.len() - 1); // never the same colour twice in a row
             parts.push(Part { r: Rect::from_min_max(pos2(x, top), pos2(x + width, y)), look, color: BINDERS[color % BINDERS.len()], seed });
             y = top;
@@ -348,7 +348,7 @@ impl Glide {
         for closest in cleared {
             self.score += 1;
             self.pop = 0.0;
-            if self.score % 10 == 0 {
+            if self.score.is_multiple_of(10) {
                 out.push(Outcome::Moment("clipglide", "ten"));
                 self.banners.push(("Ten more!", 0.0, Color32::from_rgb(140, 230, 255)));
             } else if closest < NEAR {
