@@ -116,7 +116,7 @@ pub fn update_reply(version: &str) -> Reply {
 fn agent() -> ureq::Agent {
     ureq::Agent::config_builder()
         .timeout_global(Some(Duration::from_secs(10)))
-        .user_agent("Clipster/0.1 (desktop helper)")
+        .user_agent(concat!("Clipster/", env!("CARGO_PKG_VERSION"), " (desktop helper)"))
         .build()
         .into()
 }

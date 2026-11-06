@@ -278,7 +278,11 @@ pub fn set_autostart(on: bool) -> std::io::Result<()> {
     if !on {
         return if p.exists() { std::fs::remove_file(&p) } else { Ok(()) };
     }
-    let exe = std::env::current_exe()?;
+    // an AppImage runs from a temporary mount that vanishes on exit; $APPIMAGE is the file itself
+    let exe = match std::env::var_os("APPIMAGE").map(std::path::PathBuf::from).filter(|a| a.exists()) {
+        Some(a) => a,
+        None => std::env::current_exe()?,
+    };
     std::fs::create_dir_all(p.parent().unwrap_or(&p))?;
     let body = if cfg!(windows) {
         format!("@start \"\" \"{}\"\r\n", exe.display())

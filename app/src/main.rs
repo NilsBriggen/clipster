@@ -169,6 +169,9 @@ impl App {
         let (tx, rx) = channel();
         if screenshot.is_none() {
             watch::spawn(tx.clone(), cc.egui_ctx.clone());
+            if std::env::var_os("APPIMAGE").is_some() && sys::autostart_path().exists() {
+                let _ = sys::set_autostart(true); // a new AppImage (or a moved one) keeps starting at login
+            }
         } else {
             // keep frames coming for the screenshot even if the compositor stops asking for them
             let ctx = cc.egui_ctx.clone();
