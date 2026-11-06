@@ -14,3 +14,6 @@
 /reference/
 /capture/
 /attachments/
+
+# local Claude Code state (agent worktrees)
+/.claude/
