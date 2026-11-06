@@ -463,10 +463,12 @@ fn powers(s: &str, raw: &str) -> Option<Reply> {
         (&["chess"], "chess"),
         (&["hangman", "hang man"], "hangman"),
     ];
-    if let Some((_, id)) = ARCADE.iter().find(|(kws, _)| has(s, kws)) {
+    // "i lost at chess" or "board games are fun" is small talk, not a request to play
+    let small_talk = (["i ", "we ", "my "].iter().any(|p| s.starts_with(p)) || has(s, &["is", "are", "was", "were"])) && !has(s, &["play"]);
+    if let Some((_, id)) = ARCADE.iter().find(|(kws, _)| has(s, kws)).filter(|_| !small_talk) {
         return go(format!("play {id}"));
     }
-    if has(s, &["play a game", "games", "play something", "play with me", "a game", "game", "arcade"]) {
+    if !small_talk && has(s, &["play a game", "games", "play something", "play with me", "a game", "game", "arcade"]) {
         return go("games".into());
     }
     // text tricks: "upside down hello", "hello in morse code", "01001000 01101001 from binary"
@@ -1364,6 +1366,8 @@ mod tests {
         assert_eq!(eff("wear a halo"), Effect::Hat("halo".into()));
         assert_eq!(eff("turn yourself beige"), Effect::Skin("beige".into()));
         assert_eq!(eff("let's play minesweeper"), Effect::Play("bughunt".into()));
+        assert_eq!(eff("i want to play chess"), Effect::Play("chess".into()));
+        assert_eq!(eff("I lost at chess"), Effect::None, "small talk, not a game");
         assert_eq!(eff("what have you learned"), Effect::None);
         assert!(text("I want to kill myself").contains("helpline"));
         assert!(!text("I'm still working on it").contains("Until when"));

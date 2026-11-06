@@ -573,8 +573,9 @@ mod tests {
         let from_patterns = |s: &str| {
             let text = crate::understand::respond(s).text;
             all.iter().filter(|p| p.name.starts_with("pattern ") || p.name.starts_with("chat ")).flat_map(|p| &p.lines).any(|l| {
-                let start = l.split("{x}").next().unwrap_or("");
-                text == *l || (!start.is_empty() && text.starts_with(start))
+                // the capture can open the line (and is capitalised), so match the fixed pieces around it
+                let fixed: Vec<&str> = l.split("{x}").filter(|p| !p.trim().is_empty()).collect();
+                text == *l || (l.contains("{x}") && !fixed.is_empty() && fixed.iter().all(|p| text.contains(p)))
             })
         };
         // things people say to him get an answer from him, not the encyclopedia
