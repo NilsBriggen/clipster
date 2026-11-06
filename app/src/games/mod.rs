@@ -2,6 +2,7 @@
 //! Every game keeps its rules apart from its drawing, so the rules can be tested without a window.
 
 mod bughunt;
+mod bytesize;
 mod chess;
 mod clipglide;
 mod deskmerge;
@@ -31,6 +32,7 @@ pub const NAMES: &[(&str, &str)] = &[
     ("clipglide", "Clip Glide"),
     ("deskmerge", "Desk Merge"),
     ("bughunt", "Bug Hunt"),
+    ("bytesize", "Byte Size"),
     ("chess", "Chess"),
     ("hangman", "Hangman"),
 ];
@@ -104,6 +106,7 @@ fn make(name: &str) -> Box<dyn Game> {
         "clipglide" => Box::new(clipglide::Glide::new()),
         "deskmerge" => Box::new(deskmerge::Merge::new()),
         "bughunt" => Box::new(bughunt::Hunt::new()),
+        "bytesize" => Box::new(bytesize::Bytes::new()),
         "chess" => Box::new(chess::Chess::new()),
         _ => Box::new(hangman::Hang::new()),
     }

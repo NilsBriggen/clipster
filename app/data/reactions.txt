@@ -1802,3 +1802,29 @@ That's a streak! My loops have never felt so safe.
 Another word! At this rate I'll never unbend again.
 A winning streak! Should I be worried? I feel like I should be worried.
 You keep saving me. I could get used to this.
+
+## game_start_bytesize
+Byte Size! Slide the files together. Two equal files make one twice as big. Aim for 2 KB.
+Byte Size! The disk has sixteen slots and no patience. Merge before it fills up.
+Compressing files, the fun way. The arrow keys slide everything. Everything.
+Let's see you build a whole 2 KB file. In my day that was a novel.
+
+## game_win_bytesize
+2 KB! In 1997 that was a whole business plan. Well done.
+Two kilobytes! You could store an entire memo in that. A long one.
+2 KB reached! The disk salutes you. Keep going if you dare.
+You did it! A file that size used to get its own floppy. Almost.
+
+## game_lose_bytesize
+The game disk is full. Your real one is fine. Probably.
+No moves left. That's what happens when you keep everything "just in case".
+The board filled up. Somewhere, a progress bar is stuck at 99%.
+Game over! Next time keep the biggest file in a corner. Old filing trick.
+Out of slots! The files won. They always win in the end.
+
+## game_moment_bytesize_big
+Look at that file grow! I've seen smaller programs.
+A new biggest file! The disk is sweating.
+Now we're compressing! Keep the big ones in a corner.
+That's a serious file. I'd put it in a folder. A big one.
+That merge was so clean I want to frame it.

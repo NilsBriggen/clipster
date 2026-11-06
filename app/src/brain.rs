@@ -136,7 +136,7 @@ pub fn help() -> Reply {
          • Text: count, upper, lower, reverse, mock <text>\n\
          • Random: roll 2d6, flip, pick pizza, tacos, password 20, 8ball <question>\n\
          • Fun: joke, pun, roast, fact, fortune, shower thought, quiz me, quote, advice, tip, dance, hug, shrug, tableflip, quiet, bye\n\
-         • Arcade (own window): play paper jam, clip glide, desk merge, bug hunt, chess, hangman\n\
+         • Arcade (own window): play paper jam, clip glide, desk merge, bug hunt, byte size, chess, hangman\n\
          • Games: riddle, would you rather, emoji quiz, rock paper scissors, guess my number, surprise me\n\
          • Teach me: when I say gm, say good morning · when I say work, open firefox and open code · what have you learned\n\
          • Numbers: 255 in hex, 2024 in roman, tip 15% on 48, split 120 between 4, days between june 3 and christmas, 1700000000 to date\n\

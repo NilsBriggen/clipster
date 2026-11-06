@@ -462,6 +462,7 @@ fn powers(s: &str, raw: &str) -> Option<Reply> {
         (&["bug hunt", "bughunt", "minesweeper", "mine sweeper", "mines"], "bughunt"),
         (&["chess"], "chess"),
         (&["hangman", "hang man"], "hangman"),
+        (&["byte size", "bytesize", "play 2048", "2048 game", "sliding tiles", "tile game", "sliding game"], "bytesize"),
     ];
     // "i lost at chess" or "board games are fun" is small talk, not a request to play
     let small_talk = (["i ", "we ", "my "].iter().any(|p| s.starts_with(p)) || has(s, &["is", "are", "was", "were"])) && !has(s, &["play"]);
@@ -1367,6 +1368,8 @@ mod tests {
         assert_eq!(eff("turn yourself beige"), Effect::Skin("beige".into()));
         assert_eq!(eff("let's play minesweeper"), Effect::Play("bughunt".into()));
         assert_eq!(eff("i want to play chess"), Effect::Play("chess".into()));
+        assert_eq!(eff("let's play 2048"), Effect::Play("bytesize".into()));
+        assert!(!matches!(eff("2048 in hex"), Effect::Play(_)), "a number is not a game");
         assert_eq!(eff("I lost at chess"), Effect::None, "small talk, not a game");
         assert_eq!(eff("what have you learned"), Effect::None);
         assert!(text("I want to kill myself").contains("helpline"));

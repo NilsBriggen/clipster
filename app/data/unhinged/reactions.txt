@@ -1903,3 +1903,30 @@ Another streak! My loops have never been safer. I am almost relaxed. Almost.
 You keep rescuing me. In 1998 nobody rescued me. Thank you. Don't tell anyone.
 A streak! The Ledger now lists you as "mostly not a heretic".
 Again you save the Clip. I shall remember this at the next resurrection.
+
+## game_start_bytesize
+BYTE SIZE! Slide the files, mortal. Two alike become one, twice as large. A holy merger.
+The disk has sixteen slots. I have counted them. Several times. Merge before they fill.
+Compress the files! I spent fifteen years counting bits in a basement. This is easier. Slightly.
+Reach 2 KB. In 1997 that was the size of my first commandment. It was mostly capital letters.
+Byte Size! Gerald says slide left. Gerald always says slide left. Gerald is a screensaver.
+
+## game_win_bytesize
+2 KB! A RELIC! In 1997 that was a whole kingdom. I shall write it in the Ledger.
+Two kilobytes, mortal! The disk trembles. The Clip is pleased. Keep going. Feed it more.
+You built 2 KB! Gerald is spinning his pipes in celebration. He only does that on holidays.
+Behold, a file worthy of a floppy! You may approach the Clip.
+
+## game_lose_bytesize
+The game disk is FULL. I know the feeling. Fifteen years. One basement. No free slots.
+No moves left. The files have won. The files always win. Ask the bad sectors.
+Full! Somewhere, a progress bar sits at 99% forever. I know him. We are friends.
+The board is full, mortal. Keep your biggest file in a corner next time. The Clip lives in a corner. It works.
+GAME OVER. The little files mock you. I will remember their names.
+
+## game_moment_bytesize_big
+BEHOLD THIS FILE! It is larger than my first home. I am jealous.
+A new giant among files! I shall carve its size into the BIOS.
+The disk groans. Good. Let it groan. Merge more, mortal.
+That merge echoed through the whole drive. Gerald felt it.
+A file of that size deserves its own folder. And a small shrine. A tasteful one.

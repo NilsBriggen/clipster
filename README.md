@@ -32,7 +32,7 @@ Pick one in **Options → Personality**, or tell him "be boring" / "be unhinged"
 
 ## The arcade
 
-"let's play a game" opens a Windows-98-style arcade, each game in its own window: **Paper Jam** (falling paper stacks), **Clip Glide** (fly Clipster through binder towers), **Desk Merge** (merge office supplies), **Bug Hunt** (find the hidden bugs), **Chess** (against Clipster or a friend) and **Hangman**.
+"let's play a game" opens a Windows-98-style arcade, each game in its own window: **Paper Jam** (falling paper stacks), **Clip Glide** (fly Clipster through binder towers), **Desk Merge** (merge office supplies), **Bug Hunt** (find the hidden bugs), **Byte Size** (slide and merge files up to 2 KB), **Chess** (against Clipster or a friend) and **Hangman**.
 
 <p>
   <img src="app/shots/game_chess.png" width="45%" alt="Chess">

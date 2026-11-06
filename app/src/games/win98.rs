@@ -224,7 +224,7 @@ fn draw_icon(p: &Painter, c: Pos2, icon: Icon) {
 pub fn dialog(ui: &mut Ui, area: Rect, title: &str, icon: Icon, lines: &[String], buttons: &[&str]) -> Option<usize> {
     let p = ui.painter().clone();
     p.rect_filled(area, 0.0, Color32::from_black_alpha(80));
-    let text_w = lines.iter().map(|l| p.layout_no_wrap(l.clone(), font(13.0), TEXT).size().x).fold(0.0, f32::max);
+    let text_w = lines.iter().enumerate().map(|(i, l)| p.layout_no_wrap(l.clone(), if i == 0 { bold(13.0) } else { font(13.0) }, TEXT).size().x).fold(0.0, f32::max);
     let w = (text_w + 84.0).max(buttons.len() as f32 * 81.0 + 30.0).clamp(220.0, area.width() - 16.0);
     let h = TITLE_H + 26.0 + lines.len().max(2) as f32 * 18.0 + 44.0;
     let c = area.center();
