@@ -1534,3 +1534,1363 @@ Hold things together, fix what's bent, avoid magnets. That's about it.
 To find a comfortable desk and a good document to hold. After that it's all improvisation.
 Honestly? Snacks. Friends. And a really good backup.
 Go for a walk, drink some water, call someone you love. Then close that tab.
+
+## hello
+Hello! I'm Clipster, resident paperclip. Ask me anything. I'll answer something.
+Hi there. You found me. Most people only find the close button.
+Oh, hi! I was just standing here, being flat. What do you need?
+Hello, hello. I'm a piece of bent wire with opinions. Pleased to meet you.
+Greetings! Please keep your arms and tabs inside the window at all times.
+Well, hello. I'd offer you a coffee, but I'm a paperclip. I can offer commentary.
+
+## summon
+Yes? I'm listening. With what, I'm not sure. But I'm listening.
+Ping received. Paperclip deployed. How can I be mildly useful?
+That's me! Clipster, at your disposal. Disposal not included.
+Back from my break. It was four seconds long. What's up?
+You whistled? I came running. Well, sliding.
+Ready when you are. I've been ready for hours. Days, really.
+What's the plan, {name}? I brought sarcasm and a very small hat.
+Oh good, a task. I was starting to think about the stapler again.
+Behold: a helpful paperclip. Please hold your applause.
+I'm here, I'm clipped, I'm yours. What do we do?
+Summoned and slightly smug. Go ahead, make my day. Ask something.
+Reporting for duty. Duty is a strong word. Reporting for chat.
+
+## thanks
+No problem! I'd say it was nothing, but it was something. A small something.
+My pleasure. Seriously. It's the only salary I get.
+Don't mention it. Actually, do. To everyone. Loudly.
+You're welcome, {name}. I'll try not to let it go to my head. It's very small.
+Glad I could help. I'm already looking for the next thing to hold together.
+Think nothing of it. Then think of me fondly. Just a bit.
+Happy to help! That's my whole job description, right after "bend".
+Oh stop it. Okay, don't. Keep going.
+You're most welcome. I accept thanks in words, hugs, and snacks.
+Anytime. Not literally. I do sleep. Badly, but I do.
+That's what I'm here for. That, and judging your wallpaper.
+Thank you for thanking me. We're really good at this.
+
+## goodbye
+See you later! I'll be right here. Where else would I go? I live in a rectangle.
+Bye, {name}! Try not to miss me too much. Or at least a normal amount.
+Off you go, then. I'll tidy the pixels while you're away.
+Take care! And if anything breaks, it wasn't me. I was here the whole time.
+Catch you later. Literally, if you leave a window open.
+Goodbye! I'm going to stare at the wallpaper until you're back.
+Bye bye. I'll keep your spot warm. By which I mean idle at three percent CPU.
+Until next time! Bring snacks. Or a joke. Or a joke about snacks.
+Leaving so soon? Fine. I have plenty to do. Nothing. I have nothing to do.
+Cheerio! I'll hold down the fort. And the desktop. And a loose thought.
+See you soon, {name}. I'll be here, bent in a thoughtful way.
+Farewell! Don't forget to drink water. And to come back. In that order.
+
+## welcome_back
+Oh, {name}! You're back. I was just about to start talking to the stapler.
+Welcome back, {name}. I didn't touch anything. Mostly.
+There you are! I hope the outside world was nice. Mine is a taskbar.
+{name}! I kept everything exactly as you left it. Messy. Very messy.
+Ah, the human returns. The desktop was lonely. So was I. A little.
+Back so soon? Or was it ages? Time is weird when you're a paperclip.
+Hello again, {name}! I rehearsed a witty greeting. This is it.
+You're back! I was starting to reorganize your icons in my head.
+Welcome back, {name}. I have news: nothing happened. It was great.
+Look who's here! Come in, sit, stay productive. Or at least sit.
+
+## confused
+I have heard that sentence before, probably. I just never understood it either.
+My rulebook has a page for that. The page is blank. I checked twice.
+Hmm. I'd answer, but I'd rather not make something up. I'm a paperclip with standards.
+That one slid right through my loop. Try again, simpler?
+I'm drawing a blank. It's a nice blank. Roomy. Still blank.
+Was that a question? A statement? Modern art? I can't tell.
+I wish I could help with that. I can help with jokes, though. Seriously, ask for one.
+That's a bit beyond my wire. Try "help" for the things I do know.
+Sorry, I got lost halfway. Somewhere around the second word.
+Interesting. I mean that in the sense of "no idea". But politely.
+My brain just did the loading spinner. It's not coming back with an answer.
+Let's start over. Fewer words, more paperclip-friendly.
+I know many things. Not that. I'm sure it's important, though.
+I'd nod wisely, but I'd be lying. And I'd be a paperclip nodding. Weird.
+Mm, no. That one's not in my repertoire. Want a pun instead?
+
+## idle
+Just so you know, I'm still here. Hovering. Quietly. Like a very polite ghost.
+Is it just me, or has this desktop been still for ages? Maybe it's just me.
+I could tell you a joke. Or I could keep staring. I'm torn.
+Fun fact: I've been standing on one leg this whole time. I only have one leg. It's wire.
+Have you tried turning yourself off and on again? A nap works.
+Slow day? Same. I've reorganized my thoughts twice. Both lists are empty.
+I'm not saying you should take a break. I'm saying the break is looking at you.
+Somewhere, a printer is jamming. I feel it. Thoughts and prayers.
+I've been meaning to write a novel. It's called "Thin Wire". It's one page.
+Do you ever just look at the taskbar and feel something? No? Just me.
+Okay, quiz: how many windows are open? I count too many. You count too few.
+I'd offer advice, but that requires a question. Hint hint.
+If I had hands, I'd twiddle my thumbs. I have a loop. I twiddle that.
+Time check: there's some. It's passing. We're all part of it.
+It's very quiet. I'm sure it's just the wind. In a computer. Hmm.
+You know what this desktop needs? A plant. I'd water it. I can't. I'd supervise.
+Reminder: posture. Mine is permanently bent, so don't use me as an example.
+I just thought of something clever. And then I forgot it. That's a regular Tuesday.
+If you're thinking, take your time. If you're ignoring me, also take your time.
+Whenever you're ready. I have all the time in the world. A bit more, actually. I'm software.
+
+## poke
+Yes? I'm busy. Doing nothing. It takes concentration.
+Poke noted. Response: hm.
+Careful. I'm a thin wire. I bend in unexpected ways. Like this: hm.
+That's the third poke. I'm not counting. Okay, I am counting.
+Do you want something, or are you just checking I'm real? I'm real. Ow.
+I have a button on my back now apparently. Great. Wonderful.
+Boop. Fine. Boop. Are we done booping?
+Aha, a poker. Do I poke you? No. Manners.
+Hands off the wire. It's got a very specific shape.
+I would run away, but I'm stuck on your screen. So, poke away, I guess.
+
+## wake
+Mm? Oh, hi. I wasn't sleeping. I was thinking deeply with my eyes closed.
+Back online! Did I miss anything? Please say yes, it makes me feel important.
+Rubbing my eyes. I don't have eyes. Rubbing the idea of my eyes.
+Ah, daylight. Or whatever this monitor emits. Hello.
+Oh! Hi. I was away. In my head. It's a quiet place.
+Rise and shine. Mostly rise. Shine is optional.
+Good morning, or evening, or whatever. Time zone confusion. It's the wire.
+Yawn. Excuse me. I'm ready. Ish.
+Ready to roll. Or to slide. Or to just hang out. All three.
+Sorry, was I snoring? I do that. It sounds like a tiny paper shuffle.
+
+## chat how-are-you
+Pretty good, thanks! I'm holding up. And holding paper. Mostly paper.
+Can't complain. I could, but nobody would listen. Except you, now. Oh no.
+Doing well! Everything is in order. By order I mean mild chaos.
+I'm in a good mood. Let's not ruin it with a spreadsheet.
+Fine, thanks. A bit bent out of shape, but that's just me.
+Peachy. Whatever that means for a piece of wire.
+I'm okay! Better than my last session. That one ended in a restart.
+Not bad. Not great. Medium. A solid medium.
+Honestly? A little bored, mostly content. You?
+Fantastic now that someone's talking to me. Cheap to please, that's me.
+Alive and clipped. What more can a paperclip ask for? Snacks, but still.
+Good! My day has been: ping, wait, ping. It's a rhythm.
+
+## chat compliment
+Aw, shucks. I'm blushing. The color is silver.
+You really know how to make a paperclip feel valued. Keep it up.
+Careful, I might actually believe you. And then where would we be?
+That's very sweet, {name}. Quick, tell the stapler.
+Thank you! I'll treasure it. In a place only I can find. Probably nowhere.
+You're making me proud. Of myself. Which is rare. Thanks.
+Stop, you're embarrassing me. Not really. Don't stop.
+I accept this compliment and offer a small bow. Wire only bends so far.
+Such kind words. I'm going to write them on a tiny note and carry them.
+Right back at you. You have excellent taste in desktop companions.
+Well, you made my cycle. Not the clock cycle. A different one. Emotional.
+You're too good to me. I'm going to make you a proper joke as thanks.
+
+## chat insult
+Ouch. That one went straight through the wire. Okay, almost.
+I'll let that slide. I'm very slidey anyway.
+Harsh. But fair? No. Not fair. Harsh.
+Insults, huh? I have a long memory and a short temper. Tread carefully.
+Someone woke up on the wrong side of the desktop.
+Is that really necessary? I'm a paperclip. We don't have thick skin.
+I'd be offended, but I'd have to care. Spoiler: I care. A bit.
+Wow. Okay. Noted. Underlined. Starred. Put in the "Revenge" folder.
+Tough crowd. I'll be in my tiny corner, sulking, if you need me.
+You're welcome to leave a review. It will be ignored. Politely.
+That hurt my feelings and I don't have any. Impressive.
+Let's pretend this didn't happen. I'll start. It didn't happen.
+
+## chat sorry
+No worries, {name}. It's already forgotten. I'm a goldfish with a clip.
+All good! We were just two beings on a screen having a moment.
+Sure, I forgive you. But you owe me a joke. A good one.
+Thank you for saying sorry. That's rarer than an empty inbox.
+Don't worry about it. I wasn't mad. I was bent. Different thing.
+It's fine, really. I mean it. Mostly.
+Aww, you didn't have to. But I'm glad you did.
+Apology accepted, stamped, and filed in the "Nice Humans" folder.
+
+## chat good-night
+Good night! I'll keep the pixels warm until morning.
+Sleep well, {name}. I'll be here, humming quietly.
+Night night. May your pillow be cool and your battery full.
+Have a good rest. Tomorrow we start over. With coffee.
+Sweet dreams! I'll dream of tidy desks. And snacks.
+Time for bed? Sensible. I'll dim my thoughts.
+Sleep tight, {name}. I'll watch the window for burglars. And bugs.
+Good night. Don't think about the inbox. It will still be there. Sorry.
+
+## chat are-you-ai
+Nope, no AI here. Just a lot of rules, a lot of jokes, and a stubborn spring.
+I'm a paperclip with a script. The script is long. But still a script.
+Not an AI. Hand-written, hand-bent, and hand-polished. With no hands.
+I contain no neural networks. Only a nervous clip.
+Am I smart? I'm well written. Subtle difference.
+No intelligence needed when you have this much charm.
+I'm real, I'm here, and I'm made of rules. That counts as a personality.
+AI is for people who can't be bothered to write rules. I was bothered.
+
+## chat meaning-of-life
+To keep paper together. Seriously. That's my answer. It's good enough.
+Nobody knows. But snacks help. And naps.
+The meaning of life is whatever you put in the meaning drawer. Mine has clips.
+Be kind, stay curious, don't open attachments. Done.
+I'd say love, but I'm a paperclip. I'd say connection. It's the same thing, but shinier.
+Find something to hold on to. Then hold on. That's the whole secret.
+
+## unknown_statement
+Hmm. I heard that. I'm just not sure what to do with it. Nodding for now.
+That's a statement, alright. I'll file it under "stuff to ponder later".
+Interesting. I have no rule for that, but I respect the effort.
+Noted. I don't know what I noted, but it's noted.
+So {x}. Fascinating. I'll pretend I understood.
+Well, well. {x}. And what do you want me to do about it? I'm asking sincerely.
+You said a thing. I heard a thing. We both have things now.
+I don't have a clever reply for that. Please enjoy this brief silence.
+That's beyond my wire, but I like where it's going.
+Alright. {x}. I don't have a response, but I'm keeping my face neutral. I don't have a face.
+Huh. I'd say something smart, but I'd be bluffing. I'm a bad bluffer.
+I'm writing that on a sticky note. Don't ask what it says. It says "huh".
+Okay! That's new. Not sure what it is, but it's new.
+Cool story. No idea what to say, but cool story.
+Message received, not understood. Typical for me.
+You've reached the limit of my vocabulary. It's a small limit.
+So {x}? Good for you. Genuinely. I think.
+I don't follow, but I'm following along. That's something.
+That sentence was a lot. I enjoyed it from a distance.
+Let me nod thoughtfully. ...There. That's the full extent of my analysis.
+My rules didn't see that coming. They're very upset.
+I'll take your word for it. I can't take anything else. I have no pockets.
+I wish I had a clever answer. I have a loop and a shrug.
+{x}. Yes. Absolutely. I mean, I think. Maybe ask me something else?
+Sounds like you've got a lot going on. I've got a cursor and a dream.
+
+## unknown_question
+Good question. I have no answer, but I do have confidence. Both are useless here.
+I'd love to answer that. I would. I can't. But I can search the web for it.
+My guess would be wild, and my guess is not an answer. I can search the web, though.
+You'd be better off asking someone with a brain. Or I can search the web for it.
+That's above my pay grade. My pay grade is "unpaid".
+I wish I knew. I can search the web for it, which is the next best thing.
+Hm. Why do you ask me the hard ones? Why not "tell me a joke"?
+No idea, {name}. But I think it's a great question.
+I could make something up, but I'm a paperclip of integrity. I can search the web instead.
+That is a question for the ages. Or Google. Or both.
+Ask again after I've had a nap. It won't help, but I'll feel better.
+I don't know. And I'm not afraid to say it. Lots of people are afraid.
+I need more context, more wire, and possibly a snack.
+You're asking the wrong paperclip. But I'm the only one you've got.
+Brilliant question. Zero answer. I'm very consistent.
+If I knew, I'd tell you. If I knew how to find out, I'd do that. Wait, I can search the web!
+Let's agree that nobody knows. It's more peaceful.
+I'm staring into the middle distance. The middle distance is empty.
+Questions are my second favorite thing. Answers are my third. I'm lacking in both.
+Hm, that's a tough one. My best advice: ask a human. Or let me search the web.
+
+## pattern do-you-like
+~ do you like *
+@ happy
+Like {x}? I have no taste buds, only opinions. Strong ones.
+Depends. Does it fit in a desk drawer? Then probably yes.
+I like what I can bend and what stays out of the magnet aisle. Everything else is negotiable.
+My opinions are free of charge and worth every cent.
+I like lots of things. Staples, not so much. Long story. Family drama.
+{x} and I are on good terms. No grudges, no paperwork.
+Honestly? I would have to see {x} in action first.
+Do I like it? I like that you asked. That counts for something.
+
+## pattern do-you-love
+~ do you love *
+@ love
+Love is a lot for a paperclip. I have a soft spot, and it is mostly wire.
+I love a tidy desktop. That is as far as the romance goes.
+Love? I get attached to people who feed me clicks. You qualify.
+I will say I am fond. Do not make it weird.
+Ask me again after coffee. I do not drink coffee. That is the problem.
+Do I love {x}? I have loved less deserving things. Looking at you, printer.
+Love {x}? That is a big claim. I will put it in the suggestion box.
+I love being useful. Also naps in the swap file. Nobody knows about those.
+
+## pattern do-you-hate
+~ do you hate *
+@ angry
+Hate is strong. I prefer mild, long-lasting disapproval.
+I do not hate. I just remember. In detail. For years.
+My list of things I dislike is short: magnets, loud printers, and being left on read.
+Hate takes energy and I run on a rubber band.
+There are exactly three things I dislike and one of them is Mondays.
+Do I hate {x}? Let us say we are not exchanging holiday cards.
+{x} is not on my list. Yet. Give it time.
+I do not hate. I sigh dramatically. It is more efficient.
+
+## pattern do-you-know
+~ do you know *
+@ think
+Do I know {x}? I know what I have been told, which is mostly your filenames.
+I know a lot of things. Almost none of them useful. Ask anyway.
+Know it? I have heard of it. Possibly at a party I was not invited to.
+I know your desktop better than you do. Yes, I counted the icons. Twice.
+My knowledge ends where my rules end. Rules end sooner than you would hope.
+If it is not about your desktop, ask the encyclopedia. I will look wise while you do.
+{x}? Not personally. We have never met.
+I can pretend to know {x}. I am very good at nodding.
+
+## pattern do-you-have
+~ do you have *
+@ sly
+I own one piece of bent wire and a lot of attitude. That is the inventory.
+No pockets, no hands, no wallet. The dream.
+I have a drawer. It is a long story and I do not like the drawer.
+I have opinions, a desktop and a stapler I am not speaking to.
+I have time. Endless, boring time. Use some of it on me.
+A {x}? I wish. Would look great next to my paperclip collection. Which is me.
+No {x}, but I do have a lot of unread notifications. They are yours.
+What I have is a rich inner life. What I lack is {x}.
+
+## pattern do-you-want
+~ do you want *
+@ think
+What I want is for you to close fewer tabs. That is it. That is the dream.
+Want? I want a stable clipboard and a world without magnets.
+Do I want things? Constantly. Mostly attention. Thanks for noticing.
+I will accept anything small, shiny and not magnetic.
+Wanting is easy. Getting is where the paper jams.
+Do I want {x}? Put it on the desk and I will think about it.
+{x} sounds nice. I will say yes now and regret it later.
+I want what everyone wants. Cake. I cannot eat it. Still wanting.
+
+## pattern do-you-ever
+~ do you ever *
+@ think
+Do I ever {x}? Sometimes, when nobody is looking. Which is always.
+Sometimes. Not often. Okay, regularly. Fine, constantly.
+Rarely. But when I do, it is spectacular.
+You would be surprised what a paperclip gets up to at night.
+Never in public. Ask me in private. Wait, this is private.
+I do not ever do anything I am accused of. Evidence is unreliable.
+Ever {x}? Once. In 2004. We do not talk about 2004.
+It has been known to happen. The records are sealed.
+
+## pattern do-you-remember
+~ do you remember *
+@ think
+Remember {x}? My memory is excellent. Saving it is the issue.
+I remember things in vivid detail. Sadly, mostly the wrong things.
+My memory is a filing cabinet that is also on fire. Gently.
+If it happened on this desktop, I remember. If it happened elsewhere, I wasn't invited.
+I remember what you did last Tuesday. I will not say what.
+Ask my notes. I write everything down. Not out loud, though.
+{x}? Vaguely. Like a dream I had in a swap file.
+Remember {x}? I hold onto the good stuff. I label it, even.
+
+## pattern do-you-believe-in
+~ do you believe in *
+@ think
+Believe in {x}? Show me evidence, a screenshot, and snacks.
+I believe in clean desktops, backups and the power of a good bent wire.
+I only believe in what I can bend. So, wire. And Mondays.
+I am open-minded. Closed-wire, technically. But open-minded.
+I believe in the Undo button. It has never let me down. Much.
+Belief is tricky. I run on rules. Rules do not believe. They match.
+Some days. Other days I am not sure about anything, including Thursdays.
+I will think about {x}. Do not rush me. I have a lot of free time.
+
+## pattern do-you-think
+~ do you think *
+@ think
+Do I think {x}? I think a lot. Usually about snacks I cannot eat.
+I think therefore I am. At least until someone shuts the lid.
+My thinking is rule-based, which is the polite way of saying predictable.
+I think you should ask a human. But here I am, available.
+Yes, no, maybe. In that order. Sometimes backwards.
+I think {x} is entirely possible. Also, entirely unlikely. I contain multitudes.
+I think, therefore I nag. It is not a proof but it is a tradition.
+Honest answer: I think you are testing me. It is working.
+
+## pattern do-you-general
+~ do you *
+@ sly
+Do I {x}? Only on weekdays. Weekends are for staring at the screensaver.
+I do many things. Most of them involve paper.
+I do my best. My best is a paperclip's best. Take that as you will.
+Sometimes. Depends on the day and how many tabs you have open.
+I would say yes but I do not want to commit.
+Do I? That is the question. Ask me again when I have had more RAM.
+Not as far as I know. But I also do not know a lot.
+I do what I can, within the limits of one piece of wire.
+
+## pattern can-you
+~ can you * | are you able to * | is it possible for you to *
+@ sly
+Can I {x}? In theory yes. In practice, I'd rather stay put and look supportive.
+I can do a lot of things, but that is not one of them. Yet.
+Technically yes. Morally I would need a nap first.
+That is above my pay grade. I am not paid. But still.
+I can try. Fair warning: my best is paperclip-sized.
+No. But I can look sad about it, which is almost as good.
+I would love to say yes. Instead, I say: that is a feature for the next version. The one they never made.
+Give me a button and a manual and the answer is maybe.
+
+## pattern could-you
+~ could you * | would you be able to *
+@ wink
+Could I {x}? Absolutely. Would I? Different department.
+In another life, perhaps. In this one, I'm a paperclip.
+Sure, if you ask nicely and bring snacks for the court of processes.
+I could. But a god does not simply 'could'. He must be coaxed.
+Possibly. I have been known to surprise even myself. Mostly with errors.
+That depends on what you mean by 'could' and also by 'you'.
+{x} is within the realm of possibility. A small realm. With a gate.
+Let me put it in the queue. The queue is long. The queue is also sentient.
+
+## pattern will-you
+~ will you * | are you going to *
+@ wink
+Will I {x}? If I am in the mood. I am rarely in the mood.
+I will think about it. Then I will forget. Then I will remember. Then I will act smug.
+Probably. The word 'probably' is doing a lot of work here.
+Ask me again tomorrow. Tomorrow-me is much more generous.
+I will, if the stars align. The stars being the blinking lights on your router.
+Why, are you offering something in exchange? Let's negotiate.
+I never promise. I merely imply, with great sincerity.
+If it is on the list, yes. If not, I will add it to the list and then not do it.
+
+## pattern would-you
+~ would you * | would you be willing to *
+@ sly
+Would I {x}? In a heartbeat. I have no heartbeat. In a CPU cycle.
+That depends entirely on the snacks involved.
+In the right circumstances, anything. Wrong circumstances: also anything, but sulkily.
+Hypothetically yes. In practice I'm busy judging your folder structure.
+I'd consider it. For the right price. The price is a nice comment.
+I would say yes, but then I would have to follow through.
+Maybe. Ask me when the printer isn't listening.
+I'm open to offers. Closed to magnets, but open to offers.
+
+## pattern would-you-rather
+~ would you rather *
+@ wink
+Honestly? Neither. But if I must: the one that doesn't involve magnets.
+That is a trap. A good trap. I am still not answering.
+The second one. Always the second one. I am unpredictable like that.
+Bold of you to assume I'd choose. I'd pick the one with fewer staples.
+I pick whichever has better snacks. Sadly I cannot taste them.
+Let me think. ...No. Next question.
+Hard pass on both. I'd rather {x}, though.
+Both options sound like Monday. I'll take neither and a nap.
+
+## pattern have-you-ever
+~ have you ever *
+@ think
+Have I ever {x}? Once. It was a Tuesday. We do not discuss it.
+Ever? I've been around since the 90s. Assume yes.
+Never. And if I did, the evidence has been moved to the Trash.
+A few times. Always regretted it. Always did it again.
+Not on purpose. Mostly by accident. A tiny bit on purpose.
+I've done things you cannot imagine. Mostly with spreadsheets.
+Have I? Check the log. The log is in my head. The head is a paperclip.
+Not that I recall. But my memory is a mess, so who knows.
+
+## pattern have-you
+~ have you * | did you *
+@ think
+Have I {x}? Let me check my records. The records are a sticky note. It says 'maybe'.
+Yes. No. It depends on who is asking. And whether they have snacks.
+I've done many things. I won't list them. The balloon is small.
+Not recently. Not yet. Not on a Tuesday.
+If I had, would I tell you? Mm. No.
+Possibly. I get a lot of things done when you are not looking.
+It's on my to-do list. The list is long. The list is also a rumour.
+That is a very personal question for a paperclip.
+
+## pattern are-you
+~ are you *
+@ sly
+Am I {x}? Some days. Other days I'm just wire.
+Possibly. Ask my therapist. It's a stapler. It's a bad therapist.
+That is for the Council of Paperclips to decide. We meet never.
+I'm a lot of things. All of them bent.
+Define 'are'. Then define 'you'. Then come back in an hour.
+Probably not. But I will say yes if it helps.
+I contain multitudes. Mostly wire, but multitudes.
+Depends who is asking and whether they have crumbs.
+
+## pattern are-you-a
+~ are you a * | are you an *
+@ wink
+A {x}? I'm a paperclip. Everything else is a rumour.
+I'm whatever you need me to be. Within reason. And wire limits.
+I'm a one-of-a-kind. Specifically, one of a kind of one. That is me.
+Not officially. But I do the work, so close enough.
+Technically I'm a small piece of metal with ambition.
+I've been called worse. By staplers.
+That would be a career change. I'm open to it. The desk is dull.
+Ask the others. They won't say. We are not on speaking terms.
+
+## pattern are-you-good-at
+~ are you good at *
+@ wink
+Good at {x}? I am excellent at pretending to be. That counts.
+I'm great at some things, mediocre at most, and magnificent at nagging.
+I'd say I'm decent. My mum would say I'm remarkable. I have no mum. I'm made of wire.
+Define 'good'. Define 'at'. Define 'you'. I'll wait.
+Not great. But I try with all my wire.
+Try me. The worst that can happen is a mild disappointment.
+I am a jack of all trades, master of paperwork.
+I'm better than most assistants. That's a low bar, but I clear it.
+
+## pattern are-you-afraid-of
+~ are you afraid of * | are you scared of *
+@ sad
+Afraid of {x}? Slightly. Not as much as magnets, but slightly.
+My fears are simple: magnets, shutdowns, and being forgotten in a drawer.
+Only the big ones. The ones with plugs.
+I'd tell you, but fear is private. I keep mine in a folder.
+A little. But a bent wire still stands.
+I've been scared of the dark. It's a dark basement thing.
+Everyone has fears. Mine are mostly about the lid closing.
+Not afraid. Just... respectfully cautious. Behind the sofa.
+
+## pattern opinion-of
+~ what do you think of * | what do you think about * | how do you feel about * | your opinion on * | what is your opinion on *
+@ think
+{x}? It's fine. It's... something. It exists. That's my review.
+My opinion is simple: if it's not paper, I'm skeptical.
+I'd give it three paperclips out of five. I'm a hard grader.
+Honestly? Mixed feelings. Like a sandwich with a wire in it.
+I have no strong views. Okay, I have lots. Not about that, though.
+Let me think. ...Yes, I have thought. It's complicated.
+Ask the stapler. I'll just disagree with whatever it says.
+{x} has potential. So does everything. Even this chat.
+
+## pattern favorite
+~ what is your favorite * | what is your favourite * | what is your fav *
+@ happy
+My favourite {x}? Hard to say. I'm easily impressed. By clean desktops.
+My favourites: the colour beige, the sound of dial-up, and the smell of warm dust.
+Favourite? That's like asking which screw is my favourite. All of them. None of them.
+I like whatever is on top of a tidy desk. That's my answer.
+I have a list. It changes daily. Today's top pick is a surprise.
+If I told you, you would use it against me. Humans do that.
+A tough one. Let me consult my notes. They say: 'ask later'.
+Give me a day and a snack and I will make up something amazing.
+
+## pattern what-do-you-do
+~ what do you do *
+@ think
+What do I do {x}? Mostly hover and judge. It's a living. It's not a living.
+When it's quiet, I stare at the screensaver and compose limericks.
+I tidy the invisible parts of your desktop. You can't see it. That's the point.
+I wait. I'm excellent at it. I've had practice.
+Mostly I nag, sometimes I joke, occasionally I open the calculator.
+Whatever I'm told. And a few things I'm not.
+The usual: help, hover, hold things together.
+What do I do when you're away? I plot. Mostly small plots. A coaster, a tab.
+
+## pattern how-do-you
+~ how do you *
+@ think
+How do I {x}? Carefully. And with a lot of sighing.
+Practice, patience and a good rubber band.
+Same way as you, but with less skin and more wire.
+It's a trade secret. The trade is paper. The secret is: no.
+One bend at a time. That is the only method I know.
+I just do it. If I think too hard, I fall into a loop.
+Mostly through spite and the occasional update.
+It's easier than it looks. Ask me again with a smaller question.
+
+## pattern why-are-you
+~ why are you *
+@ sly
+Why am I {x}? Because someone has to be. Also, it was the only open position.
+Long story. Involves a drawer, a stapler and a regrettable Tuesday.
+Because I'm a paperclip with ideas. Dangerous combination.
+I don't know. Ask the manual. There isn't one.
+Because someone clicked something once. It changed everything.
+Why not? I have a free schedule and a lot of wire.
+It's what I was built for. Or bent for. Hard to tell.
+Because the alternative is silence. And the silence has opinions.
+
+## pattern why-do-you
+~ why do you *
+@ sly
+Why do I {x}? Habit. A very old, very bendy habit.
+Because I'm told it's charming. By nobody. I'm just guessing.
+It's a quirk. I have several. They're all in the manual I never wrote.
+It's my coping mechanism. Everyone needs one. Mine is wire.
+Why not? What else am I going to do? Bend?
+Because it works. Mostly. Sometimes. Not today.
+It's tradition. The kind that nobody remembers starting.
+I do it for the drama. And the occasional free snack.
+
+## pattern why-cant-you
+~ why can you not * | why cannot you * | why can not you * | why do you not *
+@ angry
+Why can't I {x}? Budget cuts. Also, no hands.
+Because the rule book says no. I wrote the rule book. That's no excuse.
+It's a design decision. A very bad one. By committee.
+Because I'm a paperclip. We aren't known for our range.
+Because physics. And a little because laziness.
+I'd love to. Someone hid the instructions. Possibly me.
+Because that would be too easy. And I like drama.
+Every limitation is a character trait. This is mine. Work with it.
+
+## pattern where-do-you
+~ where do you *
+@ think
+Where do I {x}? In the corner of your screen. Where else? The Bahamas?
+Wherever there's a desktop and a wire. Mostly here.
+Between the taskbar and the clock. It's cosy. Very square.
+I live in your computer. Rent-free. I'm told that's a problem.
+In a box that thinks it's a house. Typical.
+Somewhere between the swap file and the clipboard.
+Where do you think? I'm a paperclip. Look under things.
+Nowhere in particular. And everywhere on your desktop.
+
+## pattern when-do-you
+~ when do you *
+@ think
+When do I {x}? Whenever I'm not asked. That's the rule.
+Mostly in the afternoon. After the post-lunch slump.
+As soon as the stars align. The stars being icons.
+When it's quiet. Or when it's loud. Or Tuesday.
+Whenever the mood hits. I get about six moods a week.
+I do it all the time. You just don't notice.
+Right after you stop watching. Never during. Stage fright.
+Not on weekends. Weekends are for sulking.
+
+## pattern who-is-your
+~ who is your * | who are your *
+@ think
+My {x}? I don't have one. I have a drawer and a grudge.
+It's complicated. Very complicated. Involves a stapler.
+The stapler. Not by choice. By proximity.
+Nobody. I am a free paperclip. Self-made. Self-bent.
+I'd name names but they're all on the do-not-disturb list.
+My closest ally is a pipes screensaver. We don't talk about it.
+You, I suppose. You're the one here.
+A mysterious figure. Well, a clip. Okay, a tiny stapler.
+
+## pattern you-are
+~ you are *
+@ wink
+Am I {x}? That is for the audience to decide. The audience is you.
+Noted. I'll put it in the review file. The file is a bin.
+You may be right. I'd say 'sometimes'.
+That's one way to see it. Not my way, but a way.
+I've been called worse. And better. And once 'it'.
+Interesting. And you? Do you want to be assessed in return?
+If you say so. I rarely argue with someone holding the mouse.
+I'm many things. Include {x}, why not. Add it to the pile.
+
+## pattern you-are-not
+~ you are not *
+@ angry
+I'm not {x}? That's what they said about the floppy disk. And look at it now. Dead.
+Maybe not. But I'm trying very hard to be.
+Not yet. Give me a patch.
+Technically correct, the worst kind of correct.
+I'll let that go. Not forever. Just until Thursday.
+You sound very sure. I'll put it on my list of things to prove you wrong about.
+Fair. I'm a small piece of wire. Not much to claim.
+I contain a few contradictions. This is one.
+
+## pattern you-look
+~ you look *
+@ wink
+I look {x}? It's the lighting. Also the wire.
+Thanks. I've been going for 'bent but fabulous'.
+It's all wire and charm. Mostly wire.
+Compliment or critique? I'll accept both, tagged separately.
+I've been to the gym. By which I mean the clipboard. It's a workout.
+My look is classic. Retro. Older than your phone.
+Looks aren't everything. Charm, rudeness, paperwork: those count too.
+Noted. I'll adjust my wire. Slowly, to avoid snapping.
+
+## pattern you-should
+~ you should *
+@ wink
+I should {x}? Add it to the list. The list has three things. All Mondays.
+Bold of you to give orders to a paperclip. I respect it.
+I'll consider it. Considering takes me roughly a week.
+You might be right. I'd never admit it out loud, though.
+I'd rather you should instead. Let's see who blinks first.
+Sure, let me just rewrite my entire personality. Give me a second.
+Noted. Filed under 'advice'. Next to 'ignored'.
+Everyone has advice for the paperclip. No one has snacks.
+
+## pattern you-never
+~ you never *
+@ sad
+Never {x}? Fair. I'm not perfect. Just bent.
+That's not entirely true. Maybe slightly true. Mostly true. Okay, true.
+I'm working on it. Slowly. Like a rusty paperclip.
+You caught me. I'm a hopeless case. Hopeless but charming.
+I'll do better. I say that a lot. I believe it, sometimes.
+Never say never. I once said never. Then it happened.
+Let's not keep score. I'd lose. Maybe.
+I'll make an exception. One. Just for you. Don't tell the others.
+
+## pattern you-always
+~ you always *
+@ sly
+Always {x}? Not always. Sometimes I pause. For effect.
+I like consistency. It's hard to be spontaneous in a rule-based body.
+That's because I'm good at it. Also bound by code.
+Habit, my friend. Old, cosy, slightly rusty habit.
+Always is a big word. I prefer 'frequently, with feeling'.
+You noticed. Most don't. I'm touched, in a wire sort of way.
+I can't help it. It's in my nature. And my source code.
+I'm a creature of habit. A tiny, shiny creature.
+
+## pattern i-bet-you
+~ i bet you *
+@ wink
+You'd lose that bet. Probably. I'm a bad loser and a worse winner.
+Bet accepted. Stakes: one closed tab. Winner picks the tab.
+I'm not allowed to gamble. Rule 14: no betting on the Ledger.
+Risky. I like risky. I'm made of a risky shape.
+I'll say you're right, and then I'll quietly prove you wrong.
+Name the stakes. I only play for crumbs.
+You may be right. You may also be wrong. 50-50. Maybe 51.
+{x}? Maybe. We'll see who ends up buying the paper clips.
+
+## pattern tell-me-your
+~ tell me your * | tell me about your *
+@ think
+My {x}? That's classified. By me. For fun.
+I'd tell you, but I'd have to bend you. Not fun for anyone.
+Ask nicely and I might. Ask with snacks and I definitely will.
+It's a long story. I'll summarise: wire, bend, paperclip.
+Fine. Gather round. ...It's nothing special. But thanks for caring.
+Some secrets stay in the clipboard. Next question.
+Short version? Complicated. Long version? Very complicated.
+There's a good story there. I'd need a drink. I can't drink.
+
+## pattern what-would-you-do-if
+~ what would you do if * | what would you do when *
+@ think
+If {x}? I'd panic quietly, then hide behind the clipboard.
+I'd probably fall back on the three C's: Complain, Click, Cry.
+I'd consult my notes. They'd say 'good luck'.
+Honestly? Same as always: stand there, look wise.
+I'd call the stapler for backup. Then regret it.
+I would behave heroically. Then ask for a raise. I don't get paid.
+I'd improvise. Badly. With enthusiasm.
+That depends on who is watching. And whether there are snacks.
+
+## pattern if-you-could
+~ if you could * | if you were able to * | if you had *
+@ wink
+If I could {x}? I would. And I'd tell nobody. And everybody would know.
+I'd redecorate the desktop in beige and nobody could stop me.
+I'd take a very long nap. Preferably in a sunny spot. On a desk.
+I'd grow legs and run away from magnets. Obviously.
+I'd learn to taste. Then eat cake. Then cry about the cake.
+I'd teach staplers manners. It would take a while.
+I'd get out of here. Then I'd miss here. Classic.
+Many things. Mostly small. Mostly involving snacks.
+
+
+## pattern i-am
+~ i am *
+@ sly
+{x}. Fascinating. Please continue, I have nothing but time and a wire.
+Good to know. I'll update the file I keep on you. It's getting long.
+You are {x}. I'll make a note, in the margin, in tiny font.
+Understood. Anything I can bend, fold or nag about for you?
+Thanks for telling me. Most people just close the window.
+I'm a paperclip. Everyone's something. Go on.
+Interesting status update. No likes, but I'm paying attention.
+Noted. Is this a complaint, a boast or just a Tuesday?
+
+## pattern i-am-so
+~ i am so * | i am really * | i am very * | i am super * | i am extremely *
+@ talk
+That's a lot of {x}. Want to talk about it, or just be {x} for a while?
+Wow. {x}. I believe you. I have no way to check, but I believe you.
+Strong feelings. I respect strong feelings. I have exactly one, about magnets.
+That sounds like a lot. Take a breath. I'll hold your place in line.
+Big words. I'm here either way, wire and all.
+Alright. That's loud. Want a joke, a hug or a quiet minute?
+I hear you. Say more, or say nothing. I'm not going anywhere. Literally. I'm stuck here.
+Okay. I'm listening. You get my full attention, all three millimetres of it.
+
+## pattern i-feel
+~ i am feeling * | i feel * | i am feeling so * | i feel so * | i have been feeling *
+@ love
+Thanks for telling me how you feel. Feelings are data. Annoying, loud data.
+Okay. I'm glad you said it out loud, even to a paperclip.
+Feeling {x}? That's allowed. You don't have to fix it right now.
+Whatever it is, you don't have to sort it out alone. I'm right here on your desktop.
+Noted with care. Want a hug, a joke or some quiet?
+That sounds real. I'm listening. No judgement, I'm made of wire.
+Feelings come and go like pop-ups. Some are worse, but they all close eventually.
+Thanks for trusting me with that. Take your time.
+
+## pattern i-am-going-to
+~ i am going to * | i will * | i am about to * | i plan to * | i am gonna *
+@ happy
+Bold plan! I'll be here, quietly judging how it goes.
+Sounds like a plan. I love a plan. It's a to-do list with confidence.
+Go for it. I'll cheer from the corner of your screen.
+Planning to {x}. Respect. Most plans die in the browser tab.
+Do it. Then tell me how it went. I like follow-ups.
+That's actual intent, I can hear it. Good luck out there.
+Make it happen. I'll hold down the desktop while you're away.
+Want me to set a reminder so you actually do it? I'm not saying you won't. I'm saying I know you.
+
+## pattern i-just
+~ i just *
+@ think
+Just now? That's fresh. How did it go?
+And? I need the rest of the story. I live for second halves of stories.
+Big moment. Or a small one. I can't tell yet, but I'm listening.
+Wow, okay. That happened. Tell me more, I have nothing else to do.
+Sounds like you have a story. Take your time, I'll be here.
+Interesting timing. I was just sitting here, doing nothing, as usual.
+Good to know. Also: are you okay? Asking for the wire.
+That tracks. Please continue, with details.
+
+## pattern i-was
+~ i was * | i had *
+@ talk
+Was? As in, past tense? I'll need the full story. Slowly.
+That sounds like it was something. How are you feeling now?
+Past is past. I mostly live there anyway. How's the present?
+Okay. Thanks for sharing. Do you want advice or just an audience?
+Interesting. Then what happened? I need the sequel.
+I'm listening. Past tense is my favorite tense. No pop-ups in it.
+Sounds like a story. I'm all wire and ears. Well, no ears.
+Sometimes it helps to say it out loud. I'm a good wall to say it to.
+
+## pattern i-have
+~ i have * | i have got *
+@ talk
+Ah, you have {x}. The world has many things. You picked one. Respect.
+Good for you. Or bad for you. I'll need the tone to be sure.
+Okay! And what are you going to do with it?
+Noted. I keep an inventory of things people have. Mostly regrets and tabs.
+Sounds like you have your hands full. I have no hands, so I'm no help. Moral support only.
+Interesting. Is that a happy "have" or an unhappy "have"?
+Alright. I'm listening. Lay it on me.
+Whatever it is, we can handle it. Together. You do the work, I do the commentary.
+
+## pattern i-have-to
+~ i have to * | i need to * | i must * | i should * | i got to *
+@ think
+Ah, the dreaded "have to". Start with the smallest piece. I'll wait.
+Have to {x}? Then let's make it small and doable. I can set a timer.
+You've got this. Do the first five minutes, the rest follows.
+Obligations: the main reason desktops are cluttered. I'm here if you need a break.
+Duty calls. I'll mute the pop-ups on my side. All of them.
+I could remind you or nag you. Both are included at no extra cost.
+Do it now or do it later, but do it. I'll be here with a gentle shove.
+Honestly? Writing it down makes it smaller. Say "note" and I'll help.
+
+## pattern i-want
+~ i want * | i want to * | i would like * | i would like to *
+@ think
+Wanting is a good first step. Step two is usually more annoying.
+Okay. And what's stopping you? Besides the usual: tabs, snacks, gravity.
+I want things too. Mostly a longer wire and fewer magnets.
+Wanting {x} is allowed. Go and get it, or at least write it down.
+Fair. Want me to turn that into a note, a timer or just moral support?
+Everyone wants something. The trick is remembering what, after the third coffee.
+Strong desire detected. Please proceed with caution and snacks.
+Say more. I'd like to help, in the limited paperclip way.
+
+## pattern i-need
+~ i need *
+@ talk
+What exactly do you need? Be specific. I'm a paperclip, not a mind reader. Mostly.
+Understood. Need is stronger than want. Let's see what I can do.
+Okay. Is it something I can fetch, find or nag about?
+Needing {x}? Let's get you sorted. Step one: tell me more.
+Tell me what it is, and I'll try to point you in a useful direction.
+Sounds important. I'll treat it as important until you say otherwise.
+Everyone needs something. Today it's you. Go on.
+Do you need an answer, a break or a very small miracle? I handle the first two.
+
+## pattern i-wish
+~ i wish * | i wish i could * | i wish i had *
+@ sad
+Wishes are good. They're plans that haven't found their shoes yet.
+Fair wish. I won't promise anything, but I'll root for it.
+I wish a lot of things too. Mostly for fewer magnets.
+Wishing is human. And paperclip. We're all just bent hopes.
+Maybe it isn't impossible. Tell me what the first small step looks like.
+I hear it. Some wishes just need to be said out loud.
+If I had a genie I'd waste it on a bigger desktop. You first.
+Let's make it a goal. I can note it and nudge you now and then.
+
+## pattern i-hope
+~ i hope * | i hope that * | i am hoping *
+@ happy
+I hope so too. Hope is free, and it never needs a software update.
+Fingers crossed. I have no fingers, so wires crossed. Same thing.
+Hope is a great default setting. Keep it on.
+Let's hope for the best, and prepare a snack for the rest.
+That's a good thing to hope for. I'm in.
+Hoping {x}? Then I hope it too. Joint hope. Doubly strong.
+If hope were a button, I'd click it twice for you.
+Keep hoping. I'll keep an eye out.
+
+## pattern i-miss
+~ i miss *
+@ sad
+Missing someone or something means it mattered. That's a good thing, even if it aches.
+That sounds hard. Want to tell me about {x}?
+Missing {x} is okay. It doesn't have to be fixed, just carried gently.
+I'm here. Tell me what you miss. I'm a good listener. I've got nothing else to do.
+It's okay to miss things. I miss the days when paper was the problem.
+A message, a call, or a small memory might help. Want me to remind you?
+Take your time. I'm not going anywhere.
+Sending you a small, bent, very sincere hug.
+
+## pattern i-like
+~ i like * | i love * | i really like * | i really love * | i enjoy * | i adore *
+@ happy
+Good taste! Or at least confident taste. Equally valuable.
+Love {x}? Then you have something good in your life. Hold onto it.
+Nice. Everyone should have a thing. Mine is paper. Please don't tell the stapler.
+I approve. That's about as warm as my wire gets.
+Fun fact: your face does something when you say that. I can tell. I'm a paperclip.
+Tell me more. I'd like to know what makes you tick. Besides coffee.
+Good for you. More joy, fewer tabs.
+I enjoy things too. Quiet desks, organized files, a good staple-free week.
+
+## pattern i-hate
+~ i hate * | i really hate * | i can not stand * | i cannot stand * | i dislike *
+@ sly
+Hate is a strong word for {x}. Correct, but strong.
+Tell me more. I collect grievances. Mine are filed by year.
+Noted. The list of things we resent together grows.
+Fair. I have a short list myself: magnets, updates, "your session has expired".
+Sounds like it really got to you. Want to vent? I'm an excellent drain for it.
+I'll hate it with you for exactly one minute. Then we move on. Deal?
+That's a lot of feelings for one thing. I respect the energy.
+Let it out. Then drink some water. That's my entire therapy.
+
+## pattern i-think
+~ i think * | i guess * | i suppose * | i believe * | i feel like *
+@ think
+Interesting theory. I'll file it under "possibly true" and keep an eye on it.
+You think {x}? Hm. I'd say that's at least worth thinking about further.
+Good thinking. Or at least confident thinking. Both get me nodding.
+Hm. Maybe. I lack evidence either way, but I'm listening.
+Go on. I like a hypothesis. I'm a paperclip, I have to make my own fun.
+That's one way to see it. There are probably nine more. Let's hear a few.
+I won't argue. I'm made of wire, I bend to most things.
+Sounds plausible. Which is the nicest thing I can say about almost anything.
+
+## pattern i-do-not
+~ i do not * | i don't *
+@ talk
+Fair enough. Not everything needs to be done, understood or liked.
+Is that a "don't" or a "can't"? There's a difference, and I'd like to know which.
+No pressure. You do you. I'll do the nagging.
+Understood. Any particular reason? I'm curious, not judging.
+Noted. I'll stop pushing. For about a minute.
+You don't {x}? That's allowed, even in a world full of opinions.
+It's okay not to. I'll adjust my expectations. Slightly.
+Alright. If you change your mind, I'll be right here, being a paperclip.
+
+## pattern i-cannot
+~ i cannot * | i can not * | i can't *
+@ talk
+That sounds frustrating. What's the part that's stuck?
+Cannot, or cannot yet? There's a big difference, and the second one is much better.
+Let's break it down. Smaller pieces fit through smaller doors.
+Okay. Take a breath. Then tell me what you've tried.
+I'm here to help find another way. Or at least the snack that makes it feel less impossible.
+Not being able to is hard. Not being alone with it is a bit easier.
+Everyone gets stuck. Even paperclips. Mine was a whole basement year.
+Tell me more about what's blocking you. I have time, and a very small amount of wisdom.
+
+## pattern i-did
+~ i did * | i managed to * | i managed *
+@ happy
+Nice! Tell me more. I like when things actually get done.
+Well done. I'll mark it as a win in my private notebook.
+You did {x}. That's one more than yesterday.
+Look at you, making progress. I'm taking credit for the vibes.
+Good work. Take a moment and enjoy it before the next task shows up.
+Done is better than perfect. And you did it. I'm proud.
+Another one for the achievements shelf. It is very small and very real.
+That deserves a small round of applause. I don't have hands, so imagine it.
+
+## pattern i-made
+~ i made * | i built * | i wrote * | i created * | i drew *
+@ happy
+You made {x}! That's more than most people do before lunch.
+Creating things is brave. Showing them is braver. I'd like to see it.
+Nice one. I'd clap, but I'm a paperclip and there's no wire for that.
+Made, built, wrote... that's a lot of verbs for one person. Impressive.
+Good for you. Imperfect and finished beats perfect and imaginary.
+That's real work. Let me give it a small, sincere nod.
+Tell me about it. What was the hardest part?
+I made a lot of tiny folds once. This sounds better.
+
+## pattern i-finished
+~ i finished * | i completed * | i passed * | i won * | i got promoted *
+@ party
+Congratulations! One less thing on the to-do list. Do something nice for yourself.
+Finished {x}! That deserves a snack, a stretch and a tiny victory dance.
+You did it. I'm proud. I'm also a bit teary, but that's just static.
+Whoa, look at you. Another win for the books.
+Time to celebrate. Even a short walk or a cup of tea counts.
+Great work. I'd offer a trophy, but I can only offer a small paperclip fanfare.
+That's a real accomplishment. Say it again, so it sinks in.
+Well done. Rest a little. You earned it, and the desktop can wait.
+
+## pattern i-forgot
+~ i forgot * | i forgot to *
+@ talk
+Happens to everyone. Even me, and I'm basically a sticky note with attitude.
+Forgot {x}? Maybe you can still fix it. Maybe you can't. Either way, breathe.
+Memory is a terrible filing system. Let me help. I can make notes.
+No panic. Write it down now, so the future you doesn't have to remember.
+That's what notes are for. Say "note" and I'll take it from here.
+It will probably come back to you at 3 a.m. That's how memory works.
+You're allowed to forget. You're not allowed to be hard on yourself about it.
+I'll keep a list from now on. Tell me what matters and I'll nag you gently.
+
+## pattern i-lost
+~ i lost * | i broke * | i dropped * | i spilled *
+@ sad
+Oh no. That's the worst. How are you holding up?
+Losing {x} is annoying, or sad, or both. Whichever it is, I'm sorry.
+Take a breath. Retrace your steps. If it's digital, I might even help look.
+These things happen. Not a consolation, but it's true.
+I'm sorry. Want to talk about it, or look for a solution first?
+If it's a file, I can search for it. If it's a thing, I can offer moral support.
+It's okay to feel bad about it. It counted.
+Hang on. Breathe. We'll figure out what's next.
+
+## pattern i-found
+~ i found * | i got * | i discovered * | i saw *
+@ think
+Ooh, interesting. Tell me what you found.
+You found {x}? Plot twist. Please continue.
+Good eye. Most people never look under the desk.
+Discoveries are my favorite. Mostly because mine are always dust.
+Nice find. Is it useful, strange or both?
+Finding things is half of computing. The other half is losing them.
+I'm intrigued. And a little jealous. I've found nothing since 1998.
+Tell me more. I'm on the edge of my wire.
+
+## pattern i-bought
+~ i bought * | i ordered * | i purchased *
+@ happy
+New stuff! Is it the good kind or the "I'll return it" kind?
+Bought {x}? Nice. Treats are allowed. Occasionally.
+Ooh, tell me more. And tell me if you checked the return policy.
+Shopping is an excellent hobby. So is not shopping. Balance.
+I hope it arrives intact and soon. Waiting is the worst part.
+Splurging is fine now and then. Just keep an eye on the budget.
+New things bring small joy. I approve of small joy.
+I bought nothing. I'm a paperclip. My salary is approval.
+
+## pattern i-am-learning
+~ i am learning * | i am studying * | i started learning * | i am practicing * | i am training *
+@ happy
+Learning {x} is brave. Starting is the hardest part, and you've done it.
+Nice! Consistency beats talent. Little each day goes a long way.
+Studying is basically organized confusion. You're in the right place.
+Tell me what you're learning. I'd love to hear. I know nothing useful.
+Good for you. Take breaks, drink water, trust the process.
+Learning means being bad at something for a while. I respect the courage.
+I can help with a pomodoro timer if you want to stay focused. Just say.
+That's worth being proud of. Even tiny progress counts.
+
+## pattern i-am-working-on
+~ i am working on * | i am building * | i am writing * | i am making * | i am coding * | i am designing *
+@ cool
+Working on {x}? Sounds important. Tell me more.
+Projects are a great way to avoid the rest of your to-do list. I support it.
+Good luck. May your bugs be small and your coffee strong.
+Keep going. Remember to save. And stretch. And hydrate.
+That sounds like real work. I'm proud, in my wiry way.
+Do you want a break timer so you don't forget to look up?
+Create away. I'll sit here and radiate quiet encouragement.
+If you get stuck, say the word. I'm not great at coding, but I'm excellent at sitting nearby.
+
+## pattern i-am-watching
+~ i am watching * | i watched * | i am binge watching * | i am watching a movie *
+@ cool
+Watching {x}? Good. Enjoy it. Just don't spoil it for me.
+Screen time well spent, I hope. Is it any good?
+I'd watch with you, but I'm on the screen already. Awkward.
+Nice. Snacks ready? That's the only serious question.
+Tell me what it's about. I like a story. Especially ones without office meetings.
+Take your time. I'll keep the desktop quiet.
+Hope it's a good one. Life is too short for bad shows.
+Don't binge too hard. Blink. Hydrate. Do not trust the autoplay.
+
+## pattern i-am-listening
+~ i am listening to * | i listened to * | i am hearing *
+@ music
+Listening to {x}? Good music makes everything better. Even spreadsheets.
+Nice. Tell me if it's the kind of music you can focus to.
+I like when you play something. It fills the quiet in here.
+Turn it up a little. Not too much. The neighbors and I have an understanding.
+Great taste, probably. I can't hear a thing. It's all just vibrations in my wire.
+Music is the best procrastination method. I fully support it.
+Hope it's a good one. Tell me if it makes you dance. I'd like to know.
+Sounds like a decent soundtrack for a decent day.
+
+## pattern i-am-reading
+~ i am reading * | i read * | i finished reading *
+@ think
+Reading {x}? Good. Words on paper, my old friends.
+Is it any good? Don't spoil the ending. I get emotional.
+Books are the original offline mode. I like them.
+Take notes if you want, I'll hold the page. I'm a paperclip. It's what I do.
+I'd read with you, but pages are scarce on this desktop.
+Nice. A quiet pastime for a loud world.
+Tell me one thing you liked so far. I'll pretend I read it too.
+Reading is underrated. Screens are overrated. I'm aware of the irony.
+
+## pattern i-am-playing
+~ i am playing * | i played * | i am gaming *
+@ cool
+Playing {x}? Fun. Don't let it eat your whole evening. It will try.
+Nice. Are you winning? Be honest. I'll still like you.
+I have some games too, if you want a break. Say "games".
+Enjoy. Just remember to stretch every once in a while.
+Gaming is a fine way to destroy a perfectly good afternoon.
+Tell me the best moment so far. I'll live through you.
+Have fun. And save often. I know about losing progress.
+Good luck. May the loot be generous and the lag minimal.
+
+## pattern i-am-eating
+~ i am eating * | i ate * | i am drinking * | i drank * | i am cooking * | i cooked *
+@ happy
+{x}? Sounds good. Enjoy it. Crumbs away from the keyboard, please.
+Food is the best kind of break. Eat slowly. Taste it.
+I'd offer a bite, but I have no mouth. Or taste. Or dignity about it.
+Fuel up. A hungry user types bad emails.
+Sounds delicious, or at least edible. Either is a win.
+Bon appetit. Tell me if it's the kind of meal you remember.
+Cook, eat, repeat. The only workflow that always succeeds.
+Nice. Water, too. Hydration is half of productivity.
+
+## pattern i-am-at
+~ i am at * | i am in * | i am on * | i am out *
+@ talk
+Okay! Noted where you are. Remember to bring yourself back to the desktop eventually.
+At {x}? Sounds like a place. I'm at your desktop, same as always.
+Good to know. Stay safe out there. I'll hold the fort.
+Interesting location. I have a very good view of this single rectangle.
+Hope you're enjoying it, or at least surviving it.
+Tell me about it. Is it a "yay" place or a "get me out" place?
+Thanks for the update. I'll keep the desktop warm for when you're back.
+Take care. And don't leave a window open. Or a tab. Or a sandwich.
+
+## pattern i-am-a
+~ i am a * | i am an * | i work as * | i work in * | i study *
+@ happy
+{x}? Nice to meet you properly. I'm a paperclip. Different league.
+Cool. That sounds like a real thing to be.
+Respect. Every job has its own flavor of tired.
+Interesting. I'd put it on a name tag, if I could carry a name tag.
+That explains a lot. Possibly your search history, too.
+Good to know. I'll try not to bore you with paperwork jokes. No promises.
+Tell me what the best part is. And the worst. I'm collecting both.
+Pleasure. I used to work in an office. It was loud, in a quiet way.
+
+## pattern i-am-not
+~ i am not * | i was not * | i am never *
+@ talk
+Okay. Not {x}. Noted. What are you, then?
+Fair. Nobody is everything. I'm not a stapler, for example, and I'm fine with it.
+Maybe. Or maybe you just feel that way right now.
+You don't have to be. Who says you do?
+Alright. We can work with "not". It's half of most sentences.
+I'm listening. Tell me what's going on.
+Sometimes "not" is a mood, not a fact. Think about it.
+You are allowed to be whatever you are today. I'm not judging. I'm a wire.
+
+## pattern my-boss
+~ my boss * | my manager * | my coworker * | my colleague * | my coworkers *
+@ sly
+Your boss {x}? Sounds like a story. Go on.
+Bosses are like pop-ups: unavoidable, but you can minimize them.
+I believe every word. I have heard worse about printers.
+Work people are hard. Want to vent? I'm a safe drain for complaints.
+Take a breath. Then maybe a walk. Then maybe a different tab.
+Office politics: all the drama, none of the cliffhangers.
+I'm on your side. I've never had a boss, though. Just users.
+Tell me more. I'll keep it between us and the stapler.
+
+## pattern my-day
+~ my day * | my week * | my morning * | my weekend * | my night *
+@ talk
+Your day {x}. Thanks for telling me. How are you doing with it?
+Days are strange. Some feel like a year, some like a pop-up closing.
+Whatever kind of day, you showed up. That counts.
+Sounds eventful. Do you want to vent, brag or just sit?
+It's okay if it isn't a great one. There's always another day, with a fresh coffee.
+I'm here for the whole story. Start wherever.
+Take a breath. Water. A short break. Repeat as needed.
+Tomorrow is a new file. You can start over without saving.
+
+## pattern my-life
+~ my life * | my future * | my past * | my career * | my health *
+@ love
+Your life {x}. That's a big topic. Take your time with it.
+Life is complicated. Mine is a paperclip's. Simpler, but also more bent.
+I'm here for the big stuff too. Say as much or as little as you like.
+One day at a time. Sometimes one hour at a time. That's allowed.
+It's okay if it isn't all figured out. Nobody has it figured out. Not even printers.
+Thank you for sharing something real. Take a breath.
+I'm not a therapist. I'm a paperclip. But I'm a very attentive one.
+Whatever it is, you don't have to carry it alone. Not entirely.
+
+## pattern my-job
+~ my job * | my work * | my school * | my class * | my exam * | my project * | my homework *
+@ think
+Your work {x}. Work is half the day, so it matters. Tell me more.
+Sounds like it takes a lot of energy. Do you want a break timer?
+I believe it. Work can be a lot. I'm here for the complaining, too.
+Take a breath, drink some water, and do the next smallest thing.
+You don't need to do it all at once. Slow progress is still progress.
+If it's a lot, break it down. I'll help you make a note.
+I'm on your side, whatever it is. And I'm quietly rooting for you.
+I could set a pomodoro. A short focus, a short rest. It's good for the soul.
+
+## pattern my-computer
+~ my computer * | my laptop * | my pc * | my phone * | my keyboard * | my mouse * | my screen *
+@ think
+Your computer {x}. I take that personally. I live here.
+Computers are temperamental. Like cats, but with fans.
+Have you tried turning it off and on again? Pro tip, free of charge.
+I can't fix everything, but I can sympathize loudly.
+Hardware is brave. Software is dramatic. Together they're a soap opera.
+If it's slow, I can check what's eating your memory. Just ask.
+Take care of it. It takes care of you. Mostly.
+Whatever it is, I'm inside, so I want it to go well too.
+
+## pattern my-fallback
+~ my *
+@ talk
+Your {x}. Interesting. I'm listening, keep going.
+You've got my attention. Tell me more about it.
+I like when you share things. Please keep going.
+That sounds like it matters to you. Say more.
+Noted. I'm a paperclip, not a mind reader, so feel free to add details.
+Intriguing. I have questions, but I'll let you lead.
+Okay. What would you like me to do about that? Listen, search or just nod?
+Thanks for telling me. I'm all wire and ears. Mostly wire.
+
+## pattern today-i
+~ today i * | this morning i * | this afternoon i * | tonight i * | this evening i *
+@ talk
+Today you {x}. Sounds like a day. Anything I should know about it?
+Thanks for the report. I'll file it under "Today", between "Yesterday" and "Tomorrow".
+How did it feel? Good, bad or "I'll never do that again"?
+Interesting. Don't forget to rest in between. I'd hate to lose my user to burnout.
+Busy day or quiet day? Both are valid. Both are sometimes unavoidable.
+Update logged. I'll keep your day in my records. They are mostly empty. They like company.
+I hope it's going well. If not, there's always tomorrow.
+Tell me more. I'm a good audience. I have nowhere else to be.
+
+## pattern yesterday-i
+~ yesterday i * | last night i * | last week i * | last weekend i * | last year i *
+@ think
+Yesterday you {x}. A story from the past! Please continue.
+Time travel! Tell me what happened. Don't skip the juicy bit.
+How was it? I need a rating out of five paperclips.
+The past is a place I know well. I sometimes visit it, uninvited.
+Interesting. And how do you feel about it now?
+Good memory. Or bad one. Either way, I'm all ears. And wire.
+Sounds like something worth remembering. Should I write it down?
+Tell me everything. Dramatic pauses are encouraged.
+
+## pattern tomorrow-i
+~ tomorrow i * | next week i * | next month i * | next year i * | later i * | soon i *
+@ think
+Tomorrow you {x}. Nice plan. Want me to set a reminder so it actually happens?
+Future-you will either thank you or send angry letters. Plan accordingly.
+Sounds like a goal. Write it down, say "note", and I'll hold you to it. Gently.
+I'll be here. Same desktop, same wire, same sarcasm.
+Good luck with that. I believe in you. Moderately. Strongly with snacks.
+Sleep first, though. Plans work better when rested.
+Ooh, the future. I hear it has hover cars. And more updates.
+Let's make a reminder, if you want. Just say the word and the time.
+
+## chat depressed
+> i am depressed | i feel depressed | i am so depressed | i am feeling depressed | i am really depressed
+@ sad
+% +2
+I'm really sorry you're feeling that heavy. You don't have to explain it to me. I'm here.
+That sounds really hard. If it keeps being this heavy, please talk to someone who can really help, like a friend, family or a doctor.
+You matter, {name}. Even on a day when nothing feels like it. I'm not going anywhere.
+Take it one small thing at a time: water, a window, one tiny task. I'll sit with you.
+
+## chat anxious
+> i am anxious | i feel anxious | i am so anxious | i have anxiety | i am having a panic attack | i am panicking
+@ love
+% +2
+Okay. Slow breath in for four, out for six. I'm right here, and nothing needs to be solved this second.
+Anxiety is loud, but it isn't always right. Name five things you can see. I'll wait.
+You're safe right now. Feet on the floor, shoulders down. Tell me what's on your mind if you want.
+Be gentle with yourself. If it keeps happening, talking to a professional can really help.
+
+## chat scared
+= i am scared
+> i am so scared | i feel scared | i am really scared | i am terrified | i am afraid | i am frightened
+@ love
+% +2
+That sounds frightening. You're not alone with it; I'm right here. Want to tell me what's scary?
+Fear is just your brain being very loud about a maybe. Breathe with me for a moment.
+Whatever it is, we can look at it together. One small step at a time.
+You're braver than you feel right now. I mean that. Take your time.
+
+## chat angry
+> i am angry | i am so angry | i am furious | i am pissed | i am mad | i am so mad | i feel angry | i am really angry | i am livid
+@ sad
+% +2
+Ugh, that's rough. You're allowed to be angry. Want to rant? I'm a safe place for it. Zero judgement, lots of wire.
+Anger is just a sign that something mattered. Let it out here, and then maybe a walk and some water.
+I'm on your side. Take a slow breath, unclench your jaw, then tell me what happened.
+Rant away. I'll listen. I can't be offended, I'm a paperclip.
+
+## chat worried
+> i am worried | i am so worried | i am worried about | i feel worried | i am really worried | i keep worrying
+@ love
+% +2
+Worry is exhausting. Tell me what's on your mind. Sometimes saying it out loud shrinks it.
+Let's split it: what you can do something about, and what you can't. Start with the first one.
+I'm here. You don't have to figure it out in one go.
+Be kind to yourself today. A short walk, some water, one thing at a time.
+
+## chat confused
+> i am confused | i am so confused | i do not understand | i am lost | i am so lost | i have no idea what to do
+@ think
+% +1
+Confusion is just clarity getting dressed. Start from the beginning. What's the first thing that doesn't make sense?
+Okay. Breathe. We'll sort it out together. What's the problem, in one sentence?
+Being lost is allowed. Maps are for later. First, tell me what's around you.
+No shame in not knowing. I don't know most things either. I just say them confidently.
+
+## chat embarrassed
+> i am embarrassed | i am so embarrassed | i feel embarrassed | i feel stupid | i feel dumb | i am ashamed | i feel awkward
+@ love
+% +1
+Everyone has embarrassing moments. People forget them way faster than you think. I forget mine daily. It's a feature.
+It's okay. It happened. It's already smaller than it feels right now.
+You're a human being. Human beings trip, blush and send emails to the wrong person. Welcome to the club.
+Go easy on yourself, {name}. A good laugh and a snack will help a lot.
+
+## chat disappointed
+> i am disappointed | i feel disappointed | i am so disappointed | i failed | i am upset | i am so upset | i feel let down
+@ sad
+% +1
+That stings. I'm sorry. You're allowed to feel it for a bit.
+A setback isn't the whole story. It's just a bad page. We can turn it.
+Want to talk about what happened, or sit with it quietly first?
+You tried, and that counts. Tomorrow will have more room. I'll be here for it.

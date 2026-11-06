@@ -72,7 +72,9 @@ const LEAD: &[&str] = &[
 const TRAIL: &[&str] = &[" please", " for me", " thanks", " thank you", " now", " right now", " clipster", " asap", " quickly", " real quick", " ok", " okay"];
 
 /// Lowercase, expand contractions and number words, drop politeness and filler.
-pub fn clean(raw: &str) -> String {
+/// Lowercase, punctuation out, contractions and slang expanded, number words as digits; every word kept
+/// ("I'm not sure, Clipster!" -> "i am not sure clipster"). Sentence patterns match on this.
+pub fn tidy_words(raw: &str) -> String {
     let mut s = raw.to_lowercase().replace(['’', '‘'], "'").replace(['?', '!', '"', '“', '”'], " ");
     s = format!(" {} ", s.split_whitespace().collect::<Vec<_>>().join(" "));
     s = s.replace(". ", " ");
@@ -104,7 +106,12 @@ pub fn clean(raw: &str) -> String {
         }
         i += 1;
     }
-    let mut s = out.join(" ");
+    out.join(" ")
+}
+
+/// `tidy_words`, then without polite openers and fillers ("could you please ...", "... thanks").
+pub fn clean(raw: &str) -> String {
+    let mut s = tidy_words(raw);
     loop {
         let before = s.len();
         for l in LEAD {
@@ -193,7 +200,19 @@ fn intent(s: &str, raw: &str) -> Option<Reply> {
         .or_else(|| chance(s))
         .or_else(|| chat(s))
         .or_else(|| system(s))
+        // sentence patterns ("i am *", "do you like *"), but encyclopedia questions go to the encyclopedia
+        .or_else(|| if knowledge(s) { None } else { lines::pattern(raw) })
         .or_else(|| questions(s, raw))
+}
+
+/// An encyclopedia-style question ("who painted…", "what is a…", "how many…"), not one about Clipster or the person.
+fn knowledge(s: &str) -> bool {
+    let personal = s.split_whitespace().any(|w| ["you", "your", "yours", "yourself", "i", "me", "my", "mine", "myself", "we", "our"].contains(&w));
+    let openers = [
+        "who ", "what is ", "what are ", "what was ", "what were ", "what does ", "what did ", "when ", "where ", "which ", "how many ", "how much ",
+        "how far ", "how old ", "how tall ", "how big ", "how long ", "how does ", "why is ", "why are ", "why does ", "why did ", "is it true ", "tell me about ",
+    ];
+    !personal && openers.iter().any(|p| s.starts_with(p))
 }
 
 /// "when I say gm, say good morning sunshine" / "when I say work, open firefox and open code"
@@ -1069,7 +1088,7 @@ fn chat(s: &str) -> Option<Reply> {
         (&["joke", "jokes", "funny", "laugh", "bored", "humor", "humour", "entertain me", "make me smile", "cheer me up", "something fun", "lol"][..], "joke"),
         (&["roast", "insult me", "make fun of me", "burn me", "be mean", "diss me", "trash talk"][..], "roast"),
         (&["fact", "facts", "something interesting", "teach me something", "did you know", "something i do not know", "tell me something", "learn something"][..], "fact"),
-        (&["compliment", "something nice", "i am sad", "i feel sad", "feeling down", "feel bad", "bad day", "hug", "lonely", "i am tired", "encourage me", "sad"][..], "hug"),
+        (&["compliment", "something nice", "i am sad", "i feel sad", "feeling down", "feel bad", "bad day", "hug", "lonely", "encourage me", "sad"][..], "hug"),
         (&["quiz", "quiz me", "trivia", "test me", "ask me a question", "trivia question"][..], "quiz"),
         (&["quote", "quotes", "inspire me", "inspiration", "inspirational", "motivate me", "motivation", "motivational", "wise words", "wisdom"][..], "quote"),
         (&["advice", "give me advice", "life advice"][..], "advice"),
@@ -1248,17 +1267,22 @@ fn fallback(raw: &str, s: &str) -> Reply {
         .filter(|g| g.0 > 0)
         .collect();
     scored.sort_by(|a, b| b.0.cmp(&a.0));
-    if question || scored.is_empty() {
-        return exact(&format!("ask {raw}")).unwrap_or_else(|| Reply::say("Hmm?")); // let the internet have a go
+    // the internet only gets real lookups: encyclopedia questions, or a bare name or thing ("Ada Lovelace", "platypus")
+    let personal = words.iter().any(|w| ["i", "me", "my", "you", "your", "we", "our", "us"].contains(w));
+    if knowledge(s) || (!personal && words.len() <= 3 && scored.is_empty()) {
+        return exact(&format!("ask {raw}")).unwrap_or_else(|| Reply::say("Hmm?"));
     }
-    let mut r = Reply::say(format!("{}\n\nHere's my best guess at what you're after:", crate::lines::pick("confused")));
-    for (_, label, cmd) in scored.iter().take(2) {
-        r = r.run(label, cmd);
+    // anything else is conversation he has no rule for: answer in character, offer the web as an option
+    let mut r = crate::lines::reply_with(if question { "unknown_question" } else { "unknown_statement" }, &tidy_words(raw));
+    if !scored.is_empty() {
+        r.text += "\n\nOr were you after one of these?";
+        for (_, label, cmd) in scored.iter().take(2) {
+            r = r.run(label, cmd);
+        }
     }
     r.mood(Mood::Think)
         .run("Ask the internet instead", &format!("ask {raw}"))
         .btn("Search the web for it", Act::Open(format!("https://duckduckgo.com/?q={}", url_encode(raw))))
-        .run("Show me everything you can do", "help")
 }
 
 #[cfg(test)]

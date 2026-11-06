@@ -5,6 +5,7 @@
 //! ## name             a section; "chat <id>" = conversation topic, "program <id>" = program reaction
 //! > a | b             trigger phrases (whole words, anywhere in the tidied sentence)
 //! = a | b             exact triggers (the whole tidied sentence)
+//! ~ i am * | i feel *  sentence patterns ("pattern <id>" sections): `*` captures words, replies use {x}
 //! @ mood              Mood name
 //! + Label = command   a button ("hide" closes the balloon, a link opens it)
 //! ! command           run this when triggered (only in the user's file)
@@ -39,6 +40,7 @@ pub struct Section {
     pub name: String,
     pub triggers: Vec<String>,
     pub exact: Vec<String>,
+    pub patterns: Vec<(Vec<String>, Vec<String>)>, // sentence patterns: words before and after the `*`
     pub mood: Option<Mood>,
     pub buttons: Vec<(String, String)>,
     pub commands: Vec<String>,
@@ -82,6 +84,7 @@ pub fn database(unhinged: bool) -> (Vec<Section>, Vec<String>) {
                         let t = &mut all[i];
                         t.triggers.extend(s.triggers);
                         t.exact.extend(s.exact);
+                        t.patterns.extend(s.patterns);
                         t.buttons.extend(s.buttons);
                         t.lines.extend(s.lines);
                         t.mood = s.mood.or(t.mood);
@@ -230,6 +233,19 @@ pub fn parse(text: &str, user: bool, out: &mut Vec<Section>) -> Vec<String> {
         match line.get(..2) {
             Some("> ") => s.triggers.extend(list(rest, false)),
             Some("= ") => s.exact.extend(list(rest, true)),
+            Some("~ ") => {
+                for p in rest.split(" | ") {
+                    // patterns keep openers like "i want" or "can you" that `clean` would drop
+                    let tidy = crate::understand::tidy_words(&p.replace('*', " qqstarqq "));
+                    let (before, after) = tidy.split_once("qqstarqq").unwrap_or((&tidy, ""));
+                    let (before, after): (Vec<String>, Vec<String>) = (before.split_whitespace().map(String::from).collect(), after.split_whitespace().map(String::from).collect());
+                    if !tidy.contains("qqstarqq") || before.is_empty() {
+                        bad("a pattern needs words, then * (\"i am *\")");
+                    } else {
+                        s.patterns.push((before, after));
+                    }
+                }
+            }
             Some("@ ") => match mood_named(rest) {
                 Some(m) => s.mood = Some(m),
                 None => bad("unknown mood"),
@@ -272,7 +288,21 @@ fn flavoured<'a>(db: &'a [Section], name: &str) -> Option<&'a Section> {
 
 /// A reply from section `s`, with its words taken from `words` (a mood or friendship version of it).
 fn to_reply_from(s: &Section, words: &Section) -> Reply {
-    let text = words.lines.choose(&mut rand::thread_rng()).map(|l| spoken(&s.name, l)).unwrap_or_default();
+    to_reply_x(s, words, None)
+}
+
+/// Like `to_reply_from`, filling `{x}` with `x`. Without an `x`, or with a long one, lines that don't use it are preferred.
+fn to_reply_x(s: &Section, words: &Section, x: Option<&str>) -> Reply {
+    let fits = x.is_some_and(|x| (1..=6).contains(&x.split_whitespace().count()));
+    let plain: Vec<&String> = words.lines.iter().filter(|l| !l.contains("{x}")).collect();
+    let line = if fits || plain.is_empty() { words.lines.choose(&mut rand::thread_rng()) } else { plain.choose(&mut rand::thread_rng()).copied() };
+    let text = line.map(|l| spoken(&s.name, &l.replace("{x}", x.unwrap_or("that")))).unwrap_or_default();
+    // a reply that starts with what they said ("{x}? Bold.") still starts with a capital
+    let mut chars = text.chars();
+    let text = match chars.next() {
+        Some(c) if c.is_lowercase() => c.to_uppercase().chain(chars).collect(),
+        _ => text,
+    };
     let mut r = Reply::say(text).mood(s.mood.unwrap_or(Mood::Talk));
     for (label, cmd) in &s.buttons {
         r = match cmd.as_str() {
@@ -390,6 +420,79 @@ pub fn taught() -> Vec<(String, String)> {
         .collect()
 }
 
+/// "my boss" -> "your boss", "i love you" -> "you love me": the captured words, said back.
+pub fn reflect(x: &str) -> String {
+    let words: Vec<&str> = x.split_whitespace().collect();
+    let mut out = vec![];
+    let mut i = 0;
+    while i < words.len() {
+        let pair = (words[i], words.get(i + 1).copied().unwrap_or(""));
+        let swapped = match pair {
+            ("you", "are") => Some("i am"),
+            ("you", "were") => Some("i was"),
+            ("i", "am") => Some("you are"),
+            ("i", "was") => Some("you were"),
+            _ => None,
+        };
+        if let Some(s) = swapped {
+            out.push(s);
+            i += 2;
+            continue;
+        }
+        out.push(match words[i] {
+            "i" | "me" => "you",
+            "my" => "your",
+            "mine" => "yours",
+            "myself" => "yourself",
+            "am" => "are",
+            "you" => "me",
+            "your" => "my",
+            "yours" => "mine",
+            "yourself" => "myself",
+            w => w,
+        });
+        i += 1;
+    }
+    out.join(" ")
+}
+
+/// The pattern that fits `words` best (most fixed words), and what its `*` captured.
+fn match_pattern<'a>(db: &'a [Section], words: &[&str]) -> Option<(&'a Section, String)> {
+    let mut best: Option<(usize, &Section, String)> = None;
+    for s in db.iter().filter(|s| !s.patterns.is_empty() && !s.lines.is_empty()) {
+        for (before, after) in &s.patterns {
+            let fixed = before.len() + after.len();
+            let fits = words.len() > fixed && words.iter().zip(before).all(|(w, b)| w == b) && words.iter().rev().zip(after.iter().rev()).all(|(w, a)| w == a);
+            if fits && best.as_ref().is_none_or(|b| fixed > b.0) {
+                best = Some((fixed, s, words[before.len()..words.len() - after.len()].join(" ")));
+            }
+        }
+    }
+    best.map(|(_, s, x)| (s, x))
+}
+
+/// A reply from the sentence patterns ("i hate *", "do you like *"), or `None` when none fits.
+pub fn pattern(raw: &str) -> Option<Reply> {
+    let tidy = crate::understand::tidy_words(raw);
+    // "hey clipster, i am tired" is still "i am tired"
+    let fillers = ["hey", "hi", "hello", "ok", "okay", "so", "well", "um", "uh", "oh", "clipster", "dear", "and", "but", "honestly", "actually"];
+    let words: Vec<&str> = tidy.split_whitespace().skip_while(|w| fillers.contains(w)).collect();
+    let db = db();
+    let (hit, x) = match_pattern(&db, &words)?;
+    let x = reflect(&x);
+    Some(to_reply_x(hit, flavoured(&db, &hit.name).unwrap_or(hit), Some(&x)))
+}
+
+/// A random line from a section with `{x}` filled in (reflected), e.g. the "didn't understand that" pools.
+pub fn reply_with(name: &str, x: &str) -> Reply {
+    let db = db();
+    let x = reflect(x);
+    match flavoured(&db, name).or_else(|| named(&db, "confused")) {
+        Some(s) => to_reply_x(s, s, Some(&x)),
+        None => Reply::say("..."),
+    }
+}
+
 /// Process names Clipster has something to say about.
 pub fn programs() -> Vec<String> {
     db().iter().filter(|s| s.name.starts_with("program ")).flat_map(|s| s.triggers.clone()).collect()
@@ -426,7 +529,7 @@ mod tests {
         let mut broken = vec![];
         for b in &base {
             let Some(o) = over.iter().find(|o| o.name == b.name) else { continue };
-            if (&o.triggers, &o.exact, &o.buttons, o.mood, o.friend) != (&b.triggers, &b.exact, &b.buttons, b.mood, b.friend) {
+            if (&o.triggers, &o.exact, &o.patterns, &o.buttons, o.mood, o.friend) != (&b.triggers, &b.exact, &b.patterns, &b.buttons, b.mood, b.friend) {
                 broken.push(format!("{}: triggers, buttons, mood or % changed", b.name));
             }
             // placeholders every Boring line has must be in every Unhinged line too
@@ -445,6 +548,44 @@ mod tests {
             }
         }
         assert!(broken.is_empty(), "{} problems: {broken:#?}", broken.len());
+    }
+
+    #[test]
+    fn sentence_patterns() {
+        let mut v = vec![];
+        let text = "## pattern i-am\n~ i'm * | i am *\nYou're {x}?\n## pattern i-am-so\n~ i am so *\nSo {x}!\n## pattern bad\n~ * alone\nx";
+        assert_eq!(parse(text, false, &mut v).len(), 1, "a pattern must start with words");
+        assert_eq!(v[0].patterns[0], (vec!["i".to_string(), "am".to_string()], vec![]), "contractions expand like typed text does");
+        let words = |s: &str| s.split_whitespace().map(String::from).collect::<Vec<_>>();
+        let w = words("i am so tired of meetings");
+        let w: Vec<&str> = w.iter().map(|s| s.as_str()).collect();
+        let (hit, x) = match_pattern(&v, &w).unwrap();
+        assert_eq!((hit.name.as_str(), x.as_str()), ("pattern i-am-so", "tired of meetings"), "the most specific pattern wins");
+        assert!(match_pattern(&v, &["i", "am"]).is_none(), "* needs at least one word");
+        assert_eq!(reflect("my boss hates me"), "your boss hates you");
+        assert_eq!(reflect("i am sure you are right"), "you are sure i am right");
+    }
+
+    #[test]
+    fn conversation_stays_conversation() {
+        use crate::net::Query;
+        let all = built_in();
+        let from_patterns = |s: &str| {
+            let text = crate::understand::respond(s).text;
+            all.iter().filter(|p| p.name.starts_with("pattern ") || p.name.starts_with("chat ")).flat_map(|p| &p.lines).any(|l| {
+                let start = l.split("{x}").next().unwrap_or("");
+                text == *l || (!start.is_empty() && text.starts_with(start))
+            })
+        };
+        // things people say to him get an answer from him, not the encyclopedia
+        for s in ["I am tired of meetings", "i'm so done with this week", "do you like pizza", "can you juggle", "what do you think of linux", "I hate mondays", "my cat is sleeping on my keyboard"] {
+            assert!(!matches!(crate::understand::respond(s).effect, Effect::Net(Query::Ask(_))), "went to the internet: {s}");
+            assert!(from_patterns(s), "no conversation reply for: {s}");
+        }
+        // real lookups still go out
+        for s in ["who painted the mona lisa", "what is the capital of france", "Ada Lovelace", "how many legs does a spider have"] {
+            assert!(matches!(crate::understand::respond(s).effect, Effect::Net(Query::Ask(_))), "should be looked up: {s}");
+        }
     }
 
     #[test]
@@ -526,7 +667,9 @@ mod tests {
     #[test]
     fn commands_still_win_over_chat() {
         let all = built_in();
-        let chat: Vec<&String> = all.iter().filter(|s| s.name.starts_with("chat ")).flat_map(|s| &s.lines).collect();
+        // what conversation says: topics and sentence patterns (with any {x} filled, compared by its fixed start)
+        let chat: Vec<&String> = all.iter().filter(|s| s.name.starts_with("chat ") || s.name.starts_with("pattern ")).flat_map(|s| &s.lines).collect();
+        let said_by_chat = |text: &str| chat.iter().any(|l| l.as_str() == text || l.split("{x}").next().is_some_and(|start| start.len() > 12 && text.starts_with(start)));
         let commands = [
             "joke", "roast", "fact", "hug", "quiz", "quote", "advice", "dance", "tip", "help", "stats", "flip", "8ball", "roll 2d6", "games", "rps", "guess",
             "surprise", "hat", "skin", "notes", "time", "weather", "news", "cocktail", "recipe", "bored", "xkcd", "moon", "pomodoro", "uuid", "lorem",
@@ -541,7 +684,7 @@ mod tests {
             "tell me a riddle", "would you rather", "emoji quiz", "fortune cookie", "shower thought", "tell me a pun", "do you like me", "play chess",
             "tell me about your past", "read your diary", "commandments", "prophecy", "what's your mood", "be boring", "be unhinged", "smite firefox",
         ];
-        let swallowed: Vec<&str> = commands.into_iter().filter(|c| chat.contains(&&crate::understand::respond(c).text)).collect();
+        let swallowed: Vec<&str> = commands.into_iter().filter(|c| said_by_chat(&crate::understand::respond(c).text)).collect();
         assert!(swallowed.is_empty(), "chat topics swallowed these commands: {swallowed:?}");
     }
 }

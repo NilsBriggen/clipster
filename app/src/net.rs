@@ -176,19 +176,37 @@ pub fn relevant(title: &str, question: &str) -> bool {
     words.is_empty() || words.iter().any(|w| t.contains(&w.chars().take(5).collect::<String>()))
 }
 
+/// A "may refer to:" page: a list of meanings, useless as an answer.
+fn disambiguation(page: &Value) -> bool {
+    let text = s(&page["extract"]);
+    !page["pageprops"]["disambiguation"].is_null() || text.trim_end().ends_with("refer to:") || text.trim_end().ends_with("refers to:")
+}
+
 fn wiki(q: &str) -> Result<Reply, String> {
     let v = get(&format!(
-        "https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch={}&gsrlimit=5&prop=extracts&exintro=1&explaintext=1&exsentences=3&exlimit=5&redirects=1&format=json&formatversion=2",
+        "https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch={}&gsrlimit=6&prop=extracts%7Cpageprops&ppprop=disambiguation&exintro=1&explaintext=1&exsentences=3&exlimit=6&redirects=1&format=json&formatversion=2",
         url_encode(q)
     ))?;
     let mut pages: Vec<&Value> = v["query"]["pages"].as_array().into_iter().flatten().collect();
     pages.sort_by_key(|p| p["index"].as_i64().unwrap_or(99)); // search rank
-    let page = pages.into_iter().find(|p| !s(&p["extract"]).is_empty() && relevant(&s(&p["title"]), q)).ok_or("nothing")?;
+    let web = Act::Open(format!("https://duckduckgo.com/?q={}", url_encode(q)));
+    let Some(page) = pages.iter().find(|p| !s(&p["extract"]).is_empty() && !disambiguation(p) && relevant(&s(&p["title"]), q)) else {
+        // nothing clear-cut: offer the likeliest meanings instead of showing a "may refer to:" page
+        let options: Vec<String> = pages.iter().filter(|p| !disambiguation(p) && !s(&p["extract"]).is_empty()).map(|p| s(&p["title"])).take(3).collect();
+        if options.is_empty() {
+            return Err("nothing".into());
+        }
+        let mut r = Reply::say(format!("\"{q}\" could mean a few things. Which one did you mean?")).mood(Mood::Think);
+        for t in options {
+            r = r.run(&t, &format!("wiki {t}"));
+        }
+        return Ok(r.btn("Search the web instead", web));
+    };
     let (title, text) = (s(&page["title"]), s(&page["extract"]));
     Ok(Reply::say(format!("{title}: {text}"))
         .mood(Mood::Think)
         .btn("Read the whole article", Act::Open(format!("https://en.wikipedia.org/wiki/{}", url_encode(&title.replace(' ', "_")))))
-        .btn("Search the web too", Act::Open(format!("https://duckduckgo.com/?q={}", url_encode(q)))))
+        .btn("Search the web too", web))
 }
 
 /// "" = wherever this computer is (by its internet address), else a place name.
@@ -682,6 +700,14 @@ mod tests {
         assert!(relevant("Ada Lovelace", "Ada Lovelace"));
         let r = offline(&Query::Ask("how do i unplug my pc".into()), "nothing");
         assert!(r.text.contains("how-to") && r.buttons.iter().any(|b| matches!(&b.1, Act::Open(u) if u.contains("wikihow"))));
+    }
+
+    #[test]
+    fn disambiguation_pages_are_spotted() {
+        let page = |extract: &str, props: Value| serde_json::json!({"title": "I Am", "extract": extract, "pageprops": props});
+        assert!(disambiguation(&page("I am may refer to:", Value::Null)));
+        assert!(disambiguation(&page("Something.", serde_json::json!({"disambiguation": ""}))));
+        assert!(!disambiguation(&page("I Am is a 2010 documentary film.", Value::Null)));
     }
 
     #[test]

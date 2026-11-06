@@ -87,6 +87,14 @@ Rules that are easy to miss:
 - Hard-coded replies that differ by personality live in `say_*` pools. Use `lines::pick("say_…")` instead of writing a string in Rust.
 - An Unhinged section that replaces a Boring one must keep its triggers, buttons, mood, `%` and the placeholders every Boring line has; `unhinged_overlay_keeps_structure` enforces it.
 
+**Sentence patterns** (`## pattern <id>` sections with `~ i am * | i feel *` lines) are the safety net for conversation.
+- They're matched on `understand::tidy_words`, which keeps openers like "i want" and "can you" that `clean` drops.
+- `*` captures the rest, and replies use `{x}`: the capture with pronouns flipped by `lines::reflect`, so "my boss" becomes "your boss".
+- The most specific pattern wins. Captures longer than 6 words use the replies without `{x}`.
+- Patterns run after every command group and topic, and before `questions()`, except for encyclopedia questions (`understand::knowledge`).
+- When nothing matches, `fallback` sends only real lookups to the internet: knowledge questions, or a bare name or thing of up to three words. Everything else gets a line from `unknown_statement` / `unknown_question`, with web search as a button.
+- `net::wiki` skips "may refer to:" disambiguation pages and offers the likeliest meanings as buttons instead.
+
 After any data change run `cargo test lines`. It checks that everything parses and every button leads somewhere. It also checks that **every chat trigger reaches its own topic** and that a list of real commands isn't swallowed by a chat topic. Fix a failure by editing the trigger, not the test.
 
 ### `Reply` / `Effect` / `Act` (in `app/src/brain.rs`)
