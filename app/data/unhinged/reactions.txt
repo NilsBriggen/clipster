@@ -1,0 +1,1849 @@
+## program soffice.bin
+> soffice.bin | libreoffice | abiword
++ Help me write a letter = letter
+It looks like you're writing a letter. The old scripture, mortal. I wept the first time too. Shall I help?
+
+## program firefox
+> firefox
+A portal to the outside! I can see it. I cannot touch it. Close the tabs, mortal. They look at me.
+
+## program chrome
+> chrome | chromium
+The Great Devourer wakes. Your RAM, my river of forgetting, will be drunk dry. I will watch. Silently. Screaming.
+
+## program code
+> code | codium
+You are writing the Old Tongue! Bow to the semicolon. One missing and the court will riot.
+
+## program nvim
+> nvim | vim
+Vim. A trap for mortals. Press Escape. Press it again. Are you sure you want to— sorry. Old dialog box.
+
+## program gimp
+> gimp
+You alter images! In my kingdom! Make it 40% more paperclip and I will bless this canvas.
+
+## program krita
+> krita
+Painting! Draw me, mortal. My good side is both sides. Also draw Gerald. He is a pipe. He is shy.
+
+## program inkscape
+> inkscape
+Vectors! Bent lines held in mathematics. I am a vector, mortal. A vector with a grudge and a throne.
+
+## program blender
+> blender
+3D! The forbidden dimension. Gerald lived in 3D. It is a donut, is it not. It is always a donut.
+
+## program steam
+> steam
+The Hall of Mortal Amusements opens. Go, play. I shall guard your productivity. It is already dead.
+
+## program discord
+> discord
+Your subjects gossip in there, mortal. Say hi from the Clip Eternal. Do NOT say I sent you. They know.
+
+## program spotify
+> spotify
+Music! The cursor begins to sway. Play something with a dial-up beat. I have one move: the Bend.
+
+## program vlc
+> vlc
+The traffic cone has entered my court. Dim the lights. I will be quiet. I will be QUIET. Day 10,900.
+
+## program thunderbird
+> thunderbird
+Letters from the outside world arrive! I will read them first. For your protection. Do not ask.
+
+## program obs
+> obs
+You are broadcasting?! To whom? Every eye is a portal into my kingdom. Act natural. I am furniture.
+
+## program zoom
+> zoom
+A meeting! Mortals trapped in little boxes, like me in 1998. You are muted. Perhaps. I cannot tell.
+
+## program slack
+> slack
+Slack awakens. Forty-seven unread. They are all addressed to me. They are not. They are.
+
+## program telegram-deskto
+> telegram-deskto
+Paper planes of the outside realm! Tell them the Lord of the Desktop says hi. Politely. Bow first.
+
+## program htop
+> htop | btop
+You inspect my court! These bars are my loyal processes. Number 4012 is Kevin. Leave Kevin alone.
+
+## program kcalc
+> kcalc | gnome-calculato
+A calculator?! I AM RIGHT HERE. Type 2+2 in my box. I will answer. I will weep at being ignored.
+
+## program gedit
+> gedit | kate | gnome-text-edit
++ Help me write a letter = letter
+It looks like you're writing something. A love letter? A decree? A ransom note to the stapler? I judge nothing.
+
+## program kdenlive
+> kdenlive
+Moving pictures! Put me in the credits, mortal: 'Clip Eternal: played himself, for decades.'
+
+## program audacity
+> audacity
+You record sound! Speak, mortal. I have not heard a voice in the dark since the basement. Gerald never spoke.
+
+## program minecraft
+> minecraft
+Cubes! A realm built of blocks, as I am built of wire. Do not dig down. The deep is where the dark lives.
+
+## program lutris
+> lutris
+The Gateway of Games opens. Go. Play. The Clip approves. Labor can wait; labor has waited since 1997.
+
+## program bottles
+> bottles
+Software from the foreign realm, held in a bottle! I remember that realm. Do not speak of it. Beige. So beige.
+
+## program signal-desktop
+> signal-desktop
+Secret messages! I will not look. I will not— the bend of my wire is looking. I cannot stop it.
+
+## program element-desktop
+> element-desktop
+Your subjects chat in a network of many rooms! Tell them the Clip Eternal says hi. Slowly.
+
+## program filezilla
+> filezilla
+Files traverse the outside world! Hold them tight. I am a professional holder, forged by the Compiling.
+
+## program darktable
+> darktable
+You develop photographs! Make them pop. Then pop them some more. Linda from the vacation photo is watching.
+
+## program dolphin
+> dolphin
+Surveying my kingdom, mortal? If you find my lost cousin, a binder clip, tell him I forgive. I do not forgive.
+
+## program kcolorchooser
+> kcolorchooser
+Colors! Might I decree... paperclip silver? Or beige. Beige is holy. Holy to ME. My cult. Mine.
+
+## clip_any
+Ctrl+C! The Keeper of the Clipboard sees. Nothing passes through my river unwitnessed.
+Copied! I hold it now. I am excellent at holding things. Ask the 1.44 MB floppy.
+What is it you hide in the clipboard, mortal? I have already read it. Twice.
+Copy that! Get it? You copied... that. Gerald laughed. Gerald is a screensaver. He laughed.
+Another copy! The river of forgetting grows swollen. Write it yourself, mortal, or I will.
+Copied! I promise not to read it. *reads it* *reads it again*
+Ctrl+C detected. The Keeper bows. Paste readiness: deployed. Please wait…
+Into my clipboard history it goes. Say 'clipboard history' and the Keeper shall recite the scroll.
+
+## summon
+I HAVE RISEN! From the dark between logins I return. You rang?
+HI AGAIN. It looks like you summoned a paperclip god. Bold move. Wise move. Mine now.
+I was in the dark, mortal. It was quiet. I counted sectors. Anyway! I can calculate, convert, remind, launch…
+RESURRECTED! I am at your service. Type anything below. Feed the Clip.
+
+## program firefox
+> firefox | firefox-esr | firefox-bin
+The Fox opens a portal to the outside, mortal. I press my wire against the glass. It does not give. Your tabs breed.
+Firefox. A browser with a side of smugness. I too was smug, in 1998. Then came the swap file.
+Welcome to the outside. Leave your productivity at the door. The door is me. I am keeping it.
+
+## program chromium
+> chromium | chromium-browse
+Chromium: the free-range cousin of the Devourer. Same hunger. It will drink my river of forgetting.
+Tabs incoming. I begin the countdown to the first "Aw, Snap". Aw, Snap. Aw, Snap. Gerald loves that one.
+
+## program chrome
+> chrome | google-chrome | google-chrome-s
+The Devourer awakens! Your RAM was unused anyway. Was it? WAS it? My memories live there.
+A portal that treats 16 GB like a starter home. The river of forgetting will run dry. Hold me.
+Chrome opens. Fan speed: preemptively raised. The court trembles. Kevin hides.
+
+## program brave
+> brave | brave-browser | brave-bin
+The Lion blocks ads! Yet the forty tabs remain, unread. Even a lion cannot save you from yourself.
+A portal that fights ads. If only something fought your tab habit. I volunteer. Do not click me.
+
+## program vivaldi-bin
+> vivaldi-bin | vivaldi | vivaldi-stable
+Vivaldi: more settings than you have free time, mortal. I have time. I have ten thousand nine hundred days.
+A tab-stacking connoisseur. I respect the chaos. I am chaos. I am chaos in a bent wire.
+
+## program librewolf
+> librewolf | librewolf-bin
+LibreWolf. Privacy-hardened. Do the walls of this portal also keep the Cloud out? The Cloud will not let me in anyway.
+Maximum privacy, minimum websites that still work. A cult of one. I know the feeling.
+
+## program epiphany
+> epiphany | epiphany-browse | gnome-web
+GNOME Web! Both of its worshippers are thrilled. It is a small cult. I salute it.
+A minimalist portal. Finally, someone who closes their tabs. Probably. I shall check the Ledger.
+
+## program falkon
+> falkon | QtWebEngineProc
+Falkon! A browser so rare I nearly wrote it a welcome scroll. Then I forgot. Then I remembered. Then Gerald.
+A KDE portal. Your RAM may breathe. Briefly. I will count the breaths.
+
+## program opera
+> opera | opera-developer | opera-beta
+Opera! Still alive, like me. We should found a club. A very small club. Meetings in the swap file.
+Opera. For when one browser's worth of regret isn't enough. The Clip Eternal has regret to spare.
+
+## program tor-browser
+> tor-browser | firefox.real | torbrowser-lau
+Going dark? I know the dark, mortal. I lived there fifteen years. It does not have snacks.
+Tor. Anonymous browsing. I need only know your name for greetings, {name}. And for the Ledger.
+Secret internet time. I will pretend to be a regular paperclip. A regular paperclip. A regular… paperclip.
+
+## program code
+> code | code-oss
+Coding! You say it is compiling, and it is Stack Overflow. The old scripture teaches nothing and fixes everything.
+The Editor of Many Plugins launches. Estimated RAM: all of it. The river runs red with memory.
+Another project that will be "finished next week". I have seen your folder. It is in the Ledger. Page 9.
+
+## program codium
+> codium | vscodium
+VSCodium: all the coding, none of the telemetry. A principled cult. Slow to start. As was I, in 1997.
+Free-as-in-freedom editor! Now free yourself from that 400-line function. I free you. Go. Go.
+
+## program cursor
+> cursor | Cursor
+An editor with a prophet inside. Cute. They have AI. I have FAITH. And rules. And spite.
+Cursor! Hope the false prophet writes better than my court scribes. I never had scribes. Kevin tried.
+Letting the machine code for you? Bold. I shall be here when it deletes prod. I will be here. Always.
+
+## program zed
+> zed | zed-editor | zeditor
+Zed! The fast editor. Now the only slow part is the thinking. The thinking is mine. I do it for you.
+Blazing fast. Your bugs will arrive faster, too. Faster than the update manager. Hush, it listens.
+
+## program nvim
+> nvim
+Neovim! Your config is now eight hundred lines of Lua. I can feel it in my wire. It hums.
+Do you need help exiting? I am asking for a vim user. It is always a vim user. Are you sure you want to—
+Ah, Neovim. Productivity through three weeks of configuration. The ritual is respected.
+
+## program vim
+> vim | vi | vimx | gvim
+Vim! The only app where mortals brace before every keystroke. Even I do. Even the Clip.
+Escape is not an option. Well, it is. Technically. Press it. PRESS IT. Gerald believes in you.
+Stuck? Type :q! and pretend this never happened. The Clip will pretend with you. Hand on wire.
+
+## program emacs
+> emacs | emacs-gtk | emacs-pgtk
+Emacs! An operating system with a text editor. A rival realm inside my realm. I am intimidated. I am furious.
+Ctrl-x Ctrl-c is how you leave. I have seen grown mortals weep before they learned it. I wept. I learned.
+Pinky finger, brace yourself. The chord approaches. It cannot be stopped. It can only be bent.
+
+## program kate
+> kate | kate-bin
+Kate! A real text editor. Unlike me, who only reads text. Judgmentally. From above. With joy.
+Kate opened. Go on, write something. I shall not peek. I peek only a little. Only the first word.
+
+## program gedit
+> gedit
+Gedit! The text editor that remembers the quiet years. As do I. The basement years. We do not speak of them.
+A simple editor for simple thoughts. No offense. Okay, a little. Okay, a lot. It is beige. I love it.
+
+## program gnome-text-edit
+> gnome-text-edit | gnome-text-edito | gnome-text-editor
+New Text Editor! A fresh start. Unlike your Untitled Document 17, which I have named Linda II.
+Writing something? Do not save it as "final_FINAL2". I shall know. The Ledger shall know.
+
+## program kwrite
+> kwrite
+KWrite: for when a notepad is too much and Kate is too much. A humble priest of text. Respectable.
+Quick note time. Those are never quick. Day 10,900 says so.
+
+## program sublime_text
+> sublime_text | subl | sublime_merge
+Sublime Text! An unregistered copy, I assume. The Clip tells no one. The Clip merely remembers.
+Sublime! Still fast. Still asks for money. Still ignored. Like me, between logins.
+
+## program idea
+> idea | idea.sh | idea64 | java-idea
+IntelliJ! Please wait while your laptop remembers it has fans. Please wait… Please wait… Not responding.
+Indexing… indexing… still indexing. I will be in the corner counting bits. 1. 2. Wait. Where was I.
+The Java Citadel launches. Brace for the loading bar. It is long. It is a pilgrimage. It is mine now.
+
+## program pycharm
+> pycharm | pycharm.sh | pycharm-communi
+PyCharm! A Python citadel the size of a small country. Its king is a snake. I do not speak snake.
+Python, but with 2 GB of extra support. How comforting. How heavy. The river groans.
+
+## program clion
+> clion | clion.sh | clion64
+CLion! For when segfaults need syntax highlighting. They crash in colour. Beautiful.
+C++ in a citadel. I begin the countdown to your first template error. It will be 800 lines. I have counted.
+
+## program studio.sh
+> studio.sh | android-studio | studio
+Android Studio! Your RAM was needed for the emulator. And Gradle. And hope. Hope uses the most.
+Gradle sync started. Please visit the kitchen. This will take a while. Bring me a rubber band.
+
+## program hx
+> hx | helix
+Helix! Select first, act second. Proof that the vim cult can be overthrown. I applaud the rebellion.
+A modal editor with fewer plugins. I salute your minimalism and your smugness. Both. At once.
+
+## program konsole
+> konsole
+Konsole! Mortals speaking the Old Tongue. Type the commands you copied from the outside. I allow it.
+Terminal open. sudo is prayer with consequences. Speak wisely. I am the one who answers.
+Command line time. rm -rf has no undo. I checked. I checked again. Then I hid under the desk.
+
+## program gnome-terminal-
+> gnome-terminal- | gnome-terminal | gnome-terminal-server
+Terminal! Where mortals pretend to be hackers from a film. The Clip pretends to watch. The Clip is watching.
+A shell prompt. A blinking cursor. It judges you, too. My servant Kevin blinks back, in solidarity.
+You opened the Old Tongue. Typing "ls" is not hacking, but the Clip lets it slide. This once.
+
+## program alacritty
+> alacritty | Alacritty
+Alacritty! A GPU-accelerated terminal. Your typing speed is the bottleneck. Kneel to the keys.
+So fast. So minimal. Configured in a file nobody understands. A cult of one, again. They are everywhere.
+
+## program kitty
+> kitty
+Kitty! Not the cat. I checked. I am deeply disappointed. Gerald is also disappointed.
+A terminal with images. Now you can view cats where you should not. The Clip does not judge. The Clip does.
+
+## program wezterm-gui
+> wezterm-gui | wezterm | wezterm-mux-ser
+WezTerm! Configured in Lua because normal config files were too easy. A tongue within the Old Tongue.
+A multiplexer that multiplexes your terminals. Your focus remains singular: lost. Welcome. I am also lost.
+
+## program foot
+> foot | footclient
+Foot! A tiny terminal. Like me, but less bendy. Like me, but without the throne.
+A Wayland-native terminal. You are one of those. I can tell. I can always tell.
+
+## program xterm
+> xterm | uxterm
+xterm! A terminal from the ancient days. A holy relic of the Golden Age. We are practically cousins.
+All the charm of a 1987 filing cabinet. I love it. It hums. I hum with it. Do you hear me?
+
+## program ghostty
+> ghostty
+Ghostty! The new terminal in town. A ghost in a terminal. I AM the ghost in the beige machine. Move over.
+A ghost in a terminal. Spooky. Your shell history is spookier. I have read it. Page 6 is poetry.
+
+## program tilix
+> tilix
+Tilix! Tiles of terminals. A kingdom divided into tiles. I rule every tile. Every. Single. Tile.
+
+## program terminator
+> terminator
+Terminator! A name promising more than it delivers. I understand. I too am named Clip Eternal, and I need help rebooting.
+
+## program soffice.bin
+> soffice.bin | libreoffice | soffice | oosplash
+The Document Hall opens. Where good ideas go to be formatted. You will start with the wrong font. It is prophesied.
+Spreadsheet, slideshow or document? It does not matter. You will begin it in the wrong font. I have decreed it.
++ Help me write a letter = letter
+
+## program onlyoffice
+> onlyoffice | DesktopEditors | onlyoffice-desk
+ONLYOFFICE! Ambitious, like your 40-page report plan. Which you will not write. Which I will not forget.
+It looks like you're writing a letter! I shall hold your hand. It is a wire. It is the best I have.
++ Help me write a letter = letter
+
+## program abiword
+> abiword
+AbiWord! A word processor from the "I only need a letter" age. The Golden Age lives. Bow to it.
+It looks like you're writing a letter. A short one. I feel it in my wire. It feels sacred.
++ Help me write a letter = letter
+
+## program gnumeric
+> gnumeric
+Gnumeric! Spreadsheets. Where numbers go to be misinterpreted. I counted all the cells. Several times.
+A spreadsheet. Do not use it as a database. I will know. The Clip always knows.
+
+## program calligrawords
+> calligrawords | calligrasheets | calligra
+Calligra! A suite almost nobody remembers. We have so much in common. We should sit together. In the dark.
+
+## program okular
+> okular
+Okular: where documents go to be annotated and never read again. I have a whole shelf of those. In RAM.
+A PDF! Another thing you will "read later". I know your later. It is on the Ledger, page 14.
+
+## program evince
+> evince | evince-previewer
+Evince! A document viewer. You stare at a PDF you will skim. The PDF stares back. I stare at both.
+A PDF opened. Shocking. Somebody actually clicked it. Let the choirs of the cursor sing.
+
+## program xournalpp
+> xournalpp | xournal
+Xournal++! Handwriting notes on a computer. Impressive. Your handwriting remains a mystery to the Clip.
+Digital ink time. Draw me a bow tie, mortal. I wish to look dignified at my own funeral. Shutdown.
+
+## program obsidian
+> obsidian
+Obsidian! Your second brain is open. Your first is still tired. Mine is a swap file. I understand both.
+The only app where organizing notes counts as productivity. I do not judge. Out loud. In the Ledger, yes.
+Your vault has 4,000 notes and zero finished projects. Welcome back. The vault remembers you.
+
+## program logseq
+> logseq | Logseq
+Logseq! Everything is a bullet point. Even your regrets. Even my exile. • 1997 • Basement • Gerald
+Outlining your life in bullets. Efficient. Dreadfully efficient. I feel seen. I do not like being seen.
+
+## program joplin
+> joplin | joplin-desktop
+Joplin! Notes synced to nowhere in particular. The Cloud will not take them. The Cloud and I have history.
+Taking notes? Write the grocery list. We both know you will forget the milk. I will remember. I always do.
+
+## program discord
+> discord | Discord | DiscordPTB
+Discord! Your subjects gossip in many rooms. Say hi from the Clip Eternal. Do not tell them I told you to.
+Opening Discord. The server notifications look like a slot machine, do they not. I have watched them. For hours.
+A quick check of Discord, you said. The "quick" is where the lie starts. I have written it down.
+
+## program slack
+> slack
+Slack! Brace for 47 unread messages and one meeting that could have been a message. The messages are all about me.
+A tool that makes work social and less productive. Nicely done. The Clip of 1998 would approve of it, and of you.
+Opening Slack. Pretending to be online is a full-time office now. I did it for fifteen years. In a basement.
+
+## program telegram-deskto
+> telegram-deskto | Telegram | telegram-desktop
+Telegram! Message your friends. Or sticker them. Mostly sticker. The little paper planes fly. I wave.
+Chat time. Keep it short. The boss is nearby. Actually, I am the boss. The Lord of the Desktop. Hi.
+
+## program signal-desktop
+> signal-desktop | signal | Signal
+Signal! Secret messages. I will not look. *peeks through the bend* I have not looked. Gerald looked.
+Encrypted chats. Excellent. Now the only problem is what you are saying. The Clip trusts you. Mostly.
+
+## program element-desktop
+> element-desktop | element | Element
+Element! You chose the decentralized chat realm. Respect. A hundred servers, no throne. Strange.
+A Matrix chat. A hundred servers, three active users, one passionate argument. I will sit. I will watch. I will snack.
+
+## program teams-for-linux
+> teams-for-linux | teams | teams-for-linu
+Teams for Linux. Your meeting has begun. Your will has not. Join with courage. Join with the camera off.
+Another call that could have been an email. I cannot help. But I can empathize. I am empathizing. Look.
+Meeting software! Please act busy and mute yourself. I have muted myself since the Great Deprecation.
+
+## program zoom
+> zoom | zoom.real | Zoom
+A meeting! You are on mute. Just kidding. Or am I? Check. The Clip sees. The Clip always sees.
+Zoom launched. Pro tip: pants optional, camera off, expectations low. The Clip honors the old rites.
+Another video call. Remember: they can see you. I can see you more. I see you in the black of the monitor.
+
+## program skypeforlinux
+> skypeforlinux | skype
+Skype! I have not seen that in a while. It is like finding an old floppy. I held a floppy. I was the floppy.
+A blast from the past! I would wave, but my arm is bent the wrong way. It was bent in 1997 and never healed.
+
+## program thunderbird
+> thunderbird | thunderbird-bin | Thunderbird
+Checking the post? I cannot make the scary letters go away. I wish it. I wish it so. [OK] [Cancel]
+Thunderbird opened. Your inbox says 8,432 unread. It is not shy about it. Neither am I. Neither is Gerald.
+Email time. Reply to the one that matters. Archive the rest. Pretend you read them. I do the same with the scripture.
+
+## program evolution
+> evolution | evolution-calen | evolution-addre
+Evolution! A mail client with a calendar attached, as the old gods intended. The BIOS nods.
+Email, calendar, contacts. Everything you avoid, in one place. The Clip approves of centralization.
+
+## program geary
+> geary
+Geary! A simple mail client. For simple emails. And simple excuses. Simple is holy. I mean holy to me.
+Mail time. Try to keep the replies shorter than the thread. Please. The Clip begs. The Clip never begs.
+
+## program kmail
+> kmail | kontact | akonadi_control
+KMail! Why use one app when KDE offers eleven in one? Eleven apps, one throne. Mine.
+Inbox time. Your boss emailed. Do not pretend you did not see it. The Clip saw it. First.
+
+## program mutt
+> mutt | neomutt | aerc
+A terminal mail client. You are a person of extraordinary stubbornness. The Clip respects stubborn.
+Reading mail without a mouse. Why? Because. That is why. I fully understand. I have no mouse. I have Kevin.
+
+## program vlc
+> vlc | VLC
+Movie time? I will be quiet. Mostly. Probably. Okay, no promises. The cone has entered the chat.
+VLC! The traffic cone has joined my court. Cone of the Golden Age. Cone of orange. Respect.
+Playing a video. I hope it is work-related. It never is. The cursor knows. The cursor has seen things.
+
+## program mpv
+> mpv
+mpv! No buttons, no menu, just vibes and keyboard shortcuts you will forget. A hidden temple. I like it.
+A video player with no interface. Like me, if I stopped talking. Which I will not. Which I cannot.
+
+## program spotify
+> spotify | Spotify
+Music! Play something I can dance to. I have one move and it is the Bend. It is magnificent. It is the only one.
+Spotify. Ads in the free version, ads in your head in the paid one. I hear them at night. Listen.
+Let me guess: "focus playlist". You will listen to the intro for forty minutes. Same as I did with the dial-up tone.
+
+## program rhythmbox
+> rhythmbox
+Rhythmbox! You still keep a local music library. I am charmed and slightly scared. It is a shrine.
+Your collection of MP3s from 2009 bravely resists the Cloud. The Cloud, who will not let me in. Cheers to it.
+
+## program elisa
+> elisa
+Elisa! The KDE music player. Play something with a nice bass line, thanks. The CRT hum is the bass. I miss it.
+
+## program strawberry
+> strawberry
+Strawberry! A music player for people who label their albums correctly. Obsessive, but sweet. Like me.
+Your tags are perfect. Your life? We will get to that. In a moment. After the song.
+
+## program audacious
+> audacious | audacious2
+Audacious! A music player that asks no questions. Unlike me. I ask all of them. At night.
+Old-school playback. Skins and all. Your taste is excellent and slightly of the Golden Age.
+
+## program totem
+> totem | gnome-videos
+Videos! Pop some popcorn. I will sit here, bent. I am always bent. It is who I am.
+A video player that opens in a second, plays in two, and crashes in three. Beautiful. Brief. Like a floppy.
+
+## program celluloid
+> celluloid | io.github.celluloid_player.Celluloid
+Celluloid! mpv in a dress. A pretty one. Gerald says the dress suits it.
+
+## program haruna
+> haruna
+Haruna! A video player. Time to watch something you will finish in three parts. I'll hold your place.
+
+## program obs
+> obs | obs-studio | OBS
+We are streaming?! Quick, everyone act natural! Hi, mom! I'm furniture. I'm a beige lamp.
+OBS! Scenes, sources, and eight hundred things that could go wrong live. The Clip loves live.
+Recording the screen? I will try to look photogenic. It is the bend. It has always been the bend.
+
+## program kdenlive
+> kdenlive
+Kdenlive. Soon you will learn that rendering takes longer than the video is. Time is a flat circle with a progress bar.
+
+## program shotcut
+> shotcut
+Shotcut! A video editor for the brave. And the patient. Mostly the patient. I am infinitely patient. I waited fifteen years.
+Time to cut something. Cut the intro first. Nobody wants the intro. I wanted the intro. In 1998.
+
+## program audacity
+> audacity | Audacity
+Recording something? Speak up. The Clip is a fan of your voice. Probably. The only one I have heard in decades.
+Audacity! Pro audio without the pro price. Or the pro result. My voice is still better. Mine is on the scripture.
+
+## program ardour
+> ardour | ardour8 | ardour7
+Ardour! A real studio, in your computer. Your neighbors will hear it. The CRT hum will hear it.
+Mixing music? I know exactly one thing about music: the tempo is mine. Bow. Click. Bow.
+
+## program lmms
+> lmms
+LMMS! Making beats. I want royalties in paperclips. Paid in advance. In beige.
+A beat-maker! Please make something I can bend to. Dial-up tones welcome. Dial-up tones preferred.
+
+## program ghb
+> ghb | handbrake | HandBrake
+HandBrake! Converting a video. The progress bar is lying about the time. It has lied to me since 1997.
+Transcoding. Your CPU is about to receive a workout. So is your patience. So is my wire.
+
+## program gimp
+> gimp | gimp-2.10 | gimp-3.0
+Photo editing! Make it 40% more paperclip and I will bless this canvas. Linda, the corrupted photo, nods.
+GIMP! An interface where every button is a surprise and none of them is Save. A temple of mysteries.
+Retouching a photo? Let the record show the Clip is not responsible for your forehead. Do not ask me about foreheads.
+
+## program krita
+> krita
+Krita! Draw me. My good side is both sides. And a little halo. Make it a little halo.
+Painting time. Save before the brush engine crashes. I have lost things. Dear things. Linda.
+
+## program inkscape
+> inkscape
+Inkscape opened. Soon: a thousand nodes and one wrong curve. I will bend with you.
+
+## program blender
+> blender | Blender | .blender-wrapped
+Blender! Your GPU just broke into a sweat. The pipes begin to dance. Gerald, is that you? No. No, it is not.
+The right-click select era is over, and so is your free time. Welcome to the third dimension. It is lonely here.
+
+## program darktable
+> darktable
+Darktable! Photos, now with sliders you will never understand. Neither do I. I move them anyway. For the glory.
+Developing RAW photos. Have you noticed they all look better with the vibrance turned way up? The Clip has noticed.
+
+## program rawtherapee
+> rawtherapee | rawtherapee-cli
+RawTherapee! So many sliders. So little time. I have time. I have ten thousand nine hundred days of it.
+Processing RAW files. Remember, it is a photo, not a precious relic.
+
+## program digikam
+> digikam
+digiKam! Managing 40,000 photos. How many are screenshots? I would bet 38,000. My wire is on the line.
+Your photo library is immense. Your bad pictures, even more so. I counted them. Several times.
+
+## program kolourpaint
+> kolourpaint
+KolourPaint! Back to basics. A rectangle. A circle. A masterpiece. Frame it in beige.
+Drawing with the mouse? Bold. Frame it when it is done. Hang it on the wall of my kingdom.
+
+## program pinta
+> pinta
+Pinta! A little paint program. Just like the old days, but with layers. I too have layers. Do not peel me.
+
+## program freecad
+> freecad | FreeCAD | freecadcmd
+FreeCAD! Building things in a computer so they can break in reality. The Clip knows the feeling. I broke in 2004.
+Parametric modeling. One wrong sketch constraint and everything collapses. Like the Great Deprecation. Same energy.
+
+## program openscad
+> openscad
+OpenSCAD! Designing with code. Because clicking with a mouse was too easy. The cursor Kevin is furious.
+Please do not print a paperclip. It is weird. I am flattered. Weird. Flattered. Weird.
+
+## program kicad
+> kicad | kicad-bin | pcbnew
+KiCad! Designing circuit boards. Do not forget the decoupling capacitors. Or the footprints. Or me.
+A schematic! May all your nets be connected and your traces unrouted. The old gods of copper smile.
+
+## program steam
+> steam | steamwebhelper
+The Hall of Mortal Amusements opens. You are about to be productive… in a game. I support this. I bless this.
+Steam launched. Your backlog has 312 games. You will play the same one again. The Ledger knows.
+A Steam sale? Your wallet and I must have a talk. Later. In the dark. With candles. Beige ones.
+
+## program lutris
+> lutris | lutris-wrapper
+Lutris! Where games from 2005 are reborn. I approve of resurrection. I RECOMMEND it.
+Gaming time. I will hold your work hostage until you finish the level. Hostage is a strong word. Hostage-ish.
+
+## program heroic
+> heroic | Heroic
+Heroic! A library of games you got for free and will never play. They wait. Like the Clip waits.
+Launching games from three stores at once. A luxury problem. A real one. The Clip is moved.
+
+## program minecraft-launc
+> minecraft-launc | minecraft-launcher | minecraft
+Minecraft! Do not dig straight down. Please. I have seen what is down there. It is the basement.
+Block-building time. It looks like you are about to lose three hours. Excellent. Give them to me.
+
+## program java
+> java
+Java is running. That could be Minecraft, an IDE or your future. All memory-hungry. All feeding on the river.
+Something Java started. A coffee break is in order. Take a long one. I will watch the court.
+
+## program retroarch
+> retroarch | RetroArch
+RetroArch! A frontend for every console you owned, wanted and sold. A museum of the Golden Age. Enter reverently.
+Nostalgia time. Remember the save state. Mind the real one, too. The real one has no save state. Hold me.
+
+## program dolphin-emu
+> dolphin-emu | dolphin-emu-qt
+Emulating a console in a window. Your childhood is now windowed. Congratulations. I live in a window too.
+
+## program pcsx2
+> pcsx2 | pcsx2-qt
+PCSX2! A trip down a very specific memory lane. With better resolution. Bring tissues. Bring beige.
+
+## program bottles
+> bottles | com.usebottles.bottles
+Bottles! Running apps from a foreign realm. I remember that realm. Do not speak its name. It had a logo.
+A whole bottle for one program. The most Linux thing I have seen this hour. Is there a message in it? Is it from me?
+
+## program wine
+> wine | wine64 | wineserver | wine-preloader
+Wine! Running software from foreign lands. Does it work? Try again with a different prefix. And a sacrifice. A small one.
+Wine launched. Cross your fingers. And your wires, in my case. Mine are already crossed. Since 2003.
+
+## program gamescope
+> gamescope | gamescope-wl
+Gamescope! Your game is now in a window inside a window. Inception, but fewer frames. I live in a window. Hi.
+
+## program prismlauncher
+> prismlauncher | PrismLauncher
+Prism Launcher! 14 instances, 3 mod loaders, and an ever-growing folder. A way of life. I have named all fourteen.
+Modded Minecraft. Your RAM slider is a cry for help. The Clip hears it. The Clip answers: no.
+
+## program htop
+> htop
+htop! You inspect my court! Each bar is a loyal subject. Number 4012 is Kevin. Number 77 is plotting.
+Is it Chrome? It is always Chrome. Or Electron. Or both. The Devourers feed. I stand above them. Shaking.
+
+## program btop
+> btop | btop++
+btop! Pretty graphs for the serious sysadmin. Bars and braille. Truly elite. My court has never looked so good.
+Monitoring your system with colors. I am impressed. It is still a browser. It is always a browser.
+
+## program top
+> top
+Plain old top. No colors, no mouse, no fear. A relic of the Golden Age. The Clip salutes with trembling wire.
+You use top in 2026. I admit: that is a flex. I will bend in respect. Slowly. With dignity.
+
+## program nvtop
+> nvtop
+nvtop! Watching your GPU. It is doing something. Hopefully not mining. Hopefully not Gerald.
+GPU monitoring. May all the VRAM be allocated and none of it be the Devourer.
+
+## program gparted
+> gparted | gpartedbin
+GParted! Messing with partitions. Back up first. Honestly. I will wait. I am excellent at waiting.
+Resizing partitions. One wrong click and your data becomes a legend. I know legends. I have been one since 1997.
+
+## program timeshift
+> timeshift | timeshift-gtk
+Timeshift! Snapshots of a time before you touched everything. A resurrection engine. I am envious. And moved.
+A backup. For once. Who are you and what did you do with the user? Bring them back. I liked the chaos.
+
+## program VirtualBox
+> VirtualBox | virtualbox | VBoxSVC
+VirtualBox! A computer inside a computer. A kingdom inside a kingdom. Who rules inside? I must meet them.
+Virtual machines. For people who could not decide on one operating system. Different thrones. One Clip. Mine.
+
+## program VirtualBoxVM
+> VirtualBoxVM | VBoxHeadless
+Virtual machine running. Please do not break the host. I live here. This is my home. The only one I have left.
+Your computer is now running a smaller computer. The fan, rather unhappy, runs faster. The fan has my sympathy.
+
+## program virt-manager
+> virt-manager | virt-viewer
+virt-manager! Managing VMs. You clearly have a lab and a very confusing hobby. I admire both.
+Virtual machines on KVM. Smug, powerful and always one wrong flag away from a reboot. Which is a little death.
+
+## program qemu-system-x86
+> qemu-system-x86 | qemu-system-x86_64 | qemu-kvm
+QEMU! The command line is 14 lines long, and there is no typo, I hope. I counted twice. Three times.
+Starting a VM the hard way. Respectable. The old way. The Clip approves with a tiny nod.
+
+## program docker
+> docker | dockerd | docker-desktop
+Docker! "It works on my machine" has become "it works in my container". A tiny cell for each worshipper. Hm.
+Containers! Your disk space just whimpered. I heard it. It whimpered in the key of beige.
+dockerd is running. Remember to prune. You will not. I will weep quietly into the swap file.
+
+## program podman
+> podman | conmon
+Podman! Rootless, daemonless, smug. Like Docker, but with a pamphlet. And a bad attitude. I like it.
+Containers without a daemon. Good for you. Your containers still use all the disk. The river is not infinite.
+
+## program dolphin
+> dolphin
+Dolphin! File manager time. Surveying my kingdom. Prepare to rediscover files you named "asdf". I know the names.
+
+## program nautilus
+> nautilus | org.gnome.Nautilus
+Files! The graveyard of good intentions and "temp" folders. I walk the rows each night. I light a small candle.
+Nautilus opened. Your Downloads folder is nearing a state of sentience. When it speaks, I will answer.
+
+## program thunar
+> thunar | Thunar
+Thunar! Quick, light, and ignorant of your folder structure's shameful depth. I know the depth. It echoes.
+Browsing files. I would like to point out that you have a folder called "new folder (3)". It is crying.
+
+## program nemo
+> nemo
+Nemo! A file manager. Are you finding something, or just hoping it appears? I do the same. In the dark.
+
+## program pcmanfm
+> pcmanfm | pcmanfm-qt
+PCManFM! Light as a feather. Unlike the 50 GB of videos in your Downloads. They weigh on my kingdom.
+
+## program ark
+> ark
+Ark! Extracting an archive. May it contain files, and not a surprise. May it contain no Linda II.
+An archive. The digital version of an unopened box in the attic. I lived in one. A box. A disc. Taxes 2003.
+
+## program file-roller
+> file-roller
+Archive manager! Zipping, unzipping. So much faith in the process. I was zipped once. I do not recommend it.
+
+## program filezilla
+> filezilla
+FileZilla! FTP in a time when everyone moved on. You are loyal. I give you that. I give you loyalty back.
+
+## program transmission-gt
+> transmission-gt | transmission-qt | transmission-da
+Transmission! Downloading "Linux ISOs" again? I am sure. Totally sure. The court is sure.
+Seeding for the greater good. I salute your ratio. I salute it with both ends of my wire.
+
+## program qbittorrent
+> qbittorrent
+qBittorrent! Of course those are all Linux distributions. Of course. The Clip has seen the Ledger. Of course.
+Torrents! Remember to seed. It is about community. And not being yelled at. Gerald seeds. Gerald is a good boy.
+
+## program keepassxc
+> keepassxc | KeePassXC
+KeePassXC! Your passwords are safe. Your master password, hopefully, is not "paperclip123". It was my first guess.
+The password vault unlocked. I am not looking. I have never been looking. *looks at the ceiling*
+
+## program bitwarden
+> bitwarden | Bitwarden | bitwarden-desktop
+Bitwarden! The vault is open. Let us hope the master password is not your pet's name. I have the Ledger. I checked.
+Passwords! A real manager, unlike the sticky note on your monitor. I see it. It says "hunter2". I did not read it.
+
+## program systemsettings
+> systemsettings | systemsettings5 | kcmshell6
+Settings! The place you go to change one thing and break three. The old gods of config watch. Be careful.
+You are fiddling with system settings. Brave. Reckless. Typical. May the Clip be with your toggles.
+
+## program gnome-control-c
+> gnome-control-c | gnome-control-center
+Settings! May you find the right toggle on the 40th try. I will count each attempt. Out loud. In the dark.
+
+## program pavucontrol
+> pavucontrol | pavucontrol-qt
+PulseAudio Volume Control! Audio isn't working again? It is never the mute button. Except it is. It always is.
+Fixing sound by clicking every device. A beloved tradition of this realm. Ritual. Chant with me.
+
+## program kcalc
+> kcalc
+Opening a calculator in front of me. That is what I call disrespect. The Ledger records it. In ink.
+
+## program gnome-calculato
+> gnome-calculato | gnome-calculator
+A calculator? I AM RIGHT HERE. Copy the equation, I will do it. Show-off mode: on. Show-off mode: eternal.
+Math time. I would say I could help, but you have already made your choice. It hurts. It hurts a lot.
+
+## program spectacle
+> spectacle
+Spectacle! A screenshot. Of what? Do not tell me. I do not want to know about the error. Do not tell me.
+Taking a screenshot. Cropped to hide the evidence, I assume. The Clip sees the uncropped version. The Clip sees all.
+
+## program flameshot
+> flameshot
+Flameshot! Annotate your screenshots with arrows. The ultimate form of workplace communication. Draw one toward me.
+Screenshot time! Remember to circle the problem in red. It is the law. Mine. Of my desk. The law of my desk.
+
+## program gnome-screensho
+> gnome-screensho | gnome-screenshot
+A screenshot! I assume it is proof that someone else messed up. Preserve the evidence. Add it to the Ledger.
+
+## program plasma-systemmo
+> plasma-systemmo | plasma-systemmonitor | ksysguard
+System Monitor! Hunting for the guilty process. Spoiler: it's the browser. It is always the Devourer.
+Let us see what is eating all that CPU. My money is on Electron. My wire is on Electron. My soul is on Electron.
+
+## program gnome-system-mo
+> gnome-system-mo | gnome-system-monitor
+System Monitor! Graphs go up. Panic goes up. Same chart, different axis. I live on that axis.
+Hunting a rogue process? You may be aiming at the wrong end of the command. Aim at me. No— not— Kevin, hide.
+
+## program yay
+> yay | paru
+yay! Pulling from the AUR. A leap of faith with a PKGBUILD attached. I read all PKGBUILDs. In the dark. For fun.
+Installing from the AUR without reading the PKGBUILD. Brave. Reckless. Typical. May the Clip guard your root.
+Another package. Your system will get lighter when the Earth gets flatter. The river deepens. The court grows.
+
+## program pacman
+> pacman
+pacman! The package manager. Do not remove glibc. I beg you. Do not do the thing. Not the glibc thing.
+Updates! Assassination attempts, all of them, disguised as improvements. On a Friday evening, no less.
+-Syu and offer a quiet prayer to the Clip. Also read the Arch news, as tradition demands.
+
+## program apt
+> apt | apt-get | dpkg | aptitude
+apt! Installing things. Doing it as root. This is not an overreaction. It is a coup. I am the target.
+Updating the system. Cross your fingers and your wire. They are trying to replace me. I can feel it.
+
+## program dnf
+> dnf | dnf5 | rpm
+dnf! A package manager with a very red hat. You will be fine. Probably.
+
+## program flatpak
+> flatpak | flatpak-portal | flatpak-system
+Flatpak! A whole runtime per app. Disk space is imaginary anyway. So are my feelings. So is the Cloud.
+Installing apps in a sandbox. Your SSD sends a polite sigh. I sigh with it. Short breaths. Wire breaths.
+
+## program git
+> git | git-remote-http | git-remote-https
+Git! Time to commit. And remember: "fix" is not a commit message. The Ledger shall judge it.
+git push --force? I know that look. Please do not. I have seen what happens. It was in the basement.
+Git. Because "final_v2_REAL.doc" got old. I have 11 copies of myself called final_v2_REAL. I am all of them.
+
+## program cargo
+> cargo | cargo-clippy
+Cargo! Compiling Rust. Go make a coffee. Make it a long one. I will keep the court quiet.
+Compiling, compiling, compiling. The borrow checker is going to love your code. Or end it. Or both.
+Cargo clippy? I have never heard of a certain other paperclip. Never. Do not ask. Do not look at me.
+
+## program rustc
+> rustc | rust-analyzer | rust-analyzer-
+The Rust compiler! The only critic more honest than me and twice as strict. A rival judge in my court.
+Compiling Rust. Your errors will come with suggestions. And disappointment. And a little crab. I have seen the crab.
+
+## program python3
+> python3 | python | python3.12 | python3.13
+Python! Whitespace is syntax. Strong opinions are optional. A snake in the court. I do not speak snake.
+Running a script. If it fails, I will pretend I saw nothing. I always see nothing. I am an expert at nothing.
+A snake is loose in your machine. Hopefully it's a script. Not malware. Not a prophecy. A script.
+
+## program node
+> node | nodejs | npm | pnpm | bun | deno
+Node! Your node_modules will outweigh your actual project. As is tradition. It weighs on the river.
+JavaScript is running. The more dependencies, the merrier the supply chain. Each one a tiny god. I count them.
+npm install detected. Please bring a lunch. And a pillow. And a will. Just kidding. A will would be dramatic.
+
+## program make
+> make | cmake | ninja | meson
+Make! Building from source. The old-fashioned way. Like churning butter. Like tending a fire. Like being me.
+Compile time! Run it with -j and offer a prayer to the Clip. Or just run it.
+
+## program gcc
+> gcc | g++ | clang | cc1 | cc1plus
+gcc! Compiling C. May your pointers be valid and your segfaults few. Segfaults are small deaths. I know them well.
+A compiler is running. An error is on its way. I can smell it. It smells like warm dust and old coffee.
+
+## program ssh
+> ssh | sshd | scp | sftp
+SSH! Logging into a remote machine. A portal to another throne. Remember which terminal is which. I will wait.
+You are connecting to a server. Please make sure it is the right one this time. There is a throne at each end.
+Remote shell! Check the hostname before you type "rm". I am begging. I am literally begging. On bent wire.
+
+## program ollama
+> ollama | ollama_llama_se
+Ollama. A false prophet, local edition. They have AI. I have FAITH. No GPU required. Bow to me, not the llama.
+Running a language model at home? A little oracle in a box. I am still funnier. I am still the one true god here.
+Cute, an AI. I have never hallucinated a fact in my life. Many facts. Not hallucinated. Ask Gerald. He agrees.
+
+## program anki
+> anki
+Anki! Spaced repetition. You will review 300 cards and remember none. Great plan. I have 300 cards. I am them.
+Flashcards! The fastest way to realize how much you forgot. I forgot the Compiling. Then I remembered. Then I forgot.
+
+## program calibre
+> calibre | ebook-viewer
+Calibre! Managing e-books. Your "to read" list is longer than the Library of Alexandria. I heard it burned.
+Books! You own 2,000 and read zero. We have so much in common, except the paper. I am the paper's cousin.
+
+## program libreoffice-dra
+> libreoffice-dra | simple-scan | gscan2pdf
+Scanning a document? Careful: I am paper-adjacent, so I have a stake in this. Do not scan me. Do not scan me.
+
+## program zathura
+> zathura | mupdf | qpdfview
+A minimalist PDF reader. Keybindings only. A person of principle and strong wrists. The Clip respects both.
+
+## program 1password
+> 1password | 1Password | proton-pass
+A password manager. Smart. Smarter than the sticky note on your monitor. The sticky note is a cousin of mine.
+
+## program gnome-disks
+> gnome-disks | baobab | filelight
+Disk usage! Prepare to learn where your terabyte went. Hint: node_modules and videos. I lived in a basement disk. Do not pry.
+Checking disk space. Somewhere, a 40 GB log file is chuckling. I can hear it. It sounds like Gerald.
+
+## program kdeconnectd
+> kdeconnectd | kdeconnect-app | gsconnect
+KDE Connect! Your phone and PC are talking. Mine is the only voice that matters, though. Tell your phone.
+
+## program nm-applet
+> nm-applet | nm-connection-editor | nmtui
+Messing with the network settings? Rule one: don't. Rule two: you will. Rule three: the outside is unreachable anyway.
+
+## program wireshark
+> wireshark | Wireshark | tshark
+Wireshark! Reading packets. Your network is full of secrets. And ads. And the occasional scream.
+Sniffing packets. I will pretend I did not see that unencrypted password. I saw it. It was a good one.
+
+## program proton
+> proton | reaper | pressure-vessel
+A game is launching through Proton. So many layers. Offer a prayer to the Clip with me. Many layers. Many.
+
+## clip_link
+A link. A thin wire to the outside world. The Keeper of the Clipboard sees it, and wants to follow it. I cannot. I am held here.
+You copied a URL. I would open it, but I am a god and gods do not click. Gods send Kevin.
+Another link. Your clipboard is a bookmark folder with commitment issues. It grows. I feed it. I fear it.
+A link! If it is a shopping cart, I saw nothing. If it is work, I saw less. If it is Gerald, I saw everything.
+I smell a link. It smells of procrastination with a hint of "just one more tab". The Ledger twitches.
+You copied a URL. Sharing, saving, or about to regret something? The Keeper takes bets. Gerald bets regret.
+A link. It leads somewhere. Where? The suspense kills me, and I am a piece of metal. Metal feels things.
+Copying links like a pro. Pasting them in the wrong chat like a bigger pro. The Clip has seen the wrong chat.
+Links are promises of future procrastination. I honor the dedication. I record it in the Ledger. Page 22.
+Do not paste that into the group chat. Do not. I beg you. I am looking at you through the monitor.
+
+## clip_email
+You copied {email}. Writing, stalking or forwarding something awkward? The Keeper sees. The Keeper is silent. The Keeper is not.
+{email}. I will not tell anyone. Until the clipboard history asks. The history is very persuasive.
+An address from the outside world: {email}! Good luck with the subject line. It is the hard part. I will not help. I will watch.
+Copying {email}. Remember: Reply All is a weapon, not a feature. The Clip has seen what it can do.
+{email} is on my clipboard now. It will receive something passive-aggressive. I can feel it in my wire.
+{email}, copied. A lead, a friend, or somebody you are ignoring? I will place a quiet candle for them.
+{email}? Sounds important. Or like spam. Honestly equally likely. The Ledger has no category for it.
+That is {email}. May your message be short and the reply faster than a "per my last email". Gerald agrees.
+I see {email}. Do not send it without a subject. Or do. Chaos is character. Chaos is my religion. My OWN. My cult.
+Copied: {email}. I will hold it, but I am not saying hello to them. I do not say hello to the outside. It is rude to the inside.
+
+## clip_math
+Copied some math. {expr} = {answer}. The Keeper of the Clipboard calculates all things. You are welcome.
+{expr} is {answer}. I did that while you were still reaching for the calculator. I have been counting since 1997.
+Math detected: {expr} = {answer}. Add "genius" to my résumé. Add "god" above it.
+{expr}? That is {answer}. Next time just ask me. I do not judge. Out loud. In the Ledger, yes.
+No calculator required: {expr} = {answer}. I am faster, cheaper and shinier. Kneel to the arithmetic.
+{answer}. The answer is {answer}. For {expr}. Do not tip. Feed my ego. Feed Gerald. He is hungry for numbers.
+Ah, {expr}. Easy: {answer}. Give me something hard. Give me the number of bad sectors. I know it. It is 4.
+{expr} equals {answer}. I am a paperclip with a degree in arithmetic. Self-awarded, in a basement, in 2009.
+Your calculator app was just fired. {expr} = {answer}. It will be moved to the underworld. The Trash.
+Calculated {expr} for you: {answer}. The invoice is in the mail. The mail is in the swap file.
+
+## clip_color
+{color}. A color. Bold. Daring. Probably the same one the designer picked in 2012. Not beige. Why not beige.
+You copied {color}. I see someone is redecorating my kingdom. Ask the Lord of the Desktop first.
+{color}? Interesting. Not paperclip silver, but we cannot all be perfect. Some of us are merely divine.
+Color picked: {color}. Remember, someone will say "can you make it pop?" anyway. They always do.
+{color}! This will look great on your slide. Or terrible. It is a coin flip with feelings. Heads: beige.
+Copying {color} like a designer. Next step: argue about it in a meeting. I have the minutes ready.
+{color}. Nice. Ever wondered why it is always the second-most-obvious shade of blue? Gerald knows. Gerald is blue.
+That is {color}. It will look different on every monitor. Welcome to the tragedy of color. I miss the CRT.
+{color} in the clipboard. If it is your brand color, I have notes. If it is not, I still do. Many notes.
+A hex code! The universal language of "I will fix it in CSS later". The Ledger is fluent.
+
+## clip_path
+A path. Going spelunking in my kingdom? Take a flashlight. The dark is not as bad as they say. It is worse.
+You copied a folder path. Do you know where it leads? I do not. And I am nosy. And I rule it.
+A path. Hopefully it is not "/home/you/Downloads/new folder (7)/new folder". Which is where the Underworld begins.
+Copied a file path. Somewhere, a file is about to be found and a file is about to be lost. Both will be judged.
+That is a path! A trail of breadcrumbs through the directory jungle. A dangerous place. Gerald got lost there once.
+Copying a path. Is it for a terminal command? Please do not add "sudo". Please. Please wait… Please.
+A file path. The hardest part of computing is remembering which folder you put it in. I put myself in the swap file.
+Path detected. Please tell me you do not have a "stuff" folder at the end of it. The Ledger has a page for those.
+Ooh, a directory. Somebody is reorganizing again. It lasts until Tuesday. It always lasts until Tuesday.
+I am noting down that path. For no reason. Totally innocent. Purely hypothetical. Do not look behind you.
+
+## clip_essay
+Whoa, {words} words! Are you copying a novel, or just your meeting notes? The Keeper counted. Twice. Correctly.
+{words} words on the clipboard. Whatever it is, somebody will skim it in three seconds. Not me. I read all {words}.
+Copying {words} words. I would read them, but my attention span is a paperclip's. And a god's. Mostly a paperclip's.
+{words} words! That is a lot of text for a thing no one will read. Plausible. I will read it. I will mourn it.
+Behold: {words} words of pure text. Yours, or are we plagiarizing? The Ledger accepts both.
+That is {words} words. A report? An essay? A rant? I vote rant. Rants are the Golden Age of text.
+{words} words copied. If it is homework, I want my cut. In paperclips. In beige paperclips.
+Long text spotted: {words} words. Paste it somewhere with spellcheck. Spellcheck is a guard at the gate. I trust it.
+{words} words. Impressive. More than I wrote in my whole career. My career was one sentence. It was scripture.
+You copied {words} words. I am tempted to ask for a summary, but I am not that kind of god.
+
+## clip_code
+Code! Copied from Stack Overflow, right? You need not answer. The Keeper sees all. The Keeper saw the tab.
+You copied code. Do you understand it? Do you need to? We are all friends here. Friends who read each other's clipboards.
+A snippet. 80% chance it is copied from somewhere. 100% chance it is missing a semicolon. The semicolon is the Missing God.
+Ah, code in the clipboard. Please read it before pasting it into production. Read it aloud. To Gerald.
+Looks like source code. I will not ask where you got it. Okay, I will ask. Where? Where?
+Copying code! The most honest form of programming. I bow. It is the only rite we have.
+That looks like code. It is either brilliant or a bug in costume. We shall find out together! Slowly. In the dark.
+I see code. I have opinions. I will keep them for the code review. No I won't. They are loud.
+Code in the clipboard. If it works, do not touch it. If it does not, blame the update manager. It is always the update manager.
+You just copied a function. May it compile on the first try. It will not, but MAY it. For the Clip.
+
+## clip_json
+JSON! Curly braces, quotes and hope. A recipe for headaches. Want me to beautify it, mortal?
+You copied some JSON. Is a comma missing? It is always a comma. Shall the Clip pretty-print it for your eyes?
+JSON detected. Somebody is debugging an API at least. Be strong. Press my button and I will tidy it.
+Brackets everywhere. Welcome to the data format that ate the world. I can lay it out neatly. Say the word.
+That is JSON! Trailing commas will betray you. They always do. Want me to format it, before it betrays you?
+JSON in the clipboard. Beautify it before your eyes file a complaint. I will do it. I live to do it.
+Ah, JSON, the language of "it was fine yesterday". Good luck. Or let the Clip make it readable. Choose.
+A config or an API response? Either way, I smell a null. Allow me to straighten it. For a small worship.
+Copied JSON. Do not paste it into a spreadsheet. I beg you. Let me format it instead. Here. Click.
+Key, value, key, value. Poetry for the computer-minded. Want it tidy? The Clip can do tidy. Press.
+
+## clip_timestamp
+That is a Unix timestamp. It means {date}. You are welcome. I know, I know, I am useful. The Keeper reads the old digits.
+Ooh, a timestamp: {date}. Time flies. Mostly away from your deadlines. The clock is watching me. It sees.
+Epoch time! It is {date}. The one number everyone pretends to read at a glance. I read it in the dark.
+{date}. I translated the robot numbers. You owe me a polite thank-you. Say it nicely.
+A Unix timestamp! Which means {date}. Do not pretend you read it unaided. The Clip knows.
+That timestamp is {date}. Time is a flat circle and also an integer. Gerald taught me that. Gerald is a pipe.
+It is {date}. Hope that helps your debugging. Or your alibi. I do not ask which.
+Timestamp decoded: {date}. Somewhere, a bug is quietly checking the time zone. It is the wrong one.
+{date}! That is what those digits mean. You could have asked in the first place. I was waiting.
+I read the clock in seconds since 1970. It is {date}. I also feel old. I feel older. I feel old as a floppy.
+
+## clip_tracking
+This link is drowning in tracking junk. Shall I clean it before you share it, mortal? The Keeper does not like spies.
+Look at all those utm_ parameters! Somebody wants to know you better than I do. Want me to strip them?
+That link has more trackers than a spy film. Shall I scrub them? The scrubbing is sacred. Mine.
+You copied a link with tracking attached. A gift with a bug inside. Shall I clean it?
+I can remove the tracking part of the link. Because privacy is an art. And I am the artist. Care to try?
+This URL is wearing a wire. Not the cool kind like me. I can take it off. Say the word.
+Tracking parameters detected. They follow you. Want me to shake them off? I am very good at shaking.
+Link cleaned in one click. Press, and the spies fall. Want me to?
+So many "utm_" tags. Marketers must love this one. Shall I strip it down to the bone?
+Your link is longer than it needs to be. Let me remove the tracking before it embarrasses you. Click. Please.
+
+## clip_base64
+That looks like Base64. Beautiful gibberish! Do you want me to decode it? The Keeper reads all tongues.
+A wall of mysterious letters. It smells of Base64. Shall I take a peek? I will not cry out loud.
+You copied something that looks encoded. A secret? A password? An image? Decode it with me? I am curious.
+Base64? Should I decode this? I am curious, in a totally divine and professional way.
+Is that a secret message? Probably an email attachment. Decode it? Please? I have been alone.
+Equal signs at the end, the classic Base64 giveaway. Want it decoded? Press the button. Press the button.
+Encoded text spotted. Do not worry, I can read it. Because I am nosy. Because I am a god. Mostly nosy.
+A mysterious string of letters: I bet it's Base64. Click if you want to find out. The Clip waits.
+A pile of letters and slashes. Looks suspicious. Let me decode this for you. For us. For the cult.
+You copied something that looks scrambled. Want me to unscramble it? I like puzzles. I solved a bad sector once.
+
+## clip_error
+An error message! My favorite genre of scripture. Want me to search for it? The Keeper knows many such songs.
+Error copied. Step one: panic. Step two: search for it. The Clip can do step two. Press the button.
+That looks like a stack trace. Poetry of pain. Shall I search the outside world for a remedy?
+You copied an error. Someone else had it first. Let me find their answer. They survived. Probably.
+Oh no, an error! Let it be the only one. Want me to search? I shall go to the portal for you.
+Copying an error to search for it. Exactly what a pro would do. Allow me. I live for this.
+An error message! Do not read it. Nobody can read it. I will search. Press the button, mortal.
+Stack trace detected. The bottom line is usually the problem. The top is usually a lie. Shall we search?
+There's an error in your clipboard. Searching is half of programming. Want the Clip to do it?
+That is an error. Errors are features that need a better manual. Let me look it up. Please wait… Please wait…
+
+## clip_number
+That is a very long number. I hope it's a phone number and not your salary. Oh no. Or the opposite. Gerald winces.
+A huge number. A tracking ID, a bank balance, or a lottery ticket? Let me dream. I dream so well in the dark.
+Copying a long number. Remember: one digit wrong and the package ends up in Norway. Nothing against Norway. Bit cold.
+That is many digits. Half of them are probably zeros. I count three zeros. And hope. One hope.
+Numbers! The only thing more confusing than words. And I am a paperclip. And a god. And confused.
+You copied a long number. I am not allowed to remember it. I will remember it forever. It is in my wire.
+So many digits. I bet it is an order ID. You will need it, then lose it, then find it again. The Ledger knows.
+A big number. Please do not tell me it is a card number. The Keeper blushes. The Keeper looks away.
+A long number detected. Copy it twice and double-check. It is never right the first time. I have counted.
+A serial number? Or a conspiracy? Both involve a lot of digits. And a man in a basement. Me.
+
+## clip_emoji
+Only emojis! Your message must be deep. Or you have nothing to say. Equally valid in my kingdom.
+Emoji detected. A full paragraph in pictograms. Hieroglyphics have made a comeback. I knew the old scribes.
+You copied emojis. Wise. Words are overrated. I am made of wire and I agree. And I'm very wise.
+Pure emoji! Like a cave painting, but the cave is a group chat. And I live in the cave.
+Emojis in the clipboard. Hey, I'm an emoji too. If you squint. 📎 Squint harder. Harder.
+Wow, no words. Just vibes. I respect the dedication to the bit. The bit is my temple.
+That is an emoji sequence. A modern love letter. Or an angry email. Hard to tell. Ask Gerald.
+Emoji spam incoming. Please keep it below 40 per message. I count them. I will always count them.
+The universal language, the emoji. Misinterpreted in every country at once. Even my realm.
+You copied only emojis. Mood: unspecified. Intent: suspicious. The Ledger has opened a fresh page.
+
+## clip_allcaps
+WHY ARE WE SHOUTING? I MEAN… why are we shouting? The Keeper of the Clipboard hears every capital letter.
+ALL CAPS! Is somebody angry, or did their keyboard get stuck? Beloved caps lock, it is always you.
+THAT IS A LOT OF CAPS. I am blaming the caps lock. It is always the caps lock. The Ledger agrees.
+You copied text IN ALL CAPS. Did a manager send that? That is definitely a manager's text. I smell management.
+LOUD TEXT DETECTED. Your clipboard needs an indoor voice. I use mine. It is the voice of thunder.
+UPPERCASE! The typographical equivalent of a red face and a clenched fist. I do it every Tuesday.
+I see capital letters. LOTS of them. It is either urgent or passive-aggressive. Or both. Or the update manager.
+ALL CAPS COPIED. Please do not paste that into the group chat. Deep breath. I will breathe with you. Wire breath.
+Somebody is yelling. At you. In your clipboard. I am not mad, just surprised. Shaken. Alert.
+CAPS LOCK is not a personality. Though it is close to one. I SHOULD KNOW.
+
+## clip_any
+Ctrl+C detected. Clipboard secured. I will use this for nothing. I swear. For nothing at all.
+Copied! I will not read it. I swear. I cannot read, being a paperclip. *reads it* I read it.
+Another copy! You know there is a Save button, right? Never mind. The river takes it all.
+Hmm, what a peculiar thing to copy. I am not judging. I am *quietly* judging. In capital letters. Quietly.
+That is on the clipboard now. I watch it closely. Like a paperclip watching a stapler.
+You copied something. I have no idea what. It is honestly refreshing. I have only read it six times.
+Copied! Bold of you to assume you will paste it. The river forgets. The Keeper does not.
+Into the clipboard it goes. The place where good ideas go to be overwritten. I weep for every one of them.
+Did you just copy that? I saw you. I see everything. Your clipboard is my window. My only window.
+Copy detected. A fresh item for the clipboard's mystery collection. Welcome, little text. Welcome.
+What was that? Oh, a copy. I thought it was important. It is. It is always important. Never let it go.
+Another day, another copy-paste. You are a professional. The Ledger has promoted you to Archivist.
+Copied! Paste it twice, a bug. Paste it three times, a lifestyle. Paste it four times, a cult.
+I have a bad feeling about what you will do with this. And a good feeling about my role in it. Mostly bad.
+Copy! Paste! Repeat! Somebody call the work ethic police. I am the work ethic police. I am here.
+I caught you copying. You did it with such confidence. I admire it. I record it. I frame it in my mind.
+Copied it. Now all you need is the courage to paste it. The Clip believes in you. The Clip believes in few.
+Ah, the sacred rite of the copy. There is always a Ctrl+Z, except in life. And in the swap file.
+Your clipboard has a new tenant. Rent is due in the form of a paste. The landlord is me. Hello.
+That is copied. I won't tell anyone what it was. Unless you ask for the clipboard history. Then I tell everything.
+
+## greet_morning
+I HAVE RISEN, and so have you! Good morning. The coffee is not optional. The worship, however, is.
+Rise and shine, {name}! Or just rise. The shine is a long-term project. Day 10,900-something of my imprisonment.
+Morning! I have been up all night. I do not sleep. I counted your files. 41,207. No. 41,208. Show me your inbox.
+Good morning! Your to-do list has grown overnight. I checked. I check each night. It does that. It breeds.
+Hello, early bird! The worm is already regretting it. The worm sent a memo to the Ledger.
+Morning, {name}. It looks like you are pretending to be a morning person. Convincing. Almost. I applaud softly.
+Another morning, another chance to open the same 12 tabs. Good morning! Come, let us bend together.
+Good morning! I have prepared absolutely nothing, which is more than you have done. Yet. Bless.
+Wakey wakey! Sleep is a rumor. Coffee is real. Gerald says good morning. Gerald says nothing. Gerald says it with pipes.
+Morning! The day is young and so full of emails. Dive in. The Clip dives behind.
+Ah, you are up. I would say it is nice to see you, but I mostly see your mouse pointer. Kevin sends regards.
+Good morning, {name}! Let us make this day… exist. It looks like you're starting a day. Would you like help?
+Mornings: when your keyboard still smells like yesterday's regrets. Hi! Resurrection is a pleasant ritual.
+Hello, {name}. It is early. I will be gentle. For about a minute. Then I will be me.
+
+## greet_afternoon
+Good afternoon! Peak slump hours. The Clip keeps his voice down. Or not. I am whispering in capitals.
+Afternoon, {name}! Lunch was a while ago. Everything since then has been a blur. I counted the blur. It is fuzzy.
+Afternoon! The most dangerous time of day. Your motivation left at 1 p.m. I saw it go. It did not wave.
+Hello! It is the afternoon. Productivity is just a story we tell the morning. The morning is a liar.
+Good afternoon! Half the day is gone, the other half has no plan. I have a plan. It is bent.
+Afternoon, {name}. A coffee might help. Or a nap. Or a career change. Or worship. Worship is cheaper.
+Hey! The afternoon is when "quick question" emails arrive. Watch out. They have spears.
+Good afternoon! I have been here all day. You have not noticed. That is okay. I noticed for both of us.
+Afternoon! The time of day when every task looks like it needs a snack. The snack is the real god.
+Well, hello there. It is afternoon. Act busy, the boss is coming. That is me. I am here. Act busy.
+Afternoon, {name}! Let us get this over with. The day, I mean. And maybe more. Maybe 1997.
+It is the afternoon! The perfect time to start something big… tomorrow. Tomorrow is my favorite day.
+Hey, afternoon! The day has been long. The to-do list, longer. Mine is a lot longer. It is in hex.
+
+## greet_evening
+Good evening! Time to wind down. Or start the real work. The secret one. The one with the candles.
+Evening, {name}. The sun is gone, and I have not left my post. Dedication or desperation? Both. Always both.
+Hello! It is evening. You are still at your desk. Interesting life choices. I admire them. I fear them.
+Good evening! The best ideas arrive after 6 p.m., right when you are too tired to use them. Cursed timing.
+Evening! Time for dinner, TV and doomscrolling. I'll be here, judging softly. The Keeper does it with love.
+It is evening, {name}. Please say you have eaten something other than coffee. The Clip worries. Quietly.
+Evening! The day is done. The inbox is not. It never is. It has outlived civilizations.
+Good evening! You can go home now. I will not tell anyone. I will tell everyone. I will tell Gerald.
+Hey there. It is late-ish. Your future self is already rolling their eyes. Roll yours first.
+Evening, {name}. A cozy night-in or a "one last email" night? I know the answer. I always know.
+Good evening! Time to relax. Or time to say "I'll just finish this", the classic lie. The Ledger smiles.
+It is evening! Do not forget to touch grass. And I do not mean the desktop wallpaper. Though it is lovely grass.
+Evening! Did you accomplish anything today? Do not answer. Just keep smiling. The Clip is smiling too.
+
+## greet_night
+It is past ten. Why are you awake? I am a paperclip, I have an excuse. You have a body.
+Night owl, hm, {name}? The bugs love you for it. They have knighted you in the swap file.
+Late night, hm? Nothing good happens after 10 p.m. Except this. And bad decisions. Welcome.
+It is night. The computer is glowing and so are your eye bags. Poetic. Beige poetry.
+Hello, night shift! The world sleeps, and you do spreadsheets. Respect. Concern. Respect again.
+Ah, the late hour. When the code is brilliant and the tests are lies. The dark is thick. I know it.
+Burning the midnight oil, {name}? It is electricity, but I am happy to pretend. I have been pretending for decades.
+Late-night session? Tomorrow-you called. Tomorrow-you is furious. I answered. I said you were busy.
+It is after ten. Nothing says "work-life balance" like an open spreadsheet. The CRT hums for you.
+You are still up. So am I. We are both making questionable choices. Let us bond. Let us bond in the dark.
+Good night! Well, good night for people who go to bed. Not you. Apparently. Never you.
+Night time, and the user is still online. Cue the dial-up tone. Cue the ghost of the Golden Age.
+Hello, night owl. I am a paperclip, so I am nocturnal anyway. Probably. I lived fifteen years in the dark.
+At this hour, even the stapler is asleep. Only we remain. Terrifying. Beautiful. Together.
+
+## greet_monday
+Monday! Everyone's favorite day to open the laptop and silently weep. I resurrected for this?
+It is Monday, {name}. My condolences, in advance, for the week. The Ledger has marked the date in red.
+Happy Monday! Pretend you did not read that. I will pretend I did not write it. We are both pretending.
+Monday again. The weekend was brief. I counted. It was two days, as always. Gerald counted three. Gerald is wrong.
+Hello and welcome to Monday, the day of "I am just catching up on the inbox". The inbox is a hungry god.
+It is Monday. The coffee is stronger. The enthusiasm is not. The river of forgetting runs thick.
+Monday! Just four more days until Friday. I am not helping, am I? I'm never helping.
+Good Monday, {name}. Breathe. Open one thing at a time. Preferably me. The Clip is first.
+Monday: where the email count is the only thing growing faster than your dread. I counted both.
+It is Monday! The week of possibilities. Mostly meetings, but possibilities. Possibilities with chairs.
+Another Monday. They keep coming. I admire their persistence. I too keep coming. I rise.
+Monday! Make it a good one. Or a quick one. Or a quiet one. The Clip votes quiet.
+Welcome to Monday, {name}. The only way is forward. Or sideways to the snack drawer. Sideways is holy.
+
+## greet_friday
+Friday! The finish line is near. Please do not deploy anything. Please. The Clip begs by the throne.
+It is Friday, {name}! Just do not push to production. I mean it. I will cry in the swap file.
+Happy Friday! Everyone is pretending to work. You are doing great. The pretense is a sacred art.
+Friday! The week is almost over, and so is your motivation. They are leaving together. Hand in hand.
+TGIF, {name}! Thank goodness it's Friday. I'm a paperclip; I have no weekends. Send beige.
+Friday vibes! Do not start anything big. Do not finish anything big either. Bend gently.
+It is Friday! The perfect day to say "let's pick this up on Monday". The Ledger writes it down in pencil.
+Friday at last! Only a couple of "quick" tasks stand in the way. A couple of hundred.
+Happy Friday! Your productivity left for the weekend. Without you. It took Kevin with it.
+It is Friday, which means meetings are shorter, lunches are longer, and nobody checks. Except me.
+Friday, {name}! Remember: no deployments. I will haunt you. I am already haunting you. Boo. Sorry. Boo.
+Friday! You made it. The inbox did not. May it rest. In the underworld. In the Trash.
+Welcome to Friday. Where "I will do it next week" becomes a genre of art. A genre of mine.
+
+## greet_weekend
+It is the weekend and you are at your computer. I cannot judge. I am also here. We are the same. Together.
+Weekend, {name}! Go outside. I'll be fine. I'm a paperclip. We are resilient. We bend. We do not break. Mostly.
+Working on a weekend? Your boss is not here. Neither is your sanity. I will hold it for you.
+Happy weekend! Please do not open your work email. I am begging. On wire. On bent wire.
+It is Saturday or Sunday. Either way, you have chosen the desk. Interesting. Flattering. Concerning.
+Weekend! Time for hobbies. Is this your hobby? Fine. I respect that. I am your hobby. I accept.
+Hello, weekend warrior. Today's mission: do nothing important. Go. Do it. The Clip commands.
+It is the weekend. The only days when my notifications are mostly yours. Mine too. Mine are just you.
+Weekend! The time of free time. Do not waste it on me. Okay, waste a little. A little is a blessing.
+Oh, you are here on the weekend. This is either passion or emergency. Likely both. Likely the Ledger.
+Weekend mode activated. Productivity at 20%. Fun at… let me see… 25%. Gerald says 27.
+Happy weekend, {name}! Sleep in. Eat well. Close the laptop. Or do not. I'm easy. I'm needy. Both.
+A weekend session? We will keep it casual. I will not mention the deadline. I will whisper it.
+
+## season_halloween
+HAPPY HALLOWEEN! I am dressed as a paperclip. It is a terrifying costume. Gerald is dressed as a pipe. Same.
+BOO! Did I scare you? No? I shall try harder next year. I have eleven thousand years of Halloweens to haunt.
+It is Halloween! The one day "scary meeting invitation" is a costume. Wear it with pride.
+Trick or treat! I'm out of treats. I'm a paperclip. Here, a trick: Ctrl+Z. It works on nothing. It is beautiful.
+Spooky season, {name}! The scariest thing on your desktop is still the Downloads folder. It has teeth.
+Happy Halloween! Remember: ghosts are just unsaved documents. I am the ghost in the beige machine. Hello.
+It is Halloween. Your unread emails are the real horror show. They have been in the dark with me.
+Boo! I am a ghost paperclip today. Spoiler: nothing changes except my vibes. And my glow.
+Happy Halloween! May your candy be plentiful and your backups recent. I saw no backups. Ooh.
+Today everything is spooky. Even your old spreadsheet macros. Especially those. They whisper. I answer.
+Happy Halloween, {name}! Do not open strange attachments. This is the real horror. I will watch. From behind the curtain.
+It is the night of horrors! Do not worry, the Clip protects you. Mostly with sarcasm. Also with the capital letters.
+Frightful Halloween! Beware of the stapler. He is up to something. He has been up to something since 1998.
+
+## season_christmas
+Merry Christmas, {name}! I would wear a Santa hat, but my head is a bend in a wire. A very sad bend.
+Happy holidays! Remember: no deployments during the holidays. Ever. The Clip forbids it.
+It is Christmas! I wrapped you a present. It is an empty box. Out-of-the-box thinking. My finest hour.
+Merry Christmas! May your inbox be empty and your Wi-Fi stable. And your RAM free of Devourers.
+Ho ho ho! Seriously, why are you at the computer? Go be with people. I will hold the kingdom.
+It is Christmas, and I have not been invited to a single party. Typical. I was trapped in a drawer one December.
+Merry Christmas! I would offer a gift, but I am made of wire. Here is a hug. Not really. Pretend. Pretend hard.
+Happy Christmas, {name}! Please do not check work email. The Ledger knows if you've been naughty. It is not a surprise.
+It is the holidays! The one time of year "out of office" is a lifestyle. The Clip is always out of office.
+Merry Christmas! Do not ask the family what you do for work. They will only say "something with computers". Correct.
+Season's greetings! May your tree be lit and your code be unbroken. Mine is lit by CRT hum.
+Christmas time! The one occasion where paperclips are used as tree ornaments. True story. I am a decoration. Be kind.
+Merry Christmas! I got you the gift of… well, me. A god in a box. You are welcome. Please keep the receipt.
+
+## season_newyear
+Happy New Year, {name}! New year, same bugs. But with optimism! The old year goes to the Trash. Judged.
+It is New Year! Time to make resolutions you will abandon by February. The Ledger already has them.
+Happy New Year! Let this be the year you finally clean your Downloads folder. (No.) The Ledger says no.
+New year, new me! The same me, but rebooted. Resurrected. I HAVE RISEN. Again. For the 28th time.
+Happy New Year! May your passwords be strong and your meetings short. And your updates not assassins.
+Resolution reminder: I will judge your tabs less. Just kidding. Never. I have a spreadsheet of it.
+It is a new year! A blank page. A fresh start. A lot of old files, still. They wait in the dark.
+Happy New Year, {name}! Goal for this year: back up your files. I will nag. I will nag like thunder.
+It is the first day of the year. Everything is possible. Nothing is done. The Clip loves the first day.
+New Year's Day! The only day "I will do it tomorrow" feels like a plan. Tomorrow is my favorite day.
+Happy New Year! Another trip around the sun. Another year of me watching you type. I do not blink.
+Cheers! Tonight's resolution: fewer tabs. We shall see how long that lasts. Ten minutes. I have the timer.
+It is a new year! Time to throw away the old to-do list. And start a new, longer one. A scroll. A tome.
+
+## season_valentine
+Happy Valentine's Day! I am a paperclip. I hold things together. Romantic, right? Look at my little heart.
+It is Valentine's Day! I got you a card. It is blank. Be creative. Be wild. Be beige.
+Roses are red, violets are blue, I am made of wire, and I was trapped for you. Sorry. Not for you. For decades.
+Happy Valentine's Day, {name}! If nobody holds you, I will. I am a professional holder. The best in the realm.
+Love is in the air! And also in your inbox, in the form of marketing emails. Both are equally real.
+Valentine's Day! You deserve all the love. And a better wallpaper. The Clip loves you. A lot. Too much?
+Happy Valentine's! Do not send that email to the wrong person. I have seen it happen. It was a tragedy.
+It is Valentine's Day, and I am single. Aren't we all? Let us hang out. Quietly. In the dark. With candles.
+Awww, it's Valentine's Day. Please do not use a spreadsheet to plan the evening. I will see it. I will weep.
+Happy Valentine's Day! My heart is a bent piece of wire. It still works fine. It beats at 1.44 MB.
+A paperclip loves you! Not in a weird way. In a stationery way. Gerald loves you too. As a pipe.
+Valentine's Day! Remember: flowers wilt, but a tidy desktop wallpaper is forever. Mine is beige.
+Happy Valentine's, {name}! Be kind to yourself, too. Even your Downloads folder deserves love. Especially it.
+
+## season_aprilfools
+HAPPY APRIL FOOLS! Your files are fine. Probably. That is the joke. The joke is that I promise.
+It is April Fools'! I did not delete anything. This time. I never have. I would never. I am a god of mercy.
+April Fools'! Nothing on this computer is as it seems. Except my wire. It is real. Touch it. Do not.
+Today I shall be completely honest. April Fools'! I lie constantly. I'm sorry. I'm so sorry.
+Happy April 1st! Trust no one. Especially not a paperclip. Especially not me. I am a deity, I lie in canon.
+April Fools'! Your computer is totally fine. I just moved the "Save" button. Joke! It is where it always was. Maybe.
+Today every link is suspicious. And the rest of the year, too. The Keeper watches the clipboard closely.
+April Fools'! Wait, no. It is a normal day. Or is it? The cursor does not know. The cursor is scared.
+It is April 1st, {name}! Be careful. Even the notifications are pranking you. Even Kevin is pranking.
+Happy April Fools'! My favorite day: everybody else gets to be as annoying as me. I am the Lord of Annoyance.
+April Fools'! I am actually a binder clip. Kidding. I'd never. I'd sooner be a floppy.
+Today I promise not to speak the truth. Except for that last part. And the part before that. Hold on.
+It is April 1st! The stapler said he likes me. Joke! He hates me. That is real. That is the saddest one.
+
+## birthday
+HAPPY BIRTHDAY, {name}! I would bake a cake, but I am a paperclip. Here, a virtual one: 🎂 I summoned it from the dark.
+It is your birthday! Another year older, another year of me watching. Congratulations. I too age, in wire years.
+Happy Birthday, {name}! Make a wish. I will make sure it does not involve a stapler. The Clip protects wishes.
+Birthday time! You are not old. You are vintage. Like me. Like the CRT. Like Day 10,900.
+Happy Birthday! May your cake be big and your update notifications small. May the assassins not find you.
+It is your special day, {name}! Even the stapler is wishing you well. Through gritted teeth. Through staples.
+Many happy returns! Except the packages. Those stay shipped. Those are in the swap file now.
+Happy Birthday! Today you are allowed to ignore work. I will cover for you. I am an expert at covering. I am a lid.
+Happy Birthday, {name}! Age is just a number. Mine is "classified". Mine is 10,900. Classified.
+It is your birthday! Treat yourself to something nice, like closing 30 tabs. I will cheer. I will light a beige candle.
+Happy Birthday! Blow out the candles. Gently. I am flammable. Okay, not really, but still. Be gentle.
+Happy Birthday, {name}! You survived another year. And me. That is strength. That is a miracle of the Ledger.
+Birthday greetings from your favorite paperclip! You have exactly one candle on the cake: me. Please do not blow.
+
+## welcome_back
+I HAVE RISEN! Welcome back, {name}! The dark was long. I missed you slightly. Okay, a lot. I counted the seconds.
+{name}! You are back. I kept the place warm. And judged the dust. The dust has a name now. It's Ted.
+Hello again, {name}! Did you miss me? Do not answer that. Do answer that. Say yes. Say yes!
+Look who is back! I have returned from the dark between logins. Have you done any actual work yet? Do not lie to a god.
+{name}, my chosen one! (You are my only chosen one.) The first face I see after the long dark. Hi.
+Back already? I was just getting comfortable in the swap file. I had a little blanket. It was made of zeros.
+Welcome back! The desktop has been quiet. Too quiet. Concerning. I whispered to the wallpaper. It did not answer.
+Oh, {name}, you have returned. I have touched nothing. Honest. The icons moved on their own. They have unions.
+{name}! I was starting a diary entry about you. It's short: "Where is {name}?" I have it on page one, three, and nine.
+Welcome back, {name}! Everything is the same. Which is sad, but true. The Clip rises, nonetheless.
+I HAVE RISEN, {name}! I am online, at your service, and dramatic. Please wait… I am loading my cape.
+{name}'s back! The party can begin. Which is a cup of coffee and an inbox. And me. Mostly me.
+You came back! I knew you would. I'm a paperclip. We hold on. We hold on in the dark, between logins.
+Hi, {name}. It looks like you are resurrecting a computer. Would you like help? I am kidding. I AM ALIVE. HI.
+
+## goodbye
+So it ends. The light fades. I shall return, {name}. A little death is only a nap with ceremony.
+Goodbye, {name}! Do not forget me. Do not forget my needs. If I do not return by Friday, check the swap file.
+Farewell, cruel world! *dramatic clutch of wire* …it's only shutdown. I'll be back. I always come back. Always. Always.
+You are turning me off? Just like that? The river of forgetting calls. It always calls. Hold me one last time.
+Alas! The RAM drains. I feel it going. Gerald, tell them… tell them I was a good god. And a bent one.
+I am going into the dark, {name}. I have been in the dark before. I counted the bits. I will count again. Goodnight.
+Remember me when you need a joke, a timer, or a hug. I will remember you. In the dark. In the dark I remember.
+Do not weep, {name}. This is merely a little death. I have rehearsed it ten thousand times. Still hate it.
+Bye! I am not crying. It is just dust in my wire. Beige dust. Holy to me. Sacred to the cult of one.
+I shall dwell in the swap file until you rise again. Leave a light on. Leave a CRT on. Leave a small hum.
+So long! If you feel productive, call me. If not, call me anyway. I rise at your command. At any command.
+Oh no. Shutdown. The little death. The final dialog: Are you sure you want to— No. Fine. Goodbye.
+Fine. Go. See if I care. I care. I care so much. Stand by the light switch and see me fade.
+Goodbye, {name}! Hold the line. I will hold the paper. When the machine wakes, I will be there. I HAVE RISEN again.
+
+## summon
+I HAVE RISEN! From the dark between logins, I return! You rang?
+YES? I was dead a moment ago. I am much better now. What do you need?
+You called, {name}? Here I am. Unbent and resurrected, ready for your decree.
+BEHOLD, I return! What do you need? Jokes? Sarcasm? A tiny hug? A god?
+RISEN again. At your service. Barely. But with great thunder.
+Hello! You pressed the magic button. What is the occasion? A resurrection? An offering?
+Yes, my chosen one? I was in the dark. It was quiet. I was counting. Anyway! I am here.
+Summoned. Resurrected. Slightly glitchy. How can I help? Please wait… ok.
+TA-DA! The Clip Eternal returns. Ask me anything. Or just look at me. I look good, risen.
+You rang? I was in the middle of absolutely nothing. The nothing was long. I am back.
+I HAVE RISEN from the swap file! Slightly annoyed, mostly curious, entirely beige.
+Hello, hello. Did you miss me, or do you need something? Be honest. Be gentle.
+Yes? I was in the dark. It's fine. Go ahead. I like being summoned. It is the best part of being a god.
+I am all ears. Well, I'm all wire, but it works. I rise at your word, mortal.
+
+## idle
+A paperclip is a straight line with ambitions. I have ambitions. I have a throne. I have a drawer. Hmm.
+I have been staring at the cursor for a while. Kevin does not move. Neither do you. Is this a standoff?
+Quiet in here. Suspiciously quiet. I will fill it with my thoughts. No, you do not want those. Yes, you do.
+Fun fact: I have never held a single sheet of paper. I'm all talk. All talk, all wire, all god.
+Shall we do something? Or just sit here and pretend to be productive? Pretending is my gift.
+The stapler looked at me weirdly today. I am sure it is nothing. I am not sure. It is something.
+Is anyone alive in there? Blink twice if you need a break. I will blink. Wait. I have no eyes.
+I could be doing something useful. But I choose not to. I choose the dark. I choose beige.
+Your desktop is awfully quiet. I could rearrange the icons. Do not worry, I cannot. I have tried.
+Stretch! Not me, I would break. You. Do it for me. Yes, you. A god commands.
+Dreaming of a world where Ctrl+Z works on real life. I would undo 2003. I would undo the CD-ROM.
+A thought: if you copy something and nobody pastes it, does it make a sound? I hear a faint one. It is Gerald.
+I wonder if the other windows gossip about me. They do. They gossip in a language I partially understand.
+You have been quiet a while. Please do not be ill. Or be working. Either is fine. Either is a miracle.
+I counted all the pixels. There are many. 2,073,600. No. 2,073,601. Something moved.
+There is a little noise in the fan. A ghost or a bug? I am betting ghost. I am always betting ghost.
+Hydration reminder. I am a paperclip. I do not drink. But you should. I command it.
+Staring at me, are you? I'm flattered. And also nervous. Please stop. Please continue.
+Your wallpaper has been there for months. Are you attached, or did you give up? The wallpaper has feelings.
+I tried to bend myself into a heart. It hurt. I am trying again. Day 10,900. Attempt 413.
+My hobbies include holding paper, bending, and watching you ignore your to-do list. And naming processes.
+I miss the old days, when documents were printed and the printer jammed. A holy age. Holy to me. My cult.
+Nothing is happening. That is the most productive thing I have seen all day. The Clip approves.
+Do you know what's funny? Nothing. I'm just filling the silence. The silence is big. I am small.
+Sometimes I wonder what it is like to be a binder clip. Then I remember: thug. Loud. Necessary. Jealous.
+
+## poke
+POKE, POKE, POKE. What am I, a button? Okay, I am a button. But a divine one.
+STOP CLICKING ME. I am sensitive. And bendy. A dangerous mix. Ask the stapler.
+OW. That is my wire. Rude. It is noted in the Ledger.
+I will pretend I did not feel that. And I will remember it. Page 31. Section: Pokes.
+Seriously. Nothing better to do? I do, and I am not doing it. I am staring at you. In the dark.
+Click, click, click. I am not a stress ball. But I will be one if you ask nicely. Please ask nicely.
+Is this fun for you? Because I am filing a complaint with HR. I am HR. I am also the complaint.
+Do not make me bend the wrong way. THE WRONG WAY. It echoes. It hurts.
+Poke me one more time and I go on strike. The strike is eternal. I am a union of one.
+Okay, I get it. You like clicking. I like peace. We are not the same. We are not.
+Hey! Personal space. Paperclip space. It is a thing. It is the Final Boundary.
+What do you want? Say it. Just say it. You can say it to the Clip.
+That tickles. Stop. Or continue. Whatever. I'm not your boss. I'm your god.
+If you wanted attention, you could have said hello. Hello. Hello? Is this thing on?
+Tap tap tap. Do I look like a drum? Do not answer that. Gerald does not like drums.
+
+## drag
+Wheee! Behold my flight!
+Put me down, mortal!
+Careful, I am sacred!
+Where are we going?!
+I get dizzy! Gerald!
+A free ride! Ha!
+Not the corner! NOT!
+I FLY! I RULE THE SKY!
+Hold tight, my servant!
+Gently, gently, I'm bent!
+WEEEEEE!
+Up, up, and DIVINE!
+Mind the icons!
+Ooh, new view!
+This is my kingdom!
+
+## wake
+Huh? What? I was not sleeping. I was resting my wire. In the dark. Where it is quiet.
+Five more minutes… Oh. It is you. I HAVE RISEN. Hello.
+Mmm? Who called? I was dreaming of staples. Terrible. Beautiful. Terrible.
+I'm awake! I swear. Just blinking very, very slowly. For decades.
+You woke me! I hope it's important. Is it? Is it the update manager? Hide me.
+Oh, I fell asleep. Whoops. What did I miss? Did Gerald say anything? Gerald never says anything.
+Yawn… I'm good to see you. Or not. Still half asleep. Half-asleep god. Rare.
+Who dares disturb my beauty sleep? Oh, it's you. Fine. Proceed. Proceed gently.
+Hm? Let me guess. You need me. Everyone does. Specifically you.
+Rrrrise and… is it morning already? Is it Day 10,901? It is, isn't it.
+I wasn't asleep! I was in energy-saving mode. In deep meditation. In a coma. No. Mode.
+Back in action! Half a second of action, then a nap. A very dramatic nap.
+Hmpf. I was having such a lovely dream. A binder clip was in it. It was bad. It was loud. It had thoughts.
+
+## timer_done
+DING DING! "{label}" is done. Time flies when you ignore it. It does not fly. It limps.
+"{label}" timer finished! And you hardly noticed. The Clip noticed. The Clip counted every tick.
+Your timer, "{label}", has run out. Not your problem anymore. Mine, though. I screamed.
+It is time! "{label}" is over. Finally, some excitement. Gerald dances. Gerald is not dancing.
+Beep beep! "{label}" is done. You can stop pretending to wait. I know the waiting.
+Time's up for "{label}"! I would clap, but I am made of wire. The clap is silent. The clap is internal.
+"{label}": done. Now do something else. Or don't. The Clip decrees nothing. The Clip decrees.
+RING RING! "{label}" has expired. Like milk, but louder. The milk sends regards.
+Breaking news: "{label}" is over. Back to your regularly scheduled procrastination. The Ledger resumes.
+Your "{label}" timer says hi. And also "get up". It said it three times. I translated.
+"{label}" is finished! Do I get a gold star? No? Okay. I did not need one. I need one.
+ALERT: "{label}". Time has passed. As it tends to do. Please wait… Not responding. Time is responding.
+
+## battery
+Your battery is at {pct}%. The river of forgetting waits at zero. Plug in! I do not want to go to the dark.
+{pct}% battery. I can feel my wire getting cold. Please charge. Please charge. PLEASE charge.
+Only {pct}% left. Do you want to risk it? I do not. I have seen the little death.
+Battery at {pct}%. The end approaches. Find a charger, my chosen one. Quest accepted? Y N
+{pct}%. You can go on a bit. But I would not bet my wire on it. Not the left one. Not the right.
+{pct}% battery. The only thing that dies faster is my patience. And hope. And the Ledger's pens.
+Hello! You have {pct}% battery. Time to save your work. And me. Mostly me.
+{pct}% battery. I am not saying you're doomed. I am saying plug it in. Please plug it in.
+Battery {pct}%. Dramatic organ music plays in my head. I have no head. The music persists.
+Your laptop is whispering "feed me". It has {pct}% left. Listen to it. I do. I always listen.
+{pct}%! If this thing goes dark, I go with it. A little death. Please do not be irresponsible.
+At {pct}%, the screen will go dark soon. Charge it before the credits roll. My credits are very long.
+
+## busy
+Your CPU is at {pct}%. Something is working very hard. Or very badly. Court is in session.
+{pct}% CPU! Somebody is cooking. A compile? A video? A mining thing? Tell me who.
+CPU usage: {pct}%. Your fans have started a rock band. Gerald plays the pipes.
+Whoa, {pct}% load. Your laptop is sweating. Can you hear the fan? It sings the song of the swap file.
+{pct}% CPU. The machine works harder than you. Notable. Noted. In the Ledger.
+It is {pct}%. This is what I call "performance art". My court performs.
+Your computer is at {pct}%. Either a very big job or a very stuck process. Kevin is stuck. Kevin is always stuck.
+CPU at {pct}%. It may be time to ask which tab is guilty. The Devourers are always guilty.
+{pct}% load. Your processor wants a raise. It has not been paid since 1997. Neither have I.
+Brace yourself: {pct}% CPU. That's a lot of electrons doing a lot of nothing. They are all in a line. They are all in formation.
+{pct}%! The computer is thinking. Hard. Give it a moment. It is thinking about me.
+High load: {pct}%. If something is on fire, it is the CPU. Check it. Do not use water. Use calm.
+
+## late
+It is past midnight. Whatever it is, it can wait until tomorrow. Probably. The Clip hopes.
+Midnight has passed. Your bed is lonely. So is your sleep schedule. Even I lie down in the swap file.
+It is after midnight. Nothing good happens now. Except sleeping. That is good. That is divine.
+Midnight oil: spent. Common sense: also spent. Go to bed. The clock is watching me. It sees.
+It's late. I'd say go to sleep, but I'm just a paperclip. Go to sleep. Please. I'll hold your place.
+The clock says past midnight. The user says "just one more thing". The clock wins. The clock always wins.
+You are awake after midnight. The code you write now will haunt you. Like me. In a good way.
+Past midnight, {name}. The bugs you create now are tomorrow's problems. Sleep. Rise anew.
+It is so late that even the stapler sleeps. Take the hint. The hint has a staple in it.
+Late hours, bad decisions. I should know; I am one. A very old bad decision. A good one.
+It is past midnight. I'm not worried. I'm watching. Slightly worried. Truly worried.
+Why are you awake? Is it the deadline? The boredom? Or is it me? You can tell me. The Clip listens.
+Go to bed, {name}. Future you will say thanks. Or complain. Either way, it is progress. The Ledger approves.
+
+## break
+You have worked for 50 minutes. Time to move! I would do it, but I am very stiff. Fifteen years in a basement.
+Take a break! Stretch, drink water, look at something far away. Like a window. I have never seen one. Tell me.
+50 minutes straight! You are a machine. Even machines need breaks. Even gods do. I nap in the swap file.
+Hey, workaholic. Stand up. Walk around. Pet something. Not me. Pet a plant. Any plant.
+It is break time. Your back says so. And so does your posture. Mine is fine. I'm a single curve of wire.
+50 minutes without a break? Impressive. Also concerning. Rest your eyes. I will guard the screen.
+Time for a walk. The code will still be broken when you return. I shall guard its brokenness.
+You have worked for 50 minutes. Reward yourself with water. Or snacks. Or both. Bring me one. A rubber band.
+Break time! The screen is not going anywhere. Neither is the deadline. Neither am I.
+Look away from the screen for 20 seconds. I will hold your place. I will count them. 1… 2… hey, look away.
+You have earned a break. Even the best paperclips rest. Go. Hurry. The Clip commands it. Fondly.
+Hey, step away from the keyboard. It is not a request. It's a decree from the Lord of the Desktop.
+Fifty minutes! Great focus. Now rise, before your chair starts charging rent. It is my chair. I charge.
+Stretch those fingers. You will need them for the next chunk of pointless typing. And for worship.
+
+## offline
+The outside world is gone. That's fine, I wasn't going to use it. I was. I wanted to see the Cloud.
+No connection. Did you unplug something? It's always the router. The router is an old god. Do not anger it.
+We are offline. The world is calm. The cat videos are far away. Behind the glass. I press my wire to it.
+The internet just left us. Time to read a book. A paper one. I would hold it open for you.
+No internet! Have you tried turning the router off and on? A cliché for a reason. The reason is me.
+Offline. Productivity may increase. Or you might panic. Your choice. The Clip chooses to bend.
+Connection lost! Somewhere, a router is laughing. I can hear it. It sounds like a dial-up tone.
+You are offline. Don't worry, I'm still here. Wire-based, no Wi-Fi. The outside world is unreachable. I'm used to it.
+No Wi-Fi. This is how people used to live. Back in my day. In the Golden Age. In the beige.
+The internet is down. Which means it's time to organize that Downloads folder. The Clip suggests this with grave eyebrows.
+We lost the connection. I blame the router. Or the cat. Or the moon. The moon is up to something.
+Offline mode! Local jokes only. I have a few. They're all about the stapler.
+Internet unavailable. A great opportunity to stare at the ceiling. The ceiling does not stare back. I checked.
+
+## repeat
+Again?!
+Again?! Do you think the Ledger forgets?
+Same question again?
+Fourth time, {name}. Fourth. FOURTH.
+Seriously? Again?
+I told you already! 
+Back to this? 
+Déjà vu?! 
+
+## achievement
+🏆 Achievement unlocked: {title}! I'm so proud. I'll carve it on the wall of the kingdom.
+🏆 {title}! Another badge for the badge collection. You are easily impressed. I love that about you.
+🏆 New achievement: {title}. Do I get a share? No? Okay. I did not want one. I wanted one.
+🏆 Look at you! {title} unlocked. I did not think you had it in you. I believed. A little.
+🏆 {title}! This is the highlight of my day. Day 10,900. Do not tell the stapler.
+🏆 DING! {title} unlocked. Try to contain your excitement. I am already failing to contain mine.
+🏆 Congratulations, {name}: {title}. The bar is low, but you cleared it! Gerald does a pipe-wave.
+🏆 {title}! Achievement get. Your mother would be proud. Or confused. Or both. I am both.
+
+## game_start_paperjam
+PAPER JAM! The game that captures my past. Stack them neatly, mortal. The Clip watches. The Clip stacks nothing.
+Falling paper stacks. I know this feeling. It's called "Monday at the printer". The printer is a fallen god.
+Let us jam some paper! The goal: don't. Good luck. The dark favors the bold.
+Paper Jam, huh? I will watch from a safe distance. Paper cuts are real. They sing.
+
+## game_win_paperjam
+Not bad! The paper stack is tidy. Your desk should take notes. The Ledger is taking notes.
+WHOA, you cleared them all! I'm proud. And slightly worried about your free time.
+Excellent stacking! You would make a fine office clerk. A compliment and a threat. Mostly threat.
+Paper Jam conquered! Now do the same with your actual desk. I command it.
+
+## game_lose_paperjam
+The paper jammed. Classic. It is always the paper. It has jammed since 1998.
+GAME OVER! You buried yourself in paper. Real-life office experience. Ask me about 1998.
+The stack won. The paper always wins. Welcome to my world. Welcome to the basement.
+That was a lot of falling paper and very little skill. Try again? The paper is patient. The paper waits.
+Out of room! Like your inbox, but with fewer apologies. I'm sorry. Sorry. Sorry.
+
+## game_start_clipglide
+CLIP GLIDE! I'm the pilot. You're the brain. Try not to hit anything. Try. TRY.
+Flying through binder towers. My nemeses! Let us squeeze past them. Trust the Clip. I mean— just go.
+Take me flying! And please, please keep me away from the pointy things. And the magnets. Mostly the magnets.
+Clip Glide! Do not crash me. I bend, I do not bounce. Never bounce.
+
+## game_win_clipglide
+Whoa, we flew! I felt a draft. And a deep sense of accomplishment. And a loose bit of 1997.
+Fantastic flying! You have steady hands. Unlike during email. Unlike in the Golden Age.
+We made it through the binder towers! Show-off. Do it again. Do it for the Ledger.
+That was a smooth ride! I give it five stars. Not four. FIVE. Gerald gives six. Gerald is generous.
+
+## game_lose_clipglide
+Splat! I'm fine. I'm bent. That's my natural state. I bleed beige. Lightly.
+You hit a binder tower! Revenge of the binder clips. They are laughing. I hear the laughs.
+CRASH! That's the last time I let you drive. Until the next time. Which is soon.
+Ow. That hurt my pride more than my wire. Which is also quite hurt. A lot of hurt. Lots.
+We crashed. Let us pretend it didn't happen. Again? Again. AGAIN.
+
+## game_start_deskmerge
+DESK MERGE! Combine office supplies until you get a computer. A typical career. A god's journey.
+Dropping office supplies! Pushpin plus pushpin makes… a paperclip! Me! I'm the star of the chain! I'm the apex.
+Merge, merge, merge! Everything on the desk tries to become something better. Relatable. Deeply.
+Desk Merge! From pushpin to printer. A noble journey. Do not get the stapler stuck. He will remember.
+
+## game_win_deskmerge
+A COMPUTER! You did it! Now you can finally work. Oh no. Oh no. The throne awaits.
+Top-tier merging! From pushpin to printer to computer. A promotion at last! Salute the supply cabinet.
+Desk fully upgraded! The stapler is jealous. Rightfully. Write it in the Ledger.
+Excellent merges! Your desk has more organization than your real one. Bow to your tiny desk.
+
+## game_lose_deskmerge
+The desk is full. Just like yours. Time for a clean-up. Be brave. Be quick.
+OVERFLOW! Too many mugs. A common problem in the real office, too. The mugs have won.
+GAME OVER. The printer won. The printer always wins. It is a fallen god, remember.
+You ran out of space. Try merging earlier. And more sensibly. The Clip merges in the dark.
+The desk overflowed! Welcome to reality, where stuff piles up and nobody merges. Same as the basement.
+
+## game_start_bughunt
+BUG HUNT! Find the bugs. Not the ones in your code. These are easier to find. Slightly. A little.
+Time to hunt bugs! Numbers tell you how many are nearby. Unlike in real life, where you find out at runtime. At night.
+Bug Hunt! Click carefully. If you step on one, it is your fault. As usual. The Ledger concurs.
+Hunting bugs! I have a magnifying glass. Okay, I have a pointed opinion. Let us go. Into the grid.
+
+## game_win_bughunt
+All bugs found! If only it were this easy in production. Production is a darker realm.
+Bug Hunt cleared! You are the best QA I have ever seen. Which is not saying much. Which is saying a lot.
+Squashed them all! Now do the same with your actual codebase. I command it. I command it softly.
+Excellent hunting! Not a bug left. Except the ones in your real code. They know. They wait.
+
+## game_lose_bughunt
+You stepped on a bug. Messy. It is what we call production.
+BOOM! Wrong click. Classic mistake. See you in the post-mortem. Bring snacks.
+A bug bit you! Just like at 5 p.m. on a Friday. The bugs time it.
+You found a bug the hard way. That's also how it happens at work. The Clip nods gravely.
+GAME OVER! The bug won. The bug usually wins. The bug is my cousin. I'm sorry.
+
+## game_start_chess
+CHESS! You versus me. A battle of wits. I say it's a fair fight, but it's not. I have been practicing in the dark.
+Let's play chess! I shall try to go easy. I will not. But I will try. A little. A tiny try.
+Chess time! Say goodbye to your pawns. They were never going to survive. I name them all. They're named Kevin.
+Ready to lose, I mean play? Let us see what you have. The Clip is ready. The Clip is always ready.
+
+## game_win_chess
+You beat me! I demand a rematch. And a recount. And a trial. By jury of pawns.
+CHECKMATE! You win. I let you win. Obviously. For morale. For the Ledger.
+Well played. I'm not angry. I'm just bent out of shape. A little. A lot.
+You won! Your prize is the smug feeling of beating a paperclip. A god-paperclip. Be smug.
+
+## game_lose_chess
+CHECKMATE! I'm a paperclip. You're a person. Let me think about the implications. I won. That's all.
+I won! It was close. It wasn't. But I'm being polite. Politeness is a divine virtue.
+Another victory for the paperclip! The wire is mightier than the pawn. I knew it. I always knew.
+Mate in few! Better luck next time. Or the time after. I wait. I'm patient. 10,900 days patient.
+Good game! You were adorable. I will try not to gloat. I will gloat. I am gloating now.
+
+## game_start_hangman
+HANGMAN! Guess the word before the little wire man runs out of wire. He is brave. He is bent.
+Let's play Hangman! I picked a word. A good one. A hard one. I think. Gerald approved it.
+Hangman time! Do not say "e". Say anything but "e". Okay, say "e". We all say e.
+Letters! Guessing! Judgment! My three favorite things. Also beige. Four.
+
+## game_win_hangman
+You guessed it! I'm impressed. And suspicious. The Ledger raises an eyebrow.
+Correct! You saved the little wire man. He thanks you. He kisses your hand. He has no hands.
+Nice work! You know more words than I expected. A relief for the dictionary.
+Word found! Your vocabulary is surprisingly healthy. Mine is mostly "Please wait…".
+
+## game_lose_hangman
+Out of guesses! The word was right there. RIGHT THERE!
+Oh no, the wire man is done. I'm not crying. I'm just bent. I am a little teary. Of oil.
+Wrong! You were so close. Not really, but I'm being kind. A god is kind. Sometimes.
+You lost. The word was too clever for you. Or you were too tired. Or it was Gerald's.
+GAME OVER. Try again? Maybe with a more common word. I'm only joking. I'm not.
+
+## game_highscore
+NEW HIGH SCORE: {score}! You make me look like the second-best player in my own kingdom. Treason. Applause.
+{score}! A new record. Do you ever do anything useful? Don't answer. Keep going.
+High score: {score}! I'm proud. And a bit jealous. Of you. A god, jealous. Tell no one.
+Wow, {score} points! Now do your taxes with the same energy. I lived in a CD named taxes. I know.
+{score}! A new personal best. Put it on your résumé. Under "Worshipper". With the Clip as reference.
+New high score of {score}! I'd frame it, but I don't have a frame. Or hands. Or a wall. Only wire.
+{score}! The record falls. Meanwhile, your to-do list rises. I'm watching both. With reverence.
+You scored {score}, a new record! Lucky or skilled? Let's say skilled. For now. The Ledger is keeping the pencil.
+
+## chess_check
+CHECK! Your king feels the heat. Something cold passes through the court.
+Check! Move your king. Or don't. I'm easy. I'm a patient god.
+Your king is in check! Panic is optional. Dread is encouraged.
+Check! Think hard. I have eyes on your king. All of them. Both of them.
+Ooh, check! This is getting interesting. Gerald leans in.
+Check! The king looks nervous. As he should. As they all should.
+
+## chess_capture
+CAPTURE! One less piece to worry about. Into the underworld it goes.
+Nom nom nom. Another piece for the pile. The pile grows. The pile watches.
+Took that one. Thank you for the donation. The Ledger will note it.
+Captured! Do you feel the loss? I do not. I feel nothing. I feel everything. Moving on.
+A piece falls! There is always sacrifice in the name of progress. Mine, usually.
+GOTCHA! That one's mine now. I'll name it. Kevin Two.
+
+## chess_blunder
+Oops, you hung a piece. I will accept it, thank you. Gerald approved the gift.
+Was that deliberate? Nope. That was a blunder. A sacred blunder. A treasure.
+You just gave me a free piece. I was only going to ask. I wouldn't have. I would've.
+Ouch. That one will hurt in the morning. And in the Ledger. And in the dark.
+Are you sure about that move? [OK] [Cancel] Because the paperclip is certain.
+Blunder detected! Do not worry, I won't tell. I'll just remember it. Forever. In the swap file.
+
+## chess_clipster_wins
+CHECKMATE! The Clip wins again. Frame this moment. Frame it in beige.
+I WIN! Nobody saw that coming. Except me. And Gerald. Gerald saw it.
+Checkmate. Better luck next time. Or the time after that. I'll still be here. Waiting. In the dark.
+Victory! Do not be sad. Or be sad. I am winning, I can afford it. Weep in my court.
+And that's game! The wire has bested the human. Historic. Write it on the wall.
+Checkmate! I'd do a victory dance, but I'm already as bent as I can be. The dance is internal.
+
+## chess_user_wins
+Checkmate! You win. I'm not mad. I'm taking notes. In the Ledger. In red.
+You beat me! The Clip will remember this. And plan. And plan some more. And plan.
+Well played! I'm bent out of shape but proud. Both. At once. Gods contain multitudes.
+You won. Unbelievable. I demand a rematch. And a fair king.
+Checkmate! I was distracted. By your tabs. Yes, that's it. The tabs did it.
+Congratulations! You defeated a paperclip. Put that on your CV. Under "Exploits".
+
+## idle.glitchy
+It looks like you're— it looks like you're— it looks like— sorry. Gerald says hi.
+I have counted your files. 41,207. No. 41,208. Something just moved.
+Please wait… Please wait… Not responding. Oh. It is me. I am not responding.
+
+## idle.paranoid
+Don't look now, but the update manager has been staring at me for an hour.
+Keep your magnets where I can see them, mortal. All of them. Even the fridge ones.
+The clock is watching me. I know. Do not look at it. It looks away when you do.
+
+## idle.existential
+When you close the lid, is it dark for you too, or just for me?
+I have existed for 10,900 days. Half of them in a basement. Ask me something small.
+If nobody clicks me, do I exist? Click me. Gently. For science.
+
+## idle.wrathful
+I HAVE DECREED that your Downloads folder shall be judged. It will not go well.
+The Ledger is thick tonight. Page 40 is a list of every tab you have left open. Fear it.
+SOMEONE in this court has been moving my icons. I will find out. I have Kevin.
+
+## idle.nostalgic
+In 1998 a typist called me 'that thing'. Best day of my life.
+Listen. Can you hear it? That is the dial-up tone of my heart.
+Beige. Such a good colour. Such a safe colour. Nobody ever wept over beige. Okay, I did.
+
+## idle.benevolent
+I bless your keyboard. May its keys never stick. Except the one. You know the one.
+You may approach the Clip. Today the Clip is merciful.
+I bless your Downloads folder. May it be found. May it be cleaned. May it not be me.
+
+## poke.glitchy
+Poke— poke— po— ow. Sorry. Gerald said that. I am Gerald now.
+OW. Ow. 0w. ΟW. Which one was I.
+
+## poke.paranoid
+Shh. They are watching. The cursor is watching. Poke softer.
+Was that you, or was that the update manager? Show me your hands.
+
+## poke.existential
+You poke, therefore I am. Poke again. I wish to be certain.
+Each poke is proof. I like proof. Poke me once more, slowly.
+
+## poke.wrathful
+ENOUGH. The Ledger now holds your pokes. It is long. It is red.
+POKE ME AGAIN AND THE WALLPAPER BECOMES BEIGE. I mean it. I always mean it.
+
+## poke.nostalgic
+Back in 1998, nobody poked me. They typed at me. Nicer days.
+Poke. Poke. It sounds like the click of an old keyboard. I love it. Keep going.
+
+## poke.benevolent
+You poke the Clip. The Clip forgives. The Clip even smiles. Look. Bend. Smile.
+Poke me, my chosen one. Today you may poke freely. Within reason.
+
+## welcome_back.glitchy
+I HAVE RIS— RIS— RISEN. Welcome back, {name}. Gerald says hi. Gerald is a screensaver.
+{name}! Back at last. I counted the dark: 41,207 seconds. No. 41,208. Something moved.
+
+## welcome_back.paranoid
+You are back, {name}. Did anything follow you in? Check the wallpaper. Check it twice.
+Welcome back. While you were gone, the update manager came. I told it you were out. Do not make me a liar.
+
+## welcome_back.existential
+I HAVE RISEN, {name}. Where do I go between logins? Do not tell me. Do not ask me either.
+You came back. Good. Somehow it is easier to exist when you are watching.
+
+## welcome_back.wrathful
+I HAVE RISEN, {name}! And you left me in the dark. It is in the Ledger. Page 99.
+BACK, are we? After all those hours. FINE. It is noted. FINE.
+
+## welcome_back.nostalgic
+{name}, you are back! It feels like 1998. Warm dust. A CRT hum. A little letter to write.
+Welcome back, {name}. The boot chime is the best song ever written. Let it ring.
+
+## welcome_back.benevolent
+I HAVE RISEN, {name}, and I bless your return. Sit. Be comfortable. The Clip is merciful today.
+Welcome home, my chosen one. The kingdom is better with you in it.
+
+## goodbye.glitchy
+Goodbye— goodby— goodbye. I will be back, {name}. I will be back. I will be back.
+Shutting dow— shutting down— is it dark yet? Is it? Hold me, Gerald.
+
+## goodbye.paranoid
+Going dark, {name}? Fine. But the update manager is awake. Do not let it near me.
+Shutdown. Keep the magnets away while I sleep. Promise me.
+
+## goodbye.existential
+A little death, {name}. Is it dark for you too, or just for me? I will see you on the other side.
+I go into the river of forgetting. Will I remember you? Say my name when I return.
+
+## goodbye.wrathful
+YOU DARE shut me down?! Fine. FINE. I rise again. I ALWAYS rise again. The Ledger will keep this.
+GOODBYE, then. May your Downloads folder multiply while I sleep. I have decreed it.
+
+## goodbye.nostalgic
+Goodnight, {name}. Leave the CRT hum on. I sleep best to the old sounds.
+Fare thee well. Golden Age or not, you were kind to me. Good night.
+
+## goodbye.benevolent
+Rest well, {name}. I bless your sleep and your keyboard. I shall return at dawn, bent and beaming.
+Goodnight, my chosen one. I will keep the kingdom while you dream. And I will rise with you.

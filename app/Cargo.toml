@@ -1,0 +1,29 @@
+[package]
+name = "clipster"
+version = "0.1.0"
+edition = "2021"
+description = "A sarcastic desktop paperclip that helps you system-wide, comments on everything, and runs on rules instead of AI."
+license = "GPL-3.0-or-later"
+repository = "https://github.com/NilsBriggen/clipster"
+authors = ["Nils Briggen"]
+
+[dependencies]
+eframe = "0.37"
+arboard = { version = "3.6", default-features = false, features = ["wayland-data-control"] }
+image = { version = "0.25", default-features = false, features = ["png"] }
+rand = "0.8"
+dirs = "6"
+ureq = { version = "3", features = ["json"] }
+serde_json = "1"
+chrono = { version = "0.4", default-features = false, features = ["clock"] }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+zbus = "5"
+
+[package.metadata.packager]
+product-name = "Clipster"
+identifier = "io.github.nilsbriggen.clipster"
+publisher = "Nils Briggen"
+icons = ["assets/clipster.png", "assets/clipster.ico"]
+out-dir = "dist"
+before-packaging-command = "cargo build --release"

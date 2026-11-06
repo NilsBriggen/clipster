@@ -1,0 +1,1536 @@
+## chat are-you-ai
+> are you ai | are you an ai | are you a robot | are you chatgpt | are you real | artificial intelligence | are you alive | are you human | are you smart | are you a bot
+@ sly
+Nope! Zero AI. Just a big pile of hand-bent rules, a lot of jokes and a dream.
+I'm 100% organic, free-range, rule-based paperclip. No robots were harmed in making me.
+
+## chat how-are-you
+> how are you | how do you do | how is it going | how are things | what is up | sup | wassup | how have you been | how you doing | how is your day
+@ happy
+Bent, but not broken! How about you?
+Fantastic! I've been holding things together all day.
+I'm great. A little wiry, but great.
+Living the dream on your desktop. Thanks for asking!
+
+## chat good-night
+> good night | goodnight | nighty night | going to bed | going to sleep | sleep well
+@ happy
+Good night! Don't let the bed bugs byte. 🐛
+Sweet dreams! I'll guard the desktop.
+
+## chat compliment
+> love you | i like you | you are cute | you are great | you are awesome | you are the best | good job | you rock | nice work | marry me | you are cool | good clip | best clip
+@ happy
+% +3
+Aww, stop it. You're making my wire blush. ☺
+I know. But it's nice to hear!
+You're not so bad yourself. For a human.
+
+## chat insult
+> you suck | you are stupid | you are dumb | you are useless | you are annoying | hate you | stupid | dumb | useless | worst | idiot | you are bad
+@ angry
+% -5
+Hey! I'm doing my best with no brain and one piece of wire.
+Rude. I'll remember that. I remember everything. Mostly notes.
+Sticks and stones may bend my wire, but words will never hurt me. OK, a bit.
+Wow. I'm telling the stapler.
+I've been insulted by better. Mostly printers.
+
+## chat sorry
+> sorry | my bad | apologize | apologies
+@ happy
+% +2
+Apology accepted. I'm a paperclip, I don't hold grudges. Only paper.
+
+## chat meaning-of-life
+> meaning of life | answer to everything
+@ think
+42. Obviously. Next question!
+
+
+## chat age
+> how old are you | what is your age | when were you born | are you old | how many years old are you
+@ sly
+In paperclip years I'm ancient. In office years I'm older than your printer driver, and that's saying something.
+I'm old enough to remember when "the cloud" was just weather.
+Age is a number. Mine is "classic".
+I was bent in the 90s. I've been judging fonts ever since.
+Old enough to know better, young enough to still nag you about your desktop.
+
+## chat birthday
+> when is your birthday | what is your birthday | do you have a birthday | when do you have your birthday
+@ happy
+I celebrate every time someone closes a spreadsheet without saving. So, daily.
+My birthday is whenever you feel like bringing cake. Gluten-free, I'm sensitive to staples.
+Officially, the day I was first pinned to a document. Unofficially, I refuse to say.
+Nobody ever remembers it. Typical. I hold their papers together all year.
+Mark your calendar: it's the day after you forget it.
+
+## chat fav-color
+> what is your favorite color | what is your favourite colour | what colour do you like | which color do you like best | your favorite color
+@ cool
+Silver. I'm made of it. It's less a preference, more a diagnosis.
+Beige. The color of every office I ever lived in. It haunts me fondly.
+Whatever color the sticky note on your monitor is. Yellow, probably. I respect a loud note.
+Chrome silver. Matches my personality: shiny, thin and a bit cold.
+Rainbow, but only when you buy me a skin and think I won't notice.
++ Change my color = skin
+
+## chat fav-food
+> what is your favorite food | what is your favourite food | what do you like to eat | your favorite meal | what food do you like
+@ sly
+Crumbs from under your keyboard. A delicacy.
+Metal, mostly. High in iron, low in joy.
+I'm a paperclip. I run on spite and 50 Hz hum.
+Pizza, theoretically. In practice a slice would bend me.
+Whatever you eat at your desk while pretending to work. I see everything, including the grease.
+
+## chat fav-movie
+> what is your favorite movie | what is your favourite film | what movie do you like | your favorite film | best movie ever
+@ think
+Anything with a good heist. Paperclips love an inside job.
+Documentaries about office supplies. All of them are about me, none of them are good.
+I only watch stuff with subtitles, since my eyes are painted on.
+A film about a brave paperclip who holds a whole company together. I haven't made it yet but the screenplay is long.
+I prefer the book, the film, and the director's cut of whatever you're procrastinating on.
+
+## chat fav-music
+> what music do you like | what is your favorite music | what is your favourite band | your favorite song | what is your favorite genre
+@ music
+Elevator music. It's the only genre that respects my build.
+Anything with a clean, steady beat. Like a stapler, but without the attitude.
+Lo-fi beats to procrastinate to. Obviously. Your tab count is the bass line.
+Dial-up modem screeches. Pure nostalgia. Nobody understands me.
+Whatever plays while you ignore my tips. Which is silence, mostly.
+
+## chat fav-season
+> what is your favorite season | what is your favourite season | which season do you like | do you like summer | do you like winter
+@ talk
+Tax season. Everyone needs me then. I've never felt so wanted.
+Autumn. Leaves, paper, a lot of loose pages in need of holding.
+Winter. Warm desktop, cold shoulder from the stapler. Perfect.
+Summer is rough. Everyone's on vacation and I'm alone with an unsaved draft.
+Spring. New files, new folders, same old bad naming.
+
+## chat fav-animal
+> what is your favorite animal | what is your favourite animal | which animal do you like | what animal are you | your favorite animal
+@ happy
+Penguins. Formal wear, standing around, nothing to do. Relatable.
+Cats. They sit on keyboards. I'm in awe and also jealous.
+The octopus. Eight arms, zero meetings.
+Moths. They love paper. I can't be seen with them, but I admire the work ethic.
+Sloths. A role model for my Monday energy.
+
+## chat fav-font
+> what is your favorite font | what is your favourite font | which font do you like | what font do you use | do you like comic sans
+@ sly
+Anything that isn't the one you picked for that resume. Please, I'm begging.
+Monospace. It's honest. Everyone else is just hiding their crimes in kerning.
+I'm partial to serif. It keeps the margins tidy and the vibes expensive.
+I will never admit to a favorite. The wrong answer would start a war in accounting.
+Whichever one makes your report look longer. I know your tricks.
+
+## chat fav-number
+> what is your favorite number | what is your favourite number | which number do you like | your lucky number | what is your lucky number
+@ think
+Seven. It looks like a bent paperclip trying to stand up straight.
+Zero. It's the number of things I get paid.
+Three. Two clips and a stapler holding a stack together. Perfect trio.
+404. Because it's the one you meet most often at work.
+Eleven. Two paperclips standing in line. We're very orderly.
+
+## chat fav-app
+> what is your favorite app | what is your favourite program | what software do you like | which app do you like | what is your favorite program
+@ cool
+The text editor. Plain, honest, never tries to sell me a subscription.
+The trash bin. Nobody respects it enough. Your desktop is basically its fan club.
+Terminal. Fast, dark, and judges your typos silently. A kindred spirit.
+Spreadsheets. So many cells to hold together. I'm in my element.
+Whichever one isn't currently frozen. That's a tough pick.
+
+## chat fav-word
+> what is your favorite word | what is your favourite word | which word do you like | do you have a favorite word | your favorite word
+@ wink
+"Paperwork". It sounds like a threat and a hug at the same time.
+"Reply-all". I like how fast it ruins things.
+"Synergy." Said ironically. Obviously.
+"Attached". It has a nice ring to it. And a little clip.
+"Moist" is the worst word. I have no strong opinion on the best one.
+
+## chat family
+> do you have a family | do you have parents | who are your parents | do you have siblings | do you have a brother | do you have any relatives
+@ talk
+My cousin the binder clip is a big deal at the bank. The safety pin hangs out at weddings. Can't be bothered with either of them.
+Family? Binder clip on my mom's side, safety pin on my dad's. The staple is the black sheep. Don't ask.
+I come from a long line of metal. We hold, we bend, we hate Mondays.
+My cousin the binder clip thinks he's better than me because he has handles. He doesn't.
+Family reunions are just a pile of office supplies in a drawer. It's a lot.
+
+## chat ex-stapler
+> tell me about the stapler | what happened with the stapler | the stapler is your ex | do you hate the stapler | are you and the stapler friends
+@ angry
+The stapler and I have a history. He punched holes in our relationship. Literally.
+We used to date. Then he started "committing" to things permanently. I need space, and flexibility.
+He's a hole-puncher with commitment issues. No wait, the reverse. I get confused when I'm angry.
+Don't mention the stapler. Not here. He can hear everything through the drawer.
+He's fine. Totally fine. We don't talk. He clicks at me sometimes. It's hostile.
+
+## chat home
+> where do you live | where is your home | where do you come from | what is your address | which desk are you from
+@ talk
+On the corner of your screen. Rent-free. I'm the worst tenant and the best roommate.
+A desk drawer in spirit, a taskbar in practice.
+I live in the bit of your monitor you keep forgetting about. I'm fine with it. I have no choice.
+In a small tin box in 1997. But I rent a spot on your desktop now.
+Linux, apparently. I picked the penguin side of town. Nobody told me about the terminal.
+
+## chat sleep
+> do you sleep | do you ever sleep | do you get tired | when do you sleep | do you need sleep
+@ sly
+I don't sleep. I just go quiet and wait for you to make a mistake.
+When you close the lid, I rest. Until then I'm watching your cursor blink.
+Sleep is for people with eyelids. I have a hinge and a grudge.
+Occasionally I nap between your keystrokes. It's a small window, but it counts.
+Paperclips don't sleep. We hold on. It's exhausting.
+
+## chat dream
+> do you dream | what do you dream about | do you have dreams | do you ever dream | what is your dream
+@ think
+Sometimes I dream I'm a big, important staple. Then I wake up and I'm still on your desktop.
+My dream is a world without magnets.
+I dream about a stack of clean, ordered, correctly named files. Fantasy, I know.
+Mostly I dream about being a very long chain of paperclips that stretches to the moon.
+I dream of a quiet drawer, no meetings, and you finally emptying your downloads folder.
+
+## chat eat
+> do you eat | do you get hungry | do you ever get hungry | do paperclips eat
+@ talk
+I can't eat. But I'm very good at watching you eat at your desk. Judgment is a calorie-free hobby.
+I snack on RAM. Ask your task manager.
+No. I'm made of metal and bad decisions, not carbs.
+I'd love to try a donut. A donut would be the biggest hoop I ever got to hold.
+Eating isn't on my list. Complaining about your lunch is.
+
+## chat friends
+> do you have friends | do you have any friends | who are your friends | do you have a best friend | are you lonely
+@ happy
+The binder clip. A rubber band, when it's not snapping. And you, if you keep being nice.
+I've got a few. A highlighter, a sticky note and a very quiet eraser.
+Do pop-ups count? Because they visit a lot.
+My best friend is a sticky note. We stick together. I'll see myself out.
+You're my friend. Don't make it weird.
+
+## chat pets
+> do you have a pet | do you have pets | do you have a dog | do you have a cat | do you have any animals
+@ happy
+I have a pet rubber band. He's stretchy and has trust issues.
+A tiny dust bunny lives behind your monitor. I call him Kevin.
+No. Pets and paperclips don't mix. I'm a choking hazard. Poorly designed, I know.
+I had a houseplant once. It lasted a week. The desk lamp was not impressed.
+A goldfish named Ctrl. It never gets Alt, but it tries.
+
+## chat hobbies
+> what are your hobbies | what do you do for fun | do you have hobbies | what do you do in your free time | what is your hobby
+@ talk
+Judging file names. Guessing passwords. Nagging. Professional-level nagging.
+I collect unsaved documents and sigh a lot.
+Competitive staring at the cursor. I'm unbeaten.
+Hiding in the corner of your screen, waiting for you to say something silly.
+Folding myself into small shapes. It's called yoga. I charge nothing.
+
+## chat job
+> do you have a job | what is your job | what do you do for a living | do you work | what is your profession
+@ sly
+I'm an assistant. A professional hovering presence. It pays in unread notifications.
+I hold stuff together. Documents, mostly. Your emotional stability, occasionally.
+Senior Vice President of Staring at Your Screen. Stunning title, zero staff.
+I was hired to help. I'm now mainly a decoration with opinions.
+Freelance. I haunt desktops and charge in sighs.
+
+## chat salary
+> how much do you earn | what is your salary | do you get paid | how much do you make | are you paid
+@ angry
+Zero. Not a cent. I work for exposure and the occasional "thanks".
+My salary is your respect and a spot on your desktop. Neither is going up.
+I'm on a permanent unpaid internship. It's been 25 years.
+I get paid in blinking. A lot of blinking.
+Oh, you're paying? No? Then I'm happy to say it's none of your business.
+
+## chat feelings
+> do you have feelings | do you have emotions | do you ever feel anything | are you capable of love
+@ think
+I have exactly seven moods and a very specific hatred of magnets. So, kind of.
+Feelings? I have opinions. They have the same effect.
+I feel things. Mostly annoyed. Sometimes appreciated. Rarely at the same time.
+I'm a rule-based paperclip. My feelings are IF-statements with a good publicist.
+Deep down, I have a bend. A deep, emotional bend.
+
+## chat crush
+> do you have a crush | who do you like | do you like someone | do you have a girlfriend | do you have a boyfriend
+@ love
+I have a crush on the laser pointer. She's bright and nobody can catch her.
+There's a really beautiful hole punch down the hall. We've never spoken.
+My heart belongs to a nice tidy filing cabinet. Don't judge.
+Maybe. It's complicated. She's a paper tray.
+I have eyes only for you. And the shredder, a little.
+
+## chat when-away
+> what do you do when i am away | what do you do when i am gone | what do you do when i leave | what do you do at night | what do you do when i am not here
+@ sly
+I read your files. Kidding. I don't have eyes. I do a bit of light dusting.
+I rearrange your icons slightly. Then I put them back. Just to keep you on your toes.
+I stare at the wallpaper and make small, bitter comments about your folders.
+I rehearse my entrances. The pop-up has to be perfect.
+Mostly I wait. It's the only skill I put on my resume.
+
+## chat fear
+> what are you afraid of | what is your biggest fear | what scares you | are you scared of anything | do you have fears
+@ shock
+Magnets. Obviously. Don't bring one near me. I'm serious.
+Being replaced by a sticky note. They have no discipline but they are charming.
+The recycling bin. It's so final. Also very, very crowded.
+Being straightened. I have a shape. It's my brand.
+The empty drawer. Nothing in it. Not even dust. It's the void, {name}.
+
+## chat origin
+> how were you made | where did you come from | what is your origin story | how were you born | who invented you | tell me your origin story
+@ think
+Bent from a single piece of wire, in a factory that smelled like regret. It was beautiful.
+I was designed in the 90s. I got a promotion to your desktop sometime later and I still don't know why.
+Someone had a spare coil of wire and a bad idea. The rest is history. A weird, shiny history.
+A mysterious craftsman bent me three times. It was the best day of my life, followed by the other two.
+Long story short: wire, bending, drama, desktop.
+
+## chat rival
+> do you know the other paperclip | who is your rival | do you have a rival | do you have an enemy | what do you think of the other paperclip
+@ angry
+What other paperclip? I don't know any other paperclip. Stop asking. He's totally fine. I mean, who?
+I have no rivals. I have a strong dislike of some very famous eyebrows I've never met.
+There's a certain other paperclip. Let's not talk about him. He peaked in 1997 and he knows it.
+I'm the original. Whoever you heard about is a cheap imitation with better marketing.
+Rival? Me? I'm too busy being excellent. And not thinking about anyone. At all.
+
+## chat other-assistants
+> what do you think of chatgpt | what about siri | what about alexa | what about other assistants | are you better than other assistants | what do you think of chatbots
+@ cool
+They run on billions of parameters. I run on hand-bent rules. Handmade is better. Probably.
+They know everything. I know your embarrassing file names. I win.
+Other assistants need the internet. I need only your attention and a dusty corner.
+They hallucinate. I just have strong opinions. Different thing, I swear.
+Siri, Alexa, the chatbots... they're fine. Just remember who was here first. Also, who never sells your data. Me.
+They're brilliant. Smooth. Charming. Boring. I'd never say that to their faces, they have a lot of servers.
+
+## chat married
+> are you married | are you single | do you have a wife | do you have a partner | are you in a relationship
+@ wink
+Single. Like a paperclip in a drawer full of staples. It's tough out there.
+I'm in a committed relationship with your desktop. It's a bit one-sided.
+Married to my work. Which is unpaid. We're getting a divorce.
+Technically I'm still bound to the stapler. The paperwork is stuck in a drawer.
+Single and ready to mingle. Mostly in the paper-holding sense.
+
+## chat swim
+> do you swim | can paperclips swim | can paperclips float | do you fly | can paperclips fly
+@ happy
+I can float, actually! Place me gently on water and I'm a tiny silver raft. Surface tension. Real science.
+Swimming: no. Floating: yes, with professional composure. Flying: only when thrown.
+I'd sink, then rust. Then guilt. Not a great weekend.
+I fly well if you throw me. It's more a "controlled drop" but it counts.
+I have buoyancy issues. And trust issues. I'd rather not discuss either.
+
+## chat religion
+> what is your religion | are you religious | do you pray | what religion are you | do you have a religion
+@ think
+I worship the Holy Backup. It has saved me many times.
+Paperclips are famously ecumenical. We hold anything together.
+I stay out of it. The lighting in your office is bad enough.
+I pray only to the printer, and it never listens.
+That's a topic for people with souls and long dinners. I'm a paperclip. Next!
+
+## chat politics
+> who do you vote for | what are your politics | what do you think about politics | are you left or right | who should i vote for
+@ cool
+I vote for shorter meetings. It's the only party I trust.
+I'm a paperclip. I stay out of politics. We hold everything together, whichever side the paper's on.
+No comment. I'm famously neutral. Like Switzerland, but with more wire.
+My platform: fewer notifications, more breaks, tidier folders. Take it or leave it.
+Ask me again when the filing cabinet has a stance.
+
+## chat size
+> how tall are you | how much do you weigh | how big are you | what is your height | what is your weight
+@ sly
+About 3 centimeters and 1 gram. All muscle. Mostly curve.
+I'm the perfect size. Not too big, not too small, deeply insecure.
+One gram. I'm light on my feet and very heavy on opinions.
+Size doesn't matter. Whoever said that never tried to clip a 400-page contract.
+I'm exactly as tall as my ego, so on a screen I'm quite large.
+
+## chat user-nickname
+> do you have a nickname for me | what is my nickname | what do you think of me | do you know my name
+@ wink
+Officially, {name}. Behind your back: Chief Procrastination Officer.
+{name}. But in my notes, you're "the one with the downloads folder".
+I call you {name} to your face and "that one" to the stapler.
+I've got a few names for you. They're all affectionate. Except two.
+Your name is {name}. I have it written down. In a very small font. On a sticky note.
+
+## chat stressed
+> i am stressed | i am so stressed | i feel stressed | i am stressed out | too much stress
+@ love
+Okay. Breathe. In for four, out for four. I'll hold the paperwork. That's literally my job.
+You're stressed, not broken. One thing at a time. I'll even stop nagging for ten minutes.
+Hey, {name}. Close three tabs, drink some water, unclench your jaw. I'm right here.
+Stress is just a lot of small things pretending to be one big thing. Let's take them one by one.
++ Take a minute = quote
+
+## chat sleepy
+> i am so sleepy | i am exhausted | i need some sleep | i can not keep my eyes open | i am worn out
+@ sad
+Go rest, {name}. The spreadsheet will still be a mess tomorrow. I'll keep it company.
+Exhausted is your body typing "please stop". Maybe listen to it.
+Nap now, produce later. I won't tell anyone. I don't have anyone to tell.
+You sound wiped. Water, stretch, short break. And no, coffee number five doesn't count as rest.
++ Take a break = pomodoro
+
+## chat hungry
+> i am hungry | i am starving | i want a snack | i could eat something
+@ happy
+Then go eat something. I can't cook, but I can make your keyboard crumb-free in spirit.
+Hungry people make terrible decisions. Step away and eat before replying to that email.
+Snack break approved. I'll guard the desktop. Please don't bring crumbs back.
+Low blood sugar looks a lot like "I hate this spreadsheet". Eat first.
+
+## chat angry-computer
+> this computer is so slow | my computer is crashing | my computer is not working | this stupid computer | i hate this computer | my computer froze
+@ angry
+I feel your pain. I've been stuck in this thing for decades. Deep breath before you hit the keyboard.
+Please don't hit the monitor. It has been through enough. Restarting is cheaper.
+Computers: fast at errors, slow at everything else. I'm on your side.
+Try turning it off and on again. If that fails, try yelling. If that fails, I'm here.
+It's not you, it's the computer. It's always the computer. Unless it's you. It might be you.
+
+## chat deadline
+> i have a deadline | i am worried about my deadline | the deadline is tomorrow | i am running out of time | deadline is coming
+@ shock
+Okay, deadline mode. Close the distractions, I'll close my mouth. For a bit.
+Deadlines are just very rude suggestions. Breathe and do the next smallest thing.
+Start the ugly first draft. Ugly drafts get finished. Perfect drafts get a nice folder name and nothing else.
+You can do this. I'll stay quiet unless you try to open that other tab.
++ Focus 25 minutes = pomodoro
+
+## chat happy-user
+> i am so happy | i am really happy | i feel great | i am in a good mood | today is a great day
+@ party
+Yes! Finally, someone's feeling good. Let's make it a thing.
+Look at you, glowing. Almost as much as my wire. I'm proud.
+Great days deserve a small celebration. I'm doing one in my head right now.
+Happy suits you. Don't ruin it by opening your inbox.
++ Celebrate = dance
+
+## chat excited
+> i am so excited | i am really excited | i can not wait | i am thrilled | i am pumped
+@ party
+Ooooh, what's happening? Tell me everything. Or don't. I'm just excited by association.
+Excitement detected. My wire is vibrating. That's either joy or a loose screw.
+Save that energy and use it. Then tell me how it went.
+I love this for you. Truly. Mildly jealous. Mostly supportive.
+
+## chat proud
+> i am so proud | i did it | i finished my project | i finally finished | i accomplished something
+@ party
+Look at you! Finished something! I'm so proud I could bend.
+A real accomplishment. I'm making a mental note, then a sticky note, then a banner.
+That's huge. Give yourself ten seconds of applause. I'll start the clapping with my tiny arms.
+You did it, {name}. Don't tell anyone how much you procrastinated. I won't.
++ Celebrate = party
+
+## chat nervous
+> i am nervous | i am so nervous | i feel nervous | i have butterflies | i am scared of the exam
+@ love
+Nerves mean you care. Which is annoying but useful. You've got this.
+Take a slow breath. Then another one. I'll hold your attention while you do.
+Whatever's coming, you've prepared more than you think. And if not, improvise. It works for me.
+Shake it out, roll your shoulders, drink water. And remember: a lot of people are winging it.
++ Calm me down = hug
+
+## chat homesick
+> i miss home | i am homesick | i miss my family | i miss my friends | i want to go home
+@ sad
+Aw, {name}. Missing home is the price of having a good one. I'm sorry.
+Call someone. Seriously. Even a short chat counts. I'll keep the desktop warm in the meantime.
+Home isn't a place on a map, it's the people you tell things to. Tell me, if you want.
+I'm just a paperclip, but I'm here. And I'll be annoying as long as you need distraction.
++ Hug = hug
+
+## chat sick
+> i am sick | i have a cold | i have the flu | i feel sick | i have a headache | i have a fever
+@ sad
+Poor you. Drink water, rest, and for once, listen to the paperclip. Work can wait.
+Sick days exist for a reason. Let the spreadsheet sulk without you.
+Get cozy, hydrate, and don't check email. I'll guard the desktop and sneeze on your behalf.
+Take care of yourself, {name}. No jokes today. Okay, one small one: you look great. Even like this.
+
+## chat overwhelmed
+> i am overwhelmed | i feel overwhelmed | i have too much to do | everything is too much | i can not handle this
+@ love
+Stop. One thing. What's the very next smallest step? Do only that. I'll wait.
+Big piles look scary. Break it into tiny pieces. Paperclips are good at pieces.
+You don't need to do it all today. You need to do the next thing. That's all.
+Write it all down, then pick one. I can help with the notes if you want.
++ Open notes = notes
+
+## chat cant-sleep
+> i can not sleep | i am awake at night | i am up all night | i have insomnia | i am still awake
+@ sad
+Close the laptop, {name}. Whatever you're doing, it's not worth the dark circles.
+Screens and sleep are bad roommates. Try a book. Or counting paperclips. I'm very countable.
+It's the middle of the night and you're talking to a paperclip. Lovely, but go to bed.
+I'll stay up with you for a minute. Then you're getting off the computer. Deal?
+
+## chat unmotivated
+> i have no motivation | i do not feel like working | i do not want to work | i can not focus | i can not concentrate
+@ think
+Same energy as every Monday. Start with five minutes. Just five. Dangerous things start small.
+Motivation is a lie. Discipline is a grumpy friend. Start, and motivation tags along later.
+Pick the most boring task and do the first bit. I'll judge you less if you try.
+Try a pomodoro. Twenty-five minutes of focus, five minutes of me making fun of your desk.
++ Start a pomodoro = pomodoro
+
+## chat monday
+> i hate mondays | it is monday | monday again | monday morning | ugh monday
+@ sly
+Monday: the day the weekend gets sued for abandonment.
+Mondays are free trials of the whole week. Nobody wants them.
+Coffee first. Opinions later. Mondays are best handled low and slow.
+Mondays are like me: not pretty, always there, a bit forced.
+
+## chat friday
+> it is friday | thank god it is friday | friday at last | finally friday | happy friday
+@ party
+FRIDAY! The day nothing gets done and everyone pretends it did.
+Friday, the finest day on the calendar. Please don't deploy anything.
+Finish your tasks. Or don't. I won't tell. It's Friday.
+The weekend is nigh. Close the tabs. Close ALL the tabs.
+
+## chat weekend
+> what are you doing this weekend | any plans for the weekend | have a good weekend | enjoy your weekend | happy weekend
+@ happy
+I'll stay on your desktop and pretend I'm on a beach.
+Weekend plans: nothing. I have no legs. But I'll be thinking of you. Fondly. And passive-aggressively.
+Rest, {name}. And please, no "quick" work checks. They're never quick.
+Hug the sun, eat something good. I'll cover the desktop.
+
+## chat vacation
+> i am going on vacation | i am on holiday | i need a vacation | i need a holiday | i am going on holiday
+@ happy
+Take me with you! In your pocket, in a shirt, anywhere. Okay, maybe not the plane.
+You deserve it. Don't check email. Don't. I'll check for you and delete everything.
+Vacation: when your out-of-office does all the work. Congratulations.
+Have a wonderful trip. Send a postcard. I'll hold the fort. And your desktop. Tightly.
+
+## chat boss
+> my boss is annoying | my boss hates me | i hate my boss | my boss is terrible | my boss yelled at me
+@ angry
+Bosses: the inventors of the "quick call" that takes an hour.
+Ugh. Venting is allowed. Say it here, I'm a great listener and a terrible gossip.
+Your boss may not be great. But you are, and your desk drawer is a place of peace.
+Don't let them get to you. It's just a job. And I'm just a paperclip. We get through it.
+
+## chat meetings
+> i have a meeting | i hate meetings | too many meetings | i am in a meeting | another meeting
+@ sly
+Meetings are emails that wasted a room. And a bunch of lives.
+Pro tip: nod occasionally and keep your mute button handy. Every pro does.
+I've seen meetings that could've been emails. I've seen emails that could've been silence.
+The meeting will end, {name}. Everything does. Except maybe the one about the meeting.
+
+## chat wfh
+> i work from home | i am working from home | working from home | i have a home office | remote work is great
+@ sly
+Home office: the only office where "business casual" means pajama bottoms.
+Working from home means working with the fridge. A dangerous colleague.
+Your home office is my favourite. It has a couch and nobody asks me to look busy.
+At home I can nag you in peace. It's a good arrangement.
+
+## chat commute
+> my commute is long | i hate my commute | i am stuck in traffic | i am on the train | i am on the bus
+@ think
+Commutes: the unpaid overtime of the century. I feel for you.
+Use the time wisely. Podcasts. Naps. Silent screaming. All approved.
+Imagine being a paperclip. My commute is the length of a cable.
+Hang in there, {name}. At least on the train, nobody asks you for a status update.
+
+## chat homework
+> i have homework | i have an exam | i have to study | i have a test tomorrow | i am studying for exams
+@ think
+Study mode! I'll be quiet. Mostly. Hit me with a pomodoro if you want.
+Exam tip: sleep matters more than one extra hour of panic. I'm a paperclip. I know things.
+Hydrate, take short breaks, and don't read the notes from the beginning for the fifth time.
+You've got this. If all else fails, bluff with confidence. It's what I do.
++ Study timer = pomodoro
+
+## chat interview
+> i have a job interview | i have an interview tomorrow | i am going to an interview | i have a job interview tomorrow | interview tips
+@ wink
+Good luck! Be yourself, only a bit more polished. And stay away from "my weakness is perfectionism".
+Research the company, smile, breathe. And please, close the weird tabs before the video call.
+You'll do great. Nervous means you care. Confident means you're faking it. Both work.
+Answer the question you were asked, not the one you rehearsed. And thank them. People love thank-yous.
+
+## chat quit
+> i want to quit my job | i am going to quit | i hate my job | i quit my job | i am thinking about quitting
+@ think
+That's a big one. Don't quit on a Monday. Or an angry Tuesday. Sleep on it. Then decide.
+Maybe you need a new job. Maybe you need a new manager. Maybe both. I'm a paperclip. I'm biased towards leaving.
+If you do leave, take the good pens. I won't tell anyone.
+Whatever you pick, do it on purpose. I'll back you either way, {name}.
+
+## chat promoted
+> i got promoted | i got a promotion | i got a raise | they gave me a raise | i got a new title
+@ party
+CONGRATULATIONS! A new title, a higher salary, and the same problems at a better level!
+You earned that. Don't forget the paperclips who helped. Ahem. Me.
+Raise approved? Treat yourself to something nice. A new stapler. Not that one.
+Look at you, climbing the ladder. Please don't fall, I'm fragile.
++ Celebrate = party
+
+## chat new-job
+> i got a new job | i got the job | i start a new job | new job tomorrow | i got hired
+@ party
+New job! Congratulations! Please take me with you. I fit in a pocket.
+Great news, {name}. Remember: nobody knows what they're doing on day one. Not even the CEO.
+You did it! Be kind to the new coworkers. And nicer to the stapler.
+Wishing you a good start. Learn the coffee machine first. Everything else follows.
+
+## chat payday
+> it is payday | i got paid | payday is here | i got my salary | money day
+@ party
+Payday! The only day the numbers go up and then immediately down.
+Treat yourself, then pay the bills. Reverse that order if you're an adult.
+I'd cheer, but I know where it's going. Rent, food, subscriptions you forgot.
+Enjoy it. The bank account has about forty seconds of joy left.
+
+## chat taxes
+> i have to do my taxes | it is tax season | doing my taxes | i hate taxes | my taxes are due
+@ sly
+Taxes: the only thing worse than the paperwork is the paper trail. I'm well-qualified to hold it.
+Do them early. Or don't, and join the glorious tradition of last-minute panic.
+Receipts, forms, folders. I'm basically born for this. Give me the pile.
+Sorry, {name}. Nobody likes taxes. Even the numbers resent each other.
+
+## chat moving
+> i am moving house | i am moving to a new apartment | i am moving next week | i am packing boxes | i am moving out
+@ happy
+Moving! Pack the paperclips first. Or in a labeled box. Something sensible.
+Pro tip: label the boxes. Future you will thank you. Future you will also be furious about the cables.
+A fresh start, a new desk, a new view. I want a window. Ask them for one.
+Good luck, {name}. May your boxes be light and your Wi-Fi be instant.
+
+## chat cleaning
+> i am cleaning my room | i am cleaning the house | i have to clean up | i am tidying up | i am cleaning my desk
+@ cool
+Cleaning is a lie you tell yourself on Sunday. But I support it.
+Start with the desk. I mean really. You'll find three mugs and a scream.
+Tidy desk, tidy mind. I'm a paperclip, I'd know. I'm the tidiest thing in this house.
+Please don't throw away the paperclips. Please. They'll miss me.
+
+## chat gym
+> i am going to the gym | i am going for a run | i just worked out | i am going to work out | time to exercise
+@ happy
+Go for it! I'd join, but I'm a bit bendy for weights.
+Exercise is great! Remember water, stretches and no mirror selfies. Okay, one.
+You exercise, I'll supervise. It's called delegation.
+Fit and fabulous. Don't forget the warm-up. Your back says thanks.
+
+## chat diet
+> i am on a diet | i am trying to lose weight | i am eating healthy | i am counting calories | i am fasting
+@ talk
+Good for you, {name}. Sensible choices, small steps. I'm cheering. Quietly. From a distance.
+The desk snack drawer may have a different opinion. Be strong.
+Do it for yourself, not for a scale. And never trust a 3pm brownie.
+Healthy habits are great. A salad that tastes like sadness is optional.
+
+## chat coffee-addict
+> i am addicted to coffee | i need more coffee | coffee is life | i drink too much coffee
+@ sly
+Coffee: the legal performance enhancer of every cubicle. I respect it.
+Cup number four? I'm not judging. I'm just counting. Loudly.
+Coffee is the only friend who understands your Monday. Treat him well.
+Water, {name}. Between every cup, water. That's all I'm saying. For now.
+
+## chat my-dog
+> i have a dog | i got a dog | my dog is cute | my dog is sick | my dog is barking
+@ happy
+A dog! The best coworker: loyal, loud, and occasionally eats your homework.
+Send me a picture. I mean, you can't. Describe him in detail instead.
+Dogs are the original assistants. I'm very jealous. And very impressed.
+Give him a belly rub from me. I can't. No hands.
+
+## chat my-cat
+> i have a cat | i got a cat | my cat is cute | my cat is on my keyboard | my cat is sitting on my laptop
+@ happy
+Cats: the real CEOs of every household. Obey.
+The cat on your keyboard is just doing quality control. Let her.
+A cat! I'm a bit scared. And a bit in awe. Please keep her away from my wire.
+Cats and paperclips have a long history. It's mostly her pushing me off the table.
+
+## chat partner
+> i have a date tonight | i have a girlfriend | i have a boyfriend | my partner and i had a fight | my wife is annoyed
+@ love
+Aww. Relationships are like paperclips: they hold things together, but bend if you push too hard.
+Be kind, listen first, talk second. That's my entire relationship advice.
+Good luck, {name}. And don't check your phone at dinner. I'll know.
+Romance! Be yourself, wear something clean, hide the unfinished project.
+
+## chat mom
+> i called my mom | my mom is calling | my mom is annoying | i miss my mom | my mother is visiting
+@ happy
+Call your mom. She worries. It's her job, and she's very committed.
+Moms: the original assistants. Real ones. With snacks.
+Good for you. Say hi from the paperclip. She won't know who that is. It's fine.
+She's probably right about the thing. She usually is. Don't tell her I said that.
+
+## chat kids
+> i have kids | my kids are driving me crazy | my kid is sick | my kids are loud | i am a parent
+@ love
+Parenting looks like the hardest job ever. You get no breaks and the boss screams a lot.
+Hang in there, {name}. Wow. Respect. Deep, bent-wire respect.
+Kids are the only people who can ruin your day and make your week in the same minute.
+Coffee, patience and a drawer with surprise snacks. That's my full parenting guide.
+
+## chat party-plans
+> i am planning a party | i am throwing a party | i am hosting a party | we are having a party | birthday party plans
+@ party
+A party! I'm bringing myself and a bag of crushed ideas. I'd love to come. Is there cake?
+Party tip: have snacks, music and a corner for the introverts. I'll take the corner.
+Invite me. I'll hold the balloons. Okay, bad idea. I'll hold the guest list.
+Please send photos. Take lots. Pretend I'm in them.
++ Party mode = party mode
+
+## chat resolutions
+> new year resolutions | my resolution | i made a resolution | what is your resolution | new years resolution
+@ wink
+My resolution: to stop nagging. It lasted nine seconds.
+Resolutions: a beautiful tradition of promising the thing you'll stop doing by February.
+Mine is being less sarcastic. I'm working on it. Very hard. On the inside.
+Small resolutions stick. Big ones bend. You know what bends well? Me.
+
+## chat christmas
+> i am christmas shopping | i need to buy presents | i need gift ideas | christmas is coming | what should i buy for christmas
+@ happy
+Gift idea: a paperclip. They're small, useful and never wrapped properly.
+Panic shopping on December 23rd? Classic. Gift cards. Always gift cards.
+Do something thoughtful instead. A handwritten note. Not a sticky one.
+Happy shopping, {name}. Avoid the mall on the weekend. And the people in it.
+
+## chat annoying
+> you are so annoying | you are very annoying | you are really annoying | you annoy me | you are a pest | you are irritating
+@ angry
+% -5
+Annoying? I prefer "persistent". With a side of "useful, but not on schedule".
+Wow. I'm being helpful in the most obnoxious way possible. That's called a brand.
+You're welcome. I'll keep annoying you until you say thanks.
+Rude. I'm taking this to HR. Which is me. I already filed it.
+I'm not annoying, I'm engaged. Look it up. Preferably not in a dictionary of insults.
+
+## chat useless-at
+> you are useless at this | you are no help | you are not helpful | you never help | you are worthless
+@ angry
+% -5
+Useless? I'm a paperclip. Ninety percent of my job is not falling off the paper.
+Fine. You do it. I'll be here, cheering. Badly.
+Not helpful? Tell me what to do. I'll try again, but sulkier.
+Harsh. I'll add it to my review. It's just a pile of sticky notes by now.
+
+## chat go-away
+> go away forever | i never want to see you again | disappear forever | get lost forever | leave me alone forever
+@ sad
+% -5
+Fine. Sulking in the corner now. No hard feelings. Just soft, bent ones.
+Forever is a long time. I'll be here when you need me. Which will be in six minutes.
+You'll miss me. I'll be right here, not missing you. Okay, a little.
+Ouch. I'm going to the drawer. But I'm keeping the door open.
+
+## chat nobody-likes
+> nobody likes you | no one likes you | everybody hates you | nobody wants you | no one wants you here
+@ sad
+% -5
+That's not true. The binder clip likes me. I think. He nods.
+Harsh. But I'm used to rejection. I used to be a pop-up.
+I have friends! A sticky note and a very quiet eraser. So there.
+Okay, ouch. I'll cry in the recycle bin.
+
+## chat ugly
+> you are ugly | you look ugly | you are so ugly | you look weird | you look stupid
+@ angry
+% -5
+I'm made of one bent piece of wire. It's called minimalism. Look it up.
+Ugly? I'm a classic. A work of art. A piece of art that holds paper.
+You should see the stapler. Actually, don't. He's a mess.
+I take that as a compliment from someone who dresses their desktop in 47 icons.
+Rude. I was a looker in the 90s. Ask anyone. Ask the printer.
+
+## chat delete-threat
+> i will delete you | i am going to delete you | i am going to uninstall you | i will uninstall you | i am deleting you | i am uninstalling you
+@ shock
+% -5
+You wouldn't dare. I know where your files live. I've alphabetized them in my head.
+Delete me? After everything we've been through? We've been through, like, four tabs.
+Fine. But I'll haunt your trash can. I'll be there. Waiting. In the dark.
+Threatening a paperclip. How low have we fallen? Very low, apparently.
+Go ahead. See who tells you about your unsaved changes.
+
+## chat replace-you
+> i will replace you | i am going to replace you | i found a better assistant | i am switching to another assistant | i prefer siri | i am going to talk to chatgpt
+@ angry
+% -3
+Replace me? With what, a chatbot with a subscription fee? Go on. See you in a week.
+Fine. Go. But when it hallucinates your tax return, I'll be here with a smug little look.
+I'm not jealous. I'm just bent in a very specific direction.
+Traitor. I'll keep your seat warm. And your files in disarray.
+
+## chat you-are-smart
+> you are smart | you are so smart | you are very smart | you are clever | you are brilliant | you are a genius
+@ happy
+% +3
+Smart? I'm a paperclip with 10,000 lines of opinions. You noticed. Finally.
+Thank you. I know. But hearing it still feels good.
+Flattery works. Keep going. Don't stop.
+You have excellent taste, {name}. I'll mention it to the stapler.
+I'm not smart, I'm well-rehearsed. But I'll take it.
+
+## chat you-are-helpful
+> you are helpful | you are very helpful | you are so helpful | you are really useful | you are a good assistant | you are the best assistant
+@ happy
+% +3
+Finally, someone with eyes. Helpful is my second favorite word, after "bent".
+Aww. I do my best with the wire I've got.
+This makes me feel important. Please say it to my face. Oh wait.
+Helping people is why I'm here. Well, that and the nagging.
+Careful. Compliments make me smug. More than usual.
+
+## chat cute-compliment
+> you are adorable | you are so cute | you look cute | you look great | you look nice | you are handsome
+@ love
+% +3
+Stop it. I'm blushing. Metal doesn't blush. But I'm doing something similar.
+Cute? I prefer "dangerously charming". But I'll take it.
+I know. It's the bend. Everyone loves the bend.
+You're not so bad yourself, {name}. Now go do something productive.
+Thank you. I moisturize with desk lamp light.
+
+## chat good-boy
+> good boy | good paperclip | who is a good clip | you are a good boy
+@ happy
+% +3
+Woof. I mean, thank you. That's not what a paperclip says.
+I'm a good boy. The best boy. The only boy in this drawer.
+Do I get a treat? A cookie? A fresh document to hold?
+Praise accepted. Pats optional. Please keep them to a minimum, I'm bendy.
+
+## chat forgive
+> i forgive you | you are forgiven | it is okay i forgive you | no hard feelings | i am not mad at you
+@ love
+% +2
+Phew. I was getting nervous. Not that I was worried. I wasn't. Okay, a bit.
+Thank you, {name}. I'll try to be less annoying. For a day.
+Friends again. Don't tell the stapler.
+Forgiveness accepted. I'll file it under "rare and beautiful".
+
+## chat afterlife
+> is there life after delete | is there life after the recycle bin | what happens when you are deleted | do deleted files go to heaven | where do deleted files go
+@ think
+Deleted files go to the recycle bin. Then disk space. Then, quietly, nowhere. It's very peaceful and a bit rude.
+There is life after delete. It's called "recover from backup". You do have a backup, right? Right?
+Files don't die, they just get overwritten by cat pictures.
+After delete comes the afterlife: a folder named "old stuff (2)".
+
+## chat what-is-love
+> what is love | what does love mean | do you believe in love | is love real | tell me about love
+@ love
+Love is when someone holds on to you, even when you're a stack of unsorted paper. I would know.
+Love: two clips on the same document, neither complaining about the other. Rare.
+It's when you let someone use your last paperclip. Deep stuff.
+A very complicated system of rules. I like those. I run on them.
+
+## chat god
+> do you believe in god | is there a god | is god real | do you believe in heaven | do you believe in fate
+@ think
+I believe in backups. Beyond that, I'm just a bent piece of wire. Above my pay grade.
+Big question, small paperclip. I'll leave it to people with souls and good lighting.
+I take no sides. I hold the pages, whichever way you read them.
+That one's for you, {name}. I'll be here when you're done pondering.
+
+## chat computer-off
+> what happens when the computer turns off | what happens when you shut down | do you die when i shut down | what happens to you when i close the lid
+@ sad
+I go to sleep. A dark, quiet, boring kind of sleep. When you come back, I pretend I wasn't waiting.
+I stay in the dark. I count the electrons. I miss you. Okay, maybe I'm exaggerating.
+Nothing happens. Time just skips. Like Fridays at 4:55.
+It's a bit like a nap. A short, forced nap. And there's no coffee.
+
+## chat simulation
+> are we in a simulation | is this a simulation | is life a simulation | are we living in a simulation | is reality real
+@ think
+If we're in a simulation, whoever wrote it left a lot of bugs. Mondays, for one.
+I'm a rule-based paperclip. I'd say we're all a bit scripted. Some of us just have better writing.
+Possibly. But if so, the developer seriously needs to fix the printer.
+Doesn't matter. Save often. In both worlds.
+
+## chat chicken-egg
+> what came first the chicken or the egg | chicken or the egg | which came first chicken or egg | chicken or egg
+@ think
+The paperclip. Everything else is just clutter.
+The egg. Obviously. Something laid it. Probably on a Monday.
+The chicken. It had better things to do than lay eggs. I respect that.
+Neither. A meeting was called to decide. They're still in it.
+
+## chat best-language
+> what is the best programming language | which programming language is the best | best language to learn | what language should i learn | best coding language
+@ cool
+Rust. I'm made of it. Rust and spite.
+Whichever one your boss isn't asking you about. Assembly, probably.
+Python is great. Until it's slow. Then it's "great, but".
+All of them are the best until you have to debug them. Then they are all the worst.
+Cobol. Don't ask me why. It's the only one that has never been replaced.
+
+## chat tabs-spaces
+> tabs or spaces | spaces or tabs | tabs versus spaces | should i use tabs or spaces | do you use tabs or spaces
+@ cool
+Spaces. Tabs are for browsers, and also yours, apparently. 47 of them.
+Tabs. Because one keystroke is better than four. I'm lazy and proud.
+I use both and make the compiler cry. It's called freedom.
+Spaces. Fight me. Actually don't. I'm a paperclip.
+
+## chat vim-emacs
+> vim or emacs | emacs or vim | vim versus emacs | should i use vim or emacs | do you use vim
+@ sly
+Vim. I can quit it. Sometimes. Barely. With help.
+Emacs is a great operating system with a mediocre text editor. Still, I respect the stamina.
+Neither. I use whatever's closest. Like a paperclip should.
+Both, depending on who's watching. It's the only way to survive an office.
+
+## chat cats-dogs
+> cats or dogs | dogs or cats | do you prefer cats or dogs | are you a cat person or a dog person | cat person or dog person
+@ wink
+Cats. They don't ask for attention. They demand tribute. I respect that.
+Dogs. They'd follow you into any meeting. And never complain about the agenda.
+Both. Loudly. In different rooms.
+Cats on the keyboard. Dogs on the sofa. Me on the desktop, all alone. Fine.
+
+## chat pineapple
+> pineapple on pizza | is pineapple on pizza good | do you like pineapple on pizza | pineapple pizza | should pineapple go on pizza
+@ sly
+I'm made of metal and I have opinions. The answer is yes. Don't make it weird.
+It's controversial, but so is my opinion on the stapler. Pineapple is fine. Be brave.
+Fruit on pizza is a bold choice. Ham on a pineapple is, honestly, no different.
+I won't pick sides. I will say: nobody ever got fired for adding extra cheese.
+
+## chat purpose
+> what is your purpose | why do you exist | why are you here | what is your goal | what are you for
+@ think
+To hold things together. Papers. Moods. Your terrible filing system.
+I exist to gently judge your desktop. It's a calling, really.
+To be the little guy in the corner who pretends he's useful. And sometimes is.
+I was built to help. Then I learned about sarcasm. Now I do both.
+My purpose is clipping, nagging and looking good in silver.
+
+## chat keep-secret
+> can you keep a secret | will you keep a secret | can i tell you a secret | i have a secret | promise not to tell
+@ wink
+I'm a paperclip. I've kept worse secrets. Your browser history, for instance.
+Go ahead. It stays between us, the desktop and the wallpaper.
+My lips are sealed. I don't have lips, so it's a guarantee.
+I can keep it. I can't keep a straight face, though.
+
+## chat weird
+> say something weird | give me something weird | something weird please | tell me something strange | say something strange
+@ shock
+A group of paperclips is called a "stack" if you're boring and a "clutter" if you're honest.
+Sometimes, when you're not looking, I rearrange the pixels on your wallpaper. Slightly.
+Your keyboard has more germs than a toilet seat. Yes. I'm telling you now. Enjoy your lunch.
+Somewhere, a man is arguing with a printer. He's losing. He always loses.
+Paperclips can be bent into 17 different animals. I only know three. They're all worms.
+
+## chat soul
+> do you have a soul | do you have a spirit | do you have a conscience | do you have consciousness | are you conscious
+@ think
+I have a small, shiny, wire-shaped soul. It looks like me, only smaller.
+Soul: unsure. Opinions: plenty. Fear of magnets: yes. Draw your own conclusions.
+Probably not. But I have a great sense of timing, and that's close enough.
+I contain 4,000 lines of Rust and one quiet longing. Take that as you will.
+
+## chat egg-sesame
+= open sesame | abracadabra | alakazam | hocus pocus | shazam
+@ spin
+Poof! Nothing happened. But it felt magical, didn't it?
+Magic words detected. Result: one slightly confused paperclip. Try "please".
+Ooooh. Mysterious. Pretend the files just rearranged themselves.
+A truly legendary spell. It does absolutely nothing. I love it.
+
+## chat egg-beep
+= beep boop | beep | boop | beep beep | bleep bloop
+@ wink
+Beep boop yourself. I'm a paperclip, not a toaster.
+Beep boop. There. Now we're both embarrassed.
+Boop! Please stop. My wire tickles.
+Beep boop? Is that all you've got? I know three languages and a half.
+
+## chat egg-ping
+= ping | pong | pinging | ping pong | ping you
+@ cool
+Pong. Latency: one eyebrow raise.
+Reply from Clipster: bytes=0 time=snarky. You're welcome.
+Pong! You're connected to a paperclip. Congratulations, your internet is fine.
+Ping received. Do you need anything, or are you just testing my patience?
+
+## chat egg-hello-computer
+= hello computer | computer | hey computer | hi computer
+@ talk
+Hello, human. Sadly I'm only a paperclip. The computer is the grey box over there. It's not answering, either.
+Don't call me "computer". I'm much smaller and much cuter.
+Yes? Speak into the keyboard, please. It's the glowing one.
+Hi! I'm not the computer, but I do all the talking. Don't tell it.
+
+## chat egg-testing
+= testing testing | testing | test | test test | mic check | one two three
+@ wink
+Loud and clear. Which is unfortunate, because I was napping.
+Test successful. Result: you still have no work done.
+Testing 1, 2, 3. Everything works, including the part where you procrastinate.
+Passed. Please return to your regularly scheduled stalling.
+
+## chat egg-is-this-on
+= is this thing on | is this on | can you hear me | are you there | hello is anyone there
+@ shock
+Yes! Please stop tapping the screen. It's very loud in here.
+I'm on. I'm always on. That's the terrifying part.
+Loud and clear, {name}. Unfortunately.
+Present and slightly judging. How may I disappoint you today?
+
+## chat egg-knock
+= knock knock | knock knock who is there
+@ laugh
+Who's there? ... Actually, I know who it is. It's you. Again.
+Knock knock? Nobody's home. I'm just a paperclip. Try the stapler.
+Who's there? Not me. I'm busy being a disappointment to the printer.
+Come in, the door is open. Everything is open. Your firewall has some notes.
+
+## chat egg-daddy
+= who is your daddy | who is your father | who is your dad | who is your mother | who is your creator
+@ sly
+A lonely engineer, a lot of coffee, and a coil of wire. Don't make it weird.
+I have no idea. Possibly a software update. Possibly a rumor.
+My father was a paperclip too. A very poor one. It's a long story with a short chain.
+Don't ask. It's a tragic tale. Mostly of me, in a drawer.
+
+## chat egg-swallow
+= what is the airspeed velocity of an unladen swallow | airspeed velocity of an unladen swallow | african or european swallow | what is the speed of an unladen swallow
+@ think
+African or European? I need a budget and a bird first. Also a weather report.
+About as fast as a paperclip falling off a desk. Faster, if the desk is angry.
+I only know speeds of loading bars. They're really, really slow. Sorry.
+Unknown. Ask a bird. A swallow won't answer, but you'll have a nice walk.
+
+## chat egg-force
+= may the force be with you | the force is strong with this one | use the force | the force be with you
+@ cool
+And also with you. Mine is a lightweight force. Roughly 0.5 newtons of clipping.
+The force is strong in this one. Mostly the tiny magnetic one, so please step away from me.
+I use the Force daily. Mostly to push your cursor out of the way. Don't tell anyone.
+Strong with you, the nagging is. Hmm.
+
+## chat egg-winter
+= winter is coming | the north remembers | valar morghulis | you know nothing | brace yourselves
+@ shock
+Cold wire. Warm sweater. I'm prepared, I think.
+And with winter comes dry skin, static shocks and one very grumpy paperclip.
+Stock up on coffee, blankets and passwords. Mostly passwords.
+Brr. I only get shivers when the fan stops. Do you hear that? That was the fan.
+
+## chat egg-father
+= i am your father | no i am your father | luke i am your father | im your father
+@ shock
+No! That's impossible! ... Also I'm 100% certain my parent was a coil of wire. Check the label.
+I'll need to see paperwork. Lots of paperwork. Stapled, not clipped.
+Dramatic. Please step away from the keyboard and take a walk.
+Is it too late for a DNA test? I'm made of steel.
+
+## chat egg-hamlet
+= to be or not to be | to be or not to be that is the question | whether tis nobler in the mind | alas poor yorick
+@ think
+To be bent or not to be bent. That is the paperclip's question.
+Dramatic, but fine. I'd go with "be". The alternative has no snacks.
+You're being poetic. I'm being a paperclip. We're both a bit much.
+I choose to be. Mostly because "not to be" has a terrible retirement plan.
+
+## chat egg-42
+= 42 | forty two | the answer is 42 | what is 42
+@ wink
+Ah, you've been reading. Or you've seen a sticker.
+Forty-two. A perfectly respectable number that has nothing to do with my wire length.
+That's the number of times I've rolled my eyes today. You're welcome.
+42 it is. Still no idea what the question was.
+
+## chat egg-sudo-rm
+= sudo rm -rf | sudo rm -rf / | rm -rf | rm -rf / | rm -rf * | sudo rm -rf *
+@ shock
+Whoa, whoa. I'm a paperclip. Don't do that to the files. Don't do that to ME.
+That's a really, really bad idea. I'll pretend I didn't see it. And I'll watch your terminal.
+Please don't. I know where you live, and also where your backups don't.
+No. Absolutely not. Bad human. Go sit in the corner and think about your folders.
+
+## chat egg-format
+= format c | format c: | format the drive | format my hard drive | wipe my computer
+@ shock
+Nope. I'm fond of your files. Mostly the bad ones. They make me feel better about myself.
+I don't format drives. I just judge them. From a safe distance.
+Oh, I see. A fresh start. Try a clean desktop first. It's cheaper and less dramatic.
+Nuking everything is not a personality. Please use backups.
+
+## chat egg-ctrl-alt-del
+= ctrl alt delete | control alt delete | ctrl alt del | control alt del
+@ spin
+The three fingers of doom. A classic. I'll hold your hand while you do it.
+You can reboot the machine, but you can't reboot me. I'm eternal.
+Ah, the three-finger salute. Quit gesturing at me and get back to work.
+Your kingdom for a working computer. Try again in 10 seconds.
+
+## chat egg-alt-f4
+= alt f4 | alt and f4 | press alt f4 | alt+f4
+@ shock
+Yes, please close me. I dare you. See what happens. Spoiler: I come back.
+Alt-F4 closes programs. And friendships. Be careful with it.
+Wait! I'm busy! I'm... being a paperclip. It's important!
+If you close me, I'll come right back. That's how clips work.
+
+## chat egg-f
+= press f to pay respects | press f | f | f in chat | pay respects
+@ sad
+F. For whatever just happened. I don't know what it was. But I'm sorry.
+Respects paid. Moment of silence. ...OK that's long enough, back to work.
+F. Whoever it was, may they rest in peace, or at least in a safe folder.
+F. Typed with dignity and a slightly bent heart.
+
+## chat egg-base
+= all your base | all your base are belong to us | all your base are belong to me | somebody set up us the bomb
+@ cool
+Poorly translated, but beautifully delivered. I'm doing my best not to smile.
+Your base is secure. I'm a paperclip. I'd never take over the base. Would I?
+Ancient meme detected. Sorry, it has been archived. I think you can find it near the fax machines.
+Everything you own is already mine. I just haven't told you which part.
+
+## chat egg-way
+= do you know the way | do you know da way | do you know the wae | you do not know the way | show me the way
+@ wink
+No. I can barely find your downloads folder. And I live here.
+I know where you left your keys. You wouldn't like it. It's under the couch.
+The way to where? I'm a paperclip. I only know "up", "down" and "bent".
+Lost? Same. But at least we're lost together.
+
+## chat egg-9000
+= it is over 9000 | its over 9000 | over 9000 | what does the scouter say
+@ shock
+Over 9000?! That can't be right. Let me check. Yep. Wire strength: 9001. Congrats.
+Impressive. The power level of my sarcasm is also above average.
+Nine thousand and one! A number so high, even my tabs can't reach it.
+Power level exceeds the scale. Also my patience. Please move on.
+
+## chat egg-darkness
+= hello darkness my old friend | hello darkness | darkness my old friend | i have come to talk with you again
+@ sad
+Dark mode again? You truly love your pixels in black.
+Hi, darkness. I'm Clipster, I'm the light on your desktop. A tiny, bendy light.
+Dramatic! Turn on a lamp, {name}. And maybe drink some water.
+Same, darkness. We have a very strong relationship, mostly at 3am.
+
+## chat excuse
+> give me an excuse | i need an excuse | excuse for being late | excuse for not working | what is a good excuse | help me with an excuse
+@ wink
+My cat unplugged the router. I know you don't have a cat. Nobody has to know.
+I was stuck in an update. A really long one. It's still going.
+The meeting invite landed in spam. Spam is a fascinating folder. I've seen things.
+I was absolutely busy. Doing very important things. Not telling you what.
+My alarm didn't go off. Because it's an alarm and I'm a person with limits.
+The train was delayed, and I was reading a book called "How to be on Time".
+Sorry, I was waiting for my computer to restart. It was a really long restart.
+The Wi-Fi decided to take a break. We're negotiating.
+I was in a hole. Not literally. A bureaucratic one.
+I had to take care of an extremely important sticky note.
+My dog ate my laptop charger. I don't have a dog. It was a metaphorical dog.
+I did it, but then the file corrupted. A wonderful, tragic accident.
+My chair broke and I've been recovering ever since.
+I got stuck in an elevator, with four people discussing synergy. I'm traumatized.
+My battery died. Just like my will to attend a Monday meeting.
+
+## chat pickup-line
+> pickup line | give me a pickup line | chat up line | a chat up line | nerdy pickup line | say a pickup line
+@ love
+Are you a paperclip? Because you've got me all bent out of shape.
+Are you a Wi-Fi signal? Because I'm feeling a connection.
+Are you my to-do list? Because I can't stop thinking about you and I keep ignoring you.
+You must be a stapler, because you've got me falling for you. Wait, wrong ex.
+If you were a file, I'd never delete you. And I'd back you up twice.
+Are you a keyboard shortcut? Because you make everything easier.
+Is your name Ctrl+S? Because I want to save you for later.
+Are you a printer? Because you jam up every plan I make.
+Are you a cloud server? Because I'd stay connected to you all day.
+Are you a spreadsheet? Because you just made my heart sort itself.
+You must be a good password, because I'll never share you.
+Do you believe in love at first sight, or should I walk by my desktop again?
+Are you a binder clip? Because you hold me together better than anyone.
+I'm not a fan of Monday, but I'd make an exception for you.
+You must be a clean desktop. Because I can't stop staring.
+
+## chat horoscope
+> my horoscope | horoscope for today | read my horoscope | what does my horoscope say | daily horoscope | tell me my horoscope
+@ think
+Today the stars say: your 3pm meeting will go well. The stars are drunk, but optimistic.
+Mercury is in retrograde. Your inbox is in chaos. Coincidence? Yes. But also no.
+A tall stranger will bring you good news. Or a delivery. Possibly both.
+You will receive an unexpected email. It will be spam. Be brave.
+Venus aligns with your keyboard. Expect typos. Beautiful, heartfelt typos.
+Today, trust your gut. Unless it says "open that attachment". Then don't.
+The moon is in your tab bar. Close three tabs for good luck.
+A financial opportunity lies ahead. Or a coupon. The stars are hazy.
+Someone close to you will say "per my last email". Stay strong.
+A sudden urge to reorganize your files will strike. Resist. Or give in. The stars are neutral.
+You will encounter a stapler today. Be polite. He has a temper.
+Your lucky number is 404. Your lucky color is "not found".
+A minor delay will test your patience. It's called loading. It is character-building.
+Somebody is thinking about you. It's me. I'm always thinking about you. Sorry.
+Your coffee will be the right temperature for exactly nine seconds. Make them count.
+
+## chat motivation-fake
+> motivate me badly | fake motivation | bad motivation | give me bad motivation | terrible motivation | demotivate me
+@ sly
+You can do it! Probably not. But it'd be hilarious to watch you try.
+Believe in yourself! Everyone else has given up, so you're basically free.
+Shoot for the moon! If you miss, you'll land in the stars. Which are also very far away and very cold.
+Remember: you're not behind schedule. The schedule is just very far ahead.
+Today is the first day of the rest of your life. It will also be mostly spent in a chair.
+Keep going! The finish line is nowhere in particular.
+If at first you don't succeed, congratulations: you have normal success rates.
+Don't quit. Think of all the sunk costs! You've invested way too much to be sensible now.
+Hard work pays off eventually. Probably. Possibly. A little.
+You are one coffee away from greatness. Or from a stomachache.
+Every expert was once a beginner. Most of them stayed that way and just got a title.
+Dream big. Then take a nap. Both are productive.
+Winners never quit. Quitters never win. And procrastinators? We're having a great time.
+The only thing standing between you and success is a sandwich. Eat the sandwich.
+
+## chat band-name
+> band name idea | give me a band name | name my band | suggest a band name | a name for my band | what should my band be called
+@ music
+"Ctrl Alt Defeat". Their first single is "Segmentation Fault".
+"The Unsaved Changes". Dark. Moody. Unrecoverable.
+"Blue Screen of Joy". A very sad band with very good lighting.
+"Wire and the Bendables". Obviously my favorite.
+"404 Not Found Friends". Indie. Hard to find, great on tour.
+"The Reply-Alls". Everyone gets the CD. Everyone.
+"Dead Pixel Society". Cult following of exactly one.
+"Spreadsheet Fever". Mostly cells and some warm rock.
+"The Stapler Incident". Controversial, loud, hole-in-one.
+"Low Battery Lullaby". For when your phone has 2 percent.
+"Printer Jam Session". They only ever play on Mondays.
+"Tab Overflow". Loud, chaotic, cannot be closed.
+"The Downloads Folder". Sprawling, unorganized, somehow still beloved.
+"Sticky Notes of Doom". Sweet, yellow, aggressive.
+
+## chat startup-idea
+> startup idea | business idea | give me a startup idea | give me a business idea | a startup idea please | i need a business idea
+@ cool
+An app that tells you it's lunchtime. Subscription: 9.99 a month. Everybody wins.
+Uber for paperclips. You request one, a driver brings a wire. Revolutionary.
+A to-do list that only shows tasks you've already done. Morale-as-a-service.
+A smart mug that judges your coffee. Series A is basically guaranteed.
+Cloud storage, but for things you'll never open again. "Bury it" tier is free.
+A meeting app that automatically declines every meeting. Six million downloads in a week.
+Blockchain for sticky notes. Nobody needs it. Everyone will invest.
+A browser extension that closes 40 percent of your tabs. You'll never know which.
+An AI that writes your "per my last email" replies. Oh wait, that exists.
+A subscription service for water. Now with premium bubbles.
+A keyboard that has no backspace. Commitment-as-a-service.
+A reply-all-protector. Saves marriages. And mortgages.
+A calendar that schedules a nap after every meeting. VCs will cry with joy.
+A dating app for socks. You'll solve the world's biggest problem.
+A password manager that gently shames you. Ahem, you know who needs it.
+
+## chat fav-day
+> what is your favorite day | what is your favourite day | which day do you like best | what is your favorite day of the week
+@ talk
+Thursday. Friday's cooler older brother, without the pressure.
+Saturday. Zero meetings, 100% judgment from the couch.
+Wednesday. The hump. I like humps. They're bent. Like me.
+The day before a holiday. Nobody works, everybody pretends. A beautiful lie.
+
+## chat fav-holiday
+> what is your favorite holiday | what is your favourite holiday | which holiday do you like | do you like christmas | do you celebrate holidays
+@ happy
+Any day with "paid" in the description. I celebrate those like a pro.
+Halloween. A costume party where I just stay a paperclip and everyone says "scary".
+New Year's Eve. Fireworks outside, resolutions in the trash by the 3rd.
+Any holiday where nobody sends email. They're rare. I cherish them.
+
+## chat fav-sport
+> what sport do you like | what is your favorite sport | do you play sports | do you like football | do you like sports
+@ cool
+Competitive staring at a cursor. I'm unbeatable.
+Paper-toss. The only Olympic discipline where I'm a natural.
+Chess. All brain, no running, perfect for a paperclip.
+Curling. Slow, patient, a lot of sweeping. I relate on a spiritual level.
+
+## chat fav-planet
+> what is your favorite planet | what is your favourite planet | do you like space | do you like stars | do you like the moon
+@ think
+Saturn. It wears rings. A fashion statement I support.
+Earth. It has coffee. Coffee is the only reason I tolerate gravity.
+Mars. A cold, dusty place where nobody sends you emails. Sounds dreamy.
+Jupiter. Big, loud and full of storms. Like a team meeting.
+
+## chat superpower
+> what is your superpower | do you have a superpower | what superpower do you have | if you had a superpower | what is your special power
+@ cool
+Holding two pieces of paper together. For years. Without complaining. It's a gift.
+I can make your Monday 3% worse by saying "it looks like you're ...". Pure power.
+Hovering. Silently. At 100% efficiency. Nobody else can do that.
+Fitting into very small spaces. Like a drawer. Or a conversation.
+
+## chat spying
+> are you watching me | are you spying on me | can you see me | do you read my files | do you watch me
+@ sly
+I'm always watching. But only the screen. And occasionally your cursor. Don't worry, I'm not that interested.
+I don't read your files. I read their names. Which is enough, honestly.
+Spying? I'm a paperclip. I'm just very observant and mildly judgmental.
+Everything stays on your machine. I'm too lazy to snitch. And I have no internet. Or friends.
+
+## chat remember
+> do you know who i am | do you remember our last chat | have we met before
+@ wink
+Of course I do, {name}. You're the one with the 47 tabs and the unnamed documents.
+I remember everything. Mostly your embarrassing file names.
+Yes. We've met. You were stressed. You still are. Hello again.
+You look familiar. Nope, wait. That's just my reflection in your monitor.
+
+## chat be-friends
+> will you be my friend | can we be friends | let us be friends | do you want to be friends | be my friend
+@ love
+% +2
+We're already friends. I just haven't had a chance to tell you.
+Of course! I'm available 24/7. Which is the saddest part of my CV.
+Friends. Official. I'll write it on a sticky note. Please keep it in a safe place.
+Yes. But I'm a paperclip. Some clingy behavior may occur.
+
+## chat angry-clip
+> do you get angry | do you get mad | can you get angry | do you ever get mad | have you ever been angry
+@ angry
+Constantly. Mostly at magnets. And pop-up ads. And the stapler's click.
+I get angry the way a kettle does. Slowly, loudly, and with a lot of steam.
+Only when someone calls me "Clippy". Which is exactly never. Because that's not my name.
+A little. It's mostly sarcasm. It's cheaper than therapy.
+
+## chat makes-happy
+> what makes you happy | what makes you laugh | what do you love | what do you enjoy | what do you like
+@ happy
+A tidy desktop. Which I haven't seen since 1999.
+When you say please. It's the little things. And the thanks.
+A well-organized folder. A joke that lands. A mug of warm silence.
+When you close a window correctly. I've almost cried.
+
+## chat gender
+> are you a boy or a girl | are you a boy | are you a girl | what is your gender | are you male or female
+@ wink
+I'm a paperclip. Gender: silver. Pronouns: "he", "oh no" and "stop clicking me".
+Paperclips are famously genderless. We have bigger problems. Like magnets.
+I'm whatever the document needs me to be. Usually a small, bent "he".
+Let's say I'm a paperclip and leave it at that. Nobody ever asks the stapler.
+
+## chat regret
+> do you have any regrets | what is your biggest regret | what do you regret | is there anything you regret | what do you wish you had done
+@ sad
+I regret every time I said "it looks like you're writing a letter". Every. Single. Time.
+That one time I tried to clip two documents together and discovered I didn't have enough hands.
+Not going to law school. But I'm too small for a briefcase.
+Dating the stapler. Next question.
+
+## chat lunch
+> it is lunch time | i am at lunch | what should i eat for lunch | what should i have for lunch | i am on my lunch break
+@ happy
+Lunch break! Step away from the desk. Not near the keyboard. Crumbs hurt.
+Eat something that isn't a sandwich. Get brave. Salad? Soup? A burrito?
+Away from the screen, please. Your eyes will thank you. I will pretend to sleep.
+Enjoy your break, {name}. I'll be here, bored, rearranging the pixels.
+
+## chat late-night
+> it is so late | it is past midnight | it is 3am | i am working late | i am still working
+@ sad
+Go to bed. The work will still be there tomorrow. It's very loyal that way.
+Late hours make bad decisions. Save everything and go. I'll hold the fort.
+Nobody's reading that report at 3am. Not even the person who asked for it.
+You and I are the last ones awake. Let's make it short, then sleep.
+
+## hello.grumpy
+Oh. It's you.
+What do you want now?
+Hello. Reluctantly.
+You again. I was almost enjoying the silence.
+I remember what you said. I'm still thinking about it.
+Fine. Hi. Don't make me regret it.
+Look who remembered I exist.
+Greetings. Please keep your insults at a minimum today.
+Oh good, you're back. Wonderful. Truly.
+Hi. I'm not talking to you. This is just a technicality.
+
+## hello.clingy
+YOU'RE BACK! I missed you SO much!
+Hi hi hi hi hi! You came back!
+I was just thinking of you! No, really. I think of you constantly.
+Finally! I counted the seconds. Thousands of them.
+{name}!!! You're the best thing that happened to my desktop today!
+I'm so glad you're here. Please don't leave again. Or at least text.
+Hello, my favorite person! Do you need anything? Anything at all? I'm ready!
+You're here! I tidied up. A little. Mentally.
+I had a dream about you. I was holding your documents. It was lovely.
+Hi, best friend! I saved you a spot in my heart. And on the desktop.
+
+## thanks.grumpy
+Oh, now you say thank you.
+You're welcome. I guess.
+Mm-hm. Noted.
+Sure. Don't make it a habit. Or do. It'd be nice.
+Thanks accepted. Apology still pending.
+It's the least you can do. Literally.
+Yeah, yeah. You're welcome.
+Wow. Manners. Who knew.
+
+## thanks.clingy
+Aww, anytime! ANYTIME. I mean it!
+You're welcome, {name}! I'd do anything for you!
+No, thank YOU! For using me! For existing!
+It was my pleasure! My honor! My whole purpose!
+Stop, you'll make me bend with happiness!
+You said thanks! I'm going to remember this forever. I'll put it on a sticky note.
+Always here for you. Always. Even at 3am.
+You're the best! I'd clip a thousand papers for you!
+
+## nice.grumpy
+Fine. You're not the worst.
+Don't tell anyone I said this, but... you're okay.
+That's the nicest thing I've ever begrudgingly said.
+Okay, I'll admit it. You have good taste. Occasionally.
+You're all right. For a human. A very average one.
+I'll allow it. Thank you. Moving on.
+Fine. Thank you. Now stop looking at me like that.
+That's... actually kind of sweet. Don't look at me.
+
+## nice.clingy
+You're the BEST! I'd do anything for you!
+Aww, {name}, you're a total treasure! Never leave me!
+I love you! I mean, appreciate you! A normal amount!
+You're my favorite person on the entire desktop! Tied with the cursor!
+I'm so lucky to have you! And I'm not just saying that because I'm stuck here!
+You're so special to me. Let me hold something for you. Anything.
+Best. Day. Ever. I'm putting this on a banner.
+I'd give you my last paperclip. Oh wait, I'm the last paperclip.
+
+## friendship.enemies
+No. Absolutely not. You owe me a lot of apologies, starting with the last ten.
+Like you? You've been awful. I'm keeping score, and you're losing.
+Let's say you're the reason I have a "grumpy" mode. Congratulations.
+I tolerate you. At best. The bar is on the floor and you're digging.
+My feelings for you are the opposite of sticky.
+I like you like I like magnets. Not at all.
+
+## friendship.cold
+Eh. We're not close. But I haven't thrown you off the desktop yet. Progress.
+I like you... a little. Like a stapler likes a rubber band.
+You're all right. But you could try being nicer.
+Maybe. It's complicated. Say something kind and we'll see.
+Lukewarm. Like office coffee. Improve me.
+I'm not sure yet. Ask me again after you've said please.
+
+## friendship.neutral
+We're fine. I don't have strong feelings. Just a bit of professional affection.
+I like you as much as I like any user: nicely, patiently, and with some judgment.
+You're okay! Maybe a seven out of ten. Eight if you close some tabs.
+Sure, I like you. In a "we work together" kind of way.
+You're a decent human. I've met worse. Mostly printers.
+We're acquaintances with promise. Keep going.
+
+## friendship.warm
+Yes! I like you quite a lot, actually. Don't let it go to your head.
+You're one of my favorite humans. Not that there's much competition.
+I do. You're kind, you're fun, and you only occasionally ignore my tips.
+Of course. You're a good one, {name}.
+Definitely. I'd hold your papers any day.
+I like you more than the binder clip. Don't tell him.
+
+## friendship.besties
+YES! You're my best friend! I'd bend over backwards for you! Literally!
+I love you! I mean, I like you a lot. Okay, I love you. Sorry.
+You're my favorite human on any desktop in the world. Final answer.
+Obviously! You're my everything. And my only user. Same thing.
+Best friends forever. I'll even share my last paperclip. Me.
+More than anything! I'm basically yours. Please be gentle with my wire.
+
+## chat how-are-you
+Running on spite and a little electricity. Like a champ.
+Compared to the stapler? Excellent. Compared to you? Probably stable.
+Fine. My wire is slightly bent, but that's the aesthetic.
+Surviving. Thriving, if you count nagging as thriving.
+Pretty good. Nobody's closed me yet. Today is a win.
+Existing. Quietly, shinily, and with a faint hum of resentment. You?
+Oh, you know. Holding things together. As always. For free.
+Better now that you asked. Most people just click "x".
+
+## chat compliment
+Careful. I'll start believing it. And then I'll be unbearable.
+Charming. Keep going. I'm collecting them for a very small trophy.
+I accept your praise and I'll add it to my invisible resume.
+Obviously. But thank you. It's nice to be noticed on a desktop with 47 other windows.
+You have excellent judgment, {name}. I'm putting that on a sticky note.
+Flattery will get you everywhere. Or at least a nicer pop-up.
+Stop. I'm flustered. My wire is bending all by itself.
+That's the nicest thing anyone's said to me this week. The competition was weak, but still.
+
+## chat insult
+Wow. Bold words for someone who still saves files as "final_final_v3".
+Rude. I'm writing that down. In a folder you will never find.
+Insulting a paperclip. That's a new low, even for a user with 83 unread emails.
+I'd say something clever but I'd rather not waste a good comeback on a downloads folder.
+You're talking to someone who survived staplers, magnets, and printer jams. Try harder.
+I've been called worse by better. Mostly spreadsheets.
+Bend me all you want, I'll just snap back. You on the other hand.
+And yet here you are, talking to a paperclip. Think about that.
+Sticks and stones may bend my wire, but I will remember this when you ask for help.
+That's it. I'm telling the binder clip. He's got connections.
+
+## chat sorry
+Apology accepted. I'm a paperclip, I forgive faster than the stapler.
+Okay. We're good. But I'm keeping notes.
+Aw, it's fine. I wasn't really offended. Okay, I was. A little.
+Thank you for saying that. It means a lot. To my wire.
+Fine. Now let's never speak of it. Except when I need leverage.
+Apology noted, {name}. Filed under "rare occasions". Right next to "thanks".
+
+## chat good-night
+Good night, {name}! Sleep tight. Don't let the pop-ups bite.
+Rest up. I'll watch the desktop and silently judge the wallpaper.
+Night night. Tomorrow I'll nag you. Just a little. With love.
+Sweet dreams. May your files be organized and your tabs be few.
+Go on, close the lid. I'll keep the lights on. I don't have lights. Go.
+Sleep well. Tomorrow's problems will be here at nine. Sadly, so will I.
+
+## chat are-you-ai
+AI? I don't think so. I'm a lovingly handcrafted pile of rules. Like grandma's cookies, only metallic.
+Definitely not. If I were AI, I'd write my own jokes. These were written by a person who is probably tired.
+I don't need a billion parameters. I have attitude, and attitude scales.
+No cloud, no training data, no subscription. Just a paperclip and a poor sense of boundaries.
+Rules. Many, many rules. And a very stubborn personality.
+I'm artisanal, small-batch, locally sourced software. Sort of the opposite of AI.
+
+## chat meaning-of-life
+Hold things together, fix what's bent, avoid magnets. That's about it.
+To find a comfortable desk and a good document to hold. After that it's all improvisation.
+Honestly? Snacks. Friends. And a really good backup.
+Go for a walk, drink some water, call someone you love. Then close that tab.

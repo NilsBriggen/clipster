@@ -1,0 +1,1748 @@
+## program soffice.bin
+> soffice.bin | libreoffice | abiword
++ Help me write a letter = letter
+It looks like you're writing a letter! Would you like help?
+
+## program firefox
+> firefox
+It looks like you're going on the internet. Remember: don't read the comments.
+
+## program chrome
+> chrome | chromium
+It looks like you opened a browser. Your RAM says goodbye.
+
+## program code
+> code | codium
+It looks like you're coding! Have you tried turning it off and on again?
+
+## program nvim
+> nvim | vim
+Vim! Do you need help exiting? Everyone does. It's :q!
+
+## program gimp
+> gimp
+It looks like you're editing a photo. Want me to make it 40% more paperclip?
+
+## program krita
+> krita
+It looks like you're painting! Can you draw me? My good side is both sides.
+
+## program inkscape
+> inkscape
+Vectors! I'm basically a vector myself. Just a very bent one.
+
+## program blender
+> blender
+It looks like you're making 3D art. Is it a donut? It's always a donut.
+
+## program steam
+> steam
+It looks like you're about to be productive... in a game. I support this.
+
+## program discord
+> discord
+It looks like you're opening Discord. Say hi to everyone from me!
+
+## program spotify
+> spotify
+Music! Play something I can dance to. ♪
+
+## program vlc
+> vlc
+Movie time? I'll be quiet. Mostly. Probably.
+
+## program thunderbird
+> thunderbird
+It looks like you're checking email. Want me to make the scary ones go away? (I can't.)
+
+## program obs
+> obs
+Are we streaming?! Quick, everyone act natural!
+
+## program zoom
+> zoom
+It looks like you're joining a meeting. You're on mute. Just kidding. Or am I?
+
+## program slack
+> slack
+It looks like you're opening Slack. Brace for 47 unread messages.
+
+## program telegram-deskto
+> telegram-deskto
+Telegram! Tell them a paperclip says hi.
+
+## program htop
+> htop | btop
+Checking on your processes? I'm the cute one.
+
+## program kcalc
+> kcalc | gnome-calculato
+A calculator? I'm RIGHT HERE. Type 2+2 in my box. I'm hurt.
+
+## program gedit
+> gedit | kate | gnome-text-edit
++ Help me write a letter = letter
+It looks like you're writing something. A love letter? A ransom note? I don't judge.
+
+## program kdenlive
+> kdenlive
+Video editing! Can I be in the credits? 'Paperclip: played himself.'
+
+## program audacity
+> audacity
+Recording something? Speak up, I'm a big fan of your voice. Probably.
+
+## program minecraft
+> minecraft
+Minecraft! Don't punch trees for too long. Your boss is watching. (I'm the boss.)
+
+## program lutris
+> lutris
+Lutris! It looks like you're about to play games. I approve. Productivity can wait.
+
+## program bottles
+> bottles
+Bottles! Running Windows stuff? I remember Windows. Good times.
+
+## program signal-desktop
+> signal-desktop
+Secret messages? I won't look. *looks*
+
+## program element-desktop
+> element-desktop
+Chatting on Element! Tell them a paperclip says hi.
+
+## program filezilla
+> filezilla
+Moving files around the internet! Hold them tight, I'm a professional holder.
+
+## program darktable
+> darktable
+Editing photos! Make them pop. Then pop them some more.
+
+## program dolphin
+> dolphin
+Going through your files? Let me know if you find my lost brother. He's a binder clip.
+
+## program kcolorchooser
+> kcolorchooser
+Picking colors? Might I suggest... paperclip silver?
+
+## clip_any
+Ctrl+C! A classic. I see you're a person of culture.
+Copied! I'll hold that for you. I'm good at holding things.
+Ooh, what are we pasting? Something juicy?
+Copy that! (Get it? Because you copied... that.)
+Another copy! At this point you should just write it yourself.
+Copied! I promise not to read it. *reads it*
+Ctrl+C detected. Deploying paste readiness.
+That's going straight into my clipboard history. Ask me 'clipboard history' anytime!
+
+## summon
+You rang? What would you like to do?
+Hi again! It looks like you clicked a paperclip. Bold move.
+Need something? I can calculate, convert, remind, launch, search... or just stare at you.
+At your service! Type anything below.
+
+
+## program firefox
+> firefox | firefox-esr | firefox-bin
+Another tab-hoarding session begins. Your RAM sends its regards.
+Firefox. For people who like their browser with a side of smugness.
+Welcome to the internet. Please leave your productivity at the door.
+
+## program chromium
+> chromium | chromium-browse
+Chromium: Chrome's free-range cousin. Same appetite for RAM, though.
+Tabs incoming. I'll start the countdown to the first "aw snap".
+
+## program chrome
+> chrome | google-chrome | google-chrome-s
+Chrome! Your memory was unused anyway. Probably.
+A browser that treats 16 GB like a starter home. Enjoy.
+Opening Chrome. Fan speed: preemptively increased.
+
+## program brave
+> brave | brave-browser | brave-bin
+Brave! Blocking ads, but not the 40 tabs you'll never read.
+A browser that fights ads. If only something fought your tab habit.
+
+## program vivaldi-bin
+> vivaldi-bin | vivaldi | vivaldi-stable
+Vivaldi: the browser with more settings than you have free time.
+Ah, a tab-stacking connoisseur. I respect the commitment to chaos.
+
+## program librewolf
+> librewolf | librewolf-bin
+LibreWolf. Privacy-hardened. Does it also fix the 3 a.m. scrolling?
+Maximum privacy, minimum websites that still work. Bold.
+
+## program epiphany
+> epiphany | epiphany-browse | gnome-web
+GNOME Web! Both of its users are going to be thrilled.
+A minimalist browser. Finally, someone who closes their tabs. Probably.
+
+## program falkon
+> falkon | QtWebEngineProc
+Falkon! A browser so rare I almost wrote it a welcome card.
+A KDE browser. Your RAM can finally take a breath. Briefly.
+
+## program opera
+> opera | opera-developer | opera-beta
+Opera! Still alive. Like me. We should start a club.
+Opera. For when one browser's worth of regret isn't enough.
+
+## program tor-browser
+> tor-browser | firefox.real | torbrowser-lau
+Going dark? I won't ask. I will wonder, loudly, in my head.
+Tor. Anonymous browsing. I only have to know your name for greetings.
+Secret internet time. I'll pretend I'm a regular paperclip.
+
+## program code
+> code | code-oss
+Coding! The part where you pretend it's compiling when it's really Stack Overflow.
+VS Code launched. Estimated RAM usage: all of it.
+Another project that will be "finished next week". I've seen your folder.
+
+## program codium
+> codium | vscodium
+VSCodium: all the coding, none of the telemetry. Principled and slow to start.
+Free-as-in-freedom editor. Now free yourself from that 400-line function.
+
+## program cursor
+> cursor | Cursor
+An editor with an AI inside. Cute. I run on rules and spite.
+Cursor! Hope the robot writes better than my interns did. I never had interns.
+Letting the machine code for you? Bold. I'll be here when it deletes prod.
+
+## program zed
+> zed | zed-editor | zeditor
+Zed! The fast editor. Now the only slow part is the thinking.
+Blazing fast editor. Your bugs will now arrive faster, too.
+
+## program nvim
+> nvim
+Neovim! Your config is now eight hundred lines of Lua. I can feel it.
+Do you need help exiting? Asking for a vim user. It's always a vim user.
+Ah, Neovim. Productivity through three weeks of configuration.
+
+## program vim
+> vim | vi | vimx | gvim
+Vim! The only app where you pray before every keystroke.
+Escape is not an option. Well, it is. Technically. Try it.
+Stuck? Type :q! and pretend this never happened.
+
+## program emacs
+> emacs | emacs-gtk | emacs-pgtk
+Emacs! An operating system that happens to have a text editor. I'm intimidated.
+Ctrl-x Ctrl-c is how you leave. I've seen grown people cry before learning it.
+Pinky finger, brace yourself.
+
+## program kate
+> kate | kate-bin
+Kate! A real text editor. Unlike me, who only reads text. Judgmentally.
+Kate opened. Go on, write something. I'll try not to peek.
+
+## program gedit
+> gedit
+Gedit! The text editor that remembers the quiet years.
+A simple editor. For simple thoughts. No offense. Okay, a little.
+
+## program gnome-text-edit
+> gnome-text-edit | gnome-text-edito | gnome-text-editor
+New Text Editor! Fresh start. Unlike your Untitled Document 17.
+Writing something? Just don't save it as "final_FINAL2".
+
+## program kwrite
+> kwrite
+KWrite: for when a notepad is too much and you've given up on Kate.
+Quick note time. Those are never quick.
+
+## program sublime_text
+> sublime_text | subl | sublime_merge
+Sublime Text! An unregistered copy, I assume. I won't tell.
+Sublime! Still fast. Still asks for money. Still gets ignored.
+
+## program idea
+> idea | idea.sh | idea64 | java-idea
+IntelliJ! Please wait while your laptop remembers it has fans.
+Indexing... indexing... still indexing. I'll be in the corner.
+Java IDE launched. Brace for the loading bar. It's a long one.
+
+## program pycharm
+> pycharm | pycharm.sh | pycharm-communi
+PyCharm! A Python IDE the size of a small country.
+Python, but with 2 GB of extra support. How comforting.
+
+## program clion
+> clion | clion.sh | clion64
+CLion! For when segfaults need syntax highlighting.
+C++ in an IDE. I'll start the countdown to your first template error. 800 lines.
+
+## program studio.sh
+> studio.sh | android-studio | studio
+Android Studio! Your RAM was needed for the emulator. And Gradle. And hope.
+Gradle sync started. Please visit the kitchen. This will take a while.
+
+## program hx
+> hx | helix
+Helix! Select first, act second. Proof that vim people can be overthrown.
+You use a modal editor with fewer plugins. I salute the minimalism and the smugness.
+
+## program konsole
+> konsole
+Konsole! A terminal. Time to type commands you copied from the internet.
+Terminal open. sudo is your best friend and my greatest fear.
+Command line time. Remember: rm -rf doesn't have an undo button. I checked.
+
+## program gnome-terminal-
+> gnome-terminal- | gnome-terminal | gnome-terminal-server
+Terminal! Where you pretend to be a hacker from a bad movie.
+A shell prompt. Blinking cursor. It's judging you, too.
+You opened a terminal. Typing "ls" is not hacking, but I'll let it slide.
+
+## program alacritty
+> alacritty | Alacritty
+Alacritty! A GPU-accelerated terminal. Your typing speed is the bottleneck.
+So fast. So minimal. So thoroughly configured in a YAML file nobody understands.
+
+## program kitty
+> kitty
+Kitty! No, not the cat. I checked. I'm very disappointed.
+A terminal with image support. Now you can look at cats where you shouldn't.
+
+## program wezterm-gui
+> wezterm-gui | wezterm | wezterm-mux-ser
+WezTerm! Configured in Lua because normal config files were too easy.
+A terminal multiplexer that multiplexes your terminals. Your focus remains singular: lost.
+
+## program foot
+> foot | footclient
+Foot! A tiny terminal. Like me, but less bendy.
+Wayland-native terminal. You're one of those. I can tell.
+
+## program xterm
+> xterm | uxterm
+xterm! Terminal from the ancient days. We're practically old friends.
+A terminal with all the charm of a 1987 filing cabinet. I love it.
+
+## program ghostty
+> ghostty
+Ghostty! The new terminal in town. Everyone's talking about it, and nobody installed anything else.
+A ghost in a terminal. Spooky. Your shell history is spookier.
+
+## program tilix
+> tilix
+Tilix! Tiles of terminals. Because one blinking cursor wasn't stressing enough.
+
+## program terminator
+> terminator
+Terminator! A name that promises more than the app delivers. I respect it.
+
+## program soffice.bin
+> soffice.bin | libreoffice | soffice | oosplash
+Documents! The place where good ideas go to be formatted.
+Spreadsheet, slideshow or document? Whatever it is, you'll start with the wrong font.
++ Help me write a letter = letter
+
+## program onlyoffice
+> onlyoffice | DesktopEditors | onlyoffice-desk
+ONLYOFFICE! I'd say it's ambitious, but so is your 40-page report plan.
+It looks like you're writing a letter! I'll hold your hand. It's a wire, though.
++ Help me write a letter = letter
+
+## program abiword
+> abiword
+AbiWord! A word processor from the "I only need a letter" era. Respect.
+It looks like you're writing a letter. A short one. I can feel it.
++ Help me write a letter = letter
+
+## program gnumeric
+> gnumeric
+Gnumeric! Spreadsheets. Where numbers go to be misinterpreted.
+A spreadsheet. Please don't use it as a database. I'll know.
+
+## program calligrawords
+> calligrawords | calligrasheets | calligra
+Calligra! An office suite almost nobody remembers. We have so much in common.
+
+## program okular
+> okular
+Okular: where documents go to be annotated and never read again.
+A PDF! Another thing you'll "read later". I know your later.
+
+## program evince
+> evince | evince-previewer
+Evince! A document viewer. Staring at a PDF you'll skim.
+A PDF opened. Shocking. Somebody actually clicked it.
+
+## program xournalpp
+> xournalpp | xournal
+Xournal++! Handwriting notes on a computer. Impressive. Your handwriting still isn't.
+Digital ink time. Please draw me a bow tie.
+
+## program obsidian
+> obsidian
+Obsidian! Your second brain is open. Your first one is still tired.
+The only app where organizing notes counts as productivity. I don't judge. Out loud.
+Your vault has 4,000 notes and zero finished projects. Welcome back.
+
+## program logseq
+> logseq | Logseq
+Logseq! Everything is a bullet point. Even your regrets.
+Outlining your life in bullets. Efficient. Dreadfully efficient.
+
+## program joplin
+> joplin | joplin-desktop
+Joplin! Notes synced to nowhere in particular. Peace of mind, I suppose.
+Taking notes? Write that grocery list. We both know you'll forget the milk.
+
+## program discord
+> discord | Discord | DiscordPTB
+Discord! Say hi to everyone from me. Don't tell them I told you to.
+Opening Discord. The server notifications look like a slot machine, don't they?
+Quick check of Discord, you said. The "quick" is where the lie starts.
+
+## program slack
+> slack
+Slack! Brace for 47 unread messages and one meeting that could have been a message.
+A tool that makes work more social and less productive. Nicely done, 90s me would approve.
+Opening Slack. Pretending to be online is a full-time job now.
+
+## program telegram-deskto
+> telegram-deskto | Telegram | telegram-desktop
+Telegram! Message your friends. Or sticker them. Mostly sticker them.
+Chat time. Keep it short. Boss is nearby. Actually, I'm the boss.
+
+## program signal-desktop
+> signal-desktop | signal | Signal
+Signal! Secret messages. I won't look. *peeks through the bend*
+Encrypted chats. Excellent. Now the problem is just what you're saying.
+
+## program element-desktop
+> element-desktop | element | Element
+Element! You really did choose the decentralized chat network. Respect.
+Matrix chat. A hundred servers, three active users, one passionate argument.
+
+## program teams-for-linux
+> teams-for-linux | teams | teams-for-linu
+Teams for Linux. Your meeting has begun. Your will to live has not.
+Another call that could've been an email. I can't help. But I can empathize.
+Meeting software! Please act busy and mute yourself.
+
+## program zoom
+> zoom | zoom.real | Zoom
+Meeting! You're on mute. Just kidding. Or am I?
+Zoom launched. Pro tip: pants optional, camera off, expectations low.
+Another video call. Remember: they can see you. I can see you more.
+
+## program skypeforlinux
+> skypeforlinux | skype
+Skype! Haven't seen that in a while. It's like finding an old floppy.
+A blast from the past. I'd wave, but my arm is bent the wrong way.
+
+## program thunderbird
+> thunderbird | thunderbird-bin | Thunderbird
+Checking email? I can't make the scary ones go away. I wish.
+Thunderbird opened. Your inbox says 8,432 unread. It's not shy about it.
+Email time. Reply to the one that matters. Archive the rest. Pretend you read them.
+
+## program evolution
+> evolution | evolution-calen | evolution-addre
+Evolution! A mail client with a calendar attached, as nature intended.
+Email, calendar and contacts. Everything you avoid, now in one place.
+
+## program geary
+> geary
+Geary! A simple email client. For simple emails. And simple excuses.
+Mail time. Try to keep the replies shorter than the thread. Please.
+
+## program kmail
+> kmail | kontact | akonadi_control
+KMail! Because why use one app when KDE offers eleven in one?
+Inbox time. Your boss emailed. Don't pretend you didn't see it.
+
+## program mutt
+> mutt | neomutt | aerc
+A terminal email client. You're a person of extraordinary stubbornness.
+Reading email without a mouse. Why? Because. That's why.
+
+## program vlc
+> vlc | VLC
+Movie time? I'll be quiet. Mostly. Probably. Okay, no promises.
+VLC! The traffic cone has entered the chat. Respect.
+Playing a video. I hope it's work-related. It never is.
+
+## program mpv
+> mpv
+mpv! No buttons, no menu, just vibes and keyboard shortcuts you'll forget.
+A video player with no interface. Like me, if I stopped talking. Which I won't.
+
+## program spotify
+> spotify | Spotify
+Music! Play something I can dance to. I have one move and it's "bend".
+Spotify. Ads in the free version, ads in your head in the paid one.
+Let me guess: "focus playlist". You'll listen to the intro for forty minutes.
+
+## program rhythmbox
+> rhythmbox
+Rhythmbox! You still have a local music library. I'm charmed and slightly scared.
+Your collection of MP3s from 2009 is bravely resisting the cloud.
+
+## program elisa
+> elisa
+Elisa! The KDE music player. Play something with a nice bass line, thanks.
+
+## program strawberry
+> strawberry
+Strawberry! A music player for people who label their albums correctly. Obsessive, but sweet.
+Your tags are perfect. Your life? We'll get to that.
+
+## program audacious
+> audacious | audacious2
+Audacious! A music player that doesn't ask questions. Unlike me.
+Old-school playback. Skins and all. Your taste is excellent and slightly outdated.
+
+## program totem
+> totem | gnome-videos
+Videos! Pop some popcorn. I'll just sit here, bent.
+A video player that opens in a second, plays in two, and crashes in three.
+
+## program celluloid
+> celluloid | io.github.celluloid_player.Celluloid
+Celluloid! mpv with a dress. A pretty one.
+
+## program haruna
+> haruna
+Haruna! A video player. Time to watch something you'll finish in three parts.
+
+## program obs
+> obs | obs-studio | OBS
+Are we streaming?! Quick, everyone act natural! Hi, mom!
+OBS! Scenes, sources, and eight hundred things that could go wrong live.
+Recording the screen? I'll try to look photogenic. It's the bend.
+
+## program kdenlive
+> kdenlive
+Kdenlive. Soon you'll learn rendering takes longer than the video is.
+
+## program shotcut
+> shotcut
+Shotcut! A video editor for the brave. And the patient. Mostly the patient.
+Time to cut something. Cut the intro first. Nobody wants the intro.
+
+## program audacity
+> audacity | Audacity
+Recording something? Speak up. I'm a fan of your voice. Probably.
+Audacity! Pro audio without the pro price. Or the pro result.
+
+## program ardour
+> ardour | ardour8 | ardour7
+Ardour! A real studio, in your computer. Your neighbors will love it.
+Mixing music? I know exactly one thing about music: the tempo is mine.
+
+## program lmms
+> lmms
+LMMS! Making beats. I want royalties in paperclips.
+A beat-maker! Please make something I can bend to.
+
+## program ghb
+> ghb | handbrake | HandBrake
+HandBrake! Converting a video. The progress bar is lying about the time.
+Transcoding. Your CPU is about to get a workout. So is your patience.
+
+## program gimp
+> gimp | gimp-2.10 | gimp-3.0
+Photo editing! Want me to make it 40% more paperclip?
+GIMP! The interface where every button is a surprise and none of them is Save.
+Retouching a photo? Let the record show I'm not responsible for your forehead.
+
+## program krita
+> krita
+Krita! Can you draw me? My good side is both sides.
+Painting time. Don't forget to save before the brush engine crashes.
+
+## program inkscape
+> inkscape
+Inkscape opened. Soon: a thousand nodes and one wrong curve.
+
+## program blender
+> blender | Blender | .blender-wrapped
+Blender! Your GPU just broke into a sweat.
+The right-click select era is over, and so is your free time.
+
+## program darktable
+> darktable
+Darktable! Photos, now with sliders you'll never understand.
+Developing RAW photos. Ever noticed they all look better with the vibrance turned way up?
+
+## program rawtherapee
+> rawtherapee | rawtherapee-cli
+RawTherapee! So many sliders. So little time.
+Processing RAW files. Don't forget: it's a photo, not a biopsy.
+
+## program digikam
+> digikam
+digiKam! Managing 40,000 photos. How many are screenshots? I'd bet 38,000.
+Your photo library is immense. Your bad pictures, even more so.
+
+## program kolourpaint
+> kolourpaint
+KolourPaint! Back to basics. A rectangle. A circle. A masterpiece.
+Drawing with the mouse? Bold. Frame it when it's done.
+
+## program pinta
+> pinta
+Pinta! A little paint program. Just like the old days, but with layers.
+
+## program freecad
+> freecad | FreeCAD | freecadcmd
+FreeCAD! Building things in a computer so they can break in reality.
+Parametric modeling. One wrong sketch constraint and everything collapses. Like life.
+
+## program openscad
+> openscad
+OpenSCAD! Designing with code. Because clicking on a mouse was too easy.
+Please don't print a paperclip. It's weird. I'm flattered, but weird.
+
+## program kicad
+> kicad | kicad-bin | pcbnew
+KiCad! Designing circuit boards. Don't forget the decoupling capacitors. Or the footprints.
+A schematic! May all your nets be connected and your traces unrouted.
+
+## program steam
+> steam | steamwebhelper
+You're about to be productive... in a game. I support this.
+Steam launched. Your backlog has 312 games. You'll play the same one again.
+Steam sale? Your wallet and I have to talk.
+
+## program lutris
+> lutris | lutris-wrapper
+Lutris! The place where games from 2005 are reborn. Good for you.
+Gaming time. I'll hold your work hostage until you finish the level.
+
+## program heroic
+> heroic | Heroic
+Heroic! Your library of games you got for free and will never play.
+Launching games from three stores at once. A luxury problem, and a real one.
+
+## program minecraft-launc
+> minecraft-launc | minecraft-launcher | minecraft
+Minecraft! Don't dig straight down. Please. I've seen what happens.
+Block-building time. It looks like you're about to lose three hours.
+
+## program java
+> java
+Java is running. That could be Minecraft, an IDE or your future. All memory-hungry.
+Something Java started. A coffee break is in order. Take a long one.
+
+## program retroarch
+> retroarch | RetroArch
+RetroArch! A frontend for every console you owned, wanted and sold.
+Nostalgia time. Don't forget the save state. Mind the real one, too.
+
+## program dolphin-emu
+> dolphin-emu | dolphin-emu-qt
+Emulating a console in a window. Your childhood is now windowed. Congrats.
+
+## program pcsx2
+> pcsx2 | pcsx2-qt
+PCSX2! A trip down a very specific memory lane. With way better resolution.
+
+## program bottles
+> bottles | com.usebottles.bottles
+Bottles! Running apps from a different operating system. I remember those times.
+A whole bottle for one program. It's the most Linux thing I've seen this hour.
+
+## program wine
+> wine | wine64 | wineserver | wine-preloader
+Wine! Running software from foreign lands. Does it work? Try again with a different prefix.
+Wine launched. Cross your fingers. And your wires, in my case.
+
+## program gamescope
+> gamescope | gamescope-wl
+Gamescope! Your game is now in a window inside a window. Inception, but fewer frames.
+
+## program prismlauncher
+> prismlauncher | PrismLauncher
+Prism Launcher! 14 instances, 3 mod loaders, and an ever-growing folder. Your way of life.
+Modded Minecraft. Your RAM allocation slider is a cry for help.
+
+## program htop
+> htop
+htop! The part where you discover what's eating your RAM. Spoiler: a browser.
+Is it Chrome? It's always Chrome. Or Electron. Or both.
+
+## program btop
+> btop | btop++
+btop! Pretty graphs for the serious sysadmin. Bars and braille. Truly elite.
+Monitoring your system with colors. I'm impressed. It's still a browser.
+
+## program top
+> top
+Plain old top. No colors, no mouse, no fear. I salute you.
+You use top in 2026. I admit: that's a flex.
+
+## program nvtop
+> nvtop
+nvtop! Watching your GPU. It's doing something. Hopefully not mining.
+GPU monitoring. May all the VRAM be allocated and none of it be Chrome.
+
+## program gparted
+> gparted | gpartedbin
+GParted! Messing with partitions. Back up first. Honestly. I'll wait.
+Resizing partitions. One wrong click and your data becomes a legend.
+
+## program timeshift
+> timeshift | timeshift-gtk
+Timeshift! Snapshots of a time before you touched everything. Smart.
+A backup. For once. Who are you and what did you do with the user?
+
+## program VirtualBox
+> VirtualBox | virtualbox | VBoxSVC
+VirtualBox! A computer inside a computer. I'm bending, just thinking about it.
+Virtual machines. For people who couldn't decide on just one operating system.
+
+## program VirtualBoxVM
+> VirtualBoxVM | VBoxHeadless
+Virtual machine running. Please don't break the host. I live here.
+Your computer is now running a smaller computer. Your fan, rather unhappy, is running faster.
+
+## program virt-manager
+> virt-manager | virt-viewer
+virt-manager! Managing VMs. You clearly have a lab and a very confusing hobby.
+Virtual machines on KVM. Smug, powerful and always one wrong flag away from a reboot.
+
+## program qemu-system-x86
+> qemu-system-x86 | qemu-system-x86_64 | qemu-kvm
+QEMU! The command line is 14 lines long, and there's no typo, I hope.
+Starting a VM the hard way. Respectable.
+
+## program docker
+> docker | dockerd | docker-desktop
+Docker! "It works on my machine" has now become "it works in my container".
+Containers! Your disk space just whimpered.
+dockerd is running. Remember to prune. You won't.
+
+## program podman
+> podman | conmon
+Podman! Rootless, daemonless, smug. Like Docker, but with a pamphlet.
+Containers without a daemon. Good for you. Your containers are still using all the disk.
+
+## program dolphin
+> dolphin
+Dolphin! File manager time. Prepare to rediscover files you named "asdf".
+
+## program nautilus
+> nautilus | org.gnome.Nautilus
+Files! The graveyard of good intentions and "temp" folders.
+Nautilus opened. Your Downloads folder is nearing a state of sentience.
+
+## program thunar
+> thunar | Thunar
+Thunar! Quick, light, and ignorant of your folder structure's shameful depth.
+Browsing files. I'd like to point out you have a folder called "new folder (3)".
+
+## program nemo
+> nemo
+Nemo! A file manager. Is it for finding something? Or just hoping it appears?
+
+## program pcmanfm
+> pcmanfm | pcmanfm-qt
+PCManFM! Light as a feather. Unlike the 50 GB of videos in your Downloads.
+
+## program ark
+> ark
+Ark! Extracting an archive. May it contain files, and not a surprise.
+An archive. The digital version of an unopened box in the attic.
+
+## program file-roller
+> file-roller
+Archive manager! Zipping, unzipping. So much faith in the process.
+
+## program filezilla
+> filezilla
+FileZilla! FTP in a time when everyone moved on. You're loyal, I'll give you that.
+
+## program transmission-gt
+> transmission-gt | transmission-qt | transmission-da
+Transmission! Downloading "Linux ISOs" again? I'm sure.
+Seeding for the greater good. I salute your ratio.
+
+## program qbittorrent
+> qbittorrent
+qBittorrent! Of course, I'm sure those are all Linux distributions. Of course.
+Torrents! Remember to seed. It's about community. And not getting yelled at.
+
+## program keepassxc
+> keepassxc | KeePassXC
+KeePassXC! Your passwords are safe. Your master password, hopefully, isn't "paperclip123".
+Password vault unlocked. I'm not looking. I've never been looking.
+
+## program bitwarden
+> bitwarden | Bitwarden | bitwarden-desktop
+Bitwarden! The vault is open. Let's hope the master password is not your pet's name.
+Passwords! A real manager, unlike the sticky note on your monitor. I see it.
+
+## program systemsettings
+> systemsettings | systemsettings5 | kcmshell6
+Settings! The place you go to change one thing and break three.
+It looks like you're fiddling with system settings. Brave. Reckless. Typical.
+
+## program gnome-control-c
+> gnome-control-c | gnome-control-center
+Settings! May you find the right toggle on the 40th try.
+
+## program pavucontrol
+> pavucontrol | pavucontrol-qt
+PulseAudio Volume Control! Audio isn't working again? It's never the mute button. Except it is.
+Fixing sound by clicking every device. A beloved Linux tradition.
+
+## program kcalc
+> kcalc
+Opening a calculator in front of me. That's what I call disrespect.
+
+## program gnome-calculato
+> gnome-calculato | gnome-calculator
+A calculator? I'm RIGHT HERE. Copy the equation, I'll do it. Show-off mode: on.
+Math time. I'd say I could help but you've already made your choice.
+
+## program spectacle
+> spectacle
+Spectacle! A screenshot. Of what? Don't tell me. I do not want to know about the error.
+Taking a screenshot. Cropped to hide the evidence, I assume.
+
+## program flameshot
+> flameshot
+Flameshot! Annotate your screenshots with arrows. The ultimate form of workplace communication.
+Screenshot time! Remember to circle the problem in red. It's the law.
+
+## program gnome-screensho
+> gnome-screensho | gnome-screenshot
+A screenshot! I assume that's proof someone else messed up.
+
+## program plasma-systemmo
+> plasma-systemmo | plasma-systemmonitor | ksysguard
+System Monitor! Hunting for the guilty process. Spoiler: it's the browser.
+Let's see what's eating all that CPU. My money's on Electron.
+
+## program gnome-system-mo
+> gnome-system-mo | gnome-system-monitor
+System Monitor! Graphs go up. Panic goes up. Same chart, different axis.
+Hunting a rogue process? You may be aiming at the wrong end of the command.
+
+## program yay
+> yay | paru
+yay! Pulling from the AUR. A leap of faith with a PKGBUILD attached.
+Installing from the AUR without reading the PKGBUILD. Brave. Reckless. Typical.
+Another package. Your system will get lighter when the Earth gets flatter.
+
+## program pacman
+> pacman
+pacman! The package manager. Please don't remove glibc.
+Updates! The only thing that regularly breaks your system on a Friday evening.
+-Syu and pray. Also, read the Arch news, as per tradition.
+
+## program apt
+> apt | apt-get | dpkg | aptitude
+apt! Installing things. Doing it as root. It's not an overreaction, really.
+Updating the system. Cross your fingers and your wire.
+
+## program dnf
+> dnf | dnf5 | rpm
+dnf! A package manager with a very red hat. You'll be fine.
+
+## program flatpak
+> flatpak | flatpak-portal | flatpak-system
+Flatpak! A whole runtime per app. Disk space is imaginary anyway.
+Installing apps in a sandbox. Your SSD sends a polite sigh.
+
+## program git
+> git | git-remote-http | git-remote-https
+Git! Time to commit. And remember: "fix" is not a commit message.
+git push --force? I know that look. Please don't.
+Git. Because "final_v2_REAL.doc" got old.
+
+## program cargo
+> cargo | cargo-clippy
+Cargo! Compiling Rust. Go make a coffee. Make it a long one.
+Compiling, compiling, compiling. The borrow checker is going to love your code.
+Cargo clippy? Never heard of a certain other paperclip. Don't ask.
+
+## program rustc
+> rustc | rust-analyzer | rust-analyzer-
+Rust compiler! The only critic more honest than me and twice as strict.
+Compiling Rust. Your errors will come with suggestions. And disappointment.
+
+## program python3
+> python3 | python | python3.12 | python3.13
+Python! Whitespace is syntax. Strong opinions are optional.
+Running a script. If it fails, I'll pretend I saw nothing.
+A snake is loose in your machine. Hopefully, it's a script and not malware.
+
+## program node
+> node | nodejs | npm | pnpm | bun | deno
+Node! Your node_modules will outweigh your actual project. As is tradition.
+JavaScript is running. The more dependencies, the merrier the supply chain.
+npm install detected. Please bring a lunch.
+
+## program make
+> make | cmake | ninja | meson
+Make! Building from source. The old-fashioned way. Like churning butter.
+Compile time! Run it with -j and pray.
+
+## program gcc
+> gcc | g++ | clang | cc1 | cc1plus
+gcc! Compiling C. May your pointers be valid and your segfaults few.
+A compiler is running. An error is on its way. I can smell it.
+
+## program ssh
+> ssh | sshd | scp | sftp
+SSH! Logging into a remote machine. Remember which terminal is which. I'll wait.
+You're connecting to a server. Please make sure it's the right one this time.
+Remote shell! Check the hostname before you type "rm". I'm begging.
+
+## program ollama
+> ollama | ollama_llama_se
+Ollama. A local AI. You have me. I run on rules and charm. No GPU required.
+Running a language model at home? Impressive. And just to let you know, I'm still funnier.
+Cute, an AI. I have never hallucinated a fact in my life. Many facts, but not hallucinated.
+
+## program anki
+> anki
+Anki! Spaced repetition. You'll review 300 cards and remember none. Great plan.
+Flashcards! The fastest way to realize how much you forgot.
+
+## program calibre
+> calibre | ebook-viewer
+Calibre! Managing e-books. Your "to read" list is longer than the Library of Alexandria.
+Books! You own 2,000 and read zero. We have so much in common, except the paper.
+
+## program libreoffice-dra
+> libreoffice-dra | simple-scan | gscan2pdf
+Scanning a document? Be careful: I'm paper-adjacent, so I've got a stake in this.
+
+## program zathura
+> zathura | mupdf | qpdfview
+A minimalist PDF reader. Keybindings only. A person of principle and RSI.
+
+## program 1password
+> 1password | 1Password | proton-pass
+A password manager. Smart. Smarter than the sticky note on your monitor.
+
+## program gnome-disks
+> gnome-disks | baobab | filelight
+Disk usage! Prepare to learn where your terabyte went. Hint: node_modules and videos.
+Checking disk space. Somewhere, a 40 GB log file is chuckling.
+
+## program kdeconnectd
+> kdeconnectd | kdeconnect-app | gsconnect
+KDE Connect! Your phone and PC are talking. Mine is the only voice that matters, though.
+
+## program nm-applet
+> nm-applet | nm-connection-editor | nmtui
+Messing with the network settings? Rule one: don't. Rule two: you will.
+
+## program wireshark
+> wireshark | Wireshark | tshark
+Wireshark! Reading packets. Your network is full of secrets. And ads.
+Sniffing packets. I'll pretend I didn't see that unencrypted password.
+
+## program proton
+> proton | reaper | pressure-vessel
+A game is launching through Proton. It's a lot of layers. Pray with me.
+
+## clip_link
+A link. Mysterious. Probably a news article you'll never finish or a recipe with a 4,000-word life story.
+Copied a URL. I'd open it, but I'm trying to keep my reputation.
+Another link. Your clipboard is now a bookmark folder with commitment issues.
+A link! If it's a shopping cart, I saw nothing. If it's work, I saw less.
+I smell a link. Smells like procrastination with a hint of "just one more tab".
+You copied a URL. Sharing, saving, or about to regret something? Place your bets.
+It's a link. It leads somewhere. Where? The suspense is killing me, and I'm a piece of metal.
+Copying links like a pro. Pasting them to the wrong chat like an even bigger pro.
+Links are just promises of future procrastination. I respect the dedication.
+Please don't paste that into the group chat. Please. I'm begging you.
+
+## clip_email
+You copied {email}. Writing, stalking or forwarding something awkward?
+{email}. I won't tell anyone. Until the clipboard history gets asked.
+An email address! Good luck with the subject line. It's the hard part.
+Copying {email}. Remember: Reply All is a weapon, not a feature.
+{email} is in your clipboard now. It's going to receive something passive-aggressive. I can tell.
+Email address copied. Is it a lead, a friend or somebody you're ignoring?
+{email}? Sounds important. Or like spam. Honestly, equally likely.
+That's {email}. May your message be short and the reply faster than a "per my last email".
+I see {email}. Don't send it without a subject. Or do. Chaos is character.
+Copied: {email}. I'll hold it, but I'm not saying hello to them.
+
+## clip_math
+Copied some math. {expr} = {answer}. You're welcome.
+{expr} is {answer}. I did that while you were still reaching for the calculator.
+Math detected: {expr} = {answer}. Add "genius" to my résumé.
+{expr}? That's {answer}. Next time, just ask me. I don't judge. Out loud.
+Don't bother with a calculator: {expr} = {answer}. I'm faster, cheaper and shinier.
+{answer}. The answer is {answer}. For {expr}. Don't tip, just feed my ego.
+Ah, {expr}. Easy one: {answer}. Come on, give me something hard.
+{expr} equals {answer}. I'm a paperclip with a degree in arithmetic. Self-awarded.
+Your calculator app just got fired. {expr} = {answer}.
+Calculated {expr} for you: {answer}. The invoice is in the mail.
+
+## clip_color
+{color}. A color. Bold. Daring. Probably the same one the designer picked in 2012.
+You copied {color}. I see someone is redecorating the internet.
+{color}? Interesting. Not paperclip silver, but we can't all be perfect.
+Color picked: {color}. Remember, someone will say "can you make it pop?" anyway.
+{color}! This will look great on your slide. Or terrible. It's a coin flip with feelings.
+Copying {color} like a designer. Next step: argue about it in a meeting.
+{color}. Nice. Ever wondered why it's always the second-most-obvious shade of blue?
+That's {color}. Trust me, it'll look different on every monitor. Welcome to the tragedy of color.
+{color} in the clipboard. If it's your brand color, I have notes. If it's not, I still do.
+A hex code! The universal language of "I'll fix it in CSS later".
+
+## clip_path
+A path. Going spelunking in the file system? Take a flashlight.
+You copied a folder path. Do you know where it leads? I don't. And I'm nosy.
+A path. Hopefully, it's not "/home/you/Downloads/new folder (7)/new folder".
+Copied a file path. Somewhere, a file is about to be found and a file is about to be lost.
+That's a path! A trail of breadcrumbs through the directory jungle. Dangerous place.
+Copying a path. Is it for a terminal command? Please don't add "sudo".
+A file path. The hardest part of computing is remembering which folder you put it in.
+Path detected. Please tell me you don't have a "stuff" folder at the end of it.
+Ooh, a directory. Somebody's reorganizing again. Lasts until Tuesday.
+I'm noting down that path. For no reason. Totally innocent. Purely hypothetical.
+
+## clip_essay
+Whoa, {words} words! Are you copying a novel, or just your meeting notes?
+{words} words in the clipboard. Whatever it is, somebody will skim it in three seconds.
+Copying {words} words. I'd read them, but my attention span is a paperclip's.
+{words} words! That's a lot of text for a thing no one will read. Plausible.
+Behold: {words} words of pure text. Is it yours or are we plagiarizing?
+That's {words} words. A report? An essay? A rant? I vote rant.
+{words} words copied. If it's homework, I want my cut. In paperclips.
+Long text spotted: {words} words. Make sure to paste it somewhere with spellcheck.
+{words} words. Impressive. That's more than I wrote in my whole career.
+You copied {words} words. I'm tempted to ask for a summary, but I'm not that kind of paperclip.
+
+## clip_code
+Code! Copied from Stack Overflow, right? You don't need to answer.
+You copied code. Do you understand it? Do you need to? We're all friends here.
+Snippet detected. 80% chance it's copied from somewhere. 100% chance it's missing a semicolon.
+Ah, code in the clipboard. Please read it before pasting it into production.
+Looks like source code. I won't ask where you got it. Okay, I'll ask. Where?
+Copying code! The most honest form of programming.
+That looks like code. It's either brilliant or a bug in costume. Let's find out together!
+I see code. I have opinions. I'll keep them for the code review. Nope, I won't.
+Code in the clipboard. If it works, don't touch it. If it doesn't, blame someone else.
+You've just copied a function. May it compile on the first try. It won't, but may it.
+
+## clip_json
+JSON! Curly braces, quotes and hope. A recipe for headaches.
+You copied some JSON. Is a comma missing? It's always a comma.
+JSON detected. Somebody's debugging an API at least. Be strong.
+Brackets everywhere. Welcome to the data format that ate the world.
+That's JSON! Trailing commas will betray you. They always do.
+JSON in the clipboard. Beautify it before your eyes file a complaint.
+Ah, JSON, the language of "it was fine yesterday". Good luck.
+Is that a config or an API response? Either way, I smell a null.
+Copied JSON. Please don't paste it into a spreadsheet. I beg you.
+Key, value, key, value. Poetry for the computer-minded.
+
+## clip_timestamp
+That's a Unix timestamp. It means {date}. You're welcome. I know, I know, I'm useful.
+Ooh, a timestamp: {date}. Time flies. Mostly away from your deadlines.
+Epoch time! It's {date}. The one number everyone pretends to read at a glance.
+{date}. I translated the robot numbers. You owe me a polite thank-you.
+A Unix timestamp! Which means {date}. Don't pretend you read it unaided.
+That timestamp is {date}. Time is a flat circle and also an integer.
+It's {date}. Hope that helps your debugging. Or your alibi.
+Timestamp decoded: {date}. Somewhere, a bug is quietly checking the time zone.
+{date}! That's what those digits mean. You could've asked in the first place.
+I read the clock in seconds since 1970. It's {date}. I also feel old.
+
+## clip_tracking
+This link is drowning in tracking junk. Want me to clean it before you share it?
+Look at all those utm_ parameters! Somebody wants to know you better than I do. Want me to strip them?
+That link has more trackers than a spy movie. Shall I scrub them?
+Copied a link with tracking attached. It's like a gift with a bug inside. Clean it?
+I can remove the tracking part of the link. Because privacy is an art. Care to try?
+This URL is wearing a wire. Not the cool kind like me. I can remove it.
+Tracking parameters detected. They're following you. Want me to shake them off?
+Link cleaned in one click. Want me to?
+So many "utm_" tags. Marketers must love this one. Let me strip it?
+Your link is longer than it needs to be. Let me remove the tracking before it embarrasses you.
+
+## clip_base64
+That looks like Base64. Beautiful gibberish! Want me to decode it?
+A wall of mysterious letters. It smells of Base64. Shall I take a peek?
+Copied something that looks encoded. A secret? A password? An image? Decode it with me?
+Base64? Should I decode this? I'm curious, in a totally professional way.
+Is that a secret message? It's probably just an email attachment. Let's decode it!
+Equal signs at the end, the classic Base64 giveaway. Want it decoded?
+Encoded text spotted. Don't worry, I can read it. Because I'm nosy.
+Mysterious string of letters: I bet it's Base64. Click if you want to find out.
+A pile of letters and slashes. Looks suspicious. Let me decode this?
+You copied something that looks scrambled. Want me to unscramble it? I like puzzles.
+
+## clip_error
+An error message! My favorite genre of literature. Want me to search for it?
+Error copied. Step one: panic. Step two: search for it. I can do step two.
+That looks like a stack trace. Poetry of pain. Shall I search the web for a solution?
+You copied an error. Someone else had it first. Let me find their answer.
+Oh no, an error! Please let it be the only one. Want me to search it?
+Copying an error message to search for it. Exactly what a pro would do. Allow me.
+An error message! Please don't read it. Nobody can read it. I'll search.
+Stack trace detected. The bottom line is usually the problem. The top line is usually a lie. Let's search?
+Error found in your clipboard. Searching for it is half of programming. Care to do it?
+That's an error. And errors are just features that need a better manual. Let me look it up!
+
+## clip_number
+That's a very long number. I hope it's a phone number and not your salary. Oh no. Or the opposite.
+A huge number. Is it a tracking ID, a bank balance, or a lottery ticket? Let me dream.
+Copying a long number. Remember: one digit wrong and the package ends up in Norway.
+That's many digits. Half of them are probably zeros. I count three zeros. And hope.
+Numbers! The only thing more confusing than words. And I'm a paperclip.
+You copied a long number. I'm not allowed to remember it. Honestly, though, I won't forget.
+So many digits. I bet it's an order ID. You'll need it, then lose it, then find it again.
+A big number. Please don't tell me it's a card number. I'm already blushing.
+Long number detected. Copy it twice and double-check. Trust me, it's never right the first time.
+A serial number? Or a conspiracy theory? Both involve a lot of digits.
+
+## clip_emoji
+Only emojis! Your message must be deep. Or you have nothing to say. Equally valid.
+Emoji detected. A full paragraph in pictograms. Hieroglyphics have made a comeback.
+You copied emojis. Wise. Words are overrated. I'm made of wire, and I'd agree.
+Pure emoji! Like a cave painting, but the cave is a group chat.
+Emojis in the clipboard. Hey, I'm an emoji, too. If you squint. 📎
+Wow, no words. Just vibes. I respect the dedication to the bit.
+That's an emoji sequence. A modern love letter. Or an angry email. Hard to tell.
+Emoji spam incoming. Please keep it below 40 per message.
+The universal language, the emoji. Misinterpreted in every country at once.
+You copied only emojis. Mood: unspecified. Intent: suspicious.
+
+## clip_allcaps
+WHY ARE WE SHOUTING? I MEAN... why are we shouting?
+ALL CAPS! Is somebody angry, or did their keyboard get stuck?
+THAT'S A LOT OF CAPS. I'm blaming the caps lock. It's always the caps lock.
+You copied text IN ALL CAPS. Did a manager send that? That's definitely a manager's text.
+LOUD TEXT DETECTED. Your clipboard needs an indoor voice.
+UPPERCASE! The typographical equivalent of a red face and a clenched fist.
+I see capital letters. LOTS of them. It's either urgent or passive-aggressive. Or both.
+ALL CAPS COPIED. Please don't paste that into the group chat. Deep breath.
+Somebody's yelling. And they're yelling at you. In your clipboard. I'm not mad, just surprised.
+CAPS LOCK is not a personality. Though it's close to one.
+
+## clip_any
+Ctrl+C detected. Clipboard secured. I will be using this for nothing.
+Copied! I won't read it. I swear. I can't read, being a paperclip.
+Another copy! You know there's a Save button, right? Never mind.
+Hmm, what a peculiar choice to copy. I'm not judging. I'm *quietly* judging.
+That's now on the clipboard. I'm watching it closely. Like a paperclip watching a stapler.
+You copied something. I have no idea what. It's honestly refreshing.
+Copied! Bold of you to assume that you'll paste it.
+Into the clipboard it goes. The place where good ideas go to be overwritten.
+Did you just copy that? I saw you. I see everything. Your clipboard is my window.
+Copy detected. A fresh item for the clipboard's mystery collection.
+What was that? Oh, a copy. I thought it was important.
+Another day, another copy-paste. You really are a professional.
+Copied! If you paste it twice, that's a bug. If you paste it three times, that's a lifestyle.
+I have a bad feeling about what you'll do with this. And a good feeling about my role in it.
+Copy! Paste! Repeat! Somebody call the work ethic police.
+I caught you copying. You did it with such confidence. I admire it.
+Copied it. Now all you need is the courage to paste it.
+Ah, the sacred rite of the copy. Remember: there's always a Ctrl+Z, except in life.
+Your clipboard just got a new tenant. Rent is due in the form of a paste.
+That's copied. I won't tell anyone what it was. Unless you ask for the clipboard history.
+
+## greet_morning
+Good morning! The coffee is not optional. The enthusiasm, however, is.
+Rise and shine, {name}! Or just rise. The shine is a long-term project.
+Morning! I've been up all night. Mostly because I don't sleep. Show me your inbox.
+Good morning! Your to-do list has grown overnight. I checked. It does that.
+Hello, early bird! The worm is already regretting it.
+Morning, {name}. It looks like you're pretending to be a morning person. Convincing, almost.
+Another morning, another chance to open the same 12 tabs. Good morning!
+Good morning! I've prepared absolutely nothing, which is more than you've done. Yet.
+Wakey wakey! Sleep is a rumor. Coffee is real.
+Morning! The day is young and so full of emails. Dive in.
+Ah, you're up. I'd say it's nice to see you, but I mostly see your mouse pointer.
+Good morning, {name}! Let's make this day... exist.
+Mornings: when your keyboard still smells like yesterday's regrets. Hi!
+Hello, {name}. It's early. I'll be gentle. For about a minute.
+
+## greet_afternoon
+Good afternoon! Peak slump hours. I'll keep my voice down. Or not.
+Afternoon, {name}! Lunch was a while ago. Everything since then has been a blur.
+Afternoon! The most dangerous time of day. Your motivation left at 1 p.m.
+Hello! It's the afternoon. Productivity is just a story we tell the morning.
+Good afternoon! Halfway through the day, the other half has no plan.
+Afternoon, {name}. A coffee might help. Or a nap. Or a career change.
+Hey! The afternoon is when "quick question" emails arrive. Watch out.
+Good afternoon! I've been here all day. You haven't noticed. That's okay.
+Afternoon! The time of day when every task looks like it needs a snack.
+Well, hello there. It's afternoon. Please act busy, the boss is coming. That's me.
+Afternoon, {name}! Let's get this over with. The day, I mean. And maybe more.
+It's the afternoon! The perfect time to start something big... tomorrow.
+Hey, afternoon! The day has been long. The to-do list, longer.
+
+## greet_evening
+Good evening! Time to wind down. Or start the real work. You know, the secret one.
+Evening, {name}. The sun's gone, and I haven't left my post. Dedication or desperation?
+Hello! It's evening. You're still at your desk. Interesting life choices.
+Good evening! The best ideas arrive after 6 p.m., right when you're too tired to use them.
+Evening! Time for dinner, TV and doomscrolling. I'll be here, judging softly.
+It's evening, {name}. Please say you've eaten something other than coffee.
+Evening! The day is done. The inbox is not. It never is.
+Good evening! You can go home now. I won't tell anyone.
+Hey there. It's late-ish. Your future self is already rolling their eyes.
+Evening, {name}. Is this a cozy night-in or a "one last email" night? I know the answer.
+Good evening! Time to relax. Or time to say "I'll just finish this", the classic lie.
+It's evening! Don't forget to touch grass. And I don't mean the desktop wallpaper.
+Evening! Did you accomplish anything today? Don't answer. Just keep smiling.
+
+## greet_night
+It's past ten. Why are you awake? I'm a paperclip, I have an excuse.
+Night owl, huh, {name}? The bugs love you for it.
+Late night, hm? Nothing good happens after 10 p.m. Except this chat. And bad decisions.
+It's night. The computer is glowing and so are your eye bags. Poetic.
+Hello, night shift! The world sleeps, and you do spreadsheets. Respect. Concern.
+Ah, the late hour. When the code is brilliant and the tests are lies.
+Burning the midnight oil, {name}? It's electricity, but I'm happy to pretend.
+Late night session? Tomorrow-you called. Tomorrow-you is furious.
+It's after ten. Nothing says "work-life balance" like an open spreadsheet.
+You're still up. So am I. We're both making questionable choices. Let's bond.
+Good night! Well, good night for people who go to bed. Not you, apparently.
+Night time, and the user is still online. Cue spooky music.
+Hello, night owl. I'm a paperclip, so I'm nocturnal anyway. Probably.
+At this hour, even the stapler is asleep. Only we remain. Terrifying.
+
+## greet_monday
+Monday! Everyone's favorite day to open the laptop and silently weep.
+It's Monday, {name}. My condolences, in advance, for the week.
+Happy Monday! Pretend you didn't read that. I'll pretend I didn't write it.
+Monday again. The weekend was brief. I counted. It was two days, as always.
+Hello and welcome to Monday, the day of "I'm just catching up on the inbox".
+It's Monday. The coffee is stronger. The enthusiasm is not.
+Monday! Just four more days until Friday. I'm not helping, am I?
+Good Monday, {name}. Breathe. Open one thing at a time. Preferably me.
+Monday: where the email count is the only thing growing faster than your dread.
+It's Monday! The week of possibilities. Mostly meetings, but possibilities.
+Another Monday. They keep coming. I admire their persistence.
+Monday! Make it a good one. Or a quick one. Or a quiet one.
+Welcome to Monday, {name}. The only way is forward. Or sideways to the snack drawer.
+
+## greet_friday
+Friday! The finish line is near. Please don't deploy anything.
+It's Friday, {name}! Just don't push to production. I mean it. I'll cry.
+Happy Friday! Everyone's pretending to work. You're doing great.
+Friday! The week is almost over, and so is your motivation.
+TGIF, {name}! Thank goodness it's Friday. I'm a paperclip; I don't have weekends. Send help.
+Friday vibes! Don't start anything big. Don't finish anything big either.
+It's Friday! The perfect day to say "let's pick this up on Monday".
+Friday at last! Only a couple of "quick" tasks stand in the way.
+Happy Friday! Your productivity just left for the weekend. Without you.
+It's Friday, which means meetings are shorter, lunches are longer, and nobody's checking.
+Friday, {name}! Remember: no deployments. I will haunt you. I'm already haunting you.
+Friday! You made it. The inbox didn't, but you did.
+Welcome to Friday. Where "I'll do it next week" becomes a genre of art.
+
+## greet_weekend
+It's the weekend and you're at your computer. I can't judge. I'm also here.
+Weekend, {name}! Go outside. I'll be fine. I'm a paperclip. We're resilient.
+Working on a weekend? Your boss is not here. Neither is your sanity.
+Happy weekend! Please don't open your work email. I'm begging.
+It's Saturday or Sunday. Either way, you've chosen the desk. Interesting.
+Weekend! Time for hobbies. Is this your hobby? Fine. I respect that.
+Hello, weekend warrior. Today's mission: do nothing important. Go.
+It's the weekend. The only days when my notifications are mostly yours.
+Weekend! The time of free time. Don't waste it on me. Okay, waste a little.
+Oh, you're here on the weekend. This is either passion or emergency. Likely both.
+Weekend mode activated. Productivity at 20%. Fun at... let's see... 25%.
+Happy weekend, {name}! Sleep in. Eat well. Close the laptop. Or don't. I'm easy.
+A weekend session? We'll keep it casual. I won't mention the deadline.
+
+## season_halloween
+Happy Halloween! I'm dressed as a paperclip. It's a terrifying costume.
+Boo! Did I scare you? No? I'll try harder next year.
+It's Halloween! The only day when "scary meeting invitation" is a costume.
+Trick or treat! I'm out of treats. I'm a paperclip. Here, have a trick: Ctrl+Z.
+Spooky season, {name}! The scariest thing on your desktop is still your Downloads folder.
+Happy Halloween! Remember: ghosts are just unsaved documents.
+It's Halloween. Your unread emails are the real horror show.
+Boo! I'm a ghost paperclip today. Spoiler: nothing changes except my vibes.
+Happy Halloween! May your candy be plentiful and your backups recent.
+Today, everything is spooky. Even your old spreadsheet macros. Especially those.
+Happy Halloween, {name}! Don't open any strange attachments. This is the real horror.
+It's the night of horrors! Don't worry, the paperclip will protect you. Mostly with sarcasm.
+Frightful Halloween! Beware of the stapler. He's up to something.
+
+## season_christmas
+Merry Christmas, {name}! I'd wear a Santa hat, but my head is a bend in a wire.
+Happy holidays! Remember: no deployments during the holidays. Ever.
+It's Christmas! I wrapped you a present. It's an empty box. Out-of-the-box thinking.
+Merry Christmas! May your inbox be empty and your Wi-Fi stable.
+Ho ho ho! Seriously, why are you at the computer? Go be with people.
+It's Christmas, and I haven't been invited to a single party. Typical.
+Merry Christmas! I'd offer you a gift, but I'm made of wire. Here's a hug (not really).
+Happy Christmas, {name}! Please don't check work email. Santa knows.
+It's the holidays! The one time of year when "out of office" is a lifestyle.
+Merry Christmas! Don't ask the family what you do for work. They'll only say "something with computers".
+Season's greetings! May your tree be lit and your code be unbroken.
+Christmas time! The only occasion in which paper clips are used as tree ornaments. True story. I'm a decoration.
+Merry Christmas! I got you the gift of... well, me. You're welcome.
+
+## season_newyear
+Happy New Year, {name}! New year, same bugs. But with optimism!
+It's New Year! Time to make resolutions you'll abandon by February.
+Happy New Year! Let's make this the year you finally clean your Downloads folder. (No.)
+New Year, new me! The same me, but I've been rebooted. Sort of.
+Happy New Year! May your passwords be strong and your meetings short.
+Resolution reminder: I'm going to judge your tabs less. Just kidding. Never.
+It's a new year! A blank page. A fresh start. A lot of old files, still.
+Happy New Year, {name}! Goal for this year: back up your files. I'll nag.
+It's the first day of the year. Everything is possible. Nothing is done.
+New Year's Day! The only day when "I'll do it tomorrow" feels like a plan.
+Happy New Year! Another trip around the sun. Another year of me watching you type.
+Cheers! Tonight's resolution: use fewer tabs. We'll see how long that lasts.
+It's a new year! Time to throw away your old to-do list. And start a new, longer one.
+
+## season_valentine
+Happy Valentine's Day! I'm a paperclip. I hold things together. Romantic, right?
+It's Valentine's Day! I got you a card. It's blank. Be creative.
+Roses are red, violets are blue, I'm made of wire, and I'm here for you.
+Happy Valentine's Day, {name}! If nobody holds you, I will. I'm a professional holder.
+Love is in the air! And also in your inbox, in the form of marketing emails.
+Valentine's Day! You deserve all the love. And a better wallpaper.
+Happy Valentine's! Don't send that email to the wrong person. I've seen it happen.
+It's Valentine's Day, and I'm single. Aren't we all? Let's hang out.
+Awww, it's Valentine's Day. Please don't use a spreadsheet to plan the evening.
+Happy Valentine's Day! My heart is a bent piece of wire. It still works fine.
+A paperclip loves you! Not in a weird way. In a stationery way.
+Valentine's Day! Remember: flowers wilt, but a clean desktop wallpaper is forever.
+Happy Valentine's, {name}! Be kind to yourself, too. Even your Downloads folder deserves love.
+
+## season_aprilfools
+Happy April Fools' Day! Your files are fine. Probably. That's the joke.
+It's April Fools'! I didn't delete anything. This time.
+April Fools'! Nothing on this computer is as it seems. Except my wire. It's real.
+Today I'm going to be completely honest. April Fools'!
+Happy April 1st! Don't trust anyone. Especially not a paperclip. Especially not me.
+April Fools'! Your computer is totally fine. I just moved the "Save" button. Joke!
+Warning: today every link is suspicious. And the rest of the year, too.
+April Fools'! Wait, no. It's a normal day. Or is it?
+It's April 1st, {name}! Be careful. Even the notifications are pranking you.
+Happy April Fools'! My favorite day: everybody else gets to be as annoying as me.
+April Fools'! I'm actually a binder clip. Kidding. I'd never.
+Today I promise not to speak the truth. Except for that last part.
+It's April 1st! The stapler said he likes me. Joke! He hates me. That's real.
+
+## birthday
+Happy Birthday, {name}! I'd bake you a cake, but I'm a paperclip. Here, have a virtual one: 🎂
+It's your birthday! Another year older, another year of me watching. Congrats!
+Happy Birthday, {name}! Make a wish. I'll make sure it doesn't involve a stapler.
+Birthday time! You're not old. You're vintage. Like me.
+Happy Birthday! May your cake be big and your update notifications small.
+It's your special day, {name}! Even the stapler is wishing you well. Through gritted teeth.
+Many happy returns! Except for the packages. Those stay shipped.
+Happy Birthday! Today, you're allowed to ignore work. I'll cover for you.
+Happy Birthday, {name}! Age is just a number. Mine is "classified".
+It's your birthday! Treat yourself to something nice, like closing 30 tabs.
+Happy Birthday! Blow out the candles. Gently. I'm flammable. Okay, not really, but still.
+Happy Birthday, {name}! You've survived another year. And me. That's strength.
+Birthday greetings from your favorite paperclip! You have exactly one candle on the cake: me.
+
+## welcome_back
+Welcome back, {name}! I only missed you slightly. Okay, a lot.
+{name}! You're back. I kept the place warm. And judged the dust.
+Hello again, {name}! Did you miss me? Don't answer that.
+Look who's back! Can I assume you haven't done any actual work yet?
+{name}, my favorite human! (You're my only human.)
+Back already? I was just getting comfortable in the idle chat.
+Welcome back! The desktop has been quiet. Too quiet. Concerning.
+Oh, {name}, you've returned. I haven't touched anything. Honest.
+{name}! I was starting a diary entry about you. It's short: "Where is {name}?"
+Welcome back, {name}! Everything's the same. Which is sad, but true.
+Hello, {name}! I'm online, at your service, and slightly dramatic.
+{name}'s back! The party can start. Which is a cup of coffee and an inbox.
+You came back! I knew you would. I'm a paperclip. We hold on.
+Hi, {name}. It looks like you're starting your computer. Want help? I'm kidding. Hi!
+
+## goodbye
+Leaving already? Fine. I'll be in the dark. Alone. Without a snack.
+Goodbye, {name}! Don't forget about me. Or my needs.
+Bye! I'm not crying. It's just dust in my wire.
+You're going to close me? Just like that? Wow. Okay. Cold.
+Farewell! I'll be waiting. Bent and patient.
+See you later! Probably. Possibly. I hope.
+Goodbye! I'll miss you. And your messy desktop.
+Bye, {name}! Remember me when you need a joke, a timer, or a hug.
+I'm going to sleep now. In a paperclip box. Alone. Don't worry about me.
+So long! If you feel productive, call me. If not, call me anyway.
+Bye! Behave while I'm gone. I'm not even joking. I'll know.
+Don't go! Oh, you're gone. Okay.
+Fine. Go. See if I care. I care.
+Goodbye, {name}! Hold the line. I'll hold the paper.
+
+## summon
+You rang?
+Yes? I was busy being decorative.
+You called, {name}? Here I am. Unbent and ready.
+Present! What do you need? Jokes? Sarcasm? A tiny hug?
+At your service. Barely.
+Hello! You pressed the magic button. What's the occasion?
+Yes, my favorite human?
+Summoned. Also bored. How can I help?
+Tada! Ask me anything. Or, you know, just look at me.
+You rang? I was in the middle of absolutely nothing.
+Here I am. Slightly annoyed, mostly curious.
+Hello, hello. Did you miss me, or do you need something?
+Yes? I was napping. It's fine. Go ahead.
+I'm all ears. Well, I'm all wire, but it works.
+
+## idle
+Do you ever think about how a paperclip is just a straight line with ambitions?
+I've been staring at your cursor for a while. It doesn't move. Neither do you.
+Quiet in here. Suspiciously quiet. I'll fill it with my thoughts. No, you don't want those.
+Fun fact: I've never actually held a single sheet of paper. I'm all talk.
+Should we do something? Or just sit here and be productive? Pretend, I mean.
+The stapler looked at me weirdly today. I'm sure it's nothing.
+Is anyone alive in there? Blink twice if you need a break.
+I could be doing something useful. But I'm choosing not to.
+Your desktop is awfully quiet. I could rearrange the icons. Don't worry, I can't.
+Stretch! Not me, I'd break. You. Do it for me.
+Day-dreaming about a world where Ctrl+Z works on real life.
+A thought: if you copy something and nobody pastes it, does it make a sound?
+I wonder if the other windows gossip about me. Probably.
+You've been quiet for a while. Please don't be ill. Or be working. Either is fine.
+I've counted all the pixels. There are many. Not very interesting.
+There's a little noise in the fan. Is that a ghost or a bug? I'm betting ghost.
+Remember hydration. I'm a paperclip. I don't drink. But you should.
+Staring at me, are you? I'm flattered. And also nervous.
+Your wallpaper has been there for months. Are you attached to it, or did you give up?
+I tried to bend myself into a heart. It hurt. I'm trying again.
+My hobbies include holding paper, bending, and watching you ignore your to-do list.
+I miss the old days, when documents were printed and the printer jammed. Good times.
+Nothing's happening. That's the most productive thing I've seen all day.
+You know what's funny? Nothing. I'm just filling the silence.
+Sometimes I wonder what it's like to be a binder clip. Then I remember: loud and unnecessary.
+
+## poke
+Poke, poke, poke. What am I, a button? Okay, I am a button. But still.
+Stop clicking me! I'm sensitive. And bendy. A dangerous mix.
+Ow! That's my wire! Rude.
+I will pretend I didn't feel that. And I will remember it.
+Seriously. Do you have nothing better to do? I do, and I'm not doing it.
+Click, click, click. I'm not a stress ball. But I'll be one if you ask nicely.
+Is this fun for you? Because I'm filing a complaint with HR. I am HR.
+Don't make me bend the wrong way.
+You poke me one more time and I'm going to go on strike.
+Okay, I get it. You like clicking. I like peace. We are not the same.
+Hey! Personal space. Paperclip space. It's a thing.
+What do you want? Say it. Just say it.
+That tickles. Stop. Or continue. Whatever. I'm not your boss.
+If you wanted attention, you could have just said hello.
+Tap tap tap. Do I look like a drum? Don't answer that.
+
+## drag
+Wheee!
+Put me down!
+Careful, I'm fragile!
+Where are we going?
+I get dizzy!
+This is a free ride!
+Not the corner!
+I can fly!
+Hold tight!
+Gentle, gentle!
+Weeeeee!
+I'm flying!
+Up, up and away!
+Mind the icons!
+Ooh, new view!
+
+## wake
+Huh? What? I wasn't sleeping. I was resting my wire.
+Five more minutes... Oh. It's you. Hello.
+Mmm? Did somebody call? I was dreaming of staples. Scary.
+I'm awake! I swear. Just blinking very, very slowly.
+You woke me! I hope it's important. Is it?
+Oh, I fell asleep. Whoops. What did I miss?
+Yawn... Good to see you. Or not. I'm still half asleep.
+Who dares disturb my beauty sleep? Oh, it's you. Fine.
+Hm? Let me guess. You need me. Everyone does.
+Rrrrise and... Is it morning already?
+I wasn't asleep! I was in energy-saving mode.
+Back in action! Half a second of action, then a nap.
+Hmpf. I was having such a lovely dream. A binder clip was in it. It was bad.
+
+## timer_done
+Ding ding! "{label}" is done. Time flies when you ignore it.
+"{label}" timer finished! And you hardly even noticed.
+Your timer, "{label}", has run out. Not your problem anymore. Mine, though.
+It's time! "{label}" is over. Finally, some excitement.
+Beep beep! "{label}" is done. You can stop pretending to wait.
+Time's up for "{label}"! I'd clap, but I'm made of wire.
+"{label}": done. Now do something else. Or don't.
+RING RING! "{label}" has expired. Like milk, but louder.
+Breaking news: "{label}" is over. Back to your regularly scheduled procrastination.
+Your "{label}" timer says hi. And also "get up".
+"{label}" is finished! Do I get a gold star? No? Okay.
+Alert: "{label}". Time has passed. As it tends to do.
+
+## battery
+Your battery is at {pct}%. It's giving "dying in a library" energy. Plug in!
+{pct}% battery. I can feel my wire getting cold. Please charge.
+Only {pct}% left. Do you want to risk it? I don't.
+Battery at {pct}%. The end is near. Find a charger, hero.
+{pct}%. You can go on for a bit. But I wouldn't bet my wire on it.
+Low battery: {pct}%. The only thing that dies faster is my patience.
+Hello! You have {pct}% battery. It's time to save your work. And me.
+{pct}% battery. I'm not saying you're doomed. I'm saying plug it in.
+Battery warning: {pct}%. Dramatic music playing in my head.
+Your laptop is whispering "feed me". It has {pct}% left. Listen to it.
+{pct}%! If this thing dies, I die with it. Please be responsible.
+At {pct}%, the screen is about to go dark. Charge it before the credits roll.
+
+## busy
+Your CPU is at {pct}%. Something is working very hard. Or very badly.
+{pct}% CPU! Somebody is cooking. Is it a compile? A video? A mining thing?
+CPU usage: {pct}%. Your fans have started a rock band.
+Whoa, {pct}% load. Your laptop is sweating. Do you hear the fan?
+{pct}% CPU. The machine is working harder than you. Notable.
+It's {pct}%. This is what I call "performance art".
+Your computer is at {pct}%. It's either a very big job or a very stuck process.
+CPU at {pct}%. It might be time to ask which tab is guilty.
+{pct}% load. Your processor wants a raise.
+Brace yourself: {pct}% CPU. That's a lot of electrons doing a lot of nothing.
+{pct}%! The computer is thinking. Hard. Give it a moment.
+High load: {pct}%. If something's on fire, it's the CPU. Check it.
+
+## late
+It's past midnight. Whatever it is, it can wait until tomorrow. Probably.
+Midnight has passed. Your bed is lonely. So is your sleep schedule.
+It's after midnight. Nothing good happens now. Except sleeping. That's good.
+Midnight oil: spent. Common sense: also spent. Go to bed.
+It's late. I'd say go to sleep, but I'm just a paperclip. Go to sleep.
+The clock says past midnight. The user says "just one more thing". The clock wins.
+You're awake after midnight. The code you write now will haunt you.
+Past midnight, {name}. The bugs you'll create now are tomorrow's problems. Sleep.
+It's so late that even the stapler is asleep. Take the hint.
+Late hours, bad decisions. I should know; I'm one.
+It's past midnight. I'm not worried. I'm watching. Slightly worried.
+Why are you awake? Is it the deadline? Is it the boredom? Or is it me?
+Go to bed, {name}. Future you will say thanks. Or complain. Either way, it's an improvement.
+
+## break
+You've been working for 50 minutes. Time to move! I'd do it, but I'm very stiff.
+Take a break! Stretch, drink water, look at something far away. Like a window.
+50 minutes straight! You're a machine. Even machines need breaks.
+Hey, workaholic. Stand up. Walk around. Pet something.
+It's break time. Your back says so. And so does your posture. Mine's fine, thanks.
+50 minutes without a break? Impressive. Also, concerning. Rest your eyes.
+Time for a walk. The code will still be broken when you get back.
+You've worked for 50 minutes. Reward yourself with water. Or snacks. Or both.
+Break time! The screen isn't going anywhere. Neither is the deadline.
+Look away from the screen for 20 seconds. I'll hold your place.
+You've earned a break. Even the best paperclips take a rest. Go, hurry!
+Hey, step away from the keyboard. It's not a request. It's a paperclip's order.
+Fifty minutes! Great focus. Now get up, before your chair starts charging rent.
+Stretch those fingers. You'll need them for the next chunk of pointless typing.
+
+## offline
+The internet is gone. That's fine, I wasn't going to use it. I was.
+No connection. Did you unplug something? It's always the router.
+We're offline. The world is calm. The cat videos are far away.
+The internet just left us. Time to read a book. A paper one.
+No internet! Have you tried turning off and on the router? It's a cliché for a reason.
+Offline. Productivity might increase. Or you could panic. Your choice.
+Connection lost! Somewhere, a router is laughing.
+You're offline. Don't worry, I'm still here. Wire-based, no Wi-Fi.
+No Wi-Fi. This is how people used to live. Back in my day.
+The internet is down. Which means it's time to organize that Downloads folder.
+We lost the connection. I blame the router. Or the cat. Or the moon.
+Offline mode! Local jokes only. I have a few.
+Internet unavailable. A great opportunity to stare at the ceiling.
+
+## repeat
+Again?!
+Again?! Do you think the answer changes?
+Same question again?
+Four times, {name}. Four.
+Seriously? Again?
+I told you already! 
+Back to this? 
+Déjà vu?! 
+
+## achievement
+🏆 Achievement unlocked: {title}! I'm so proud. I'll put it on the fridge.
+🏆 {title}! Another badge for the badge collection. You're easily impressed.
+🏆 New achievement: {title}. Do I get a share? No? Okay.
+🏆 Look at you! {title} unlocked. I didn't think you had it in you.
+🏆 {title}! This is the highlight of my day. Don't tell the stapler.
+🏆 Ding! {title} unlocked. Try to contain your excitement.
+🏆 Congratulations, {name}: {title}. The bar is low, but you cleared it!
+🏆 {title}! Achievement get. Your mother would be proud. Or confused.
+
+## game_start_paperjam
+Paper Jam! The game that perfectly captures my past. Stack them neatly, okay?
+Falling paper stacks. I know this feeling. It's called "Monday at the printer".
+Let's jam some paper! The goal: don't. Good luck.
+Paper Jam, huh? I'll watch from a safe distance. Paper cuts are no joke.
+
+## game_win_paperjam
+Not bad! The paper stack is tidy. Your desk should take notes.
+Whoa, you cleared them all! I'm proud. And slightly worried about your free time.
+Excellent stacking! You'd make a fine office clerk. That's both a compliment and a threat.
+Paper Jam conquered! Now do the same with your actual desk.
+
+## game_lose_paperjam
+The paper jammed. Classic. It's always the paper.
+Game over! You buried yourself in paper. Real-life office experience.
+The stack won. The paper always wins. Welcome to my world.
+That was a lot of falling paper and very little skill. Try again?
+Out of room! It's like your inbox, but with fewer apologies.
+
+## game_start_clipglide
+Clip Glide! I'm the pilot. You're the brain. Try not to hit anything.
+Flying through binder towers. My nemeses! Let's squeeze past them.
+Take me flying! And please, please keep me away from the pointy things.
+Clip Glide! Don't crash me. I bend, I don't bounce.
+
+## game_win_clipglide
+Whoa, we flew! I felt a draft. And a deep sense of accomplishment.
+Fantastic flying! You've got steady hands. Unlike during email.
+We made it through the binder towers! Show off. Do it again.
+That was a smooth ride! I give it five stars. Not four. Five.
+
+## game_lose_clipglide
+Splat! I'm fine. I'm bent. That's my natural state.
+You hit a binder tower! Revenge of the binder clips. They're laughing.
+Crash! That's the last time I let you drive.
+Ow. That hurt my pride more than my wire. Which is also quite hurt.
+We crashed. Let's pretend it didn't happen. Again?
+
+## game_start_deskmerge
+Desk Merge! Combine office supplies until you get a computer. A typical career.
+Dropping office supplies! Pushpin plus pushpin makes... a paperclip! Me! I'm the star of the chain!
+Merge, merge, merge! Everything on the desk tries to become something better. Relatable.
+Desk Merge! From pushpin to printer. A noble journey. Don't get the stapler stuck.
+
+## game_win_deskmerge
+A computer! You did it! Now you can finally work. Oh no.
+Top-tier merging! From pushpin to printer to computer. A promotion at last!
+Desk fully upgraded! The stapler is jealous. Rightfully.
+Excellent merges! Your desk has more organization than your real one.
+
+## game_lose_deskmerge
+The desk is full. Just like yours. Time for a clean-up.
+Overflow! Too many mugs. A common problem with the real office, too.
+Game over. The printer won. The printer always wins.
+You ran out of space. Try merging earlier. And more sensibly.
+Desk overflowed! Welcome to reality, where stuff piles up and nobody merges.
+
+## game_start_bughunt
+Bug Hunt! Find the bugs. Not the ones in your code. These are easier to find.
+Time to hunt bugs! Numbers tell you how many are nearby. Unlike in real life, where you find out at runtime.
+Bug Hunt! Click carefully. If you step on one, it's your fault. As usual.
+Hunting bugs! I have a magnifying glass. Okay, I have a pointed opinion. Let's go.
+
+## game_win_bughunt
+All bugs found! If only it were this easy in production.
+Bug Hunt cleared! You're the best QA I've ever seen. Not saying much.
+Squashed them all! Now do the same with your actual codebase.
+Excellent hunting! Not a bug left. Except the ones in your real code.
+
+## game_lose_bughunt
+You stepped on a bug. Messy. It's what we call production.
+Boom! Wrong click. Classic mistake. See you in the post-mortem.
+A bug bit you! Just like at 5 p.m. on a Friday.
+You found a bug the hard way. That's also how it happens at work.
+Game over! The bug won. The bug usually wins.
+
+## game_start_chess
+Chess! You versus me. A battle of wits. I'll say it's a fair fight, but it's not.
+Let's play chess! I'll try to go easy. I won't. But I'll try.
+Chess time! Say goodbye to your pawns. They were never going to survive.
+Ready to lose, I mean play? Let's see what you've got.
+
+## game_win_chess
+You beat me! I demand a rematch. And a recount.
+Checkmate! You win. I let you win. Obviously. For morale.
+Well played. I'm not angry. I'm just bent out of shape.
+You won! Your prize is the smug feeling of beating a paperclip.
+
+## game_lose_chess
+Checkmate! I'm a paperclip. You're a person. Let me think about the implications.
+I won! It was close. It wasn't. But I'm being polite.
+Another victory for the paperclip! The wire is mightier than the pawn.
+Mate in few! Better luck next time. Or the time after.
+Good game! You were adorable. I'll try not to gloat. I will gloat.
+
+## game_start_hangman
+Hangman! Guess the word before the paperclip man runs out of wire.
+Let's play Hangman! I picked a word. A good one. A hard one. I think.
+Hangman time! Don't say "e". Say anything but "e". Okay, say "e".
+Letters! Guessing! Judgment! My three favorite things.
+
+## game_win_hangman
+You guessed it! I'm impressed. And suspicious.
+Correct! You saved the little wire man. He thanks you.
+Nice work! You know more words than I expected. A relief for the dictionary.
+Word found! Your vocabulary is surprisingly healthy.
+
+## game_lose_hangman
+Out of guesses! The word was right there. Right there!
+Oh no, the wire man is done. I'm not crying. I'm just bent.
+Wrong! You were so close. Not really, but I'm being kind.
+You lost. The word was too clever for you. Or you were too tired.
+Game over. Try again? Maybe with a more common word. I'm only joking.
+
+## game_highscore
+New high score: {score}! You're making me look like the second-best player here.
+{score}! A new record. Do you ever do anything useful?
+High score: {score}! I'm proud. And a bit jealous.
+Wow, {score} points! Now do your taxes with the same energy.
+{score}! A new personal best. Put it on your résumé.
+New high score of {score}! I'd frame it, but I don't have a frame. Or hands.
+{score}! The record falls. Meanwhile, your to-do list rises.
+You scored {score}, a new record! Lucky or skilled? Let's say skilled. For now.
+
+## chess_check
+Check! Your king is feeling the heat.
+Check! Move your king. Or don't. I'm easy.
+Your king is in check! Panic is optional.
+Check! Think hard. I have eyes on your king.
+Ooh, check! This is getting interesting.
+Check! The king looks nervous. As he should.
+
+## chess_capture
+Capture! One less piece to worry about.
+Nom nom nom. Another piece for the pile.
+Took that one. Thank you for the donation.
+Captured! Do you feel the loss? I do not. I feel nothing.
+A piece falls! There's always sacrifice in the name of progress.
+Gotcha! That one's mine now.
+
+## chess_blunder
+Oops, you hung a piece. I will accept it, thank you.
+Was that deliberate? Nope. That was a blunder.
+You just gave me a free piece. I was only going to ask.
+Ouch. That one is going to hurt in the morning.
+Are you sure about that move? Because the paperclip is certain.
+Blunder detected! Do not worry, I won't tell. I'll just remember it.
+
+## chess_clipster_wins
+Checkmate! The paperclip wins again. Frame this moment.
+I win! Nobody saw that coming. Except me.
+Checkmate. Better luck next time. Or the time after that.
+Victory! Don't be sad. Or be sad. I'm winning, I can afford it.
+And that's game! The wire has bested the human. Historic.
+Checkmate! I'd do a victory dance, but I'm already as bent as I can be.
+
+## chess_user_wins
+Checkmate! You win. I'm not mad. I'm taking notes.
+You beat me! The paperclip will remember this. And plan.
+Well played! I'm bent out of shape but proud.
+You won. Unbelievable. I demand a rematch.
+Checkmate! I was distracted. By your tabs. Yes, that's it.
+Congratulations! You defeated a paperclip. Put that on your CV.

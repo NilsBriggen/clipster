@@ -1,0 +1,16 @@
+# build output
+/app/target/
+/app/dist/
+
+# files of the tool that built this project (local only)
+/build-activity.log
+/feed.json
+/craft.json
+/usage.json
+/checks/
+/investigation.cany/
+/inbox/
+/pinned/
+/reference/
+/capture/
+/attachments/
