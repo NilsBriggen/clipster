@@ -24,6 +24,7 @@ zbus = "5"
 product-name = "Clipster"
 identifier = "io.github.nilsbriggen.clipster"
 publisher = "Nils Briggen"
+category = "Utility"
 icons = ["assets/clipster.png", "assets/clipster.ico"]
 out-dir = "dist"
 before-packaging-command = "cargo build --release"

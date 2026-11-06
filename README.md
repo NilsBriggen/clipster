@@ -43,7 +43,7 @@ Pick one in **Options → Personality**, or tell him "be boring" / "be unhinged"
 
 Download the latest release from the [Releases page](https://github.com/NilsBriggen/clipster/releases):
 
-- **Linux:** `Clipster-…-x86_64.AppImage`. Make it executable (`chmod +x`) and run it.
+- **Linux:** `clipster_…_x86_64.AppImage`. Make it executable (`chmod +x`) and run it.
 - **Windows:** `clipster_…_x64_en-US.msi`. Run the installer.
 
 On first start Clipster walks you through a short setup: your name, his personality, what he may comment on, and whether he starts at login.
