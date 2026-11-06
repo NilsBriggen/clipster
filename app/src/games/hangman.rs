@@ -115,7 +115,7 @@ impl Hang {
             self.burst = true;
             out.push(Outcome::Won("hangman"));
             out.push(Outcome::Score("hangman", self.streak));
-            if self.streak % 3 == 0 {
+            if self.streak.is_multiple_of(3) {
                 out.push(Outcome::Moment("hangman", "streak"));
             }
         } else if self.lost() {
