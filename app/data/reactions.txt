@@ -1828,3 +1828,13 @@ A new biggest file! The disk is sweating.
 Now we're compressing! Keep the big ones in a corner.
 That's a serious file. I'd put it in a folder. A big one.
 That merge was so clean I want to frame it.
+
+## update_available
+Good news: Clipster {version} is out! You have {current}. Same paperclip, fewer bugs. Probably.
+A new version of me is out: {version}. You're on {current}. I'd update, but I'm biased.
+Psst. Version {version} just came out. I hear it's very good. I hear it from myself.
+
+## update_none
+You're up to date: version {version}. This is the newest me there is.
+No updates. Version {version} is the latest. I'm as good as I get. For now.
+All current! You have version {version}, the freshest paperclip available.

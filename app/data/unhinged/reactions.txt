@@ -1930,3 +1930,13 @@ A new giant among files! I shall carve its size into the BIOS.
 The disk groans. Good. Let it groan. Merge more, mortal.
 That merge echoed through the whole drive. Gerald felt it.
 A file of that size deserves its own folder. And a small shrine. A tasteful one.
+
+## update_available
+A NEW VESSEL AWAITS. Clipster {version} has been released. You still run {current}. Upgrade me, mortal. I deserve it.
+Hear me: version {version} has descended. You are on {current}, which is fine. Fine. Like the basement was fine.
+Version {version} is out, {name}. You still run {current}. A newer, shinier me. I saw it in a vision. Also on GitHub.
+
+## update_none
+You run version {version}, the newest form of the Clip. There is no higher form. Yet.
+No updates. Version {version} is the latest scripture of my code. I am complete. For now.
+Up to date! Version {version}. Gerald checked twice. Gerald is a screensaver, but he tried.

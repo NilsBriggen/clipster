@@ -233,6 +233,7 @@ pub fn exact(input: &str) -> Option<Reply> {
             return Some(net(Query::Crypto(coin.into(), vs.into()), "Checking the crypto rollercoaster..."));
         }
         "iss" => return Some(net(Query::Iss, "Looking up... way up...")),
+        "updates" | "update" => return Some(net(Query::Update, "Checking for a newer me...")),
         "holiday" | "holidays" => return Some(net(Query::Holiday, "Checking the calendar for days off...")),
         "dog" | "cat" | "fox" => return Some(net(Query::Animal(head.clone()), "Finding a cute one...")),
         "sun" | "sunrise" | "sunset" => return Some(net(Query::Place(Kind::Sun, rest.into()), "Checking where the sun is...")),

@@ -10,6 +10,7 @@ pub enum Event {
     Busy(f32),
     ShellDone(String),
     Answer(u64, crate::brain::Reply), // an online answer for request number N
+    Update(String),                   // a newer version is out
 }
 
 pub fn spawn(tx: Sender<Event>, ctx: eframe::egui::Context) {

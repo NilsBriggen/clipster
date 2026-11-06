@@ -677,7 +677,7 @@ mod tests {
             "password 20", "battery", "uptime", "disk", "top", "timers", "cancel", "clipboard history", "12*(3+4)^2", "5 km to miles", "timer 5m tea",
             "remind me in 10 min to stretch", "note buy milk", "open firefox", "why is the sky blue?", "who was Ada Lovelace?", "define serendipity",
             "weather in Rome", "time in Tokyo", "100 dollars to euros", "bitcoin price", "tech news", "on this day", "next holiday", "where is the ISS",
-            "another word for happy", "what rhymes with orange", "is github down?", "what's my ip", "show me a dog", "search cats", "youtube lofi",
+            "another word for happy", "what rhymes with orange", "is github down?", "what's my ip", "show me a dog", "check for updates", "search cats", "youtube lofi",
             "map paris", "louder", "mute", "volume 30", "skip this song", "make the screen darker", "take a screenshot", "find the file called report",
             "my latest download", "empty the trash", "days until christmas", "start a stopwatch", "lock", "run ls", "count hello world", "upper hi",
             "pick pizza, tacos", "call me Sam", "good morning", "wear a wizard hat", "turn gold", "start with my computer", "let's play a game",

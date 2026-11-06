@@ -145,6 +145,10 @@ struct App {
     unhinged: bool,                                // personality: the trapped god (true) or the plain paperclip
     onboarding: Option<u8>,                        // the first-run setup's step (0 = waiting for a name)
     moments: std::collections::HashMap<&'static str, Instant>, // when each game last got a live comment
+    check_updates: bool,           // look for a newer version once a day
+    next_update_check: Instant,
+    update: Option<String>,        // a newer version that's out
+    update_told: String,           // the version he last told you about (once per version)
 }
 
 /// (id, counter, how many). Titles and quips live in the "achievements" section.
@@ -214,6 +218,10 @@ impl App {
             notice_clip: true,
             notice_programs: true,
             notice_health: true,
+            check_updates: true,
+            next_update_check: Instant::now() + Duration::from_secs(45), // after the greeting, not during it
+            update: None,
+            update_told: String::new(),
             quiet_until: None,
             next_tip: now + Duration::from_secs(600),
             last_touch: now,
@@ -573,7 +581,7 @@ impl App {
         let unix = |at: &Instant| (std::time::SystemTime::now() + at.saturating_duration_since(Instant::now())).duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0);
         serde_json::json!({
             "tips_every": self.tips_every, "notice_clip": self.notice_clip, "notice_programs": self.notice_programs,
-            "notice_health": self.notice_health, "sounds": self.sounds, "breaks": self.breaks, "name": self.name,
+            "notice_health": self.notice_health, "check_updates": self.check_updates, "update_told": self.update_told, "sounds": self.sounds, "breaks": self.breaks, "name": self.name,
             "hat": self.hat, "skin": self.skin, "friendship": self.friendship, "highscores": self.highscores, "birthday": self.birthday.map(|(m, d)| [m, d]), "stats": self.stats, "unlocked": self.unlocked, "explored": self.explored, "persona": if self.unhinged { "unhinged" } else { "boring" }, "anchor": self.anchor.or(self.saved_anchor).map(|a| [a.x, a.y]),
             "timers": self.timers.iter().map(|(at, l, every)| serde_json::json!([unix(at), l, every])).collect::<Vec<_>>(),
         })
@@ -586,7 +594,8 @@ impl App {
         let b = |k: &str, d: bool| v[k].as_bool().unwrap_or(d);
         self.tips_every = v["tips_every"].as_u64().unwrap_or(self.tips_every);
         (self.notice_clip, self.notice_programs, self.notice_health) = (b("notice_clip", true), b("notice_programs", true), b("notice_health", true));
-        (self.sounds, self.breaks) = (b("sounds", true), b("breaks", true));
+        (self.sounds, self.breaks, self.check_updates) = (b("sounds", true), b("breaks", true), b("check_updates", true));
+        self.update_told = v["update_told"].as_str().unwrap_or("").to_string();
         self.name = v["name"].as_str().unwrap_or("").to_string();
         self.hat = v["hat"].as_str().map(String::from);
         self.skin = v["skin"].as_str().unwrap_or("silver").to_string();
@@ -920,7 +929,27 @@ impl App {
                 Event::Program(p) if self.notice_programs => self.pipe_up(brain::react_program(&p)),
                 Event::Battery(p) if self.notice_health => self.pipe_up(brain::react_battery(p)),
                 Event::Busy(l) if self.notice_health => self.pipe_up(brain::react_busy(l)),
+                Event::Update(v) if net::newer(&v, env!("CARGO_PKG_VERSION")) => self.update = Some(v),
                 _ => {}
+            }
+        }
+        // once a day: is there a newer Clipster? (GitHub is only asked while this is switched on)
+        if self.check_updates && self.screenshot.is_none() && now >= self.next_update_check {
+            self.next_update_check = now + Duration::from_secs(24 * 3600);
+            let (tx, ctx2) = (self.tx.clone(), ctx.clone());
+            std::thread::spawn(move || {
+                if let Ok(v) = net::latest_version() {
+                    let _ = tx.send(Event::Update(v));
+                    ctx2.request_repaint();
+                }
+            });
+        }
+        // tell you once per new version, when he isn't in the middle of something with you
+        if let Some(v) = self.update.clone().filter(|v| self.check_updates && *v != self.update_told) {
+            if self.balloon.is_none() && self.input.is_empty() && !self.quiet() && self.onboarding.is_none() {
+                self.update_told = v.clone();
+                self.sound("message");
+                self.show(net::update_reply(&v));
             }
         }
         // comments he made on his own close by themselves, but not while you're reading (pointer on him) or typing
@@ -1032,6 +1061,7 @@ impl App {
                 ui.checkbox(&mut self.notice_clip, "Comment on things I copy");
                 ui.checkbox(&mut self.notice_programs, "Comment on programs I open");
                 ui.checkbox(&mut self.notice_health, "Warn me about battery and a busy computer");
+                ui.checkbox(&mut self.check_updates, "Tell me when a new version is out");
                 ui.checkbox(&mut self.sounds, "Play sounds (alarms and pop-ups)");
                 ui.checkbox(&mut self.breaks, "Remind me to take breaks");
                 let mut auto = sys::autostart_path().exists();

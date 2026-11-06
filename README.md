@@ -46,7 +46,7 @@ Download the latest release from the [Releases page](https://github.com/NilsBrig
 - **Linux:** `clipster_…_x86_64.AppImage`. Make it executable (`chmod +x`) and run it.
 - **Windows:** `clipster_…_x64_en-US.msi`. Run the installer.
 
-On first start Clipster walks you through a short setup: your name, his personality, what he may comment on, and whether he starts at login.
+On first start Clipster walks you through a short setup: your name, his personality, what he may comment on, and whether he starts at login. When a new version comes out, he tells you once and links to the download (or ask him to "check for updates").
 
 **Call him from anywhere:** Meta+C on KDE Plasma, Ctrl+Alt+C on Windows. Drag him anywhere, right-click for his menu, double-click for a trick.
 
@@ -70,7 +70,7 @@ Almost everything Clipster says is plain text in `app/data/` (the Unhinged perso
 
 ## Privacy
 
-Clipster runs locally. He reads your clipboard and the list of running programs to comment on them, and keeps clipboard history in memory only. He uses the internet only when you ask for something live (weather, an encyclopedia lookup, exchange rates…), through free public services. There's no telemetry.
+Clipster runs locally. He reads your clipboard and the list of running programs to comment on them, and keeps clipboard history in memory only. He uses the internet only when you ask for something live (weather, an encyclopedia lookup, exchange rates…), through free public services, and once a day to ask GitHub whether a newer Clipster is out (switch that off in Options). There's no telemetry.
 
 ## License
 

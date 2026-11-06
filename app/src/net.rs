@@ -53,6 +53,7 @@ pub enum Query {
     Files(String),
     RandomWiki,
     Briefing,
+    Update, // is there a newer Clipster?
 }
 
 pub fn answer(q: &Query) -> Reply {
@@ -85,6 +86,31 @@ fn offline(q: &Query, e: &str) -> Reply {
         r = r.btn("Search the web instead", Act::Open(format!("https://duckduckgo.com/?q={}", url_encode(t))));
     }
     r.run("Show me what you can do", "help")
+}
+
+/// Where new versions are published.
+pub const RELEASES: &str = "https://github.com/NilsBriggen/clipster/releases/latest";
+
+/// The newest released version ("0.2.0"), from GitHub's list of releases.
+pub fn latest_version() -> Result<String, String> {
+    let v = get("https://api.github.com/repos/NilsBriggen/clipster/releases/latest")?;
+    let tag = s(&v["tag_name"]);
+    let tag = tag.trim_start_matches('v');
+    if tag.is_empty() { Err("nothing".into()) } else { Ok(tag.to_string()) }
+}
+
+/// Is version `a` newer than `b`? Numbers compare part by part, so 0.10.0 beats 0.9.1.
+pub fn newer(a: &str, b: &str) -> bool {
+    let parts = |v: &str| v.split('.').map(|p| p.trim().parse::<u64>().unwrap_or(0)).collect::<Vec<_>>();
+    parts(a) > parts(b)
+}
+
+/// "Version X is out", with a button to the download page.
+pub fn update_reply(version: &str) -> Reply {
+    Reply::say(lines::pick("update_available").replace("{version}", version).replace("{current}", env!("CARGO_PKG_VERSION")))
+        .mood(Mood::Party)
+        .btn(&format!("Get version {version}"), Act::Open(RELEASES.into()))
+        .btn("Not now", Act::Hide)
 }
 
 fn agent() -> ureq::Agent {
@@ -525,6 +551,11 @@ fn fetch(q: &Query) -> Result<Reply, String> {
             .btn("Copy address", Act::Copy(ip))
             .run("Show my local network addresses", "lan"))
         }
+        Query::Update => {
+            let latest = latest_version()?;
+            let here = env!("CARGO_PKG_VERSION");
+            Ok(if newer(&latest, here) { update_reply(&latest) } else { Reply::say(lines::pick("update_none").replace("{version}", here)).mood(Mood::Happy) })
+        }
         Query::Iss => {
             let v = get("http://api.open-notify.org/iss-now.json")?;
             let (lat, lon) = (f(&v["iss_position"]["latitude"]), f(&v["iss_position"]["longitude"]));
@@ -703,6 +734,16 @@ mod tests {
     }
 
     #[test]
+    fn newer_versions_compare_by_number() {
+        assert!(newer("0.2.0", "0.1.0"));
+        assert!(newer("0.10.0", "0.9.1"), "not alphabetical");
+        assert!(newer("1.0.0", "0.99.99"));
+        assert!(!newer("0.1.0", "0.1.0"));
+        assert!(!newer("0.1.0", "0.2.0"));
+        assert!(update_reply("9.9.9").text.contains("9.9.9"));
+    }
+
+    #[test]
     fn disambiguation_pages_are_spotted() {
         let page = |extract: &str, props: Value| serde_json::json!({"title": "I Am", "extract": extract, "pageprops": props});
         assert!(disambiguation(&page("I am may refer to:", Value::Null)));
@@ -730,7 +771,7 @@ mod tests {
             Query::Cocktail, Query::CatFact, Query::Bored, Query::Xkcd(true), Query::Affirm, Query::Kanye,
             Query::Quote, Query::Advice, Query::News(false), Query::News(true), Query::OnThisDay, Query::Iss, Query::Trivia,
             Query::IsDown("example.com".into()), Query::Words("rel_syn", "happy".into()), Query::Words("rel_rhy", "clip".into()),
-Query::RandomWiki, Query::Briefing,             Query::Spell("definately".into()), Query::Spell("necessary".into()), Query::Animal("dog".into()),
+Query::RandomWiki, Query::Briefing, Query::Update,             Query::Spell("definately".into()), Query::Spell("necessary".into()), Query::Animal("dog".into()),
         ] {
             match fetch(&q) {
                 Ok(r) => println!("OK  {q:?}: {}", r.text.replace('\n', " / ").chars().take(150).collect::<String>()),

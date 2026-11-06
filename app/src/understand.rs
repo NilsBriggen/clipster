@@ -1138,6 +1138,7 @@ fn system(s: &str) -> Option<Reply> {
         (&["on this day", "this day in history", "today in history", "history today", "happened on this day", "historical events", "happened today in history"][..], "onthisday"),
         (&["news", "headlines", "current events", "what is happening in the world", "what is going on in the world"][..], "news"),
         (&["iss", "space station", "international space station", "astronauts", "people in space"][..], "iss"),
+        (&["check for updates", "check for update", "check for a new version", "is there an update", "is there a new version", "update clipster", "update yourself", "new version of clipster", "what version are you", "which version are you", "your version", "clipster version"][..], "updates"),
         (&["holiday", "holidays", "public holiday", "bank holiday", "day off", "days off"][..], "holiday"),
         (&["local ip", "lan", "local network", "wifi address", "network interfaces"][..], "lan"),
         (&["public ip", "where am i", "my location", "my ip", "ip address", "ip", "my isp", "internet provider"][..], "ip"),
@@ -1369,6 +1370,8 @@ mod tests {
         assert_eq!(eff("let's play minesweeper"), Effect::Play("bughunt".into()));
         assert_eq!(eff("i want to play chess"), Effect::Play("chess".into()));
         assert_eq!(eff("let's play 2048"), Effect::Play("bytesize".into()));
+        assert_eq!(eff("check for updates"), Effect::Net(Query::Update));
+        assert_eq!(eff("is there a new version?"), Effect::Net(Query::Update));
         assert!(!matches!(eff("2048 in hex"), Effect::Play(_)), "a number is not a game");
         assert_eq!(eff("I lost at chess"), Effect::None, "small talk, not a game");
         assert_eq!(eff("what have you learned"), Effect::None);
