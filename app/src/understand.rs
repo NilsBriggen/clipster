@@ -941,15 +941,16 @@ fn windows_place(t: &str) -> Option<String> {
 
 fn resolve(t: &str, raw: &str) -> String {
     let t = tidy_target(t);
-    let dir = |d: Option<std::path::PathBuf>| d.map(|p| p.to_string_lossy().into_owned());
+    // without XDG user-dirs set up, `dirs` knows no Downloads folder: use ~/Downloads rather than downloads.com
+    let dir = |d: Option<std::path::PathBuf>, name: &str| d.or_else(|| dirs::home_dir().map(|h| h.join(name))).map(|p| p.to_string_lossy().into_owned());
     let place = if cfg!(windows) { windows_place(t) } else { None }.or_else(|| match t {
-        "downloads" | "download" => dir(dirs::download_dir()),
-        "documents" | "docs" | "document" => dir(dirs::document_dir()),
-        "pictures" | "photos" | "images" | "pics" => dir(dirs::picture_dir()),
-        "music" | "songs" => dir(dirs::audio_dir()),
-        "videos" | "movies" => dir(dirs::video_dir()),
-        "desktop" => dir(dirs::desktop_dir()),
-        "home" | "home folder" | "files" | "file manager" | "file explorer" | "explorer" | "finder" => dir(dirs::home_dir()),
+        "downloads" | "download" => dir(dirs::download_dir(), "Downloads"),
+        "documents" | "docs" | "document" => dir(dirs::document_dir(), "Documents"),
+        "pictures" | "photos" | "images" | "pics" => dir(dirs::picture_dir(), "Pictures"),
+        "music" | "songs" => dir(dirs::audio_dir(), "Music"),
+        "videos" | "movies" => dir(dirs::video_dir(), "Videos"),
+        "desktop" => dir(dirs::desktop_dir(), "Desktop"),
+        "home" | "home folder" | "files" | "file manager" | "file explorer" | "explorer" | "finder" => dir(dirs::home_dir(), ""),
         "trash" | "recycle bin" | "bin" => Some("trash:///".into()),
         "browser" | "web browser" | "internet" | "web" => Some("https://duckduckgo.com".into()),
         "email" | "mail" | "inbox" => first_in_path(&["thunderbird", "evolution", "kmail", "geary"]).or(Some("mailto:".into())),

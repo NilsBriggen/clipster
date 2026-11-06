@@ -171,7 +171,7 @@ pub fn trash() -> Reply {
 }
 
 pub fn latest_download() -> Reply {
-    let dir = dirs::download_dir().unwrap_or_default();
+    let dir = dirs::download_dir().or_else(|| dirs::home_dir().map(|h| h.join("Downloads"))).unwrap_or_default();
     let newest = std::fs::read_dir(&dir)
         .into_iter()
         .flatten()
