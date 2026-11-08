@@ -53,6 +53,20 @@ enum Anim {
     Party,
     Sneeze,
     Glitch,
+    Juggle,    // three paper balls
+    Newspaper, // reading the paper, eyes over the top
+    Nap,       // slumped on his notepad
+    Typing,    // a tiny keyboard
+}
+
+/// How long an animation plays before he's back to idle.
+fn anim_len(a: Anim) -> f32 {
+    match a {
+        Anim::Nap => 6.0,
+        Anim::Newspaper => 4.0,
+        Anim::Juggle | Anim::Typing => 3.0,
+        _ => 1.8,
+    }
 }
 
 impl From<Mood> for Anim {
@@ -323,6 +337,19 @@ impl App {
             }
         }
         app.refresh_mood(); // screenshots too: CLIPSTER_MOOD=glitchy shows a glitchy day
+        if app.screenshot.is_some() {
+            // CLIPSTER_ANIM=juggle (newspaper, nap, typing) shows one of the longer idle animations in a screenshot
+            let forced = match std::env::var("CLIPSTER_ANIM").as_deref() {
+                Ok("juggle") => Some(Anim::Juggle),
+                Ok("newspaper") => Some(Anim::Newspaper),
+                Ok("nap") => Some(Anim::Nap),
+                Ok("typing") => Some(Anim::Typing),
+                _ => None,
+            };
+            if let Some(a) = forced {
+                (app.anim, app.anim_t0, app.balloon) = (a, 0.0, None);
+            }
+        }
         if first_run && app.screenshot.is_none() {
             let r = app.onboard("");
             app.show(r); // a brand-new install gets the setup instead of the plain greeting
@@ -1181,7 +1208,10 @@ impl App {
         // little tricks now and then so he never looks frozen
         if self.anim == Anim::Idle && t > self.next_trick {
             use rand::seq::SliceRandom;
-            let mut tricks = vec![Anim::Sway, Anim::Wiggle, Anim::LookAround, Anim::Wink, Anim::Yawn, Anim::Tap, Anim::Stretch, Anim::Cool, Anim::Sneeze, Anim::Music];
+            let mut tricks = vec![
+                Anim::Sway, Anim::Wiggle, Anim::LookAround, Anim::Wink, Anim::Yawn, Anim::Tap, Anim::Stretch, Anim::Cool, Anim::Sneeze, Anim::Music,
+                Anim::Juggle, Anim::Newspaper, Anim::Nap, Anim::Typing,
+            ];
             // his mood of the day shows in what he does when nobody's looking
             tricks.extend(match lines::day_mood() {
                 Some("glitchy") => vec![Anim::Glitch, Anim::Glitch, Anim::Glitch, Anim::Glitch, Anim::Dizzy],
@@ -1214,7 +1244,7 @@ impl App {
         } else if self.balloon.is_none() && now.duration_since(self.last_touch) > Duration::from_secs(240) && self.anim == Anim::Idle {
             self.anim = Anim::Sleep;
         }
-        if self.anim != Anim::Idle && self.anim != Anim::Sleep && t - self.anim_t0 > 1.8 {
+        if self.anim != Anim::Idle && self.anim != Anim::Sleep && t - self.anim_t0 > anim_len(self.anim) as f64 {
             self.anim = Anim::Idle;
         }
     }
@@ -1605,8 +1635,10 @@ fn draw_clipster(p: &egui::Painter, origin: Pos2, t: f32, at: f32, anim: Anim, l
     let (mut frown, mut shades, mut tear, mut glass, mut confetti) = (0.0f32, false, None::<f32>, None::<(f32, f32)>, false);
     let mut extra: Option<(&str, Vec2, Color32)> = None;
     let ink = Color32::from_rgb(30, 30, 30);
-    let fade = (1.0 - at / 1.8).max(0.0);
-    let bell = (at.clamp(0.0, 1.8) / 1.8 * PI).sin(); // 0 -> 1 -> 0 over the animation
+    let len = anim_len(anim);
+    let fade = (1.0 - at / len).max(0.0);
+    let bell = (at.clamp(0.0, len) / len * PI).sin(); // 0 -> 1 -> 0 over the animation
+    let inout = (at / 0.4).min((len - at) / 0.4).clamp(0.0, 1.0); // props slide in and out
     match anim {
         Anim::Idle => {}
         Anim::Talk => brow = ((at * 9.0).sin() * 2.5).max(0.0),
@@ -1730,6 +1762,33 @@ fn draw_clipster(p: &egui::Painter, origin: Pos2, t: f32, at: f32, anim: Anim, l
             confetti = true;
             dy -= (at * PI / 0.45).sin().abs() * 12.0 * fade;
             brow = 4.0;
+        }
+        Anim::Juggle => {
+            let ph = at * 3.2;
+            look = vec2(ph.cos() * 0.7, -0.9);
+            dy -= (at * 6.4).sin().abs() * 2.0 * inout;
+            brow = 2.0;
+        }
+        Anim::Newspaper => {
+            look = vec2(((at * 1.3).sin()) * 0.6, 0.35); // reading along the lines
+            brow = 2.5;
+        }
+        Anim::Nap => {
+            sy = 1.0 - 0.3 * inout + (t * 1.4).sin() * 0.015 * inout; // slumps onto the pad, breathing
+            rot = 0.18 * inout;
+            closed = inout > 0.5;
+            if inout > 0.5 {
+                let z = (t * 0.6).fract();
+                extra = Some((if z < 0.5 { "z" } else { "Z" }, vec2(64.0 + z * 8.0, 40.0 - z * 22.0), ink));
+            }
+        }
+        Anim::Typing => {
+            look = vec2(0.0, 0.9);
+            dy -= (at * 21.0).sin().abs() * 1.2 * inout;
+            brow = 1.0;
+            if inout >= 1.0 {
+                extra = Some((if (at * 4.0) as i32 % 2 == 0 { "tap" } else { "tak" }, vec2(64.0, 104.0), ink));
+            }
         }
         Anim::Glitch => {
             // decades in a basement: he skips like a scratched CD
@@ -1881,6 +1940,50 @@ fn draw_clipster(p: &egui::Painter, origin: Pos2, t: f32, at: f32, anim: Anim, l
             let wob = (at * 9.0 + i as f32).sin() * 2.0;
             p.rect_filled(Rect::from_center_size(origin + vec2(x + wob, y) * SCALE, vec2(3.0, 5.0)), 1.0, c);
         }
+    }
+    let paper = Color32::from_rgb(246, 243, 232);
+    let edge = Stroke::new(1.0, Color32::from_rgb(110, 110, 110));
+    let at_ = |x: f32, y: f32| origin + vec2(x, y) * SCALE;
+    match anim {
+        // the props of the longer idle animations, drawn over everything else
+        Anim::Juggle => {
+            for i in 0..3 {
+                let ph = at * 3.2 + i as f32 * 2.09;
+                let c = at_(30.0 + ph.cos() * 20.0, 2.0 - ph.sin().abs() * 20.0 * inout + (1.0 - inout) * 26.0);
+                p.circle(c, 4.5 * SCALE, paper, edge);
+                p.line_segment([c + vec2(-2.0, -1.0) * SCALE, c + vec2(1.5, 1.5) * SCALE], Stroke::new(1.0, Color32::from_rgb(170, 170, 170)));
+            }
+        }
+        Anim::Newspaper => {
+            let drop = (1.0 - inout) * 70.0; // rises into place, lowers at the end
+            let r = Rect::from_min_max(at_(-8.0, 46.0 + drop), at_(68.0, 106.0 + drop));
+            p.rect_filled(r, 1.0, paper);
+            p.rect_stroke(r, 1.0, edge, egui::StrokeKind::Inside);
+            p.line_segment([pos2(r.center().x, r.min.y), pos2(r.center().x, r.max.y)], Stroke::new(1.0, Color32::from_rgb(200, 196, 185)));
+            p.rect_filled(Rect::from_min_max(r.min + vec2(4.0, 4.0) * SCALE, pos2(r.center().x - 3.0, r.min.y + 9.0 * SCALE)), 0.0, Color32::from_rgb(40, 40, 40));
+            for half in [0.0, 1.0] {
+                for row in 0..6 {
+                    let x0 = r.min.x + (4.0 + half * 38.0) * SCALE;
+                    let y = r.min.y + (16.0 + row as f32 * 7.0) * SCALE;
+                    let w = if (row + half as i32) % 3 == 2 { 22.0 } else { 30.0 };
+                    p.line_segment([pos2(x0, y), pos2(x0 + w * SCALE, y)], Stroke::new(1.2, Color32::from_rgb(150, 150, 150)));
+                }
+            }
+        }
+        Anim::Typing => {
+            let rise = (1.0 - inout) * 12.0;
+            let kb = Rect::from_min_max(at_(2.0, 116.0 + rise), at_(60.0, 130.0 + rise));
+            p.rect_filled(kb, 3.0, Color32::from_rgb(70, 72, 80));
+            let lit = (at * 12.0) as usize;
+            for row in 0..3 {
+                for col in 0..9 {
+                    let k = Rect::from_min_size(kb.min + vec2(2.5 + col as f32 * 6.1, 1.8 + row as f32 * 4.0) * SCALE, vec2(4.6, 2.9) * SCALE);
+                    let on = (row * 9 + col) * 7 % 27 == lit % 27;
+                    p.rect_filled(k, 1.0, if on { Color32::from_rgb(255, 214, 80) } else { Color32::from_rgb(200, 202, 208) });
+                }
+            }
+        }
+        _ => {}
     }
     if let Some((s, off, color)) = extra {
         let size = if s.chars().count() > 1 { 12.0 } else { 20.0 };
