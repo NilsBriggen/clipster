@@ -24,6 +24,7 @@ pub enum Effect {
     Quiet(u64),
     ListTimers,
     CancelTimers,
+    CancelTimer(String), // the timers whose label contains this
     Exit,
     Net(crate::net::Query),
     ClipHistory,
@@ -410,7 +411,8 @@ pub fn exact(input: &str) -> Option<Reply> {
         "timer" | "alarm" => return Some(timer(rest, "")),
         "remind" | "reminder" => return Some(remind(rest)),
         "timers" => return Some(Reply::say("").effect(Effect::ListTimers)),
-        "cancel" | "stop" => return Some(Reply::say(lines::pick("say_cancel")).effect(Effect::CancelTimers)),
+        "cancel" | "stop" if rest.is_empty() || rest == "all" => return Some(Reply::say(lines::pick("say_cancel")).effect(Effect::CancelTimers)),
+        "cancel" => return Some(Reply::say(lines::pick("say_timer_cancelled").replace("{label}", rest)).effect(Effect::CancelTimer(rest.to_string()))),
         "note" | "remember" | "todo" => return Some(note_add(rest)),
         "notes" | "todos" => return Some(notes_list()),
         // notes are only wiped after a yes, and only when it's clearly about them ("forget it" is not)

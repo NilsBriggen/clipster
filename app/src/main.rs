@@ -996,9 +996,25 @@ impl App {
                         .collect();
                     format!("Your timers:\n{list}")
                 };
-                r = r.run("Cancel all timers", "cancel");
+                // one Cancel button per named timer (a few), then all of them
+                let mut labels: Vec<&String> = self.timers.iter().map(|(_, l, _)| l).filter(|l| !l.is_empty()).collect();
+                labels.dedup();
+                for l in labels.into_iter().take(4) {
+                    r = r.run(&format!("Cancel \"{l}\""), &format!("cancel {l}"));
+                }
+                if !self.timers.is_empty() {
+                    r = r.run("Cancel all timers", "cancel");
+                }
             }
             Effect::CancelTimers => self.timers.clear(),
+            Effect::CancelTimer(name) => {
+                let before = self.timers.len();
+                let low = name.to_lowercase();
+                self.timers.retain(|(_, l, _)| !l.to_lowercase().contains(&low));
+                if self.timers.len() == before {
+                    r = Reply::say(format!("I don't have a timer called \"{name}\".")).run("Show my timers", "timers");
+                }
+            }
             Effect::CopyNow(text) => {
                 ctx.copy_text(text.clone());
                 self.ignore_clip = text;
