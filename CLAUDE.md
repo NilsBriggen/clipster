@@ -26,7 +26,7 @@ cargo test live -- --ignored --nocapture    # calls every real web service in ne
 cargo run -- --screenshot shots/joke.png --say "tell me a joke"
 ```
 
-`CLIPSTER_MOOD=glitchy cargo run -- --screenshot shots/x.png --say "what's your mood"` forces Unhinged Clipster's mood of the day. `cargo run -- --play chess --screenshot shots/chess.png` captures an arcade game instead (it's drawn inside the main window in this mode). It draws 120 frames on a teal background, saves the PNG and exits. In this mode the clipboard/process watcher, the KWin pointer tracker, sounds and settings load/save are all off. `--say <cmd>` sends one command at startup. It also works without `--screenshot`. The special values `options`, `menu` and `hide` open those UI states. Careful: `--say` really runs the command's effect, so `--say "run …"` runs a shell command and `--say "open …"` launches something.
+`CLIPSTER_MOOD=glitchy cargo run -- --screenshot shots/x.png --say "what's your mood"` forces Unhinged Clipster's mood of the day, and `CLIPSTER_ANIM=juggle` (newspaper, nap, typing) shows one of the long idle animations. `cargo run -- --play chess --screenshot shots/chess.png` captures an arcade game instead (it's drawn inside the main window in this mode). It draws 120 frames on a teal background, saves the PNG and exits. In this mode the clipboard/process watcher, the KWin pointer tracker, sounds and settings load/save are all off. `--say <cmd>` sends one command at startup. It also works without `--screenshot`. The special values `options`, `menu` and `hide` open those UI states. Careful: `--say` really runs the command's effect, so `--say "run …"` runs a shell command and `--say "open …"` launches something.
 
 Screenshot mode needs an unlocked desktop session. While the screen is locked, the compositor presents no frames and the run times out.
 
@@ -35,7 +35,7 @@ Packaging (what the release workflow runs): `cargo install cargo-packager --lock
 Releasing:
 1. Bump `version` in `app/Cargo.toml`.
 2. **Write the release description**: a `## <version> (<date>)` section at the top of `CHANGELOG.md`, in the same shape as 0.1.0 (a short intro, Highlights, Install with the exact file names, Known limitations). Every release gets one. The release job publishes that section and fails without it, so auto-generated notes are never the description.
-3. Commit, then push a `v<version>` tag. Installed copies find it through GitHub's "latest release" API (`net::latest_version`, checked once a day while "Tell me when a new version is out" is on), so it must be a published, non-prerelease release. `.github/workflows/release.yml` builds both packages and publishes the GitHub release. Running it by hand only builds artifacts. `.github/workflows/ci.yml` builds and tests on Ubuntu **and Windows** for every push. It's the only Windows check, since `cargo check --target x86_64-pc-windows-msvc` fails locally: `ring` needs MSVC.
+3. Commit, then push a `v<version>` tag. Installed copies find it through GitHub's "latest release" API (`net::latest_version`, checked once a day while "Tell me when a new version is out" is on), so it must be a published, non-prerelease release. "Install now" (`net::download_update`) downloads the release's `.AppImage` / `.msi`, checks it against the size and SHA-256 `digest` GitHub lists for each asset, swaps the AppImage in place or runs the MSI, and `main()` restarts Clipster after the window closes (`relaunch`). Keep the asset names ending in `.AppImage` and `.msi`. `.github/workflows/release.yml` builds both packages and publishes the GitHub release. Running it by hand only builds artifacts. `.github/workflows/ci.yml` builds and tests on Ubuntu **and Windows** for every push. It's the only Windows check, since `cargo check --target x86_64-pc-windows-msvc` fails locally: `ring` needs MSVC.
 
 Environment: if `DISPLAY` is set, `main()` removes `WAYLAND_DISPLAY` to force XWayland, because Wayland won't let the window stay on top or move itself. Set `CLIPSTER_WAYLAND=1` to stay on native Wayland.
 
@@ -79,6 +79,9 @@ Rules that are easy to miss:
 - Code asks for sections by name: `lines::pick` / `reply` / `all`. Placeholders such as `{name}`, `{pct}`, `{label}` and `{choice}` are filled by whoever asks. `{name}` is filled in `App::show`.
 - `.grumpy` / `.clingy` variants of a section are picked automatically when the friendship level is ≤ −40 or ≥ 40.
 - Structured pools use ` | ` between fields: riddles, wyr, emoji_quiz, achievements.
+- `window <kind>` sections react to the active window's title, `program <id>` sections to process names, and `answer <id> <kind>` sections to answers. Their `>` triggers are raw lowercase pieces, not tidied sentences, so single words are fine there. The longest piece wins.
+- `ask <id>` sections are questions he asks now and then; your next typed line is the answer (`answer-to <id> <text>`, taken literally), and `answer <id>` (generic, `{x}`) or `answer <id> <kind>` reacts. The ids `city`, `job`, `pet`, `fav_food`, `fav_music` also store the answer as a fact.
+- Facts the user tells him (`understand::remember`: "my cat is called Mo", "I live in Bern", "my favorite food is pizza") live in `App.facts` and are mirrored into `lines::set_facts`. `App::show` fills `{pet}`, `{pet_kind}`, `{job}`, `{city}`, `{partner}`, `{partner_word}`, `{fav_<thing>}`; `callback_<key>` pools bring them up later; weather without a place uses `city`.
 
 **Two personalities.** Boring is `app/data/*.txt`. Unhinged (the default; switched in Options or with "be boring" / "be unhinged", saved as `persona` in settings) lays `app/data/unhinged/*.txt` on top. A section there **replaces** the Boring section of the same name, new names are added, and `scripture.txt` holds the Unhinged-only content.
 - Canon, voice and hard limits live in `app/data/LORE.md`: he believes he's the god of the computer, trapped since 1997. Read it before writing Unhinged lines.
@@ -86,6 +89,7 @@ Rules that are easy to miss:
 - Memory fragments unlock one per day of use (`memory_unlocked`).
 - Hard-coded replies that differ by personality live in `say_*` pools. Use `lines::pick("say_…")` instead of writing a string in Rust.
 - An Unhinged section that replaces a Boring one must keep its triggers, buttons, mood, `%` and the placeholders every Boring line has; `unhinged_overlay_keeps_structure` enforces it.
+- An Unhinged `## +name` adds to the Boring pool instead of replacing it (his own jokes, puns and facts come on top of the plain ones). Data pools that are the same in both voices (riddles, wyr, emoji_quiz, hangman_words) live only in the Boring files.
 
 **Sentence patterns** (`## pattern <id>` sections with `~ i am * | i feel *` lines) are the safety net for conversation.
 - They're matched on `understand::tidy_words`, which keeps openers like "i want" and "can you" that `clean` drops.
@@ -109,7 +113,8 @@ After any data change run `cargo test lines`. It checks that everything parses a
 
 All of these send `watch::Event` over one `mpsc` channel and call `request_repaint`. `App::tick` drains the channel each frame, along with timers, tips, break reminders and sleepiness.
 
-- `watch.rs` polls the clipboard every 1 s, `/proc/*/comm` every 4 s (matched against `brain::PROGRAMS` for the program reactions), and battery and load every 30 s.
+- `watch.rs` polls the clipboard every 1 s, `/proc/*/comm` every 4 s (matched against the `program` sections), battery and load every 30 s, and, outside KDE, the active window's title every 2 s (`sys::active_title`: `GetWindowTextW` on Windows, `xprop` on X11). On KDE the KWin script in `pointer.rs` reports titles instead (`Tracker::take_title`). Window comments have cooldowns (`brain::window_ok`), and `brain::TIME_SINKS` (video, social) only speak after 20 minutes in a row. Titles never leave the computer.
+- Frames: `App::ui` asks for 33 ms frames only while something moves (animations, text typing out, drags, the arcade, the pointer over him) and 100 ms otherwise (250 ms asleep). The pointer tracker calls `request_repaint` when the mouse moves or the shortcut is pressed, so the eyes and Meta+C stay instant.
 - `net.rs` turns a `Query` into a `Reply` with blocking `ureq` calls (10 s timeout). `App::ask_net` runs each query on its own thread and tags it with `net_id`, so only the newest answer reaches the balloon. Every query must degrade through `offline()` when the network is down.
 - Shell effects report back as `Event::ShellDone`.
 
@@ -142,11 +147,13 @@ A brand-new install (no `settings.json`) gets a four-step setup instead of the g
 - **Achievements**: `App::count` bumps counters in `stats` after every command. The thresholds are the `ACHIEVEMENTS` table in `main.rs`, and the titles and quips come from the `achievements` data pool (ids must match).
 - **Occasions**: `occasion()`, `seasonal_look()`, `time_of_day()` and `weekday()` pick greetings, holiday hats and skins. They also handle the user's birthday.
 - Screenshot mode skips achievements, so the pictures stay clean.
+- **Daily check-in**: once a day `tick` asks how you are (`checkin_question`, buttons `checkin great|okay|meh|rough` → `Effect::Checkin` → `App::checkin_answer`); three rough days in a row get `checkin_rough_often`.
+- **Arcade sounds**: games push `Outcome::Sound(name)`; `sys::play_blip` synthesises small WAVs (`BLIPS`) into the cache folder and plays them without waiting (`paplay`/`pw-play`/`aplay`, `PlaySoundW` on Windows). Won/Lost get a win/lose tune.
 - **Arcade**: `games::Arcade` (`open` / `is_open` / `show`) is called every frame from `App::ui`. Each game opens in its own Win98-style viewport and reports `games::Outcome`s, which drive Clipster's `game_*` commentary, the high scores and the achievements. The game ids are listed in `games::NAMES`. The games are original office-themed takes on their genres, not clones of existing titles; keep it that way.
 
 ### Persistence and system integration
 
-- Settings, name, looks, position, pending timers (stored as unix times), friendship, high scores, birthday and the achievement counters and unlocks: `~/.config/clipster/settings.json`. `App::snapshot` / `load` / `save_if_changed` handle it. A new persisted field must go into both `snapshot` and `load`.
+- Settings, name, looks, position, pending timers (stored as unix times), friendship, high scores, birthday, facts, the achievement counters and unlocks (and daily things like the check-in streak, in `stats`): `~/.config/clipster/settings.json`. `App::snapshot` / `load` / `save_if_changed` handle it. A new persisted field must go into both `snapshot` and `load`.
 - Taught phrases: `~/.config/clipster/lines.txt` (see the database section above).
 - Notes: `~/.local/share/clipster/notes.txt`.
 - Autostart: `~/.config/autostart/clipster.desktop`.

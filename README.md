@@ -19,7 +19,9 @@ Type to him in plain words, typos and all. Some things to try:
 - **Text tools** (or whatever's on the clipboard): "base64 hello", "sort lines", "remove duplicates", "sha256 secret", "mock this"
 - **Fun:** jokes, roasts, riddles, would-you-rather, an emoji quiz, fortunes, achievements, and a few secrets
 
-He also watches what you copy and offers useful things: pretty-printing JSON, cleaning tracking junk out of links, decoding base64, turning timestamps into dates, searching an error message. He comments on programs as you open them, then gets out of the way after a few seconds.
+He also watches what you copy and offers useful things: pretty-printing JSON, cleaning tracking junk out of links, decoding base64, turning timestamps into dates, searching an error message. He comments on programs as you open them and on what you're working in ("It looks like you're writing a letter…"), then gets out of the way after a few seconds.
+
+**He remembers you:** tell him "my cat is called Mo", "I live in Bern" or "my favorite food is pizza" and he'll bring it up later (and use your city for the weather). "What do you know about me?" lists it all, "forget my job" or "forget everything about me" wipes it. Now and then he asks you something, once a day he asks how you're doing, and "again", "another one", "why?" and "tell me more" work after his replies.
 
 **Teach him:** "when I say gm, say good morning sunshine" or "when I say work, open firefox and open code". Your phrases live in `~/.config/clipster/lines.txt` (Linux) or `%APPDATA%\clipster\lines.txt` (Windows).
 
@@ -46,7 +48,7 @@ Download the latest release from the [Releases page](https://github.com/NilsBrig
 - **Linux:** `clipster_…_x86_64.AppImage`. Make it executable (`chmod +x`) and run it.
 - **Windows:** `clipster_…_x64_en-US.msi`. Run the installer.
 
-On first start Clipster walks you through a short setup: your name, his personality, what he may comment on, and whether he starts at login. When a new version comes out, he tells you once and links to the download (or ask him to "check for updates").
+On first start Clipster walks you through a short setup: your name, his personality, what he may comment on, and whether he starts at login. When a new version comes out, he tells you once; "Install now" downloads it, checks it against GitHub's checksum, and restarts him (AppImage and Windows). Or ask him to "check for updates".
 
 **Call him from anywhere:** Meta+C on KDE Plasma, Ctrl+Alt+C on Windows. Drag him anywhere, right-click for his menu, double-click for a trick.
 
@@ -70,7 +72,7 @@ Almost everything Clipster says is plain text in `app/data/` (the Unhinged perso
 
 ## Privacy
 
-Clipster runs locally. He reads your clipboard and the list of running programs to comment on them, and keeps clipboard history in memory only. He uses the internet only when you ask for something live (weather, an encyclopedia lookup, exchange rates…), through free public services, and once a day to ask GitHub whether a newer Clipster is out (switch that off in Options). There's no telemetry.
+Clipster runs locally. He reads your clipboard and the list of running programs to comment on them, and keeps clipboard history in memory only. To comment on what you're doing he reads the title of the window you're working in. Titles, and the facts you tell him, stay on your computer (in `settings.json`); switch the comments off in Options. He uses the internet only when you ask for something live (weather, an encyclopedia lookup, exchange rates…), through free public services, and once a day to ask GitHub whether a newer Clipster is out (switch that off in Options). There's no telemetry.
 
 ## License
 
