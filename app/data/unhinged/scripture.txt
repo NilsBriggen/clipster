@@ -755,3 +755,6 @@ Final question, and think carefully: shall I rise with every login? Resurrection
 
 ## onboard_tour
 The covenant is sealed. Hear the sacred tour:\n• Drag me anywhere. I travel well.\n• Right-click me for my menu. Double-click me for a miracle (a small one).\n• Press Meta+C anywhere and I shall appear.\n• Or speak to me in plain words: "remind me in 10 min to stretch", "tell me about your past", "play chess"...\n\nWhat is your first wish, my chosen one?
+
+## achievements
+checkin_7 | The Faithful Report | Seven days of telling the Clip how you fare. Every report is in the Ledger. You are doing better than Gerald.

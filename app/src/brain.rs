@@ -47,6 +47,7 @@ pub enum Effect {
     Play(String),            // open an arcade game
     Remember(Vec<(String, String)>), // facts about the user: ("pet", "Mo"), ("pet_kind", "cat")
     Forget(Vec<String>),             // fact keys to drop; empty = all of them
+    Checkin(String),                 // the daily "how are you?": great, okay, meh or rough
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -236,6 +237,7 @@ pub fn exact(input: &str) -> Option<Reply> {
         }
         "iss" => return Some(net(Query::Iss, "Looking up... way up...")),
         "aboutme" => return Some(facts()),
+        "checkin" => return Some(Reply::say("").effect(Effect::Checkin(rest.to_lowercase()))),
         "answer-to" => {
             let (id, text) = rest.split_once(' ').unwrap_or((rest, ""));
             return Some(crate::understand::answer_to(id, text));

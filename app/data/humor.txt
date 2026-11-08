@@ -1695,3 +1695,6 @@ Last one: should I start when you log in? I promise to be only slightly clingy.
 
 ## onboard_tour
 All set! Quick tour:\n• Drag me anywhere you like.\n• Right-click me for my menu, double-click me for a trick.\n• Press Meta+C anywhere to call me.\n• Or just type below, in plain words: "remind me in 10 min to stretch", "5 km to miles", "play chess"...\n\nWhat shall we do first?
+
+## achievements
+checkin_7 | Checked In | Seven days in a row you told me how you are. I wrote it all down. In pencil, in case things get better.

@@ -121,6 +121,7 @@ struct App {
     facts: std::collections::BTreeMap<String, String>, // what you told him: "pet", "city", "fav_food"…
     last_cmd: Option<String>,               // the last command worth repeating ("again", "another one")
     waiting: Option<(String, Instant)>,     // he asked you something (`## ask <id>`): your next line is the answer
+    checkin: bool,                             // ask how you're doing once a day
     notice_windows: bool,                      // comment on what the active window is
     window_kind: Option<String>,               // the active window's kind (`## window <kind>`), and since when
     window_since: Instant,
@@ -159,6 +160,23 @@ struct App {
     update_told: String,           // the version he last told you about (once per version)
 }
 
+/// The check-in streaks after answering today: (days in a row answered, rough days in a row).
+fn checkin_streaks(stats: &std::collections::BTreeMap<String, u64>, today: u64, rough: bool) -> (u64, u64) {
+    let get = |k: &str| stats.get(k).copied().unwrap_or(0);
+    let streak = match stats.get("checkin_last") {
+        Some(&d) if d == today => get("checkin_streak").max(1),
+        Some(&d) if d + 1 == today => get("checkin_streak") + 1,
+        _ => 1,
+    };
+    let run = match (rough, stats.get("rough_last")) {
+        (false, _) => 0,
+        (true, Some(&d)) if d == today => get("rough_run").max(1),
+        (true, Some(&d)) if d + 1 == today => get("rough_run") + 1,
+        (true, _) => 1,
+    };
+    (streak, run)
+}
+
 /// "again", "another one", "one more": the current balloon's own "Another…" button, else the last command.
 fn repeat_command(typed: &str, balloon: Option<&Reply>, last: Option<&str>) -> Option<String> {
     const AGAIN: &[&str] = &["again", "another", "another 1", "1 more", "more", "do it again", "once more", "1 more time", "next", "again please", "more please", "another please"];
@@ -183,7 +201,7 @@ const ACHIEVEMENTS: &[(&str, &str, u64)] = &[
     ("birthday", "birthday", 1), ("nice_10", "nice", 10), ("mean_10", "mean", 10), ("quiet_5", "quiet", 5),
     ("timer_25", "timers", 25), ("notes_10", "notes", 10), ("explorer", "explored", 25), ("best_friends", "besties", 1),
     ("enemies", "enemies", 1), ("konami", "konami", 1), ("archaeologist", "memories", 30), ("devout", "prayers", 10),
-    ("confessor", "confessions", 5),
+    ("confessor", "confessions", 5), ("checkin_7", "checkin_streak", 7),
 ];
 
 impl App {
@@ -246,6 +264,7 @@ impl App {
             notice_clip: true,
             notice_programs: true,
             notice_windows: true,
+            checkin: true,
             facts: Default::default(),
             last_cmd: None,
             waiting: None,
@@ -340,6 +359,32 @@ impl App {
         self.show(r);
         self.sound("message");
         self.auto_hide = Some(Instant::now() + reading_time(&self.balloon.as_ref().map(|b| b.text.clone()).unwrap_or_default()));
+    }
+
+    /// Your answer to the daily check-in: his reaction, a streak, and real kindness after rough days in a row.
+    fn checkin_answer(&mut self, answer: &str) -> Reply {
+        let answer = if ["great", "okay", "meh", "rough"].contains(&answer) { answer } else { "okay" };
+        let today = chrono::Datelike::num_days_from_ce(&chrono::Local::now().date_naive()) as u64;
+        self.stat(&format!("checkin_{answer}"), 1);
+        let (streak, rough) = checkin_streaks(&self.stats, today, answer == "rough");
+        self.stats.extend([("checkin_last".into(), today), ("checkin_streak".into(), streak), ("rough_run".into(), rough)]);
+        if answer == "rough" {
+            self.stats.insert("rough_last".into(), today);
+        }
+        let pool = if rough >= 3 { "checkin_rough_often".to_string() } else { format!("checkin_{answer}") };
+        let mut text = lines::pick(&pool);
+        if answer != "rough" && [3, 7, 14, 30, 50, 100].contains(&streak) {
+            text = format!("{text} {}", lines::pick("checkin_streak").replace("{n}", &streak.to_string()));
+        }
+        let r = Reply::say(text);
+        let r = match answer {
+            "rough" => r.mood(Mood::Love).run("Tell me a joke", "joke").run("A hug, please", "hug").run("Remind me to take a break in 20 minutes", "timer 20m Take a break"),
+            "meh" => r.mood(Mood::Think).run("Cheer me up", "joke").run("Today's trivia question", "quiz"),
+            "great" => r.mood(Mood::Party).run("Today's trivia question", "quiz"),
+            _ => r.mood(Mood::Happy).run("Today's trivia question", "quiz"),
+        };
+        self.announce_unlocks();
+        r
     }
 
     /// Now and then (at most 3 times a day) he asks you something instead of chattering.
@@ -675,7 +720,7 @@ impl App {
     fn snapshot(&self) -> String {
         let unix = |at: &Instant| (std::time::SystemTime::now() + at.saturating_duration_since(Instant::now())).duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0);
         serde_json::json!({
-            "tips_every": self.tips_every, "notice_clip": self.notice_clip, "notice_programs": self.notice_programs, "notice_windows": self.notice_windows, "facts": self.facts,
+            "tips_every": self.tips_every, "notice_clip": self.notice_clip, "notice_programs": self.notice_programs, "notice_windows": self.notice_windows, "checkin": self.checkin, "facts": self.facts,
             "notice_health": self.notice_health, "check_updates": self.check_updates, "update_told": self.update_told, "sounds": self.sounds, "breaks": self.breaks, "name": self.name,
             "hat": self.hat, "skin": self.skin, "friendship": self.friendship, "highscores": self.highscores, "birthday": self.birthday.map(|(m, d)| [m, d]), "stats": self.stats, "unlocked": self.unlocked, "explored": self.explored, "persona": if self.unhinged { "unhinged" } else { "boring" }, "anchor": self.anchor.or(self.saved_anchor).map(|a| [a.x, a.y]),
             "timers": self.timers.iter().map(|(at, l, every)| serde_json::json!([unix(at), l, every])).collect::<Vec<_>>(),
@@ -689,7 +734,7 @@ impl App {
         let b = |k: &str, d: bool| v[k].as_bool().unwrap_or(d);
         self.tips_every = v["tips_every"].as_u64().unwrap_or(self.tips_every);
         (self.notice_clip, self.notice_programs, self.notice_health) = (b("notice_clip", true), b("notice_programs", true), b("notice_health", true));
-        self.notice_windows = b("notice_windows", true);
+        (self.notice_windows, self.checkin) = (b("notice_windows", true), b("checkin", true));
         for (k, v) in v["facts"].as_object().into_iter().flatten() {
             self.facts.insert(k.clone(), v.as_str().unwrap_or("").to_string());
         }
@@ -802,6 +847,7 @@ impl App {
             Effect::Timer(secs, label) => self.timers.push((Instant::now() + Duration::from_secs(secs), label, 0)),
             Effect::Repeat(secs, label) => self.timers.push((Instant::now() + Duration::from_secs(secs), label, secs)),
             Effect::SetName(n) => self.name = n,
+            Effect::Checkin(answer) => r = self.checkin_answer(&answer),
             Effect::Remember(facts) => {
                 self.facts.extend(facts);
                 lines::set_facts(&self.facts);
@@ -1071,6 +1117,17 @@ impl App {
                 self.show(net::update_reply(&v));
             }
         }
+        // once a day, a couple of minutes in, when you're around and he's not mid-conversation: how are you?
+        let today = chrono::Datelike::num_days_from_ce(&chrono::Local::now().date_naive()) as u64;
+        if self.checkin && self.screenshot.is_none() && self.t() > 120.0 && self.stats.get("checkin_day") != Some(&today) && self.balloon.is_none()
+            && self.onboarding.is_none() && !self.quiet() && self.input.is_empty() && now.duration_since(self.last_touch) < Duration::from_secs(600)
+        {
+            self.stats.insert("checkin_day".into(), today);
+            let q = Reply::say(lines::pick("checkin_question")).mood(Mood::Happy);
+            self.show(q.run("😀 Great", "checkin great").run("🙂 Okay", "checkin okay").run("😐 Meh", "checkin meh").run("😞 Rough", "checkin rough"));
+            self.sound("message");
+            self.auto_hide = Some(now + Duration::from_secs(600));
+        }
         // what you're working in: titles from the KWin script, and long stretches on video or social sites
         if let Some(t) = self.tracker.as_ref().and_then(|tr| tr.take_title()) {
             self.window_title(&t);
@@ -1192,6 +1249,7 @@ impl App {
                 ui.checkbox(&mut self.notice_clip, "Comment on things I copy");
                 ui.checkbox(&mut self.notice_programs, "Comment on programs I open");
                 ui.checkbox(&mut self.notice_windows, "Comment on what I'm doing (window titles stay on this computer)");
+                ui.checkbox(&mut self.checkin, "Ask how I'm doing once a day");
                 ui.checkbox(&mut self.notice_health, "Warn me about battery and a busy computer");
                 ui.checkbox(&mut self.check_updates, "Tell me when a new version is out");
                 ui.checkbox(&mut self.sounds, "Play sounds (alarms and pop-ups)");
@@ -2073,6 +2131,16 @@ fn main() -> eframe::Result {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn checkin_streaks_count_days_in_a_row() {
+        let mut s = std::collections::BTreeMap::new();
+        assert_eq!(checkin_streaks(&s, 100, false), (1, 0));
+        s.extend([("checkin_last".to_string(), 99), ("checkin_streak".to_string(), 6), ("rough_last".to_string(), 99), ("rough_run".to_string(), 2)]);
+        assert_eq!(checkin_streaks(&s, 100, true), (7, 3), "a week, and the third rough day running");
+        assert_eq!(checkin_streaks(&s, 100, false), (7, 0), "a good day ends the rough run");
+        assert_eq!(checkin_streaks(&s, 105, true), (1, 1), "a gap starts over");
+    }
 
     #[test]
     fn again_repeats_the_right_thing() {
