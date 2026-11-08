@@ -16,6 +16,8 @@ Type to him in plain words, typos and all. Some things to try:
 - **Writing:** "proofread this" (the clipboard, or the text after it) finds doubled words, common misspellings, a/an mix-ups, its/it's and long sentences, and fixes the safe ones. "Write a complaint letter", "cover letter" or "out of office" give a fill-in-the-blanks template to copy or open as an email
 - **Focus:** "focus 45 minutes on the report" (he nudges you back if you drift to videos or social media), "where did my time go today?"
 - **Files:** "tidy my downloads" sorts loose files into folders by type (nothing is deleted, and "undo the tidy" puts everything back), "find duplicates in downloads", "old big files"
+- **Goals and your day:** "set my focus goal to 2 hours", "limit video to 30 minutes a day", "plan my day" (today's top 3), "wrap up my day" (what got done, the rest moves to tomorrow), "my week in review"
+- **Looking after the computer:** "computer checkup" (free space, trash, temporary files, system updates, battery health, apps that start with the computer, the last backup, each with a fix), and backups to a USB drive or folder that copy only what changed and never delete anything
 - **Tips:** "any tips for this app?" gives a keyboard shortcut for what you're working in
 - **Math and conversions:** "12*(3+4)^2", "5 km to miles", "100 dollars to euros", "255 in hex", "2024 in roman", "tip 15% on 48", "days between june 3 and christmas"
 - **Your computer:** "how's my computer doing", "what's hogging my cpu", "how much ram is firefox using", "louder", "make the screen darker", "take a screenshot", "lock", "empty the trash"
@@ -26,7 +28,9 @@ Type to him in plain words, typos and all. Some things to try:
 
 He also watches what you copy and offers useful things: pretty-printing JSON, cleaning tracking junk out of links, decoding base64, turning timestamps into dates, searching an error message. He comments on programs as you open them and on what you're working in ("It looks like you're writing a letter…"), then gets out of the way after a few seconds.
 
-**Clipster's Desk** ("open my desk", or right-click him): one window with today's time per app and your focus sessions, the last seven days, your to-dos, timers and notes, and tidying your downloads. It comes in the Windows 98 look, or a flat modern one for those who must (View menu or Options).
+**Clipster's Desk** ("open my desk", Meta+Shift+C, or right-click him): one window with eight tabs: Today (time per app, focus and goals, your top 3), Week (with a week in review you can copy), To-do, Reminders and notes, Clipboard (history and pinned snippets), Upkeep (checkup, tidying, backups), You & me (what he knows about you, your taught phrases, achievements) and Settings. It comes in the Windows 98 look, or a flat modern one for those who must.
+
+**A proper welcome:** new installs get a Windows 98-style setup and tour window. "Show me around" opens the tour again.
 
 **He remembers you:** tell him "my cat is called Mo", "I live in Bern" or "my favorite food is pizza" and he'll bring it up later (and use your city for the weather). "What do you know about me?" lists it all, "forget my job" or "forget everything about me" wipes it. Now and then he asks you something, once a day he asks how you're doing, and "again", "another one", "why?" and "tell me more" work after his replies.
 
@@ -61,7 +65,7 @@ On first start Clipster walks you through a short setup: your name, his personal
 
 ### Platform notes
 
-Clipster is developed on Linux with KDE Plasma, where everything works, including following the mouse and keeping him above other windows. On other Linux desktops the global shortcut and mouse-following are off. On Windows nearly everything works: volume and media go through the keyboard's media keys, brightness works on laptop screens, and for Wi-Fi and Bluetooth he opens the right Settings page, because Windows doesn't let apps flip those switches. CPU temperature isn't available on Windows.
+Clipster is developed on Linux with KDE Plasma, where everything works, including following the mouse and keeping him above other windows. On other Linux desktops the global shortcut and mouse-following are off. On Windows nearly everything works: volume and media go through the keyboard's media keys, brightness works on laptop screens, and for Wi-Fi and Bluetooth he opens the right Settings page, because Windows doesn't let apps flip those switches. CPU temperature isn't available on Windows. The Desk opens with Ctrl+Alt+Shift+C there (Meta+Shift+C on KDE). During focus sessions he silences notifications on KDE, GNOME, Cinnamon and XFCE; Windows doesn't let apps switch Do Not Disturb, so there he opens the Focus settings for you.
 
 ## Build from source
 
@@ -79,7 +83,7 @@ Almost everything Clipster says is plain text in `app/data/` (the Unhinged perso
 
 ## Privacy
 
-Clipster runs locally. He reads your clipboard and the list of running programs to comment on them, and keeps clipboard history in memory only. To comment on what you're doing he reads the title of the window you're working in. Titles, how long you spend in each kind of app (for the time report and the Desk), and the facts you tell him stay on your computer (in `settings.json`); switch the comments off in Options. He uses the internet only when you ask for something live (weather, an encyclopedia lookup, exchange rates…), through free public services, and once a day to ask GitHub whether a newer Clipster is out (switch that off in Options). There's no telemetry.
+Clipster runs locally. He reads your clipboard and the list of running programs to comment on them, and keeps clipboard history in memory only. To comment on what you're doing he reads the title of the window you're working in. Titles, how long you spend in each kind of app (for the time report and the Desk), and the facts you tell him stay on your computer (in `settings.json`); switch the comments off in Settings. Pinned clipboard snippets are saved; the clipboard history isn't. Backups go only where you point them. The upkeep checkup asks your own package manager (or Windows Update) how many updates are waiting. He uses the internet only when you ask for something live (weather, an encyclopedia lookup, exchange rates…), through free public services, and once a day to ask GitHub whether a newer Clipster is out (switch that off in Settings). There's no telemetry.
 
 ## License
 
