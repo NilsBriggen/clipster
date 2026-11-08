@@ -57,6 +57,7 @@ pub enum Effect {
     AppTips,                         // a tip for the app you're in (the app knows which)
     Pref(String, String),            // a setting changed on the Desk's Settings tab: key, value
     Goals,                           // how today is going against the focus goal and the daily limits
+    Clip(String),                    // the Desk's Clipboard tab: "copy h3", "pin h3", "unpin p1", "clear"
     Wrapup,                          // the end-of-day card on the Desk
     Review(bool),                    // the week in review (true = copy it as text)
     OpenDesk(String),                // Clipster's Desk, on this tab ("" = where it was): stats, to-dos, reminders, upkeep
@@ -306,6 +307,12 @@ pub fn exact(input: &str) -> Option<Reply> {
         "wrapup" if rest == "bye" => return Some(Reply::say(lines::pick("wrapup_goodnight")).mood(Mood::Love)),
         "wrapup" => return Some(Reply::say("").effect(Effect::Wrapup)),
         "review" => return Some(Reply::say("").effect(Effect::Review(rest == "copy"))),
+        "clip" if !rest.is_empty() => return Some(Reply::say("").effect(Effect::Clip(rest.to_string()))),
+        // the Desk's You & me tab forgets one fact (or all of them, after its own "are you sure")
+        "forgetfact" if !rest.is_empty() => {
+            let key = rest.trim();
+            return Some(Reply::say("").effect(Effect::Forget(if key == "all" { vec![] } else { vec![key.to_string()] })));
+        }
         "pref" => {
             let (key, value) = rest.split_once(' ').unwrap_or((rest, ""));
             return Some(Reply::say("").effect(Effect::Pref(key.to_string(), value.to_string())));

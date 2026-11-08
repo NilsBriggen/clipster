@@ -112,6 +112,8 @@ struct App {
     next_trick: f64,
     dragging: bool,
     clip_history: Vec<String>,
+    pins: Vec<String>, // clipboard snippets pinned on the Desk (saved; the history isn't)
+    sample_clips: Vec<String>, // made-up copies for screenshots of the Desk
     stopwatch: Option<Instant>,
     timers: Vec<(Instant, String, u64)>, // when, what, repeat every N seconds (0 = once)
     name: String,
@@ -258,6 +260,71 @@ fn repeat_command(typed: &str, balloon: Option<&Reply>, last: Option<&str>) -> O
     button.or_else(|| last.map(String::from))
 }
 
+/// What the Desk's You & me tab shows: the facts (with the key that forgets each), every achievement with
+/// its progress (secret ones stay secret until unlocked), the best scores and the friendship.
+fn about_me(facts: &std::collections::BTreeMap<String, String>, birthday: Option<(u32, u32)>, stats: &std::collections::BTreeMap<String, u64>, unlocked: &[String], scores: &std::collections::BTreeMap<String, u32>, friendship: i32) -> desk::Me {
+    let mut rows = vec![];
+    for (key, value) in facts {
+        let label = match key.as_str() {
+            "pet" => format!("Pet: {value}{}", facts.get("pet_kind").map(|k| format!(" ({k})")).unwrap_or_default()),
+            "partner" => format!("Partner: {value}{}", facts.get("partner_word").map(|k| format!(" ({k})")).unwrap_or_default()),
+            "city" => format!("Lives in: {value}"),
+            "job" => format!("Job: {value}"),
+            k if k.ends_with("_kind") || k.ends_with("_word") => continue,
+            k => format!("{}: {value}", k.strip_prefix("fav_").map(|f| format!("Favourite {f}")).unwrap_or_else(|| k.replace('_', " "))),
+        };
+        rows.push((key.clone(), label));
+    }
+    if let Some((m, d)) = birthday {
+        let date = chrono::NaiveDate::from_ymd_opt(2024, m, d).map(|x| x.format("%B %-d").to_string()).unwrap_or_default();
+        rows.push(("birthday".into(), format!("Birthday: {date}")));
+    }
+    let what = |counter: &str| -> Option<&'static str> {
+        Some(match counter {
+            "commands" => "commands",
+            "jokes" => "jokes",
+            "roasts" => "roasts",
+            "nights" => "late nights",
+            "streak" => "days in a row",
+            "games" => "games",
+            "chess_wins" => "chess wins",
+            "taught" => "phrases taught",
+            "copies" => "copies",
+            "birthday" => "birthday told",
+            "nice" => "kind words",
+            "mean" => "rude words",
+            "quiet" => "times hushed",
+            "timers" => "timers",
+            "notes" => "notes",
+            "explored" => "things tried",
+            "checkin_streak" => "check-ins in a row",
+            _ => return None, // secrets
+        })
+    };
+    let achievements = ACHIEVEMENTS
+        .iter()
+        .map(|(id, counter, need)| {
+            let (title, quip) = achievement(id);
+            desk::Achievement { title, quip, unlocked: unlocked.iter().any(|u| u == id), progress: what(counter).map(|w| (stats.get(*counter).copied().unwrap_or(0), *need, w)) }
+        })
+        .collect();
+    let scores = scores
+        .iter()
+        .filter(|(_, s)| **s > 0 && **s != u32::MAX)
+        .filter_map(|(k, s)| games::NAMES.iter().find(|(id, _)| k.starts_with(id)).map(|(_, name)| (name.to_string(), *s)))
+        .collect();
+    desk::Me { facts: rows, achievements, scores, friendship, days: stats.get("days").copied().unwrap_or(1) }
+}
+
+/// Made-up facts, progress and scores for screenshots of the Desk.
+fn sample_me() -> desk::Me {
+    let facts = [("pet", "Mo"), ("pet_kind", "cat"), ("city", "Bern"), ("job", "designer"), ("fav_food", "pizza")].map(|(k, v)| (k.to_string(), v.to_string())).into_iter().collect();
+    let stats = [("commands", 412), ("jokes", 37), ("games", 9), ("copies", 64), ("days", 31), ("notes", 4), ("timers", 18), ("explored", 19)].map(|(k, v)| (k.to_string(), v)).into_iter().collect();
+    let unlocked = ["first_words", "chatterbox_100", "joke_10", "gamer_1", "night_owl", "streak_7", "teacher"].map(String::from);
+    let scores = [("paperjam", 1240), ("clipglide", 37), ("deskmerge", 2048)].map(|(k, v)| (k.to_string(), v)).into_iter().collect();
+    about_me(&facts, Some((6, 3)), &stats, &unlocked, &scores, 46)
+}
+
 /// (id, counter, how many). Titles and quips live in the "achievements" section.
 const ACHIEVEMENTS: &[(&str, &str, u64)] = &[
     ("first_words", "commands", 1), ("chatterbox_100", "commands", 100), ("chatterbox_1000", "commands", 1000),
@@ -304,6 +371,8 @@ impl App {
             next_trick: 10.0,
             dragging: false,
             clip_history: vec![],
+            pins: vec![],
+            sample_clips: ["Printer code: 4711", "Meeting moved to 3 pm, room B", "https://example.com/quarterly-report", "Kind regards,\nSam", "SELECT * FROM paperclips WHERE bent = false;"].map(String::from).to_vec(),
             stopwatch: None,
             timers: vec![],
             name: String::new(),
@@ -514,11 +583,11 @@ impl App {
         };
         match &self.desk_sample {
             Some((t, k, f, c)) => {
-                let view = desk::View { timers: t.clone(), kind_time: k, focus_log: f, focus_now: Some(("the slides".into(), 18 * 60, 7 * 60, 40)), checkins: c, streaks: (4, 6, 31), status, prefs };
+                let view = desk::View { timers: t.clone(), kind_time: k, focus_log: f, focus_now: Some(("the slides".into(), 18 * 60, 7 * 60, 40)), checkins: c, streaks: (4, 6, 31), status, prefs, clips: &self.sample_clips, pins: &self.sample_clips[..2], me: sample_me() };
                 self.desk.show(ctx, &view, look, near)
             }
             None => {
-                let view = desk::View { timers, kind_time: &self.kind_time, focus_log: &self.focus_log, focus_now, checkins: &self.checkin_days, streaks, status, prefs };
+                let view = desk::View { timers, kind_time: &self.kind_time, focus_log: &self.focus_log, focus_now, checkins: &self.checkin_days, streaks, status, prefs, clips: &self.clip_history, pins: &self.pins, me: about_me(&self.facts, self.birthday, &self.stats, &self.unlocked, &self.highscores, self.friendship) };
                 self.desk.show(ctx, &view, look, near)
             }
         }
@@ -1010,7 +1079,7 @@ impl App {
         let unix = |at: &Instant| (std::time::SystemTime::now() + at.saturating_duration_since(Instant::now())).duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0);
         serde_json::json!({
             "tips_every": self.tips_every, "notice_clip": self.notice_clip, "notice_programs": self.notice_programs, "notice_windows": self.notice_windows, "checkin": self.checkin, "facts": self.facts, "kind_time": self.kind_time, "focus_log": self.focus_log, "desk_look": if self.desk_modern { "modern" } else { "classic" }, "checkin_days": self.checkin_days,
-            "dnd": self.dnd, "wrapup": self.wrapup, "upkeep_day": self.upkeep_day, "focus_goal": self.focus_goal, "budgets": self.budgets,
+            "pins": self.pins, "dnd": self.dnd, "wrapup": self.wrapup, "upkeep_day": self.upkeep_day, "focus_goal": self.focus_goal, "budgets": self.budgets,
             "notice_health": self.notice_health, "check_updates": self.check_updates, "update_told": self.update_told, "sounds": self.sounds, "breaks": self.breaks, "name": self.name,
             "hat": self.hat, "skin": self.skin, "friendship": self.friendship, "highscores": self.highscores, "birthday": self.birthday.map(|(m, d)| [m, d]), "stats": self.stats, "unlocked": self.unlocked, "explored": self.explored, "persona": if self.unhinged { "unhinged" } else { "boring" }, "anchor": self.anchor.or(self.saved_anchor).map(|a| [a.x, a.y]),
             "timers": self.timers.iter().map(|(at, l, every)| serde_json::json!([unix(at), l, every])).collect::<Vec<_>>(),
@@ -1034,6 +1103,7 @@ impl App {
             *field = v[key].as_bool().unwrap_or(true);
         }
         self.focus_goal = v["focus_goal"].as_u64().unwrap_or(0);
+        self.pins = serde_json::from_value(v["pins"].clone()).unwrap_or_default();
         self.budgets = serde_json::from_value(v["budgets"].clone()).unwrap_or_default();
         let fortnight = (chrono::Local::now() - chrono::Duration::days(14)).format("%Y-%m-%d").to_string();
         for (day, a) in v["checkin_days"].as_object().into_iter().flatten().filter(|(d, _)| **d > fortnight) {
@@ -1302,11 +1372,55 @@ impl App {
             Effect::Forget(keys) => {
                 if keys.is_empty() {
                     self.facts.clear();
+                    self.birthday = None;
                 }
                 for k in keys {
+                    if k == "birthday" {
+                        self.birthday = None;
+                    }
                     self.facts.remove(&k);
+                    self.facts.remove(&format!("{k}_kind")); // "pet" takes "pet_kind" with it
+                    self.facts.remove(&format!("{k}_word"));
                 }
                 lines::set_facts(&self.facts);
+                if r.text.is_empty() {
+                    self.desk_status = "Forgotten.".into(); // from the Desk
+                    silent = true;
+                }
+            }
+            Effect::Clip(cmd) => {
+                let (verb, target) = cmd.split_once(' ').unwrap_or((cmd.as_str(), ""));
+                // "h3" = the 3rd entry of the history (oldest first), "p1" = the first pin
+                let at = |t: &str| -> Option<(char, usize)> { Some((t.chars().next()?, t.get(1..)?.parse::<usize>().ok()?.checked_sub(1)?)) };
+                let get = |app: &Self, t: &str| match at(t) {
+                    Some(('h', i)) => app.clip_history.get(i).cloned(),
+                    Some(('p', i)) => app.pins.get(i).cloned(),
+                    _ => None,
+                };
+                let pool = match verb {
+                    "copy" => get(self, target).map(|t| {
+                        ctx.copy_text(t.clone());
+                        self.ignore_clip = t;
+                        "clip_copied"
+                    }),
+                    "pin" => get(self, target).map(|t| {
+                        self.pins.retain(|p| p != &t);
+                        self.pins.insert(0, t);
+                        self.pins.truncate(30);
+                        "clip_pinned"
+                    }),
+                    "unpin" => at(target).filter(|(l, i)| *l == 'p' && *i < self.pins.len()).map(|(_, i)| {
+                        self.pins.remove(i);
+                        "clip_unpinned"
+                    }),
+                    "clear" => {
+                        self.clip_history.clear();
+                        Some("clip_cleared")
+                    }
+                    _ => None,
+                };
+                self.desk_status = pool.map(lines::pick).unwrap_or_default();
+                silent = true;
             }
             Effect::SayName => {
                 r = if self.name.is_empty() {

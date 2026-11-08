@@ -8,7 +8,7 @@ pub fn respond(input: &str) -> Reply {
     let raw = input.trim();
     let head = raw.split_whitespace().next().unwrap_or("").to_lowercase();
     // shell commands and button-only commands (whose text is data, like quiz answers) are taken literally
-    if ["run", "$", "sh", "cmd", "reveal", "wyrpick", "onboard", "window", "answer-to", "checkin", "install", "forget", "tidy", "pref"].contains(&head.as_str()) || head == "answer" && raw.contains('|') {
+    if ["run", "$", "sh", "cmd", "reveal", "wyrpick", "onboard", "window", "answer-to", "checkin", "install", "forget", "tidy", "pref", "clip", "forgetfact"].contains(&head.as_str()) || head == "answer" && raw.contains('|') {
         if let Some(r) = exact(raw) {
             return r; // shell commands are taken literally, never "understood"
         }
@@ -1659,6 +1659,10 @@ mod tests {
         }
         assert!(matches!(respond("desk week").effect, Effect::OpenDesk(t) if t == "week"));
         assert!(!matches!(respond("desk lamp").effect, Effect::OpenDesk(_)), "only real tab names");
+        assert_eq!(respond("clip copy h2").effect, Effect::Clip("copy h2".into()));
+        assert_eq!(respond("forgetfact pet").effect, Effect::Forget(vec!["pet".into()]));
+        assert_eq!(respond("forgetfact all").effect, Effect::Forget(vec![]));
+        assert!(matches!(respond("desk you").effect, Effect::OpenDesk(t) if t == "you"));
     }
 
     #[test]

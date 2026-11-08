@@ -15,7 +15,7 @@ use std::time::{Duration, Instant};
 
 const W: f32 = 720.0;
 const H: f32 = 520.0;
-const TABS: [&str; 6] = ["Today", "Week", "To-do", "Reminders", "Upkeep", "Settings"];
+const TABS: [&str; 8] = ["Today", "Week", "To-do", "Reminders", "Clipboard", "Upkeep", "You & me", "Settings"];
 
 /// A tab's index from its number or (the start of) its name: "2", "settings", "todo".
 pub fn tab(name: &str) -> Option<usize> {
@@ -41,6 +41,26 @@ pub struct View<'a> {
     pub streaks: (u64, u64, u64),                    // focus, check-in, days with Clipster
     pub status: String,
     pub prefs: Prefs,
+    pub clips: &'a [String], // the clipboard history, oldest first
+    pub pins: &'a [String],
+    pub me: Me,
+}
+
+/// What the You & me tab shows.
+#[derive(Default)]
+pub struct Me {
+    pub facts: Vec<(String, String)>, // (key to forget, "Pet: Mo (cat)")
+    pub achievements: Vec<Achievement>,
+    pub scores: Vec<(String, u32)>, // game, best score
+    pub friendship: i32,
+    pub days: u64,
+}
+
+pub struct Achievement {
+    pub title: String,
+    pub quip: String,
+    pub unlocked: bool,
+    pub progress: Option<(u64, u64, &'static str)>, // so far, needed, of what (None = a secret)
 }
 
 /// A copy of the settings for the Settings tab; changes go back as "pref <key> <value>" commands.
@@ -80,6 +100,7 @@ struct Files {
     plan: Vec<(PathBuf, PathBuf)>,
     plan_desktop: bool,
     can_undo: bool,
+    taught: Vec<(String, String)>, // your phrases: (when you say, what I do)
 }
 
 #[derive(Default)]
@@ -101,6 +122,9 @@ pub struct Desk {
     numbers: BTreeMap<String, String>, // the Settings tab's minute fields while you type in them
     editing: Option<(usize, String)>,  // a to-do being renamed: its line, the new text so far
     planning: bool,                    // "plan my day": the To-do tab asks for today's top 3
+    forget_all: bool,                  // the You & me tab's "are you sure?"
+    teach_say: String,
+    teach_reply: String,
     wrapping: bool,                    // "wrap up my day": the end-of-day card over the Today tab
     scroll: BTreeMap<&'static str, f32>, // how far each list is scrolled, in rows
 }
@@ -186,6 +210,7 @@ impl Desk {
             plan: dir.map(|d| crate::tidy::plan(&d)).unwrap_or_default(),
             plan_desktop: self.desktop,
             can_undo: crate::tidy::undo_log().exists(),
+            taught: crate::lines::taught(),
         };
     }
 
@@ -205,6 +230,8 @@ impl Desk {
             "To-do" => self.todos(ui, c, view, look, out),
             "Reminders" => self.reminders(ui, c, view, look, out),
             "Settings" => self.settings(ui, c, &view.prefs, look, out),
+            "Clipboard" => self.clipboard(ui, c, view, look, out),
+            "You & me" => self.you_and_me(ui, c, view, look, out),
             _ => self.tidy(ui, c, look, out),
         }
         // Classic's View menu, last so it lies on top of the page
@@ -854,6 +881,170 @@ impl Desk {
         out.extend(cmds);
     }
 
+    /// The clipboard history (newest first) with Pin and Copy, and the pinned snippets.
+    fn clipboard(&mut self, ui: &mut Ui, c: Rect, view: &View, look: Look, out: &mut Vec<String>) {
+        let p = ui.painter().clone();
+        let ctl = look.ctl();
+        let bottom = c.max.y - ctl - 12.0;
+        let left = Rect::from_min_max(c.min, pos2(c.min.x + ((c.width() - 12.0) * 0.58).round(), bottom));
+        let right = Rect::from_min_max(pos2(left.max.x + 12.0, c.min.y), pos2(c.max.x, bottom));
+        let pitch = ctl + 6.0;
+        // a list of snippets with buttons on the right; returns the clicked (row index, button index)
+        let list = |desk: &mut Desk, ui: &mut Ui, card: Rect, title: &str, key: &'static str, items: Vec<(usize, &String)>, buttons: &[&str], empty: &str| -> Option<(usize, usize)> {
+            look.group(&p, card, title);
+            if items.is_empty() {
+                let g = p.layout(empty.to_string(), look.font(12.5), look.dim(), card.width() - 40.0);
+                p.galley(pos2(card.center().x - g.size().x / 2.0, card.min.y + 60.0), g, look.dim());
+            }
+            let area = Rect::from_min_max(pos2(card.min.x + 12.0, card.min.y + 30.0), pos2(card.max.x - 12.0, card.max.y - 8.0));
+            let fits = (area.height() / pitch) as usize;
+            let first = desk.first_row(ui, key, card, items.len(), fits);
+            let mut hit = None;
+            for (n, (i, text)) in items.iter().skip(first).take(fits).enumerate() {
+                let y = area.min.y + n as f32 * pitch;
+                let mut bx = area.max.x;
+                for (b, label) in buttons.iter().enumerate().rev() {
+                    let w = if *label == "✕" { 26.0 } else { p.layout_no_wrap(label.to_string(), look.bold(12.0), look.text()).size().x + 20.0 };
+                    bx -= w;
+                    if look.button(ui, Rect::from_min_size(pos2(bx, y), vec2(w, ctl)), Id::unique((key, *i, b)), label, true).clicked() {
+                        hit = Some((*i, b));
+                    }
+                    bx -= 6.0;
+                }
+                let one_line = text.split_whitespace().collect::<Vec<_>>().join(" ");
+                let g = clipped(&p, &one_line, look.font(12.5), look.text(), bx - area.min.x - 6.0);
+                p.galley(pos2(area.min.x, y + ctl / 2.0 - g.size().y / 2.0), g, look.text());
+                if n + 1 < fits && first + n + 1 < items.len() {
+                    look.divider(&p, area.min.x, area.max.x, y + pitch - 3.0);
+                }
+            }
+            scrollbar(&p, look, card, first, fits, items.len());
+            hit
+        };
+        let first_line = |pool: &str| crate::lines::all(pool).first().cloned().unwrap_or_default();
+        let history: Vec<(usize, &String)> = view.clips.iter().enumerate().rev().collect();
+        match list(self, ui, left, "Recent copies", "clips", history, &["Pin", "Copy"], &first_line("clip_empty")) {
+            Some((i, 0)) => out.push(format!("clip pin h{}", i + 1)),
+            Some((i, _)) => out.push(format!("clip copy h{}", i + 1)),
+            None => {}
+        }
+        let pins: Vec<(usize, &String)> = view.pins.iter().enumerate().collect();
+        match list(self, ui, right, "Pinned", "pins", pins, &["Copy", "✕"], &first_line("clip_pins_empty")) {
+            Some((i, 0)) => out.push(format!("clip copy p{}", i + 1)),
+            Some((i, _)) => out.push(format!("clip unpin p{}", i + 1)),
+            None => {}
+        }
+        if look.button(ui, Rect::from_min_size(pos2(c.min.x, c.max.y - ctl), vec2(120.0, ctl)), Id::unique("clip-clear"), "Clear history", !view.clips.is_empty()).clicked() {
+            out.push("clip clear".into());
+        }
+        p.text(pos2(c.max.x, c.max.y - ctl / 2.0), Align2::RIGHT_CENTER, "The history stays in memory only. Pinned snippets are saved.", look.font(11.0), look.dim());
+    }
+
+    /// What he keeps about you: facts, taught phrases, achievements, scores and friendship.
+    fn you_and_me(&mut self, ui: &mut Ui, c: Rect, view: &View, look: Look, out: &mut Vec<String>) {
+        let p = ui.painter().clone();
+        let (ctl, half) = (look.ctl(), ((c.width() - 12.0) / 2.0).round());
+        let first_line = |pool: &str| crate::lines::all(pool).first().cloned().unwrap_or_default();
+        let me = &view.me;
+        // facts
+        let fr = Rect::from_min_size(c.min, vec2(half, ((c.height() - 12.0) * 0.53).round()));
+        look.group(&p, fr, "What I know about you");
+        let (x0, x1) = (fr.min.x + 12.0, fr.max.x - 12.0);
+        if me.facts.is_empty() {
+            let g = p.layout(first_line("youme_no_facts"), look.font(12.0), look.dim(), fr.width() - 24.0);
+            p.galley(pos2(x0, fr.min.y + 34.0), g, look.dim());
+        } else if look.button(ui, Rect::from_min_size(pos2(x1 - 126.0, fr.max.y - ctl - 10.0), vec2(126.0, ctl)), Id::unique("me-forget-all"), "Forget everything", true).clicked() {
+            self.forget_all = true;
+        }
+        let rows = ((fr.height() - 30.0 - ctl - 14.0) / 22.0).max(0.0) as usize;
+        for (n, (key, label)) in me.facts.iter().take(rows).enumerate() {
+            let y = fr.min.y + 30.0 + n as f32 * 22.0;
+            let g = clipped(&p, label, look.font(12.5), look.text(), x1 - x0 - 30.0);
+            p.galley(pos2(x0, y + 10.0 - g.size().y / 2.0), g, look.text());
+            if look.button(ui, Rect::from_center_size(pos2(x1 - 11.0, y + 10.0), vec2(22.0, 20.0)), Id::unique(("me-fact", n)), "✕", true).clicked() {
+                out.push(format!("forgetfact {key}"));
+            }
+        }
+        // taught phrases, and teaching a new one
+        let pr = Rect::from_min_max(pos2(c.min.x, fr.max.y + 12.0), pos2(c.min.x + half, c.max.y));
+        look.group(&p, pr, "Your phrases");
+        let (x0, x1) = (pr.min.x + 12.0, pr.max.x - 12.0);
+        let taught = self.files.taught.clone();
+        if taught.is_empty() {
+            let g = p.layout(first_line("youme_no_phrases"), look.font(12.0), look.dim(), pr.width() - 24.0);
+            p.galley(pos2(x0, pr.min.y + 34.0), g, look.dim());
+        }
+        let add_y = pr.max.y - ctl - 10.0;
+        let rows = ((add_y - pr.min.y - 34.0) / 22.0).max(0.0) as usize;
+        for (n, (say, does)) in taught.iter().take(rows).enumerate() {
+            let y = pr.min.y + 30.0 + n as f32 * 22.0;
+            let g = clipped(&p, &format!("\u{201c}{say}\u{201d} → {does}"), look.font(12.5), look.text(), x1 - x0 - 30.0);
+            p.galley(pos2(x0, y + 10.0 - g.size().y / 2.0), g, look.text());
+            if look.button(ui, Rect::from_center_size(pos2(x1 - 11.0, y + 10.0), vec2(22.0, 20.0)), Id::unique(("me-phrase", n)), "✕", true).clicked() {
+                out.push(format!("unlearn {say}"));
+            }
+        }
+        let w = (x1 - x0 - 66.0) / 2.0;
+        look.input(ui, Rect::from_min_size(pos2(x0, add_y), vec2(w, ctl)), Id::unique("me-say"), &mut self.teach_say, "when I say…");
+        look.input(ui, Rect::from_min_size(pos2(x0 + w + 6.0, add_y), vec2(w, ctl)), Id::unique("me-reply"), &mut self.teach_reply, "you say…");
+        let ready = !self.teach_say.trim().is_empty() && !self.teach_reply.trim().is_empty();
+        if look.button(ui, Rect::from_min_size(pos2(x1 - 54.0, add_y), vec2(54.0, ctl)), Id::unique("me-teach"), "Add", ready).clicked() {
+            out.push(format!("when i say {}, say {}", self.teach_say.trim(), self.teach_reply.trim()));
+            self.teach_say.clear();
+            self.teach_reply.clear();
+        }
+        // achievements, two to a row, scrolling
+        let ar = Rect::from_min_size(pos2(c.min.x + half + 12.0, c.min.y), vec2(c.width() - half - 12.0, ((c.height() - 12.0) * 0.66).round()));
+        let unlocked = me.achievements.iter().filter(|a| a.unlocked).count();
+        look.group(&p, ar, &format!("Achievements ({unlocked} of {})", me.achievements.len()));
+        let (pitch, colw) = (19.0, (ar.width() - 24.0) / 2.0);
+        let rows: Vec<&[Achievement]> = me.achievements.chunks(2).collect();
+        let fits = ((ar.height() - 38.0) / pitch) as usize;
+        let first = self.first_row(ui, "achievements", ar, rows.len(), fits);
+        for (n, pair) in rows.iter().skip(first).take(fits).enumerate() {
+            for (k, a) in pair.iter().enumerate() {
+                let at = pos2(ar.min.x + 12.0 + k as f32 * colw, ar.min.y + 30.0 + n as f32 * pitch);
+                let (text, color) = match (a.unlocked, a.progress) {
+                    (true, _) => (format!("✓ {}", a.title), look.text()),
+                    (false, Some((have, need, what))) => (format!("{}  {}/{} {what}", a.title, have.min(need), need), look.dim()),
+                    (false, None) => ("??? (a secret)".to_string(), look.dim()),
+                };
+                let g = clipped(&p, &text, look.font(11.5), color, colw - 8.0);
+                let r = Rect::from_min_size(at, vec2(colw - 8.0, pitch));
+                p.galley(pos2(at.x, r.center().y - g.size().y / 2.0), g, color);
+                if a.unlocked {
+                    ui.interact(r, Id::unique(("me-ach", first + n, k)), Sense::hover()).on_hover_text(&a.quip);
+                }
+            }
+        }
+        scrollbar(&p, look, ar, first, fits, rows.len());
+        // friendship and high scores
+        let sr = Rect::from_min_max(pos2(ar.min.x, ar.max.y + 12.0), c.max);
+        look.group(&p, sr, "Us");
+        let (x0, x1) = (sr.min.x + 12.0, sr.max.x - 12.0);
+        let mood = match me.friendship {
+            f if f >= 80 => "best friends",
+            f if f >= 40 => "friends",
+            f if f > -40 => "getting to know each other",
+            f if f > -80 => "frosty",
+            _ => "sworn rivals",
+        };
+        p.text(pos2(x0, sr.min.y + 38.0), Align2::LEFT_CENTER, format!("Friendship: {mood} · {} together", plural(me.days, "day")), look.font(12.5), look.text());
+        look.bar(&p, Rect::from_min_size(pos2(x0, sr.min.y + 48.0), vec2(x1 - x0, 10.0)), (me.friendship + 100) as f32 / 200.0, if me.friendship < 0 { look.danger() } else { look.accent() });
+        let scores = if me.scores.is_empty() { "No high scores yet. \"Let's play a game\" fixes that.".to_string() } else { format!("Best: {}", me.scores.iter().map(|(g, s)| format!("{g} {s}")).collect::<Vec<_>>().join(" · ")) };
+        let g = p.layout(scores, look.font(11.5), look.dim(), x1 - x0);
+        p.galley(pos2(x0, sr.min.y + 66.0), g, look.dim());
+        if self.forget_all {
+            let lines = ["Forget everything I know about you?".to_string(), "Your facts and your birthday go. Your name and your phrases stay.".to_string()];
+            if let Some(i) = look.dialog(ui, c.expand(12.0), "You & me", &lines, &["Forget it all", "Keep"]) {
+                if i == 0 {
+                    out.push("forgetfact all".into());
+                }
+                self.forget_all = false;
+            }
+        }
+    }
+
     /// A small minutes field: shows `have` until you type; returns the new number when you leave it or press Enter.
     fn minutes(&mut self, ui: &mut Ui, look: Look, r: Rect, key: &str, have: &str) -> Option<u64> {
         let id = Id::unique(("desk-minutes", key));
@@ -1456,7 +1647,8 @@ fn sample_files(desktop: bool) -> Files {
         .iter()
         .map(|(f, c)| (base.join(f), base.join(c).join(f)))
         .collect();
-    Files { at: Some(Instant::now()), todos, notes, plan, plan_desktop: desktop, can_undo: true }
+    let taught = vec![("gm".to_string(), "\"Good morning, sunshine!\"".to_string()), ("work".to_string(), "open firefox → open code".to_string())];
+    Files { at: Some(Instant::now()), todos, notes, plan, plan_desktop: desktop, can_undo: true, taught }
 }
 
 /// Made-up timers, times, sessions and check-ins for screenshots: (timers, kind_time, focus_log, checkins).
