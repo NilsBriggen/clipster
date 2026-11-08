@@ -138,6 +138,10 @@ struct App {
     last_cmd: Option<String>,               // the last command worth repeating ("again", "another one")
     waiting: Option<(String, Instant)>,     // he asked you something (`## ask <id>`): your next line is the answer
     quit_at: Option<Instant>,               // close then (to restart into an update)
+    focus: Option<Focus>,
+    focus_log: Vec<FocusLog>,
+    kind_time: std::collections::BTreeMap<String, std::collections::BTreeMap<String, u64>>, // day -> window kind -> seconds
+    kind_mark: Instant,     // time is counted up to here
     checkin: bool,                             // ask how you're doing once a day
     notice_windows: bool,                      // comment on what the active window is
     window_kind: Option<String>,               // the active window's kind (`## window <kind>`), and since when
@@ -192,6 +196,22 @@ fn checkin_streaks(stats: &std::collections::BTreeMap<String, u64>, today: u64, 
         (true, _) => 1,
     };
     (streak, run)
+}
+
+/// A running focus session.
+struct Focus {
+    label: String,
+    start: Instant,
+    until: Instant,
+    distracted: u64,              // seconds spent in distraction kinds
+    last_nudge: Option<Instant>,
+}
+
+/// A finished focus session, kept for the Desk: (day "2026-11-09", planned minutes, focused seconds, distracted seconds, label).
+type FocusLog = (String, u64, u64, u64, String);
+
+fn today_key() -> String {
+    chrono::Local::now().format("%Y-%m-%d").to_string()
 }
 
 /// After an update: what to start once this window has closed (the new AppImage, or the Windows installer).
@@ -302,6 +322,10 @@ impl App {
             last_cmd: None,
             waiting: None,
             quit_at: None,
+            focus: None,
+            focus_log: vec![],
+            kind_time: Default::default(),
+            kind_mark: Instant::now(),
             window_kind: None,
             window_since: Instant::now(),
             window_said: Default::default(),
@@ -421,6 +445,70 @@ impl App {
         self.auto_hide = Some(Instant::now() + reading_time(&self.balloon.as_ref().map(|b| b.text.clone()).unwrap_or_default()));
     }
 
+    /// Count the time since the last mark for the window kind you're in (only while you're around, and only
+    /// while window comments are on: it comes from the same titles). Distraction time also counts against a focus session.
+    fn account_time(&mut self) {
+        let now = Instant::now();
+        let secs = now.duration_since(self.kind_mark).as_secs();
+        self.kind_mark = now;
+        let away = self.tracker.is_some() && now.duration_since(self.last_move) > Duration::from_secs(300);
+        if secs == 0 || secs > 3600 || away || !self.notice_windows || self.screenshot.is_some() {
+            return; // a long gap means the computer slept
+        }
+        let kind = self.window_kind.clone().unwrap_or_else(|| "other".into());
+        *self.kind_time.entry(today_key()).or_default().entry(kind.clone()).or_insert(0) += secs;
+        if let Some(f) = &mut self.focus {
+            if brain::DISTRACTIONS.contains(&kind.as_str()) {
+                f.distracted += secs;
+            }
+        }
+    }
+
+    /// End the focus session (on time, or early): log it, keep the streak, and say how it went.
+    fn finish_focus(&mut self, early: bool) -> Reply {
+        self.account_time();
+        let Some(f) = self.focus.take() else { return Reply::say("") };
+        let total = Instant::now().duration_since(f.start).as_secs().max(1);
+        let focused = total.saturating_sub(f.distracted);
+        let planned = f.until.duration_since(f.start).as_secs() / 60;
+        self.focus_log.push((today_key(), planned, focused, f.distracted, f.label.clone()));
+        let excess = self.focus_log.len().saturating_sub(60);
+        self.focus_log.drain(..excess);
+        if early && total < 120 {
+            return Reply::say(lines::pick("focus_cancel")).mood(Mood::Sly);
+        }
+        let today = chrono::Datelike::num_days_from_ce(&chrono::Local::now().date_naive()) as u64;
+        let streak = match self.stats.get("focus_last_day") {
+            Some(&d) if d == today => self.stats.get("focus_streak").copied().unwrap_or(1),
+            Some(&d) if d + 1 == today => self.stats.get("focus_streak").copied().unwrap_or(0) + 1,
+            _ => 1,
+        };
+        self.stats.extend([("focus_last_day".into(), today), ("focus_streak".into(), streak)]);
+        self.stat("focus_sessions", 1);
+        let (pool, pct) = brain::focus_score(focused, total);
+        let mut text = lines::pick(pool).replace("{n}", &(focused / 60).to_string()).replace("{pct}", &pct.to_string());
+        if [3, 7, 14, 30].contains(&streak) {
+            text = format!("{text} {}", lines::pick("focus_streak").replace("{n}", &streak.to_string()));
+        }
+        let again = if f.label.is_empty() { "focus 25m".to_string() } else { format!("focus 25m {}", f.label) };
+        Reply::say(text).mood(if pct >= 60 { Mood::Party } else { Mood::Think }).run("Another 25 minutes", &again).run("Open the Desk", "desk")
+    }
+
+    /// "where did my time go today?"
+    fn time_report(&mut self) -> Reply {
+        self.account_time();
+        let (rows, pool) = brain::time_report(&self.kind_time.get(&today_key()).cloned().unwrap_or_default());
+        let mut text = lines::pick(if rows.is_empty() { "timereport_none" } else { "timereport_intro" });
+        for (kind, secs) in rows.iter().take(5) {
+            text += &format!("\n• {}: {}", brain::kind_name(kind), brain::fmt_dur(*secs));
+        }
+        if !rows.is_empty() {
+            text = format!("{text}\n{}", lines::pick(pool));
+        }
+        let r = Reply::say(text).mood(Mood::Think).run("Open the Desk", "desk");
+        if self.notice_windows { r } else { r.btn("Turn on window comments (Options)", Act::Options) }
+    }
+
     /// Your answer to the daily check-in: his reaction, a streak, and real kindness after rough days in a row.
     fn checkin_answer(&mut self, answer: &str) -> Reply {
         let answer = if ["great", "okay", "meh", "rough"].contains(&answer) { answer } else { "okay" };
@@ -483,11 +571,12 @@ impl App {
         if title.eq_ignore_ascii_case("clipster") || games::NAMES.iter().any(|(_, t)| *t == title) {
             return; // his own windows
         }
-        let kind = lines::window_kind(title);
+        let kind = lines::window_kind(title).or_else(|| Some("other".into()));
         if kind != self.window_kind {
+            self.account_time(); // the time so far belongs to the window you just left
             (self.window_kind, self.window_since) = (kind.clone(), Instant::now());
         }
-        if let Some(k) = kind.filter(|k| !brain::TIME_SINKS.contains(&k.as_str())) {
+        if let Some(k) = kind.filter(|k| !brain::TIME_SINKS.contains(&k.as_str()) && k != "other") {
             self.window_comment(&k);
         }
     }
@@ -495,7 +584,7 @@ impl App {
     fn window_comment(&mut self, kind: &str) {
         let now = Instant::now();
         // not in the first minute (you just started him), not over a conversation, and not too often
-        if !self.notice_windows || self.t() < 60.0 || self.balloon.is_some() || self.quiet() || !self.input.is_empty() {
+        if !self.notice_windows || self.t() < 60.0 || self.balloon.is_some() || self.quiet() || !self.input.is_empty() || self.focus.is_some() {
             return;
         }
         if !brain::window_ok(self.window_last, self.window_said.get(kind).copied(), now) {
@@ -794,7 +883,7 @@ impl App {
     fn snapshot(&self) -> String {
         let unix = |at: &Instant| (std::time::SystemTime::now() + at.saturating_duration_since(Instant::now())).duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0);
         serde_json::json!({
-            "tips_every": self.tips_every, "notice_clip": self.notice_clip, "notice_programs": self.notice_programs, "notice_windows": self.notice_windows, "checkin": self.checkin, "facts": self.facts,
+            "tips_every": self.tips_every, "notice_clip": self.notice_clip, "notice_programs": self.notice_programs, "notice_windows": self.notice_windows, "checkin": self.checkin, "facts": self.facts, "kind_time": self.kind_time, "focus_log": self.focus_log,
             "notice_health": self.notice_health, "check_updates": self.check_updates, "update_told": self.update_told, "sounds": self.sounds, "breaks": self.breaks, "name": self.name,
             "hat": self.hat, "skin": self.skin, "friendship": self.friendship, "highscores": self.highscores, "birthday": self.birthday.map(|(m, d)| [m, d]), "stats": self.stats, "unlocked": self.unlocked, "explored": self.explored, "persona": if self.unhinged { "unhinged" } else { "boring" }, "anchor": self.anchor.or(self.saved_anchor).map(|a| [a.x, a.y]),
             "timers": self.timers.iter().map(|(at, l, every)| serde_json::json!([unix(at), l, every])).collect::<Vec<_>>(),
@@ -813,6 +902,17 @@ impl App {
             self.facts.insert(k.clone(), v.as_str().unwrap_or("").to_string());
         }
         lines::set_facts(&self.facts);
+        // the last week of time per app kind, and the last 60 focus sessions
+        let week_ago = (chrono::Local::now() - chrono::Duration::days(7)).format("%Y-%m-%d").to_string();
+        for (day, kinds) in v["kind_time"].as_object().into_iter().flatten().filter(|(d, _)| **d > week_ago) {
+            let kinds = kinds.as_object().into_iter().flatten().map(|(k, s)| (k.clone(), s.as_u64().unwrap_or(0))).collect();
+            self.kind_time.insert(day.clone(), kinds);
+        }
+        for f in v["focus_log"].as_array().into_iter().flatten() {
+            if let (Some(d), Some(m), Some(fo), Some(di), Some(l)) = (f[0].as_str(), f[1].as_u64(), f[2].as_u64(), f[3].as_u64(), f[4].as_str()) {
+                self.focus_log.push((d.into(), m, fo, di, l.into()));
+            }
+        }
         (self.sounds, self.breaks, self.check_updates) = (b("sounds", true), b("breaks", true), b("check_updates", true));
         self.update_told = v["update_told"].as_str().unwrap_or("").to_string();
         self.name = v["name"].as_str().unwrap_or("").to_string();
@@ -922,6 +1022,21 @@ impl App {
             Effect::Repeat(secs, label) => self.timers.push((Instant::now() + Duration::from_secs(secs), label, secs)),
             Effect::SetName(n) => self.name = n,
             Effect::Checkin(answer) => r = self.checkin_answer(&answer),
+            Effect::Focus(_, _) if self.focus.is_some() => r = Reply::say(lines::pick("focus_already")).run("Stop the session", "focus stop"),
+            Effect::Focus(secs, label) => {
+                let now = Instant::now();
+                self.account_time();
+                self.focus = Some(Focus { label: label.clone(), start: now, until: now + Duration::from_secs(secs), distracted: 0, last_nudge: None });
+                let text = lines::pick("focus_start").replace("{n}", &(secs / 60).to_string()).replace("{x}", &label);
+                r = Reply::say(text).mood(Mood::Cool).run("Stop the session", "focus stop");
+            }
+            Effect::FocusStop => {
+                r = match self.focus.is_some() {
+                    true => self.finish_focus(true),
+                    false => Reply::say("There's no focus session running. Start one with: focus 25 minutes"),
+                }
+            }
+            Effect::TimeReport => r = self.time_report(),
             Effect::Todo(op) => {
                 let news = todo::apply(&op);
                 if let Effect::Timer(secs, label) = &news.effect {
@@ -1243,13 +1358,30 @@ impl App {
         // once a day, a couple of minutes in, when you're around and he's not mid-conversation: how are you?
         let today = chrono::Datelike::num_days_from_ce(&chrono::Local::now().date_naive()) as u64;
         if self.checkin && self.screenshot.is_none() && self.t() > 120.0 && self.stats.get("checkin_day") != Some(&today) && self.balloon.is_none()
-            && self.onboarding.is_none() && !self.quiet() && self.input.is_empty() && now.duration_since(self.last_touch) < Duration::from_secs(600)
+            && self.onboarding.is_none() && self.focus.is_none() && !self.quiet() && self.input.is_empty() && now.duration_since(self.last_touch) < Duration::from_secs(600)
         {
             self.stats.insert("checkin_day".into(), today);
             let q = Reply::say(lines::pick("checkin_question")).mood(Mood::Happy);
             self.show(q.run("😀 Great", "checkin great").run("🙂 Okay", "checkin okay").run("😐 Meh", "checkin meh").run("😞 Rough", "checkin rough"));
             self.sound("message");
             self.auto_hide = Some(now + Duration::from_secs(600));
+        }
+        // time per app kind, and the focus session: its end, and a nudge when you drift off for a minute
+        if now.duration_since(self.kind_mark) > Duration::from_secs(30) {
+            self.account_time();
+        }
+        if self.focus.as_ref().is_some_and(|f| now >= f.until) {
+            let r = self.finish_focus(false);
+            self.show(r);
+            self.sound("complete");
+        } else if let Some(k) = self.window_kind.clone().filter(|k| brain::DISTRACTIONS.contains(&k.as_str()) && now.duration_since(self.window_since) > Duration::from_secs(60)) {
+            let due = self.focus.as_ref().is_some_and(|f| f.last_nudge.is_none_or(|n| now.duration_since(n) > Duration::from_secs(600)));
+            if due && self.balloon.is_none() {
+                if let Some(f) = &mut self.focus {
+                    f.last_nudge = Some(now);
+                }
+                self.pipe_up(Reply::say(lines::pick(&format!("focus_nudge_{k}"))).mood(Mood::Sly).run("Stop the session", "focus stop"));
+            }
         }
         // what you're working in: titles from the KWin script, and long stretches on video or social sites
         if let Some(t) = self.tracker.as_ref().and_then(|tr| tr.take_title()) {
@@ -1270,7 +1402,9 @@ impl App {
             self.pipe_up(brain::react_late());
         }
         if now >= self.next_tip {
-            if self.tips_every > 0 && self.balloon.is_none() && !self.memory_waiting() && self.ask_due() {
+            if self.focus.is_some() {
+                // focusing: no chatter
+            } else if self.tips_every > 0 && self.balloon.is_none() && !self.memory_waiting() && self.ask_due() {
                 self.ask_something();
             } else if self.tips_every > 0 && self.balloon.is_none() {
                 let nudge = self.memory_waiting();

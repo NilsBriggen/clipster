@@ -427,6 +427,17 @@ const TIMER_WORDS: &[&str] = &[
 ];
 
 fn timers(s: &str, raw: &str) -> Option<Reply> {
+    // focus sessions: "focus for 45 minutes on the report", "help me focus", "stop focusing"
+    if has(s, &["stop focusing", "end focus", "end the focus", "stop the focus", "cancel focus", "cancel the focus", "focus off", "end my focus session"]) {
+        return go("focus stop".into());
+    }
+    if s == "focus" || s.starts_with("focus ") || has(s, &["focus session", "focus mode", "help me focus", "i need to focus", "start focusing", "time to focus"]) {
+        let rest = after(s, &["start a focus session for ", "start a focus session ", "focus session for ", "focus mode for ", "focus for ", "focus ", "help me focus for ", "help me focus on ", "help me focus "]).unwrap_or("");
+        return go(format!("focus {}", keep(raw, rest)));
+    }
+    if has(s, &["where did my time go", "time report", "how did i spend my time", "what did i do today", "my screen time", "screen time today", "how long was i on", "what have i been doing"]) {
+        return go("timereport".into());
+    }
     if !has(s, TIMER_WORDS) && !s.starts_with("in ") && !s.starts_with("every ") || has(s, &["until", "till"]) || s.contains("countdown to") || s.contains("count down to") {
         return None; // "countdown to christmas" is a date question
     }
@@ -1589,6 +1600,14 @@ mod tests {
     fn proofreading_in_plain_words() {
         let r = respond("proofread Please send the the report today.");
         assert!(r.buttons.iter().any(|(_, a)| matches!(a, crate::brain::Act::Run(c) if c == "proofread fix")), "offers the easy fixes: {} {:?}", r.text, r.buttons);
+    }
+
+    #[test]
+    fn focus_in_plain_words() {
+        assert_eq!(eff("focus for 45 minutes on the report"), Effect::Focus(2700, "the report".into()));
+        assert_eq!(eff("help me focus"), Effect::Focus(1500, String::new()));
+        assert_eq!(eff("stop focusing"), Effect::FocusStop);
+        assert_eq!(eff("where did my time go today?"), Effect::TimeReport);
     }
 
     #[test]

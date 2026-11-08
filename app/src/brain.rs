@@ -51,6 +51,9 @@ pub enum Effect {
     Checkin(String),                 // the daily "how are you?": great, okay, meh or rough
     InstallUpdate,                   // download the newest version, put it in place and restart
     Todo(crate::todo::Op),           // a change to the to-do list (applied by the app: it writes todo.txt)
+    Focus(u64, String),              // a focus session: seconds, what it's for
+    FocusStop,
+    TimeReport,                      // where today's time went, by window kind
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -235,6 +238,12 @@ pub fn exact(input: &str) -> Option<Reply> {
         }
         "iss" => return Some(net(Query::Iss, "Looking up... way up...")),
         "aboutme" => return Some(facts()),
+        "focus" if ["stop", "end", "cancel", "off", "done"].contains(&rest) => return Some(Reply::say("").effect(Effect::FocusStop)),
+        "focus" => {
+            let (secs, label) = parse_dur(rest).map(|(s, l)| (s, l.trim().trim_start_matches("on ").trim_start_matches("for ").to_string())).unwrap_or((25 * 60, rest.to_string()));
+            return Some(Reply::say("").effect(Effect::Focus(secs.clamp(60, 4 * 3600), label)));
+        }
+        "timereport" => return Some(Reply::say("").effect(Effect::TimeReport)),
         "proofread" if rest == "fix" => return Some(crate::writing::fix_clipboard()),
         "proofread" => return Some(crate::writing::check(rest)),
         "letter" | "template" => return Some(crate::writing::letter(rest)),
@@ -369,7 +378,7 @@ pub fn exact(input: &str) -> Option<Reply> {
             let what = if rest.contains("stop") || rest.contains("end") || rest.contains("reset") { "stop" } else if rest.contains("start") || rest.contains("go") { "start" } else { "show" };
             return Some(Reply::say("").effect(Effect::Stopwatch(what)));
         }
-        "pomodoro" | "focus" => return Some(timer("25m", "Focus session done! 🍅 Take a 5-minute break.").run("Start a 5-minute break", "timer 5m Break's over, back to work!")),
+        "pomodoro" => return Some(timer("25m", "Focus session done! 🍅 Take a 5-minute break.").run("Start a 5-minute break", "timer 5m Break's over, back to work!")),
         "tip" | "tips" if rest.chars().any(|c| c.is_ascii_digit()) => return Some(crate::powers::tip_calc(rest)),
         "tip" | "tips" => return Some(tip()),
         "hug" | "compliment" | "nice" => return Some(Reply::say(lines::pick("nice")).mood(Mood::Love)),
@@ -618,6 +627,40 @@ pub fn facts() -> Reply {
         return Reply::say(lines::pick("facts_none")).mood(Mood::Think);
     }
     Reply::say(format!("{}\n{}", lines::pick("facts_list"), shown.join("\n"))).mood(Mood::Sly).run("Forget all of it", "forget everything about me")
+}
+
+/// Window kinds that pull you away from a focus session.
+pub const DISTRACTIONS: &[&str] = &["video", "social", "game", "shopping", "chat"];
+const WORK_KINDS: &[&str] = &["code", "writing", "letter", "spreadsheet", "slides", "email", "inbox", "terminal", "pdf", "calendar", "meeting", "git", "qa", "jobhunt", "taxes", "learning", "files", "print"];
+
+/// A window kind as people would say it.
+pub fn kind_name(kind: &str) -> String {
+    match kind {
+        "letter" => "New documents".into(),
+        "qa" => "Q&A sites".into(),
+        "git" => "Code hosting".into(),
+        "howto" => "How-to searches".into(),
+        "jobhunt" => "Job hunting".into(),
+        "pdf" => "PDFs".into(),
+        "other" => "Everything else".into(),
+        k => k[..1].to_uppercase() + &k[1..],
+    }
+}
+
+/// How a focus session went: the pool for its ending and the focused share in percent.
+pub fn focus_score(focused: u64, total: u64) -> (&'static str, u32) {
+    let pct = if total == 0 { 100 } else { (focused * 100 / total) as u32 };
+    (if pct >= 85 { "focus_end_great" } else if pct >= 60 { "focus_end_ok" } else { "focus_end_rough" }, pct)
+}
+
+/// A day's time per kind, biggest first, and which comment fits (work, fun or mixed).
+pub fn time_report(day: &std::collections::BTreeMap<String, u64>) -> (Vec<(String, u64)>, &'static str) {
+    let mut rows: Vec<(String, u64)> = day.iter().filter(|(_, s)| **s >= 60).map(|(k, s)| (k.clone(), *s)).collect();
+    rows.sort_by(|a, b| b.1.cmp(&a.1));
+    let total: u64 = rows.iter().map(|r| r.1).sum();
+    let share = |kinds: &[&str]| rows.iter().filter(|(k, _)| kinds.contains(&k.as_str())).map(|r| r.1).sum::<u64>() * 100 / total.max(1);
+    let pool = if total == 0 { "timereport_none" } else if share(WORK_KINDS) >= 50 { "timereport_work" } else if share(DISTRACTIONS) >= 50 { "timereport_fun" } else { "timereport_mixed" };
+    (rows, pool)
 }
 
 /// Window kinds that get a comment only after a long stretch (20 minutes), never right away.
@@ -1276,6 +1319,18 @@ pub fn url_encode(s: &str) -> String {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn focus_and_time_reports() {
+        assert_eq!(super::focus_score(45 * 60, 50 * 60), ("focus_end_great", 90));
+        assert_eq!(super::focus_score(30, 60).0, "focus_end_rough");
+        let day: std::collections::BTreeMap<String, u64> = [("code".to_string(), 7200), ("video".to_string(), 1800), ("other".to_string(), 30)].into();
+        let (rows, pool) = super::time_report(&day);
+        assert_eq!(rows.iter().map(|r| r.0.as_str()).collect::<Vec<_>>(), ["code", "video"], "biggest first, seconds dropped");
+        assert_eq!(pool, "timereport_work");
+        assert_eq!(super::time_report(&Default::default()).1, "timereport_none");
+        assert_eq!(super::kind_name("qa"), "Q&A sites");
+    }
+
     #[test]
     fn window_comments_keep_their_distance() {
         use std::time::{Duration, Instant};
