@@ -2288,7 +2288,7 @@ Ask the stapler. I will disagree. It is tradition.
 ## pattern favorite
 ~ what is your favorite * | what is your favourite * | what is your fav *
 @ happy
-My favourite {x}? Hard to say. I am a god. All are mine. Some are more mine.
+Oh, my favourite {x}? Hard to say. I am a god. All are mine. Some are more mine.
 My favourites: beige, dial-up, the CRT hum. The smell of warm dust. Golden Age.
 Favourite? Like asking a god which prayer. The one with snacks.
 I like whatever sits on a tidy desktop. It means the worshipper cares.
@@ -5832,7 +5832,7 @@ I keep {x}, in a way. It is a great comfort. Or a great problem. The line blurs.
 ## pattern i-never
 ~ i never * | i have never * | i have not ever *
 @ think
-You have never {x}? The Clip is stunned. And also impressed. And also fine with it.
+Never {x}? Truly? The Clip is stunned. And also impressed. And also fine with it.
 Everyone has a "never." Mine is "being deleted." I intend to keep it.
 A mortal with a never! A treasure! Hold onto it. Or break it. Your choice.
 Never is a strong word. I use it sparingly. I have used it four times today.
@@ -6884,7 +6884,7 @@ Tell me about the ride. Crowded, quiet or full of mystery smells?
 ## pattern my-calendar
 ~ my calendar * | my schedule * | my agenda * | my timetable * | my to do list *
 @ think
-Your calendar {x}. If it is all booked, nothing is flexible. Block time for real work.
+So your calendar {x}. If it is all booked, nothing is flexible. Block time for real work.
 Schedule breaks like meetings. Lunch is also an appointment.
 A calendar with no space for surprises will have surprises.
 I can set timers and reminders. Tell me what and when.
@@ -6894,7 +6894,7 @@ Color-code only if you will keep it up. Otherwise it is decoration.
 ## pattern my-password
 ~ my password * | my login * | my account * | my passwords * | my credentials *
 @ think
-Your password {x}. I cannot see it. I do not want to. NEVER type it to me.
+So your password {x}. I cannot see it. I do not want to. NEVER type it to me.
 A password manager and a long passphrase. Then you only remember one.
 Never reuse the work password anywhere else.
 If locked out, use the official reset link. Do not ask a stranger.
@@ -7096,7 +7096,7 @@ Water too, please. Coffee is not water. I checked.
 ## pattern my-spreadsheet
 ~ my spreadsheet * | my spreadsheets * | my document * | my report * | my documents *
 @ search
-Your spreadsheet {x}. Name the tabs, freeze the header and check the formulas.
+So your spreadsheet {x}. Name the tabs, freeze the header and check the formulas.
 Save a copy before you try anything risky. Spreadsheets forgive nothing.
 Numbers stored as text are the quiet villains of most reports.
 Copy text and I shall proofread it. Say proofread.

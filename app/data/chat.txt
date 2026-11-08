@@ -2068,7 +2068,7 @@ Ask the stapler. I'll just disagree with whatever it says.
 ## pattern favorite
 ~ what is your favorite * | what is your favourite * | what is your fav *
 @ happy
-My favourite {x}? Hard to say. I'm easily impressed. By clean desktops.
+Oh, my favourite {x}? Hard to say. I'm easily impressed. By clean desktops.
 My favourites: the colour beige, the sound of dial-up, and the smell of warm dust.
 Favourite? That's like asking which screw is my favourite. All of them. None of them.
 I like whatever is on top of a tidy desk. That's my answer.
@@ -2309,7 +2309,7 @@ Noted. Is this a complaint, a boast or just a Tuesday?
 ## pattern i-am-so
 ~ i am so * | i am really * | i am very * | i am super * | i am extremely *
 @ talk
-That's a lot of {x}. Want to talk about it, or just be {x} for a while?
+Oof, that's a lot of {x}. Want to talk about it, or just be {x} for a while?
 Wow. {x}. I believe you. I have no way to check, but I believe you.
 Strong feelings. I respect strong feelings. I have exactly one, about magnets.
 That sounds like a lot. Take a breath. I'll hold your place in line.
@@ -2765,7 +2765,7 @@ I could set a pomodoro. A short focus, a short rest. It's good for the soul.
 ## pattern my-computer
 ~ my computer * | my laptop * | my pc * | my phone * | my keyboard * | my mouse * | my screen *
 @ think
-Your computer {x}. I take that personally. I live here.
+So your computer {x}. I take that personally. I live here.
 Computers are temperamental. Like cats, but with fans.
 Have you tried turning it off and on again? Pro tip, free of charge.
 I can't fix everything, but I can sympathize loudly.
@@ -5571,7 +5571,7 @@ If the worry sticks around, tell someone close to you. A worry shared is a worry
 ## pattern thinking-about
 ~ i am thinking about * | i am thinking of * | i have been thinking about * | i keep thinking about *
 @ think
-Thinking about {x}? I think about paper clips, but I will not say it. Do tell.
+You're thinking about {x}? I think about paper clips, but I will not say it. Do tell.
 Say more. I like a good thought. Especially one I can nod at.
 That sounds important. Or nothing. Either way I am listening.
 Sometimes thinking about it is half the work. The other half is a snack.
@@ -6664,7 +6664,7 @@ Tell me about the ride. Is it crowded, quiet or full of mystery smells?
 ## pattern my-calendar
 ~ my calendar * | my schedule * | my agenda * | my timetable * | my to do list *
 @ think
-Your calendar {x}. If it's all booked, nothing is flexible. Block time for real work.
+So your calendar {x}. If it's all booked, nothing is flexible. Block time for real work.
 Schedule breaks like meetings. Lunch is also an appointment.
 A calendar with no space for surprises will have surprises.
 I can set timers and reminders. Tell me what and when.
@@ -6674,7 +6674,7 @@ Color-code only if you'll keep it up. Otherwise it's just decoration.
 ## pattern my-password
 ~ my password * | my login * | my account * | my passwords * | my credentials *
 @ think
-Your password {x}. I can't see it and I don't want to. Never type it to me.
+So your password {x}. I can't see it and I don't want to. Never type it to me.
 Use a password manager and a long passphrase. Then you only remember one.
 Never reuse a work password anywhere else.
 If you're locked out, use the official reset link. Don't ask a stranger.
@@ -6876,7 +6876,7 @@ Water too, please. Coffee is not water. I checked.
 ## pattern my-spreadsheet
 ~ my spreadsheet * | my spreadsheets * | my document * | my report * | my documents *
 @ search
-Your spreadsheet {x}. Name the tabs, freeze the header and check the formulas.
+So your spreadsheet {x}. Name the tabs, freeze the header and check the formulas.
 Save a copy before you try anything risky. Spreadsheets forgive nothing.
 Numbers stored as text are the quiet villain of most reports.
 I can proofread text if you copy it. Say proofread.
