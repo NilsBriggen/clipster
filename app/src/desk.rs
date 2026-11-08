@@ -13,9 +13,19 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
-const W: f32 = 620.0;
-const H: f32 = 470.0;
-const TABS: [&str; 5] = ["Today", "Week", "To-do", "Reminders & notes", "Files"];
+const W: f32 = 720.0;
+const H: f32 = 520.0;
+const TABS: [&str; 5] = ["Today", "Week", "To-do", "Reminders", "Upkeep"];
+
+/// A tab's index from its number or (the start of) its name: "2", "settings", "todo".
+pub fn tab(name: &str) -> Option<usize> {
+    let t = name.trim().to_lowercase().replace('-', "");
+    match t.parse::<usize>() {
+        Ok(n) => Some(n.min(TABS.len() - 1)),
+        Err(_) if t.len() >= 3 => TABS.iter().position(|n| n.to_lowercase().replace('-', "").starts_with(&t)),
+        Err(_) => None,
+    }
+}
 
 /// What the app knows that the Desk shows (borrowed for one frame).
 pub struct View<'a> {
@@ -74,8 +84,11 @@ impl Desk {
         self.open
     }
 
-    pub fn set_tab(&mut self, tab: usize) {
-        self.tab = tab.min(TABS.len() - 1);
+    /// Switch to a tab by number or name ("settings", "week", "to-do"); anything else leaves it as it is.
+    pub fn set_tab(&mut self, name: &str) {
+        if let Some(i) = tab(name) {
+            self.tab = i;
+        }
     }
 
     /// Call every frame: draws the window next to `near` (Clipster) and returns the commands its buttons ran.
@@ -151,11 +164,11 @@ impl Desk {
                 (c, close, None)
             }
         };
-        match self.tab {
-            0 => self.today(ui, c, view, look, out),
-            1 => week(ui, c, view, look),
-            2 => self.todos(ui, c, look, out),
-            3 => self.reminders(ui, c, view, look, out),
+        match TABS[self.tab] {
+            "Today" => self.today(ui, c, view, look, out),
+            "Week" => week(ui, c, view, look),
+            "To-do" => self.todos(ui, c, look, out),
+            "Reminders" => self.reminders(ui, c, view, look, out),
             _ => self.tidy(ui, c, look, out),
         }
         // Classic's View menu, last so it lies on top of the page
@@ -223,19 +236,19 @@ impl Desk {
         let look = Look::Modern;
         let o = win.min.to_vec2();
         let at = |x: f32, y: f32, w: f32, h: f32| Rect::from_min_size(pos2(x, y) + o, vec2(w, h));
-        let card = at(8.0, 6.0, 604.0, 456.0);
+        let card = at(8.0, 6.0, W - 16.0, H - 14.0);
         p.add(egui::epaint::Shadow { offset: [0, 2], blur: 8, spread: 0, color: Color32::from_rgba_unmultiplied(0x17, 0x20, 0x33, 0x26) }.as_shape(card, CornerRadius::same(12)));
         p.rect(card, CornerRadius::same(12), tok::FRAME, Stroke::new(1.0, tok::BORDER), StrokeKind::Inside);
         p.hline(card.x_range(), o.y + 48.0, Stroke::new(1.0, tok::DIVIDER));
         p.add(Shape::line(PAPERCLIP.iter().map(|(x, y)| pos2(*x, *y) + o).collect(), Stroke::new(1.4, tok::PAPERCLIP)));
         p.text(pos2(50.0, 26.0) + o, Align2::LEFT_CENTER, "Clipster's Desk", look.bold(15.0), tok::TEXT);
-        let mover = ui.interact(at(8.0, 6.0, 412.0, 42.0), Id::unique("desk-modern-title"), Sense::click_and_drag());
+        let mover = ui.interact(at(8.0, 6.0, W - 208.0, 42.0), Id::unique("desk-modern-title"), Sense::click_and_drag());
         if drag && mover.drag_started() {
             ui.ctx().send_viewport_cmd(egui::ViewportCommand::StartDrag);
         }
         // the look switch: both segments are always there, so Classic is one click away
-        p.rect(at(424.0, 14.0, 142.0, 28.0), CornerRadius::same(6), tok::CARD, Stroke::new(1.0, tok::CONTROL_BORDER), StrokeKind::Inside);
-        for (seg, label, active) in [(at(424.0, 14.0, 70.0, 28.0), "Classic 98", false), (at(494.0, 14.0, 72.0, 28.0), "Modern", true)] {
+        p.rect(at(W - 196.0, 14.0, 142.0, 28.0), CornerRadius::same(6), tok::CARD, Stroke::new(1.0, tok::CONTROL_BORDER), StrokeKind::Inside);
+        for (seg, label, active) in [(at(W - 196.0, 14.0, 70.0, 28.0), "Classic 98", false), (at(W - 126.0, 14.0, 72.0, 28.0), "Modern", true)] {
             let resp = ui.interact(seg, Id::unique(("desk-look", label)), Sense::click());
             let fill = match (active, resp.is_pointer_button_down_on(), resp.hovered()) {
                 (true, true, _) => Some(tok::ACCENT_SOFT_PRESSED),
@@ -253,25 +266,26 @@ impl Desk {
                 out.push("desklook classic".into());
             }
         }
-        let x = at(574.0, 14.0, 28.0, 28.0);
+        let x = at(W - 46.0, 14.0, 28.0, 28.0);
         let close = ui.interact(x, Id::unique("desk-modern-close"), Sense::click());
         if close.hovered() {
             p.rect_filled(x, CornerRadius::same(6), if close.is_pointer_button_down_on() { tok::DANGER.gamma_multiply(0.85) } else { tok::DANGER });
         }
         cross(&p, x.center(), 5.0, 1.4, if close.hovered() { Color32::WHITE } else { tok::DIM });
-        // tabs: fixed widths, so nothing shifts when one becomes active
+        // tabs: each as wide as its label in Medium, so nothing shifts when one becomes active
         let mut tx = 20.0;
-        for (i, (name, w)) in TABS.iter().zip([66.0, 64.0, 70.0, 148.0, 60.0]).enumerate() {
+        for (i, name) in TABS.iter().enumerate() {
+            let w = p.layout_no_wrap(name.to_string(), look.bold(12.5), tok::TEXT).size().x + 24.0;
             if look.tab(ui, at(tx, 56.0, w, 30.0), name, self.tab == i).clicked() {
                 self.tab = i;
             }
-            tx += w + 6.0;
+            tx += w + 4.0;
         }
-        p.rect(at(16.0, 94.0, 588.0, 328.0), CornerRadius::same(10), tok::PAGE, Stroke::new(1.0, tok::BORDER), StrokeKind::Inside);
-        p.hline(o.x + 16.0..=o.x + 604.0, o.y + 426.0, Stroke::new(1.0, tok::DIVIDER));
-        let quip = clipped(&p, &view.status, look.font(11.0), tok::DIM, 576.0);
-        p.galley(pos2(20.0, 441.0 - quip.size().y / 2.0) + o, quip, tok::DIM);
-        (at(28.0, 106.0, 564.0, 298.0), close.clicked())
+        p.rect(at(16.0, 94.0, W - 32.0, H - 142.0), CornerRadius::same(10), tok::PAGE, Stroke::new(1.0, tok::BORDER), StrokeKind::Inside);
+        p.hline(o.x + 16.0..=o.x + W - 16.0, o.y + H - 44.0, Stroke::new(1.0, tok::DIVIDER));
+        let quip = clipped(&p, &view.status, look.font(11.0), tok::DIM, W - 44.0);
+        p.galley(pos2(20.0, H - 29.0 - quip.size().y / 2.0) + o, quip, tok::DIM);
+        (at(28.0, 106.0, W - 56.0, H - 172.0), close.clicked())
     }
 
     // ---------- the tabs (one layout for both looks) ----------

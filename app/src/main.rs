@@ -384,7 +384,7 @@ impl App {
                 cc.egui_ctx.set_embed_viewports(true);
                 app.desk.sample = true;
                 app.desk_sample = Some(desk::sample());
-                app.desk.set_tab(std::env::var("CLIPSTER_DESK_TAB").ok().and_then(|t| t.parse().ok()).unwrap_or(0));
+                app.desk.set_tab(&std::env::var("CLIPSTER_DESK_TAB").unwrap_or_default());
                 app.desk_modern = std::env::var("CLIPSTER_DESK_LOOK").as_deref() == Ok("modern");
             }
         } else if let Some(game) = play {
@@ -1092,9 +1092,10 @@ impl App {
                 }
             }
             Effect::TimeReport => r = self.time_report(),
-            Effect::OpenDesk => {
+            Effect::OpenDesk(tab) => {
                 self.desk_status = lines::pick("desk_status");
                 self.desk.open();
+                self.desk.set_tab(&tab);
             }
             Effect::DeskLook(modern) => {
                 self.desk_modern = modern;
@@ -2570,7 +2571,7 @@ fn main() -> eframe::Result {
             .with_title("Clipster")
             .with_app_id("clipster")
             .with_inner_size(match (play.as_deref(), screenshot.is_some()) {
-                (Some("desk"), true) => [640.0, 490.0],
+                (Some("desk"), true) => [740.0, 540.0],
                 (Some(_), true) => [560.0, 640.0],
                 _ => [FULL_W, 330.0],
             })

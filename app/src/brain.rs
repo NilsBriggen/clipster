@@ -55,7 +55,7 @@ pub enum Effect {
     FocusStop,
     TimeReport,                      // where today's time went, by window kind
     AppTips,                         // a tip for the app you're in (the app knows which)
-    OpenDesk,                        // Clipster's Desk, the window with stats, to-dos, reminders and files
+    OpenDesk(String),                // Clipster's Desk, on this tab ("" = where it was): stats, to-dos, reminders, upkeep
     DeskLook(bool),                  // the Desk's look: true = modern, false = classic 98
     Tidy(String),                    // move a folder's files into subfolders by type (after a yes)
     TidyUndo,
@@ -247,7 +247,7 @@ pub fn exact(input: &str) -> Option<Reply> {
         }
         "iss" => return Some(net(Query::Iss, "Looking up... way up...")),
         "aboutme" => return Some(facts()),
-        "desk" if rest.is_empty() || rest == "open" => return Some(Reply::say(lines::pick("desk_open")).mood(Mood::Happy).effect(Effect::OpenDesk)),
+        "desk" if rest.is_empty() || rest == "open" || crate::desk::tab(rest).is_some() => return Some(Reply::say(lines::pick("desk_open")).mood(Mood::Happy).effect(Effect::OpenDesk(rest.trim_start_matches("open").trim().to_string()))),
         "desklook" if rest == "modern" || rest == "classic" => return Some(Reply::say("").effect(Effect::DeskLook(rest == "modern"))),
         "unnote" => return Some(note_remove(rest.parse().unwrap_or(0))),
         "apptips" if rest.is_empty() => return Some(Reply::say("").effect(Effect::AppTips)),
