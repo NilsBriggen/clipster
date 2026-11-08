@@ -21,12 +21,17 @@ pub fn category(name: &str) -> &'static str {
     CATEGORIES.iter().find(|(_, exts)| exts.contains(&ext.as_str())).map_or("Other", |(c, _)| c)
 }
 
-/// "downloads" / "desktop" (or a path) -> the folder.
+/// Whether `which` names a folder he tidies ("downloads", "my desktop"; empty means downloads).
+pub fn known(which: &str) -> bool {
+    matches!(which.trim().to_lowercase().as_str(), "" | "downloads" | "download" | "my downloads" | "desktop" | "my desktop")
+}
+
+/// "downloads" / "desktop" -> the folder (None when it isn't known, or this computer has none).
 pub fn folder(which: &str) -> Option<PathBuf> {
     match which.trim().to_lowercase().as_str() {
-        "" | "downloads" | "download" | "my downloads" => dirs::download_dir(),
+        w if !known(w) => None,
         "desktop" | "my desktop" => dirs::desktop_dir(),
-        _ => None,
+        _ => dirs::download_dir(),
     }
 }
 

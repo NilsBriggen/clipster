@@ -250,7 +250,7 @@ pub fn exact(input: &str) -> Option<Reply> {
         "apptips" => return Some(app_tip(rest)),
         "tidy" if rest == "undo" => return Some(Reply::say("").effect(Effect::TidyUndo)),
         "tidy" if rest.ends_with(" confirmed") => return Some(Reply::say("").effect(Effect::Tidy(rest.trim_end_matches(" confirmed").to_string()))),
-        "tidy" if rest.is_empty() || crate::tidy::folder(rest).is_some() => return Some(tidy_plan(rest)),
+        "tidy" if crate::tidy::known(rest) => return Some(tidy_plan(rest)),
         "dupes" => return Some(net(Query::Dupes(rest.to_string()), "Comparing your files byte by byte. I love this kind of work.")),
         "oldfiles" => return Some(net(Query::OldFiles(rest.to_string()), "Digging for big old files...")),
         "focus" if ["stop", "end", "cancel", "off", "done"].contains(&rest) => return Some(Reply::say("").effect(Effect::FocusStop)),
@@ -628,7 +628,10 @@ pub fn app_tip(kind: &str) -> Reply {
 /// "tidy downloads": what would move where, and a Yes button (nothing moves before that).
 pub fn tidy_plan(which: &str) -> Reply {
     let name = if which.trim().is_empty() { "downloads" } else { which.trim() };
-    let Some(dir) = crate::tidy::folder(name) else { return Reply::say("I can tidy your downloads or your desktop. Which one?").run("Downloads", "tidy downloads").run("Desktop", "tidy desktop") };
+    if !crate::tidy::known(name) {
+        return Reply::say("I can tidy your downloads or your desktop. Which one?").run("Downloads", "tidy downloads").run("Desktop", "tidy desktop");
+    }
+    let Some(dir) = crate::tidy::folder(name) else { return Reply::say(format!("I can't find a {name} folder on this computer.")).mood(Mood::Think) };
     let plan = crate::tidy::plan(&dir);
     let label = dir.file_name().map(|n| n.to_string_lossy().to_string()).unwrap_or_else(|| name.to_string());
     if plan.is_empty() {
