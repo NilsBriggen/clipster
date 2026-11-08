@@ -1,8 +1,10 @@
 #![cfg_attr(all(windows, not(debug_assertions)), windows_subsystem = "windows")] // no console window behind him
 
 mod brain;
+mod backup;
 mod desk;
 mod plan;
+mod upkeep;
 mod fun;
 mod games;
 mod lines;
@@ -114,6 +116,15 @@ struct App {
     clip_history: Vec<String>,
     pins: Vec<String>, // clipboard snippets pinned on the Desk (saved; the history isn't)
     sample_clips: Vec<String>, // made-up copies for screenshots of the Desk
+    upkeep: Option<(Instant, upkeep::Report)>, // the last checkup
+    sample_upkeep: upkeep::Report,              // made-up readings for screenshots
+    upkeep_running: bool,
+    backup_sources: Vec<String>,
+    backup_target: String,
+    backup_last: Option<i64>, // unix seconds
+    backup_result: String,    // what the last backup did, for the Desk
+    backup_progress: Option<(usize, usize, u64)>, // running: files done, files to copy, bytes
+    dnd_restore: Option<String>, // a notification setting to put back if Clipster stopped mid-session
     stopwatch: Option<Instant>,
     timers: Vec<(Instant, String, u64)>, // when, what, repeat every N seconds (0 = once)
     name: String,
@@ -220,6 +231,7 @@ struct Focus {
     until: Instant,
     distracted: u64,              // seconds spent in distraction kinds
     last_nudge: Option<Instant>,
+    dnd: Option<sys::Dnd>,        // the system's notifications, silenced until the session ends (dropping it restores them)
 }
 
 /// A finished focus session, kept for the Desk: (day "2026-11-09", planned minutes, focused seconds, distracted seconds, label).
@@ -372,6 +384,18 @@ impl App {
             dragging: false,
             clip_history: vec![],
             pins: vec![],
+            upkeep: None,
+            sample_upkeep: upkeep::Report {
+                startup: ["1Password", "LocalSend", "Nextcloud"].iter().map(|n| sys::StartupApp { id: format!("{n}.desktop"), name: n.to_string(), on: *n != "Nextcloud" }).collect(),
+                checks: vec![],
+            },
+            upkeep_running: false,
+            backup_sources: [dirs::document_dir(), dirs::picture_dir(), dirs::desktop_dir()].into_iter().flatten().filter(|d| d.exists()).map(|d| d.to_string_lossy().into_owned()).collect(),
+            backup_target: String::new(),
+            backup_last: None,
+            backup_result: String::new(),
+            backup_progress: None,
+            dnd_restore: None,
             sample_clips: ["Printer code: 4711", "Meeting moved to 3 pm, room B", "https://example.com/quarterly-report", "Kind regards,\nSam", "SELECT * FROM paperclips WHERE bent = false;"].map(String::from).to_vec(),
             stopwatch: None,
             timers: vec![],
@@ -464,6 +488,8 @@ impl App {
                 app.desk_sample = Some(desk::sample());
                 app.desk.set_tab(&std::env::var("CLIPSTER_DESK_TAB").unwrap_or_default());
                 app.desk_modern = std::env::var("CLIPSTER_DESK_LOOK").as_deref() == Ok("modern");
+                let startup = app.sample_upkeep.startup.clone();
+                app.sample_upkeep.checks = upkeep::judge(&upkeep::Readings { disk: Some((175_000_000_000, 752_000_000_000)), trash: Some((2_400_000_000, 31)), temp: 43_000_000, uptime: 9 * 86_400, updates: Some(5), battery: Some(82), startup, loose: 24 });
                 app.focus_goal = 120; // so the pictures show a goal and a limit
                 app.budgets.insert("video".into(), 30);
             }
@@ -583,11 +609,11 @@ impl App {
         };
         match &self.desk_sample {
             Some((t, k, f, c)) => {
-                let view = desk::View { timers: t.clone(), kind_time: k, focus_log: f, focus_now: Some(("the slides".into(), 18 * 60, 7 * 60, 40)), checkins: c, streaks: (4, 6, 31), status, prefs, clips: &self.sample_clips, pins: &self.sample_clips[..2], me: sample_me() };
+                let view = desk::View { timers: t.clone(), kind_time: k, focus_log: f, focus_now: Some(("the slides".into(), 18 * 60, 7 * 60, 40)), checkins: c, streaks: (4, 6, 31), status, prefs, clips: &self.sample_clips, pins: &self.sample_clips[..2], me: sample_me(), upkeep: Some((&self.sample_upkeep, 120)), upkeep_running: false, backup_check: upkeep::backup_check(true, Some(backup::now() - 9 * 86_400), backup::now(), true), backup: desk::Backup { sources: &self.backup_sources, target: "/run/media/you/BACKUP", last: Some(backup::now() - 9 * 86_400), result: "214 copied (1.3 GB), 4120 unchanged", progress: None } };
                 self.desk.show(ctx, &view, look, near)
             }
             None => {
-                let view = desk::View { timers, kind_time: &self.kind_time, focus_log: &self.focus_log, focus_now, checkins: &self.checkin_days, streaks, status, prefs, clips: &self.clip_history, pins: &self.pins, me: about_me(&self.facts, self.birthday, &self.stats, &self.unlocked, &self.highscores, self.friendship) };
+                let view = desk::View { timers, kind_time: &self.kind_time, focus_log: &self.focus_log, focus_now, checkins: &self.checkin_days, streaks, status, prefs, clips: &self.clip_history, pins: &self.pins, me: about_me(&self.facts, self.birthday, &self.stats, &self.unlocked, &self.highscores, self.friendship), upkeep: self.upkeep.as_ref().map(|(t, r)| (r, t.elapsed().as_secs())), upkeep_running: self.upkeep_running, backup_check: self.backup_check(), backup: desk::Backup { sources: &self.backup_sources, target: &self.backup_target, last: self.backup_last, result: &self.backup_result, progress: self.backup_progress } };
                 self.desk.show(ctx, &view, look, near)
             }
         }
@@ -615,7 +641,11 @@ impl App {
     /// End the focus session (on time, or early): log it, keep the streak, and say how it went.
     fn finish_focus(&mut self, early: bool) -> Reply {
         self.account_time();
-        let Some(f) = self.focus.take() else { return Reply::say("") };
+        let Some(mut f) = self.focus.take() else { return Reply::say("") };
+        // notifications come back first, so his own "session done" isn't swallowed
+        if f.dnd.take().is_some() {
+            self.dnd_restore = None;
+        }
         let total = Instant::now().duration_since(f.start).as_secs().max(1);
         let focused = total.saturating_sub(f.distracted);
         let planned = f.until.duration_since(f.start).as_secs() / 60;
@@ -643,6 +673,96 @@ impl App {
         }
         let again = if f.label.is_empty() { "focus 25m".to_string() } else { format!("focus 25m {}", f.label) };
         Reply::say(text).mood(if pct >= 60 { Mood::Party } else { Mood::Think }).run("Another 25 minutes", &again).run("Open the Desk", "desk")
+    }
+
+    /// Run the checkup on its own thread (it asks the package manager, which can take a while).
+    fn start_checkup(&mut self, ctx: &egui::Context, nudge: bool) {
+        if self.upkeep_running || self.screenshot.is_some() {
+            return;
+        }
+        self.upkeep_running = true;
+        let (tx, ctx) = (self.tx.clone(), ctx.clone());
+        std::thread::spawn(move || {
+            let _ = tx.send(Event::Upkeep(Box::new(upkeep::run()), nudge));
+            ctx.request_repaint();
+        });
+    }
+
+    /// The Upkeep tab's backup row.
+    fn backup_check(&self) -> upkeep::Check {
+        let set_up = !self.backup_sources.is_empty() && !self.backup_target.is_empty();
+        upkeep::backup_check(set_up, self.backup_last, backup::now(), std::path::Path::new(&self.backup_target).exists())
+    }
+
+    /// "backup add <folder>", "remove <n>", "target <place>", "now", "eject".
+    fn backup_command(&mut self, ctx: &egui::Context, cmd: &str) -> Reply {
+        let (verb, arg) = cmd.split_once(' ').unwrap_or((cmd, ""));
+        let arg = arg.trim();
+        match verb {
+            "add" => {
+                let path = std::path::Path::new(arg);
+                if !path.is_dir() {
+                    return Reply::say(format!("I can't find a folder at {arg}.")).mood(Mood::Think);
+                }
+                if !self.backup_sources.iter().any(|s| s == arg) {
+                    self.backup_sources.push(arg.to_string());
+                }
+                self.desk_status = format!("Backing up {} too.", path.file_name().map(|n| n.to_string_lossy().to_string()).unwrap_or(arg.to_string()));
+            }
+            "remove" => {
+                if let Some(i) = arg.parse::<usize>().ok().and_then(|n| n.checked_sub(1)).filter(|i| *i < self.backup_sources.len()) {
+                    self.backup_sources.remove(i);
+                }
+                self.desk_status = lines::pick("settings_saved");
+            }
+            "target" => {
+                self.backup_target = arg.to_string();
+                self.desk_status = format!("Backups go to {arg}.");
+            }
+            "eject" => {
+                return match sys::eject(std::path::Path::new(&self.backup_target)) {
+                    Ok(()) => Reply::say("Ejected. You can unplug it now.").mood(Mood::Happy),
+                    Err(e) => Reply::say(format!("I couldn't eject it: {e}")).mood(Mood::Think),
+                };
+            }
+            _ => return self.start_backup(ctx),
+        }
+        Reply::say("") // from the Desk: its status bar says it
+    }
+
+    /// Copy what changed to the backup place, on its own thread, reporting progress as it goes.
+    fn start_backup(&mut self, ctx: &egui::Context) -> Reply {
+        if self.backup_progress.is_some() {
+            return Reply::say("A backup is already running. Patience. I'm carrying as fast as I can.").mood(Mood::Think);
+        }
+        if self.backup_sources.is_empty() || self.backup_target.is_empty() {
+            return Reply::say(lines::pick("backup_not_set_up")).mood(Mood::Think).run("Set it up", "desk upkeep");
+        }
+        let target = std::path::PathBuf::from(&self.backup_target);
+        if !target.exists() {
+            return Reply::say(lines::pick("backup_drive_missing").replace("{x}", &self.backup_target)).mood(Mood::Think);
+        }
+        let limits = sys::drives().into_iter().find(|d| target.starts_with(&d.path)).map_or(backup::Limits { strict_names: cfg!(windows), fat: false }, |d| backup::Limits { strict_names: d.strict_names(), fat: d.fat() });
+        let sources: Vec<std::path::PathBuf> = self.backup_sources.iter().map(std::path::PathBuf::from).collect();
+        let (tx, ctx) = (self.tx.clone(), ctx.clone());
+        self.backup_progress = Some((0, 0, 0));
+        std::thread::spawn(move || {
+            let result = backup::plan(&sources, &target, limits).map(|plan| {
+                let total = plan.copies.len();
+                let mut last = Instant::now();
+                let _ = tx.send(Event::BackupProgress(0, total, 0));
+                backup::run(&plan, &mut |done, bytes| {
+                    if last.elapsed() > Duration::from_millis(250) || done == total {
+                        last = Instant::now();
+                        let _ = tx.send(Event::BackupProgress(done, total, bytes));
+                        ctx.request_repaint();
+                    }
+                })
+            });
+            let _ = tx.send(Event::BackupDone(result));
+            ctx.request_repaint();
+        });
+        Reply::say(lines::pick("backup_started")).mood(Mood::Search)
     }
 
     /// Seconds focused today, the running session included.
@@ -1079,7 +1199,7 @@ impl App {
         let unix = |at: &Instant| (std::time::SystemTime::now() + at.saturating_duration_since(Instant::now())).duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0);
         serde_json::json!({
             "tips_every": self.tips_every, "notice_clip": self.notice_clip, "notice_programs": self.notice_programs, "notice_windows": self.notice_windows, "checkin": self.checkin, "facts": self.facts, "kind_time": self.kind_time, "focus_log": self.focus_log, "desk_look": if self.desk_modern { "modern" } else { "classic" }, "checkin_days": self.checkin_days,
-            "pins": self.pins, "dnd": self.dnd, "wrapup": self.wrapup, "upkeep_day": self.upkeep_day, "focus_goal": self.focus_goal, "budgets": self.budgets,
+            "pins": self.pins, "backup_sources": self.backup_sources, "backup_target": self.backup_target, "backup_last": self.backup_last, "backup_result": self.backup_result, "dnd_restore": self.dnd_restore, "dnd": self.dnd, "wrapup": self.wrapup, "upkeep_day": self.upkeep_day, "focus_goal": self.focus_goal, "budgets": self.budgets,
             "notice_health": self.notice_health, "check_updates": self.check_updates, "update_told": self.update_told, "sounds": self.sounds, "breaks": self.breaks, "name": self.name,
             "hat": self.hat, "skin": self.skin, "friendship": self.friendship, "highscores": self.highscores, "birthday": self.birthday.map(|(m, d)| [m, d]), "stats": self.stats, "unlocked": self.unlocked, "explored": self.explored, "persona": if self.unhinged { "unhinged" } else { "boring" }, "anchor": self.anchor.or(self.saved_anchor).map(|a| [a.x, a.y]),
             "timers": self.timers.iter().map(|(at, l, every)| serde_json::json!([unix(at), l, every])).collect::<Vec<_>>(),
@@ -1104,6 +1224,16 @@ impl App {
         }
         self.focus_goal = v["focus_goal"].as_u64().unwrap_or(0);
         self.pins = serde_json::from_value(v["pins"].clone()).unwrap_or_default();
+        if let Ok(sources) = serde_json::from_value(v["backup_sources"].clone()) {
+            self.backup_sources = sources;
+        }
+        self.backup_target = v["backup_target"].as_str().unwrap_or_default().to_string();
+        self.backup_last = v["backup_last"].as_i64();
+        self.backup_result = v["backup_result"].as_str().unwrap_or_default().to_string();
+        // Clipster stopped during a focus session: put the notification setting back
+        if let Some(m) = v["dnd_restore"].as_str() {
+            sys::dnd_restore(m);
+        }
         self.budgets = serde_json::from_value(v["budgets"].clone()).unwrap_or_default();
         let fortnight = (chrono::Local::now() - chrono::Duration::days(14)).format("%Y-%m-%d").to_string();
         for (day, a) in v["checkin_days"].as_object().into_iter().flatten().filter(|(d, _)| **d > fortnight) {
@@ -1234,9 +1364,23 @@ impl App {
             Effect::Focus(secs, label) => {
                 let now = Instant::now();
                 self.account_time();
-                self.focus = Some(Focus { label: label.clone(), start: now, until: now + Duration::from_secs(secs), distracted: 0, last_nudge: None });
-                let text = lines::pick("focus_start").replace("{n}", &(secs / 60).to_string()).replace("{x}", &label);
+                let dnd = if self.dnd && self.screenshot.is_none() { sys::dnd_on() } else { None };
+                self.dnd_restore = dnd.as_ref().and_then(|d| d.marker());
+                let quiet = dnd.is_some();
+                self.focus = Some(Focus { label: label.clone(), start: now, until: now + Duration::from_secs(secs), distracted: 0, last_nudge: None, dnd });
+                let mut text = lines::pick("focus_start").replace("{n}", &(secs / 60).to_string()).replace("{x}", &label);
+                let today = chrono::Datelike::num_days_from_ce(&chrono::Local::now().date_naive()) as u64;
+                if quiet {
+                    text = format!("{text} {}", lines::pick("dnd_on"));
+                } else if self.dnd && self.screenshot.is_none() && self.stats.get("dnd_said") != Some(&today) {
+                    // once a day: this system won't let him silence it (Windows, and desktops without a switch)
+                    self.stats.insert("dnd_said".into(), today);
+                    text = format!("{text} {}", lines::pick("dnd_unsupported"));
+                }
                 r = Reply::say(text).mood(Mood::Cool).run("Stop the session", "focus stop");
+                if !quiet && cfg!(windows) && self.dnd {
+                    r = r.btn("Open Focus settings", Act::Open("ms-settings:quiethours".into()));
+                }
             }
             Effect::FocusStop => {
                 r = match self.focus.is_some() {
@@ -1297,6 +1441,30 @@ impl App {
                 }
             }
             Effect::Goals => r = self.goals(),
+            Effect::UpkeepCheck => {
+                self.start_checkup(ctx, false);
+                silent = true;
+            }
+            Effect::OpenSystem(what) => {
+                let opened = if what == "startup" { sys::open_startup_settings() } else { sys::open_updater() };
+                r = match opened {
+                    Ok(()) => Reply::say(if what == "startup" { "Opening the start-up settings." } else { "Opening the updater. Updates are good for you, like vegetables." }).mood(Mood::Happy),
+                    Err(e) => Reply::say(e).mood(Mood::Think),
+                };
+            }
+            Effect::Startup(id, on) => {
+                let name = self.upkeep.as_ref().and_then(|(_, rep)| rep.startup.iter().find(|a| a.id == id)).map_or(id.clone(), |a| a.name.clone());
+                r = match sys::set_startup(&id, on) {
+                    Ok(()) => {
+                        if let Some(app) = self.upkeep.as_mut().and_then(|(_, rep)| rep.startup.iter_mut().find(|a| a.id == id)) {
+                            app.on = on;
+                        }
+                        Reply::say(lines::pick(if on { "upkeep_startup_on" } else { "upkeep_startup_off" }).replace("{x}", &name)).mood(Mood::Happy)
+                    }
+                    Err(e) => Reply::say(format!("I couldn't change that: {e}")).mood(Mood::Sad),
+                };
+            }
+            Effect::Backup(cmd) => r = self.backup_command(ctx, &cmd),
             Effect::Wrapup => {
                 let today = chrono::Local::now().date_naive();
                 let n = todo::load().iter().filter(|i| i.done && i.done_on == Some(today)).count();
@@ -1678,6 +1846,39 @@ impl App {
                     }
                     self.quit_at = Some(now + Duration::from_secs(3)); // long enough to read it
                 }
+                Event::Upkeep(report, nudge) => {
+                    self.upkeep_running = false;
+                    let needs = report.checks.iter().filter(|c| c.level != upkeep::Level::Good).count() + usize::from(self.backup_check().level != upkeep::Level::Good);
+                    self.upkeep = Some((Instant::now(), *report));
+                    if nudge && needs > 0 {
+                        self.pipe_up(Reply::say(lines::pick("upkeep_day").replace("{n}", &needs.to_string())).mood(Mood::Think).run("Open Upkeep", "desk upkeep").btn("Later", Act::Hide));
+                    }
+                }
+                Event::BackupProgress(done, total, bytes) => self.backup_progress = Some((done, total, bytes)),
+                Event::BackupDone(result) => {
+                    self.backup_progress = None;
+                    let r = match result {
+                        Ok(s) => {
+                            self.backup_last = Some(backup::now());
+                            let mut text = if s.copied == 0 { lines::pick("backup_nothing_new") } else { lines::pick("backup_done").replace("{n}", &s.copied.to_string()).replace("{x}", &upkeep::size(s.bytes)) };
+                            if s.conflicts > 0 {
+                                text = format!("{text} {}", lines::pick("backup_conflicts").replace("{n}", &s.conflicts.to_string()));
+                            }
+                            if !s.errors.is_empty() {
+                                text = format!("{text}\n{} file(s) couldn't be copied, for example: {}", s.errors.len(), s.errors[0]);
+                            }
+                            self.backup_result = format!("{} copied ({}), {} unchanged{}", s.copied, upkeep::size(s.bytes), s.plan_same, if s.errors.is_empty() { String::new() } else { format!(", {} failed", s.errors.len()) });
+                            let r = Reply::say(text).mood(Mood::Party);
+                            let removable = ["/run/media/", "/media/"].iter().any(|m| self.backup_target.starts_with(m));
+                            if removable { r.run("Eject the drive", "backup eject") } else { r }
+                        }
+                        Err(e) => {
+                            self.backup_result = e.clone();
+                            Reply::say(e).mood(Mood::Sad).run("Open Backup", "desk upkeep")
+                        }
+                    };
+                    self.show(r);
+                }
                 Event::Installed(Err(e)) => {
                     let r = Reply::say(lines::pick("say_update_failed").replace("{error}", &e)).mood(Mood::Sad);
                     self.show(r.btn("Open the download page", Act::Open(net::RELEASES.into())));
@@ -1745,7 +1946,20 @@ impl App {
             let (hour, weekday) = (chrono::Timelike::hour(&clock), chrono::Datelike::weekday(&clock).number_from_monday());
             let tracked: u64 = self.kind_time.get(&today_key()).map_or(0, |d| d.values().sum());
             let week = plan::week_number(clock.date_naive());
-            if self.wrapup && hour >= 17 && tracked >= 2 * 3600 && self.stats.get("wrapup_day") != Some(&today) {
+            let days = self.stats.get("days").copied().unwrap_or(0);
+            let backup_days = backup::days_since(self.backup_last, backup::now());
+            let backup_due = !self.backup_sources.is_empty() && !self.backup_target.is_empty() && backup_days.is_none_or(|d| d >= 7) && self.backup_progress.is_none();
+            if self.upkeep_day && days >= 3 && self.t() > 600.0 && self.stats.get("upkeep_week") != Some(&week) {
+                // once a week: check quietly, and say something only if something needs looking at
+                self.stats.insert("upkeep_week".into(), week);
+                self.start_checkup(ctx, true);
+            } else if backup_due && self.t() > 900.0 && self.stats.get("backup_nag_day") != Some(&today) && hour >= 10 {
+                self.stats.insert("backup_nag_day".into(), today);
+                let present = std::path::Path::new(&self.backup_target).exists();
+                let text = if present { lines::pick("backup_reminder").replace("{n}", &backup_days.unwrap_or(7).to_string()) } else { lines::pick("backup_drive_missing").replace("{x}", &self.backup_target) };
+                let r = Reply::say(text).mood(Mood::Think);
+                self.pipe_up(if present { r.run("Back up now", "backup now").btn("Later", Act::Hide) } else { r.btn("Later", Act::Hide) });
+            } else if self.wrapup && hour >= 17 && tracked >= 2 * 3600 && self.stats.get("wrapup_day") != Some(&today) {
                 self.stats.insert("wrapup_day".into(), today);
                 self.pipe_up(Reply::say(lines::pick("wrapup_offer")).mood(Mood::Happy).run("Wrap up my day", "wrapup").btn("Not today", Act::Hide));
             } else if (weekday == 5 && hour >= 15 || weekday >= 6) && self.stats.get("days").copied().unwrap_or(0) >= 3 && self.stats.get("review_week") != Some(&week) {

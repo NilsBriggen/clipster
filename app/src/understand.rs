@@ -8,7 +8,7 @@ pub fn respond(input: &str) -> Reply {
     let raw = input.trim();
     let head = raw.split_whitespace().next().unwrap_or("").to_lowercase();
     // shell commands and button-only commands (whose text is data, like quiz answers) are taken literally
-    if ["run", "$", "sh", "cmd", "reveal", "wyrpick", "onboard", "window", "answer-to", "checkin", "install", "forget", "tidy", "pref", "clip", "forgetfact"].contains(&head.as_str()) || head == "answer" && raw.contains('|') {
+    if ["run", "$", "sh", "cmd", "reveal", "wyrpick", "onboard", "window", "answer-to", "checkin", "install", "forget", "tidy", "pref", "clip", "forgetfact", "startup"].contains(&head.as_str()) || head == "answer" && raw.contains('|') {
         if let Some(r) = exact(raw) {
             return r; // shell commands are taken literally, never "understood"
         }
@@ -313,7 +313,7 @@ fn go(cmd: String) -> Option<Reply> {
 }
 
 fn in_path(p: &str) -> bool {
-    std::env::var_os("PATH").is_some_and(|path| std::env::split_paths(&path).any(|d| d.join(p).is_file() || cfg!(windows) && d.join(format!("{p}.exe")).is_file()))
+    crate::sys::in_path(p)
 }
 
 fn first_in_path(list: &[&str]) -> Option<String> {
@@ -444,6 +444,21 @@ fn timers(s: &str, raw: &str) -> Option<Reply> {
                 return go(format!("budget {kind} {}", if amount.is_empty() { "off" } else { amount }));
             }
         }
+    }
+    // looking after the computer ("check for updates" is Clipster's own; these are the system's)
+    // as commands only (the start of the sentence), so "i hate system updates" stays a conversation
+    let starts = |ps: &[&str]| ps.iter().any(|p| s == *p || s.starts_with(&format!("{p} ")));
+    if starts(&["computer checkup", "check up on my computer", "check my computer", "computer check up", "upkeep", "maintenance check", "look after my computer"]) {
+        return go("upkeep".into());
+    }
+    if starts(&["system updates", "update my system", "update the system", "install system updates", "open the updater", "check for system updates", "show system updates", "any system updates"]) {
+        return go("sysupdates".into());
+    }
+    if starts(&["back up now", "backup now", "back up my files now", "backup my files now", "run a backup", "run my backup", "run the backup", "start a backup", "start the backup", "make a backup"]) {
+        return go("backup now".into());
+    }
+    if starts(&["startup apps", "start up apps", "show my startup apps", "apps that start with my computer", "programs that start with my computer", "autostart apps"]) {
+        return go("desk upkeep".into());
     }
     // the start and end of the day, and the week
     if has(s, &["plan my day", "plan the day", "plan today", "plan my morning", "morning plan", "help me plan my day"]) {

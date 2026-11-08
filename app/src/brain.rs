@@ -58,6 +58,10 @@ pub enum Effect {
     Pref(String, String),            // a setting changed on the Desk's Settings tab: key, value
     Goals,                           // how today is going against the focus goal and the daily limits
     Clip(String),                    // the Desk's Clipboard tab: "copy h3", "pin h3", "unpin p1", "clear"
+    UpkeepCheck,                     // run the checkup (on a background thread)
+    OpenSystem(String),              // the system's own "updater" or "startup" settings
+    Startup(String, bool),           // an app that starts with the computer: on or off
+    Backup(String),                  // "add <folder>", "remove 2", "target <place>", "now", "eject"
     Wrapup,                          // the end-of-day card on the Desk
     Review(bool),                    // the week in review (true = copy it as text)
     OpenDesk(String),                // Clipster's Desk, on this tab ("" = where it was): stats, to-dos, reminders, upkeep
@@ -308,6 +312,20 @@ pub fn exact(input: &str) -> Option<Reply> {
         "wrapup" => return Some(Reply::say("").effect(Effect::Wrapup)),
         "review" => return Some(Reply::say("").effect(Effect::Review(rest == "copy"))),
         "clip" if !rest.is_empty() => return Some(Reply::say("").effect(Effect::Clip(rest.to_string()))),
+        // upkeep: the checkup, the system's updater and start-up apps, backups
+        "upkeep" if rest == "check" => return Some(Reply::say("").effect(Effect::UpkeepCheck)),
+        "upkeep" if rest == "cleartemp" => {
+            let what = if cfg!(windows) { "the temporary files older than a week" } else { "the thumbnails" };
+            return Some(Reply::say(format!("Clear {what}? Programs make new ones when they need them.")).mood(Mood::Think).run("Yes, clear them", crate::sys::temp_clear_command()).btn("No, leave them", Act::Hide));
+        }
+        "upkeep" if rest.is_empty() => return Some(Reply::say(lines::pick("upkeep_checking")).mood(Mood::Search).effect(Effect::OpenDesk("upkeep".into()))),
+        "sysupdates" => return Some(Reply::say("").effect(Effect::OpenSystem("updater".into()))),
+        "startup" if rest == "settings" => return Some(Reply::say("").effect(Effect::OpenSystem("startup".into()))),
+        "startup" => {
+            let (on, id) = rest.split_once(' ')?;
+            return Some(Reply::say("").effect(Effect::Startup(id.to_string(), match on { "on" => true, "off" => false, _ => return None })));
+        }
+        "backup" if rest == "now" || rest == "eject" || ["add ", "remove ", "target "].iter().any(|v| rest.starts_with(v)) => return Some(Reply::say("").effect(Effect::Backup(rest.to_string()))),
         // the Desk's You & me tab forgets one fact (or all of them, after its own "are you sure")
         "forgetfact" if !rest.is_empty() => {
             let key = rest.trim();

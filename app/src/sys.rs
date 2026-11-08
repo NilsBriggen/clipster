@@ -85,12 +85,32 @@ pub mod win {
         pub x: i32,
         pub y: i32,
     }
+    #[repr(C)]
+    #[derive(Default)]
+    pub struct RecycleInfo {
+        pub size: u32, // SHQUERYRBINFO is 24 bytes on 64-bit Windows (the i64s are 8-aligned)
+        pub bytes: i64,
+        pub items: i64,
+    }
+    /// "C:\\" as the zero-terminated UTF-16 that Windows wants.
+    pub fn wide(s: &str) -> Vec<u16> {
+        s.encode_utf16().chain(std::iter::once(0)).collect()
+    }
     #[link(name = "kernel32")]
     extern "system" {
         pub fn GetSystemPowerStatus(s: *mut PowerStatus) -> i32;
         pub fn GlobalMemoryStatusEx(s: *mut MemStatus) -> i32;
         pub fn GetTickCount64() -> u64;
         pub fn GetSystemTimes(idle: *mut FileTime, kernel: *mut FileTime, user: *mut FileTime) -> i32;
+        pub fn GetDiskFreeSpaceExW(dir: *const u16, avail: *mut u64, total: *mut u64, free: *mut u64) -> i32;
+        pub fn GetLogicalDrives() -> u32;
+        pub fn GetDriveTypeW(root: *const u16) -> u32; // 2 removable, 3 fixed
+        pub fn GetVolumeInformationW(root: *const u16, name: *mut u16, name_len: u32, serial: *mut u32, max_part: *mut u32, flags: *mut u32, fs: *mut u16, fs_len: u32) -> i32;
+        pub fn SetThreadErrorMode(new: u32, old: *mut u32) -> i32; // 1 = no "insert a disk" box for empty card readers
+    }
+    #[link(name = "shell32")]
+    extern "system" {
+        pub fn SHQueryRecycleBinW(root: *const u16, info: *mut RecycleInfo) -> i32; // 0 = OK
     }
     #[link(name = "user32")]
     extern "system" {
@@ -426,6 +446,579 @@ pub fn os_name() -> String {
     }
 }
 
+
+// ---------- upkeep: what the computer never tells you by itself ----------
+// The parsers are plain functions on text, so the tests run them on output from both systems.
+
+/// Whether a program is on the PATH.
+pub fn in_path(p: &str) -> bool {
+    std::env::var_os("PATH").is_some_and(|path| std::env::split_paths(&path).any(|d| d.join(p).is_file() || cfg!(windows) && d.join(format!("{p}.exe")).is_file()))
+}
+
+/// Run a command for at most `secs`: (exit code, stdout). Output is read on its own thread so a big one can't block.
+pub fn run_for(mut cmd: Command, secs: u64) -> Option<(Option<i32>, String)> {
+    use std::io::Read;
+    let mut child = cmd.stdout(std::process::Stdio::piped()).stderr(std::process::Stdio::null()).spawn().ok()?;
+    let mut out = child.stdout.take()?;
+    let reader = std::thread::spawn(move || {
+        let mut s = String::new();
+        let _ = out.read_to_string(&mut s);
+        s
+    });
+    let until = std::time::Instant::now() + std::time::Duration::from_secs(secs);
+    let code = loop {
+        match child.try_wait() {
+            Ok(Some(status)) => break status.code(),
+            Ok(None) if std::time::Instant::now() < until => std::thread::sleep(std::time::Duration::from_millis(100)),
+            _ => {
+                let _ = child.kill();
+                return None;
+            }
+        }
+    };
+    Some((code, reader.join().unwrap_or_default()))
+}
+
+/// `df -Pk` -> (available, total) in kB. The token ending in "%" anchors the columns, so spaces in names don't matter.
+pub fn parse_df(out: &str) -> Option<(u64, u64)> {
+    let line = out.lines().nth(1)?;
+    let t: Vec<&str> = line.split_whitespace().collect();
+    let pct = t.iter().position(|x| x.ends_with('%') && x[..x.len() - 1].parse::<u32>().is_ok())?;
+    Some((t.get(pct.checked_sub(1)?)?.parse().ok()?, t.get(pct.checked_sub(3)?)?.parse().ok()?))
+}
+
+/// Free and total bytes on the drive that holds `dir`.
+#[cfg(not(windows))]
+pub fn disk_space(dir: &std::path::Path) -> Option<(u64, u64)> {
+    let out = command("df").arg("-Pk").arg("--").arg(dir).output().ok()?;
+    parse_df(&String::from_utf8_lossy(&out.stdout)).map(|(a, t)| (a * 1024, t * 1024))
+}
+
+#[cfg(windows)]
+pub fn disk_space(dir: &std::path::Path) -> Option<(u64, u64)> {
+    let (mut avail, mut total, mut free) = (0u64, 0u64, 0u64);
+    let w = win::wide(&dir.to_string_lossy());
+    (unsafe { win::GetDiskFreeSpaceExW(w.as_ptr(), &mut avail, &mut total, &mut free) } != 0).then_some((avail, total))
+}
+
+/// The mount table: (mount point, file system type), with "\040" and friends turned back into characters.
+pub fn parse_mounts(text: &str) -> Vec<(String, String)> {
+    let unescape = |s: &str| s.replace("\\040", " ").replace("\\011", "\t").replace("\\012", "\n").replace("\\134", "\\");
+    text.lines()
+        .filter_map(|l| {
+            let mut f = l.split_whitespace();
+            let (_dev, mount, kind) = (f.next()?, f.next()?, f.next()?);
+            Some((unescape(mount), kind.to_string()))
+        })
+        .collect()
+}
+
+/// How much is under `dir` (never following links), counting at most `limit` files.
+pub fn dir_size(dir: &std::path::Path, limit: usize) -> u64 {
+    let (mut total, mut seen, mut todo) = (0, 0, vec![dir.to_path_buf()]);
+    while let Some(d) = todo.pop() {
+        for e in std::fs::read_dir(&d).into_iter().flatten().flatten() {
+            let Ok(m) = std::fs::symlink_metadata(e.path()) else { continue };
+            if m.is_dir() {
+                todo.push(e.path());
+            } else if m.is_file() {
+                total += m.len();
+                seen += 1;
+                if seen >= limit {
+                    return total;
+                }
+            }
+        }
+    }
+    total
+}
+
+/// The trash or Recycle Bin: (bytes, items).
+#[cfg(not(windows))]
+pub fn trash_size() -> Option<(u64, u64)> {
+    use std::os::unix::fs::MetadataExt;
+    let uid = std::fs::metadata("/proc/self").ok()?.uid();
+    let mut dirs: Vec<PathBuf> = vec![dirs::data_dir()?.join("Trash")];
+    // every local disk can have its own trash (network and FUSE mounts are skipped: they can hang)
+    for (mount, kind) in parse_mounts(&std::fs::read_to_string("/proc/self/mounts").unwrap_or_default()) {
+        let skip = ["proc", "sysfs", "devtmpfs", "devpts", "tmpfs", "autofs", "nfs", "nfs4", "cifs", "smb3", "cgroup2", "overlay", "squashfs"];
+        if skip.contains(&kind.as_str()) || kind.starts_with("fuse") {
+            continue;
+        }
+        let m = PathBuf::from(&mount);
+        dirs.push(m.join(format!(".Trash-{uid}")));
+        // a shared .Trash only counts with the sticky bit set
+        if std::fs::metadata(m.join(".Trash")).is_ok_and(|md| md.is_dir() && md.mode() & 0o1000 != 0) {
+            dirs.push(m.join(".Trash").join(uid.to_string()));
+        }
+    }
+    dirs.sort();
+    dirs.dedup();
+    let (mut bytes, mut items) = (0, 0);
+    for d in dirs {
+        items += std::fs::read_dir(d.join("info")).into_iter().flatten().flatten().filter(|e| e.path().extension().is_some_and(|x| x == "trashinfo")).count() as u64;
+        bytes += dir_size(&d.join("files"), 200_000);
+    }
+    Some((bytes, items))
+}
+
+#[cfg(windows)]
+pub fn trash_size() -> Option<(u64, u64)> {
+    let (mut bytes, mut items, mut any) = (0u64, 0u64, false);
+    for root in drive_roots() {
+        let mut info = win::RecycleInfo { size: std::mem::size_of::<win::RecycleInfo>() as u32, ..Default::default() };
+        let w = win::wide(&root);
+        if unsafe { win::SHQueryRecycleBinW(w.as_ptr(), &mut info) } == 0 {
+            any = true;
+            bytes += info.bytes.max(0) as u64;
+            items += info.items.max(0) as u64;
+        }
+    }
+    any.then_some((bytes, items))
+}
+
+/// The drive roots ("C:\\", "E:\\") that are fixed disks or removable drives.
+#[cfg(windows)]
+fn drive_roots() -> Vec<String> {
+    let mask = unsafe { win::GetLogicalDrives() };
+    (0..26u8)
+        .filter(|i| mask & (1 << i) != 0)
+        .map(|i| format!("{}:\\", (b'A' + i) as char))
+        .filter(|r| {
+            let w = win::wide(r);
+            matches!(unsafe { win::GetDriveTypeW(w.as_ptr()) }, 2 | 3)
+        })
+        .collect()
+}
+
+/// Temporary files that are safe to clear and come back by themselves: thumbnails on Linux, week-old temp files on Windows.
+#[cfg(not(windows))]
+pub fn temp_size() -> u64 {
+    let home = dirs::home_dir().unwrap_or_default();
+    dirs::cache_dir().map(|c| dir_size(&c.join("thumbnails"), 200_000)).unwrap_or(0) + dir_size(&home.join(".thumbnails"), 200_000)
+}
+
+#[cfg(windows)]
+pub fn temp_size() -> u64 {
+    let week = std::time::SystemTime::now() - std::time::Duration::from_secs(7 * 86_400);
+    let (mut total, mut todo, mut seen) = (0, vec![std::env::temp_dir()], 0);
+    while let Some(d) = todo.pop() {
+        for e in std::fs::read_dir(&d).into_iter().flatten().flatten() {
+            let Ok(m) = std::fs::symlink_metadata(e.path()) else { continue };
+            if m.is_dir() {
+                todo.push(e.path());
+            } else if m.modified().is_ok_and(|t| t < week) && m.created().is_ok_and(|t| t < week) {
+                total += m.len();
+            }
+            seen += 1;
+            if seen > 200_000 {
+                return total;
+            }
+        }
+    }
+    total
+}
+
+/// The command (for `run`) that clears what `temp_size` counted; asked about first.
+pub fn temp_clear_command() -> &'static str {
+    if cfg!(windows) { crate::brain::TEMP_CLEAR } else { "run rm -rf ~/.cache/thumbnails/* ~/.thumbnails/* && echo 'Thumbnails cleared! 🧹'" }
+}
+
+/// How many system updates are waiting, from each tool's own output. None = couldn't tell.
+pub fn count_updates(tool: &str, code: Option<i32>, out: &str) -> Option<u32> {
+    let lines = || out.lines().filter(|l| !l.trim().is_empty()).count() as u32;
+    match (tool, code) {
+        ("checkupdates", Some(0)) | ("flatpak", Some(0)) => Some(lines()),
+        ("checkupdates", Some(2)) => Some(0),
+        ("apt", Some(0)) => Some(out.lines().filter(|l| l.starts_with("Inst ")).count() as u32),
+        ("dnf", Some(0)) => Some(0),
+        ("dnf", Some(100)) => Some(out.lines().take_while(|l| !l.starts_with("Obsoleting")).filter(|l| l.split_whitespace().count() == 3).count() as u32),
+        ("windows", Some(0)) => out.trim().lines().last()?.trim().parse().ok(),
+        _ => None,
+    }
+}
+
+/// System updates waiting to be installed (the package manager's, plus Flatpak on Linux).
+#[cfg(not(windows))]
+pub fn pending_updates() -> Option<u32> {
+    let run = |tool: &str, prog: &str, args: &[&str]| -> Option<Option<u32>> {
+        if !in_path(prog) {
+            return None;
+        }
+        let mut c = command(prog);
+        c.args(args);
+        Some(run_for(c, 90).and_then(|(code, out)| count_updates(tool, code, &out)))
+    };
+    // never "pacman -Sy" ourselves: checkupdates syncs into a private database
+    let system = run("checkupdates", "checkupdates", &[])
+        .or_else(|| run("apt", "apt-get", &["-s", "-o", "Debug::NoLocking=true", "dist-upgrade"]))
+        .or_else(|| run("dnf", "dnf", &["check-update", "-q", "-C"]))
+        .flatten();
+    let flatpak = run("flatpak", "flatpak", &["remote-ls", "--updates", "--columns=application"]).flatten();
+    match (system, flatpak) {
+        (None, None) => None,
+        (a, b) => Some(a.unwrap_or(0) + b.unwrap_or(0)),
+    }
+}
+
+#[cfg(windows)]
+pub fn pending_updates() -> Option<u32> {
+    // Online=$false reads Windows' own last scan: quick, no network
+    let ps = r#"$s=(New-Object -ComObject Microsoft.Update.Session).CreateUpdateSearcher(); $s.Online=$false; $s.Search("IsInstalled=0 and IsHidden=0 and Type='Software'").Updates.Count"#;
+    run_for(shell(ps), 120).and_then(|(code, out)| count_updates("windows", code, &out))
+}
+
+/// Open the system's updater.
+pub fn open_updater() -> Result<(), String> {
+    if cfg!(windows) {
+        return open_with_desktop("ms-settings:windowsupdate").map_err(|e| e.to_string());
+    }
+    let tools: [(&str, &[&str]); 4] = [("plasma-discover", &["--mode", "update"]), ("pamac-manager", &["--updates"]), ("octopi", &[]), ("gnome-software", &["--mode=updates"])];
+    for (prog, args) in tools {
+        if in_path(prog) {
+            return command(prog).args(args).spawn().map(|_| ()).map_err(|e| e.to_string());
+        }
+    }
+    Err("I couldn't find an updater app. Your package manager knows the way: sudo pacman -Syu, sudo apt upgrade or sudo dnf upgrade.".into())
+}
+
+/// How much the battery holds now compared with new, in percent.
+pub fn health(full: u64, design: u64) -> Option<u8> {
+    (design > 0 && full > 0).then(|| (full * 100 / design).min(100) as u8)
+}
+
+#[cfg(not(windows))]
+pub fn battery_health() -> Option<u8> {
+    for e in std::fs::read_dir("/sys/class/power_supply").ok()?.flatten() {
+        let p = e.path();
+        let read = |f: &str| std::fs::read_to_string(p.join(f)).ok().map(|s| s.trim().to_string());
+        if read("type").as_deref() != Some("Battery") || read("scope").as_deref() == Some("Device") {
+            continue;
+        }
+        let num = |f: &str| read(f).and_then(|s| s.parse::<u64>().ok());
+        let pair = num("energy_full").zip(num("energy_full_design")).or_else(|| num("charge_full").zip(num("charge_full_design")));
+        if let Some((full, design)) = pair {
+            return health(full, design);
+        }
+    }
+    None
+}
+
+#[cfg(windows)]
+pub fn battery_health() -> Option<u8> {
+    battery()?; // no battery, no question
+    let ps = r#"$f=(Get-CimInstance -Namespace root/wmi -ClassName BatteryFullChargedCapacity -EA Stop | Select -First 1).FullChargedCapacity; $d=(Get-CimInstance -Namespace root/wmi -ClassName BatteryStaticData -EA Stop | Select -First 1).DesignedCapacity; "$f $d""#;
+    let (_, out) = run_for(shell(ps), 30)?;
+    let mut n = out.split_whitespace().filter_map(|x| x.parse::<u64>().ok());
+    health(n.next()?, n.next()?)
+}
+
+/// An app that starts with the computer. `id` is what `set_startup` needs.
+#[derive(Clone, Debug, PartialEq)]
+pub struct StartupApp {
+    pub id: String,
+    pub name: String,
+    pub on: bool,
+}
+
+/// A key of the [Desktop Entry] group in a .desktop file.
+pub fn desktop_key(text: &str, key: &str) -> Option<String> {
+    let mut inside = false;
+    for l in text.lines() {
+        let l = l.trim();
+        if l.starts_with('[') {
+            inside = l == "[Desktop Entry]";
+        } else if inside {
+            if let Some((k, v)) = l.split_once('=') {
+                if k.trim() == key {
+                    return Some(v.trim().to_string());
+                }
+            }
+        }
+    }
+    None
+}
+
+/// The same file with `key=value` set in its [Desktop Entry] group (replaced, or added at the group's end).
+pub fn set_desktop_key(text: &str, key: &str, value: &str) -> String {
+    let (mut out, mut inside, mut done) = (vec![], false, false);
+    for l in text.lines() {
+        let t = l.trim();
+        if t.starts_with('[') {
+            if inside && !done {
+                out.push(format!("{key}={value}"));
+                done = true;
+            }
+            inside = t == "[Desktop Entry]";
+        } else if inside && t.split_once('=').is_some_and(|(k, _)| k.trim() == key) {
+            out.push(format!("{key}={value}"));
+            done = true;
+            continue;
+        }
+        out.push(l.to_string());
+    }
+    if !done {
+        out.push(format!("{key}={value}"));
+    }
+    out.join("\n") + "\n"
+}
+
+/// Which autostart entries count: not part of the desktop itself, meant for this desktop, not Clipster.
+pub fn startup_entry(file: &str, text: &str, system: bool, desktop: &[String]) -> Option<StartupApp> {
+    let key = |k: &str| desktop_key(text, k);
+    let listed = |k: &str| key(k).map(|v| v.split(';').any(|d| desktop.iter().any(|x| x.eq_ignore_ascii_case(d.trim()))));
+    if file == "clipster.desktop" || key("X-KDE-autostart-phase").is_some() || key("X-GNOME-Autostart-Phase").is_some() || system && key("NoDisplay").as_deref() == Some("true") || listed("OnlyShowIn") == Some(false) || listed("NotShowIn") == Some(true) {
+        return None;
+    }
+    let on = key("Hidden").as_deref() != Some("true") && key("X-GNOME-Autostart-enabled").as_deref() != Some("false");
+    Some(StartupApp { id: file.to_string(), name: key("Name").unwrap_or_else(|| file.trim_end_matches(".desktop").to_string()), on })
+}
+
+#[cfg(not(windows))]
+fn autostart_dirs() -> (PathBuf, Vec<PathBuf>) {
+    let user = dirs::config_dir().unwrap_or_default().join("autostart");
+    let system = std::env::var("XDG_CONFIG_DIRS").ok().filter(|s| !s.is_empty()).unwrap_or_else(|| "/etc/xdg".into()).split(':').map(|d| PathBuf::from(d).join("autostart")).collect();
+    (user, system)
+}
+
+#[cfg(not(windows))]
+pub fn startup_apps() -> Vec<StartupApp> {
+    let (user, system) = autostart_dirs();
+    let desktop: Vec<String> = std::env::var("XDG_CURRENT_DESKTOP").unwrap_or_default().split(':').map(String::from).collect();
+    let files = |d: &PathBuf| -> Vec<(String, String)> {
+        std::fs::read_dir(d).into_iter().flatten().flatten().filter(|e| e.path().extension().is_some_and(|x| x == "desktop")).filter_map(|e| Some((e.file_name().to_string_lossy().to_string(), std::fs::read_to_string(e.path()).ok()?))).collect()
+    };
+    // the user's copy of a file overrides the system one with the same name
+    let mut all: std::collections::BTreeMap<String, (String, bool)> = system.iter().flat_map(files).map(|(f, t)| (f, (t, true))).collect();
+    all.extend(files(&user).into_iter().map(|(f, t)| (f, (t, false))));
+    let mut apps: Vec<StartupApp> = all.iter().filter_map(|(f, (t, sys))| startup_entry(f, t, *sys, &desktop)).collect();
+    apps.sort_by_key(|a| a.name.to_lowercase());
+    apps
+}
+
+/// Switch an app's start-up on or off (from the next login). On Linux a system entry gets a user copy that hides it.
+#[cfg(not(windows))]
+pub fn set_startup(id: &str, on: bool) -> Result<(), String> {
+    if id.contains('/') || id.contains("..") {
+        return Err("That isn't an autostart entry.".into());
+    }
+    let (user, system) = autostart_dirs();
+    let mine = user.join(id);
+    match std::fs::read_to_string(&mine) {
+        Ok(text) if on && desktop_key(&text, "X-Clipster-Hidden").is_some() => std::fs::remove_file(&mine).map_err(|e| e.to_string()),
+        Ok(text) => {
+            let text = set_desktop_key(&text, "Hidden", if on { "false" } else { "true" });
+            let text = if on && desktop_key(&text, "X-GNOME-Autostart-enabled").as_deref() == Some("false") { set_desktop_key(&text, "X-GNOME-Autostart-enabled", "true") } else { text };
+            std::fs::write(&mine, text).map_err(|e| e.to_string())
+        }
+        Err(_) if !on => {
+            let text = system.iter().find_map(|d| std::fs::read_to_string(d.join(id)).ok()).ok_or("I couldn't find that app's autostart entry.")?;
+            std::fs::create_dir_all(&user).map_err(|e| e.to_string())?;
+            std::fs::write(&mine, set_desktop_key(&set_desktop_key(&text, "Hidden", "true"), "X-Clipster-Hidden", "true")).map_err(|e| e.to_string())
+        }
+        Err(_) => Ok(()), // nothing hides it
+    }
+}
+
+/// The Run entries Windows lists, as JSON from PowerShell (one object or an array). Called on Windows, tested everywhere.
+#[cfg_attr(not(windows), allow(dead_code))]
+pub fn parse_startup_json(out: &str) -> Vec<StartupApp> {
+    let v: serde_json::Value = serde_json::from_str(out.trim()).unwrap_or_default();
+    let list = match v {
+        serde_json::Value::Array(a) => a,
+        o @ serde_json::Value::Object(_) => vec![o],
+        _ => vec![],
+    };
+    let mut apps: Vec<StartupApp> = list.iter().filter_map(|e| Some(StartupApp { id: e["name"].as_str()?.to_string(), name: e["name"].as_str()?.to_string(), on: !e["off"].as_bool().unwrap_or(false) })).collect();
+    apps.sort_by_key(|a| a.name.to_lowercase());
+    apps
+}
+
+#[cfg(windows)]
+pub fn startup_apps() -> Vec<StartupApp> {
+    // UTF-8 JSON from PowerShell (reg.exe uses the OEM codepage); "off" is the first byte's lowest bit in StartupApproved
+    let ps = r#"$k='HKCU:\Software\Microsoft\Windows\CurrentVersion'; $r=Get-Item "$k\Run"; $a=Get-Item "$k\Explorer\StartupApproved\Run" -EA 0; ConvertTo-Json -Compress -InputObject @($r.GetValueNames() | ? {$_} | % { $b=if($a){$a.GetValue($_)}; @{name=$_; off=[bool]($b -and ($b[0] -band 1))} })"#;
+    run_for(shell(ps), 30).map(|(_, out)| parse_startup_json(&out)).unwrap_or_default()
+}
+
+#[cfg(windows)]
+pub fn set_startup(id: &str, on: bool) -> Result<(), String> {
+    // what Task Manager does: 02 = on, 03 = off; the Run entry itself stays
+    let data = if on { "020000000000000000000000" } else { "030000000000000000000000" };
+    let out = command("reg").args(["add", r"HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run", "/v", id, "/t", "REG_BINARY", "/d", data, "/f"]).output().map_err(|e| e.to_string())?;
+    if out.status.success() { Ok(()) } else { Err(String::from_utf8_lossy(&out.stderr).trim().to_string()) }
+}
+
+/// The system's own page for start-up apps.
+pub fn open_startup_settings() -> Result<(), String> {
+    let r = if cfg!(windows) {
+        open_with_desktop("ms-settings:startupapps")
+    } else if in_path("systemsettings") {
+        command("systemsettings").arg("kcm_autostart").spawn().map(|_| ())
+    } else if in_path("gnome-tweaks") {
+        command("gnome-tweaks").spawn().map(|_| ())
+    } else {
+        open_with_desktop(&dirs::config_dir().unwrap_or_default().join("autostart").to_string_lossy())
+    };
+    r.map_err(|e| e.to_string())
+}
+
+/// A drive to back up to.
+#[derive(Clone, Debug, PartialEq)]
+pub struct Drive {
+    pub path: PathBuf,
+    pub label: String,
+    pub fs: String,
+    pub free: u64,
+}
+
+impl Drive {
+    /// File systems that refuse characters like ":" and "?" in names.
+    pub fn strict_names(&self) -> bool {
+        cfg!(windows) || ["vfat", "exfat", "msdos", "ntfs", "ntfs3", "fuseblk", "fat32"].contains(&self.fs.to_lowercase().as_str())
+    }
+    /// FAT can't hold a file of 4 GB or more.
+    pub fn fat(&self) -> bool {
+        ["vfat", "msdos", "fat32", "fat"].contains(&self.fs.to_lowercase().as_str())
+    }
+}
+
+/// USB sticks and other drives: mounted under /run/media or /media on Linux, removable or extra fixed drives on Windows.
+#[cfg(not(windows))]
+pub fn drives() -> Vec<Drive> {
+    parse_mounts(&std::fs::read_to_string("/proc/self/mounts").unwrap_or_default())
+        .into_iter()
+        .filter(|(m, _)| m.starts_with("/run/media/") || m.starts_with("/media/"))
+        .map(|(m, fs)| {
+            let path = PathBuf::from(&m);
+            Drive { label: path.file_name().map(|n| n.to_string_lossy().to_string()).unwrap_or(m.clone()), free: disk_space(&path).map_or(0, |d| d.0), path, fs }
+        })
+        .collect()
+}
+
+#[cfg(windows)]
+pub fn drives() -> Vec<Drive> {
+    let system = std::env::var("SystemDrive").unwrap_or_else(|_| "C:".into()).to_uppercase();
+    let mut old = 0u32;
+    unsafe { win::SetThreadErrorMode(1, &mut old) };
+    let found = drive_roots()
+        .into_iter()
+        .filter(|r| !r.to_uppercase().starts_with(&system))
+        .filter_map(|r| {
+            let w = win::wide(&r);
+            let (mut name, mut fs) = ([0u16; 261], [0u16; 64]);
+            let (mut serial, mut max, mut flags) = (0u32, 0u32, 0u32);
+            if unsafe { win::GetVolumeInformationW(w.as_ptr(), name.as_mut_ptr(), 261, &mut serial, &mut max, &mut flags, fs.as_mut_ptr(), 64) } == 0 {
+                return None; // an empty card reader
+            }
+            let text = |b: &[u16]| String::from_utf16_lossy(&b[..b.iter().position(|c| *c == 0).unwrap_or(b.len())]);
+            let path = PathBuf::from(&r);
+            let label = if text(&name).is_empty() { r.clone() } else { format!("{} ({})", text(&name), r.trim_end_matches('\\')) };
+            Some(Drive { free: disk_space(&path).map_or(0, |d| d.0), path, label, fs: text(&fs) })
+        })
+        .collect();
+    unsafe { win::SetThreadErrorMode(old, &mut old) };
+    found
+}
+
+/// Eject a backup drive (Linux; on Windows there's no plain command, so the tray icon it is).
+pub fn eject(path: &std::path::Path) -> Result<(), String> {
+    if cfg!(windows) {
+        return Err("Windows has no plain eject command. Use the USB icon by the clock.".into());
+    }
+    let out = command("gio").args(["mount", "-e"]).arg(path).output().map_err(|e| e.to_string())?;
+    if out.status.success() { Ok(()) } else { Err(String::from_utf8_lossy(&out.stderr).trim().to_string()) }
+}
+
+/// Files that would be downloaded just by reading them (OneDrive "online-only"); backups skip them.
+pub fn online_only(m: &std::fs::Metadata) -> bool {
+    #[cfg(windows)]
+    {
+        use std::os::windows::fs::MetadataExt;
+        m.file_attributes() & (0x40_0000 | 0x1000) != 0
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = m;
+        false
+    }
+}
+
+// ---------- Do Not Disturb during a focus session ----------
+
+/// Notifications silenced; dropping it lets them back in.
+pub struct Dnd {
+    #[cfg(target_os = "linux")]
+    kde: Option<(zbus::blocking::Connection, u32)>,
+    restore: Option<String>, // the setting to put back: "gnome:true", "xfce:false"…
+}
+
+impl Dnd {
+    /// What to put back if Clipster stops before the session ends (KDE needs nothing: it lets go by itself).
+    pub fn marker(&self) -> Option<String> {
+        self.restore.clone()
+    }
+}
+
+impl Drop for Dnd {
+    fn drop(&mut self) {
+        #[cfg(target_os = "linux")]
+        if let Some((conn, cookie)) = self.kde.take() {
+            let _ = conn.call_method(Some("org.freedesktop.Notifications"), "/org/freedesktop/Notifications", Some("org.freedesktop.Notifications"), "UnInhibit", &(cookie,));
+        }
+        if let Some(m) = self.restore.take() {
+            dnd_restore(&m);
+        }
+    }
+}
+
+/// Put a desktop's notification setting back ("gnome:true", "cinnamon:true", "xfce:false").
+pub fn dnd_restore(marker: &str) {
+    let Some((desk, old)) = marker.split_once(':') else { return };
+    let _ = match desk {
+        "gnome" => command("gsettings").args(["set", "org.gnome.desktop.notifications", "show-banners", old]).status(),
+        "cinnamon" => command("gsettings").args(["set", "org.cinnamon.desktop.notifications", "display-notifications", old]).status(),
+        "xfce" => command("xfconf-query").args(["-c", "xfce4-notifyd", "-p", "/do-not-disturb", "-n", "-t", "bool", "-s", old]).status(),
+        _ => return,
+    };
+}
+
+/// Silence notifications for a focus session: KDE's inhibition, or GNOME's, Cinnamon's or XFCE's setting.
+/// None where the system doesn't let an app do that (Windows keeps its Focus API for packaged apps).
+#[cfg(target_os = "linux")]
+pub fn dnd_on() -> Option<Dnd> {
+    let desktop = std::env::var("XDG_CURRENT_DESKTOP").unwrap_or_default().to_lowercase();
+    if let Ok(conn) = zbus::blocking::Connection::session() {
+        let (dest, path, iface) = (Some("org.freedesktop.Notifications"), "/org/freedesktop/Notifications", Some("org.freedesktop.Notifications"));
+        let caps: Vec<String> = conn.call_method(dest, path, iface, "GetCapabilities", &()).ok().and_then(|m| m.body().deserialize().ok()).unwrap_or_default();
+        if caps.iter().any(|c| c == "inhibitions") {
+            let hints: std::collections::HashMap<&str, zbus::zvariant::Value> = Default::default();
+            let cookie: Option<u32> = conn.call_method(dest, path, iface, "Inhibit", &("clipster", "Focus session", hints)).ok().and_then(|m| m.body().deserialize().ok());
+            if let Some(cookie) = cookie {
+                return Some(Dnd { kde: Some((conn, cookie)), restore: None });
+            }
+        }
+    }
+    let get = |args: &[&str], prog: &str| command(prog).args(args).output().ok().filter(|o| o.status.success()).map(|o| String::from_utf8_lossy(&o.stdout).trim().to_string());
+    let (desk, old) = if desktop.contains("gnome") || desktop.contains("unity") {
+        ("gnome", get(&["get", "org.gnome.desktop.notifications", "show-banners"], "gsettings")?)
+    } else if desktop.contains("cinnamon") {
+        ("cinnamon", get(&["get", "org.cinnamon.desktop.notifications", "display-notifications"], "gsettings")?)
+    } else if desktop.contains("xfce") {
+        ("xfce", get(&["-c", "xfce4-notifyd", "-p", "/do-not-disturb"], "xfconf-query").unwrap_or_else(|| "false".into()))
+    } else {
+        return None;
+    };
+    let quiet = if desk == "xfce" { "true" } else { "false" };
+    dnd_restore(&format!("{desk}:{quiet}"));
+    Some(Dnd { kde: None, restore: Some(format!("{desk}:{old}")) })
+}
+
+#[cfg(not(target_os = "linux"))]
+pub fn dnd_on() -> Option<Dnd> {
+    None
+}
+
 #[cfg(test)]
 mod tests {
     #[test]
@@ -440,6 +1033,49 @@ mod tests {
     }
 
     use super::*;
+
+    #[test]
+    fn upkeep_parsers_read_both_systems() {
+        // df with a space in the mount point, and the Windows/Linux update tools
+        let df = "Filesystem     1024-blocks      Used Available Capacity Mounted on\n/dev/nvme0n1p2  999116800 612345678 380000000      62% /run/media/me/My Disk\n";
+        assert_eq!(parse_df(df), Some((380000000, 999116800)));
+        assert_eq!(parse_df("garbage"), None);
+        assert_eq!(count_updates("checkupdates", Some(0), "linux 6.1 -> 6.2\nfirefox 1 -> 2\n"), Some(2));
+        assert_eq!(count_updates("checkupdates", Some(2), ""), Some(0));
+        assert_eq!(count_updates("checkupdates", Some(1), "error"), None);
+        assert_eq!(count_updates("apt", Some(0), "NOTE: simulation\nInst libc6 [2.35] (2.36 Debian)\nConf libc6\nInst curl (8.0 Debian)\n"), Some(2));
+        assert_eq!(count_updates("dnf", Some(100), "\nkernel.x86_64   6.5.6-300.fc39   updates\nvim.x86_64  2:9.0-1.fc39  updates\nObsoleting Packages\nold.x86_64 1-1 updates\n"), Some(2));
+        assert_eq!(count_updates("dnf", Some(1), ""), None);
+        assert_eq!(count_updates("windows", Some(0), "3\r\n"), Some(3));
+        assert_eq!(count_updates("windows", Some(1), "Exception"), None);
+        assert_eq!(health(5_300_000, 6_400_000), Some(82));
+        assert_eq!(health(7, 5), Some(100), "never above new");
+        assert_eq!(health(5, 0), None);
+        assert_eq!(parse_mounts("/dev/sdb1 /run/media/me/USB\\040STICK vfat rw 0 0\nproc /proc proc rw 0 0"), vec![("/run/media/me/USB STICK".into(), "vfat".into()), ("/proc".into(), "proc".into())]);
+    }
+
+    #[test]
+    fn startup_entries_and_desktop_files() {
+        let kde = vec!["KDE".to_string()];
+        let app = "[Desktop Entry]\nName=LocalSend\nExec=localsend --hidden\n";
+        assert_eq!(startup_entry("localsend.desktop", app, false, &kde), Some(StartupApp { id: "localsend.desktop".into(), name: "LocalSend".into(), on: true }));
+        assert!(startup_entry("x.desktop", "[Desktop Entry]\nName=X\nHidden=true\n", false, &kde).is_some_and(|a| !a.on));
+        assert!(startup_entry("x.desktop", "[Desktop Entry]\nName=X\nX-GNOME-Autostart-enabled=false\n", false, &kde).is_some_and(|a| !a.on));
+        assert_eq!(startup_entry("p.desktop", "[Desktop Entry]\nName=P\nX-KDE-autostart-phase=1\n", true, &kde), None, "part of the desktop");
+        assert_eq!(startup_entry("g.desktop", "[Desktop Entry]\nName=G\nOnlyShowIn=GNOME;\n", true, &kde), None, "another desktop's");
+        assert_eq!(startup_entry("n.desktop", "[Desktop Entry]\nName=N\nNoDisplay=true\n", true, &kde), None);
+        assert_eq!(startup_entry("clipster.desktop", app, false, &kde), None, "not himself");
+        let set = set_desktop_key("[Desktop Entry]\nName=A\nHidden=false\n[Desktop Action x]\nName=B\n", "Hidden", "true");
+        assert_eq!(desktop_key(&set, "Hidden").as_deref(), Some("true"));
+        assert_eq!(desktop_key(&set, "Name").as_deref(), Some("A"), "the group's own Name, not the action's");
+        let added = set_desktop_key("[Desktop Entry]\nName=A\n[Desktop Action x]\nName=B\n", "Hidden", "true");
+        assert!(added.contains("Name=A\nHidden=true\n[Desktop Action x]"), "{added}");
+        // Windows' JSON: an array, or one bare object
+        let many = r#"[{"name":"Spotify","off":true},{"name":"OneDrive","off":false}]"#;
+        assert_eq!(parse_startup_json(many), vec![StartupApp { id: "OneDrive".into(), name: "OneDrive".into(), on: true }, StartupApp { id: "Spotify".into(), name: "Spotify".into(), on: false }]);
+        assert_eq!(parse_startup_json(r#"{"name":"Teams","off":false}"#).len(), 1);
+        assert!(parse_startup_json("").is_empty());
+    }
 
     #[test]
     fn readings_and_names() {

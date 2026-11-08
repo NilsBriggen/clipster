@@ -13,6 +13,9 @@ pub enum Event {
     Update(String),                   // a newer version is out
     Title(String),                    // the window you're working in (or its title) changed
     Installed(Result<(std::path::PathBuf, String), String>), // the update is in place (what to run, version), or why not
+    Upkeep(Box<crate::upkeep::Report>, bool),          // the checkup's readings (true = the weekly nudge asked)
+    BackupProgress(usize, usize, u64),                // files done, files to copy, bytes copied
+    BackupDone(Result<crate::backup::Summary, String>),
 }
 
 /// `titles`: also watch the active window's title (where the KWin script doesn't report it).
