@@ -1196,9 +1196,15 @@ impl App {
                 };
             }
             Effect::Todo(op) => {
+                // stars, priorities, edits and un-ticking on the Desk answer in its status bar, not a balloon
+                let quiet = matches!(op, todo::Op::StarAt(_) | todo::Op::PrioAt(_) | todo::Op::EditAt(..) | todo::Op::UndoneAt(_));
                 let news = todo::apply(&op);
                 if let Effect::Timer(secs, label) = &news.effect {
                     self.timers.push((Instant::now() + Duration::from_secs(*secs), label.clone(), 0));
+                }
+                if quiet {
+                    self.desk_status = news.text.clone();
+                    silent = true;
                 }
                 r = Reply { effect: Effect::None, ..news };
             }

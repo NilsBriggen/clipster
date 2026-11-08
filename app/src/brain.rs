@@ -447,6 +447,23 @@ pub fn exact(input: &str) -> Option<Reply> {
         "cancel" => return Some(Reply::say(lines::pick("say_timer_cancelled").replace("{label}", rest)).effect(Effect::CancelTimer(rest.to_string()))),
         "note" | "remember" => return Some(note_add(rest)),
         "notes" => return Some(notes_list()),
+        // the Desk's commands name an item by its line: "todo #3 done", "todo #3 edit call Anna"
+        "todo" if rest.starts_with('#') => {
+            use crate::todo::Op;
+            let (n, what) = rest[1..].split_once(' ').unwrap_or((&rest[1..], ""));
+            let (verb, text) = what.split_once(' ').unwrap_or((what, ""));
+            let n: usize = n.parse().ok()?;
+            let op = match verb {
+                "done" => Op::DoneAt(n),
+                "undone" => Op::UndoneAt(n),
+                "star" => Op::StarAt(n),
+                "prio" => Op::PrioAt(n),
+                "edit" => Op::EditAt(n, text.to_string()),
+                _ => return None,
+            };
+            return Some(Reply::say("").effect(Effect::Todo(op)));
+        }
+        "todo" if rest == "tomorrow" => return Some(Reply::say("").effect(Effect::Todo(crate::todo::Op::Tomorrow))),
         "todo" | "to-do" if !rest.is_empty() => return Some(Reply::say("").effect(Effect::Todo(crate::todo::Op::Add(rest.to_string())))),
         "todo" | "to-do" | "todos" if rest.is_empty() => return Some(crate::todo::list()),
         "todos" if rest == "clear" => return Some(crate::todo::clear_confirm()),

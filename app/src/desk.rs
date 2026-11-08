@@ -95,6 +95,8 @@ pub struct Desk {
     desktop: bool, // the Files tab looks at the desktop instead of downloads
     files: Files,
     numbers: BTreeMap<String, String>, // the Settings tab's minute fields while you type in them
+    editing: Option<(usize, String)>,  // a to-do being renamed: its line, the new text so far
+    scroll: BTreeMap<&'static str, f32>, // how far each list is scrolled, in rows
 }
 
 impl Desk {
@@ -397,52 +399,121 @@ impl Desk {
         if items.is_empty() {
             p.text(list.center(), Align2::CENTER_CENTER, "Nothing on your list. Add something below.", look.font(12.5), look.dim());
         }
-        let (pitch, s) = if look == Look::Modern { (32.0, 16.0) } else { (24.0, 14.0) };
-        let mut open: Vec<&todo::Item> = items.iter().filter(|i| !i.done).collect();
-        open.extend(items.iter().filter(|i| i.done)); // finished ones last
-        let fits = ((list.height() - 12.0) / pitch) as usize;
-        let rows = if open.len() > fits { fits.saturating_sub(1) } else { fits }; // room for "+N more"
-        let shown = open.len().min(rows);
-        for (n, item) in open.iter().take(rows).enumerate() {
-            let cy = list.min.y + 6.0 + pitch / 2.0 + n as f32 * pitch;
-            if look.checkbox(ui, Rect::from_center_size(pos2(list.min.x + 12.0 + s / 2.0, cy), vec2(s, s)), item.done, Id::unique(("desk-todo", n))).clicked() {
-                out.push(format!("{} {}", if item.done { "undone" } else { "done" }, item.text));
-            }
-            // the due date first, so the text can stop short of it
-            let mut due_w = 0.0;
-            if let Some(d) = item.due.filter(|_| !item.done) {
-                let (txt, col, urgent) = if d < today {
-                    (format!("overdue · {}", d.format("%b %-d")), look.danger(), true)
-                } else if d == today {
-                    ("today".to_string(), look.accent(), true)
-                } else {
-                    (d.format("%a %b %-d").to_string(), look.dim(), false)
-                };
-                let font = if urgent && look == Look::Modern { look.bold(11.5) } else { look.font(11.5) };
-                due_w = p.text(pos2(list.max.x - 12.0, cy), Align2::RIGHT_CENTER, txt, font, col).width() + 12.0;
-            }
-            let color = if item.done { look.dim() } else { look.text() };
-            let tx = list.min.x + 38.0;
-            let galley = clipped(&p, &item.text, look.font(12.5), color, list.max.x - 12.0 - due_w - tx);
-            let top = pos2(tx, cy - galley.size().y / 2.0);
-            if item.done {
-                p.hline(tx..=tx + galley.size().x, top.y + galley.size().y * 0.55, Stroke::new(1.0, look.dim()));
-            }
-            p.galley(top, galley, color);
-            if n + 1 < shown {
-                look.divider(&p, list.min.x + 12.0, list.max.x - 12.0, cy + pitch / 2.0);
+        // Today (the top 3, then what's due), Upcoming (a week), Later, Done. Numbers are lines in the file (1-based).
+        let week = today + chrono::Days::new(7);
+        let mut groups: [(&str, Vec<usize>); 4] = [("Today", vec![]), ("Upcoming", vec![]), ("Later", vec![]), ("Done", vec![])];
+        for (i, it) in items.iter().enumerate() {
+            let g = match it.due {
+                _ if it.done => 3,
+                _ if it.top_today(today) => 0,
+                Some(d) if d <= today => 0,
+                Some(d) if d <= week => 1,
+                _ => 2,
+            };
+            groups[g].1.push(i);
+        }
+        let order = |i: &usize| (!items[*i].top_today(today), !items[*i].prio, items[*i].due.unwrap_or(chrono::NaiveDate::MAX));
+        for g in groups.iter_mut().take(3) {
+            g.1.sort_by_key(order);
+        }
+        enum Row {
+            Head(&'static str, usize),
+            Item(usize),
+        }
+        let rows: Vec<Row> = groups.iter().filter(|g| !g.1.is_empty()).flat_map(|(name, ix)| std::iter::once(Row::Head(name, ix.len())).chain(ix.iter().map(|i| Row::Item(*i)))).collect();
+        let pitch = if look == Look::Modern { 28.0 } else { 22.0 };
+        let inner = list.shrink2(vec2(0.0, 6.0));
+        let fits = (inner.height() / pitch) as usize;
+        let first = self.first_row(ui, "todo", list, rows.len(), fits);
+        let s = if look == Look::Modern { 16.0 } else { 13.0 };
+        for (n, row) in rows.iter().skip(first).take(fits).enumerate() {
+            let y = inner.min.y + n as f32 * pitch;
+            let cy = y + pitch / 2.0;
+            match row {
+                Row::Head(name, count) => {
+                    p.text(pos2(list.min.x + 12.0, cy + 2.0), Align2::LEFT_CENTER, format!("{name} ({count})"), look.bold(11.5), look.dim());
+                }
+                Row::Item(i) => {
+                    let (it, line) = (&items[*i], *i + 1);
+                    let hover = ui.rect_contains_pointer(Rect::from_min_max(pos2(list.min.x, y), pos2(list.max.x, y + pitch)));
+                    if look.checkbox(ui, Rect::from_center_size(pos2(list.min.x + 12.0 + s / 2.0, cy), vec2(s, s)), it.done, Id::unique(("desk-todo", line))).clicked() {
+                        out.push(format!("todo #{line} {}", if it.done { "undone" } else { "done" }));
+                    }
+                    let mut tx = list.min.x + 38.0;
+                    if !it.done {
+                        // ☆ puts it in today's top 3; ! marks it important (shown on hover until it is)
+                        let star = Rect::from_center_size(pos2(tx + 7.0, cy), vec2(18.0, 18.0));
+                        let top = it.top_today(today);
+                        if ui.interact(star, Id::unique(("desk-star", line)), Sense::click()).clicked() {
+                            out.push(format!("todo #{line} star"));
+                        }
+                        p.text(star.center(), Align2::CENTER_CENTER, if top { "★" } else { "☆" }, look.font(14.0), if top { look.accent() } else { look.dim() });
+                        let bang = Rect::from_center_size(pos2(tx + 24.0, cy), vec2(12.0, 18.0));
+                        if ui.interact(bang, Id::unique(("desk-prio", line)), Sense::click()).clicked() {
+                            out.push(format!("todo #{line} prio"));
+                        }
+                        if it.prio || hover {
+                            p.text(bang.center(), Align2::CENTER_CENTER, "!", look.bold(13.0), if it.prio { look.danger() } else { look.dim().gamma_multiply(0.5) });
+                        }
+                        tx += 36.0;
+                    }
+                    // the date on the right, so the text can stop short of it
+                    let mut due_w = 0.0;
+                    if let Some(d) = it.due.filter(|_| !it.done) {
+                        let (txt, col, urgent) = if d < today {
+                            (format!("overdue · {}", d.format("%b %-d")), look.danger(), true)
+                        } else if d == today {
+                            ("today".to_string(), look.accent(), true)
+                        } else {
+                            (d.format("%a %b %-d").to_string(), look.dim(), false)
+                        };
+                        let txt = if it.every.is_some() { format!("{txt} · repeats") } else { txt };
+                        let font = if urgent && look == Look::Modern { look.bold(11.5) } else { look.font(11.5) };
+                        due_w = p.text(pos2(list.max.x - 14.0, cy), Align2::RIGHT_CENTER, txt, font, col).width() + 12.0;
+                    }
+                    let text_r = Rect::from_min_max(pos2(tx, y + 2.0), pos2(list.max.x - 14.0 - due_w, y + pitch - 2.0));
+                    if self.editing.as_ref().is_some_and(|(l, _)| *l == line) {
+                        let mut text = self.editing.as_ref().map(|e| e.1.clone()).unwrap_or_default();
+                        let id = Id::unique(("desk-todo-edit", line));
+                        let resp = look.input(ui, Rect::from_center_size(text_r.center(), vec2(text_r.width(), ctl)), id, &mut text, "");
+                        if !resp.has_focus() && !resp.lost_focus() {
+                            resp.request_focus();
+                        }
+                        if resp.lost_focus() {
+                            if !ui.input(|i| i.key_pressed(egui::Key::Escape)) && text.trim() != it.text {
+                                out.push(format!("todo #{line} edit {}", text.trim()));
+                            }
+                            self.editing = None;
+                        } else {
+                            self.editing = Some((line, text));
+                        }
+                        continue;
+                    }
+                    let color = if it.done { look.dim() } else { look.text() };
+                    let galley = clipped(&p, &it.text, look.font(12.5), color, text_r.width());
+                    let top = pos2(tx, cy - galley.size().y / 2.0);
+                    if it.done {
+                        p.hline(tx..=tx + galley.size().x, top.y + galley.size().y * 0.55, Stroke::new(1.0, look.dim()));
+                    }
+                    p.galley(top, galley, color);
+                    if !it.done && ui.interact(text_r, Id::unique(("desk-todo-text", line)), Sense::click()).double_clicked() {
+                        self.editing = Some((line, it.text.clone()));
+                    }
+                    let next_is_item = matches!(rows.get(first + n + 1), Some(Row::Item(_)));
+                    if next_is_item && n + 1 < fits {
+                        look.divider(&p, list.min.x + 12.0, list.max.x - 12.0, y + pitch);
+                    }
+                }
             }
         }
-        if open.len() > rows {
-            p.text(pos2(list.max.x - 12.0, list.max.y - 6.0), Align2::RIGHT_BOTTOM, format!("+{} more", open.len() - rows), look.font(11.0), look.dim());
-        }
+        scrollbar(&p, look, list, first, fits, rows.len());
         // add a to-do
         let y = list.max.y + 20.0;
         let add = Rect::from_min_size(pos2(c.max.x - 82.0, y), vec2(82.0, ctl));
         let due_r = Rect::from_min_size(pos2(add.min.x - 108.0, y), vec2(100.0, ctl));
         p.text(pos2(c.min.x, y + ctl / 2.0), Align2::LEFT_CENTER, "New:", look.font(12.5), look.text());
         p.text(pos2(due_r.min.x - 30.0, y + ctl / 2.0), Align2::LEFT_CENTER, "due", look.font(12.5), look.text());
-        let text = look.input(ui, Rect::from_min_max(pos2(c.min.x + 40.0, y), pos2(due_r.min.x - 42.0, y + ctl)), Id::unique("desk-todo-text"), &mut self.todo_text, "call Anna");
+        let text = look.input(ui, Rect::from_min_max(pos2(c.min.x + 40.0, y), pos2(due_r.min.x - 42.0, y + ctl)), Id::unique("desk-todo-text"), &mut self.todo_text, "call Anna, or: water the plants every monday");
         let due = look.input(ui, due_r, Id::unique("desk-todo-due"), &mut self.todo_due, "friday");
         let enter = (text.lost_focus() || due.lost_focus()) && ui.input(|i| i.key_pressed(egui::Key::Enter));
         if (look.button(ui, add, Id::unique("desk-todo-add"), "Add", !self.todo_text.trim().is_empty()).clicked() || enter) && !self.todo_text.trim().is_empty() {
@@ -455,6 +526,18 @@ impl Desk {
         if look.button(ui, Rect::from_min_size(pos2(c.min.x, y + 40.0), vec2(142.0, ctl)), Id::unique("desk-todo-clear"), &format!("Clear finished ({finished})"), finished > 0).clicked() {
             out.push("todos clear".into());
         }
+        p.text(pos2(c.max.x, y + 40.0 + ctl / 2.0), Align2::RIGHT_CENTER, "☆ today's top 3 · ! important · double-click to rename", look.font(11.0), look.dim());
+    }
+
+    /// Wheel scrolling for a list drawn row by row: the first row to show, kept per list.
+    fn first_row(&mut self, ui: &Ui, key: &'static str, area: Rect, total: usize, fits: usize) -> usize {
+        let max = total.saturating_sub(fits) as f32;
+        let at = self.scroll.entry(key).or_insert(0.0);
+        if ui.rect_contains_pointer(area) {
+            *at -= ui.input(|i| i.smooth_scroll_delta.y) / 24.0;
+        }
+        *at = at.clamp(0.0, max);
+        at.round() as usize
     }
 
     fn reminders(&mut self, ui: &mut Ui, c: Rect, view: &View, look: Look, out: &mut Vec<String>) {
@@ -780,6 +863,17 @@ fn week(ui: &mut Ui, c: Rect, view: &View, look: Look) {
 /// "1 day", "4 days".
 fn plural(n: u64, word: &str) -> String {
     format!("{n} {word}{}", if n == 1 { "" } else { "s" })
+}
+
+/// A thin scroll thumb along the right edge of `area` when not all rows fit.
+fn scrollbar(p: &Painter, look: Look, area: Rect, first: usize, fits: usize, total: usize) {
+    if total <= fits || total == 0 {
+        return;
+    }
+    let track = Rect::from_min_max(pos2(area.max.x - 6.0, area.min.y + 6.0), pos2(area.max.x - 3.0, area.max.y - 6.0));
+    let h = (track.height() * fits as f32 / total as f32).max(16.0);
+    let y = track.min.y + (track.height() - h) * first as f32 / (total - fits) as f32;
+    p.rect_filled(Rect::from_min_size(pos2(track.min.x, y), vec2(track.width(), h)), CornerRadius::same(2), if look == Look::Modern { tok::CONTROL_BORDER } else { win98::SHADOW });
 }
 
 /// One line of text, cut off with "…" where it would pass `width`.
@@ -1183,12 +1277,14 @@ impl Look {
 fn sample_files(desktop: bool) -> Files {
     let today = chrono::Local::now().date_naive();
     let d = |n: i64| Some(today + chrono::Duration::days(n));
+    let item = |text: &str, due: Option<chrono::NaiveDate>| todo::Item { text: text.into(), due, ..Default::default() };
     let todos = vec![
-        todo::Item { done: false, text: "Send the quarterly report".into(), due: d(0) },
-        todo::Item { done: false, text: "Call Anna about the offsite".into(), due: d(3) },
-        todo::Item { done: false, text: "Renew the stapler licence".into(), due: d(-1) },
-        todo::Item { done: false, text: "Water the office plant".into(), due: None },
-        todo::Item { done: true, text: "Buy more paperclips".into(), due: None },
+        todo::Item { prio: true, top: Some(today), ..item("Send the quarterly report", d(0)) },
+        todo::Item { top: Some(today), ..item("Call Anna about the offsite", d(3)) },
+        item("Renew the stapler licence", d(-1)),
+        todo::Item { every: Some("week".into()), ..item("Water the office plant", d(2)) },
+        item("Plan the team lunch", None),
+        todo::Item { done: true, done_on: Some(today), ..item("Buy more paperclips", None) },
     ];
     let notes = ["Printer code: 4711", "Ask IT about the second monitor", "Gerald says hi"].iter().map(|s| s.to_string()).collect();
     let base = PathBuf::from(if desktop { "/home/you/Desktop" } else { "/home/you/Downloads" });
