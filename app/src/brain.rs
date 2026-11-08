@@ -413,7 +413,11 @@ pub fn exact(input: &str) -> Option<Reply> {
         "cancel" | "stop" => return Some(Reply::say(lines::pick("say_cancel")).effect(Effect::CancelTimers)),
         "note" | "remember" | "todo" => return Some(note_add(rest)),
         "notes" | "todos" => return Some(notes_list()),
-        "forget" => return Some(notes_clear()),
+        // notes are only wiped after a yes, and only when it's clearly about them ("forget it" is not)
+        "forget" if rest == "notes confirmed" => return Some(notes_clear()),
+        "forget" if rest.is_empty() || ["notes", "my notes", "all notes", "all my notes", "the notes", "my list", "the list"].contains(&rest.to_lowercase().as_str()) => {
+            return Some(notes_confirm());
+        }
         "count" | "wc" => return Some(count(rest)),
         "upper" | "lower" | "reverse" | "mock" | "title" => return Some(transform(&head, rest)),
         "quiet" | "shh" | "shush" | "silence" | "mute" => return Some(quiet()),
@@ -1074,6 +1078,14 @@ fn notes_list() -> Reply {
         .btn("Open notes file", Act::Open(notes_path().to_string_lossy().into_owned()))
         .btn("Copy all", Act::Copy(text))
         .run("Forget them all", "forget notes")
+}
+
+fn notes_confirm() -> Reply {
+    let n = std::fs::read_to_string(notes_path()).unwrap_or_default().lines().filter(|l| !l.trim().is_empty()).count();
+    if n == 0 {
+        return Reply::say("There are no notes to forget. Clean slate already.");
+    }
+    Reply::say(format!("Forget all {n} note(s)? There's no undo, not even for me.")).mood(Mood::Shock).run("Yes, forget them", "forget notes confirmed").btn("Keep them", Act::Hide)
 }
 
 fn notes_clear() -> Reply {

@@ -8,7 +8,7 @@ pub fn respond(input: &str) -> Reply {
     let raw = input.trim();
     let head = raw.split_whitespace().next().unwrap_or("").to_lowercase();
     // shell commands and button-only commands (whose text is data, like quiz answers) are taken literally
-    if ["run", "$", "sh", "cmd", "reveal", "wyrpick", "onboard", "window", "answer-to", "checkin", "install"].contains(&head.as_str()) || head == "answer" && raw.contains('|') {
+    if ["run", "$", "sh", "cmd", "reveal", "wyrpick", "onboard", "window", "answer-to", "checkin", "install", "forget"].contains(&head.as_str()) || head == "answer" && raw.contains('|') {
         if let Some(r) = exact(raw) {
             return r; // shell commands are taken literally, never "understood"
         }
@@ -806,7 +806,7 @@ fn extras(s: &str, raw: &str) -> Option<Reply> {
 fn notes(s: &str, raw: &str) -> Option<Reply> {
     let about_notes = has(s, &["notes", "note", "to do", "to do list", "list", "todos", "reminders"]);
     if about_notes && has(s, &["delete", "clear", "erase", "remove", "wipe", "forget", "empty", "reset"]) && !s.starts_with("note ") {
-        return go("forget".into());
+        return go("forget notes".into()); // asks first
     }
     if s == "notes" || has(s, &["my notes", "show notes", "list notes", "read notes", "my to do", "my to do list", "my list", "my todos", "what is on my list", "what did i ask you to remember", "what did i tell you to remember", "what do i need to do", "what should i remember", "all notes"]) {
         return go("notes".into());
@@ -1479,6 +1479,16 @@ mod tests {
         assert_eq!(eff("forget notes"), respond("forget notes").effect, "notes keep their own forget");
         assert!(!matches!(eff("forget my notes"), Effect::Forget(_)));
         assert!(!text("what's my ip").contains("told me"), "not a question about facts");
+    }
+
+    #[test]
+    fn notes_are_never_wiped_without_asking() {
+        assert!(exact("forget it").is_none(), "\"forget it\" isn't about notes");
+        for s in ["forget notes", "clear my notes", "forget"] {
+            let r = respond(s);
+            assert!(r.buttons.iter().all(|(_, a)| !matches!(a, crate::brain::Act::Run(c) if c == "forget notes confirmed")) || r.text.contains("Forget all"), "{s} asks first");
+        }
+        assert!(!respond("forget it").text.contains("Poof"));
     }
 
     #[test]
