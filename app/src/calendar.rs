@@ -1,0 +1,566 @@
+//! Your calendar: the private iCal links (or .ics files) you give him, read on a background thread every
+//! 15 minutes and cached, so the agenda still shows offline. Parsing and recurring events are plain functions
+//! on text, tested with Google, Outlook and Nextcloud shapes. Links and events never leave the computer.
+
+use crate::brain::{Act, Mood, Reply};
+use crate::lines;
+use chrono::{Datelike, Days, Duration, Local, Months, NaiveDate, NaiveDateTime, NaiveTime, TimeZone, Weekday};
+use std::sync::Mutex;
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct Event {
+    pub uid: String,
+    pub start: NaiveDateTime, // local time
+    pub end: NaiveDateTime,
+    pub all_day: bool,
+    pub title: String,
+    pub place: String,
+    pub join: Option<String>, // a video-call link from the location, URL or description
+}
+
+impl Event {
+    /// What the heads-up and "already told" remember it by.
+    pub fn key(&self) -> String {
+        format!("{}@{}", self.uid, self.start)
+    }
+}
+
+/// One VEVENT as written, before recurring ones are expanded.
+#[derive(Default, Clone)]
+struct Raw {
+    uid: String,
+    start: Option<(NaiveDateTime, bool)>,
+    end: Option<NaiveDateTime>,
+    duration: Option<Duration>,
+    title: String,
+    place: String,
+    url: String,
+    description: String,
+    rrule: Option<String>,
+    exdates: Vec<NaiveDateTime>,
+    recurrence_id: Option<NaiveDateTime>,
+    cancelled: bool,
+}
+
+/// "a\, b\nc" -> "a, b" + newline + "c".
+fn unescape(s: &str) -> String {
+    let mut out = String::new();
+    let mut it = s.chars();
+    while let Some(c) = it.next() {
+        if c == '\\' {
+            match it.next() {
+                Some('n') | Some('N') => out.push('\n'),
+                Some(o) => out.push(o),
+                None => {}
+            }
+        } else {
+            out.push(c);
+        }
+    }
+    out
+}
+
+/// A DATE or DATE-TIME value: (local time, all day). `Z` times are UTC and become local.
+// shortcut: TZID times are read as local time, wrong only for events made in another time zone; add chrono-tz if that comes up.
+fn when(params: &str, value: &str) -> Option<(NaiveDateTime, bool)> {
+    let v = value.trim();
+    if params.contains("VALUE=DATE") && !params.contains("VALUE=DATE-TIME") || v.len() == 8 {
+        return NaiveDate::parse_from_str(v, "%Y%m%d").ok().map(|d| (d.and_time(NaiveTime::MIN), true));
+    }
+    if let Some(utc) = v.strip_suffix('Z') {
+        let t = NaiveDateTime::parse_from_str(utc, "%Y%m%dT%H%M%S").ok()?;
+        return Some((chrono::Utc.from_utc_datetime(&t).with_timezone(&Local).naive_local(), false));
+    }
+    NaiveDateTime::parse_from_str(v, "%Y%m%dT%H%M%S").ok().map(|t| (t, false))
+}
+
+/// "PT1H30M", "P1D", "P2W" -> a duration.
+fn duration(v: &str) -> Option<Duration> {
+    let v = v.trim().trim_start_matches('+');
+    let mut total = Duration::zero();
+    let mut num = String::new();
+    for c in v.chars().skip_while(|c| *c == 'P') {
+        match c {
+            '0'..='9' => num.push(c),
+            'T' => {}
+            u => {
+                let n: i64 = num.parse().ok()?;
+                num.clear();
+                total += match u {
+                    'W' => Duration::weeks(n),
+                    'D' => Duration::days(n),
+                    'H' => Duration::hours(n),
+                    'M' => Duration::minutes(n),
+                    'S' => Duration::seconds(n),
+                    _ => return None,
+                };
+            }
+        }
+    }
+    Some(total)
+}
+
+fn raws(ics: &str) -> Vec<Raw> {
+    // unfold: a line starting with a space or tab continues the one before
+    let mut lines: Vec<String> = vec![];
+    for l in ics.lines() {
+        let l = l.trim_end_matches('\r');
+        if (l.starts_with(' ') || l.starts_with('\t')) && !lines.is_empty() {
+            lines.last_mut().unwrap().push_str(&l[1..]);
+        } else {
+            lines.push(l.to_string());
+        }
+    }
+    let mut out = vec![];
+    let mut cur: Option<Raw> = None;
+    let mut depth = 0; // VALARM and friends inside an event
+    for l in &lines {
+        match l.as_str() {
+            "BEGIN:VEVENT" => {
+                cur = Some(Raw::default());
+                depth = 0;
+                continue;
+            }
+            "END:VEVENT" => {
+                if let Some(r) = cur.take() {
+                    out.push(r);
+                }
+                continue;
+            }
+            _ => {}
+        }
+        let Some(r) = cur.as_mut() else { continue };
+        if l.starts_with("BEGIN:") {
+            depth += 1;
+            continue;
+        }
+        if l.starts_with("END:") {
+            depth -= 1;
+            continue;
+        }
+        if depth > 0 {
+            continue;
+        }
+        let Some((head, value)) = l.split_once(':') else { continue };
+        let (name, params) = head.split_once(';').unwrap_or((head, ""));
+        match name.to_ascii_uppercase().as_str() {
+            "UID" => r.uid = value.to_string(),
+            "DTSTART" => r.start = when(params, value),
+            "DTEND" => r.end = when(params, value).map(|w| w.0),
+            "DURATION" => r.duration = duration(value),
+            "SUMMARY" => r.title = unescape(value),
+            "LOCATION" => r.place = unescape(value),
+            "URL" => r.url = value.to_string(),
+            "DESCRIPTION" => r.description = unescape(value),
+            "RRULE" => r.rrule = Some(value.to_string()),
+            "EXDATE" => r.exdates.extend(value.split(',').filter_map(|v| when(params, v).map(|w| w.0))),
+            "RECURRENCE-ID" => r.recurrence_id = when(params, value).map(|w| w.0),
+            "STATUS" => r.cancelled = value.eq_ignore_ascii_case("CANCELLED"),
+            _ => {}
+        }
+    }
+    out
+}
+
+/// The first video-call link in a text.
+pub fn join_link(text: &str) -> Option<String> {
+    const HOSTS: &[&str] = &["zoom.us/", "meet.google.com/", "teams.microsoft.com/", "teams.live.com/", "meet.jit.si/", "webex.com/", "whereby.com/", "gotomeeting.com/", "meet.goto.com/", "bluejeans.com/"];
+    text.split(|c: char| c.is_whitespace() || "<>\"'()[],".contains(c))
+        .map(|w| w.trim_end_matches(['.', ';']))
+        .find(|w| w.starts_with("https://") && HOSTS.iter().any(|h| w.contains(h)))
+        .map(String::from)
+}
+
+fn weekday(code: &str) -> Option<Weekday> {
+    Some(match code {
+        "MO" => Weekday::Mon,
+        "TU" => Weekday::Tue,
+        "WE" => Weekday::Wed,
+        "TH" => Weekday::Thu,
+        "FR" => Weekday::Fri,
+        "SA" => Weekday::Sat,
+        "SU" => Weekday::Sun,
+        _ => return None,
+    })
+}
+
+/// The `n`th (1-based, or -1 = last) `day` of a month.
+fn nth_weekday(year: i32, month: u32, n: i32, day: Weekday) -> Option<NaiveDate> {
+    if n > 0 {
+        NaiveDate::from_weekday_of_month_opt(year, month, day, n as u8)
+    } else {
+        let first_next = NaiveDate::from_ymd_opt(year, month, 1)?.checked_add_months(Months::new(1))?;
+        let mut d = first_next.pred_opt()?;
+        let mut k = -1;
+        loop {
+            if d.weekday() == day {
+                if k == n {
+                    return Some(d);
+                }
+                k -= 1;
+            }
+            d = d.pred_opt()?;
+            if d.month() != month {
+                return None;
+            }
+        }
+    }
+}
+
+/// The start times a recurring event has, from its first one on, until `until` (at most 3000 steps looked at).
+/// Without a COUNT, daily and weekly ones skip ahead to near `from`, so an old series still reaches today.
+fn starts(first: NaiveDateTime, rule: &str, from: NaiveDateTime, until: NaiveDateTime) -> Vec<NaiveDateTime> {
+    let part = |k: &str| rule.split(';').find_map(|p| p.strip_prefix(&format!("{k}=")).map(String::from));
+    let freq = part("FREQ").unwrap_or_default();
+    let interval = part("INTERVAL").and_then(|v| v.parse::<u32>().ok()).unwrap_or(1).max(1);
+    let count = part("COUNT").and_then(|v| v.parse::<usize>().ok());
+    let end = part("UNTIL").and_then(|v| when("", &v).map(|w| if w.1 { w.0 + Duration::days(1) - Duration::seconds(1) } else { w.0 })).map_or(until, |u| u.min(until));
+    let byday: Vec<(i32, Weekday)> = part("BYDAY")
+        .map(|v| v.split(',').filter_map(|d| {
+            let (n, code) = d.split_at(d.len().saturating_sub(2));
+            Some((n.parse::<i32>().unwrap_or(0), weekday(code)?))
+        }).collect())
+        .unwrap_or_default();
+    let bymonthday: Option<u32> = part("BYMONTHDAY").and_then(|v| v.parse().ok());
+    let time = first.time();
+    let mut out: Vec<NaiveDateTime> = vec![];
+    let push = |t: NaiveDateTime, out: &mut Vec<NaiveDateTime>| -> bool {
+        // false = stop: past the end, or enough of them
+        if t > end || count.is_some_and(|c| out.len() >= c) {
+            return false;
+        }
+        if t >= first {
+            out.push(t);
+        }
+        true
+    };
+    let period = match freq.as_str() {
+        "DAILY" => 1,
+        "WEEKLY" => 7,
+        _ => 0,
+    };
+    let skip = if count.is_none() && period > 0 && from > first { ((from - first).num_days() / (period * interval as i64) - 1).max(0) as u32 } else { 0 };
+    for k in skip..skip + 3000 {
+        let step = k * interval;
+        let go_on = match freq.as_str() {
+            "DAILY" => push(first + Duration::days(step as i64), &mut out),
+            "WEEKLY" if !byday.is_empty() => {
+                // the week of the first one (from Monday), then every `interval` weeks
+                let monday = first.date() - Duration::days(first.weekday().num_days_from_monday() as i64) + Duration::weeks(step as i64);
+                let mut days: Vec<NaiveDate> = byday.iter().map(|(_, d)| monday + Duration::days(d.num_days_from_monday() as i64)).collect();
+                days.sort();
+                days.into_iter().all(|d| push(d.and_time(time), &mut out))
+            }
+            "WEEKLY" => push(first + Duration::weeks(step as i64), &mut out),
+            "MONTHLY" => {
+                let Some(m) = first.date().with_day(1).and_then(|d| d.checked_add_months(Months::new(step))) else { break };
+                let day = match (byday.first(), bymonthday) {
+                    (Some((n, wd)), _) if *n != 0 => nth_weekday(m.year(), m.month(), *n, *wd),
+                    (_, Some(md)) => m.with_day(md),
+                    _ => m.with_day(first.day()), // months without that day are skipped, like calendars do
+                };
+                match day {
+                    Some(d) => push(d.and_time(time), &mut out),
+                    None => m.and_time(time) <= end,
+                }
+            }
+            "YEARLY" => match first.date().with_year(first.year() + step as i32) {
+                Some(d) => push(d.and_time(time), &mut out),
+                None => true, // 29 February in a year without one
+            },
+            _ => {
+                push(first, &mut out);
+                false
+            }
+        };
+        if !go_on {
+            break;
+        }
+    }
+    out
+}
+
+/// The events of a calendar that touch the days `from .. from + days`, recurring ones expanded, sorted by start.
+pub fn parse(ics: &str, from: NaiveDate, days: u64) -> Vec<Event> {
+    let window = (from.and_time(NaiveTime::MIN), (from + Days::new(days)).and_time(NaiveTime::MIN));
+    let raws = raws(ics);
+    // moved or changed single occurrences of a recurring event: (uid, original start)
+    let moved: Vec<(String, NaiveDateTime)> = raws.iter().filter_map(|r| r.recurrence_id.map(|t| (r.uid.clone(), t))).collect();
+    let mut out = vec![];
+    for r in &raws {
+        let Some((start, all_day)) = r.start else { continue };
+        let length = match (r.end, r.duration) {
+            (Some(e), _) if e > start => e - start,
+            (_, Some(d)) => d,
+            _ if all_day => Duration::days(1),
+            _ => Duration::hours(1),
+        };
+        let firsts = match (&r.rrule, r.recurrence_id) {
+            (Some(rule), None) => starts(start, rule, window.0 - length, window.1),
+            _ => vec![start],
+        };
+        for s in firsts {
+            if r.recurrence_id.is_none() && (r.exdates.iter().any(|x| *x == s || x.date() == s.date() && all_day) || moved.contains(&(r.uid.clone(), s))) {
+                continue;
+            }
+            let e = s + length;
+            if r.cancelled || e <= window.0 || s >= window.1 {
+                continue;
+            }
+            let join = join_link(&r.place).or_else(|| join_link(&r.url)).or_else(|| join_link(&r.description));
+            out.push(Event { uid: r.uid.clone(), start: s, end: e, all_day, title: if r.title.is_empty() { "(no title)".into() } else { r.title.clone() }, place: r.place.clone(), join });
+        }
+    }
+    out.sort_by_key(|e| (e.start, e.title.clone()));
+    out
+}
+
+/// A calendar source as people paste it: `webcal://` is the same link over https.
+pub fn source(s: &str) -> Option<String> {
+    let s = s.trim().trim_matches(['"', '\'', '<', '>']);
+    if let Some(rest) = s.strip_prefix("webcal://").or_else(|| s.strip_prefix("webcals://")) {
+        return Some(format!("https://{rest}"));
+    }
+    if s.starts_with("https://") || s.starts_with("http://") {
+        return Some(s.to_string());
+    }
+    let path = std::path::Path::new(s);
+    (path.extension().is_some_and(|x| x.eq_ignore_ascii_case("ics")) && path.is_file()).then(|| s.to_string())
+}
+
+/// Where a source's last good copy is kept.
+fn cache_file(src: &str) -> Option<std::path::PathBuf> {
+    let hash = src.bytes().fold(0xcbf29ce484222325u64, |h, b| (h ^ b as u64).wrapping_mul(0x100000001b3));
+    // tests keep their copies out of the real cache folder
+    let base = if cfg!(test) { Some(std::env::temp_dir().join(format!("clipster-test-{}", std::process::id()))) } else { dirs::cache_dir().map(|d| d.join("clipster")) };
+    base.map(|d| d.join(format!("calendar-{hash:016x}.ics")))
+}
+
+/// Read every source (a link, or a file), falling back to the cached copy when one can't be reached.
+/// Returns the events of the next 30 days and a problem per source that failed with no cache.
+pub fn fetch(sources: &[String]) -> (Vec<Event>, Vec<String>) {
+    let today = Local::now().date_naive();
+    let (mut events, mut problems) = (vec![], vec![]);
+    for src in sources {
+        let text = if src.starts_with("http") { crate::net::get_text(src) } else { std::fs::read_to_string(src).map_err(|e| e.to_string()) };
+        let cache = cache_file(src);
+        let text = match text {
+            Ok(t) if t.contains("BEGIN:VCALENDAR") => {
+                if let Some(c) = &cache {
+                    let _ = c.parent().map(std::fs::create_dir_all);
+                    let _ = std::fs::write(c, &t);
+                }
+                t
+            }
+            other => match cache.and_then(|c| std::fs::read_to_string(c).ok()) {
+                Some(t) => t,
+                None => {
+                    problems.push(match other {
+                        Ok(_) => format!("{} isn't a calendar", short(src)),
+                        Err(e) => format!("{}: {e}", short(src)),
+                    });
+                    continue;
+                }
+            },
+        };
+        events.extend(parse(&text, today - Days::new(1), 32));
+    }
+    events.sort_by_key(|e| (e.start, e.title.clone()));
+    events.dedup_by(|a, b| a.key() == b.key());
+    (events, problems)
+}
+
+/// A source for showing: the host of a link (never its secret path), or a file's name.
+pub fn short(src: &str) -> String {
+    if src.starts_with("http") {
+        src.split('/').nth(2).unwrap_or(src).to_string()
+    } else {
+        std::path::Path::new(src).file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_else(|| src.to_string())
+    }
+}
+
+// The App's events, for the morning briefing (which runs on the net thread).
+static CACHE: Mutex<Vec<Event>> = Mutex::new(Vec::new());
+
+pub fn set_cache(events: &[Event]) {
+    if let Ok(mut c) = CACHE.lock() {
+        *c = events.to_vec();
+    }
+}
+
+/// "📅 Today: 9:00 Standup, 14:00 Dentist" for the briefing, or nothing.
+pub fn today_line() -> Option<String> {
+    let today = Local::now().date_naive();
+    let c = CACHE.lock().ok()?;
+    let items: Vec<String> = c.iter().filter(|e| e.start.date() == today || e.all_day && e.start.date() <= today && e.end.date() > today).take(4).map(label).collect();
+    (!items.is_empty()).then(|| format!("📅 Today: {}", items.join(", ")))
+}
+
+/// "9:00 Standup" or "All day: Holiday".
+pub fn label(e: &Event) -> String {
+    if e.all_day { format!("{} (all day)", e.title) } else { format!("{} {}", e.start.format("%-H:%M"), e.title) }
+}
+
+/// The events on `day` (all-day ones that span it too).
+pub fn on(events: &[Event], day: NaiveDate) -> Vec<&Event> {
+    events.iter().filter(|e| e.start.date() == day || e.all_day && e.start.date() <= day && e.end.date() > day).collect()
+}
+
+/// The timed event going on at `at`, if any (all-day ones don't make you busy).
+pub fn busy_at(events: &[Event], at: NaiveDateTime) -> Option<&Event> {
+    events.iter().find(|e| !e.all_day && e.start <= at && at < e.end)
+}
+
+/// "What's on Friday": that day's events and reminders.
+pub fn agenda_reply(events: &[Event], reminders: &[(NaiveDateTime, String)], day: NaiveDate, linked: bool) -> Reply {
+    if !linked && reminders.is_empty() {
+        return Reply::say(lines::pick("calendar_none")).mood(Mood::Think).run("Open the Agenda", "desk agenda");
+    }
+    let mut items: Vec<(NaiveDateTime, String)> = on(events, day).into_iter().map(|e| (if e.all_day { e.start.date().and_time(NaiveTime::MIN) } else { e.start }, label(e))).collect();
+    items.extend(reminders.iter().filter(|(t, _)| t.date() == day).map(|(t, l)| (*t, format!("{} ⏰ {}", t.format("%-H:%M"), if l.is_empty() { "Reminder" } else { l }))));
+    items.sort();
+    let when = describe_day(day);
+    if items.is_empty() {
+        return Reply::say(format!("{} ({when})", lines::pick("agenda_empty"))).mood(Mood::Happy).run("Open the Agenda", "desk agenda");
+    }
+    let mut text = format!("{when}: {}", lines::pick("agenda_intro").replace("{n}", &items.len().to_string()));
+    for (_, l) in &items {
+        text += &format!("\n• {l}");
+    }
+    let mut r = Reply::say(text).mood(Mood::Write);
+    if let Some(link) = on(events, day).iter().find_map(|e| e.join.clone()) {
+        r = r.btn("Join the call", Act::Open(link));
+    }
+    r.run("Open the Agenda", "desk agenda")
+}
+
+/// "Am I free Friday at 3?"
+pub fn free_reply(events: &[Event], reminders: &[(NaiveDateTime, String)], at: NaiveDateTime, linked: bool) -> Reply {
+    let when = format!("{} at {}", describe_day(at.date()), at.format("%-H:%M"));
+    if let Some(e) = busy_at(events, at) {
+        return Reply::say(lines::pick("agenda_busy").replace("{when}", &when).replace("{x}", &e.title)).mood(Mood::Think).run("That day's agenda", &format!("calendar day {}", at.date()));
+    }
+    if let Some((_, l)) = reminders.iter().find(|(t, _)| (*t - at).num_minutes().abs() < 30) {
+        return Reply::say(lines::pick("agenda_busy").replace("{when}", &when).replace("{x}", if l.is_empty() { "a reminder" } else { l })).mood(Mood::Think);
+    }
+    let r = Reply::say(lines::pick("agenda_free").replace("{when}", &when)).mood(Mood::Happy);
+    if linked { r.run("That day's agenda", &format!("calendar day {}", at.date())) } else { r.run("Link my calendar", "desk agenda") }
+}
+
+/// "today", "tomorrow", "Friday, November 13".
+pub fn describe_day(day: NaiveDate) -> String {
+    let today = Local::now().date_naive();
+    match (day - today).num_days() {
+        0 => "Today".into(),
+        1 => "Tomorrow".into(),
+        2..=6 => day.format("%A").to_string(),
+        _ => day.format("%A, %B %-d").to_string(),
+    }
+}
+
+/// The next timed event from `now`.
+pub fn next(events: &[Event], now: NaiveDateTime) -> Option<&Event> {
+    events.iter().find(|e| !e.all_day && e.start >= now)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn d(y: i32, m: u32, day: u32) -> NaiveDate {
+        NaiveDate::from_ymd_opt(y, m, day).unwrap()
+    }
+    fn t(y: i32, m: u32, day: u32, h: u32, min: u32) -> NaiveDateTime {
+        d(y, m, day).and_hms_opt(h, min, 0).unwrap()
+    }
+
+    const GOOGLE: &str = "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Google Inc//Google Calendar 70.9054//EN\r\nBEGIN:VTIMEZONE\r\nTZID:Europe/Zurich\r\nEND:VTIMEZONE\r\n\
+BEGIN:VEVENT\r\nDTSTART;TZID=Europe/Zurich:20261109T090000\r\nDTEND;TZID=Europe/Zurich:20261109T091500\r\nRRULE:FREQ=WEEKLY;BYDAY=MO,WE,FR\r\nEXDATE;TZID=Europe/Zurich:20261111T090000\r\nUID:standup@google.com\r\nSUMMARY:Standup\r\nLOCATION:https://meet.google.com/abc-defg-hij\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nDESCRIPTION:This is an event reminder\r\nEND:VALARM\r\nEND:VEVENT\r\n\
+BEGIN:VEVENT\r\nDTSTART;TZID=Europe/Zurich:20261113T100000\r\nDTEND;TZID=Europe/Zurich:20261113T101500\r\nRECURRENCE-ID;TZID=Europe/Zurich:20261113T090000\r\nUID:standup@google.com\r\nSUMMARY:Standup (moved)\r\nEND:VEVENT\r\n\
+BEGIN:VEVENT\r\nDTSTART;VALUE=DATE:20261112\r\nDTEND;VALUE=DATE:20261114\r\nUID:offsite\r\nSUMMARY:Team offsite\\, Bern\r\nEND:VEVENT\r\n\
+BEGIN:VEVENT\r\nDTSTART;TZID=Europe/Zurich:20261110T140000\r\nDTEND;TZID=Europe/Zurich:20261110T150000\r\nUID:dentist\r\nSUMMARY:Dentist\r\nSTATUS:CANCELLED\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n";
+
+    #[test]
+    fn google_shapes_recurrence_exceptions_and_moves() {
+        let ev = parse(GOOGLE, d(2026, 11, 9), 7);
+        let titles: Vec<(NaiveDateTime, &str)> = ev.iter().map(|e| (e.start, e.title.as_str())).collect();
+        assert!(titles.contains(&(t(2026, 11, 9, 9, 0), "Standup")), "{titles:?}");
+        assert!(!titles.iter().any(|(s, _)| *s == t(2026, 11, 11, 9, 0)), "Wednesday was cancelled with EXDATE");
+        assert!(!titles.iter().any(|(s, n)| *s == t(2026, 11, 13, 9, 0) && *n == "Standup"), "Friday's moved...");
+        assert!(titles.contains(&(t(2026, 11, 13, 10, 0), "Standup (moved)")), "...to 10:00");
+        assert!(titles.contains(&(t(2026, 11, 12, 0, 0), "Team offsite, Bern")), "escaped commas, all-day");
+        assert!(!titles.iter().any(|(_, n)| *n == "Dentist"), "cancelled events are left out");
+        assert_eq!(ev.iter().find(|e| e.title == "Standup").unwrap().join.as_deref(), Some("https://meet.google.com/abc-defg-hij"));
+        let offsite = ev.iter().find(|e| e.uid == "offsite").unwrap();
+        assert!(offsite.all_day && on(&ev, d(2026, 11, 13)).iter().any(|e| e.uid == "offsite"), "a two-day event is on both days");
+        assert_eq!(busy_at(&ev, t(2026, 11, 9, 9, 10)).map(|e| e.title.as_str()), Some("Standup"));
+        assert!(busy_at(&ev, t(2026, 11, 9, 9, 15)).is_none(), "the end is free again");
+        assert!(busy_at(&ev, t(2026, 11, 12, 12, 0)).is_none(), "all-day events don't make you busy");
+    }
+
+    #[test]
+    fn outlook_and_nextcloud_shapes() {
+        // Outlook: folded lines, a Teams link in the description, UTC times, a monthly "second Tuesday" meeting
+        let outlook = "BEGIN:VCALENDAR\nBEGIN:VEVENT\nUID:040000008200E00074C5B7101A82E008\nSUMMARY:Monthly review with a ver\n y long title\nDTSTART:20261110T130000Z\nDTEND:20261110T140000Z\nRRULE:FREQ=MONTHLY;BYDAY=2TU;COUNT=3\nDESCRIPTION:Join here: https://teams.microsoft.com/l/meetup-join/19%3ameeting_x\\n\\nThanks\nEND:VEVENT\nEND:VCALENDAR\n";
+        let ev = parse(outlook, d(2026, 11, 1), 120);
+        assert_eq!(ev.len(), 3, "COUNT=3: {ev:?}");
+        assert_eq!(ev[0].title, "Monthly review with a very long title", "unfolded");
+        assert_eq!(ev[1].start.date(), d(2026, 12, 8), "the second Tuesday of December");
+        assert_eq!(ev[2].start.date(), d(2027, 1, 12));
+        assert!(ev[0].join.as_deref().is_some_and(|j| j.starts_with("https://teams.microsoft.com/")));
+        let utc = chrono::Utc.with_ymd_and_hms(2026, 11, 10, 13, 0, 0).unwrap().with_timezone(&Local).naive_local();
+        assert_eq!(ev[0].start, utc, "UTC times become local");
+        // Nextcloud: a daily event with UNTIL, INTERVAL and a DURATION instead of DTEND; a yearly birthday
+        let nc = "BEGIN:VCALENDAR\nBEGIN:VEVENT\nUID:a1\nSUMMARY:Water the plants\nDTSTART:20261109T180000\nDURATION:PT10M\nRRULE:FREQ=DAILY;INTERVAL=2;UNTIL=20261115T235959\nEND:VEVENT\nBEGIN:VEVENT\nUID:b2\nSUMMARY:Anna's birthday\nDTSTART;VALUE=DATE:19900215\nRRULE:FREQ=YEARLY\nEND:VEVENT\nEND:VCALENDAR\n";
+        let ev = parse(nc, d(2026, 11, 9), 365);
+        let old = "BEGIN:VCALENDAR\nBEGIN:VEVENT\nUID:c3\nSUMMARY:Daily since 2001\nDTSTART:20010101T080000\nRRULE:FREQ=DAILY\nEND:VEVENT\nEND:VCALENDAR\n";
+        assert_eq!(parse(old, d(2026, 11, 9), 2).len(), 2, "a series from long ago still reaches today");
+        let plants: Vec<NaiveDate> = ev.iter().filter(|e| e.uid == "a1").map(|e| e.start.date()).collect();
+        assert_eq!(plants, vec![d(2026, 11, 9), d(2026, 11, 11), d(2026, 11, 13), d(2026, 11, 15)]);
+        assert_eq!(ev.iter().find(|e| e.uid == "a1").unwrap().end - t(2026, 11, 9, 18, 0), Duration::minutes(10));
+        assert_eq!(ev.iter().filter(|e| e.uid == "b2").map(|e| e.start.date()).collect::<Vec<_>>(), vec![d(2027, 2, 15)], "a birthday from 1990, once a year");
+    }
+
+    #[test]
+    fn fetches_files_and_keeps_a_copy_for_offline() {
+        let dir = std::env::temp_dir().join(format!("clipster-cal-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let file = dir.join("work.ics");
+        let tomorrow = (Local::now().date_naive() + Days::new(1)).format("%Y%m%d");
+        std::fs::write(&file, format!("BEGIN:VCALENDAR\nBEGIN:VEVENT\nUID:x\nSUMMARY:Planning\nDTSTART:{tomorrow}T100000\nDTEND:{tomorrow}T110000\nEND:VEVENT\nEND:VCALENDAR\n")).unwrap();
+        let src = file.to_string_lossy().into_owned();
+        let (ev, problems) = fetch(std::slice::from_ref(&src));
+        assert!(problems.is_empty() && ev.iter().any(|e| e.title == "Planning"), "{ev:?} {problems:?}");
+        std::fs::remove_file(&file).unwrap();
+        let (ev, problems) = fetch(std::slice::from_ref(&src));
+        assert!(problems.is_empty() && ev.iter().any(|e| e.title == "Planning"), "the cached copy stands in: {problems:?}");
+        let (ev, problems) = fetch(&["/nowhere/at/all.ics".to_string()]);
+        assert!(ev.is_empty() && problems.len() == 1);
+        let _ = std::fs::remove_dir_all(&dir);
+        let _ = cache_file(&src).map(std::fs::remove_file);
+    }
+
+    /// CLIPSTER_ICS_URL=http://… cargo test calendar_live -- --ignored --nocapture
+    #[test]
+    #[ignore]
+    fn calendar_live() {
+        let url = std::env::var("CLIPSTER_ICS_URL").expect("set CLIPSTER_ICS_URL");
+        let (ev, problems) = fetch(&[url]);
+        println!("{} events, problems: {problems:?}", ev.len());
+        for e in ev.iter().take(10) {
+            println!("{} {} {:?}", e.start, e.title, e.join);
+        }
+        assert!(!ev.is_empty());
+    }
+
+    #[test]
+    fn sources_and_links() {
+        assert_eq!(source("webcal://example.com/cal/secret.ics").as_deref(), Some("https://example.com/cal/secret.ics"));
+        assert_eq!(source(" https://calendar.google.com/calendar/ical/x/basic.ics ").as_deref(), Some("https://calendar.google.com/calendar/ical/x/basic.ics"));
+        assert_eq!(source("not a link"), None);
+        assert_eq!(short("https://calendar.google.com/calendar/ical/private-abc/basic.ics"), "calendar.google.com", "never the secret part");
+        assert_eq!(join_link("Room 4 (https://zoom.us/j/123456?pwd=x)").as_deref(), Some("https://zoom.us/j/123456?pwd=x"));
+        assert_eq!(join_link("https://example.com/agenda"), None);
+        assert_eq!(nth_weekday(2026, 11, -1, Weekday::Fri), Some(d(2026, 11, 27)), "the last Friday");
+    }
+}

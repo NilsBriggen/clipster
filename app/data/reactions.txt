@@ -6189,3 +6189,48 @@ Lately you've been in these:
 I don't see a list of recent files. Some apps don't report them.
 No recent files on record. Either you're new here or very private.
 Your computer isn't keeping a recent-files list I can read.
+
+## agenda_intro
+{n} things on the agenda:
+Here's what's on ({n}):
+{n} on your calendar:
+
+## agenda_empty
+Nothing on the calendar. A rare, beautiful thing.
+Your calendar is clear.
+No appointments. Plan something, or enjoy the quiet.
+
+## agenda_free
+You're free {when}. Nothing booked.
+{when}: free, as far as your calendar knows.
+Nothing on {when}. It's yours.
+
+## agenda_busy
+{when} you have "{x}".
+Not free: "{x}" is on {when}.
+{when} is taken by "{x}".
+
+## event_soon
+"{x}" starts in {n} min.
+Heads-up: "{x}" in {n} min.
+{n} minutes until "{x}". Time to wrap up.
+
+## calendar_added
+Calendar linked. I'll read it every 15 minutes.
+Got it. Your appointments will show on the Agenda.
+Linked. I'll give you a heads-up before things start.
+
+## calendar_removed
+Calendar unlinked.
+That calendar is gone from the Agenda.
+Removed. I won't read it any more.
+
+## calendar_failed
+I couldn't read that calendar. The link might be wrong, or you're offline.
+That calendar didn't answer. Check the link in its settings.
+No luck reading that calendar right now.
+
+## calendar_none
+I don't know your calendar yet. Paste its private iCal link on the Agenda tab (Calendars…), or say "add my calendar" and the link.
+No calendar linked. Find its secret iCal address in your calendar's settings and give it to me.
+Link your calendar and I'll know your day. Its iCal link is in the calendar's settings.

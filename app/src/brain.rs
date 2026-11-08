@@ -58,6 +58,7 @@ pub enum Effect {
     Pref(String, String),            // a setting changed on the Desk's Settings tab: key, value
     Goals,                           // how today is going against the focus goal and the daily limits
     Clip(String),                    // the Desk's Clipboard tab: "copy h3", "pin h3", "unpin p1", "clear"
+    Calendar(String),                // "add <link>", "remove 2", "refresh", "day 2026-11-13", "next", "free <unix time>"
     Reading(String),                 // the reading list: "save <link>" (none = the newest copied link), "open 2", "done 2", "list"
     UpkeepCheck,                     // run the checkup (on a background thread)
     OpenSystem(String),              // the system's own "updater" or "startup" settings
@@ -321,6 +322,8 @@ pub fn exact(input: &str) -> Option<Reply> {
         "wrapup" => return Some(Reply::say("").effect(Effect::Wrapup)),
         "review" => return Some(Reply::say("").effect(Effect::Review(rest == "copy"))),
         "clip" if !rest.is_empty() => return Some(Reply::say("").effect(Effect::Clip(rest.to_string()))),
+        // the calendar: "calendar" (today), "calendar add <link>", "calendar day 2026-11-13", "calendar free <unix time>"
+        "calendar" | "agenda" => return Some(Reply::say("").effect(Effect::Calendar(if rest.is_empty() { "today".into() } else { rest.to_string() }))),
         // the reading list: "readlater https://…" (or bare: the newest copied link), "reading", "reading done 2"
         "readlater" => return Some(Reply::say("").effect(Effect::Reading(format!("save {rest}").trim().to_string()))),
         "reading" if rest.is_empty() || rest == "list" => return Some(Reply::say("").effect(Effect::Reading("list".into()))),

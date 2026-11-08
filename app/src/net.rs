@@ -207,7 +207,7 @@ fn get(url: &str) -> Result<Value, String> {
     res.body_mut().read_json::<Value>().map_err(|e| e.to_string())
 }
 
-fn get_text(url: &str) -> Result<String, String> {
+pub(crate) fn get_text(url: &str) -> Result<String, String> {
     let mut res = agent().get(url).header("Accept", "text/plain").call().map_err(|e| e.to_string())?;
     res.body_mut().read_to_string().map_err(|e| e.to_string())
 }
@@ -801,6 +801,9 @@ fn fetch(q: &Query) -> Result<Reply, String> {
             if let Ok(w) = place(Kind::Weather, "") {
                 let lines: Vec<&str> = w.text.lines().collect();
                 text += &format!("\n{}\n{}", lines.first().unwrap_or(&""), lines.get(2).unwrap_or(&""));
+            }
+            if let Some(c) = crate::calendar::today_line() {
+                text += &format!("\n{c}");
             }
             if let Some(t) = &todos {
                 text += &format!("\n{t}");

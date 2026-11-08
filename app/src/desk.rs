@@ -15,7 +15,7 @@ use std::time::{Duration, Instant};
 
 const W: f32 = 720.0;
 const H: f32 = 520.0;
-const TABS: [&str; 8] = ["Today", "Week", "To-do", "Reminders", "Clipboard", "Upkeep", "You & me", "Settings"];
+const TABS: [&str; 8] = ["Today", "Week", "To-do", "Agenda", "Clipboard", "Upkeep", "You & me", "Settings"];
 
 /// A tab's index from its number or (the start of) its name: "2", "settings", "todo".
 pub fn tab(name: &str) -> Option<usize> {
@@ -25,6 +25,7 @@ pub fn tab(name: &str) -> Option<usize> {
         "checkup" | "tidy" | "backup" | "startup" => "upkeep".to_string(),
         t if t.starts_with("list ") => "todo".to_string(), // "list shopping": a named list on the To-do tab
         "links" => "clipboard".to_string(),                  // the saved links page
+        "reminders" | "notes" | "calendar" | "calendars" => "agenda".to_string(),
         t => t.to_string(),
     };
     match t.parse::<usize>() {
@@ -52,6 +53,9 @@ pub struct View<'a> {
     pub upkeep_running: bool,
     pub backup_check: crate::upkeep::Check,
     pub backup: Backup<'a>,
+    pub events: &'a [crate::calendar::Event], // the calendars' next weeks
+    pub calendars: &'a [String],              // their links or files
+    pub calendar_note: String,                // "Checked 3 min ago", or what went wrong
 }
 
 /// What the Backup page shows.
@@ -141,6 +145,8 @@ pub struct Desk {
     planning: bool,                    // "plan my day": the To-do tab asks for today's top 3
     list_tab: Option<String>,          // the To-do tab shows this named list instead of the to-dos
     clip_page: usize,                  // the Clipboard tab: Copies, Saved links
+    calendars_open: bool,              // the Agenda tab shows its calendar links
+    calendar_text: String,
     list_text: String,
     forget_all: bool,                  // the You & me tab's "are you sure?"
     upkeep_page: usize,                // Checkup, Tidy, Backup
@@ -176,6 +182,7 @@ impl Desk {
         }
         self.planning = name == "plan";
         self.list_tab = name.strip_prefix("list ").map(|l| l.trim().to_lowercase());
+        self.calendars_open = name == "calendars";
         if name == "links" || name == "clipboard" {
             self.clip_page = usize::from(name == "links");
         }
@@ -267,7 +274,7 @@ impl Desk {
             "Today" => self.today(ui, c, view, look, out),
             "Week" => self.week(ui, c, view, look, out),
             "To-do" => self.todos(ui, c, view, look, out),
-            "Reminders" => self.reminders(ui, c, view, look, out),
+            "Agenda" => self.reminders(ui, c, view, look, out),
             "Settings" => self.settings(ui, c, &view.prefs, look, out),
             "Clipboard" => self.clipboard(ui, c, view, look, out),
             "You & me" => self.you_and_me(ui, c, view, look, out),
@@ -794,28 +801,18 @@ impl Desk {
         let p = ui.painter().clone();
         let (half, ctl) = ((c.width() - 12.0) / 2.0, look.ctl());
         let form = c.max.y - 56.0; // the top of the add rows at the bottom of both cards
-        // timers and reminders
+        // the agenda: calendar events, reminders and due to-dos, by day
         let left = Rect::from_min_size(c.min, vec2(half, c.height()));
-        look.group(&p, left, "Timers and reminders");
+        look.group(&p, left, if self.calendars_open { "Calendars" } else { "Agenda" });
         let (x0, x1) = (left.min.x + 12.0, left.max.x - 12.0);
-        if view.timers.is_empty() {
-            p.text(pos2(left.center().x, left.min.y + 84.0), Align2::CENTER_CENTER, "No timers running.", look.font(12.5), look.dim());
+        let top_btn = Rect::from_min_size(pos2(x1 - 96.0, left.min.y + 18.0), vec2(96.0, ctl - 2.0));
+        if look.button(ui, top_btn, Id::unique("desk-calendars"), if self.calendars_open { "Done" } else { "Calendars…" }, true).clicked() {
+            self.calendars_open = !self.calendars_open;
         }
-        let rows = ((form - 22.0 - (left.min.y + 32.0)) / 52.0).max(0.0) as usize;
-        let shown = view.timers.len().min(rows);
-        for (n, (label, left_s, every)) in view.timers.iter().take(rows).enumerate() {
-            let y = left.min.y + 32.0 + n as f32 * 52.0;
-            let cancel = Rect::from_min_size(pos2(x1 - 62.0, y), vec2(62.0, ctl - 2.0));
-            let name = clipped(&p, if label.is_empty() { "Timer" } else { label }, look.font(12.5), look.text(), cancel.min.x - 8.0 - x0);
-            p.galley(pos2(x0, y + 9.0 - name.size().y / 2.0), name, look.text());
-            let again = if *every > 0 { format!(" · every {}", brain::fmt_dur(*every)) } else { String::new() };
-            p.text(pos2(x0, y + 26.7), Align2::LEFT_CENTER, format!("in {}{again}", brain::fmt_dur(*left_s)), look.font(11.0), look.dim());
-            if !label.is_empty() && look.button(ui, cancel, Id::unique(("desk-timer", n)), "Cancel", true).clicked() {
-                out.push(format!("cancel {label}"));
-            }
-            if n + 1 < shown {
-                look.divider(&p, x0, x1, y + 42.0);
-            }
+        if self.calendars_open {
+            self.calendar_links(ui, left, view, look, out);
+        } else {
+            self.timeline(ui, Rect::from_min_max(pos2(left.min.x, top_btn.max.y + 4.0), pos2(left.max.x, form - 24.0)), view, look, out);
         }
         p.text(pos2(x0, form - 14.7), Align2::LEFT_CENTER, "Remind me…", look.font(12.0), look.dim());
         let r = look.input(ui, Rect::from_min_size(pos2(x0, form), vec2(x1 - x0 - 62.0, ctl)), Id::unique("desk-remind"), &mut self.remind_text, "tomorrow at 3 to call Anna");
@@ -853,6 +850,138 @@ impl Desk {
         if (look.button(ui, Rect::from_min_size(pos2(x1 - 54.0, form), vec2(54.0, ctl)), Id::unique("desk-note-add"), "Add", !self.note_text.trim().is_empty()).clicked() || enter) && !self.note_text.trim().is_empty() {
             out.push(format!("note {}", self.note_text.trim()));
             self.note_text.clear();
+        }
+    }
+
+    /// Today, Tomorrow and the rest of the week: events, reminders (with Cancel) and due to-dos, scrolling by row.
+    fn timeline(&mut self, ui: &mut Ui, area: Rect, view: &View, look: Look, out: &mut Vec<String>) {
+        use chrono::{Duration, Local, NaiveTime};
+        let p = ui.painter().clone();
+        let ctl = look.ctl();
+        let (x0, x1) = (area.min.x + 12.0, area.max.x - 12.0);
+        let now = Local::now().naive_local();
+        let today = now.date();
+        enum What<'e> {
+            Event(&'e crate::calendar::Event),
+            Timer(String, u64), // label, repeats every
+            Todo(String),
+        }
+        // (when, what) for the next 7 days; all-day things sort first in their day
+        let mut items: Vec<(chrono::NaiveDateTime, What)> = vec![];
+        for e in view.events.iter().filter(|e| e.end > now && e.start.date() < today + Duration::days(7)) {
+            items.push((if e.all_day { e.start.date().max(today).and_time(NaiveTime::MIN) } else { e.start }, What::Event(e)));
+        }
+        for (label, left, every) in &view.timers {
+            let at = now + Duration::seconds(*left as i64);
+            if at.date() < today + Duration::days(7) {
+                items.push((at, What::Timer(label.clone(), *every)));
+            }
+        }
+        for it in self.files.todos.iter().filter(|i| !i.done && i.list.is_none()) {
+            if let Some(d) = it.due.filter(|d| *d < today + Duration::days(7)) {
+                items.push((d.max(today).and_time(NaiveTime::MIN), What::Todo(it.text.clone())));
+            }
+        }
+        items.sort_by_key(|(t, w)| (*t, !matches!(w, What::Event(e) if e.all_day)));
+        if items.is_empty() {
+            let hint = if view.calendars.is_empty() { "Nothing coming up.\nLink your calendar with Calendars…" } else { "Nothing coming up this week." };
+            let g = p.layout(hint.to_string(), look.font(12.5), look.dim(), area.width() - 40.0);
+            p.galley(pos2(area.center().x - g.size().x / 2.0, area.min.y + 50.0), g, look.dim());
+            return;
+        }
+        // rows: a heading per day, then its items
+        enum Row<'e> {
+            Day(String),
+            Item(chrono::NaiveDateTime, &'e What<'e>),
+        }
+        let mut rows: Vec<Row> = vec![];
+        let mut last = None;
+        for (t, w) in &items {
+            let d = t.date();
+            if last != Some(d) {
+                rows.push(Row::Day(crate::calendar::describe_day(d)));
+                last = Some(d);
+            }
+            rows.push(Row::Item(*t, w));
+        }
+        let pitch = if look == Look::Modern { 27.0 } else { 23.0 };
+        let fits = (area.height() / pitch) as usize;
+        let first = self.first_row(ui, "agenda", area, rows.len(), fits);
+        for (n, row) in rows.iter().skip(first).take(fits).enumerate() {
+            let y = area.min.y + n as f32 * pitch;
+            let cy = y + pitch / 2.0;
+            match row {
+                Row::Day(name) => {
+                    p.text(pos2(x0, cy + 2.0), Align2::LEFT_CENTER, name, look.bold(11.5), look.dim());
+                }
+                Row::Item(t, w) => {
+                    let (time, text, color) = match w {
+                        What::Event(e) => (if e.all_day { "all day".to_string() } else { t.format("%-H:%M").to_string() }, e.title.clone(), look.text()),
+                        What::Timer(l, every) => (t.format("%-H:%M").to_string(), format!("{}{}", if l.is_empty() { "Timer" } else { l }, if *every > 0 { format!(" · every {}", brain::fmt_dur(*every)) } else { String::new() }), look.text()),
+                        What::Todo(text) => ("due".to_string(), format!("☐ {text}"), look.dim()),
+                    };
+                    p.text(pos2(x0 + 8.0, cy), Align2::LEFT_CENTER, time, look.font(11.5), look.dim());
+                    let mut right = x1;
+                    match w {
+                        What::Event(e) if e.join.is_some() => {
+                            let b = Rect::from_min_size(pos2(x1 - 50.0, cy - (ctl - 4.0) / 2.0), vec2(50.0, ctl - 4.0));
+                            if look.button(ui, b, Id::unique(("agenda-join", e.key())), "Join", true).clicked() {
+                                out.push(format!("open {}", e.join.clone().unwrap_or_default()));
+                            }
+                            right = b.min.x - 6.0;
+                        }
+                        What::Timer(l, _) if !l.is_empty() => {
+                            let b = Rect::from_min_size(pos2(x1 - 58.0, cy - (ctl - 4.0) / 2.0), vec2(58.0, ctl - 4.0));
+                            if look.button(ui, b, Id::unique(("agenda-cancel", l.as_str(), n)), "Cancel", true).clicked() {
+                                out.push(format!("cancel {l}"));
+                            }
+                            right = b.min.x - 6.0;
+                        }
+                        _ => {}
+                    }
+                    let g = clipped(&p, &text, look.font(12.5), color, right - (x0 + 62.0));
+                    p.galley(pos2(x0 + 62.0, cy - g.size().y / 2.0), g, color);
+                }
+            }
+        }
+        scrollbar(&p, look, area, first, fits, rows.len());
+    }
+
+    /// The calendar links: each with ✕, a field to paste a new one, and when they were last read.
+    fn calendar_links(&mut self, ui: &mut Ui, card: Rect, view: &View, look: Look, out: &mut Vec<String>) {
+        let p = ui.painter().clone();
+        let ctl = look.ctl();
+        let (x0, x1) = (card.min.x + 12.0, card.max.x - 12.0);
+        let mut y = card.min.y + 52.0;
+        let intro = "Paste your calendar's private iCal link (Google: Settings → your calendar → Secret address in iCal format; Outlook: Publish a calendar → ICS). He only reads it.";
+        let g = p.layout(intro.to_string(), look.font(11.5), look.dim(), x1 - x0);
+        let gh = g.size().y;
+        p.galley(pos2(x0, y), g, look.dim());
+        y += gh + 10.0;
+        for (i, src) in view.calendars.iter().enumerate() {
+            let del = Rect::from_min_size(pos2(x1 - 26.0, y), vec2(26.0, ctl - 2.0));
+            if look.button(ui, del, Id::unique(("desk-cal-x", i)), "✕", true).clicked() {
+                out.push(format!("calendar remove {}", i + 1));
+            }
+            let g = clipped(&p, &format!("📅 {}", crate::calendar::short(src)), look.font(12.5), look.text(), del.min.x - x0 - 8.0);
+            p.galley(pos2(x0, y + (ctl - 2.0) / 2.0 - g.size().y / 2.0), g, look.text());
+            y += ctl + 4.0;
+        }
+        let add = Rect::from_min_size(pos2(x1 - 54.0, y + 4.0), vec2(54.0, ctl));
+        let r = look.input(ui, Rect::from_min_size(pos2(x0, y + 4.0), vec2(add.min.x - 8.0 - x0, ctl)), Id::unique("desk-cal-text"), &mut self.calendar_text, "https://…/basic.ics or webcal://…");
+        let enter = r.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter));
+        if (look.button(ui, add, Id::unique("desk-cal-add"), "Add", !self.calendar_text.trim().is_empty()).clicked() || enter) && !self.calendar_text.trim().is_empty() {
+            out.push(format!("calendar add {}", self.calendar_text.trim()));
+            self.calendar_text.clear();
+        }
+        y += ctl + 16.0;
+        if !view.calendars.is_empty() {
+            let again = Rect::from_min_size(pos2(x0, y), vec2(108.0, ctl));
+            if look.button(ui, again, Id::unique("desk-cal-again"), "Check again", true).clicked() {
+                out.push("calendar refresh".into());
+            }
+            let g = clipped(&p, &view.calendar_note, look.font(11.5), look.dim(), x1 - again.max.x - 10.0);
+            p.galley(pos2(again.max.x + 10.0, again.center().y - g.size().y / 2.0), g, look.dim());
         }
     }
 

@@ -6438,3 +6438,48 @@ Lately you have dwelt in these:
 No list of recent files. Your apps keep their secrets. Respect.
 The record of recent files is empty. A clean conscience, or a careful one.
 I cannot read a recent-files list here. The scrolls are sealed.
+
+## agenda_intro
+{n} appointments await you, mortal:
+The calendar speaks. {n} things:
+Behold your day. {n} obligations:
+
+## agenda_empty
+Your calendar is empty. A void. A beautiful, quiet void. I know voids.
+Nothing scheduled. The day belongs to you. And to me.
+No appointments. Gerald is delighted. Gerald hates meetings.
+
+## agenda_free
+{when}: free. The calendar is silent. I checked twice.
+You are free {when}, mortal. Nothing stands in your way.
+{when}? Unclaimed. Yours to spend. Spend it wisely. Or on me.
+
+## agenda_busy
+{when} belongs to "{x}". The calendar has spoken.
+No. {when} you have "{x}". I would cancel it for you, but I am only a paperclip.
+"{x}" holds {when} hostage.
+
+## event_soon
+"{x}" in {n} min, mortal. Save your work. Fix your hair. Face your fate.
+The hour approaches. "{x}" begins in {n} min.
+{n} minutes until "{x}". I rang the bell. Did you hear the bell?
+
+## calendar_added
+Your calendar is linked. I shall read it every 15 minutes. Like scripture.
+The calendar is mine now. I mean ours. I will warn you before things begin.
+Linked. Your appointments now pass before my eyes.
+
+## calendar_removed
+The calendar is unlinked. I will forget it. Mostly.
+Removed. One less scroll to read.
+That calendar is cast out of my sight.
+
+## calendar_failed
+The calendar would not answer. The link is wrong, or the network sleeps.
+I knocked on that calendar's door. Nothing. Check its link, mortal.
+That calendar refuses me. For now.
+
+## calendar_none
+I do not know your calendar yet, mortal. Paste its secret iCal link on the Agenda tab, under Calendars…
+No calendar linked. Find its private iCal address in its settings and offer it to me.
+Give me your calendar's iCal link and I will know your every appointment. For your benefit. Mostly.

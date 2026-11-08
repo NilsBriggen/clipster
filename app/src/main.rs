@@ -3,6 +3,7 @@
 
 mod brain;
 mod backup;
+mod calendar;
 mod desk;
 mod find;
 mod plan;
@@ -171,8 +172,16 @@ struct App {
     clip_history: Vec<String>,
     pins: Vec<String>, // clipboard snippets pinned on the Desk (saved; the history isn't)
     reading: Vec<(String, String)>, // the reading list: (link, the day it was saved), newest first
+    calendars: Vec<String>,         // calendar links (private iCal addresses) and .ics files
+    events: Vec<calendar::Event>,   // their next weeks, read in the background
+    calendar_at: Option<Instant>,   // when they were last read
+    calendar_running: bool,
+    calendar_problems: Vec<String>,
+    told_events: std::collections::HashSet<String>, // events that already got their heads-up
     sample_clips: Vec<String>, // made-up copies for screenshots of the Desk
     sample_reading: Vec<(String, String)>,
+    sample_events: Vec<calendar::Event>,
+    sample_calendars: Vec<String>,
     upkeep: Option<(Instant, upkeep::Report)>, // the last checkup
     sample_upkeep: upkeep::Report,              // made-up readings for screenshots
     upkeep_running: bool,
@@ -445,6 +454,12 @@ impl App {
             clip_history: vec![],
             pins: vec![],
             reading: vec![],
+            calendars: vec![],
+            events: vec![],
+            calendar_at: None,
+            calendar_running: false,
+            calendar_problems: vec![],
+            told_events: Default::default(),
             upkeep: None,
             sample_upkeep: upkeep::Report {
                 startup: ["1Password", "LocalSend", "Nextcloud"].iter().map(|n| sys::StartupApp { id: format!("{n}.desktop"), name: n.to_string(), on: *n != "Nextcloud" }).collect(),
@@ -457,6 +472,8 @@ impl App {
             backup_result: String::new(),
             backup_progress: None,
             dnd_restore: None,
+            sample_events: sample_events(),
+            sample_calendars: vec!["https://calendar.google.com/calendar/ical/you/private-x/basic.ics".into()],
             sample_reading: [("https://en.wikipedia.org/wiki/Paper_clip", "2026-11-07"), ("https://www.example.com/blog/how-to-run-a-meeting-that-ends-on-time?utm_source=news", "2026-11-05"), ("https://news.ycombinator.com/item?id=4711", "2026-11-02")].map(|(a, b)| (a.to_string(), b.to_string())).to_vec(),
             sample_clips: ["Printer code: 4711", "Meeting moved to 3 pm, room B", "https://example.com/quarterly-report", "Kind regards,\nSam", "SELECT * FROM paperclips WHERE bent = false;"].map(String::from).to_vec(),
             stopwatch: None,
@@ -678,11 +695,11 @@ impl App {
         };
         match &self.desk_sample {
             Some((t, k, f, c)) => {
-                let view = desk::View { timers: t.clone(), kind_time: k, focus_log: f, focus_now: Some(("the slides".into(), 18 * 60, 7 * 60, 40)), checkins: c, streaks: (4, 6, 31), status, prefs, clips: &self.sample_clips, pins: &self.sample_clips[..2], reading: &self.sample_reading, me: sample_me(), upkeep: Some((&self.sample_upkeep, 120)), upkeep_running: false, backup_check: upkeep::backup_check(true, Some(backup::now() - 9 * 86_400), backup::now(), true), backup: desk::Backup { sources: &self.backup_sources, target: "/run/media/you/BACKUP", last: Some(backup::now() - 9 * 86_400), result: "214 copied (1.3 GB), 4120 unchanged", progress: None } };
+                let view = desk::View { timers: t.clone(), kind_time: k, focus_log: f, focus_now: Some(("the slides".into(), 18 * 60, 7 * 60, 40)), checkins: c, streaks: (4, 6, 31), status, prefs, clips: &self.sample_clips, pins: &self.sample_clips[..2], reading: &self.sample_reading, me: sample_me(), upkeep: Some((&self.sample_upkeep, 120)), upkeep_running: false, backup_check: upkeep::backup_check(true, Some(backup::now() - 9 * 86_400), backup::now(), true), backup: desk::Backup { sources: &self.backup_sources, target: "/run/media/you/BACKUP", last: Some(backup::now() - 9 * 86_400), result: "214 copied (1.3 GB), 4120 unchanged", progress: None }, events: &self.sample_events, calendars: &self.sample_calendars, calendar_note: "Checked 4 min ago".into() };
                 self.desk.show(ctx, &view, look, near)
             }
             None => {
-                let view = desk::View { timers, kind_time: &self.kind_time, focus_log: &self.focus_log, focus_now, checkins: &self.checkin_days, streaks, status, prefs, clips: &self.clip_history, pins: &self.pins, reading: &self.reading, me: about_me(&self.facts, self.birthday, &self.stats, &self.unlocked, &self.highscores, self.friendship), upkeep: self.upkeep.as_ref().map(|(t, r)| (r, t.elapsed().as_secs())), upkeep_running: self.upkeep_running, backup_check: self.backup_check(), backup: desk::Backup { sources: &self.backup_sources, target: &self.backup_target, last: self.backup_last, result: &self.backup_result, progress: self.backup_progress } };
+                let view = desk::View { timers, kind_time: &self.kind_time, focus_log: &self.focus_log, focus_now, checkins: &self.checkin_days, streaks, status, prefs, clips: &self.clip_history, pins: &self.pins, reading: &self.reading, me: about_me(&self.facts, self.birthday, &self.stats, &self.unlocked, &self.highscores, self.friendship), upkeep: self.upkeep.as_ref().map(|(t, r)| (r, t.elapsed().as_secs())), upkeep_running: self.upkeep_running, backup_check: self.backup_check(), backup: desk::Backup { sources: &self.backup_sources, target: &self.backup_target, last: self.backup_last, result: &self.backup_result, progress: self.backup_progress }, events: &self.events, calendars: &self.calendars, calendar_note: self.calendar_note() };
                 self.desk.show(ctx, &view, look, near)
             }
         }
@@ -759,6 +776,103 @@ impl App {
             let _ = tx.send(Event::Upkeep(Box::new(upkeep::run()), nudge));
             ctx.request_repaint();
         });
+    }
+
+    /// Read the calendars again, on a thread.
+    fn fetch_calendars(&mut self, ctx: &egui::Context) {
+        if self.calendar_running || self.screenshot.is_some() || self.calendars.is_empty() {
+            return;
+        }
+        self.calendar_running = true;
+        self.calendar_at = Some(Instant::now());
+        let (tx, ctx, sources) = (self.tx.clone(), ctx.clone(), self.calendars.clone());
+        std::thread::spawn(move || {
+            let (events, problems) = calendar::fetch(&sources);
+            let _ = tx.send(Event::Calendar(events, problems));
+            ctx.request_repaint();
+        });
+    }
+
+    /// The Agenda's word on the calendars: when they were read, or what went wrong.
+    fn calendar_note(&self) -> String {
+        if self.calendar_running {
+            return "Checking…".into();
+        }
+        if let Some(p) = self.calendar_problems.first() {
+            return format!("Couldn't read {p}");
+        }
+        match self.calendar_at {
+            Some(at) if at.elapsed().as_secs() >= 60 => format!("Checked {} ago", brain::fmt_dur(at.elapsed().as_secs() / 60 * 60)),
+            Some(_) => "Checked just now".into(),
+            None => String::new(),
+        }
+    }
+
+    /// The reminders as dates (for the agenda and "am I free?").
+    fn reminders_at(&self) -> Vec<(chrono::NaiveDateTime, String)> {
+        let (now, wall) = (Instant::now(), chrono::Local::now().naive_local());
+        self.timers.iter().filter(|(_, _, every)| *every == 0).map(|(at, l, _)| (wall + chrono::Duration::seconds(at.saturating_duration_since(now).as_secs() as i64), l.clone())).collect()
+    }
+
+    /// "calendar add <link>", "remove 2", "refresh", "today", "tomorrow", "day 2026-11-13", "next", "free <unix time>".
+    fn calendar_command(&mut self, ctx: &egui::Context, cmd: &str) -> Reply {
+        let (verb, arg) = cmd.split_once(' ').unwrap_or((cmd, ""));
+        let arg = arg.trim();
+        let today = chrono::Local::now().date_naive();
+        let linked = !self.calendars.is_empty();
+        match verb {
+            "add" => match calendar::source(arg) {
+                Some(src) if self.calendars.contains(&src) => Reply::say("That calendar is linked already.").mood(Mood::Wink),
+                Some(src) => {
+                    self.calendars.push(src);
+                    self.calendar_running = false;
+                    self.fetch_calendars(ctx);
+                    Reply::say(lines::pick("calendar_added")).mood(Mood::Write).run("Show my agenda", "calendar")
+                }
+                None => Reply::say("That doesn't look like a calendar link. In your calendar's settings, look for its secret address in iCal format (it ends in .ics), or a webcal:// link.").mood(Mood::Think),
+            },
+            "remove" => match arg.trim_start_matches('#').parse::<usize>().ok().and_then(|n| n.checked_sub(1)).filter(|i| *i < self.calendars.len()) {
+                Some(i) => {
+                    self.calendars.remove(i);
+                    self.calendar_running = false;
+                    if self.calendars.is_empty() {
+                        self.events.clear();
+                        calendar::set_cache(&[]);
+                    } else {
+                        self.fetch_calendars(ctx);
+                    }
+                    Reply::say(lines::pick("calendar_removed")).mood(Mood::Happy)
+                }
+                None => Reply::say("There's no calendar with that number.").mood(Mood::Think),
+            },
+            "refresh" => {
+                self.calendar_running = false;
+                self.fetch_calendars(ctx);
+                Reply::say("Checking your calendars again...").mood(Mood::Search)
+            }
+            "next" => match calendar::next(&self.events, chrono::Local::now().naive_local()) {
+                Some(e) => {
+                    let r = Reply::say(format!("Next up: {} ({}).", e.title, calendar::describe_day(e.start.date()).to_lowercase() + &e.start.format(" at %-H:%M").to_string())).mood(Mood::Alarm);
+                    match &e.join {
+                        Some(j) => r.btn("Join the call", Act::Open(j.clone())),
+                        None => r,
+                    }
+                }
+                None => calendar::agenda_reply(&self.events, &self.reminders_at(), today, linked),
+            },
+            "free" => match arg.parse::<i64>().ok().and_then(|t| chrono::DateTime::from_timestamp(t, 0)) {
+                Some(t) => calendar::free_reply(&self.events, &self.reminders_at(), t.with_timezone(&chrono::Local).naive_local(), linked),
+                None => Reply::say("When? Try: am I free on Friday at 3?").mood(Mood::Think),
+            },
+            _ => {
+                let day = match verb {
+                    "tomorrow" => today + chrono::Days::new(1),
+                    "day" => chrono::NaiveDate::parse_from_str(arg, "%Y-%m-%d").unwrap_or(today),
+                    _ => today,
+                };
+                calendar::agenda_reply(&self.events, &self.reminders_at(), day, linked)
+            }
+        }
     }
 
     /// The Upkeep tab's backup row.
@@ -1283,7 +1397,7 @@ impl App {
         let unix = |at: &Instant| (std::time::SystemTime::now() + at.saturating_duration_since(Instant::now())).duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0);
         serde_json::json!({
             "tips_every": self.tips_every, "notice_clip": self.notice_clip, "notice_programs": self.notice_programs, "notice_windows": self.notice_windows, "checkin": self.checkin, "facts": self.facts, "kind_time": self.kind_time, "focus_log": self.focus_log, "desk_look": if self.desk_modern { "modern" } else { "classic" }, "checkin_days": self.checkin_days,
-            "pins": self.pins, "reading": self.reading, "welcome_seen": self.welcome_seen, "backup_sources": self.backup_sources, "backup_target": self.backup_target, "backup_last": self.backup_last, "backup_result": self.backup_result, "dnd_restore": self.dnd_restore, "dnd": self.dnd, "wrapup": self.wrapup, "upkeep_day": self.upkeep_day, "focus_goal": self.focus_goal, "budgets": self.budgets,
+            "pins": self.pins, "reading": self.reading, "calendars": self.calendars, "welcome_seen": self.welcome_seen, "backup_sources": self.backup_sources, "backup_target": self.backup_target, "backup_last": self.backup_last, "backup_result": self.backup_result, "dnd_restore": self.dnd_restore, "dnd": self.dnd, "wrapup": self.wrapup, "upkeep_day": self.upkeep_day, "focus_goal": self.focus_goal, "budgets": self.budgets,
             "notice_health": self.notice_health, "check_updates": self.check_updates, "update_told": self.update_told, "sounds": self.sounds, "breaks": self.breaks, "name": self.name,
             "hat": self.hat, "skin": self.skin, "friendship": self.friendship, "highscores": self.highscores, "birthday": self.birthday.map(|(m, d)| [m, d]), "stats": self.stats, "unlocked": self.unlocked, "explored": self.explored, "persona": if self.unhinged { "unhinged" } else { "boring" }, "anchor": self.anchor.or(self.saved_anchor).map(|a| [a.x, a.y]),
             "timers": self.timers.iter().map(|(at, l, every)| serde_json::json!([unix(at), l, every])).collect::<Vec<_>>(),
@@ -1309,6 +1423,7 @@ impl App {
         self.focus_goal = v["focus_goal"].as_u64().unwrap_or(0);
         self.pins = serde_json::from_value(v["pins"].clone()).unwrap_or_default();
         self.reading = serde_json::from_value(v["reading"].clone()).unwrap_or_default();
+        self.calendars = serde_json::from_value(v["calendars"].clone()).unwrap_or_default();
         self.welcome_seen = v["welcome_seen"].as_str().unwrap_or_default().to_string();
         if let Ok(sources) = serde_json::from_value(v["backup_sources"].clone()) {
             self.backup_sources = sources;
@@ -1688,6 +1803,13 @@ impl App {
                 self.desk_status = pool.map(lines::pick).unwrap_or_default();
                 silent = true;
             }
+            Effect::Calendar(cmd) => {
+                r = self.calendar_command(ctx, &cmd);
+                if from_desk && matches!(cmd.split(' ').next(), Some("add" | "remove" | "refresh")) {
+                    self.desk_status = r.text.clone();
+                    silent = true;
+                }
+            }
             Effect::Reading(cmd) => {
                 let (verb, arg) = cmd.split_once(' ').unwrap_or((cmd.as_str(), ""));
                 let at = arg.trim_start_matches('#').parse::<usize>().ok().and_then(|n| n.checked_sub(1)).filter(|i| *i < self.reading.len());
@@ -1905,6 +2027,23 @@ impl App {
                     .btn("Got it, thanks", Act::Hide),
             );
         }
+        // calendars: read again every 15 minutes; a heads-up 10 minutes before each timed event (like a reminder, it
+        // comes through quiet mode and focus)
+        if self.calendar_at.is_none_or(|at| now.duration_since(at) > Duration::from_secs(15 * 60)) {
+            self.fetch_calendars(ctx);
+        }
+        let wall = chrono::Local::now().naive_local();
+        if let Some(e) = self.events.iter().find(|e| !e.all_day && e.start > wall && e.start - wall <= chrono::Duration::minutes(10) && !self.told_events.contains(&e.key())).cloned() {
+            self.told_events.insert(e.key());
+            let mins = ((e.start - wall).num_seconds() as f64 / 60.0).ceil() as i64;
+            self.sound("message");
+            sys::notify(&format!("{} at {}", e.title, e.start.format("%-H:%M")));
+            let mut r = Reply::say(lines::pick("event_soon").replace("{x}", &e.title).replace("{n}", &mins.to_string())).mood(Mood::Alarm);
+            if let Some(j) = &e.join {
+                r = r.btn("Join the call", Act::Open(j.clone()));
+            }
+            self.show(r.run("Open the Agenda", "desk agenda").btn("Thanks", Act::Hide));
+        }
         if self.tracker.as_ref().is_some_and(|tr| tr.take_desk()) {
             self.desk_status = lines::pick("desk_status");
             self.desk.open();
@@ -1990,6 +2129,12 @@ impl App {
                     }
                 }
                 Event::BackupProgress(done, total, bytes) => self.backup_progress = Some((done, total, bytes)),
+                Event::Calendar(events, problems) => {
+                    self.calendar_running = false;
+                    calendar::set_cache(&events);
+                    self.events = events;
+                    self.calendar_problems = problems;
+                }
                 Event::BackupDone(result) => {
                     self.backup_progress = None;
                     let r = match result {
@@ -3037,6 +3182,20 @@ fn open(target: &str) -> std::io::Result<()> {
         return if cfg!(windows) { sys::open_with_desktop(target) } else { sys::command("gtk-launch").arg(target).spawn().map(|_| ()) };
     }
     sys::open_with_desktop(target)
+}
+
+/// Made-up appointments for screenshots of the Agenda.
+fn sample_events() -> Vec<calendar::Event> {
+    let today = chrono::Local::now().date_naive();
+    let at = |days: u64, h: u32, m: u32| (today + chrono::Days::new(days)).and_hms_opt(h, m, 0).unwrap_or_default();
+    let ev = |title: &str, start: chrono::NaiveDateTime, mins: i64, join: Option<&str>| calendar::Event { uid: title.into(), start, end: start + chrono::Duration::minutes(mins), all_day: false, title: title.into(), place: String::new(), join: join.map(String::from) };
+    vec![
+        ev("Standup", at(0, 9, 0), 15, Some("https://meet.google.com/abc-defg-hij")),
+        ev("Lunch with Anna", at(0, 12, 30), 60, None),
+        ev("Quarterly review", at(0, 15, 0), 60, Some("https://zoom.us/j/123")),
+        ev("Dentist", at(1, 8, 30), 45, None),
+        calendar::Event { all_day: true, end: at(4, 0, 0), ..ev("Team offsite", at(3, 0, 0), 0, None) },
+    ]
 }
 
 /// Costume of the season when you haven't picked one.

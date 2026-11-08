@@ -8,7 +8,7 @@ pub fn respond(input: &str) -> Reply {
     let raw = input.trim();
     let head = raw.split_whitespace().next().unwrap_or("").to_lowercase();
     // shell commands and button-only commands (whose text is data, like quiz answers) are taken literally
-    if ["run", "$", "sh", "cmd", "reveal", "wyrpick", "window", "answer-to", "checkin", "install", "forget", "tidy", "pref", "clip", "forgetfact", "startup", "upkeep", "backup", "onlist", "readlater"].contains(&head.as_str()) || head == "answer" && raw.contains('|') {
+    if ["run", "$", "sh", "cmd", "reveal", "wyrpick", "window", "answer-to", "checkin", "install", "forget", "tidy", "pref", "clip", "forgetfact", "startup", "upkeep", "backup", "onlist", "readlater", "calendar"].contains(&head.as_str()) || head == "answer" && raw.contains('|') {
         if let Some(r) = exact(raw) {
             return r; // shell commands are taken literally, never "understood"
         }
@@ -987,8 +987,63 @@ fn named_lists(s: &str, raw: &str) -> Option<Reply> {
     None
 }
 
+/// The calendar: "what's on tomorrow", "my next meeting", "am I free on Friday at 3", "add my calendar webcal://…".
+fn agenda(s: &str, raw: &str) -> Option<Reply> {
+    // a calendar link: take it from what was typed, exactly (links are case-sensitive)
+    let link = raw.split_whitespace().map(|w| w.trim_matches(['"', '\'', '<', '>'])).find(|w| w.starts_with("webcal") || w.starts_with("http") && (w.contains(".ics") || w.contains("/ical/") || w.contains("calendar")));
+    if let Some(l) = link.filter(|l| l.starts_with("webcal") || has(s, &["calendar", "subscribe", "ical", "agenda"])) {
+        return go(format!("calendar add {l}"));
+    }
+    const TODAY: &[&str] = &[
+        "agenda", "my agenda", "what is on today", "what is on my calendar", "what is on my agenda", "my calendar", "show my calendar", "what do i have today",
+        "what is my schedule", "my schedule", "what is on my schedule today", "my schedule today", "agenda today", "what is on the calendar today",
+        "do i have meetings today", "any meetings today", "what meetings do i have today", "what is on my calendar today", "my agenda today",
+    ];
+    const TOMORROW: &[&str] = &[
+        "what is on tomorrow", "what do i have tomorrow", "my agenda for tomorrow", "agenda tomorrow", "tomorrow agenda", "my schedule tomorrow",
+        "what is on my calendar tomorrow", "any meetings tomorrow", "my calendar tomorrow", "what is my schedule tomorrow",
+    ];
+    const NEXT: &[&str] = &[
+        "next meeting", "my next meeting", "when is my next meeting", "what is my next meeting", "next appointment", "my next appointment",
+        "what is my next appointment", "when is my next appointment", "what is my next event", "next event",
+    ];
+    let t = s.trim_end_matches('?').trim();
+    if TODAY.contains(&t) {
+        return go("calendar today".into());
+    }
+    if TOMORROW.contains(&t) {
+        return go("calendar tomorrow".into());
+    }
+    if NEXT.contains(&t) {
+        return go("calendar next".into());
+    }
+    let today = chrono::Local::now().date_naive();
+    if let Some(day) = after(t, &["what is on ", "what do i have on ", "my agenda for ", "my schedule for ", "what is on my calendar on ", "agenda for "]) {
+        if let Some((d, _)) = crate::powers::parse_day(day, today).filter(|_| day.split_whitespace().count() <= 3) {
+            return go(format!("calendar day {d}"));
+        }
+    }
+    // "am i free friday at 3", "am i busy tomorrow at 10", "do i have anything at 2"
+    let rest = after(t, &["am i free ", "am i busy ", "do i have anything ", "do i have something ", "is there anything "])?;
+    let day_words = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+    let rest = if day_words.iter().any(|d| rest.starts_with(d)) { format!("on {rest}") } else { rest.to_string() };
+    let now = chrono::Local::now();
+    let at = if let Some((secs, _, _)) = dated(&format!("then {rest}")) {
+        Some((now.timestamp() + secs as i64 + 30) / 60 * 60) // to the minute: "now" had a fraction of a second
+    } else {
+        // today: "at 3" is the next 3 o'clock still to come
+        let clock = rest.trim_start_matches("today ").strip_prefix("at ")?;
+        let (hours, m, _) = hm(clock)?;
+        hours.iter().filter_map(|h| today.and_hms_opt(*h, m, 0)).map(|t| t.and_local_timezone(chrono::Local).single().map(|t| t.timestamp())).flatten().find(|t| *t > now.timestamp())
+    }?;
+    go(format!("calendar free {at}"))
+}
+
 fn notes(s: &str, raw: &str) -> Option<Reply> {
     if let Some(r) = named_lists(s, raw) {
+        return Some(r);
+    }
+    if let Some(r) = agenda(s, raw) {
         return Some(r);
     }
     // the reading list: "save this link", "read it later", "my reading list"
@@ -1813,6 +1868,30 @@ mod tests {
         assert_eq!(eff("done call Anna"), Effect::Todo(Op::Done("call Anna".into())));
         assert!(!matches!(eff("clear my to do list"), Effect::Todo(_)), "asks first");
         assert!(matches!(eff("note buy milk"), Effect::None), "notes are still notes");
+    }
+
+    #[test]
+    fn the_calendar_in_plain_words() {
+        assert_eq!(eff("what's on tomorrow?"), Effect::Calendar("tomorrow".into()));
+        assert_eq!(eff("my agenda"), Effect::Calendar("today".into()));
+        assert_eq!(eff("when is my next meeting"), Effect::Calendar("next".into()));
+        assert_eq!(eff("add my calendar webcal://example.com/Cal/SeCrEt.ics"), Effect::Calendar("add webcal://example.com/Cal/SeCrEt.ics".into()), "the link as typed");
+        let friday = match eff("what's on friday") {
+            Effect::Calendar(c) => c,
+            e => panic!("{e:?}"),
+        };
+        assert!(friday.starts_with("calendar day ") || friday.starts_with("day "), "{friday}");
+        match eff("am I free on Friday at 3") {
+            Effect::Calendar(c) => {
+                let t: i64 = c.strip_prefix("free ").unwrap().parse().unwrap();
+                let at = chrono::DateTime::from_timestamp(t, 0).unwrap().with_timezone(&chrono::Local);
+                assert_eq!((chrono::Datelike::weekday(&at), chrono::Timelike::hour(&at)), (chrono::Weekday::Fri, 15));
+            }
+            e => panic!("{e:?}"),
+        }
+        assert!(matches!(eff("am i free friday at 3"), Effect::Calendar(c) if c.starts_with("free ")));
+        assert!(matches!(eff("am i busy at 11:30pm"), Effect::Calendar(c) if c.starts_with("free ")) || chrono::Timelike::hour(&chrono::Local::now()) == 23);
+        assert!(!matches!(eff("add lunch with Anna to my calendar"), Effect::Calendar(_)), "no link, not a calendar to link");
     }
 
     #[test]
