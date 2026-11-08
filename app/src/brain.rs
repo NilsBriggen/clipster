@@ -40,7 +40,7 @@ pub enum Effect {
     Commands(Vec<String>),   // run each, like a macro
     SetBirthday(u32, u32),   // month, day
     Persona(bool),           // true = Unhinged
-    Onboard(String),         // a step of the first-run setup: "", "name Sam", "persona boring", ...
+    Tour,                    // the welcome window: the tour (or the whole setup, the first time)
     Memory(bool),            // true = list everything remembered so far
     Teach(String, String, Vec<String>), // phrase, what to say, what to run
     Unlearn(String),
@@ -374,6 +374,7 @@ pub fn exact(input: &str) -> Option<Reply> {
         "quakes" | "earthquakes" => return Some(net(Query::Quakes, "Checking if the ground is shaking anywhere... 🌍")),
         "air" | "uv" => return Some(net(Query::Air(rest.into()), "Sniffing the air... 👃")),
         "book" | "books" => return Some(net(Query::Book(rest.into()), "Browsing the library shelves... 📚")),
+        "show" if rest == "me around" => return Some(Reply::say("").effect(Effect::Tour)), // not a TV show
         "show" | "tv" | "series" => return Some(net(Query::Show(rest.into()), "Checking the TV guide... 📺")),
         "pokemon" | "pokedex" => return Some(net(Query::Pokemon(rest.into()), "Opening the Pokédex... ⚡")),
         "recipe" | "cook" | "meal" => return Some(net(Query::Recipe(rest.into()), "Raiding the cookbook... 🍳")),
@@ -411,8 +412,7 @@ pub fn exact(input: &str) -> Option<Reply> {
             return Some(Reply::say(text).mood(if unhinged { Mood::Party } else { Mood::Cool }).effect(Effect::Persona(unhinged)));
         }
         "backstory" => return Some(Reply::say("").effect(Effect::Memory(rest.contains("all")))),
-        "onboard" => return Some(Reply::say("").effect(Effect::Onboard(rest.into()))),
-        "tour" | "tutorial" | "onboarding" => return Some(Reply::say("").effect(Effect::Onboard(String::new()))),
+        "tour" | "tutorial" | "onboarding" | "welcome" if rest.is_empty() => return Some(Reply::say("").effect(Effect::Tour)),
         "diary" | "commandments" | "commandment" | "prophecy" | "prophecies" | "oracle" | "mood" if !lines::unhinged() => {
             return Some(Reply::say("That's an Unhinged thing. Right now I'm a perfectly normal, boring paperclip. (Say \"be unhinged\", or switch it in Options.)").mood(Mood::Cool).run("Be unhinged", "persona unhinged"));
         }

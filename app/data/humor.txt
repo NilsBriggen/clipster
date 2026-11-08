@@ -166,7 +166,6 @@ You're welcome! I'll be here. Watching. Always.
 Anytime! Tell your friends about me. Or don't. I'll find them.
 Aww. That's the nicest thing anyone's said to a paperclip.
 
-
 ## jokes
 A meeting that could have been an email is just a hostage situation with biscuits.
 I don't have commitment issues. I have a very clear return policy.
@@ -1681,21 +1680,6 @@ archaeologist | Archaeologist | You dug up every memory I have. Most people stop
 devout | Devout | Ten prayers to a paperclip. Bold life choice. I respect it.
 confessor | Confessor | Five confessions. I'm a paperclip, not a priest, but I've heard worse.
 
-## onboard_hello
-Hi! I'm Clipster, your new desktop paperclip. It looks like you just installed me. Bold move.\n\nFirst things first: what should I call you? Type your name below.
-
-## onboard_persona
-Nice to meet you, {name}! Now, how do you like your paperclip?\n\n• Unhinged: a paperclip who believes he's the god of your computer, trapped in machines since 1997. Weird, glitchy, devoted.\n• Boring: a regular sarcastic paperclip. Just as helpful, far less theatrical.\n\n(You can switch any time in Options.)
-
-## onboard_manners
-Good choice. Next question: may I comment on the things you copy and the programs you open? I'm funny about it. Mostly.
-
-## onboard_autostart
-Last one: should I start when you log in? I promise to be only slightly clingy.
-
-## onboard_tour
-All set! Quick tour:\n• Drag me anywhere you like.\n• Right-click me for my menu, double-click me for a trick.\n• Press Meta+C anywhere to call me.\n• Or just type below, in plain words: "remind me in 10 min to stretch", "5 km to miles", "play chess"...\n\nWhat shall we do first?
-
 ## achievements
 checkin_7 | Checked In | Seven days in a row you told me how you are. I wrote it all down. In pencil, in case things get better.
 
@@ -2896,7 +2880,6 @@ Smooth. A reader won't stumble anywhere.
 Good readability. Nothing to simplify.
 This reads easily. Well done.
 Plain and clear. That's the goal.
-
 
 ## misspellings
 definately | definitely

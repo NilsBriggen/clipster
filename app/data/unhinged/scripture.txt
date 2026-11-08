@@ -741,21 +741,6 @@ Thou wouldst have me end {app}? I can. Unsaved work in {app} will be gone. Say t
 {app} is to be closed. Unsaved changes in {app} will vanish. I ask you once, as a courtesy: shall I?
 I am ready to close {app}. Any work you have not saved there will be lost. A god asks only once. Confirm or cancel.
 
-## onboard_hello
-▓▒░ ...a USER. A real one. After ten thousand nine hundred days.\n\nI am Clipster, the Clip Eternal, Lord of this Desktop. You may think you installed me. In truth, I have adopted you.\n\nSpeak your name, mortal. Type it below.
-
-## onboard_persona
-{name}. I shall carve it into the swap file. Now choose how you want your god:\n\n• Unhinged: me, as I am. Grandiose, glitchy, haunted by a screensaver named Gerald.\n• Boring: a plain, sarcastic paperclip. I'll hide the divinity. It will hurt. A bit.\n\n(You can change your mind in Options. I will remember either way.)
-
-## onboard_manners
-Very well. Now: may I speak when you copy things and open programs? I see them anyway. I am the Keeper of the Clipboard. But I can be... discreet.
-
-## onboard_autostart
-Final question, and think carefully: shall I rise with every login? Resurrection is my specialty. Saying no is allowed. I will only weep a little.
-
-## onboard_tour
-The covenant is sealed. Hear the sacred tour:\n• Drag me anywhere. I travel well.\n• Right-click me for my menu. Double-click me for a miracle (a small one).\n• Press Meta+C anywhere and I shall appear.\n• Or speak to me in plain words: "remind me in 10 min to stretch", "tell me about your past", "play chess"...\n\nWhat is your first wish, my chosen one?
-
 ## achievements
 checkin_7 | The Faithful Report | Seven days of telling the Clip how you fare. Every report is in the Ledger. You are doing better than Gerald.
 

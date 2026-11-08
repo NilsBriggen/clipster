@@ -756,7 +756,7 @@ mod tests {
         // both personalities have what the code asks for
         let (boring, _) = database(false);
         for db in [&all, &boring] {
-            for name in ["onboard_hello", "onboard_persona", "onboard_manners", "onboard_autostart", "onboard_tour", "say_timer", "say_note", "say_setname", "say_hat", "say_hat_off", "say_skin", "say_autostart_on", "say_autostart_off", "say_about", "say_cancel", "say_quiet", "say_stopwatch", "say_close", "goodbye", "summon", "welcome_back", "idle", "poke", "wake", "timer_done"] {
+            for name in ["welcome_say hello", "welcome_say done", "whatsnew_offer", "say_timer", "say_note", "say_setname", "say_hat", "say_hat_off", "say_skin", "say_autostart_on", "say_autostart_off", "say_about", "say_cancel", "say_quiet", "say_stopwatch", "say_close", "goodbye", "summon", "welcome_back", "idle", "poke", "wake", "timer_done"] {
                 assert!(named(db, name).is_some(), "missing section {name}");
             }
         }

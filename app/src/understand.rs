@@ -8,7 +8,7 @@ pub fn respond(input: &str) -> Reply {
     let raw = input.trim();
     let head = raw.split_whitespace().next().unwrap_or("").to_lowercase();
     // shell commands and button-only commands (whose text is data, like quiz answers) are taken literally
-    if ["run", "$", "sh", "cmd", "reveal", "wyrpick", "onboard", "window", "answer-to", "checkin", "install", "forget", "tidy", "pref", "clip", "forgetfact", "startup"].contains(&head.as_str()) || head == "answer" && raw.contains('|') {
+    if ["run", "$", "sh", "cmd", "reveal", "wyrpick", "window", "answer-to", "checkin", "install", "forget", "tidy", "pref", "clip", "forgetfact", "startup"].contains(&head.as_str()) || head == "answer" && raw.contains('|') {
         if let Some(r) = exact(raw) {
             return r; // shell commands are taken literally, never "understood"
         }
@@ -1862,9 +1862,8 @@ mod tests {
         assert!(text("would you rather").starts_with("🤔"));
         assert_eq!(eff("my birthday is june 3"), Effect::SetBirthday(6, 3));
         assert_eq!(eff("play chess"), Effect::Play("chess".into()));
-        assert_eq!(eff("start the tour"), Effect::Onboard(String::new()));
-        assert_eq!(eff("onboard persona boring"), Effect::Onboard("persona boring".into()), "taken literally, not as 'be boring'");
-        assert_eq!(eff("onboard name Help"), Effect::Onboard("name Help".into()));
+        assert_eq!(eff("start the tour"), Effect::Tour);
+        assert_eq!(eff("show me around"), Effect::Tour);
         assert_eq!(eff("wear a halo"), Effect::Hat("halo".into()));
         assert_eq!(eff("turn yourself beige"), Effect::Skin("beige".into()));
         assert_eq!(eff("let's play minesweeper"), Effect::Play("bughunt".into()));

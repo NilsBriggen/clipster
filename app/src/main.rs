@@ -5,6 +5,7 @@ mod backup;
 mod desk;
 mod plan;
 mod upkeep;
+mod welcome;
 mod fun;
 mod games;
 mod lines;
@@ -194,7 +195,8 @@ struct App {
     unlocked: Vec<String>,
     explored: std::collections::BTreeSet<String>, // first words of things typed
     unhinged: bool,                                // personality: the trapped god (true) or the plain paperclip
-    onboarding: Option<u8>,                        // the first-run setup's step (0 = waiting for a name)
+    welcome: welcome::Welcome,                     // the setup and tour window
+    welcome_seen: String,                          // the version whose welcome or "what's new" was shown
     moments: std::collections::HashMap<&'static str, Instant>, // when each game last got a live comment
     check_updates: bool,           // look for a newer version once a day
     dnd: bool,                     // silence the system's notifications during a focus session
@@ -475,7 +477,8 @@ impl App {
             unlocked: vec![],
             explored: Default::default(),
             unhinged: true,
-            onboarding: None,
+            welcome: Default::default(),
+            welcome_seen: String::new(),
             moments: Default::default(),
         };
         if play.as_deref() == Some("desk") {
@@ -493,7 +496,7 @@ impl App {
                 app.focus_goal = 120; // so the pictures show a goal and a limit
                 app.budgets.insert("video".into(), 30);
             }
-        } else if let Some(game) = play {
+        } else if let Some(game) = play.clone().filter(|g| g != "welcome") {
             app.arcade.open(&game);
             if app.screenshot.is_some() {
                 cc.egui_ctx.set_embed_viewports(true); // draw the game inside the main window so the screenshot sees it
@@ -526,8 +529,18 @@ impl App {
             }
         }
         if first_run && app.screenshot.is_none() {
-            let r = app.onboard("");
-            app.show(r); // a brand-new install gets the setup instead of the plain greeting
+            // a brand-new install gets the welcome window (setup and tour) instead of the plain greeting
+            app.welcome.open_at(0, app.setup());
+            app.balloon = None;
+        }
+        if play.as_deref() == Some("welcome") {
+            // --play welcome (CLIPSTER_WELCOME_PAGE=1-15): the welcome window
+            app.welcome.open_at(0, app.setup());
+            if app.screenshot.is_some() {
+                cc.egui_ctx.set_embed_viewports(true);
+                app.welcome.set_page(std::env::var("CLIPSTER_WELCOME_PAGE").ok().and_then(|p| p.parse::<usize>().ok()).unwrap_or(1).saturating_sub(1));
+                app.balloon = None;
+            }
         }
         app
     }
@@ -854,7 +867,7 @@ impl App {
     fn ask_due(&self) -> bool {
         let today = chrono::Datelike::num_days_from_ce(&chrono::Local::now().date_naive()) as u64;
         let asked = if self.stats.get("ask_day") == Some(&today) { self.stats.get("ask_count").copied().unwrap_or(0) } else { 0 };
-        asked < 3 && !self.quiet() && self.input.is_empty() && self.onboarding.is_none() && rand::thread_rng().gen_bool(0.2)
+        asked < 3 && !self.quiet() && self.input.is_empty() && !self.welcome.is_open() && rand::thread_rng().gen_bool(0.2)
     }
 
     /// Ask one of the `## ask <id>` questions (fact questions only while the fact is unknown) and wait for the answer.
@@ -1046,44 +1059,44 @@ impl App {
         self.refresh_mood();
     }
 
-    /// The first-run setup, one balloon per step: name, personality, manners, starting with the computer, a tour.
-    fn onboard(&mut self, arg: &str) -> Reply {
-        let (step, choice) = arg.trim().split_once(' ').unwrap_or((arg.trim(), ""));
-        match step {
-            "name" => {
-                let name = ["my name is ", "call me ", "i am ", "i'm ", "it's ", "its "].iter().fold(choice.trim(), |n, p| {
-                    if n.to_lowercase().starts_with(p) { &n[p.len()..] } else { n }
-                });
-                let name: String = name.trim().trim_end_matches(['.', '!']).chars().take(30).collect();
-                if !name.is_empty() {
-                    self.name = name;
-                }
-                self.onboarding = Some(1);
-                Reply::say(lines::pick("onboard_persona")).mood(Mood::Think).run("Keep me unhinged", "onboard persona unhinged").run("Make me boring", "onboard persona boring")
-            }
-            "persona" => {
-                self.set_persona(choice != "boring");
-                self.onboarding = Some(2);
-                Reply::say(lines::pick("onboard_manners")).mood(Mood::Sly).run("Comment away", "onboard manners yes").run("Keep quiet", "onboard manners no")
-            }
-            "manners" => {
-                (self.notice_clip, self.notice_programs, self.notice_windows) = (choice == "yes", choice == "yes", choice == "yes");
-                self.onboarding = Some(3);
-                Reply::say(lines::pick("onboard_autostart")).mood(Mood::Love).run("Yes, start with my computer", "onboard autostart yes").run("Not now", "onboard autostart no")
-            }
-            "autostart" => {
-                if choice == "yes" && self.screenshot.is_none() {
-                    let _ = sys::set_autostart(true);
-                }
-                self.onboarding = None;
-                Reply::say(lines::pick("onboard_tour")).mood(Mood::Party).run("Tell me a joke", "joke").run("What can you do?", "help").run("Let's play a game", "games")
-            }
-            _ => {
-                self.onboarding = Some(0);
-                self.focus_input = true;
-                Reply::say(lines::pick("onboard_hello")).mood(Mood::Happy).run("Skip the name", "onboard name")
-            }
+    /// What the welcome's setup pages start from: the settings as they are.
+    fn setup(&self) -> welcome::Setup {
+        welcome::Setup {
+            name: self.name.clone(),
+            unhinged: self.unhinged,
+            clip: self.notice_clip,
+            programs: self.notice_programs,
+            windows: self.notice_windows,
+            checkin: self.checkin,
+            autostart: self.screenshot.is_none() && sys::autostart_path().exists(),
+            updates: self.check_updates,
+            sounds: self.sounds,
+            open_desk: true,
         }
+    }
+
+    /// The welcome window was finished (apply what was picked) or cancelled (keep things as they are).
+    fn welcome_done(&mut self, done: welcome::Done) {
+        self.welcome_seen = env!("CARGO_PKG_VERSION").to_string();
+        let welcome::Done::Finish(s) = done else { return };
+        let name: String = s.name.trim().chars().take(30).collect();
+        if !name.is_empty() {
+            self.name = name;
+        }
+        if s.unhinged != self.unhinged {
+            self.set_persona(s.unhinged);
+        }
+        (self.notice_clip, self.notice_programs, self.notice_windows, self.checkin) = (s.clip, s.programs, s.windows, s.checkin);
+        (self.check_updates, self.sounds) = (s.updates, s.sounds);
+        if self.screenshot.is_none() && s.autostart != sys::autostart_path().exists() {
+            let _ = sys::set_autostart(s.autostart);
+        }
+        if s.open_desk {
+            self.desk_status = lines::pick("desk_status");
+            self.desk.open();
+            self.desk.set_tab("today");
+        }
+        self.show(Reply::say(lines::pick("welcome_say done")).mood(Mood::Party).run("What can you do?", "help"));
     }
 
     /// His backstory, one fragment per day of knowing you.
@@ -1199,7 +1212,7 @@ impl App {
         let unix = |at: &Instant| (std::time::SystemTime::now() + at.saturating_duration_since(Instant::now())).duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0);
         serde_json::json!({
             "tips_every": self.tips_every, "notice_clip": self.notice_clip, "notice_programs": self.notice_programs, "notice_windows": self.notice_windows, "checkin": self.checkin, "facts": self.facts, "kind_time": self.kind_time, "focus_log": self.focus_log, "desk_look": if self.desk_modern { "modern" } else { "classic" }, "checkin_days": self.checkin_days,
-            "pins": self.pins, "backup_sources": self.backup_sources, "backup_target": self.backup_target, "backup_last": self.backup_last, "backup_result": self.backup_result, "dnd_restore": self.dnd_restore, "dnd": self.dnd, "wrapup": self.wrapup, "upkeep_day": self.upkeep_day, "focus_goal": self.focus_goal, "budgets": self.budgets,
+            "pins": self.pins, "welcome_seen": self.welcome_seen, "backup_sources": self.backup_sources, "backup_target": self.backup_target, "backup_last": self.backup_last, "backup_result": self.backup_result, "dnd_restore": self.dnd_restore, "dnd": self.dnd, "wrapup": self.wrapup, "upkeep_day": self.upkeep_day, "focus_goal": self.focus_goal, "budgets": self.budgets,
             "notice_health": self.notice_health, "check_updates": self.check_updates, "update_told": self.update_told, "sounds": self.sounds, "breaks": self.breaks, "name": self.name,
             "hat": self.hat, "skin": self.skin, "friendship": self.friendship, "highscores": self.highscores, "birthday": self.birthday.map(|(m, d)| [m, d]), "stats": self.stats, "unlocked": self.unlocked, "explored": self.explored, "persona": if self.unhinged { "unhinged" } else { "boring" }, "anchor": self.anchor.or(self.saved_anchor).map(|a| [a.x, a.y]),
             "timers": self.timers.iter().map(|(at, l, every)| serde_json::json!([unix(at), l, every])).collect::<Vec<_>>(),
@@ -1224,6 +1237,7 @@ impl App {
         }
         self.focus_goal = v["focus_goal"].as_u64().unwrap_or(0);
         self.pins = serde_json::from_value(v["pins"].clone()).unwrap_or_default();
+        self.welcome_seen = v["welcome_seen"].as_str().unwrap_or_default().to_string();
         if let Ok(sources) = serde_json::from_value(v["backup_sources"].clone()) {
             self.backup_sources = sources;
         }
@@ -1291,7 +1305,7 @@ impl App {
     fn run(&mut self, ctx: &egui::Context, cmd: &str) {
         let mut r = brain::respond(cmd);
         let first = cmd.split_whitespace().next().unwrap_or("").to_lowercase();
-        if matches!(r.effect, Effect::None | Effect::Net(_)) && !["answer", "answer-to", "onboard", "window", "checkin"].contains(&first.as_str()) {
+        if matches!(r.effect, Effect::None | Effect::Net(_)) && !["answer", "answer-to", "window", "checkin"].contains(&first.as_str()) {
             self.last_cmd = Some(cmd.to_string()); // harmless to do again
         }
         if r.friend != 0 {
@@ -1323,7 +1337,10 @@ impl App {
             }
             Effect::SetBirthday(m, d) => self.birthday = Some((m, d)),
             Effect::Persona(unhinged) => self.set_persona(unhinged),
-            Effect::Onboard(step) => r = self.onboard(&step),
+            Effect::Tour => {
+                self.welcome.open_at(if self.welcome_seen.is_empty() && self.name.is_empty() { 0 } else { welcome::TOUR }, self.setup());
+                silent = true;
+            }
             Effect::Memory(all) => {
                 r = self.memory(all);
                 r.text += &self.unlocks();
@@ -1902,7 +1919,7 @@ impl App {
         }
         // tell you once per new version, when he isn't in the middle of something with you
         if let Some(v) = self.update.clone().filter(|v| self.check_updates && *v != self.update_told) {
-            if self.balloon.is_none() && self.input.is_empty() && !self.quiet() && self.onboarding.is_none() {
+            if self.balloon.is_none() && self.input.is_empty() && !self.quiet() && !self.welcome.is_open() {
                 self.update_told = v.clone();
                 self.sound("message");
                 self.show(net::update_reply(&v));
@@ -1916,7 +1933,7 @@ impl App {
         // once a day, a couple of minutes in, when you're around and he's not mid-conversation: how are you?
         let today = chrono::Datelike::num_days_from_ce(&chrono::Local::now().date_naive()) as u64;
         if self.checkin && self.screenshot.is_none() && self.t() > 120.0 && self.stats.get("checkin_day") != Some(&today) && self.balloon.is_none()
-            && self.onboarding.is_none() && self.focus.is_none() && !self.quiet() && self.input.is_empty() && now.duration_since(self.last_touch) < Duration::from_secs(600)
+            && !self.welcome.is_open() && self.focus.is_none() && !self.quiet() && self.input.is_empty() && now.duration_since(self.last_touch) < Duration::from_secs(600)
         {
             self.stats.insert("checkin_day".into(), today);
             let q = Reply::say(lines::pick("checkin_question")).mood(Mood::Happy);
@@ -1940,7 +1957,11 @@ impl App {
         }
         // the evening wrap-up (after 5 pm, on a day with two hours tracked) and the week in review (Friday afternoon or the weekend)
         let idle = self.screenshot.is_none() && self.balloon.is_none() && self.focus.is_none() && !self.quiet() && self.input.is_empty() && !self.desk.is_open()
-            && self.onboarding.is_none() && now.duration_since(self.last_touch) < Duration::from_secs(600);
+            && !self.welcome.is_open() && now.duration_since(self.last_touch) < Duration::from_secs(600);
+        if idle && self.welcome_seen.is_empty() && !self.name.is_empty() && self.t() > 20.0 {
+            self.welcome_seen = env!("CARGO_PKG_VERSION").to_string();
+            self.pipe_up(Reply::say(lines::pick("whatsnew_offer")).mood(Mood::Party).run("Show me", "tour").btn("Later", Act::Hide));
+        }
         if idle && now.duration_since(self.kind_mark) < Duration::from_secs(1) {
             let clock = chrono::Local::now();
             let (hour, weekday) = (chrono::Timelike::hour(&clock), chrono::Datelike::weekday(&clock).number_from_monday());
@@ -2193,7 +2214,6 @@ impl App {
             self.hist_idx = self.history.len();
             // during setup, the first thing typed is the user's name
             let cmd = match self.waiting.take() {
-                _ if self.onboarding == Some(0) => format!("onboard name {cmd}"),
                 Some((id, at)) if at.elapsed() < Duration::from_secs(120) => format!("answer-to {id} {cmd}"),
                 _ => repeat_command(&cmd, self.balloon.as_ref(), self.last_cmd.as_deref()).unwrap_or(cmd),
             };
@@ -2234,6 +2254,20 @@ impl eframe::App for App {
         if self.screenshot.is_some() && self.arcade.is_open() {
             self.frames += 1; // --play with --screenshot: just the game
             return self.take_screenshot(&ctx);
+        }
+        if self.welcome.is_open() {
+            let (t, hat, skin) = (self.t() as f32, self.hat.clone().unwrap_or_else(|| "none".into()), self.skin.clone());
+            let (cmds, done) = self.welcome.show(&ctx, &|p, at| draw_clipster(p, at, t, t, Anim::Idle, vec2((t * 0.7).sin() * 0.4, 0.1), (t % 4.0) < 0.12, &hat, &skin));
+            for cmd in cmds {
+                self.run(&ctx, &cmd);
+            }
+            if let Some(d) = done {
+                self.welcome_done(d);
+            }
+            if self.screenshot.is_some() {
+                self.frames += 1;
+                return self.take_screenshot(&ctx);
+            }
         }
         if self.desk.is_open() {
             for cmd in self.show_desk(&ctx, near) {
@@ -2390,7 +2424,7 @@ impl App {
 /// The right-click menu lives in the balloon, so it always has room.
 fn menu_reply() -> Reply {
     let mut r = Reply::say("What shall we do?");
-    for (label, cmd) in [("Open my desk", "desk"), ("Tell me a joke", "joke"), ("Roast me", "roast"), ("Fun fact", "fact"), ("Quiz me!", "quiz"), ("Do a dance!", "dance"), ("What can you do?", "help"), ("Be quiet for an hour", "quiet")] {
+    for (label, cmd) in [("Open my desk", "desk"), ("Show me around", "tour"), ("Tell me a joke", "joke"), ("Roast me", "roast"), ("Fun fact", "fact"), ("Quiz me!", "quiz"), ("Do a dance!", "dance"), ("What can you do?", "help"), ("Be quiet for an hour", "quiet")] {
         r = r.run(label, cmd);
     }
     r = r.btn("Options", Act::Options).btn("Hide balloon", Act::Hide).run("Goodbye, Clipster", "bye");
@@ -3025,6 +3059,7 @@ fn main() -> eframe::Result {
             .with_app_id("clipster")
             .with_inner_size(match (play.as_deref(), screenshot.is_some()) {
                 (Some("desk"), true) => [740.0, 540.0],
+                (Some("welcome"), true) => [620.0, 480.0],
                 (Some(_), true) => [560.0, 640.0],
                 _ => [FULL_W, 330.0],
             })
