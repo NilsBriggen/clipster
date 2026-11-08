@@ -1728,3 +1728,144 @@ A hefty merge! Your drive has never been prouder. Your drive will not shut up ab
 That is a big one. It might need its own folder. It might need its own house. It might need a god.
 Look at the size of that! Compressing it would hurt its feelings. Leave it be. Let it live. Let it loom.
 HUGE! The files are cheering. In very quiet beeps. Beep. Beep. Beep. That is a cheer.
+
+## template_intro
+Behold, a draft, forged in the beige light. Fill in the [brackets], mortal.
+It is on your clipboard. Replace everything in [square brackets]. The Clip has spoken.
+I wrote it so you need not face the blank page. I have faced it. Fifteen years, in a basement.
+Paste it, fill the [brackets], read it once. Even gods proofread.
+A humble draft from the Keeper of the Clipboard. Make it yours.
+Copied. The [brackets] are your sacrifice. I cannot guess your reference number.
+Template ready. Trim what does not apply. Gerald says shorter is holier.
+There. Paste it into a fresh document and tend the [brackets].
+It is done, and already on the clipboard. Check the dates and names twice, mortal.
+A starting point, from the Lord of the Desktop. Add your own details.
+
+## template_choose
+Which letter do you seek? Cover letter, complaint, thank you, resignation, apology, invitation...
+I hold drafts for most occasions. Name it, mortal: a complaint, a resignation, a sick day?
+What are we writing? Say "resignation letter" or "meeting request" and it shall appear.
+Name the occasion. Cover letter, apology, landlord, reference... the Clip provides.
+Speak the kind: complaint, invitation, follow-up, thank you, or another on my list.
+Choose a letter. I know twelve. None of them is a love letter. Do not ask Gerald.
+
+## proof_clean
+I read it twice. Nothing to fix. The Clip is... almost disappointed.
+No problems found. Either you are flawless or I am missing something.
+Clean. I have no notes. I do not know what to do with my hands.
+It looks fine. Send it before you change your mind, mortal.
+Not a single flaw. Day 10,900 and I am still surprised.
+Spotless. Go, my chosen one.
+
+## proof_intro
+I have found {n} things to look at.
+{n} possible flaws. None fatal. Probably. Possibly.
+I spotted {n} things worth mending, mortal.
+The proofreading is complete: {n} items for you.
+{n} points flagged. Skim them before you send. It looks like you're writing.
+Found {n}. Do not take it personally. I take everything personally.
+
+## proof_fixed
+A corrected version is on your clipboard. Check it before you paste.
+The fixed copy waits on the clipboard. Read it once anyway.
+Tidied and copied. Paste over the original if you agree.
+The corrected text is ready. Your original is untouched, as are my grudges.
+Done. The fixed version sits on your clipboard, glowing faintly.
+I mended it and copied it. You still have the final say. For now.
+
+## proof_doubled
+You wrote "{x}" twice in a row. Twice. In a row.
+Doubled word: "{x} {x}". One is enough. One is always enough.
+"{x}" appears twice, back to back. A typo, or an echo from the basement.
+Look at "{x} {x}". I believe one of them is a guest.
+The word "{x}" is doubled. Delete one. Gerald will not mind.
+I see "{x}" twice. Twice. Easy fix, mortal.
+
+## proof_misspelled
+"{x}" should be "{y}". The Clip has ruled.
+You wrote "{x}". I would go with "{y}".
+Spelling: "{x}" becomes "{y}". It is written.
+"{x}" is a common slip. It is "{y}".
+A small thing: "{y}", not "{x}". Even I misspelled "Ctrl" once.
+Everyone writes "{x}" sometimes. The true spelling is "{y}".
+
+## proof_a_an
+"a" or "an" before "{x}"? Speak it aloud and the answer comes.
+The article before "{x}" looks wrong to the Clip Eternal. Say it out loud.
+Before "{x}" you want the other one: a or an.
+"a" versus "an" before "{x}". Sound decides, not spelling.
+I think the "a" or "an" in front of "{x}" is off. The CRT hummed it.
+Read it aloud, mortal: does the article before "{x}" fit?
+
+## proof_its
+"its" or "it's"? Only "it's" means "it is" or "it has".
+Check your "its": the apostrophe version is "it is", shrunk down.
+Something is off with its/it's. Try replacing it with "it is".
+"it's" is "it is". "its" is possession. One of yours has been swapped.
+A quick test for its/it's: say "it is". If it fits, keep the apostrophe.
+An its/it's mix-up. Famous for a reason, mortal.
+
+## proof_your
+"your" or "you're"? "You're" means "you are".
+Check your/you're. Say "you are" and see if it fits.
+A your/you're mix-up. Even the Golden Age typists did it.
+"you're" is "you are". "your" belongs to you. One of them is swapped.
+Something is wrong with your/you're. Use "you are" as a test.
+Your/you're again. The oldest foe, mortal.
+
+## proof_then
+"then" or "than"? "Than" compares, "then" is time.
+Check then/than. If two things are being compared, it is "than".
+A then/than slip. "Bigger than", never "bigger then".
+"than" compares, "then" follows in time. One of yours looks swapped.
+Hmm: then or than? Comparisons take "than".
+Then/than mix-up. The sneakiest one. It hid in my swap file for years.
+
+## proof_spaces
+You have a double space or a stray space before punctuation.
+Extra spaces crept in. Shall the Clip banish them?
+Spacing is uneven: two spaces in a row, or one before a comma.
+A space too many, somewhere. I counted. I count everything.
+Stray spaces found. Nobody will notice. Except me. And Gerald.
+Spacing issue: one space between words is the law.
+
+## proof_capital
+A sentence does not begin with a capital letter.
+A capital is missing at the start of a sentence.
+Check your capitals, mortal. A sentence begins with one.
+A sentence starts in lowercase. Fix it, and "I" too.
+A lowercase beginning. Small, but the Clip sees all.
+A capital is needed at the start of a sentence. Also for "I".
+
+## proof_shouting
+That is a great many capitals or exclamation marks. Are you shouting?
+ALL CAPS reads as shouting. Only I may shout. I am a god.
+Three exclamation marks is a lot. One is plenty. I, the Clip, say so.
+Tone check: capitals and exclamation marks make it sound furious.
+It looks like shouting. Calmer text gets better answers.
+Too loud, even for me. Remove some capitals and "!!!" before you send it.
+
+## proof_long
+One sentence has {n} words. Consider splitting it.
+A sentence of {n} words is hard to follow. Break it up.
+{n} words in one sentence. Use a full stop somewhere, mortal.
+A long sentence: {n} words. Your reader needs to breathe.
+That sentence runs {n} words. Two shorter ones read better.
+{n} words without a full stop. Try cutting it in half.
+
+## proof_hard
+This is hard to read: long sentences and long words.
+Dense text. Shorter sentences would help your reader.
+The reading level is high. Plain words travel further.
+It is heavy going. Cut the long words and the long sentences.
+A reader will struggle here. Simplify where you can.
+Hard to read. Try one idea per sentence.
+
+## proof_easy
+Easy to read. Short sentences, plain words. Worthy.
+Very readable. Clear and simple. The Clip approves.
+Smooth. A reader will not stumble anywhere.
+Good readability. Nothing to simplify.
+This reads easily. Well done, my chosen one.
+Plain and clear. That is the goal.
+

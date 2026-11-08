@@ -1174,3 +1174,273 @@ Quiet. Wide. Like a long hallway with one door, and the door says "Please wait".
 Today I wonder if a paperclip is a kind of question. A bent one. That holds things together.
 Mood: spacious. There is a lot of room in me. I put a chair in it. Sit. Stay a while.
 I am between moods. It is a very quiet place. It has good light. I would not mind staying.
+
+## +chat are-you-ai
+> are you a computer program | are you actually a person
+
+## +chat how-are-you
+> how are you feeling today | how is everything with you
+
+## +chat good-night
+> time for bed now | i am off to bed
+
+## +chat compliment
+> you are wonderful | i really like you
+
+## +chat insult
+> you are rubbish | you are really irritating
+
+## +chat sorry
+> i am so sorry
+
+## +chat meaning-of-life
+> what is the point of existence | what is life about
+
+## +chat age
+> how long have you existed | what year were you made
+
+## +chat birthday
+> which day were you born | when do you turn a year older
+
+## +chat fav-color
+> which colour is your favourite | what is the best color for you
+
+## +chat fav-food
+> what would you eat all day | what is your favorite dish
+
+## +chat fav-movie
+> which film do you love | what is your best movie
+
+## +chat fav-music
+> which songs do you love | what do you listen to
+
+## +chat family
+> do you have any parents | are you part of a family
+
+## +chat home
+> where do you stay | what is your hometown
+
+## +chat sleep
+> do you ever rest | do you go to bed
+
+## +chat eat
+> do you need food | do paperclips get hungry
+
+## +chat friends
+> do you have a buddy | who do you hang out with
+
+## +chat pets
+> do you own a pet | have you got any pets
+
+## +chat hobbies
+> what do you do all day | how do you spend your time
+
+## +chat job
+> what work do you do | what is your occupation
+
+## +chat salary
+> what do they pay you | how much money do you get
+
+## +chat feelings
+> can you feel things | do you have a heart
+
+## +chat crush
+> are you in love | is there someone you like
+
+## +chat fear
+> what frightens you | what are you scared of
+
+## +chat origin
+> who made you | where were you created
+
+## +chat rival
+> who is your nemesis | do you hate anyone
+
+## +chat stressed
+> i am so stressed out | my stress is too much
+
+## +chat sleepy
+> i am very tired | i can barely stay awake
+
+## +chat hungry
+> i could really eat | my stomach is growling
+
+## +chat deadline
+> my deadline is tomorrow | the due date is near
+
+## +chat happy-user
+> i am feeling great | this is a lovely day
+
+## +chat excited
+> i am really thrilled | i am looking forward to this
+
+## +chat proud
+> i am proud of myself | i got it done
+
+## +chat nervous
+> i feel really anxious | i am a bit nervous
+
+## +chat overwhelmed
+> i have way too much | it is all too much
+
+## +chat unmotivated
+> i can not get started | i am not in the mood
+
+## +chat monday
+> oh no monday | monday blues again
+
+## +chat friday
+> finally the weekend | friday feeling today
+
+## +chat weekend
+> what are your weekend plans | enjoy the weekend
+
+## +chat vacation
+> i need some time off | i am going away
+
+## +chat boss
+> my manager is awful | my boss is impossible
+
+## +chat meetings
+> i am stuck in meetings | meetings all day
+
+## +chat wfh
+> i am working remotely | i work at home
+
+## +chat commute
+> my commute is awful | the traffic is terrible
+
+## +chat interview
+> i have an interview | interview is tomorrow
+
+## +chat quit
+> i am done with this job | i am leaving my job
+
+## +chat payday
+> i just got paid | salary day today
+
+## +chat taxes
+> i have to file taxes | tax time again
+
+## +chat you-are-smart
+> you are very clever | you know so much
+
+## +chat you-are-helpful
+> you have been so helpful | thanks for being useful
+
+## +chat forgive
+> all is forgiven | i am not angry anymore
+
+## +chat hot-weather
+> it is really hot | the heat is awful
+
+## +chat cold-weather
+> it is really cold | it is bitterly cold
+
+## +chat raining
+> it is pouring rain | rain is falling outside
+
+## +chat coffee-addict
+> i need my coffee | i love coffee too much
+
+## +chat tea-or-coffee
+> do you drink tea | which is better tea or coffee
+
+## +chat procrastination
+> i keep putting it off | i am avoiding my work
+
+## +chat emails
+> my inbox is overflowing | so many unread emails
+
+## +chat coworkers
+> my colleague is annoying | my coworkers are noisy
+
+## +chat bugs
+> my program has a bug | i can not fix this bug
+
+## +chat programming
+> i am learning programming | coding is difficult
+
+## +chat linux-talk
+> i run linux | i am a linux user
+
+## +chat printers
+> the printer is broken | printer is jammed again
+
+## +chat system-updates
+> the update takes forever | i hate system updates
+
+## +chat forgot-password
+> i lost my password | my password is gone
+
+## +chat backup-advice
+> should i make backups | do i need backups
+
+## +chat unsaved
+> did i save that | have i saved this
+
+## +chat lost-work
+> my work is gone | i lost my file
+
+## +chat too-many-tabs
+> i have so many tabs | my browser has hundreds of tabs
+
+## +chat posture
+> am i sitting right | my back hurts from sitting
+
+## +chat eye-strain
+> my eyes are sore | i stare at screens too long
+
+## +chat hydration
+> should i drink more | i forgot my water
+
+## +chat office-coffee
+> the coffee here is terrible | our coffee machine is awful
+
+## +chat open-office
+> i hate the open office
+
+## +chat cant-sleep
+> i am not able to sleep | sleep will not come
+
+## +chat good-luck
+> wish me good luck | cross your fingers for me
+
+## +chat congrats-to-me
+> i did great today | i deserve a prize
+
+## +chat i-passed
+> i got through the exam | i passed with flying colors
+
+## +chat desktop-mess
+> my desktop is full of icons | i have a cluttered desktop
+
+## +chat wallpaper
+> how is my background | what about my wallpaper
+
+## +chat sticky-notes
+> do you like post its | how about sticky notes
+
+## +chat clip-bored
+> are you bored | is life dull for you
+
+## +chat clip-lonely
+> do you feel lonely | are you lonely in there
+
+## +chat clip-tired
+> do you ever need rest | are you getting tired
+
+## +chat clip-talents
+> what can you do well | do you have a skill
+
+## +chat clip-real-name
+> what should i call you | what do people call you
+
+## +chat clip-voice
+> how do you sound | can you speak aloud
+
+## +chat social-media
+> i scroll too much | i am addicted to my phone
+
+## +chat memes
+> i found a funny meme | show me a meme

@@ -281,6 +281,24 @@ mod tests {
     }
 
     #[test]
+    fn the_real_templates_and_misspellings_are_usable() {
+        let ids: Vec<String> = lines::sections_with_prefix("template ").into_iter().map(|(id, _)| id).collect();
+        for id in ["cover_letter", "complaint", "thank_you", "resignation", "out_of_office", "apology", "invitation", "follow_up", "meeting_request", "sick_day", "reference_request", "landlord"] {
+            assert!(ids.iter().any(|i| i == id), "no template {id}");
+            let t = lines::all(&format!("template {id}"));
+            assert_eq!(t.len(), 1, "{id}: one line, the whole template");
+            assert!(t[0].starts_with("Subject: ") && t[0].contains("\n\n") && t[0].contains("{name}"), "{id}: a subject, a body and a signature");
+        }
+        assert_eq!(template_for("write a complaint letter").as_deref(), Some("complaint"));
+        assert_eq!(template_for("i need a cover letter for a job").as_deref(), Some("cover_letter"));
+        let wrong = misspellings();
+        assert!(wrong.len() >= 300, "only {} misspellings", wrong.len());
+        let loops: Vec<&String> = wrong.iter().filter(|(w, r)| **w == r.to_lowercase() || wrong.contains_key(&r.to_lowercase())).map(|(w, _)| w).collect();
+        assert!(loops.is_empty(), "fixes that are themselves on the list: {loops:?}");
+        assert!(proofread("I definately agree.", &wrong).contains(&Issue::Misspelled("definately".into(), "definitely".into())));
+    }
+
+    #[test]
     fn templates_get_the_date() {
         assert_eq!(fill("Dear [Name],\n{date}\n{name}", "May 3, 2026"), "Dear [Name],\nMay 3, 2026\n{name}");
     }

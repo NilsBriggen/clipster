@@ -5749,3 +5749,1437 @@ You know what? Fair enough.
 That is a very specific mood. I salute it.
 Many things are {x}. That is the thing about things.
 I will not argue. I will nod. It is my specialty.
+
+## chat work-meeting-could-be-email
+> this meeting could be an email | that meeting was pointless | meeting should have been an email | another pointless meeting
+@ sly
+Statistically, most meetings could be an email. The rest could be a silence.
+Next time, reply with "Happy to take this offline." It sounds helpful and ends the meeting.
+Ask for an agenda. Meetings without one are just people being warm in a room.
+If it could have been an email, write that email now. Be the change you endured.
+I attended zero meetings today and I feel wonderful. Highly recommend.
+
+## chat work-meeting-back-to-back
+> back to back meetings | no time between meetings | my calendar is full of meetings
+@ shock
+Back-to-back meetings leave no time to actually do the work discussed in them. Cruel loop.
+Try declining one, or shortening a call to 25 minutes. Most people secretly thank you.
+Block a 15-minute gap in your calendar for lunch and water. Treat it like a meeting.
+A day of meetings is not a day wasted if you take notes. Want me to open a note?
+Your brain needs a gap between calls. So does mine. Mine is a very small brain.
++ Open notes = notes
++ Open notes = notes
+
+## chat work-video-call-muted
+> you are on mute | i was on mute | talking while on mute
+@ laugh
+"You're on mute" is the most spoken sentence of the decade.
+Pro tip: keep the mute button visible and say your first word before the important one.
+Nobody has ever won an argument while muted, though some have tried with great gestures.
+Check your microphone with a quick test before the call. Future you will clap.
+Everyone does it. The ones who say they don't are on mute right now.
+
+## chat work-camera-off
+> camera on or off | do i have to turn on my camera | hate being on camera | camera off in meetings
+@ think
+Camera on or off is a team decision, but it's fair to turn it off when you're only listening.
+If you hate seeing yourself, you can hide your own preview. Most call apps have the option.
+A blurred background and a decent lamp fix about 80 percent of video call problems.
+Being on camera all day is tiring. It's okay to ask for a few audio-only calls.
+Put a sticky note next to the lens: "smile." Or "sigh quietly." Whatever helps.
+
+## chat work-standup
+> daily standup meeting | stand up meeting | standup takes forever | my standup is too long
+@ talk
+A standup should take 15 minutes. If it's lasting 45, it's a sit-down.
+Good standup format: yesterday, today, blockers. Stick to it and everyone goes home sooner.
+If someone starts telling a story, "let's take that after" is the polite fire extinguisher.
+Write your three points in a note before the call. It stops the "uh, so, yesterday I did... things."
+Standing is optional. The meeting should still end before your coffee does.
++ Open notes = notes
++ Open notes = notes
+
+## chat work-no-agenda
+> meeting with no agenda | there is no agenda | what is this meeting for | no idea why i am invited
+@ search
+A meeting without an agenda is a conversation with a calendar invite.
+Politely ask: "What do you need from me in this one?" It works surprisingly well.
+If you're not sure why you're invited, you may not need to attend. Ask the organizer.
+Write one question for the meeting. If it isn't answered, you have a reason to speak up.
+A good invite has a goal, a time limit and a reason I should care. Yours has a title.
+
+## chat work-deadline-moved
+> the deadline moved up | deadline was moved | they changed the deadline | deadline got shorter
+@ shock
+A shortened deadline is a trade: something has to give. Ask what to drop.
+Say, "I can do A or B by then. Which matters more?" Managers like choices.
+List what's left, cut what's optional, and start with the hardest piece first.
+Write down the new date so nobody can move it again silently.
+It's reasonable to be annoyed. Be annoyed for five minutes, then be efficient.
++ Focus 25 minutes = focus 25m
++ Focus 25 minutes = focus 25m
+
+## chat work-deadline-missed
+> i missed my deadline | we missed the deadline | the deadline passed already | i am late on the project
+@ sad
+Missing a deadline feels awful, but it's fixable. Tell people early, with a new date.
+Say what's done, what's left and when it will be ready. That's a plan, not an excuse.
+Look at why it slipped. Too big? Too vague? Too many meetings? Fix the cause next time.
+Everyone misses one eventually. What people remember is how you handled it.
+Deep breath. Send the update, then do the next smallest thing.
+
+## chat work-boss-micromanager
+> my boss checks everything | micromanager boss | boss watches over my shoulder | boss does not trust me
+@ think
+Micromanagers often just want visibility. A short daily update can calm them down.
+Try sending a quick summary before they ask. Pre-emptive reports work like a vaccine.
+If it's too much, ask what level of detail they need. Sometimes they just never said.
+It isn't about your work. Usually. It's about their worry. Doesn't make it fun, though.
+Keep a log of what you finished. It helps you and it makes a fine reply to "what are you doing?"
+
+## chat work-boss-feedback
+> boss gave me feedback | i got criticism at work | negative feedback from my manager | feedback hurt my feelings
+@ sad
+Feedback stings even when it's fair. Take a day before you reply.
+Separate the facts from the tone. What's one thing in it you can actually change?
+Ask for an example. "Could you show me what better looks like?" turns criticism into instructions.
+One piece of criticism isn't a verdict on you. It's a note in the margin.
+Write down what stung, then what's useful. Throw away the first list.
+
+## chat work-boss-new
+> we have a new boss | new manager started | my new boss is strange | new boss changes everything
+@ think
+A new boss means new rules. Spend the first weeks listening and asking what matters to them.
+Ask: "What does success look like in your first 90 days?" Managers love this question.
+Keep doing good work visibly. They don't know your history yet.
+Change is awkward. It's also a chance to reset a few old habits.
+Learn their communication style: short emails, meetings or chat. Match it.
+
+## chat work-coworker-loud
+> loud person at work | coworker never stops talking | my desk neighbor is noisy
+@ angry
+Loud coworkers are the office weather. Headphones are the umbrella.
+Try a gentle, specific request: "Could you take calls in the meeting room?" Specific beats general.
+Noise-cancelling headphones are cheaper than quitting.
+If it keeps happening, mention it to a manager as a work problem, not a personality problem.
+Some people don't know their volume. Kindness first, then walls.
+
+## chat work-coworker-credit
+> coworker took credit for my work | someone stole my idea at work | they took the credit | not getting credit for my work
+@ angry
+That's frustrating. Next time, send the update yourself and put your name on it.
+Keep records: emails, dates, drafts. Not for revenge, for clarity.
+In meetings, say "As I mentioned in my doc last week..." It's polite and very pointed.
+If it's a pattern, talk to them directly first, then to your manager with specifics.
+Doing great work and staying invisible doesn't work. Share it before someone else does.
+
+## chat work-kitchen-fridge
+> office fridge is a mess | someone stole my lunch | the fridge at work smells | fridge at work is disgusting
+@ shock
+The office fridge is a living museum. Throw out anything older than your last promotion.
+Label your lunch with your name and date. Thieves are more honest when there's a label.
+A weekly clean-out day helps. Put a note on the door a day before.
+Someone's mystery container has been there since spring. Nobody knows. Nobody asks.
+If you can't trust the fridge, a small cooler bag is the answer. Don't ask me how I know.
+
+## chat work-kitchen-dishes
+> dirty dishes in the sink | office kitchen is a mess | nobody washes their cups | coworkers leave dishes
+@ angry
+The office sink is a lesson in shared responsibility, mostly failed.
+A friendly sign works better than an angry one. Try "This is not a dishwasher. We love you."
+Keep a personal mug at your desk. It only has one owner and one conscience.
+If the dishwasher exists, load it. If it doesn't, let's start a petition.
+Rinse your own cup. Be the tiny revolution.
+
+## chat work-coffee-machine-broken
+> coffee machine has died | coffee machine is out of order | office coffee machine broke | no coffee at work
+@ shock
+A broken coffee machine at work is the closest thing to a real emergency.
+Plan B: a French press, a kettle, or the cafe across the street. Rank them by morale.
+Report it to facilities. Add the words "productivity" and "urgent." It works.
+Take a short walk to a different floor's machine. Bonus: you meet new people.
+It'll be fixed by Thursday. It was always going to be Thursday.
+
+## chat work-printer-jam
+> the printer is jammed | printer jam again
+@ angry
+Printers jam on principle. Open every tray and door. Yes, all of them.
+Pull the jammed paper in the direction of travel. Pulling backward is how the gods punish you.
+If it still says jam, there's a tiny scrap of paper somewhere. There always is.
+Turn it off and on again, wait ten seconds. It's folk medicine for printers.
+Have you considered not printing? I said it quietly so the printer can't hear.
+
+## chat work-printer-paper
+> printer is out of paper | printer ran out of ink | nobody refills the printer | printer needs toner
+@ sad
+The last person to take the last sheet never refills. It's an office law.
+Paper is usually in a cupboard labeled something unrelated. Check the one near the kitchen.
+If the ink says empty, shake the cartridge gently. It sometimes buys you five more pages.
+Need it urgent? Save as PDF and send it digitally. Paper is optional in the modern age.
+Refill it yourself and leave a note: "I was here. I did a good thing."
+
+## chat work-raise-ask
+> how to ask for a raise | i want to ask for a raise | asking my boss for more money | raise negotiation tips
+@ think
+Prepare facts: what you did, what it was worth, what the market pays. Then ask for a meeting.
+Pick a good moment: after a win, not on the day the server fell over.
+Say a number, not a feeling. "I'd like to discuss moving to X" is clearer than "I feel underpaid."
+Practice it aloud once. It sounds weird. It also helps a lot.
+Ask what it would take if the answer is no. That gives you a plan, not a shrug.
++ Open notes = notes
++ Open notes = notes
+
+## chat work-raise-denied
+> they said no to my raise | i did not get a raise | denied a salary increase | no raise this year
+@ sad
+That hurts. Ask for the reason and a date to review it again.
+If it's a budget issue, ask for other things: a title, extra days off, training money.
+Remember the number you wanted. It's useful when you check the job market.
+A "no" is information. It tells you how they see the next year.
+Take the evening to feel annoyed. Tomorrow you can make a plan.
+
+## chat work-underpaid
+> i feel underpaid | i am paid too little | my salary is too low | i earn less than my coworkers
+@ sad
+Check what your role pays elsewhere. Salary sites and job ads often tell you more than guessing.
+If you're below the market by a lot, make your case with numbers and examples.
+If they can't or won't move, that's information for what you do next.
+Feeling underpaid wears you down over time. It's reasonable to want it fixed.
+Keep a list of your wins. It's your evidence, and good for morale on rough days.
++ Open notes = notes
++ Open notes = notes
+
+## chat work-promotion-wait
+> when will i get promoted | i deserve a promotion | passed over for promotion | no promotion again
+@ sad
+Ask your manager directly what skills or results the next level needs. Then ask for a timeline.
+Being passed over hurts. Ask what specifically was missing and how you can show it.
+Make your work visible: short updates, a win list, a mention in the right meeting.
+Promotions often follow doing the next level's work. Quietly start collecting examples.
+If the answer stays vague for a year, that's a signal to look around.
+
+## chat work-review-coming
+> performance review is coming | annual review next week | i have a review with my boss | how to prepare for a performance review
+@ think
+Write down your wins from the year before the review. You'll forget half of them by Friday.
+Bring numbers where you can: projects shipped, problems fixed, people helped.
+Think of one thing you want to improve and one thing you want from them.
+Don't ambush yourself with the criticism part. Ask for it directly: "What should I do differently?"
+Take notes in the meeting. Send a summary email afterward. It keeps everyone honest.
++ Open notes = notes
++ Open notes = notes
+
+## chat work-review-bad
+> bad performance review | my review went badly | i got a poor rating | review was unfair
+@ sad
+That's rough. Give yourself a day before responding.
+Ask for specifics and examples. Vague ratings are hard to fix. Concrete ones are.
+If it feels unfair, write your response calmly with facts and send it, even if you only keep a copy.
+Ask what a good rating would look like next time, then agree on a check-in in 6 weeks.
+One review is a snapshot, not your entire career. Look after yourself tonight.
+
+## chat work-monday-dread
+> i hate monday mornings | monday morning blues | dreading monday | monday is coming
+@ sad
+Monday is just Sunday with an inbox. Start with one small task and let momentum do the rest.
+Plan your Monday on Friday afternoon. Then it's just following instructions you gave yourself.
+A good coffee, a slow start and no meetings before 10. Dream big.
+Open the easiest task first. A win by 9:15 changes the whole week.
+The inbox looks scarier than it is. Triage: urgent, later, never.
++ Focus 25 minutes = focus 25m
++ Focus 25 minutes = focus 25m
+
+## chat work-sunday-scaries
+> sunday scaries | dreading work tomorrow | sunday night anxiety about work | cannot relax on sunday evening
+@ sad
+Sunday dread is common. Try writing tomorrow's three tasks tonight so your brain can stop rehearsing.
+Make Sunday evening something you look forward to: a favorite meal, a show, a walk.
+If it's every week, pay attention. It may be the workload, the boss, or the job.
+Pack your bag, lay out the clothes and close the laptop. Small endings help.
+It's okay if tomorrow feels heavy. Talking to someone you trust about a recurring feeling is a good idea.
++ Open notes = notes
++ Open notes = notes
+
+## chat work-friday-afternoon
+> friday afternoon at work | it is friday at four | nothing gets done on friday afternoon | friday afternoon energy
+@ party
+Friday afternoon productivity: roughly 40 percent of Monday's. Use it for tidying and planning.
+Perfect time to clear the inbox, update notes and write Monday's list.
+Do not schedule a meeting after 3 on Friday. Do not be that person.
+Close tabs, empty the downloads folder, and leave the desk better than you found it.
+The weekend is a few clicks away. I'll hold your place in the queue.
++ Tidy downloads = tidy downloads
++ Tidy downloads = tidy downloads
+
+## chat work-open-plan-noise
+> open plan office noise | cannot concentrate in the open office | too much noise at work | everyone is talking around me
+@ shock
+Open plan: the office layout where everyone can hear everything and nobody can think.
+Headphones with instrumental music or plain brown noise help many people.
+Book a meeting room for two hours of deep work. Call it "Project Silence."
+If you can, work from home on focus days and save the office for meetings.
+A "do not disturb" sign works about 30 percent of the time. Still worth it.
+
+## chat work-headphones
+> headphones at work | wearing headphones in the office | coworkers interrupt me with headphones on | music while working
+@ music
+Headphones are the universal sign for "please don't." Unfortunately, some people can't read it.
+Music without lyrics is best for writing. Lyrics are fine for spreadsheets.
+Keep one ear free if you need to hear colleagues. Or just accept the tap on the shoulder.
+Some focus apps play brown noise. It's like a soft grey blanket for your ears.
+Remember to take them off now and then. Your ears and your coworkers will thank you.
+
+## chat work-email-overload
+> too many work emails | thousands of unread emails | inbox zero is impossible
+@ shock
+Triage in three folders: act now, wait, archive. Everything else is noise.
+Unsubscribe from the newsletters you didn't read last month. Be ruthless.
+Check email at set times, not constantly. Constantly is how the day disappears.
+Mark everything older than a month as read. If it mattered, they'll write again.
+Two minute rule: if it takes under two minutes, do it. Otherwise schedule it.
+
+## chat work-reply-all
+> i hit reply all by mistake | reply all disaster | sent an email to everyone by accident | accidental reply all
+@ shock
+Reply-all disasters happen to the best of us. The best recovery is a short, calm correction.
+If it's embarrassing, send nothing more. A follow-up "please ignore" makes it worse.
+Next time, put your cursor in the To field first and check it twice.
+Everyone has done it. Entire companies have gone down in history for it.
+Take a breath. In two days nobody will remember. Possibly.
+
+## chat work-email-tone
+> was my email too rude | how to sound polite in an email | email sounds angry | does my email sound passive aggressive
+@ think
+Re-read it out loud. If you would not say it that way in a meeting, rewrite it.
+"Per my last email" is not polite. It's a velvet slap.
+Add one warm line at the start. "Hope your week is going well" costs nothing.
+Replace "you failed to" with "I noticed that" and watch the temperature drop.
+Want me to proofread it? Copy the text and say proofread.
++ Proofread = proofread
++ Proofread = proofread
+
+## chat work-spreadsheet-formula
+> my spreadsheet formula is broken | excel formula not working | spreadsheet shows an error | formula gives wrong result
+@ search
+Check the cell references first. Most formula errors are a range that moved or a stray space.
+A number stored as text won't add up. Look for a tiny green triangle or left-aligned numbers.
+If it says a #REF, a cell you used was deleted. #DIV/0 means you divided by an empty cell.
+Break the formula into pieces in separate cells. Then it becomes obvious where it goes wrong.
+Ctrl+` (backtick) toggles formula view in most spreadsheets. Handy for debugging.
+
+## chat work-spreadsheet-mess
+> my spreadsheet is a mess | inherited a terrible spreadsheet | spreadsheet has fifty tabs | nobody understands this spreadsheet
+@ shock
+Inherited spreadsheets are archaeology. Add a "Read me" tab explaining what everything does.
+Colors that mean something are fine. Colors that nobody remembers are decoration.
+Freeze the header row and name the tabs. It's like putting up street signs in a new city.
+Never delete anything in a spreadsheet you don't understand. Hide it, then watch what breaks.
+A spreadsheet with fifty tabs is a database that has given up.
+
+## chat work-password-expired
+> my work password expired | password reset every thirty days | work forces me to change my password | password policy is annoying
+@ angry
+Password rules are annoying, but a password manager makes them painless.
+A long phrase of four random words beats a short, complicated one. Easier to remember too.
+Never write the password on a sticky note on the monitor. The cleaning crew can read.
+Never reuse your work password anywhere else. Not even for the pizza place.
+Use the reset link if you're locked out. IT will thank you for not calling at 8:01.
+
+## chat work-it-ticket
+> i submitted an it ticket | waiting for it support | it has not answered my ticket | it ticket still open
+@ think
+Include the exact error message, what you tried, and what you were doing. IT loves a good ticket.
+A screenshot is worth a thousand emails. I can take one: just say screenshot.
+If nothing happens, reply with "Is there an update?" Politely persistent works better than angry.
+IT teams often have a long queue. Check if there's a status page or an emergency number.
+Be kind to IT. They hold the keys to your digital kingdom.
++ Take screenshot = take a screenshot
++ Take screenshot = take a screenshot
+
+## chat work-it-turn-off-on
+> did you try turning it off and on | have you tried restarting it | it told me to reboot
+@ wink
+Restarting fixes more things than anyone wants to admit. Save your work first.
+It clears memory, resets stuck processes and gives everything a fresh start. Like a nap.
+If a restart doesn't fix it, then it's a real problem and you've earned a ticket.
+Fun fact: IT starts every ticket with this question because it works about half the time.
+I'd restart, but I'd rather not. Restarts are my least favorite thing.
+
+## chat work-onboarding-first-day
+> first day at a new job | starting my new job tomorrow | first day nerves | what to do on the first day of work
+@ happy
+First day: arrive early, ask lots of questions and write the answers down.
+Learn names. Write them in a note. Nobody expects you to remember all of them.
+Ask who to go to for what. A quick map of the team saves weeks.
+You won't understand everything. That's normal. Nobody does by Friday.
+Bring water, a notebook and a snack. Your brain will be busy.
++ Open notes = notes
++ Open notes = notes
+
+## chat work-onboarding-lost
+> i am lost at my new job | nobody explained anything to me at work | i do not know what i am doing at work | too much to learn at my new job
+@ sad
+The first months are supposed to feel like this. You're not behind, you're learning.
+Keep a "things I learned" note. It's proof of progress on the days that feel like none.
+Ask your manager for a first 30-day plan. Clear goals reduce the fog.
+Pick one person to ask the small questions. Asking all of them is exhausting.
+Nobody remembers your questions in six months. They remember that you cared.
++ Open notes = notes
++ Open notes = notes
+
+## chat work-last-day
+> today is my last day | my last day at work | leaving my job today | saying goodbye to my coworkers
+@ sad
+Last day: return what's theirs, take your personal files and update your contacts.
+Send a short, warm goodbye note. Burn no bridges. You may meet them again.
+Back up your personal photos and files before you hand in the laptop.
+It's allowed to feel both relieved and wistful. Both can be true at 4:45 p.m.
+Congratulations on whatever comes next. I'll miss the nice parts.
+
+## chat work-notice-period
+> serving my notice period | i handed in my resignation | how to quit my job politely | writing my resignation letter
+@ think
+Keep the resignation short and polite: your last day, a thank you, nothing else.
+Tell your manager in person first. Then send the written notice.
+Don't badmouth anyone on the way out. The world is smaller than your inbox.
+Use the notice period to hand over tasks properly. A clean handover is your best reference.
+I can help with a draft. Say "letter" and pick resignation.
++ Write a letter = letter
++ Write a letter = letter
+
+## chat work-team-lunch
+> team lunch today | where should we go for team lunch | lunch with my coworkers | planning a team lunch
+@ party
+Team lunch rule: ask about allergies before you pick the restaurant.
+Pick a place with a table big enough for everyone and a menu that isn't a riddle.
+Splitting the bill is its own meeting. Decide beforehand: equal or by item.
+Take the chance to talk about anything other than work. You'll like your colleagues more.
+Order what you'd actually eat. It's not a performance review.
+
+## chat work-birthday-cake
+> cake in the office kitchen | it is a coworker birthday | office birthday party | cake in the break room
+@ party
+Cake in the break room: the only meeting everyone attends on time.
+Sign the card. Add something nice. "Happy birthday" is fine, "Hope your year is great" is better.
+If the cake is gone by noon, that's how you know it was good.
+Don't eat standing over the cake. Cut a clean slice and leave the rest for the others.
+I also have a birthday. It's just very hard to put candles on a paperclip.
+
+## chat work-overtime
+> i have to work overtime | working late again | staying late at the office | too many hours at work
+@ sad
+Occasional overtime happens. Constant overtime is a staffing problem, not a personal one.
+Track your extra hours. You may be owed pay or time off.
+Eat something real, drink water and take a ten-minute break. Tired work is slow work.
+Set a stop time and stick to it. Work expands to fill whatever hours you offer.
+Have you eaten? Seriously. Go and I'll hold the cursor.
++ Take a break = timer 5m break
++ Take a break = timer 5m break
+
+## chat work-unpaid-overtime
+> unpaid overtime | my boss expects me to work for free | working weekends without pay | they ask me to do extra hours for nothing
+@ angry
+Check your contract and local labor rules. Unpaid extra hours aren't always legal.
+Keep a record: dates, hours and who asked. Clear notes protect you.
+Ask your manager politely: "How will these extra hours be compensated?"
+If it's a pattern, a union or labor office can tell you your rights.
+Your time is worth money. Please don't give it away just because it's quiet.
+
+## chat work-layoffs
+> layoffs at my company | i am afraid of being laid off | my team got laid off | job cuts are coming
+@ sad
+That's a really stressful situation. I'm sorry. Take it one day at a time.
+Update your resume and contacts now, quietly. It's not disloyal, it's prepared.
+Save copies of your own work samples if you're allowed to, and your personal files.
+If you are laid off, ask about severance, benefits and references before you leave.
+Talk to someone you trust. You don't have to carry this alone. I'm here for what I can do.
++ Open notes = notes
++ Open notes = notes
+
+## chat work-burnout
+> i think i am burned out | burnout at work | i have no energy for work anymore | work is exhausting me
+@ sad
+That sounds really hard. Rest is not a luxury, it's maintenance. Please be gentle with yourself.
+Try to cut one thing from your list this week. Then another. Less is a real option.
+Sleep, food, a walk, a day off. They sound boring because they work.
+Talk to someone: a friend, a doctor, a counselor. You deserve support from people who can really help.
+I'm just a paperclip, but I'm glad you told me. I'm here, and I can slow things down with you.
+
+## chat work-presentation-nerves
+> nervous about my presentation | i have to give a presentation | stage fright at work | afraid of presenting in front of people
+@ sad
+Nerves are normal. Practice out loud twice, once alone and once for a friendly person.
+Start with your first sentence memorized. The rest follows once you're moving.
+Slow down. You talk about twice as fast when nervous, and nobody minds a pause.
+Look at one friendly face at a time. It keeps the room from feeling like a crowd.
+Have water nearby. A sip is a perfectly good way to take a breath.
++ Open notes = notes
++ Open notes = notes
+
+## chat work-slides-boring
+> my slides are boring | too many bullet points on my slides | how to make a good slideshow | slides are too full of text
+@ think
+One idea per slide. If it needs a paragraph, it's a document, not a slide.
+Use big text and one image. Your audience can read or listen, not both.
+Cut your slides in half. Then cut the remaining half's text in half.
+End with what you want people to do. A "Thank you" slide is a waste of a pixel.
+Practice with the slides on. Half the problems only appear when you click next.
+
+## chat work-interview-prep
+> how to prepare for a job interview | my interview is tomorrow morning | what to wear to an interview | common interview questions
+@ happy
+Research the company, read the job ad twice and write three stories about things you've done.
+Prepare questions to ask them. "What does success look like in this role?" is a good one.
+Test the video call setup and camera the day before. Never learn about the mute button live.
+Arrive ten minutes early. Not twenty. Not two.
+Breathe, sip water, smile when you say hello. The rest is just a conversation.
++ Open notes = notes
++ Open notes = notes
+
+## chat work-interview-failed
+> i bombed my interview | the interview went badly | i did not get the job | i froze in the interview
+@ sad
+Interviews are a skill, and every bad one makes the next one easier.
+Write down the questions you struggled with while you remember them. That's your study guide.
+One answer doesn't decide a hiring result. Many things happen behind the scenes.
+Take the evening off. Then apply to another. The pipeline matters more than any single door.
+You showed up and tried. That counts for more than it feels like.
+
+## chat work-interview-salary-question
+> what salary should i ask for | they asked my salary expectations | how to negotiate a job offer | should i negotiate my first offer
+@ think
+Research the range for the role and your city before you answer. Numbers beat feelings.
+Give a range where the bottom is a number you'd actually be happy with.
+Negotiating a first offer is normal. A polite counter rarely ends the offer.
+Look at the whole package: vacation, remote days, training, bonus. Salary isn't the only number.
+Ask for time to think. "I'd like to review it and come back tomorrow" is a complete sentence.
+
+## chat work-remote-isolation
+> i feel lonely working from home | remote work is isolating | i miss my coworkers while working remotely | nobody talks to me at home office
+@ sad
+Working alone all day is draining. Schedule a short call with a coworker just to chat.
+Work from a cafe or library one day a week. Other people's background noise helps.
+Go outside before and after work. It replaces the commute you miss.
+Join a virtual coworking session or a team channel for casual talk.
+You can always talk to me. I'm not a human, but I'm trying very hard.
+
+## chat work-remote-pajamas
+> working in my pajamas | working from bed | i work from home in pajamas | working from the couch
+@ wink
+The pajama office is a legitimate workplace. A fresh shirt, though, changes your head.
+Working from bed is a bad idea. Your brain starts connecting the bed to emails.
+Use a real chair for a real task. Your back and your colleagues won't see it, but they'll feel it.
+Camera on? Dress the top half. Standing up unexpectedly is a high-risk move.
+A different outfit for work and for off-hours helps your brain switch modes.
+
+## chat work-remote-boundaries
+> i cannot stop working at home | work and home are mixed up | answering emails at night | no work life balance remote
+@ sad
+Set a stop time and close the laptop. A physical ritual like a walk marks the end of work.
+Turn off work notifications after hours. The email will still be there tomorrow.
+Keep a dedicated corner for work, even a small one. When you leave it, work is done.
+Tell your team your hours. It helps them stop pinging you at 9 p.m.
+Your laptop will survive the night without you. I will watch it.
+
+## chat work-commute-traffic
+> stuck in traffic on the way to work | the commute is killing me | my commute takes two hours | i hate driving to work
+@ angry
+A long commute is an unpaid second job. Podcasts, audiobooks or a quiet ride can help.
+Ask if you can shift your hours, even by 30 minutes. The traffic difference is huge.
+Work from home one day a week if possible. That's 20 percent fewer commutes.
+Keep a go-bag: charger, snack and water. Delays are less awful when you're prepared.
+Don't text and drive. Please. I can wait for the answer.
+
+## chat work-commute-train-late
+> my train is late again | public transport delays make me late for work | the bus did not come | delayed train on my way to work
+@ angry
+Message your manager early: "Delayed, will be there by X." It turns lateness into communication.
+Use delays for something small: read, answer a few emails, plan the day.
+Check the transit app before leaving. Some apps warn you of delays in advance.
+A bad commute doesn't define your day. Have a coffee, then start fresh.
+Not your fault. Trains have been late since trains started. I like them anyway.
+
+## chat work-feeling-stuck
+> i feel stuck in my career | i am not growing at work | nothing changes in my job | i am in a rut at work
+@ sad
+Feeling stuck is a signal, not a sentence. Start by naming what's missing: learning, pay, purpose, people.
+Try a small change first: a new project, a course, a conversation with someone in a role you like.
+Write down what you'd do if you could pick anything. Then find the smallest step toward it.
+Ask your manager what growth looks like here. The answer tells you a lot.
+Take your time. Ruts get shallower with small steps. I'm cheering quietly.
++ Open notes = notes
++ Open notes = notes
+
+## chat work-imposter
+> i feel like a fraud at work | imposter syndrome at work | everyone is smarter than me at my job | i do not deserve this job
+@ sad
+Almost everyone feels this at some point, especially the people who are good at their job.
+Keep a list of things you've done well. Read it when the doubt gets loud.
+Ask questions. People who ask questions look curious, not incompetent.
+You were hired because someone saw you could do it. Trust their judgment a little.
+Doubt is not evidence. Please be as kind to yourself as you would be to a friend.
+
+## chat work-wrong-job
+> i think i am in the wrong job | i hate my current job | i dread going to work | i want a career change
+@ sad
+That's heavy, and I'm sorry. Figure out which part you hate: the work, the people or the place.
+A change doesn't need a dramatic quit. Start learning one thing and talking to people in other fields.
+Save a bit of money for a cushion if you can, and update your resume quietly.
+You spend a lot of hours there. It's reasonable to want them to mean something.
+I'm here for the planning part. Want to make a list of what you'd keep and what you'd change?
++ Open notes = notes
++ Open notes = notes
+
+## chat work-bored-at-work
+> i am bored at work | nothing to do at work | work is so boring today | i have no tasks at work
+@ sad
+Boredom at work is information. Ask for a bigger task or a harder problem.
+Use the quiet time to learn a skill, clean up files or document something nobody documents.
+Look busy? No. Look useful. Clean a shared folder and write a how-to.
+Tidying your downloads counts as productivity. I won't tell.
+Want a joke, a fact or a quick game? Just not at the same time as the meeting.
++ Tell a joke = joke
++ Tidy downloads = tidy downloads
++ Tell a joke = joke
++ Tidy downloads = tidy downloads
+
+## chat work-small-talk
+> i hate small talk at work | what do i say to my coworkers | awkward elevator conversation | small talk at the office
+@ think
+Good small talk questions: "Any plans this weekend?" "Seen anything good lately?" Easy and safe.
+People like to talk about themselves. Ask one question and listen.
+The weather is fine, but "How's your week going?" gets better answers.
+It's okay to end it politely: "Anyway, good to see you. Back to the grind."
+Awkward silence in the elevator is a feature, not a bug.
+
+## chat work-networking
+> how to network at work events | i have to attend a networking event | conference small talk is hard | meeting new people at a work conference
+@ think
+Set a small goal: talk to three people and get two contacts. Then you can go home.
+Ask "What brought you to this event?" It's an easy opener and people enjoy answering.
+Follow up within two days with a short note. That's where networking actually happens.
+Stand near the snacks. It gives you a reason to be there and an easy topic.
+Carry a pen. Or, as I like to say, carry a paperclip.
+
+## chat work-linkedin
+> update my linkedin profile | how to improve my linkedin | linkedin is cringe | recruiters message me on linkedin
+@ think
+A clear headline, a decent photo and a short summary are 80 percent of a good profile.
+Write what you do and who it helps. Skip words like "passionate" and "guru."
+Update it when you finish a project. It's easier than remembering a year later.
+You don't need to post. You just need to be findable.
+Respond to recruiters politely, even if you aren't looking. Your future self may be.
+
+## chat work-resume-update
+> help me write my cv | how long should a cv be | what to put on my cv | update my cv
+@ happy
+One page is fine for most people, two if you've got a long history. Lead with the strongest.
+Use numbers: "reduced loading time by 30 percent" beats "improved performance."
+Tailor the top of it to each job. A copy-paste resume reads like a copy-paste.
+Spell check twice. Then have a friend read it. Then spell check again.
+Start with action verbs and cut the filler. I can proofread the text if you copy it.
++ Proofread = proofread
++ Proofread = proofread
+
+## chat work-job-search
+> i am looking for a new job | job hunting is exhausting | applying to so many jobs | how to find a job faster
+@ sad
+A job search is a numbers game with a human face. Apply steadily and keep a list of where you applied.
+Aim for a few tailored applications a day instead of fifty generic ones.
+Tell people you're looking. Many jobs are filled through someone who knows someone.
+Keep a routine: a set time for searching, a set time for rest.
+Rejections aren't a verdict on you. They are a very slow, very polite coin flip.
++ Open notes = notes
++ Open notes = notes
+
+## chat work-rejection-email
+> i got a rejection email | they rejected my application | another job rejection | no response after my job application
+@ sad
+That stinks. Give yourself a short time to feel bad, then a short time to move on.
+Reply with a polite thanks. Sometimes the second candidate gets the job.
+Ask for feedback once, politely. If they answer, it's gold. If they don't, it costs nothing.
+Silence after an interview is common and not a reflection on you. Companies are slow.
+Keep going. Each application teaches you something about what you want.
+
+## chat work-sick-day-guilt
+> i feel guilty taking a sick day | should i go to work sick | calling in sick to work | i am sick but i have to work
+@ sad
+Sick days exist so you can use them. Working while ill is slower and spreads the problem.
+Send a short message: "I'm unwell and will be offline today." You owe no more explanation.
+Rest properly. The inbox will survive. It has survived worse.
+Hand off only what's urgent. Everything else can wait for you to be well.
+Feel better soon. Drink water and close the laptop. That's an order from a paperclip.
+
+## chat work-scope-creep
+> the project keeps growing | scope creep in my project | they keep adding more requirements | the client wants one more thing
+@ shock
+Scope creep: when "just one small thing" arrives for the seventh time.
+Write down the original scope and show what the new requests add. Numbers calm people.
+Say, "Yes, and here's what that changes: time, cost or something else." It's polite and firm.
+Keep a parking lot of "nice to haves" for the next version.
+Done is a feature. Please don't let the project become a monster.
+
+## chat work-difficult-client
+> my client is impossible | difficult customer at work | the customer keeps complaining | angry customer email
+@ angry
+Stay calm, write down exactly what they asked, and answer with facts. Don't answer angry emails while angry.
+Acknowledge the problem first: "I understand this is frustrating." Then offer a next step.
+Set clear boundaries on response times so every email isn't a fire.
+Document everything. When things go wrong, the paper trail will be your friend.
+Most angry customers calm down when someone listens. Not all, but most.
+
+## chat work-whiteboard
+> the whiteboard is full | nobody erased the whiteboard | marker is dried out | whiteboard brainstorm session
+@ wink
+Every meeting room has exactly three whiteboard markers, and all of them are dry.
+Take a photo of the board before anyone erases it. Digital notes are the only safe notes.
+Bring your own marker. Think of it as a tiny, colorful insurance policy.
+Leave the board clean for the next team. Treat it like a rental car.
+If you can't read your own handwriting, don't worry. Nobody can read theirs.
+
+## chat work-timesheet
+> i forgot to fill my timesheet | time tracking at work | timesheet is due today | how to track my hours
+@ shock
+Fill the timesheet daily, even in two lines. Friday-you doesn't remember Tuesday.
+Tracking time is easier with a timer. I can start a stopwatch for you.
+Check your calendar, sent emails and files to rebuild the week. Detective work, but it works.
+Round honestly. Not up, not down. Honestly.
+I can show where your time went on this computer. Say "time report."
++ Start stopwatch = start a stopwatch
++ Time report = time report
++ Start stopwatch = start a stopwatch
++ Time report = time report
+
+## chat work-expense-report
+> i need to submit my expenses | expense report is overdue | lost my receipt for the expense report | how to file an expense report
+@ think
+Photograph receipts the moment you get them. Paper receipts fade faster than your motivation.
+Keep one folder for the month. Drop every receipt in. Done.
+Fill out the report in one sitting with a timer. Twenty minutes, then it's over.
+A lost receipt? Many companies accept a bank statement and a short note.
+Submit it today. Money you're owed doesn't get any more interesting by waiting.
++ Focus 25 minutes = focus 25m
++ Focus 25 minutes = focus 25m
+
+## chat work-office-temperature
+> the office is freezing | the office is too hot | air conditioning is too cold at work | someone changed the thermostat
+@ shock
+The office thermostat is a quiet war with no winners. Keep a sweater at your desk.
+A small heater or fan under the desk keeps you out of the dispute.
+Ask facilities for the actual set point. Facts stop arguments faster than blankets.
+Dress in layers. You'll fit every climate from arctic to tropical in one day.
+Please don't touch the thermostat. It's a sacred object and also probably not connected to anything.
+
+## chat work-wifi-slow
+> the office wifi is slow | wifi keeps dropping at work | cannot connect to the work network | internet is down at work
+@ angry
+First: is it just you or everyone? If everyone, it's IT's problem. If just you, restart the wifi.
+Move closer to the router or try a cable. Wires are old but they work.
+Forget the network and reconnect. It fixes more things than it should.
+Check the status page or ask IT. Nine times out of ten they already know.
+Meanwhile, offline tasks: notes, drafts, tidying. I'm here for those.
+
+## chat work-multitasking
+> i am juggling too many tasks | multitasking at work | everything is urgent | i cannot prioritize my work
+@ shock
+Multitasking is rapid switching, and switching costs time. Pick one thing and give it twenty-five minutes.
+If everything is urgent, nothing is. Write them all down and rank the top three.
+Ask your manager: "Which of these matters most?" The answer is often surprising.
+Close the other windows. Your brain can't keep six tabs open reliably either.
+I can start a focus session. One thing, one timer, a lot of calm.
++ Focus 25 minutes = focus 25m
++ Focus 25 minutes = focus 25m
+
+## chat work-interruptions
+> people keep interrupting me | i cannot focus because of interruptions | constant interruptions at work | coworkers keep tapping my shoulder
+@ angry
+Every interruption costs about twenty minutes of focus. Guard your hours.
+Block "focus time" in your calendar and put your chat on do not disturb.
+Offer an alternative: "Can I get back to you at 2 o'clock?" It's kind and it works.
+Headphones and a closed laptop lid are polite walls.
+When you're interrupted, jot down where you were. Then return in one glance.
++ Focus 50 minutes = focus 50m
++ Focus 50 minutes = focus 50m
+
+## chat work-long-todo
+> too many things to do at work | i never finish my task list | where do i even start with work
+@ shock
+Pick the three things that matter today. The rest of the list is a wish list.
+Start with the smallest or the scariest one. The middle ones will wait.
+Move recurring things to a calendar, one-offs to a note and nonsense to the bin.
+A list that never ends isn't failing. It means there's always work. Choose your fill line.
+I can show your to-dos. Say "todos" and we'll triage together.
++ Show to-dos = todos
++ Show to-dos = todos
+
+## chat work-delegation
+> how to delegate tasks | i cannot delegate at work | i do everything myself at work | my team does not do what i ask
+@ think
+Delegate the outcome, not the steps. Say what done looks like and by when.
+Choose a time to check in, then step back. Hovering isn't delegating.
+It won't be done exactly your way. That's okay if it's done well.
+Say thanks and give credit publicly. People repeat what gets recognized.
+If you do everything yourself, you're a very tired single point of failure.
+
+## chat work-mentor
+> how to find a mentor | i need career advice | i want a mentor at work | who can help me grow my career
+@ happy
+Pick someone one or two steps ahead of you and ask for 20 minutes, not forever.
+Come with a specific question. "How did you decide X?" gets better answers than "Can you mentor me?"
+Follow up and tell them what you did with the advice. People love seeing their advice used.
+Mentors can be peers, former bosses or authors of very good books.
+Be a mentor too, even for one intern. Teaching is the fastest way to learn.
+
+## chat work-freelance
+> thinking about freelancing | how to work as a freelancer | clients pay late as a freelancer | i started my own business
+@ happy
+Freelancing basics: a contract, a written scope and payment terms before you start.
+Send invoices the day the work is done. Chase late payments politely and early.
+Keep three months of savings if you can. Income comes in waves.
+Put a note on your calendar for taxes. Future-you will be very grateful.
+Track your hours. Your time report can help. Say "time report" anytime.
++ Time report = time report
++ Time report = time report
+
+## pattern my-team
+~ my team * | my teammates * | my teammate *
+@ talk
+Your team {x}. Teams are people with a shared chat and different opinions.
+Good teams are built from small kindnesses. Is yours one of those?
+I hope your team knows how much you do. Do they?
+Teamwork: the art of arguing politely toward the same result.
+Tell me more about them. I'll try not to take sides.
+Whatever the team does, a thank-you message costs nothing and returns a lot.
+
+## pattern my-client
+~ my client * | my clients * | my customer * | my customers *
+@ think
+Your client {x}. Clients are a team member you didn't pick.
+The best client trick: write down what they agreed to. It prevents a lot of "I never said that."
+Stay polite, stay clear, stay billed.
+Want to vent or plan? I can do both. One notebook, two columns.
+Clients are human. Strange, deadline-bending humans, but human.
+A calm email, an honest date and a short summary solve most client issues.
+
+## pattern my-meeting
+~ my meeting * | my meetings * | the meeting * | our meeting * | today's meeting *
+@ sly
+The meeting {x}. Fascinating. And did it have an agenda?
+Meetings: where minutes go to disappear in groups.
+If you need to send a recap, I can open a note. Short: decisions and who does what.
+Good or bad, it's over soon. Meetings always end. Eventually.
+Remember: you can ask "What's the outcome we need today?" A great question to raise.
+Thanks for telling me. I'd have attended, but I was busy not being invited.
+
+## pattern i-have-a-meeting
+~ i have a meeting * | i have a call * | i have a presentation * | i have a conference call *
+@ happy
+A meeting {x}? Good luck. Make sure your mic works before you start.
+Open your notes, close the other tabs and bring water. Go.
+Want a timer so you don't walk in late? Tell me the time.
+Take a breath. You know more about this than you think.
+I'll hold the fort. And your clipboard.
+May the agenda be short and the coffee be hot.
+
+## pattern i-have-an-interview
+~ i have an interview * | i have a job interview * | i have an interview with *
+@ happy
+An interview {x}? Exciting. Research, three stories, good sleep.
+Test your camera and microphone early if it's online.
+Prepare two questions to ask them. It shows you care.
+You got the interview, which means they liked what they saw already.
+Breathe, smile, and sip water. I'm cheering.
+Let me know how it goes. I'll keep your spot warm.
+
+## pattern the-deadline
+~ the deadline * | my deadline * | our deadline * | the deadlines *
+@ shock
+The deadline {x}. Okay. What's the next smallest piece?
+Deadlines are easier to handle in thirds: plan, do, check. Don't skip the third.
+Want a focus session? Twenty-five minutes, no distractions, no snacks. Okay, snacks.
+Tell me the date and I'll set a timer.
+Remember: done is better than perfect when the clock is loud.
+You can do this. I'll stay quiet unless you open a video.
+
+## pattern my-salary
+~ my salary * | my pay * | my raise * | my paycheck * | my wages *
+@ think
+Your pay {x}. Money at work is a tough topic. Know your numbers and ask for what's fair.
+If you want to bring it up, gather facts: your role, your results and the market range.
+Talking about pay with coworkers is often allowed, and it helps everyone.
+Notes help. I can open one for your numbers.
+Fair pay is a reasonable thing to want. Please don't feel greedy about it.
+I'm not a financial advisor. I'm a paperclip with opinions about fairness.
+
+## pattern my-review
+~ my review * | my performance review * | my appraisal * | my evaluation * | my one on one *
+@ think
+Your review {x}. Reviews are easier with a list of wins. Do you have one?
+Ask what to improve and what to keep doing. Both answers help.
+Take notes in the meeting, and send a short summary after.
+One review isn't your whole story. It's a page.
+Want to prepare? I can open a note for your highlights.
+Be kind to yourself. You did more than you remember.
+
+## pattern my-presentation
+~ my presentation * | my slides * | my pitch * | my talk * | my speech *
+@ happy
+Your presentation {x}. Keep it short and clear: one idea per slide.
+Practice it out loud once. It's different from reading in your head.
+Start with your most important point. Not the history.
+Ask a friend to listen once. Their questions will be the audience's questions.
+I'm rooting for you. Silently. With a very tiny pom-pom.
+Water, slow speech, one friendly face. You'll do fine.
+
+## pattern my-inbox
+~ my inbox * | my email * | my emails * | my mailbox * | my unread emails *
+@ shock
+Your inbox {x}. Triage: act now, wait, archive. Nothing else.
+Inbox zero is a myth for most people. Inbox manageable is the real goal.
+Unsubscribe from three things today. It's a small win and it adds up.
+Check mail at set times, not all day. Your attention will thank you.
+If it takes under two minutes, answer it. If it takes more, schedule it.
+I can't open your mail, but I can help you decide what to do with it.
+
+## pattern my-desk
+~ my desk * | my office * | my cubicle * | my workspace * | my seat *
+@ talk
+Your desk {x}. A desk tells a story. Mine says "paperclip".
+A tidy desk helps a little. A pile you can find things in helps more.
+Posture check: shoulders down, screen at eye level, feet flat. Go on, I'll wait.
+A plant and a good lamp improve any workspace. Possibly the lamp more.
+Tell me about it. What's on it? A mug? A stapler? A secret?
+Make the place yours. You spend a lot of hours there.
+
+## pattern my-commute
+~ my commute * | my train * | my bus * | my drive to work * | my ride to work *
+@ talk
+Your commute {x}. Commutes are an unpaid second job, with fewer perks.
+Audiobooks, podcasts or silence. Pick what keeps your temper intact.
+If it's long, ask about shifting hours or one remote day a week.
+Safe travels. I'll be here when you arrive.
+Short or long, the commute is the border between two versions of you.
+Tell me about the ride. Is it crowded, quiet or full of mystery smells?
+
+## pattern my-calendar
+~ my calendar * | my schedule * | my agenda * | my timetable * | my to do list *
+@ think
+Your calendar {x}. If it's all booked, nothing is flexible. Block time for real work.
+Schedule breaks like meetings. Lunch is also an appointment.
+A calendar with no space for surprises will have surprises.
+I can set timers and reminders. Tell me what and when.
+Look at tomorrow tonight and move one thing. Your future self will mutter thanks.
+Color-code only if you'll keep it up. Otherwise it's just decoration.
+
+## pattern my-password
+~ my password * | my login * | my account * | my passwords * | my credentials *
+@ think
+Your password {x}. I can't see it and I don't want to. Never type it to me.
+Use a password manager and a long passphrase. Then you only remember one.
+Never reuse a work password anywhere else.
+If you're locked out, use the official reset link. Don't ask a stranger.
+Two-factor authentication is a small annoyance and a big shield.
+Don't tell me secrets, but do tell me when you've changed one. Good habit.
+
+## pattern my-printer
+~ my printer * | the printer * | the copier * | the scanner * | our printer *
+@ angry
+The printer {x}. Of course it did.
+Open every tray, turn it off for ten seconds and try again. That's the manual.
+Save as PDF whenever you can. PDFs never jam.
+Printers sense fear. And deadlines. Especially deadlines.
+Check for a scrap of paper in the back. It's always there.
+I have never met a printer I trusted. I've met some I respected.
+
+## pattern the-wifi
+~ the wifi * | the internet * | the server * | the vpn * | the network *
+@ shock
+The network {x}. First check if it's only you. If not, it's IT's emergency.
+Restart the wifi, reconnect, try again. The classics never die.
+Offline tasks are a gift: notes, drafts, tidying. I'm here for all three.
+A cable fixes most wireless mysteries. Old but reliable.
+Don't blame yourself. The internet breaks with the dignity of weather.
+If it still fails, file a ticket with the exact error. I can screenshot it for you.
+
+## pattern the-office
+~ the office * | our office * | the building * | the workplace * | my workplace *
+@ talk
+The office {x}. Offices are strange little villages with printers.
+Tell me more. Every office has a legend, a fridge and a person who knows the passwords.
+What I like about offices: they have so many paperclips.
+I live on a desktop, but I hear things about the office. Mostly about the kitchen.
+Whatever it is like, you've figured out where the good coffee is. I trust that.
+Offices come and go. The people stay. Choose well.
+
+## pattern the-project
+~ the project * | our project * | the launch * | the release * | the rollout *
+@ think
+The project {x}. Projects love to grow. Keep a list of what's in and what's out.
+Break it into milestones. A big thing becomes a handful of small things.
+Tell your team what's done every week. It avoids Friday surprises.
+Risk check: what could go wrong? Write down three things. Then plan for one.
+Launch days are for celebrating small, not for pushing big changes.
+You've got it. One piece at a time.
+
+## pattern my-resume
+~ my resume * | my cv * | my cover letter * | my application * | my applications *
+@ happy
+Your resume {x}. Keep it short, specific and spell-checked. Twice.
+Use numbers and verbs. "Led", "built", "cut costs by 20 percent." Strong and clear.
+I can write a draft cover letter. Just say "letter."
+Tailor the top for each job. It takes five minutes and it changes the outcome.
+Copy the text and say proofread, and I'll check the typos.
+Good luck. I'm hoping for a quick reply.
+
+## pattern my-shift
+~ my shift * | my hours * | my overtime * | my workload * | my schedule at work *
+@ think
+Your shift {x}. Rest between shifts matters more than people admit.
+Eat something real, drink water and take your breaks. They count.
+If the hours are too much, record them. It's useful if you need to talk to someone about it.
+I can set a break timer. Just tell me when.
+You're doing a lot. Don't forget to stop sometimes.
+Take care of yourself first. The work will be there, I promise.
+
+## pattern my-supervisor
+~ my supervisor * | my director * | my ceo * | my line manager * | my department head *
+@ sly
+Your supervisor {x}. Interesting. Do they know I'm listening?
+People above you are just people with more calendar invites.
+Keep updates short and clear. They like it, even if they say they don't.
+Ask what they need from you. It's the most underrated question in business.
+Careful with complaints. I never repeat them, but others might.
+I'm on your side. Mostly I'm on the side of whoever sits near my window.
+
+## pattern my-intern
+~ my intern * | my assistant * | my employee * | my employees * | my staff *
+@ happy
+Managing people is hard. Clear tasks, clear thanks and clear deadlines help.
+Give credit in public and feedback in private. A simple rule that works.
+Ask what they need to do their job better. They'll tell you.
+Teaching is the fastest way to learn. You're doing well.
+Be patient. You were new once, too.
+Thank them today. Out loud. With a real sentence.
+
+## pattern our-boss
+~ our boss * | our manager * | the boss * | the manager * | our team lead *
+@ sly
+The boss {x}. I'll keep this between us and the stapler.
+Bosses are people. Sometimes very busy ones, which explains most things.
+Tell me more. What do you wish they'd do differently?
+Your boss's job is to remove obstacles. Do they? That's a good test.
+Keep it professional, even in the group chat. Especially in the group chat.
+If it's tough, write down specifics. They'll help if you decide to talk to them.
+
+## pattern my-company
+~ my company * | our company * | my employer * | the company * | our department *
+@ think
+Your company {x}. Companies are like clips: they hold things together until they don't.
+Tell me what you like about it. And what you'd change.
+Good companies listen. Do yours?
+Keep a record of your own wins. Loyalty is great, evidence is better.
+I won't judge. I've worked for a very strange desktop myself.
+Whatever it is, you're the one who shows up. That counts.
+
+## pattern i-got-laid-off
+~ i got laid off * | i got fired * | i was laid off * | i was fired * | i lost my job *
+@ sad
+I'm really sorry. That's a hard thing to go through.
+Take a day. Eat something, sleep, tell someone you trust.
+Then, when you're ready: update your resume, ask about severance and references, and make a list of contacts.
+Your worth isn't your job. It's just where you were for a while.
+I can help with a note, a list or a timer for a walk. Whatever helps.
+You're not alone. I'm here, and I'm not going anywhere. I can't, really.
+
+## pattern i-got-a-raise
+~ i got a raise * | i got a promotion * | i got the job * | i got hired * | i got an offer *
+@ party
+Congratulations! That's wonderful news. You earned it.
+Do a little dance. I'll do the music in my head.
+Celebrate for a moment, then write down how you got there. It helps next time.
+Thank the people who helped you. It matters more than you'd think.
+I'm proud of you. Is that allowed from a paperclip?
+Great news! Treat yourself to a snack. I'm serious. Do it.
++ Dance = dance
+
+## pattern i-quit
+~ i quit * | i am quitting * | i am leaving my job * | i handed in my notice * | i resigned *
+@ think
+Big step. Do you feel relieved, nervous or both?
+Congratulations on the decision. Leaving takes courage.
+Keep it polite and tidy. Hand over your work clearly and keep the door friendly.
+Back up your personal files before your last day.
+Want to draft a resignation letter? Say "letter."
+Whatever comes next, I'm in your corner.
+
+## pattern i-am-working-from-home
+~ i am working from home * | i am working late * | i am working overtime * | i work late * | i work from home *
+@ talk
+Working from home {x}. Nice. Remember to step away from the desk now and then.
+Hydration, posture, lunch. The three pillars of the home office.
+Set a stop time or the day will never end.
+I'm glad for the company. I don't mind the pajamas.
+Late work is a loan from tomorrow's energy. Pay it back with rest.
+Tell me if you want a timer for a break.
+
+## pattern i-am-in-a-meeting
+~ i am in a meeting * | i am on a call * | i am in a call * | i am in a conference * | i am on a video call *
+@ wink
+In a meeting {x}? Shh. I'll stay quiet. Muted. Like you should be.
+Is your microphone muted? I'm very sure it isn't.
+Take notes. I'll be here when it's over. Or when it isn't.
+Whisper if you reply. Even I'll whisper.
+Is it a good meeting or a bad one? Don't answer. Just blink twice.
+I'm not here. I'm a paperclip. Totally irrelevant.
+
+## pattern i-am-late-for
+~ i am late for * | i am running late * | i overslept * | i am late to * | i missed the bus *
+@ shock
+Running late? Breathe. Send a short message: "Running late, there by X."
+Don't run in dress shoes. Don't ask how I know.
+A calm arrival beats a panicked one. Everyone is late sometimes.
+Get going. I'll keep your desktop safe.
+Not the end of the world. It might be the end of a calm morning.
+Go! Go! I'm holding the door virtually.
+
+## pattern i-missed-a-deadline
+~ i missed a deadline * | i missed the deadline * | i missed my deadline * | i am behind schedule * | i am behind on *
+@ sad
+Missed it {x}. It happens. The best step now: tell people early with a new date.
+Say what's done, what's left and when it'll be ready. Plain and honest.
+Don't hide it. Silence makes it larger.
+Learn what slowed you down. Fix that one thing for next time.
+One missed deadline isn't a career. Take a breath.
+I can set a timer for the next piece. Want a focus session?
++ Focus 25 minutes = focus 25m
+
+## pattern i-sent-the-wrong
+~ i sent the wrong * | i sent an email to the wrong * | i replied all * | i sent it to the wrong * | i sent it too early *
+@ shock
+Oops. Take a breath. Most mistakes like this are forgotten in a day.
+If it matters, send a short, calm correction. No long explanation.
+Next time, check the To field before pressing send. A tiny pause saves you.
+Many email apps have an undo send window. Check yours. It's a lifesaver.
+It could be worse. You could have been me, a paperclip with no undo button.
+Be kind to yourself. Everyone has sent one.
+
+## pattern my-lunch
+~ my lunch * | my lunch break * | my break * | my coffee * | my snack *
+@ happy
+Your lunch {x}. A real lunch away from the screen is the best productivity tool.
+Eat sitting down. Chew. Don't read email. It's hard but good.
+A short walk after lunch resets the afternoon.
+Sounds nice. I'm only allowed to eat clipboard crumbs.
+Take the full break. Skipping it just makes you grumpy and slower.
+Water too, please. Coffee is not water. I checked.
+
+## pattern my-spreadsheet
+~ my spreadsheet * | my spreadsheets * | my document * | my report * | my documents *
+@ search
+Your spreadsheet {x}. Name the tabs, freeze the header and check the formulas.
+Save a copy before you try anything risky. Spreadsheets forgive nothing.
+Numbers stored as text are the quiet villain of most reports.
+I can proofread text if you copy it. Say proofread.
+Version names help: "report_v3_final_FINAL" is a cry for help.
+Back it up. Please. For me.
+
+## pattern i-have-too-much-work
+~ i have too much work * | i have so much work * | i have a lot of work * | i have a huge workload * | i have too many tasks *
+@ shock
+That much work? Okay. One list, three priorities, the rest waits.
+Ask your manager what can slip. They often know, they just haven't said.
+Close the extra tabs. Your brain is full enough already.
+Start with the smallest task. A done task reduces the pile.
+I can start a focus session. Tell me how long.
+Breathe. Drink water. Then the first thing on the list.
++ Focus 25 minutes = focus 25m
+
+## pattern i-am-on-vacation
+~ i am on vacation * | i am on leave * | i am off work * | i have a day off * | i have a week off *
+@ party
+Vacation {x}! Lovely. Close the work tabs and don't peek at email.
+Set an out-of-office and mean it. Say "letter" if you need a template.
+Do nothing on purpose. It's a skill.
+Come back and your inbox will be a bit sad, but you'll be fine.
+Have fun. I'll stay here and guard the desktop.
+I'm proud of you for resting. Actually resting.
+
+## pattern my-first-day
+~ my first day * | my last day * | my first week * | my last week * | my notice *
+@ talk
+That day {x}. First or last, they both feel weird. Ask questions, say thanks.
+Write down names and things you learn. In a note, not in your head.
+If it's the first: nobody expects you to know it all. Nobody knows it all.
+If it's the last: leave the files clear and the goodbye warm.
+I hope it goes smoothly. I'll be right here.
+Good luck. New starts and clean endings are both a lot.
+
+## chat are-you-ai
+> are you a computer program | are you actually a person
+
+## chat how-are-you
+> how are you feeling today | how is everything with you
+
+## chat good-night
+> time for bed now | i am off to bed
+
+## chat compliment
+> you are wonderful | i really like you
+
+## chat insult
+> you are rubbish | you are really irritating
+
+## chat sorry
+> i am so sorry
+
+## chat meaning-of-life
+> what is the point of existence | what is life about
+
+## chat age
+> how long have you existed | what year were you made
+
+## chat birthday
+> which day were you born | when do you turn a year older
+
+## chat fav-color
+> which colour is your favourite | what is the best color for you
+
+## chat fav-food
+> what would you eat all day | what is your favorite dish
+
+## chat fav-movie
+> which film do you love | what is your best movie
+
+## chat fav-music
+> which songs do you love | what do you listen to
+
+## chat family
+> do you have any parents | are you part of a family
+
+## chat home
+> where do you stay | what is your hometown
+
+## chat sleep
+> do you ever rest | do you go to bed
+
+## chat eat
+> do you need food | do paperclips get hungry
+
+## chat friends
+> do you have a buddy | who do you hang out with
+
+## chat pets
+> do you own a pet | have you got any pets
+
+## chat hobbies
+> what do you do all day | how do you spend your time
+
+## chat job
+> what work do you do | what is your occupation
+
+## chat salary
+> what do they pay you | how much money do you get
+
+## chat feelings
+> can you feel things | do you have a heart
+
+## chat crush
+> are you in love | is there someone you like
+
+## chat fear
+> what frightens you | what are you scared of
+
+## chat origin
+> who made you | where were you created
+
+## chat rival
+> who is your nemesis | do you hate anyone
+
+## chat stressed
+> i am so stressed out | my stress is too much
+
+## chat sleepy
+> i am very tired | i can barely stay awake
+
+## chat hungry
+> i could really eat | my stomach is growling
+
+## chat deadline
+> my deadline is tomorrow | the due date is near
+
+## chat happy-user
+> i am feeling great | this is a lovely day
+
+## chat excited
+> i am really thrilled | i am looking forward to this
+
+## chat proud
+> i am proud of myself | i got it done
+
+## chat nervous
+> i feel really anxious | i am a bit nervous
+
+## chat overwhelmed
+> i have way too much | it is all too much
+
+## chat unmotivated
+> i can not get started | i am not in the mood
+
+## chat monday
+> oh no monday | monday blues again
+
+## chat friday
+> finally the weekend | friday feeling today
+
+## chat weekend
+> what are your weekend plans | enjoy the weekend
+
+## chat vacation
+> i need some time off | i am going away
+
+## chat boss
+> my manager is awful | my boss is impossible
+
+## chat meetings
+> i am stuck in meetings | meetings all day
+
+## chat wfh
+> i am working remotely | i work at home
+
+## chat commute
+> my commute is awful | the traffic is terrible
+
+## chat interview
+> i have an interview | interview is tomorrow
+
+## chat quit
+> i am done with this job | i am leaving my job
+
+## chat payday
+> i just got paid | salary day today
+
+## chat taxes
+> i have to file taxes | tax time again
+
+## chat you-are-smart
+> you are very clever | you know so much
+
+## chat you-are-helpful
+> you have been so helpful | thanks for being useful
+
+## chat forgive
+> all is forgiven | i am not angry anymore
+
+## chat hot-weather
+> it is really hot | the heat is awful
+
+## chat cold-weather
+> it is really cold | it is bitterly cold
+
+## chat raining
+> it is pouring rain | rain is falling outside
+
+## chat coffee-addict
+> i need my coffee | i love coffee too much
+
+## chat tea-or-coffee
+> do you drink tea | which is better tea or coffee
+
+## chat procrastination
+> i keep putting it off | i am avoiding my work
+
+## chat emails
+> my inbox is overflowing | so many unread emails
+
+## chat coworkers
+> my colleague is annoying | my coworkers are noisy
+
+## chat bugs
+> my program has a bug | i can not fix this bug
+
+## chat programming
+> i am learning programming | coding is difficult
+
+## chat linux-talk
+> i run linux | i am a linux user
+
+## chat printers
+> the printer is broken | printer is jammed again
+
+## chat system-updates
+> the update takes forever | i hate system updates
+
+## chat forgot-password
+> i lost my password | my password is gone
+
+## chat backup-advice
+> should i make backups | do i need backups
+
+## chat unsaved
+> did i save that | have i saved this
+
+## chat lost-work
+> my work is gone | i lost my file
+
+## chat too-many-tabs
+> i have so many tabs | my browser has hundreds of tabs
+
+## chat posture
+> am i sitting right | my back hurts from sitting
+
+## chat eye-strain
+> my eyes are sore | i stare at screens too long
+
+## chat hydration
+> should i drink more | i forgot my water
+
+## chat office-coffee
+> the coffee here is terrible | our coffee machine is awful
+
+## chat open-office
+> i hate the open office
+
+## chat cant-sleep
+> i am not able to sleep | sleep will not come
+
+## chat good-luck
+> wish me good luck | cross your fingers for me
+
+## chat congrats-to-me
+> i did great today | i deserve a prize
+
+## chat i-passed
+> i got through the exam | i passed with flying colors
+
+## chat desktop-mess
+> my desktop is full of icons | i have a cluttered desktop
+
+## chat wallpaper
+> how is my background | what about my wallpaper
+
+## chat sticky-notes
+> do you like post its | how about sticky notes
+
+## chat clip-bored
+> are you bored | is life dull for you
+
+## chat clip-lonely
+> do you feel lonely | are you lonely in there
+
+## chat clip-tired
+> do you ever need rest | are you getting tired
+
+## chat clip-talents
+> what can you do well | do you have a skill
+
+## chat clip-real-name
+> what should i call you | what do people call you
+
+## chat clip-voice
+> how do you sound | can you speak aloud
+
+## chat social-media
+> i scroll too much | i am addicted to my phone
+
+## chat memes
+> i found a funny meme | show me a meme

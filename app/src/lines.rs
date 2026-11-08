@@ -602,6 +602,25 @@ mod tests {
     }
 
     #[test]
+    fn tips_and_occasions_are_well_formed() {
+        let all = built_in();
+        let kinds: Vec<&str> = all.iter().filter_map(|s| s.name.strip_prefix("window ")).collect();
+        let tips: Vec<&Section> = all.iter().filter(|s| s.name.starts_with("tips ")).collect();
+        assert!(tips.len() >= 30, "only {} tip pools", tips.len());
+        for t in &tips {
+            let kind = &t.name["tips ".len()..];
+            assert!(kinds.contains(&kind) || ["desktop", "general"].contains(&kind), "tips for an unknown window kind: {kind}");
+            assert!(t.lines.len() >= 4, "{}: only {} tips", t.name, t.lines.len());
+        }
+        for s in all.iter().filter(|s| s.name.starts_with("occasion ")) {
+            let id = &s.name["occasion ".len()..];
+            let date = id.split(' ').next().unwrap_or_default();
+            assert!(id == "friday13" || chrono::NaiveDate::parse_from_str(&format!("2024-{date}"), "%Y-%m-%d").is_ok(), "bad occasion date: {id}");
+            assert!(s.lines.len() >= 3, "{}: too few lines", s.name);
+        }
+    }
+
+    #[test]
     fn unhinged_overlay_keeps_structure() {
         let (base, _) = database(false);
         let (over, _) = database(true);

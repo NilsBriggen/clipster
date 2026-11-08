@@ -2708,3 +2708,666 @@ A hefty merge! Your drive has never been prouder.
 That's a big one. It might need its own folder.
 Look at the size of that! Compressing it would hurt its feelings.
 Huge! The files are cheering. In very quiet beeps.
+
+## template cover_letter
+> cover letter | covering letter | job application | apply for a job | application letter
+Subject: Application for [job title]\n\nDear [Hiring manager's name],\n\nI am writing to apply for the [job title] position at [company], which I found on [where you saw the advert]. With [number] years of experience in [your field], I believe I can contribute to your team from the start.\n\nIn my current role as [current job title] at [current employer], I [your main responsibility or achievement]. I have also [a second relevant skill or achievement], which I understand is important for this position.\n\nWhat attracts me to [company] is [a specific reason]. I would welcome the opportunity to discuss how my background fits your needs.\n\nThank you for your time and consideration. My CV is attached, and I can be reached at [phone or email].\n\nYours sincerely,\n{name}\n{date}
+
+## template complaint
+> complaint | complain | refund | faulty | defective | bad service
+Subject: Complaint regarding [product or service], order [reference number]\n\nDear [Company or contact name],\n\nI am writing to complain about [product or service], which I [bought or received] on [date of purchase]. The reference number is [order or account number].\n\nThe problem is as follows: [describe what went wrong, with dates and facts]. This does not meet what was advertised or agreed.\n\nI would like you to [refund the full amount, replace the item, or repair the problem] by [reasonable deadline]. I have attached [receipts, photos, or other evidence].\n\nPlease confirm receipt of this letter and let me know how you plan to resolve the matter. If I do not hear from you by [date], I will consider taking further steps.\n\nYours faithfully,\n{name}\n{date}
+
+## template thank_you
+> thank you letter | thank you note | thank you email | say thanks | show gratitude
+Subject: Thank you for [what they did]\n\nDear [Name],\n\nThank you very much for [what they did or gave]. It really made a difference, and I appreciate the time and care you put into it.\n\n[One specific detail about how it helped you or what you enjoyed.]\n\nI hope I can return the favour someday. Please let me know if there is ever anything I can do for you.\n\nWith many thanks,\n{name}\n{date}
+
+## template resignation
+> resignation | resign | quit my job | leaving my job | notice of leaving | hand in notice
+Subject: Resignation from my position as [job title]\n\nDear [Manager's name],\n\nPlease accept this letter as formal notice that I am resigning from my position as [job title] at [company]. My last working day will be [last day], in line with my [number]-week notice period.\n\nThank you for the opportunities I have had during my time here. I have valued working with the team and learned a great deal.\n\nI am happy to help make the transition smooth, including [handing over projects, training a colleague, or documenting my work] before I leave. Please let me know how I can best support this.\n\nKind regards,\n{name}\n{date}
+
+## template out_of_office
+> out of office | auto reply | automatic reply | away message | vacation reply | on holiday
+Subject: Out of office: back on [return date]\n\nHello,\n\nThank you for your message. I am out of the office from [start date] until [return date], with limited access to email.\n\nI will reply when I return. If your matter is urgent, please contact [colleague's name] at [colleague's email or phone], who can help in my absence.\n\nKind regards,\n{name}
+
+## template apology
+> apology | apologise | apologize | say sorry | letter of apology | make amends
+Subject: My apologies for [what happened]\n\nDear [Name],\n\nI want to apologise for [what happened] on [date]. It was my mistake, and I am sorry for the [inconvenience, confusion, or upset] it caused you.\n\n[One sentence explaining what went wrong, without making excuses.]\n\nTo make it right, I will [what you will do], and I will [what you will change so it does not happen again].\n\nThank you for your patience and understanding. If there is anything else I can do, please tell me.\n\nSincerely,\n{name}\n{date}
+
+## template invitation
+> invitation | invite | invite people | party invite | event invitation | you are invited
+Subject: You are invited: [event name] on [date]\n\nDear [Name],\n\nWe would be delighted if you could join us for [event name].\n\nDate: [date]\nTime: [start time] to [end time]\nPlace: [venue and address]\n\n[One or two lines about the event, dress code, or what to bring.]\n\nPlease let us know by [RSVP date] whether you can come, by replying to this message or contacting [name and phone or email].\n\nWe hope to see you there.\n\nBest wishes,\n{name}\n{date}
+
+## template follow_up
+> follow up | following up | checking in | no reply yet | chase up | reminder email
+Subject: Following up on [topic]\n\nDear [Name],\n\nI am following up on my [email or conversation] of [date] about [topic]. I understand you are busy, so I wanted to check whether you had a chance to look at it.\n\nTo recap: [one or two sentences with the key point or the question].\n\nCould you let me know [what you need from them] by [date]? If it would help, I am happy to [offer a call, extra information, or a shorter summary].\n\nThank you for your time.\n\nBest regards,\n{name}\n{date}
+
+## template meeting_request
+> meeting request | request a meeting | schedule a meeting | book a meeting | set up a call | arrange a meeting
+Subject: Meeting request: [topic]\n\nDear [Name],\n\nI would like to arrange a meeting to discuss [topic]. It should take about [duration, e.g. 30 minutes] and would cover [main points or decisions needed].\n\nI am available on:\n- [option 1: day, date and time]\n- [option 2: day, date and time]\n- [option 3: day, date and time]\n\nIf none of these suit you, please suggest another time. We could meet [in person at location, by phone, or by video call].\n\nThank you, and I look forward to hearing from you.\n\nBest regards,\n{name}\n{date}
+
+## template sick_day
+> sick day | calling in sick | sick leave | not well | absence email | off sick
+Subject: Absence from work today, [date]\n\nDear [Manager's name],\n\nI am not well enough to work today, [date], and I am writing to let you know I will be off sick. I expect to return on [expected return date], and I will keep you updated if that changes.\n\nI have [passed on urgent tasks to a colleague, or noted the tasks that need attention] so that nothing is held up. You can reach me by [phone or email] if something cannot wait.\n\nI am sorry for the short notice and any inconvenience.\n\nKind regards,\n{name}\n{date}
+
+## template reference_request
+> reference request | ask for a reference | recommendation letter | be my referee | job reference | referee
+Subject: Request for a reference\n\nDear [Name],\n\nI hope you are well. I am applying for [job, course, or role] at [organisation], and I wondered whether you would be willing to act as a reference for me.\n\nWe worked together at [company or place] from [year] to [year], when I [your role and a project or achievement you shared]. I believe you are well placed to speak about my [skills or qualities].\n\nThe deadline for the reference is [date]. I can send you my CV and the job description to make it easier. If you do not have time, I completely understand.\n\nThank you very much for considering this.\n\nBest wishes,\n{name}\n{date}
+
+## template landlord
+> landlord | letter to landlord | tenant | rental repair | repair request | flat repair
+Subject: Request for repair at [address]\n\nDear [Landlord's or agent's name],\n\nI am the tenant of [address and flat number] and I am writing about [description of the problem, e.g. a leaking pipe in the bathroom]. I first noticed it on [date].\n\nThe problem affects [how it affects daily life or the property], and I would be grateful if you could arrange a repair. I am at home on [days and times] and can give access to a contractor.\n\nCould you please confirm by [date] when the work will be carried out? I have attached [photos or earlier messages] for reference.\n\nThank you for your help.\n\nYours sincerely,\n{name}\n{date}
+
+## template_intro
+Here's a draft. Fill in the [brackets] and it's done.
+Draft copied to your clipboard. Replace everything in [square brackets].
+I wrote it so you don't have to start from a blank page. Edit freely.
+It's on your clipboard. Paste it, fill in the [brackets], and read it once before sending.
+A plain, polite draft. Swap in your own details and it will do the job.
+Copied. The [brackets] are yours to fill. I can't guess your reference number.
+Template ready. Trim anything that doesn't apply, and keep it short.
+There. Paste it into a new document and fix the [brackets].
+Done, and it's already on the clipboard. Check the dates and names twice.
+Here's a starting point. Add your own details and tone it up or down.
+
+## template_choose
+Which kind of letter? Cover letter, complaint, thank you, resignation, out of office, apology, invitation...
+I have drafts for most occasions. Tell me what it's for: a complaint, a resignation, a sick day?
+What are we writing? Say something like "resignation letter" or "meeting request".
+Name the occasion and I'll hand you a draft. Cover letter, apology, landlord, reference...
+Tell me the kind: complaint, invitation, follow-up, thank you, or something else on my list.
+Pick a letter type. I know twelve, and none of them is a love letter.
+
+## proof_clean
+I read it twice. Nothing to fix. Annoying, really.
+No problems found. Either you're good or I'm missing something.
+Clean. I have no notes, which is rare for me.
+Looks fine to me. Send it before you change your mind.
+Not a single issue. I'm a little disappointed.
+Spotless, as far as I can tell. Go.
+
+## proof_intro
+I found {n} things to look at.
+{n} possible issues. None fatal, probably.
+I spotted {n} things worth fixing.
+Proofread done: {n} items for you.
+{n} points flagged. Skim them before you send.
+Found {n}. Don't take it personally.
+
+## proof_fixed
+I copied a corrected version to your clipboard. Check it before you paste.
+Fixed copy is on the clipboard. Read it once anyway.
+Cleaned up and copied. Paste over the original if you agree.
+Corrected text is ready to paste. Your original is untouched.
+Done. The fixed version is on your clipboard, waiting.
+I tidied it and copied it. You still have the final say.
+
+## proof_doubled
+You wrote "{x}" twice in a row.
+Doubled word: "{x} {x}". One is enough.
+"{x}" appears twice in a row. A typo, probably.
+Look at "{x} {x}". I think one of them is a guest.
+The word "{x}" is doubled. Delete one.
+I see "{x}" twice, back to back. Easy fix.
+
+## proof_misspelled
+"{x}" should be "{y}".
+You wrote "{x}". I'd go with "{y}".
+Spelling: "{x}" becomes "{y}".
+"{x}" is a common slip. It's "{y}".
+Small thing: "{y}", not "{x}".
+Everyone writes "{x}" sometimes. The right spelling is "{y}".
+
+## proof_a_an
+"a" or "an" before "{x}"? Check which one sounds right.
+The article before "{x}" looks wrong. Say it out loud.
+Before "{x}" you probably want the other one: a or an.
+"a" versus "an" before "{x}". Sound decides, not spelling.
+I think the "a" or "an" in front of "{x}" is off.
+Read it aloud: does the article before "{x}" fit?
+
+## proof_its
+"its" or "it's"? Only "it's" means "it is" or "it has".
+Check your "its": the apostrophe version is short for "it is".
+Something's off with its/it's. Try replacing it with "it is".
+"it's" is "it is". "its" is possession. One of yours is swapped.
+Quick test for its/it's: say "it is". If that works, use the apostrophe.
+An its/it's mix-up. Famous for a reason.
+
+## proof_your
+"your" or "you're"? "You're" means "you are".
+Check your/you're. Try saying "you are" and see if it fits.
+A your/you're mix-up. It happens to the best of us.
+"you're" is "you are". "your" belongs to you. One of them is swapped.
+Something's wrong with your/you're. Use "you are" as a test.
+Your/you're again. It's the most common one there is.
+
+## proof_then
+"then" or "than"? Use "than" to compare, "then" for time.
+Check then/than. If you're comparing two things, it's "than".
+A then/than slip. "Bigger than", never "bigger then".
+"than" compares, "then" follows in time. One of yours looks swapped.
+Hmm: then or than? Comparisons take "than".
+Then/than mix-up. It's the sneakiest one.
+
+## proof_spaces
+You have a double space or a stray space before punctuation.
+A few extra spaces crept in. Shall we remove them?
+Spacing is uneven: two spaces in a row, or one before a comma.
+There's a space too many somewhere. I counted.
+Stray spaces found. Nobody will notice, except everybody.
+Spacing issue: one space between words is the standard.
+
+## proof_capital
+A sentence doesn't start with a capital letter.
+Capital letter missing at the start of a sentence.
+Check your capitals. A sentence begins with one.
+Sentence start in lowercase. Fix it, and "I" as well.
+A lowercase sentence start. Small, but it shows.
+Capital needed at the beginning of a sentence. Also for "I".
+
+## proof_shouting
+That's a lot of capitals or exclamation marks. Is it shouting?
+ALL CAPS reads as shouting. Lowercase is friendlier.
+Three exclamation marks is a lot. One is plenty.
+Tone check: capitals and exclamation marks make it feel angry.
+It looks like shouting. Calmer text gets better answers.
+Too loud. Remove a few capitals and "!!!" before you send it.
+
+## proof_long
+One sentence has {n} words. Consider splitting it.
+A sentence with {n} words is hard to follow. Break it up.
+{n} words in one sentence. Use a full stop somewhere.
+Long sentence: {n} words. Your reader needs to breathe.
+That sentence runs {n} words. Two shorter ones read better.
+{n} words without a full stop. Try cutting it in half.
+
+## proof_hard
+This is hard to read: long sentences and long words.
+Dense text. Shorter sentences would help your reader.
+Reading level is high. Plain words travel further.
+It's heavy going. Cut the long words and the long sentences.
+A reader will struggle with this. Simplify where you can.
+Hard to read. Try one idea per sentence.
+
+## proof_easy
+Easy to read. Short sentences, plain words.
+Very readable. Clear and simple.
+Smooth. A reader won't stumble anywhere.
+Good readability. Nothing to simplify.
+This reads easily. Well done.
+Plain and clear. That's the goal.
+
+
+## misspellings
+definately | definitely
+recieve | receive
+seperate | separate
+occured | occurred
+occurence | occurrence
+occurrance | occurrence
+untill | until
+wich | which
+accomodate | accommodate
+accomodation | accommodation
+acheive | achieve
+acheivement | achievement
+adress | address
+agressive | aggressive
+aquire | acquire
+aquaintance | acquaintance
+acquaintence | acquaintance
+alot | a lot
+apparant | apparent
+apparantly | apparently
+arguement | argument
+athiest | atheist
+begining | beginning
+beleive | believe
+belive | believe
+bizzare | bizarre
+buisness | business
+bussiness | business
+calender | calendar
+catagory | category
+cemetary | cemetery
+changable | changeable
+collegue | colleague
+colleage | colleague
+comming | coming
+commited | committed
+commitee | committee
+comittee | committee
+completly | completely
+concious | conscious
+consciencious | conscientious
+critisism | criticism
+curiousity | curiosity
+decieve | deceive
+definate | definite
+definitly | definitely
+dilemna | dilemma
+disapoint | disappoint
+dissapoint | disappoint
+dissappear | disappear
+disapear | disappear
+doesnt | doesn't
+dont | don't
+embarass | embarrass
+embarrasment | embarrassment
+enviroment | environment
+equiptment | equipment
+exagerate | exaggerate
+excercise | exercise
+exellent | excellent
+existance | existence
+experiance | experience
+extreemly | extremely
+facinating | fascinating
+familar | familiar
+febuary | february
+finaly | finally
+foriegn | foreign
+forseeable | foreseeable
+fourty | forty
+freind | friend
+fullfil | fulfil
+futher | further
+gaurd | guard
+generaly | generally
+goverment | government
+gratefull | grateful
+guage | gauge
+happend | happened
+harrass | harass
+heighth | height
+heirarchy | hierarchy
+humourous | humorous
+hygene | hygiene
+ignorence | ignorance
+immediatly | immediately
+independant | independent
+indispensible | indispensable
+inteligent | intelligent
+intresting | interesting
+interupt | interrupt
+irrelevent | irrelevant
+knowlege | knowledge
+knowledgable | knowledgeable
+liason | liaison
+libary | library
+lisence | license
+maintainance | maintenance
+managment | management
+millenium | millennium
+miniscule | minuscule
+mischievious | mischievous
+neccessary | necessary
+necesary | necessary
+neccesary | necessary
+noticable | noticeable
+occassion | occasion
+occassionally | occasionally
+occurrs | occurs
+oppurtunity | opportunity
+opertunity | opportunity
+orignal | original
+parliment | parliament
+particulary | particularly
+persistant | persistent
+personell | personnel
+posession | possession
+possesion | possession
+potatos | potatoes
+prefered | preferred
+presance | presence
+priviledge | privilege
+probaly | probably
+probly | probably
+professer | professor
+pronounciation | pronunciation
+publically | publicly
+questionaire | questionnaire
+realy | really
+reccomend | recommend
+recomend | recommend
+refered | referred
+relevent | relevant
+religous | religious
+remeber | remember
+resistence | resistance
+responsability | responsibility
+restaraunt | restaurant
+resturant | restaurant
+rythm | rhythm
+scedule | schedule
+schedual | schedule
+sieze | seize
+similiar | similar
+sincerly | sincerely
+speach | speech
+succesful | successful
+successfull | successful
+sucessful | successful
+supercede | supersede
+suprise | surprise
+surprize | surprise
+tendancy | tendency
+threshhold | threshold
+tommorow | tomorrow
+tomorow | tomorrow
+tounge | tongue
+truely | truly
+tyrany | tyranny
+underate | underrate
+unfortunatly | unfortunately
+unforseen | unforeseen
+unneccessary | unnecessary
+usualy | usually
+vaccum | vacuum
+vacume | vacuum
+vegtable | vegetable
+vehical | vehicle
+visable | visible
+wierd | weird
+withold | withhold
+writting | writing
+yeild | yield
+adresses | addresses
+aggresive | aggressive
+agressively | aggressively
+allready | already
+amatuer | amateur
+anual | annual
+anwser | answer
+answear | answer
+appearence | appearance
+appologise | apologise
+arround | around
+assasination | assassination
+asociation | association
+assocation | association
+atempt | attempt
+attendence | attendance
+availible | available
+avalable | available
+awfull | awful
+bankrupcy | bankruptcy
+basicly | basically
+becuase | because
+becasue | because
+beacuse | because
+befor | before
+beutiful | beautiful
+beautifull | beautiful
+begginer | beginner
+beggining | beginning
+brillant | brilliant
+brocolli | broccoli
+bureacracy | bureaucracy
+burgler | burglar
+camoflage | camouflage
+carribean | caribbean
+cheif | chief
+chocolat | chocolate
+choosen | chosen
+cieling | ceiling
+clasic | classic
+comparision | comparison
+competative | competitive
+competion | competition
+completetly | completely
+comunicate | communicate
+comunication | communication
+comunity | community
+concensus | consensus
+congradulations | congratulations
+conscence | conscience
+consistant | consistent
+contraversy | controversy
+convienient | convenient
+convinient | convenient
+corperation | corporation
+critcal | critical
+dammage | damage
+decison | decision
+defintion | definition
+definatly | definitely
+delibrate | deliberate
+dependant | dependent
+desparate | desperate
+developement | development
+diffrent | different
+differnt | different
+dificult | difficult
+difficulity | difficulty
+disasterous | disastrous
+disipline | discipline
+discription | description
+dissapointed | disappointed
+doccument | document
+documment | document
+dosent | doesn't
+easly | easily
+eigth | eighth
+elligible | eligible
+eligable | eligible
+emmigrate | emigrate
+enought | enough
+entrence | entrance
+equivalant | equivalent
+especialy | especially
+evidance | evidence
+excelent | excellent
+exept | except
+expecialy | especially
+explaination | explanation
+extention | extension
+familiy | family
+favorit | favorite
+feasable | feasible
+fianlly | finally
+flourescent | fluorescent
+forign | foreign
+gaurantee | guarantee
+garantee | guarantee
+grammer | grammar
+gramar | grammar
+greatful | grateful
+guidence | guidance
+hankerchief | handkerchief
+harasment | harassment
+hieght | height
+hierachy | hierarchy
+hipocrit | hypocrite
+hopefull | hopeful
+imediately | immediately
+immediatley | immediately
+incidently | incidentally
+incredable | incredible
+inevitible | inevitable
+infomation | information
+informaton | information
+inital | initial
+initialy | initially
+innoculate | inoculate
+intellegent | intelligent
+interferance | interference
+interpet | interpret
+intrest | interest
+invitaion | invitation
+irrisistible | irresistible
+jewelery | jewellery
+labratory | laboratory
+languege | language
+lenght | length
+liesure | leisure
+liklihood | likelihood
+likly | likely
+liscense | license
+magasine | magazine
+mantain | maintain
+marrage | marriage
+mathmatics | mathematics
+medicin | medicine
+medeval | medieval
+mispell | misspell
+momento | memento
+morgage | mortgage
+mysterous | mysterious
+naturaly | naturally
+neice | niece
+neigbour | neighbour
+nieghbor | neighbor
+ninty | ninety
+noticeing | noticing
+nuiscance | nuisance
+obstacal | obstacle
+ocassion | occasion
+ocurred | occurred
+offical | official
+ommision | omission
+omited | omitted
+oportunity | opportunity
+oppinion | opinion
+oppisite | opposite
+orginal | original
+outragous | outrageous
+pallete | palette
+paralell | parallel
+pasttime | pastime
+pavillion | pavilion
+peice | piece
+percieve | perceive
+perfomance | performance
+perhapse | perhaps
+permanant | permanent
+perseverence | perseverance
+personnell | personnel
+persue | pursue
+phenomenom | phenomenon
+playwrite | playwright
+politican | politician
+posibility | possibility
+posible | possible
+practicly | practically
+preceed | precede
+predjudice | prejudice
+presense | presence
+prevelant | prevalent
+priviledged | privileged
+proceedure | procedure
+proffesional | professional
+profesional | professional
+promiss | promise
+prominant | prominent
+propoganda | propaganda
+psycology | psychology
+publicaly | publicly
+puting | putting
+quantaty | quantity
+quarentine | quarantine
+quater | quarter
+readible | readable
+reasearch | research
+recepient | recipient
+receit | receipt
+recieved | received
+reciept | receipt
+recomendation | recommendation
+reconize | recognize
+refering | referring
+referance | reference
+regluar | regular
+relevence | relevance
+reluctent | reluctant
+remmember | remember
+rember | remember
+repitition | repetition
+reponsible | responsible
+representitive | representative
+requirment | requirement
+reqiure | require
+resturaunt | restaurant
+resouces | resources
+rediculous | ridiculous
+ridiculus | ridiculous
+sacrilegous | sacrilegious
+safty | safety
+saftey | safety
+salery | salary
+satelite | satellite
+scarey | scary
+scheduel | schedule
+sciene | science
+sence | sense
+sentance | sentence
+seperately | separately
+sherrif | sheriff
+shedule | schedule
+signiture | signature
+skillfull | skilful
+sociaty | society
+sofware | software
+softare | software
+speciffic | specific
+specificaly | specifically
+stuborn | stubborn
+studing | studying
+sucess | success
+sucessfully | successfully
+suficient | sufficient
+sufficent | sufficient
+supose | suppose
+suposed | supposed
+suprised | surprised
+suprisingly | surprisingly
+survielance | surveillance
+susceptable | susceptible
+symetry | symmetry
+tecnology | technology
+techncal | technical
+temperture | temperature
+temprature | temperature
+tenent | tenant
+thankfull | thankful
+thier | their
+theif | thief
+theyre | they're
+throught | thought
+tomatos | tomatoes
+tradgedy | tragedy
+transfered | transferred
+transmision | transmission
+trully | truly
+twelth | twelfth
+ubiquitus | ubiquitous
+undoubtably | undoubtedly
+unfortunatley | unfortunately
+univerity | university
+univeristy | university
+unkown | unknown
+unnecesary | unnecessary
+unusuall | unusual
+upto | up to
+useable | usable
+vaccuum | vacuum
+valueable | valuable
+varient | variant
+vengance | vengeance
+verison | version
+vigourous | vigorous
+villian | villain
+volonteer | volunteer
+wellcome | welcome
+whereever | wherever
+whitch | which
+wholely | wholly
+wating | waiting
+wendsday | wednesday
+wensday | wednesday
+wherabouts | whereabouts
+willingnes | willingness
+writen | written
+yatch | yacht
+yesturday | yesterday
+youre | you're

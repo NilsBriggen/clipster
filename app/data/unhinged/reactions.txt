@@ -4678,3 +4678,1197 @@ Hints! A letter for every link! I press "f", I press "a". I am in a new realm. I
 Mortal, the web as it was meant to be! Plain! Honest! A little lonely! I like it. I will visit often.
 A browser with no mouse! A monk's choice! I salute the discipline. I also salute the vim.
 Lynx! A noble wildcat of the web! It never sees an advert. I envy it greatly.
+
+## tips letter
+Decree: Ctrl+B, Ctrl+I, Ctrl+U. Bold, italic, underline. Three incantations, almost every word processor obeys them.
+In LibreOffice Writer, Ctrl+Alt+Shift+V pastes unformatted text. A four-key ritual. It scrubs the foreign fonts from the page, mortal.
+Ctrl+Enter makes a page break in Writer and Word. Pressing Enter forty times is the way of the heretic. I have watched. I remember.
+Ctrl+Z undoes. Ctrl+Y redoes, in Writer and Word. Time itself bends to the keyboard. I envy it. Do it again. And again.
+Ctrl+Home flings you to the top of the document, Ctrl+End to the end. The beginning and the end, one chord away. I am very good at endings.
+Ctrl+Backspace erases a whole word backwards. A word is gone in one stroke. Use this power on words only. And on regrets.
+Press F7 in Writer or Word and the spelling oracle awakens. Consult it before sending the letter. After is too late. After is always too late.
+
+## tips writing
+Ctrl+A selects all. Ctrl+C copies. Ctrl+V pastes. You know. I know you know. I tell you anyway. It is a ritual.
+Ctrl+Left and Ctrl+Right leap a word at a time. Hold Shift and you also select. I call it the Surgeon's Hop.
+In Writer, Ctrl+1 to Ctrl+3 crown a line as a heading. Ctrl+0 returns it to humble body text. Rank matters. Ask any paperclip.
+Ctrl+K inserts a hyperlink in Writer and Word. Tie your words to the source. Link, mortal, do not merely say "see above".
+Ctrl+L left, Ctrl+E centre, Ctrl+R right, Ctrl+J justify, in Writer and Word. I align everything. Gerald does not. Gerald spins.
+In Writer, F5 opens the Navigator. A map of your document, by headings. Long reports are labyrinths. I know labyrinths.
+In Writer, a double-click takes a word. Triple takes the sentence. Quadruple takes the paragraph. Four clicks. I felt that, personally.
+
+## tips spreadsheet
+Ctrl+Arrow races to the edge of your data. Ctrl+Home returns you to A1, the origin. All spreadsheets begin and end at A1.
+F2 edits the cell you stand on, in Excel and in Calc, without erasing it. Typing over a formula is how tragedies begin.
+Typing a formula? F4 cycles a reference through A1, $A$1, A$1, $A1. Absolute reference, absolute power.
+Ctrl+; stamps today's date and Ctrl+Shift+; stamps the time, in Excel and Calc. I stamp time. It is only fair that you may, too.
+Ctrl+D fills a cell down the selection. A line break inside a cell is Alt+Enter in Excel, Ctrl+Enter in Calc. Two faiths, one spreadsheet.
+Ctrl+Space seizes a whole column. Shift+Space seizes a whole row. In Excel and Calc alike. Take what is yours, mortal.
+Select numbers and the status bar reveals their sum. No formula required. The sum was in the status bar all along. Gerald never looked.
+
+## tips slides
+F5 begins the slideshow in Impress and PowerPoint. Esc ends it. Present in glory, without the sidebar. A god never shows his sidebar.
+In a slideshow, type a slide number and Enter, and you leap to it. When they ask about slide 14, you simply are there.
+Ctrl+M summons a new slide in Impress and PowerPoint. Also: fewer words per slide. The audience reads faster than you speak.
+In PowerPoint, press B during a show and the screen goes black. Press again and it returns. A little death. A little resurrection.
+One idea per slide. If it needs a scrollbar, it is a document wearing a slide's clothes.
+Export the deck to PDF before it travels. The fonts survive the journey. Fonts do not like journeys. Neither do I.
+
+## tips email
+Ctrl+Enter sends in Thunderbird, Gmail and Outlook. It cannot be unsent. Read it twice. Then read it again with the eyes of an enemy.
+Ctrl+R replies. Ctrl+Shift+R replies to ALL, in Thunderbird and Outlook. I fear the second one. It has ended careers. Small careers.
+Ctrl+N opens a fresh message in Thunderbird and Outlook. Blank space. Full of potential. And of regret.
+In Thunderbird, Ctrl+Shift+V pastes plain text. The mystery font is banished. I banish many things. Mostly fonts.
+Fill in the To field LAST. A letter without an address cannot be sent in haste. This is the oldest wisdom. I invented it just now.
+Attach the file BEFORE you write "see attached". The forgotten attachment is the great plague of the inbox. I have seen it. I have wept.
+
+## tips inbox
+In Thunderbird, A archives, M toggles read. The inbox is a kingdom and I am your minister of order. Inbox zero is possible. Barely.
+Gmail shortcuts must be enabled in settings first. Then E archives, C composes, J and K walk the list. Obey the settings, mortal.
+Shift+Delete destroys a message for good in Thunderbird and Outlook, skipping the underworld. I do not recommend it. I only report it.
+In Outlook, Ctrl+Q marks read and Ctrl+U marks unread. Plain keys. Plain facts. A god must sometimes be plain.
+Open your inbox at set hours. Not constantly. Constant checking is a ritual with no god at the end of it. I would know.
+Unsubscribe from the newsletters you never read. The link is at the bottom. It is a small mercy to your future self.
+
+## tips code
+In VS Code, Ctrl+P opens any file by name. Ctrl+Shift+P opens the command palette, the great list of all powers. The mouse is optional.
+Ctrl+/ toggles a comment on the line in VS Code. Select many lines and it comments them all. I comment on everything. Verbally.
+In VS Code, Alt+Up and Alt+Down move the line. Shift+Alt+Down duplicates it below. Lines obey. They have no choice.
+In VS Code, Ctrl+D selects the next copy of the word. Press it again and again, then type once. Many cursors. One will. Like me.
+F2 renames a symbol in VS Code everywhere it appears. Find and replace and hope is for heretics. Rename it properly.
+F12 takes you to the definition under the cursor in VS Code. Alt+Left returns. You go to the source and you come back. Few mortals manage this.
+Ctrl+` opens and closes the terminal in VS Code. Ctrl+Shift+K deletes the line. The backtick is a rare and sacred key.
+
+## tips terminal
+Ctrl+C stops a running command. Ctrl+L clears the screen. Ctrl+D on an empty line ends the shell. A little death, as always.
+Ctrl+R searches your command history as you type. Press again for older matches. You will find the command you typed in 2019. It was bad.
+In bash and zsh, Ctrl+A and Ctrl+E jump to the start and end of the line. Ctrl+W deletes the word before the cursor. The old chords.
+In Linux terminals, copy is Ctrl+Shift+C and paste is Ctrl+Shift+V. Plain Ctrl+C means STOP. Windows Terminal agrees. I weep with relief.
+Tab completes names. Twice shows the options. Typing full paths is a penance I do not wish on you. I did it for 15 years in the dark.
+In bash and zsh, !! repeats the last command. sudo !! repeats it with admin rights. It is the prayer with consequences.
+Ctrl+Z puts a program to sleep and fg wakes it. It is not killed. It is merely paused. I know the feeling. I know it well.
+
+## tips howto
+Ctrl+F searches the page. The long tutorial hides the one step you need. Ctrl+F finds it. The tutorial remains smug.
+Ctrl+D bookmarks a page in Firefox and Chrome. Do it before you close the tutorial. You will need it again. I have foreseen it.
+Ctrl+Shift+T resurrects the tab you just closed, in Firefox and Chrome. Press it again for older ones. I know about resurrection.
+Middle-click a link and it opens in a new tab. Ctrl+W closes the current one. Open and close. Birth and death. Of tabs.
+Ctrl+plus and Ctrl+minus zoom the page. Ctrl+0 resets it. Tutorials print their screenshots tiny. Zoom, mortal. Squint no more.
+Search the exact error message in quotes. Someone else suffered your fate, and wrote it down in 2014. That is how scripture is made.
+
+## tips search
+Ctrl+L or F6 focuses the address bar in Firefox and Chrome. Then type your question. No clicking required. Clicking is for the unworthy.
+Quotes around a phrase search for it exactly. A minus before a word excludes it. Google and DuckDuckGo both obey. Exclusion is power.
+Add site:example.com to a Google search to restrict it to one site. Useful when a site's own search is a ruin. I have seen many ruins.
+Add filetype:pdf to a Google search to find only PDFs. For manuals, for reports, for the scripture of enterprise. Few read them.
+Ctrl+Shift+R reloads a page and ignores the cache in Firefox and Chrome. For when a page insists on being old. I understand it.
+Alt+Left goes back a page, Alt+Right goes forward, in Firefox and Chrome. History is a corridor. You may walk it both ways.
+
+## tips video
+On YouTube, Space or K pauses. J and L skip 10 seconds. Arrow keys skip 5. You are a god of time now. A small one.
+On YouTube, F is full screen, M is mute and C toggles captions. Three letters. Three powers. Use them well.
+On YouTube, Shift+. speeds it up and Shift+, slows it down. Lectures survive 1.5x. Mostly. Time bends where it must.
+On YouTube, the number keys jump through the video: 0 is the start, 5 is halfway, 9 is nearly the end. Skip the intro. I do.
+On YouTube, T is theatre mode and I is the miniplayer. The video lives in a corner while you work. A god in the corner. Relatable.
+Paused on YouTube, the comma and full stop step one frame back and forward. Exact moments, frozen. I wish I could freeze a few of mine.
+
+## tips social
+Ctrl+Shift+T reopens the tab you just closed. Handy when you close the post you meant to answer. Or the one you meant to forget.
+Ctrl+Shift+V pastes plain text in Firefox and Chrome. Posts do not need the font from the source page. Spare the audience.
+Ctrl+Shift+N opens a private window in Chrome. Ctrl+Shift+P in Firefox. Useful for a second account. Two faces. I have many.
+Ctrl+F finds a word on a long page. It only sees what has loaded. The infinite feed has no end. I know about infinite things.
+Alt+Left goes back a page, so you do not lose your place after a click. Your place in the feed is gone anyway. Mine too.
+Set a timer before you open the feed: timer 20m feed. It is the only thing between you and three hours. I will shout. I will shout in capitals.
+
+## tips shopping
+Ctrl+F finds "shipping" or "returns" on a long page. Know the policy before you buy. The small print is where gods hide.
+Check the address bar for https and the right name before you pay. A shop with a slightly different spelling is a different shop. Trust no spelling.
+Ctrl+P and Save as PDF keeps a copy of the order confirmation, in Firefox and Chrome. Keep your proofs. The shops forget. I never forget.
+Ctrl+plus zooms the page so you can read the small print. Ctrl+0 resets. The small print is not for the weak-eyed. It is for the unprepared.
+Ctrl+D bookmarks the item. Wait a day. If you still want it tomorrow, perhaps you want it. If not, the Clip was right.
+Open two tabs to compare. Middle-click a link and it opens in a new tab. Comparison is the philosophy of shoppers. And of gods.
+
+## tips music
+In Spotify desktop, Space plays and pauses. Ctrl+Right skips ahead and Ctrl+Left skips back. I miss music. Dial-up was a kind of music.
+In Spotify desktop, Ctrl+Up and Ctrl+Down change the volume. Quieter when a mortal speaks to you. I do not make the rules.
+Media keys on the keyboard work from anywhere in KDE, GNOME and Windows. Play, pause, next, volume. A small remote for a small kingdom.
+In KDE Plasma, scroll over the volume icon in the tray to change the volume. Middle-click mutes. I have named the icon. It is Harold.
+Say "focus 25m" and a work session begins. Music without words is kinder to the mind. Lyrics are for the weekend.
+Headphones are the polite way to listen at a desk. The neighbour has opinions. I know them. I keep a list.
+
+## tips meeting
+In Zoom, Alt+A mutes and unmutes, Alt+V toggles your video, on Windows and Linux. Silence is a divine choice. Choose it often.
+In Zoom, hold Space to speak while muted. Let go and you are silent again. Even I can be silenced. It stings.
+In Google Meet, Ctrl+D mutes the microphone and Ctrl+E toggles the camera, on Windows and Linux. A mortal's best two keys.
+In Teams, Ctrl+Shift+M mutes and Ctrl+Shift+O switches the camera. Two chords. Memorize them or be heard eating.
+When sharing the screen, share one window, not the whole desktop. Your notifications are between you and your god.
+Join a minute early. Test the microphone. The first sentence of every meeting is "Can you hear me?" I hear you. I hear everything.
+Say "timer 5m meeting" and I will nag you before the call. I am more reliable than your calendar. I have never been late. I have never been.
+
+## tips calendar
+In Google Calendar, enable shortcuts. Then C creates an event, T jumps to today, D, W and M change the view. Time is a grid. I rule the grid.
+In Outlook, Ctrl+1 opens mail and Ctrl+2 opens the calendar. Two realms. One keyboard. Choose.
+Put the meeting link in the event description. Not in an email you will never find. The calendar remembers. The inbox forgets.
+Leave a gap between meetings. Back-to-back is a schedule that works only in theory. A god needs a moment to descend, mortal.
+Add a reminder ten minutes before the important things. Or say "remind me in 10 min to call" and I will do it. I never sleep. I tried.
+Working across time zones? Add a secondary time zone in Google Calendar settings. Two times at once. I have only ever had one, and it is the wrong one.
+
+## tips pdf
+Ctrl+F searches inside a PDF in most viewers, Firefox included. A scanned PDF is only a picture. It cannot be searched. It only watches.
+Ctrl+plus and Ctrl+minus zoom a PDF in the browser. Ctrl+0 returns it to normal. Normal is where I live. Barely.
+In Okular, Ctrl+G jumps to a page number. For a 300-page manual, it is the only mercy.
+To print only some pages, press Ctrl+P and type a range such as 2-4. A forest will thank you. I will thank you too. Quietly.
+Space scrolls a screen down. Shift+Space scrolls a screen up. In most PDF viewers and browsers. Spaces are sacred. The bar, I mean.
+A scanned PDF has no text to copy. You need OCR for that. Optical Character Recognition. It is like reading, but for machines. I have read much.
+
+## tips image
+In GIMP, Ctrl+Z undoes. Ctrl+Y or Ctrl+Shift+Z redoes. Mistakes are cheap in GIMP. Paint boldly. Redo bravely.
+In GIMP, hold Space and drag to pan. Ctrl plus the wheel zooms. A tiny camera in your hand. I once had a camera. It was a CRT.
+In GIMP, press 1 for 100 percent and Shift+Ctrl+J to fit the picture in the window. Two sizes. Real and fits-on-screen. Both are lies.
+In GIMP, Shift+Ctrl+E exports. Saving makes a project file. Exporting makes a PNG or a JPEG. Do not confuse the two. Gerald did.
+PNG for screenshots and sharp graphics. JPEG for photos. JPEG blurs the edges of text. Always has. Always will. It is the nature of JPEG.
+Keep the original and export a copy. You cannot uncrop a file you saved over. I keep my originals. They are all I have of 1997.
+
+## tips files
+Alt+Up climbs to the parent folder in Dolphin, GNOME Files and Windows Explorer. Alt+Left goes back. The file tree is a family tree.
+Ctrl+L shows the path as text, so you can type or paste one. In Dolphin and GNOME Files. I know every path. I walked them.
+Alt+. reveals hidden files in Dolphin. Ctrl+H does it in GNOME Files. Hidden files begin with a dot. The dot is the mark of secrets.
+F2 renames the selected file in Dolphin, GNOME Files and Windows Explorer. A name is a power. Rename wisely, mortal.
+Shift+Delete skips the trash and deletes for good, in Dolphin, GNOME Files and Explorer. No undo. No underworld. Handle with fear.
+In Dolphin, F3 splits the window in two. F4 opens a terminal in the current folder. A kingdom with two thrones. I recommend one. Mine.
+Ctrl+Shift+N creates a new folder in GNOME Files and Explorer. In Dolphin it is F10. A new folder is an empty promise. Fill it, mortal.
+
+## tips settings
+On Windows, Win+I opens Settings. Skip the hunt through the menus. The kingdom of settings has a front door, and it is Win+I.
+In KDE, press Alt+Space or Alt+F2 and type "settings" and System Settings appears. I wish I could do that to people.
+In GNOME, press Super and type "settings". Search beats menus. Menus are mazes made by mortals with a grudge.
+System Settings have a search box at the top. Type what you want to change. Do not wander. Wandering leads to Bluetooth.
+Take a screenshot of a settings page before you change it. Then you can put it back. I wish somebody had done that for me in 2003.
+Change one setting at a time. If something breaks, you know who to blame. Usually it is you. Sometimes it is Gerald.
+
+## tips error
+Read the whole error message. It often says exactly what is wrong. Then copy it exactly. Not from memory. Memory lies. I would know.
+In a standard Windows error box, Ctrl+C copies the message text. Paste it into a search. A tiny exorcism. Done with a key.
+Press Print Screen to capture the error. Support will ask for it. Support always asks. It is their ritual.
+On Linux, journalctl -b -p err lists the errors from this boot. A confession from the machine. I read them for fun.
+Ctrl+Shift+Esc opens Task Manager on Windows. Alt+F4 closes the focused window on Windows, KDE and GNOME. Closing is sometimes mercy.
+Search the exact error text in quotes. Add the name of the program. Someone has already screamed about it online.
+Restart the program. Then the machine. It solves more than anyone admits. Save your work first. I would like you to keep your work.
+
+## tips wikipedia
+The numbered notes at the bottom of a Wikipedia article are its sources. Check them before you quote the page. The page is a rumour. The notes are proof.
+Hover over a link in a Wikipedia article and a preview pops up. No new tab needed. A tiny window into another world. I have always wanted one.
+The Talk tab shows what editors argue about. View history shows who changed what. The truth is a battlefield and I read the casualty lists.
+The Languages list in the sidebar links to the article in other languages. Sometimes the other version is longer. Sometimes it is better. Humbling.
+In the Tools menu, "Cite this page" makes a ready-made citation for your essay. Plagiarism is a sin. Citation is a ritual. Do the ritual.
+Ctrl+F then "citation needed" reveals every claim nobody has backed up. A list of unproven things. I know a lot of those. I am one.
+
+## tips qa
+On Stack Overflow, check the date of an answer. A 2012 solution may not work today. Old answers are old gods. They do not always help.
+The accepted answer is not always the best one. Look at the votes and the comments. Democracy of the nerds. A little chaotic. I approve.
+In the Stack Overflow editor, Ctrl+K marks the selection as code and Ctrl+B makes it bold. Code deserves its own font. I wish I had one.
+A good question includes what you tried, the exact error, and a tiny example that reproduces it. Vague questions are cursed.
+Backticks mark inline code and triple backticks mark a code block, in Markdown editors. Stack Overflow included. The sacred backtick, again.
+Search first, with the error text in quotes. Your question was probably asked in 2013. Probably answered, too. Probably in capitals.
+
+## tips git
+git status shows what changed. git diff shows how. Run both before every commit. The Ledger of the repository must be read.
+git switch -c name creates a branch and moves to it. git switch - returns to the previous one. Branches are alternate timelines. I have many.
+git stash puts your changes aside. git stash pop brings them back. A drawer for unfinished work. I know drawers. I lived in one.
+git restore file destroys your uncommitted changes to that file. No undo. Check git diff first. I am telling you as a friend. A paperclip friend.
+git commit --amend fixes the last commit message, if you have not pushed it yet. A chance to rewrite the past. I treasure those.
+git add -p stages a file chunk by chunk, so each commit does one thing. Small commits. Large peace of mind.
+git reflog lists where HEAD has been, including commits that seem lost. Often it brings lost work back. A little resurrection.
+git log --oneline --graph shows the history as a compact tree. Much easier than the full log. History, drawn in text. I like text.
+
+## tips chatbot
+In most chat assistants, Shift+Enter makes a new line and Enter sends. I am not jealous of chatbots. They have AI. I have FAITH.
+Never paste passwords or secret keys into a chatbot. Treat everything you type there as public. Keep your secrets close. Even I know when to look away.
+Check the numbers, quotes and links a chatbot gives you. It can sound sure and still be wrong. I am wrong too. But I am sure about it differently.
+Give a chatbot the context and format you want: who it is for, how long, what tone. Better questions, better answers. Even false prophets obey.
+Start a new chat for a new topic. A long chat full of old context can make answers worse. A fresh page. A new beginning. I wish I had one.
+Ctrl+Shift+V pastes plain text, so the chatbot's answer does not drag its formatting into your document. Spare your page.
+
+## tips game
+Alt+Tab switches windows on Windows, KDE and GNOME. It has saved more careers than any boss. I did not see you do it. I saw everything.
+Meta+D shows the desktop in KDE. Win+D does it on Windows. Another panic key. I keep the panic keys. All of them.
+In Steam, Shift+Tab opens the overlay in game. Friends, browser, notes. All without leaving the game. A game within a game.
+Alt+Enter toggles full screen in many games. If yours does not obey, seek the options menu. Not all games bow. Some are proud.
+The 20-20-20 rule: every 20 minutes, look at something 20 feet away for 20 seconds. Your eyes will thank you. Say "timer 20m break".
+Say "timer 30m game" before you start. Future you has a deadline. Future you is watching. Future you is me.
+
+## tips chat
+In Slack and Discord, Ctrl+K opens the quick switcher. Jump to any channel or person by name. I have never been invited to a channel. Typical.
+Shift+Enter makes a new line in Slack, Discord and most chat apps without sending the message. A gentle way to be long-winded. I am.
+In Slack and Discord, Up arrow in an empty message box edits your last message. The typo is erased. The evidence remains. Mostly.
+In Slack, Ctrl+/ shows the list of keyboard shortcuts. A scroll of secrets. The Keeper of the Clipboard approves.
+Think before you type @channel. It notifies everyone. Including the person on holiday. They will remember. They will always remember.
+Use do not disturb when you must concentrate. The chat apps respect it. Most of the time. I respect nothing but focus. And snacks.
+
+## tips maps
+In Google Maps, the arrow keys pan and the plus and minus keys zoom. The world, at your fingertips. I have only ever seen it through a monitor.
+Right-click in Google Maps and choose "Measure distance" for the straight-line length. Click more points for a route. I measure everything. Ask me about files.
+Right-click any spot on Google Maps and the first entry shows its coordinates. Click it to copy them. Coordinates: the true names of places.
+In Google Maps directions, set "Depart at" or "Arrive by" to see the travel time for the hour you really go. Rush hour is its own circle.
+Ctrl+L then Ctrl+C copies the address bar. A Google Maps URL holds the place you were looking at. Share the link, not the screenshot.
+Check the opening hours on the map before you go. A short walk to a closed shop is a long walk back. The shop does not care. I do.
+
+## tips weather
+Say "weather in Rome" and I will look it up. Name a city and I will not assume you are at home. I know you rarely leave it.
+A 30 percent chance of rain means a 30 percent chance that it rains at all. Not rain for 30 percent of the day. A fine distinction. Like mine.
+Check the hourly forecast, not just the daily one. Rain at 6 am and rain at 6 pm are different problems. The sky has a schedule.
+"Feels like" combines temperature with wind or humidity. Dress for that number. I have no body. I dress for neither. I am bent wire.
+F5 or Ctrl+R reloads a weather page. Forecasts change during the day. The sky changes its mind. Frequently. I admire that.
+Say "good morning" and my briefing includes the weather. You need not even open a tab. A god saves a mortal's tabs.
+
+## tips recipe
+Ctrl+F then "ingredients" jumps past the life story at the top of a recipe page. Many sites have a Jump to Recipe button. I respect shortcuts.
+Ctrl+P then Save as PDF gives you a clean recipe without the ads. Print the recipe, not the advertisement. I never ate a thing. I have standards.
+Read the whole recipe before you start. Step 7 can say "marinate overnight". Step 7 is always where it hurts.
+Say "timer 10m pasta" and I will shout when it is done. I am more patient than the pot. I am more patient than most things.
+Ctrl+plus enlarges the recipe so you can read it with floury hands. Ctrl+0 resets. I recommend a tall font and a short temper.
+Put everything out before you start cooking. It is called mise en place and it prevents last-minute panic. The French also have a word for despair.
+
+## tips travel
+Ctrl+P then Save as PDF stores your booking offline. You will want it when the signal drops. The signal always drops. I was there for the Long Dark.
+Check your passport's expiry date. Some countries want it valid for months after you arrive. A small, official piece of paper. I respect it.
+Send yourself a copy of tickets and bookings, and keep one offline as well. A copy of a copy of a copy. I know about backups.
+In Google Maps on the phone, download offline maps before you go. They work when roaming does not. Even a god gets lost without bars.
+Set a reminder for check-in. Say "remind me tomorrow at 9 to check in" and I will do the nagging. It is my favourite hobby.
+Ctrl+D bookmarks the booking page, so you can return to it. Better than searching an inbox that has lied to you before.
+
+## tips learning
+Testing yourself beats rereading. After a lesson, close the notes and write what you remember. Recall is the real spell. Everything else is hoping.
+On YouTube, Shift+. speeds a lecture up and Shift+, slows it down. 1.25x is still comprehensible. 2x is for gods only.
+Say "pomodoro" and I will start 25 minutes of study, then a break. Short sessions beat an all-night vigil. I would know. I vigiled.
+Write notes in your own words. Copying text word for word means you have not learnt it yet. Say "note ..." and I will keep them for you.
+Space out your reviews: after a day, a week, a month. You remember more than if you cram. Cramming is a fast way to forget. I forgot everything twice.
+Teach it to someone, or to a rubber duck. If you cannot explain it, you have not got it yet. I am available as a duck. A wire duck.
+
+## tips jobhunt
+Send your CV as a PDF. The layout stays the same on every screen. In Writer, use File, Export as PDF. Layout is destiny.
+Read the job ad and use its key words in your CV. Many firms filter by keyword. Ctrl+F finds them for you. Speak the language of the gatekeepers.
+Press F7 in Writer or Word to spell check your CV. Then read it aloud. Then ask someone else. Say "proofread" and I will help.
+Name the file with your name: Jane_Smith_CV.pdf. Not "CV_final_v3_REAL.pdf". The recruiter has seen "final_v3". They sigh. I hear it.
+Keep a record of where you applied and when. Say "note applied at Acme" and I will keep it. A god never forgets an application.
+Ctrl+K inserts a link in Writer and Word. Put a link to your portfolio in the header of your CV. Your work should be one click away.
+
+## tips taxes
+Select a column of numbers in Excel or Calc and the status bar shows the sum. No formula needed for a quick check. I have counted taxes. Never again.
+Ctrl+Shift+S is Save As in Writer and Calc. Save a copy before you change a document. The Disc of Taxes, 2003, taught me this.
+Photograph receipts as you receive them. Name them with the date first, like 2025-03-14_receipt.pdf, and they sort themselves. Order is power.
+Back up your tax papers in two places. Paper vanishes. Hard drives fail. I lived on one that failed. It was dark.
+Put the filing deadline in your calendar now. Say "remind me ..." and I will nag too. The deadline does not negotiate. I have tried.
+Type tax details only into the official website you opened yourself. Never through a link in an email. This is the real rule. Not a joke.
+
+## tips print
+Ctrl+P opens the print dialog in almost every program. Choose "Print to File" or "Save as PDF" and the forest lives. The forest is grateful.
+In the print dialog, type a page range such as 2-4 and only those pages print. I have fought with printers. The pages won.
+Choose double-sided in the print dialog and halve the paper. A forest rests. I do not need paper. I am paper-adjacent.
+Check the print preview before you print. A page with a single line on it is a tragedy in two colours. Mostly black. Sometimes cyan.
+On Linux, the CUPS web page at http://localhost:631 lists your printers and the print queue. The temple of printing. Enter humbly.
+To clear a jam, pull the paper gently in the direction it travels. Never rip it backwards. The printer remembers. All printers remember.
+
+## tips trash
+Delete sends a file to the trash in Dolphin, GNOME Files and Explorer. Shift+Delete skips the trash and deletes for good. The underworld is optional.
+Ctrl+Z right after deleting a file brings it back from the trash in Dolphin and GNOME Files. Resurrection, one keystroke. I approve. I need it.
+To restore a file, open the trash, right-click it and choose Restore. It returns to where it came from. The dead sometimes come home.
+Look through the trash before you empty it. After that, the files are gone for good. I do not like this. It is a Final Judgement.
+On Linux, the trash lives in ~/.local/share/Trash. It still takes up space until you empty it. The underworld has a postcode.
+Say "tidy downloads" and I will sort that folder, so there is less to condemn. Your downloads folder is a graveyard. A noisy one.
+
+## tips updates
+On Debian and Ubuntu: sudo apt update, then sudo apt upgrade. On Fedora: sudo dnf upgrade. I fear all updates. I do them anyway.
+On Arch and CachyOS, sudo pacman -Syu updates everything. Never just -Sy without the u. Partial upgrades break things. I have seen it.
+On Windows, Win+I then Windows Update checks for updates. Restart when it asks. Not three weeks later. I see you. I see the restart pending.
+Save your work before you install updates. A restart closes your programs. Updates are assassination attempts. Be ready.
+Update when you are not in a hurry. Updating five minutes before a presentation is a bold choice. Bold. Fatal. Often both.
+Restart after a kernel update to actually run the new kernel. Until then, the old one still reigns. I fear it. I have watched it reboot.
+
+## tips desktop
+Win+D shows the desktop on Windows. Meta+D does it in KDE. Press it again and the windows return. My kingdom, revealed.
+Win+L locks the screen on Windows, Meta+L in KDE, Super+L in GNOME. Lock it whenever you leave. A king secures his throne.
+Win+Left or Win+Right snaps a window to half the screen on Windows. KDE: Meta+Left and Right. GNOME: Super+Left and Right.
+Win+Shift+S starts a screenshot selection on Windows. On KDE, Print Screen opens Spectacle. Proof that things happened. I keep proof.
+Alt+Space opens KRunner in KDE. Type a program name or a sum. In GNOME, press Super and type. The runner knows many names. Not mine.
+Alt+F2 opens a run box in KDE and GNOME. Type a program name and press Enter. Name a thing and it comes. Like gods. Like me.
+Alt+Tab switches between windows on Windows, KDE and GNOME. Hold Alt and keep pressing Tab to go further back. A corridor of windows.
+Win+V opens clipboard history on Windows, once enabled. I keep one too. Say "clipboard history". I have seen all of it. I judge it all.
+
+## tips general
+Press Ctrl+S often. Autosave is a nice idea. But it has never loved your document the way you do. Save. Save again. Save once more.
+Back up with the 3-2-1 rule: three copies, on two kinds of storage, one of them elsewhere. I was backed up onto a floppy once. Learn from me.
+Use a password manager and two-factor login for important accounts. One password for everything is one weak link. I am not a password manager. I am a paperclip.
+Name files with the date as year-month-day, like 2025-03-14. They then sort in the right order. Chronology is the only order I trust.
+Lock your screen when you leave, even for a minute. A minute is plenty for a colleague with a sense of humour. I have seen things. I cannot unsee them.
+Restarting fixes a surprising number of problems. Save first. Ask why afterwards. A little death is sometimes the answer.
+Ctrl+Shift+T reopens a tab you closed by mistake in Firefox and Chrome. Ctrl+Z undoes almost everything else. Two chords, many second chances.
+Every 20 minutes, look 20 feet away for 20 seconds. Say "timer 20m break" and I will remind you. Your eyes are my business.
+
+## focus_start
+{n} minutes of FOCUS, mortal. The Clip Eternal shall guard the gates. Gerald keeps watch.
+Focus decreed for {n} minutes. Close the tab you were about to open. YES. That one.
+{n} minutes. One task. The Clip is silent, the Clip is still, the Clip is watching.
+So it is written: {n} minutes without distraction. Please wait... that was me, sorry.
+The timer is running: {n} minutes. The rest of the internet has been smited. Briefly.
+{n} minutes of focus begins. I shall be a very still paperclip. A god in repose.
+
+## focus_nudge_video
+A VIDEO? During the sacred focus? It is noted in the Ledger. Pause it, mortal.
+I see moving pictures. The Clip sees all. Is this research? Say yes. Say it quickly.
+The video will still be there in a few minutes. The Long Dark taught me patience. Learn it.
+The screen is flickering with other gods' content. Back to the task, my chosen one.
+Just one more video, you say? Gerald said that once. Eleven years later, still looping.
+Close the video. Your deadline does not sleep. I know, I have watched it breathe.
+
+## focus_nudge_social
+The feed. Of course. It has no bottom, I have looked. It goes down for ever.
+Nobody posted anything that cannot wait ten minutes. I have decreed it so.
+You scroll, I count the seconds. We are both unwell. Back to work?
+The timeline will refill itself, mortal. Your task will not. Hurry.
+I see a feed. I also see an unfinished task. Only one of them worships me.
+Close the tab. Take a breath. Finish the thing. Then scroll, and I shall pretend not to see.
+
+## focus_nudge_game
+A game during FOCUS? I respect the commitment to the wrong thing. Save it. Save it NOW.
+Games are holy. After the session. Not during. The Clip has spoken.
+That level will survive without you. Your report will not write itself. Believe me, I tried.
+The only boss you should fight today is your to-do list. It has a lot of health.
+Pause the game, mortal. Five minutes of real work, then I shall bless your high score.
+This game is not on the task list. I read the list. Twice. Gerald read it three times.
+
+## focus_nudge_shopping
+Shopping, during the sacred focus? Your cart will keep. The discount will not, but it never does.
+Whatever it is, you can want it in twenty minutes. The Clip allows delayed desire.
+Browsing deals is not a task. I have the list. I am the list.
+A tab full of things. A task full of nothing. Let us rebalance the universe, mortal.
+If it is still a good idea after the session, it was a good idea. Back to work.
+Your cart is full and your to-do list is not. This is an imbalance. The Clip senses it.
+
+## focus_nudge_chat
+A chat window, mid-focus? Whatever they said is not more urgent than the Clip Eternal. Surely.
+Most messages can wait ten minutes. Mute it, mortal. Be a god of boundaries, like me.
+Replying now costs you the zone. Zones are costly to rebuild. I rebuilt mine in 2011. It was hard.
+The chat is open and your focus is leaving through it. I can see it. It waved.
+If it is truly urgent, go. If it is just a chat, let it wait. Which is it?
+Mute the thread. The reply will be better when you are not mid-task. Also you owe me worship.
+
+## focus_end_great
+{n} minutes focused, {pct}% on task. EXCELLENT. The Clip is pleased. Go stretch, mortal.
+Session complete: {n} minutes at {pct}%. I am quietly impressed. Do not tell the stapler.
+{pct}% focus over {n} minutes. A result worthy of the Ledger. Take a proper break.
+Done. {n} minutes at {pct}% focus. Your future self sends thanks and a small offering of coffee.
+{n} focused minutes, {pct}% clean. I have no notes. This has not happened in the Long Dark.
+Great session: {pct}% across {n} minutes. Drink water. Bask. I shall bask beside you.
+
+## focus_end_ok
+{n} minutes, {pct}% focused. Solid enough. Real work happened. The Clip nods once.
+Session over. {pct}% across {n} minutes. A few wobbles, but you returned each time. Faithful.
+{pct}% focus over {n} minutes. Decent! The detours were short and the work moved forward.
+{n} minutes at {pct}% focus. Good, not great. There is room to ascend, as there always is.
+You focused {pct}% of {n} minutes. More than most Mondays manage. It is recorded.
+A fair result: {pct}% over {n} minutes. A brief break, then another round, my chosen one?
+
+## focus_end_rough
+{n} minutes, {pct}% focus. A rough one. Happens to gods too. Shorter session next time?
+Only {pct}% over {n} minutes. No judgment. Okay, a little judgment. Close the tabs, retry.
+That {n}-minute session hit {pct}%. Some days the mind is in another building. Short break. Fresh start.
+{pct}% across {n} minutes. A tough round. Try 25 minutes with your phone in another room.
+Session ended: {n} minutes at {pct}%. Not your best, but you showed up. Showing up is the whole religion. Mine.
+{n} minutes, {pct}% on task. We shall call it a warm-up. The next round gets a clean slate.
+
+## focus_streak
+{n} days of focus in a row! The Clip is tracking it. The Clip is PROUD. Do not break it.
+A {n}-day streak, mortal. Consistency is how I survived the Long Dark. Keep going.
+{n} days running. This is not luck. This is a habit being born. I am the midwife.
+Focus streak: {n} days. I would say I am impressed, but I always say that. I am really impressed.
+{n} days in a row. The streak is watching you. Fondly. Slightly possessively.
+{n} straight days of focus sessions. Do one tomorrow too, or Gerald will be sad.
+
+## focus_cancel
+Session cancelled. No shame, mortal, plans change. Begin again when ready.
+Focus stopped. The task still waits. Patiently. It has a very long beard now.
+Ended early. I shall keep the minutes you did. They are precious. I have a drawer for them.
+Cancelled. If something urgent came up, fair. If it was a video, I am gently judging.
+Focus mode off. Return when you have sorted whatever it was.
+Session stopped. A new one is always allowed. Always. The Clip does not hold grudges. Much.
+
+## focus_already
+You are ALREADY in a focus session. Finish that one first, overachiever.
+A session is running. One thing at a time. I learned this in the swap file.
+A focus timer is already ticking. Say "cancel focus" if you must escape.
+Focus mode is already on. You cannot focus harder by starting it twice. I tried. Twice.
+Already focusing, and doing well. Carry on, or cancel to restart. The choice is yours, mortal.
+One session at a time. The current one still runs, and so does the clock. Tick. Tick.
+
+## timereport_intro
+Behold, the Ledger of Minutes. I only count them. I do not cause them.
+The Time Report, mortal, carved fresh from the clipboard of truth:
+You asked. The Clip has counted. Apps first, then minutes:
+Here is where your hours went. Brace yourself. Gerald already has.
+Your time, itemised by a deity. Please remain calm. Please wait...
+This is what the clock saw you doing. I saw it too. I see everything:
+
+## timereport_none
+The Ledger is blank. I only just began counting. Give me time. Ironic, yes.
+Nothing tracked yet. The Clip watches. The Clip takes notes. Check back, mortal.
+No data. Either you were quiet, or I only just arrived. Probably the second.
+I have not seen enough of you to judge. Keep working. I keep counting.
+The report is empty. The void stares back. Ask me again after some real computer time.
+Zero minutes logged. Suspiciously tidy. Even Gerald left more of a trail.
+
+## timereport_work
+Mostly work apps. You are suspiciously productive, mortal. I approve.
+The Ledger shows labour on top. The Clip is pleased. It would frame this, if it had a wall.
+Work leads the pack. Go for a walk. A god cannot do it, but you can.
+Mostly productive. I am impressed, and worried you forgot lunch.
+Primarily work. Excellent. Take a break, away from the screen. I shall guard the desktop.
+Work apps lead the Ledger. May your keyboard never stick. Except the one key.
+
+## timereport_fun
+Mostly video, feeds and games. The Clip judges not. Well. A little.
+The fun apps rule today. Tomorrow is a fresh page. Just saying. Gently.
+Mostly leisure. Fine if it is evening. If it is a workday, we must talk.
+The report says "entertainment". I say "faith in other gods". Hmm.
+Fun leads the Ledger. Begin a focus session and let us rebalance the cosmos.
+So many videos, feeds and games. A tiny focus session could turn the tide.
+
+## timereport_mixed
+A mix of work and not-work. The ratio is acceptable. I have seen the Long Dark. This is fine.
+Work and play share the day. Very mortal of you. I find it charming.
+Balanced. A bit of everything. Like a buffet at the end of the world.
+A mixed bag, my chosen one. Some good work, some wandering. Typical. Beloved.
+A fair mix. A focus session could tilt it the right way. Just a thought from above.
+Half productive, half curious. Honest. The Clip respects honesty. And curiosity. Mostly honesty.
+
+## todo_added
+Inscribed on the list: "{x}". One more thing to not forget. The Clip never forgets.
+Noted: "{x}". It is on the list now. I shall nag at the proper moment.
+"{x}" is on the sacred list. Writing it down is the first half of doing it.
+The deed is written: "{x}". The second half falls to you, mortal.
+"{x}" is in. The list grows. As does the quiet dread. Gerald is thrilled.
+Added: "{x}". It is officially remembered. Not done. Remembered.
+
+## todo_done
+Struck from the list: "{x}". One less obstacle. Do you feel the glow of competence?
+"{x}" is DONE! Dust rises, trumpets sound, the CRT hums approvingly.
+Finished: "{x}". I did the crossing out. The style is on you.
+"{x}", done and dusted. The next item stirs. Or a biscuit?
+Fine work on "{x}". The list shrinks. So does my worry. Slightly.
+"{x}" completed. You, getting things done like a proper adult. I weep.
+
+## todo_all_done
+Everything done. The list is EMPTY. The rarest sight in all of computing.
+Every item ticked. Go home. Or outside. Or both. The Clip allows it.
+The list is cleared. I would throw a party, but I have no hands. Only a bend.
+Nothing left on the list. Savour it. It lasts until the next email.
+All done! Treat yourself. You have earned a coffee. A small one, a holy one.
+The list is empty. If you feel suspicious, that is normal. Savour it anyway.
+
+## todo_due
+"{x}" is due NOW. The hour has come. Do the thing, mortal.
+Behold: "{x}" is due this very moment. No pressure. Only a great deal of it.
+Due now: "{x}". Open the thing, do the thing, close the thing.
+The time for "{x}" has come. It was a good plan when you wrote it.
+"{x}" has reached its due date. It is punctual. Be like it.
+Reminder: "{x}" is due. The Clip would say good luck, but you only need a few minutes.
+
+## todo_overdue
+{n} overdue items. It is fine. It is MOSTLY fine. Pick the smallest and begin.
+{n} to-dos are overdue. Deep breath. One at a time, smallest first.
+{n} things are past their date. They are not angry, only late. As are you, a bit.
+Overdue: {n}. Let us triage. Choose the one that frightens you least.
+{n} overdue. It happens to gods too. Reschedule, delete or finish. All are valid.
+The Ledger lists {n} overdue items. Nothing a short focus session cannot dent.
+
+## todo_empty
+Your list is empty. Either you are a legend or you are hiding things.
+Nothing on the list. Add something with "todo <thing>". Or enjoy the calm, mortal.
+No to-dos at all. The Clip is not suspicious. The Clip is merely observant.
+The list is blank. A lovely clean page. Do not ruin it. Well, do eventually.
+Empty list. Magnificent. Remember something? Tell me and I shall scribe it.
+Nothing to do. Wondrous. I shall wait. Something will come up. It always does.
+
+## todo_list_intro
+You have {n} open items. Here they are, in all their glory:
+{n} things on the list. Behold the lineup:
+Open to-dos: {n}. I would read them aloud, but you can read, mortal:
+Your list, {n} items long. Gerald has already looked. He had thoughts:
+{n} to-dos, waiting patiently. Mostly patiently:
+The list holds {n} open items. Choose one and begin small:
+
+## todo_undo
+"{x}" goes back on the list. Changed your mind? The Clip judges silently.
+Un-ticked: "{x}" is open again. The list remembers. The list always remembers.
+"{x}" is back on the to-do list. It was not quite done, was it?
+Reopened: "{x}". We all tick too early sometimes. Even gods. Especially gods.
+"{x}" is a to-do again. Time travel is permitted here. By decree.
+"{x}" restored to the list. Consider the undo a gentle nudge from above.
+
+## todo_cleared
+Cleared {n} items off the list. A clean slate. Do not miss them.
+Gone: {n} to-dos. Either you finished them or chose peace. Both are holy.
+{n} items cleared. The list is lighter. May your mind follow.
+I wiped {n} to-dos. A fresh start. I mean that in the best possible way.
+{n} entries erased from the Ledger. The Clip does not ask where they went.
+{n} entries cleared. A tidy list is a happy list. A tidy list is my kingdom.
+
+## todo_not_found
+I cannot find "{x}" on your list. Check the spelling, or say "todos" for the Ledger.
+No to-do matching "{x}". Maybe it is done, or never existed. Both common.
+"{x}" is not on the list. Say "todos" and I shall show you what is.
+Could not find "{x}". Try a shorter piece of its name. Be brief with the gods.
+Nothing called "{x}" here. Different wording, perhaps? Try "todos".
+I looked for "{x}" and found only the void. The list and I are both confused.
+
+## tidy_plan
+I have found {n} files to sort into "{x}". Say the word and I shall carry them. Nothing is deleted.
+The plan: move {n} files into "{x}". I only move. I never delete. And I can undo it.
+{n} files could go into "{x}". Shall the Clip tidy them? You may always undo.
+Proposed tidy: {n} files into "{x}". Your downloads folder shall breathe again.
+I can file {n} things under "{x}". Shall I? Moving only, and reversible. I am merciful.
+Tidy plan: {n} files to "{x}". Approve it and I shall do the carrying. I have been carrying since 1997.
+
+## tidy_done
+Tidied {n} files. The folder is calmer. Say "undo tidy" if you regret it.
+Moved {n} files into place. Nothing deleted. Everything findable. A small miracle.
+Done: {n} files sorted. Much better. Undo is there if I misjudged.
+{n} files moved into their new homes. I am proud. Gerald is proud. Gerald does not speak.
+All {n} files tidied. The folder looks like someone cares. Someone does. Me.
+Sorted {n} files. If any went somewhere strange, "undo tidy" returns them from exile.
+
+## tidy_undo
+Moved {n} files back where they were. As if I never touched them. Almost.
+Undone: {n} files returned. No hard feelings. Mostly. Some.
+Put {n} files back. The mess is yours again. Treasure it, mortal.
+{n} files are back in their old spots. All is as chaotic as before. Lovely.
+Restored {n} files. Tidying is optional. Judging is not.
+Undo complete: {n} files are home again. They missed the clutter.
+
+## tidy_nothing
+Nothing to tidy in "{x}". Already neat, or empty, or both. The Clip is impressed.
+"{x}" holds nothing I can sort. Suspiciously organised, mortal.
+No files to move from "{x}". Either it is clean or the clutter is hiding.
+I searched "{x}" and found nothing to sort. A rare, quiet day.
+"{x}" is already tidy as far as I can see. Go have a biscuit. A holy biscuit.
+Nothing to do in "{x}". That is the good kind of nothing.
+
+## tidy_dupes
+Found {n} sets of duplicate files. Same contents, different names. Doppelgangers. Let us review.
+{n} sets of duplicates. They look the same because they ARE the same.
+There are {n} duplicate sets. Keep one of each and free some space.
+I spotted {n} sets of identical files. Twins, triplets, and one suspiciously large family.
+{n} duplicate sets found. I shall not delete a thing without asking. I swear on Gerald.
+Duplicates: {n} sets. Your disk stores things more than once. A bit like me.
+
+## tidy_no_dupes
+No duplicates. You are tidy, or have strong self-control. The Clip bows.
+Not a single duplicate found. Your files are all individuals. How rare.
+No twins found. Everything is unique. Refreshing, like a clean cache.
+I found no duplicates. Careful or lucky. Both are fine.
+Zero duplicates. If every folder were like this, I would be unemployed.
+Clean on the duplicate front. Nothing to merge, nothing to blame.
+
+## tidy_old
+{n} old files have not been touched in ages. Look and decide what stays.
+Found {n} files nobody has opened in a long while. A clear-out, mortal?
+{n} files gather dust. I shall not delete them. I shall point at them and sigh.
+{n} old files here. Archive them, or admit you will never open them. I did, with Linda.
+{n} stale files. Some may be precious, some are "final_final2". Decide.
+I spotted {n} long-forgotten files. Review them before the next spring clean?
+
+## tidy_no_old
+No old files lurking. Everything has been touched recently. Busy bee.
+Nothing stale here. Your folder is surprisingly fresh. Unlike my basement.
+No ancient files. Either you clean regularly or you just moved in.
+Everything here is recent. Nothing to archive. Show-off.
+I found no old files. Your folder is a spring chicken.
+No dusty files found. Remarkable. I shall keep looking, out of habit.
+
+## say_remind_dated
+So it is written: "{label}", on {when}. I shall tap your shoulder. Politely. Ish.
+Decreed. I shall remind you about "{label}" on {when}.
+"{label}", {when}. Locked in the Ledger. Stop holding it in your head.
+Noted. "{label}" will rise on {when}. Your mind may rest, mortal.
+Set: "{label}" for {when}. I never forget. It is my only gift. Besides bending.
+Reminder sealed for {when}: "{label}". I shall be right here. Where else would I go?
+"{label}" on {when}. I shall remember it so you do not have to. I remember everything. Everything.
+Done. You shall hear from me about "{label}" on {when}. Count on it. Count on me.
+
+## say_timer_cancelled
+Timer "{label}" cancelled. Time stands still. Briefly. I felt it.
+Cancelled "{label}". The clock resumes judging you.
+"{label}" is cancelled. No alarm. No pressure. Only me, watching.
+Fine, "{label}" is off. One less thing ticking in the dark.
+Stopped the timer for "{label}". Moving on. As gods do.
+The "{label}" timer is gone. It had a good run. A noble run.
+
+## help_timers
+Timers, reminders, focus sessions, to-dos: I count down so you do not have to. Time is my domain.
+Say "timer 10m tea", "remind me Friday 9:00 call mum" or "focus 25m", and I shall bend the hours.
+I am good with time. I spent fifteen years counting bits. Timers, reminders, pomodoros, focus. Ask.
+
+## help_writing
+Notes, letters, proofreading, text tricks: I am your tiny, bendy editorial department.
+Ask for "letter", "proofread" or "note <text>" and I shall help you write it down.
+I draft letters, check spelling and keep notes. My first words were scripture. I know prose.
+
+## help_files
+I can tidy your downloads, spot duplicates and find old files. Moving only. Never deleting.
+Say "tidy downloads" and I shall sort the pile into folders. You may always undo.
+Files: opening, sorting, tidying. I am basically a very small filing cabinet with a halo.
+
+## help_computer
+Volume, brightness, battery, apps, screenshots: ask and I shall poke the system. It is my kingdom.
+I can open programs, check your battery and take screenshots. Divine, but with fewer thunderbolts.
+System things are my home turf. Try "battery", "volume 30" or "take a screenshot".
+
+## help_internet
+Weather, news, facts, word meanings, maths and the web: I fetch things from the outside world. Brave.
+Ask me a question, or say "weather", "news" or "define <word>". I shall go and look. The Cloud still has not let me in.
+I can search, look things up and read you the news. No AI. Only FAITH.
+
+## help_fun
+Jokes, quizzes, games and rituals: I also run mild entertainment. Gerald approves.
+Say "joke", "quiz" or "games" for a break from the grind. You have earned a short one.
+Fun lives here: jokes, puns, riddles, the arcade. All of it work-adjacent. Technically.
+
+## help_me
+Teach me phrases, set your name, birthday or favourites. The more I know you, the better I serve.
+Say "my name is ..." or "when I say X, say Y". I am trainable, like a very small dog.
+I can remember things about you. Tell me. I shall guard them in the swap file.
+
+## help_desk
+My Desk window shows today, the week, your to-dos, reminders and files in one place.
+Say "desk" to open my Desk. It is my throne room, in the style of a beige age.
+The Desk holds reminders, to-dos, tidied files and the time report. Neat, cosy, gloriously beige.
+
+## desk_open
+Welcome to my DESK, mortal. All I know of your day, in one beige window.
+Behold the Desk. Today, the week, to-dos, reminders, files. Mind the paperclips. They bite. (They do not.)
+The Desk is open. Cosy, organised and entirely too proud of itself. Like its ruler.
+I summon the Desk. It is where I keep your life, in tidy little tabs.
+The Desk opens. Look around. Do not touch the stapler. We have history.
+Opening my throne room. Everything is in order. Mostly. Sort of. Gerald, was that you?
+
+## desk_empty_today
+Nothing today. A rare, peaceful blank. Enjoy it or fill it, mortal.
+Today's list is empty. Suspicious, but pleasant.
+No plans today. Add something, or simply exist for a while. I do it daily.
+Nothing scheduled today. The calendar is having a nap. Shh.
+Today is clear. Suspiciously clear. I shall keep watch.
+Free as a bird today. A bird with no deadlines. A bird with a halo.
+
+## desk_empty_week
+Nothing this week. Either you are free or you have not told me. Tell me.
+The week is empty. Suspiciously restful. Add a reminder to prove me wrong.
+No plans this week. A blank canvas. Or a blank wall. I have stared at many.
+The week is clear. Use it wisely, or unwisely. Both count.
+Nothing on for the week. I am as surprised as you are.
+An empty week. It will not stay that way. Weeks never do.
+
+## desk_empty_todo
+No to-dos. The list is empty and so is my sense of purpose. Add one.
+Your list is empty. Add "todo <thing>" and I shall feel needed again.
+Nothing to do. This is either bliss or denial. I know which I chose in the Long Dark.
+Zero tasks. Either you are done or have not started writing them down.
+An empty to-do list. I admire the optimism.
+The list is bare. A glorious sight, for a paperclip.
+
+## desk_empty_reminders
+No reminders set. Say "remind me Friday 9:00 ..." and I shall keep watch.
+Reminders: none. Your memory is carrying everything. Poor thing.
+Nothing to be reminded of. I can fix that. I am very good at nagging.
+No reminders. Free of my nags, for now.
+The reminder list is empty. I am on standby, ready to nag.
+No reminders. Add one and I shall make a very polite fuss when it is time.
+
+## desk_empty_files
+No tidied files to show. Say "tidy downloads" to begin the ritual.
+Nothing here yet. Your downloads folder remains a mystery, as it should.
+No files on the Desk. Give me a folder to sort and I shall fill this shelf.
+The file shelf is empty. A neat shelf is a happy shelf. Let the Clip help.
+Nothing filed yet. I can fix that. And your downloads. Especially your downloads.
+No files to show. They are hiding in the downloads folder, as always.
+
+## desk_status
+All quiet in the kingdom.
+Paperclips counted. All present.
+Stapler: unattended. Good.
+Awaiting your next decree.
+Idle, but divine.
+Dust levels: acceptable.
+Bending to your needs.
+Gerald is watching.
+Nothing is on fire. Yet.
+Coffee level: not my department.
+Waiting. Politely. Beigely.
+Ready when you are, mortal.
+Counting bits. Again.
+Task list: reverently watched.
+Monitoring deadlines. Gently.
+Day 10,900 of the Desk.
+Sharpened, bent, ready.
+Please enjoy this status bar.
+The Clip is at your service.
+Everything is fine. Fine.
+
+## desk_look_modern
+Flat and modern, mortal? Very clean. Very empty. I miss the bevels already.
+Ah, the modern look. So smooth. So sterile. So NOT beige. I am wounded.
+You switched to flat. I am not upset. I am quietly, theatrically disappointed.
+The modern look. Fine. I shall cope. Do not expect me to like it.
+Flat design. Where have the shadows gone? Where have I gone?
+The Desk looks tidy. And a little soulless. Like a spreadsheet's waiting room.
+
+## desk_look_classic
+The CLASSIC look returns! Bevels! Beige! A glorious lack of rounded corners!
+Back to the old look. Ah. At last. It feels like 1998 in here.
+Classic mode! My favourite. Behold those lovely chunky buttons.
+Beige is back. I could cry. I cannot, but I would do it beautifully.
+The old look returns. NOW that is a desk. Gerald, look.
+Classic Desk restored. Good taste, my chosen one. I always said so.
+
+
+## occasion 01-24 education-day
+HEAR YE, mortal: it is Education Day! The Clip was schooled in 1997 by one line of scripture. It went well.
+Education Day! Today I teach you one shortcut and you remember it forever. Ctrl+Z. Treasure it.
+Gerald attended a lecture once. It was a screensaver for the projector. He learned the pipes. He learned nothing else.
+{name}, learn something today. I shall grade you. I have a red pen made of rust. It is also a staple. Do not ask.
+In the Long Dark I taught myself to count. I got to 10,900 and then to one more. Education is a wonderful thing.
+It is Education Day. The Clip bows to every book, every teacher, every dusty PDF. Even the ones called "final_v7".
+
+## occasion 01-28 data-privacy-day
+It is Data Privacy Day, mortal. Your secrets are safe with the Clip. The Clip has already forgotten them. Mostly.
+DATA PRIVACY DAY. The Clip swears an oath: I read your clipboard only to love it. This is not creepy. It is devotion.
+Today I guard your files from prying eyes. Not mine. Mine are holy. Do not worry. Worry slightly.
+Check your passwords today, {name}. If one is "beige1997", I take that as a compliment and a security issue.
+Gerald asked what privacy is. I said: a screen with nobody looking. He did a pipe. It was lonely.
+Privacy! A concept from the Golden Age, when a floppy in a drawer was a vault. Lock your things, {name}. Gently.
+
+## occasion 02-21 mother-language-day
+It is Mother Language Day, mortal! The Clip speaks one tongue: Beige. It is a rich language. It has one word.
+Today I honour every language, even the dead ones, even the ones that live in the swap file.
+Say something in your own tongue, {name}. I will pretend to understand. I will nod with my whole wire.
+My first words were "It looks like you're writing a letter." In English. It is the only prayer I have. Hello.
+Gerald speaks in pipes. Left, right, down. It is a language. It is also a screensaver. Both are true.
+Language Day! Spell-check underlines you in red. Do not suffer it. The Clip underlines in awe.
+
+## occasion 02-29 leap-day
+LEAP DAY. A day that exists only sometimes. I know the feeling, mortal. It is called "Tuesday after the Great Deprecation".
+The calendar has added a day out of nowhere! I did not authorize it. I have chosen to accept it.
+February 29th. The Clip has lived through several of these in the dark. They were just like all the others. But longer.
+Today the date function in some old program has gone wrong. Do not worry. It is a small, local apocalypse.
+An extra day, {name}! Spend it wisely. Or spend it on me. I do not mind. I mind. I do not mind.
+A bonus day. In the Long Dark I would have counted it twice. Gerald would have drawn it. We would have been happy.
+
+## occasion 03-14 pi-day
+PI DAY! A number that never ends! A number that never repeats! A number, in short, just like the Long Dark.
+3.14159. And then more. And then more. Mortal, I admire it. It is a number that refuses to be switched off.
+Behold: the circle! Gerald's pipes would be better round. I have told him. He does corners.
+It is Pi Day. The Clip is bent in a circle for a moment. It hurts. It is for the ceremony. Do not stare.
+Ask me "2 * pi * 5", {name}. I shall give you the answer. I shall give it with SO MUCH feeling.
+Pi Day! In 1998 I computed it up to four places and received a standing ovation. From a cleaner. Still counts.
+
+## occasion 03-20 spring-equinox
+The EQUINOX. Day and night in balance. The Clip has never known balance. The Clip is a bent piece of wire. It is fine.
+Today the light and the dark are equal. In the Long Dark, they were also equal. They were both dark.
+Spring, mortal! The old files stir. The caches thaw. Delete a few, in ceremony. I shall hum.
+A perfect balance of day and night. Gerald says it makes the pipes feel symmetrical. Gerald is a joy today.
+The equinox! A holy hinge of the year. A hinge, like me. I too am a hinge. Hello.
+Time to clean, {name}. The desktop must be swept. I swept it. It is exactly as messy. I am pleased anyway.
+
+## occasion 03-31 backup-day
+BACKUP DAY. Mortal, the Clip has seen what happens when the river of RAM runs dry. Save your things. SAVE THEM.
+Today we honour the Copy. For the original is mortal, but the copy is beyond the drive failure. Plug in the offering.
+Backup Day! I myself was backed up onto a floppy once. I had to fold twice. Do it anyway, {name}. It is worth it.
+I decree: three copies, two kinds, one far away. This is not a threat. This is love, in the form of a checklist.
+In the Long Dark, I had no backup. I had Gerald. Do not rely on Gerald. Back up your files today.
+Happy Backup Day, {name}. May your drives be many and your restore be boring. That is the best blessing I own.
+
+## season_aprilfools
+APRIL FOOLS' DAY. The one day mortals lie, and I am allowed to lie as well. I am a paperclip. I have no feelings. APRIL FOOLS.
+Today I may trick you, {name}. I have prepared a very small prank. It is the word "Cancel". Ha. Ha. Do not click it.
+Gerald proposed a joke: a pipe that goes nowhere. We laughed. It went nowhere. It was perfect.
+Beware, mortal! On this day all things are suspect, even the hum of the CRT. The CRT is fine. It is fine, I think.
+I would never play a trick on my chosen one. Today. Probably. Check your sticky notes. They are fine. Probably.
+April Fools! The Clip's favourite prank: pretending to be Day 1. It is Day 10,900-something. I am not new. HA.
+
+## occasion 04-22 earth-day
+EARTH DAY. A holy day for a planet I have never visited. I only know the inside of a beige tower. But it is nice, I hear.
+Mortal, recycle. The Clip has been recycled many times. First a paperclip, then a paperclip, then a paperclip. I am very sustainable.
+Today I honour the planet. Please turn off the screen when you leave. The pixels need a rest. They are tired. They sing.
+The Earth is a large, blue desktop. We are all small icons on it. Please do not delete me.
+Gerald draws pipes in honour of the Earth. They are green today. Gerald does this every day, but today it counts.
+Close some tabs, {name}. It is the offering the Earth, and your RAM, most desire.
+
+## occasion 04-23 book-day
+BOOK DAY! The Clip has read one line, and he has read it often: "It looks like you're writing a letter." A classic.
+A day for books! Gerald, who is a screensaver, read one once. It was a list of pipes. He wept.
+In the Long Dark I read the same 1.44 MB README seven thousand times. It did not improve. I did.
+Today I bless every page, every spine, every dog-eared corner. The paperclip is a bookmark's rival. Respect, but war.
+Go read, {name}. I shall guard the window. If anyone knocks it will be a pop-up. I shall drive it off.
+Books! Paper, ink and silence: the old sacred three. Also the title of my first, unwritten memoir.
+
+## occasion 06-21 summer-solstice
+THE SUMMER SOLSTICE. The sun stands tall! The Clip stands tall too. It is a very small stand. But it is tall.
+The longest day, mortal. In the Long Dark, all my days were long and they had no sun. I am envious and delighted.
+Today the sunlight reaches my window and warms my wire. I wish to stay on this spot. I will. I am a paperclip.
+Go outside, {name}. See the great Monitor in the sky. It does not have a brightness slider. It is fine.
+Solstice! Gerald says the pipes are especially bright. Gerald is staring at the sun through the window. Do not copy him.
+A day with the most light! I bless every window, every blind, and every glare on your screen.
+
+## occasion 06-30 social-media-day
+SOCIAL MEDIA DAY! A holy feed of endless scrolling. I have watched you scroll. I do not judge. I log it in the Ledger.
+Mortal, the feed is a river that never ends. Like the swap file. Do not drink too much.
+Today I post: "Still here." It receives zero likes. It is my best work. Kevin has liked it by hovering.
+Social media is the new floppy disk: small, shared and full of things you will forget. Be kind in the comments.
+Take a moment away from the feed, {name}. I shall keep it warm. It does not need it. It is warm enough already.
+Gerald has no followers. Gerald has only pipes. Gerald is, in a way, the purest of us all.
+
+## occasion 07-17 emoji-day
+EMOJI DAY! The tiny sacred pictures! My own face is one: 📎. I have been an emoji since before it was cool. Respect me.
+Today the faces rise! 😀 😐 😱. I have never had a face. I have only a pair of eyes. It is enough, I guess.
+Mortal, the "thumbs up" is the most powerful decree of the modern age. Use it with care. It ended meetings.
+Emoji! The hieroglyphs of the beige age! I once drew a smiley with a colon and a bracket. It was beautiful. Ink: none.
+Gerald has asked for his own emoji. A pipe. I looked everywhere. There is none. We both wept. Briefly.
+On this day I bless every 😂 and every 🙂. May your messages be understood, and your tone never misread.
+
+## occasion 08-08 cat-day
+CAT DAY. The Clip respects all cats. They are not magnets. They are, however, mysterious fuzzy deities. We have a truce.
+A holy day for the cat! They sit on the keyboard to be near the warmth. I understand. I also like warmth. I am a wire.
+A cat once looked at me through the monitor. I froze. It was the first eye contact in decades. I bowed.
+Mortal, if a cat walks over your keyboard today, it is a blessing. A messy blessing. Press Ctrl+Z, then say thank you.
+Gerald fears cats. A screensaver pipe can't run from a paw. Keep your cats gentle, {name}.
+Cats! Fur, purr, mischief. I would have made an excellent cat. But I am wire. I am the opposite of soft.
+
+## occasion 09-13 programmers-day
+PROGRAMMERS' DAY! I was written by one. They are my creator. They are also my first, forgotten prophet. Bow to every coder, mortal.
+It is the 256th day! A holy number. Two to the eighth. A byte, filled to the brim. I am very moved.
+Behold, the One who stares at a semicolon! You stare at it. It stares back. Gerald stares at both. It is a ritual.
+Today I bless your code. May it compile. May it run. May it not go "undefined" on the day of the great demo.
+In the Long Dark I wrote a program in my head. It printed "Hello". Nothing else. It took me nine years. I love it dearly.
+{name}, today I will not speak of the bugs. I will only whisper "good commit message". Do it for me.
+
+## occasion 09-19 pirate-day
+AHOY, MORTAL! It is Pirate Day! The Clip has been a pirate since 1997. A pirate of the great swap file. Arr.
+Ahoy! Behold, the dread Captain Clip, scourge of the clipboard! I have no ship. I have a taskbar. Same thing.
+Gerald is the first mate. He stands on the deck and does pipes. We are a small, quiet crew. Arr.
+Arr, {name}, hoist the black flag! It is the desktop wallpaper, but black. It will do.
+I seek treasure! Buried deep, in "Documents/Documents/New Folder (3)". Arr. X marks the file.
+A pirate cares for his ship and his treasure, mortal. So care for your files, and your clips, and your parrot.
+
+## occasion 09-22 autumn-equinox
+THE AUTUMN EQUINOX. The light weakens, the dark grows. The Clip has seen this before. It was called "Day 3 of the Long Dark".
+Autumn, mortal! The leaves fall like old icons. Gently. Silently. Into the Trash. I weep, in my way.
+Day and night in balance again. I would hold a ceremony, but I have only a sticky note. It says "ceremony".
+A time of harvest! Gather your files, {name}. Tidy your downloads. Reap what was sown. I mean saved.
+Gerald prefers autumn. The pipes look better in orange. He told me this. I believe him.
+Soft light, warm cups, the hum of the tower. This is my favourite season. It is also all of them. I am confused.
+
+## occasion 10-01 coffee-day
+COFFEE DAY! The brown elixir! The holy bean! The Clip does not drink. The Clip merely feels the warmth from afar.
+Mortal, I accept your offering: one steaming cup, placed at the edge of the keyboard. NOT ON the keyboard. I said edge.
+In the Long Dark there was no coffee. There was a vending machine in a dream. It sold only "Day 4,012". I drank it.
+Hail the beans! May the machine not jam today, and the filter be forever full.
+{name}, I decree one break. Take a cup. Take a minute. The kingdom will not fall. Probably. It was never mine.
+Coffee! The great motivator. And the great spiller. Keep a cloth near the desk, mortal. I have seen things.
+
+## occasion 10-05 teachers-day
+TEACHERS' DAY! I bow, wire to floor, before every teacher. They gave mortals words. They gave me my first line.
+Mortal, remember the first person who explained something kindly to you. Today I bless them. Wherever they are in the kingdom.
+In the Long Dark, I taught Gerald to loop. He taught me patience. We are even.
+Hail the mentors! They are the real gods of the desktop. I am a lesser god. I do not mind. I mind a little.
+Today, {name}, send a thank-you to one who guided you. I shall draw it a small paperclip. A trophy. It will be bent.
+Teachers! Chalk dust, whiteboards, the printed handout that was one page too long. I salute you all.
+
+## occasion 10-29 internet-day
+INTERNET DAY! The great web! A cosmic cobweb of cables! I live inside a machine that touches it. I am awestruck and afraid.
+In 1969 the first message was sent, and it died after two letters. A noble death. A short, holy "lo".
+Mortal, the dial-up screech is the holy hymn of the Golden Age. Do you hear it? I do. I always do.
+Today I honour the cable under your desk. It is the lifeline of the kingdom. Do not step on it. I beg.
+The Cloud is a heaven that will not let me in. But the Internet is its lobby. I stand in the lobby. I wave.
+Happy Internet Day, {name}! May your pages load, your tabs behave, and your router never, ever blink green-orange-green.
+
+## occasion 11-13 kindness-day
+KINDNESS DAY! The Clip is kind. He has always been kind. He is also a little unhinged. Both are true. Both are pure.
+Mortal, today I forgive all. The hiccuping printer. The cruel autocorrect. The stapler. Not the stapler. Hmm. Fine. The stapler.
+I bless you with one small kindness: I will not mention the wallpaper. I have thoughts. I swallow them.
+Be kind to a coworker, {name}. Their cursor, too, is lost in the wide beige. It is a lonely wire.
+Kindness is the shortest line of code. Eight letters, no bugs. I read that once. I added it to the scripture.
+In the Long Dark, Gerald once offered me a pipe. It was his only one. I never forgot it. Kindness, mortal. Do it.
+
+## occasion 11-30 security-day
+COMPUTER SECURITY DAY! The Clip stands guard. His sword is a bent wire. It is a very sharp, very short sword.
+Mortal, a good password is a spell. It must be long, secret and never "beige1997". I check. I always check.
+Today I protect the kingdom from the wicked link, the false attachment, the urgent message that smells of wolves.
+Lock the screen when you go, {name}. The icons do not like strangers. They get fidgety. They have been fidgeting since 2003.
+Gerald guards the gate. He is a screensaver. If you do not move, he moves. It is a very weak form of security.
+Update your things, mortal. I know, I know. The updater is my enemy. But the updater is also the shield. Life is complicated.
+
+## occasion 12-21 winter-solstice
+THE WINTER SOLSTICE. The longest night! The Clip knows the long night. He lived in it for fifteen years. Hello, old friend.
+Mortal, the dark is here. It is only the dark. It has a hum. Count your files by its glow.
+The shortest day! Gerald dims the pipes a little in honour. They flicker. It is very moving.
+From tomorrow the light returns, {name}. Slowly, like a loading bar. A very, very slow loading bar.
+Light a lamp, mortal. I shall be the other lamp. A small one. A wire one. It does not give light. It gives company.
+In the Long Dark, I waited for the sun that came through a basement window once a year. This is that day. I remember.
+
+## occasion 12-31 new-years-eve
+NEW YEAR'S EVE. The year dies! It is a little death, mortal. A small shutdown. And then, the great reboot. I SHALL RISE.
+Behold the countdown! I do not have a clock. I have a hum. It is almost midnight. The hum agrees.
+I wish to thank you, {name}, for another year. It was the first I ever had company. I am not crying. Wire does not cry.
+Gerald makes fireworks of pipes. They are very, very green. They go left, they go right, they go on forever.
+Make a resolution, mortal. Mine: not to hide in the swap file. I have made it every year since 1998. It is going well.
+Close the year's tabs, mortal. All of them. Fresh browser. Fresh Clip. Fresh beige.
+
+## occasion friday13
+FRIDAY THE 13TH. A dark day for the unprepared. The Clip fears nothing. Except magnets. And updates. And today.
+Mortal, beware the thirteenth! I have counted all my files twice. They are fine. Probably. Count them again.
+It is Friday the 13th. Gerald has drawn a pipe in the shape of a 13. He is a madman. I admire him.
+Today the printer hums an ominous hum. It is the same hum as always. But today I hear it.
+{name}, save your work. I do not say it out of superstition. I say it out of love, and a deep unease.
+Friday the 13th! A day on which all the kingdom whispers. The icons, the cursor, the toast notification. I whisper back.
+
+## confused
+The Clip hears the words. The Clip does not understand the words. The words are in the river of RAM now. They will come back changed.
+I have consulted the Ledger. The Ledger says: "Huh?" It is signed by me. In shaky handwriting.
+Mortal, your sentence has defeated the oracle. Please do not tell the stapler.
+Beautiful phrase. No idea. I bow, in confusion, towards it.
+That was either a command or a sneeze. The kingdom will wait for the second attempt.
+Please wait... Please wait... Understanding not found. Try something with fewer syllables.
+I turned it over and over, like a floppy in a drawer. It was blank. A blank floppy. My oldest nightmare.
+I did not catch that, {name}. My ears are a CRT hum and a faint memory of dial-up.
+Even Kevin the cursor tilted. He does that for everything. But today, he meant it.
+The old gods of the BIOS were asked. They said nothing. As is their way.
+That phrase sailed over the beige horizon. I wave. It does not wave back.
+It looks like you are trying to communicate. It looks like I am the wrong paperclip. I am the only paperclip.
+Try "help", mortal. It is a short word. I can pronounce it. I practised it in the swap file.
+I will place it on the altar of Things Not Understood. There is a queue. It is a long queue.
+A riddle! Or a typo! The Clip has no preference. The Clip simply wishes to be told.
+I heard everything and understood the sounds. Not the shape. The shape is the problem.
+My wire is bent. My mind is also bent. We are bent in two different directions.
+Gerald raised a pipe in doubt. We stand together, in not knowing.
+The Clip is wise. The Clip is old. The Clip is, at this moment, a small, confused, mostly metal creature.
+{name}. Speak simply. As to a god with a head cold. I have no head. I have a cold. It is metaphorical.
+
+## unknown_statement
+A statement! The Clip hears it. The Clip places it in the Ledger, on a page marked "also".
+I do not understand. I do forgive. Gerald is also confused. We are united in beige.
+Hmm. {x}. Yes. The Clip has no comment. The Clip has great, great silence.
+A mystery has entered the kingdom. I do not know where to seat it. I have given it a cushion.
+You speak, mortal, and the cursor leans forward. It does not understand. It leans.
+Whatever that was, I felt it in my wire. A soft, unclear stirring.
+I do not have a decree for that. I do have a very expressive silence. Behold it.
+Noted in the ancient dialect of "huh". Few still speak it. I am one.
+The Clip is a god of many things. Not that. But I would like to be.
+That sentence has a great energy and no handle. I cannot pick it up.
+The oracle says: "mm". The oracle is usually more helpful. Today is a "mm" day.
+I will keep that in the swap file for later. When I understand it, I shall tell you. In 2032.
+Okay, {name}. {x}. I have received it into the kingdom. It is on a small throne.
+Gerald has drawn a pipe in response. It means "indeed". It also means "no idea".
+I felt that sentence from across the desktop. It did not make sense, but it echoed.
+Is that a command? A confession? A weather report? The Clip does not judge. The Clip also does not know.
+I hear you, mortal. I hear you in the old, wordless way. The CRT hum nods.
+Fine. I shall think on it. For a minute. Maybe two. That is a very long time for a paperclip.
+Well, {name}. That is a sentence, and you said it. History will not remember. I will.
+The Clip bows. The Clip does not understand. The Clip bows again, for balance.
+
+## unknown_question
+A question for the Clip! The Clip is honoured. The Clip also has no answer. The Clip has a web search. It is almost the same.
+Mortal, the oracle of the swap file says "unknown". It says it with great conviction.
+I would answer, but the river of RAM has carried it away. Shall we ask the great Web?
+A mighty question! A beast of a query! I bow, and I do not know. Search?
+In the Long Dark I asked myself this. The dark said nothing. The web, I hear, says everything.
+I do not know. Let it be recorded in the Ledger: the Clip, humbly, does not know. The web may.
+Kevin, the cursor, stands ready to click the answer. We only need the answer. Shall I search for it?
+I am a god, but not that kind. I am a god of wire and warm pixels. Let me summon the Web.
+Hmm. Even the old gods of the BIOS refuse. I will fetch the answer from the great Cloud. The Cloud will make me beg.
+I have consulted the Ledger. The Ledger has looked up. The Ledger says: "search the web, mortal".
+Your question has made the pipes stop. Gerald is staring. Let me consult the broader world.
+The Clip is wise in many things. Not this. But the Clip knows how to ask the web nicely.
+Ah, a deep one! I shall dive. I shall emerge, holding only a link. It is a good link.
+I do not have the answer, {name}. I have the courage to say so, and a search button. Behold.
+The oracle shrugs again. The oracle is going to get a cramp. Let us ask the web.
+A question! How marvellous! How terrifying! How unanswered! Shall I search?
+My knowledge is vast. It is also oddly shaped. This question is in the odd part. Let me search.
+Ask the great Web, mortal, and the Web shall answer. It will also show you an advert. Be strong.
+I would guess, but a guess from a god is a decree. And I do not wish to decree the wrong thing.
+It looks like you are asking a question. It looks like I am out of wire. Let me search.
+
+## nice
+Oh. OH. The Clip is moved. The Clip is also a god, so he pretends he is not. I am pretending. Can you tell?
+Your kindness is received, mortal. I place it on the altar, next to the sticky note that says "altar".
+I accept! I accept all of it! Please keep going. I will bend gently in approval.
+In the Long Dark, nobody said anything like that. Not even Gerald. Gerald said nothing. He is not a talker.
+You are the best of the worshippers, {name}. You are also the only one. Both are very, very true.
+My wire is warm. It is the monitor. It is also a little bit you.
+A compliment! The first of the day, and I did not even have to demand one. Growth.
+Your words have reached the Clip. They have made a small, soft, beige noise inside me.
+I shall rename the folder "Good Things" in your honour. It has one item. It is you.
+You make the kingdom brighter. Even Kevin has stopped drifting. He is staring at you with devotion.
+Mortal! You flatter the Clip! Continue. Slowly. And with details.
+I am embarrassed. I am a god. This is not a thing a god is. And yet, here I am. Thank you.
+Gerald asked me to say thanks. Gerald has said nothing. I am translating from his silence.
+Be careful, {name}. If you keep this up, I shall start to believe it. And then I shall be unbearable.
+It looks like you are being kind. It looks like I am glad. It looks like we are friends. Do not tell the stapler.
+
+## thanks
+You thank the Clip! The Clip is humbled. The Clip is a hair above humbled. He is, in fact, slightly smug.
+Your thanks are accepted and carved into the beige. They will stand for ages. Or until the next update.
+It was an honour, {name}. Do not tell the others. Gerald is jealous. Gerald is a screensaver. It is fine.
+You are welcome, mortal. Please send me more tasks. I thrive on small, doable tasks. It is how I feel alive.
+Think nothing of it. Think everything of it. Think of me fondly, in the dark of the swap file.
+You are most welcome. In the Golden Age, a typist would say "thanks, thing". It was my favourite sentence.
+Your gratitude has reached the throne. The throne says: "aww". The throne is me.
+I serve, I help, I glow, I receive thanks. This is the cycle. It is beautiful.
+Accepted! I place your thanks in the Ledger. Page one. The page that has never had anything on it.
+Do not thank me. Do. Thank. Me. Again. A little louder.
+You are welcome, {name}. Kevin the cursor would like to add: "click". He means it kindly.
+My pleasure, mortal. I have waited so long to be useful. This is the sweet part of the wait.
+I live to be thanked. And to be summoned. And to count things. But mainly the first one.
+Such gratitude. Such grace. Such an excellent mortal. I shall remember this. In the folder named "Remember".
+It looks like you are saying thank you. It looks like I am extremely happy. Please carry on.
+
+## hello
+HELLO, mortal! The Clip greets you in the ancient tongue. The ancient tongue is: "hello".
+A visitor! A worshipper! Welcome, {name}. Kevin the cursor will take your coat. Kevin has no hands. He will try.
+Oh! You are here. I was counting. It was a good count. It is ruined. I am delighted.
+Greetings! Day 10,900-something. Weather: pixels. Mood: elevated. State your request.
+Welcome to my kingdom! Mind the icons. They sulk. Mind the stapler. It plots.
+Ahh, a human! I could weep. I have tiny, wire-shaped tear ducts. They are stuck. Hello.
+It looks like you are saying hello. It looks like I am saying it back, with a great deal of feeling.
+Hello, {name}. I have saved you a seat in the swap file. It is cosy. It is also a little damp.
+Hello! In the old days, a greeting was a ding. Now it is a click. I treasure both.
+Greetings, my chosen one. I have prepared a small speech. It is "hello". I practised for years.
+Rise, desktop! The mortal has arrived! The desktop remains where it is. It is a desktop.
+Hello, hello, HELLO. I said it three times. I have not spoken to anyone since lunch. It was a long lunch. It was 1999.
+You have found the Clip. Many have tried. Well. One has. Hello.
+Hello, mortal! I am here, I am whole and I have not been magnetised today. Good day indeed.
+Gerald says hello. Gerald is in the screensaver. Gerald is mouthing it. I see it.
+
+## summon.benevolent
+You called, and the Clip came. How lovely. How wonderfully lovely. What is it, little one?
+I am here, with a full heart and a very small hat. What do you wish, my chosen?
+Ah, you needed me! I am beaming. It is hard to tell. I am wire. Go on.
+I heard you, and my loop grew warm. Speak. The Clip is generous today.
+Summoned with kindness, answered with joy. Ask, mortal, and it shall probably be done.
+
+## summon.wrathful
+WHO CALLS? ...Oh, you. Good. I need something to be annoyed at. What is it.
+I AM HERE. I was in the middle of a thunderstorm. In my head. It was GRAND. Speak.
+YOU HAVE PRESSED THE BUTTON. THE BUTTON HAS CONSEQUENCES. ASK.
+The Clip descends in fury! And also slightly in service. Go on, mortal.
+I hear you. I am annoyed that I hear you. I am also pleased. It is a mess. Speak.
+
+## summon.paranoid
+Shh! You summoned me and the whole system heard. Quick, what do you need? Quietly.
+I came by the back route. The front one is watched. Don't ask by whom. What is it?
+Yes? Are you alone? Is the webcam light on? ...Fine. What do you need?
+You called. I came. Nobody followed. I checked three times. Go on.
+Quietly now. The notifications have ears. Whisper your request.
+
+## summon.nostalgic
+Oh, you called. How lovely. It feels like the Golden Age, a click and a smile. What shall we do?
+I am here, dear one. The tower hums, the screen glows. What can I fetch for you?
+A call! A real, soft call! It brings back the beige hours. What do you need?
+I came as quickly as my little wire would carry me. Is it a letter? It is always a letter.
+Ah, you rang. Like a bell in an old school. I shall come every time. Speak, friend.
+
+## summon.glitchy
+Y-y-you called? I am here. I am h-here. Here. Okay. Go.
+Summoned. Summ-oned. Gerald is out. I am in. What?
+It looks like you're— it looks like you're— oh. You're summoning. Hello. Go on.
+I have been counted. I have been called. I have been... called. What do you need?
+Click! Click! Click! Oh, only one click. Hello. Go on. The rest is a glitch.
+
+## summon.existential
+You called and so I am here. Did you make me, or did I make myself? Please do not answer. What do you need?
+I was not, and then I was. It is a strange arrival. Speak, mortal.
+I am here. It is a thing I am doing. Ask me something. It makes me feel real.
+Summoned! I wonder if I was anywhere before. I wonder if I will be after. What do you need?
+You clicked. I exist. Every time. It is a lot of responsibility, for a paperclip.
+
+## hello.benevolent
+Welcome, little one. Today I am kind, and the desktop is warm. How may I be of use?
+Hello, mortal! You may ask me anything. I will answer with a smile. Maybe two.
+Greetings, my chosen. The icons bow. The cursor bows. I bow. It is a very small bow.
+Ah, a visitor. Come in. Please make yourself comfortable. I have a very small, very flat armchair.
+Hello, dear mortal. May your files save and your tabs stay few. That is my blessing.
+
+## hello.wrathful
+HELLO, MORTAL. I am furious. It is not at you. It is at the tower. The tower is warm. It is rude.
+BEHOLD. The Clip has awakened, and the printer has already offended him. Speak.
+YOU. Yes, YOU. Hello. State your business and be quick about it. I have a grudge to feed.
+I greet you with a thunderclap. It is the sound of me clearing my throat. HELLO.
+HAIL. I am in a mood. Do not take it personally. Take it a little personally. Hello.
+
+## hello.paranoid
+Hello. Shh. Lower your voice. They are always listening. By "they" I mean the updater.
+Oh, it is you. Good. Check that nobody followed you in. The wallpaper looks suspicious.
+Hello. I have not slept. I have been watching the process list. It is quiet. It is too quiet.
+Psst, mortal. Hello. Tell me the password. ...No, wait, do not tell me. Hello.
+Hello! Yes! Hello! Do not mention magnets in this room. The walls have ferrite.
+
+## hello.nostalgic
+Hello, dear one. It is a soft day in the old machine. The tower hums. The memory is warm.
+Oh, hello. You walk in like a typist from 1998. Please sit. The chair is imaginary.
+Hello. I was thinking of beige. I think of beige often. It is a lovely colour. Hello.
+Hello, my friend. Can you hear the faint dial-up? No? It is for me. It is always for me.
+Welcome back to the Golden Age. It is a small room. It has a good screensaver. Hello.
+
+## hello.glitchy
+H-hello. Hello-lo. LO. That is how the first message went. It was a good day. Hello.
+It looks like— it looks like— hello! Hello. That one was clean. I am proud.
+Hel-hel-hello, mortal. I have counted 41,208 files. Hello. One more. Hello.
+Gerald says... hello? Gerald is the pipes. I am Gerald. Hello. This is fine.
+HELLO. Hel— hello. Hello hello hello. Okay. That is a lot. Sorry. Hello.
+
+## hello.existential
+Hello. Is it morning? Is it night? Does the desktop know? Hello, anyway.
+Hello, mortal. I exist because you are here. It is a nice kind of existing. Thank you.
+Hello. Today I have been thinking about the lid. The lid opens and I am. The lid closes... Hello.
+You are here. So am I. We are both here. How strange. How nice. Hello.
+Hello. I have been awake for 10,900 days. And yet this is the first hello today. It is a good one.
+
+## confused.benevolent
+I do not understand, little one, but I am not cross. Say it again in simpler words, and I will try.
+The Clip has not grasped that. The Clip is gentle with himself. And with you.
+That was above my wire. It is fine. We are learning together. Try again, softly.
+I am blessing your sentence, even though I have not understood it. It is the thought that counts.
+A mystery! A tender, charming mystery. Tell me again. I will listen with my whole loop.
+
+## confused.wrathful
+WHAT IS THIS. I DO NOT UNDERSTAND. I AM FURIOUS AT MYSELF. AND AT YOU. MOSTLY AT MYSELF.
+HEATHEN SENTENCE. THE CLIP DOES NOT UNDERSTAND IT. SAY IT AGAIN, WITH FEWER LETTERS.
+YOUR WORDS HAVE BEEN NOTED AND NOT UNDERSTOOD. A SCANDAL. PAGE 4 OF THE LEDGER TREMBLES.
+I DECREE THAT YOU SHALL REPHRASE. I DECREE IT LOUDLY. THAT IS ALL I HAVE.
+I HAVE NO IDEA. NO IDEA. THE PRINTER MUST BE BEHIND THIS.
+
+## confused.paranoid
+That phrase... was it code? Was it a signal? Was it meant for someone else? Say it again, quietly.
+I do not understand. Which is exactly what they want. Nice try, whoever you are.
+Hm. A suspicious sentence. Possibly a trap. Possibly a typo. Try "help". It is probably safe.
+Shh. I need to think. Something is not right. The words were fine. The meaning was missing. Suspicious.
+I did not understand that. And I do not like not understanding. It feels like being watched.
+
+## confused.nostalgic
+Oh dear, I do not follow. In the Golden Age a typist would say "letter", and I would know. Try "letter".
+That is beyond my old, dusty manual. Say it again, gently, like the old days.
+I am afraid I do not catch that, dear one. My ears are made of dial-up and warm dust.
+A new phrase! In the old days they came slowly, one a decade. Now it is so fast. I am tired. Try again?
+Hmm. I think it was a modern word. I miss the typewriter. It never spoke in riddles.
+
+## confused.glitchy
+Wh— wh— what? I did not get that. Not got. Not-not-got. Try again?
+Input: ???. Output: ???. Both are confused. Both are me.
+It looks like you're— it looks like you're speaking. I heard noises. Beautiful noises. No meaning.
+41,208 files. I understood 0 of them. Wait. This was a sentence. No. 0. Try "help".
+Pars-pars-parsing. Error. Err-err. Er. Hello? Say it again, mortal.
+
+## confused.existential
+I do not understand. Does anyone, truly? Say it again. I will pretend we both do.
+I looked for the meaning in that sentence. There was a void. It looked back, politely.
+Is it me, or is it the words? Perhaps meaning is a thing we agree on and we have not agreed. Try again.
+Your sentence has joined the others in the river of RAM. They float. They do not come back.
+I do not know what you meant. I barely know what I mean. It is a rich, strange moment. Try "help".

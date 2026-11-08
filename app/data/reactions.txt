@@ -4510,3 +4510,1071 @@ Browsing without a mouse. Efficient. Smug. A bit lonely, but efficient.
 A very light browser. It loads fast. It will not load your banking site. It never does.
 A text web browser. A reminder that most pages are just words. And a few thousand scripts.
 A browser with vim-style keys. Hint mode, follow with letters. A very fine tool.
+
+## tips letter
+Tip: Ctrl+B, Ctrl+I and Ctrl+U toggle bold, italic and underline in nearly every word processor. Your mouse can rest.
+Tip: In LibreOffice Writer, Ctrl+Alt+Shift+V pastes as unformatted text. Handy when the source font looks like a ransom note.
+Tip: Ctrl+Enter inserts a page break in Writer and in Word. Far better than pressing Enter forty times.
+Tip: Ctrl+Z undoes, Ctrl+Y redoes in Writer and Word. Regret is only a few keystrokes deep.
+Tip: Ctrl+Home jumps to the top of the document and Ctrl+End to the bottom. Scrolling is for people with time.
+Tip: Ctrl+Backspace deletes a whole word at once, backwards. Great for undoing a sentence you regret starting.
+Tip: F7 starts the spell check in Writer and in Word. Do it before you send the letter, not after you spot the typo.
+
+## tips writing
+Tip: Ctrl+A selects everything, Ctrl+C copies, Ctrl+V pastes. You know this. Everyone knows this. Do it anyway.
+Tip: Ctrl+Left and Ctrl+Right move a word at a time. Add Shift to select as you go. Surgical.
+Tip: In LibreOffice Writer, Ctrl+1, Ctrl+2 and Ctrl+3 apply Heading 1 to 3. Ctrl+0 goes back to body text.
+Tip: Ctrl+K inserts a hyperlink in Writer and Word. Link the source instead of writing "click here".
+Tip: Ctrl+L, Ctrl+E and Ctrl+R align left, centre and right in Writer and Word. Ctrl+J justifies.
+Tip: In LibreOffice Writer, F5 opens the Navigator. A long report is easier when you can jump by heading.
+Tip: In LibreOffice Writer, double-click selects a word and triple-click selects a sentence. Quadruple-click gets the paragraph.
+
+## tips spreadsheet
+Tip: Ctrl+Arrow jumps to the edge of a block of data. Ctrl+Home goes back to A1. Scrolling 10,000 rows is optional.
+Tip: F2 edits the selected cell in Excel and in Calc without wiping its contents. Typing over a formula is how tears begin.
+Tip: While typing a formula, F4 cycles a reference between A1, $A$1, A$1 and $A1. In Excel and in Calc.
+Tip: Ctrl+; enters today's date and Ctrl+Shift+; the current time, in Excel and in Calc. No calendar needed.
+Tip: Ctrl+D fills the cell above down into the selected cells. A new line inside a cell is Alt+Enter in Excel and Ctrl+Enter in Calc.
+Tip: Ctrl+Space selects a whole column and Shift+Space a whole row. Works in Excel and Calc.
+Tip: Select a range of numbers and the status bar shows their sum, no formula needed. Excel and Calc both do it.
+
+## tips slides
+Tip: F5 starts the slideshow in Impress and in PowerPoint. Esc ends it. Rehearsing in the editor is how you present with a sidebar showing.
+Tip: During a slideshow, type a slide number and press Enter to jump straight to it. Handy when someone asks about slide 14.
+Tip: Ctrl+M adds a new slide in Impress and in PowerPoint. Fewer words per slide helps more than new slides, though.
+Tip: In PowerPoint, B or the full stop key blackens the screen during a show. Press it again to return. Great for a pause.
+Tip: One idea per slide. If it needs scrolling, it is a document, not a slide.
+Tip: Export your deck as a PDF before sending it. The fonts will look the same on every screen.
+
+## tips email
+Tip: Ctrl+Enter sends the message in Thunderbird, Gmail and Outlook. Read it twice before you press it.
+Tip: Ctrl+R replies and Ctrl+Shift+R replies to all, in Thunderbird and in Outlook. Choose with care.
+Tip: Ctrl+N starts a new message in Thunderbird and in Outlook.
+Tip: In Thunderbird, Ctrl+Shift+V pastes as plain text. No more mystery fonts in the middle of your email.
+Tip: Fill in the To field last. An email that cannot be sent by accident cannot be sent to the wrong person.
+Tip: Attach the file first, then write "see attached". The attachment is the most forgotten thing in email history.
+
+## tips inbox
+Tip: In Thunderbird, A archives the selected message and M toggles read and unread. Inbox zero is a keystroke away.
+Tip: In Gmail, switch on keyboard shortcuts in the settings. Then E archives, C composes, J and K move between messages.
+Tip: Shift+Delete removes a message for good in Thunderbird and in Outlook, without sending it to the trash first. Use with care.
+Tip: In Outlook, Ctrl+Q marks a message as read and Ctrl+U as unread.
+Tip: Open your inbox at fixed times, not all day. Constant checking is just a very slow game of Whack-a-mole.
+Tip: Unsubscribe at the bottom of a newsletter you do not read. The link counts as a gift to your future self.
+
+## tips code
+Tip: In VS Code, Ctrl+P opens any file by name and Ctrl+Shift+P opens the command palette. The mouse is optional.
+Tip: Ctrl+/ comments or uncomments the current line in VS Code. Select several lines and it does them all.
+Tip: In VS Code, Alt+Up and Alt+Down move the current line. Shift+Alt+Down copies it below.
+Tip: Ctrl+D in VS Code selects the next occurrence of the highlighted word. Press it repeatedly, then type once to edit them all.
+Tip: F2 renames a symbol in VS Code everywhere it is used. Better than find and replace and hope.
+Tip: F12 goes to the definition of the thing under the cursor in VS Code, and Alt+Left takes you back.
+Tip: Ctrl+` toggles the built-in terminal in VS Code. Ctrl+Shift+K deletes the current line.
+
+## tips terminal
+Tip: Ctrl+C stops the running command and Ctrl+L clears the screen. Ctrl+D on an empty line exits the shell.
+Tip: Ctrl+R searches your command history as you type. Press it again for older matches.
+Tip: Ctrl+A and Ctrl+E jump to the start and the end of the line in bash and zsh. Ctrl+W deletes the word before the cursor.
+Tip: Most Linux terminals paste with Ctrl+Shift+V and copy with Ctrl+Shift+C, since Ctrl+C means stop. Windows Terminal does that too.
+Tip: Tab completes file names and commands. Press it twice to see the options. Typing full paths is for the brave and the bored.
+Tip: In bash and zsh, !! repeats the previous command. sudo !! repeats it with admin rights, which is the classic fix for "permission denied".
+Tip: Ctrl+Z pauses a running program and fg brings it back. The program is not harmed. It is merely inconvenienced.
+
+## tips howto
+Tip: Ctrl+F searches the current page. Long tutorials usually hide the one step you need on the third screen.
+Tip: Ctrl+D bookmarks the page in Firefox and Chrome. Do it before you close the tutorial you will need again.
+Tip: Ctrl+Shift+T reopens the tab you just closed, in Firefox and in Chrome. Repeat for older ones.
+Tip: Middle-click a link to open it in a new tab. Ctrl+W closes the current tab.
+Tip: Ctrl+plus and Ctrl+minus zoom the page, Ctrl+0 resets it. Useful for tiny screenshots in a tutorial.
+Tip: Search the exact error message in quotes. Somebody has already had your problem, and wrote about it in 2014.
+
+## tips search
+Tip: Ctrl+L or F6 focuses the address bar in Firefox and Chrome, ready for a search. No clicking required.
+Tip: Put a phrase in quotes to search for it exactly, and a minus sign before a word to leave it out. Works in Google and DuckDuckGo.
+Tip: Add site:example.com to a Google search to restrict it to that website. Handy when a site's own search is hopeless.
+Tip: Add filetype:pdf to a Google search to find only PDFs. Great for manuals and reports.
+Tip: Ctrl+Shift+R reloads a page and ignores the cached copy in Firefox and Chrome. Useful when a page insists on being old.
+Tip: Alt+Left goes back a page and Alt+Right forward in Firefox and Chrome. Your trackball days are over.
+
+## tips video
+Tip: On YouTube, Space or K pauses, J and L skip 10 seconds back and forward, and the arrow keys skip 5.
+Tip: On YouTube, F is full screen, M is mute and C toggles captions.
+Tip: On YouTube, Shift+. speeds the video up and Shift+, slows it down. Lectures survive 1.5x. Usually.
+Tip: On YouTube, the number keys 0 to 9 jump to 0 to 90 percent of the video. 0 goes back to the start.
+Tip: On YouTube, T switches to theatre mode and I opens the miniplayer, so the video can sit in a corner while you work. Mostly work.
+Tip: On YouTube, while the video is paused, the comma and full stop keys step one frame back and forward.
+
+## tips social
+Tip: Ctrl+Shift+T reopens the tab you just closed. Handy when you close the post you meant to answer.
+Tip: Ctrl+Shift+V pastes as plain text in Firefox and Chrome. Posts do not need the font from the source page.
+Tip: Ctrl+Shift+N opens a private window in Chrome and Ctrl+Shift+P in Firefox. Useful for logging into a second account.
+Tip: Ctrl+F finds a word on a long page, even in a long feed. Not in a feed that loads as you scroll, but that is the feed's problem.
+Tip: Alt+Left goes back a page, so you do not lose your place after clicking a link.
+Tip: Set a timer before you open the feed: "timer 20m feed". It is the only thing between you and 3 hours.
+
+## tips shopping
+Tip: Ctrl+F finds "shipping" or "returns" on a long product page. Better to know the policy before you buy.
+Tip: Check the address bar for https and the right website name before you pay. A shop with a slightly different spelling is a different shop.
+Tip: Ctrl+P and Save as PDF keeps a copy of your order confirmation, in Firefox and in Chrome.
+Tip: Ctrl+plus zooms the page so you can read the small print. Ctrl+0 resets.
+Tip: Ctrl+D bookmarks the item. Wait a day. If you still want it tomorrow, it is probably a real want.
+Tip: Open two tabs to compare products or prices. Middle-click the link and it opens in a new tab.
+
+## tips music
+Tip: Spotify desktop: Space plays and pauses, Ctrl+Right is the next track and Ctrl+Left the previous one.
+Tip: Spotify desktop: Ctrl+Up and Ctrl+Down change the volume. Quieter when the call starts.
+Tip: Media keys on your keyboard work from anywhere, in KDE, GNOME and Windows. Play, pause, next, volume.
+Tip: In KDE Plasma, scroll over the volume icon in the tray to change the volume. A middle-click mutes.
+Tip: Say "focus 25m" to start a work session. Instrumental music is easier on the concentration than lyrics.
+Tip: Headphones are the polite way to listen at a desk. Your office neighbour has opinions.
+
+## tips meeting
+Tip: In Zoom, Alt+A mutes and unmutes and Alt+V starts and stops your video, on Windows and Linux.
+Tip: In Zoom, hold Space to talk while muted. Let go and you are muted again.
+Tip: In Google Meet, Ctrl+D mutes the microphone and Ctrl+E turns the camera on and off, on Windows and Linux.
+Tip: In Teams, Ctrl+Shift+M mutes and unmutes, and Ctrl+Shift+O turns the camera on or off.
+Tip: When screen sharing, share a single window, not the whole screen. Nobody needs to see your notifications.
+Tip: Join a minute early and test the microphone. The first sentence of every meeting is "Can you hear me?"
+Tip: Say "timer 5m meeting" and I will tell you when the call should start. I am far more reliable than your calendar.
+
+## tips calendar
+Tip: In Google Calendar, turn on keyboard shortcuts. Then C creates an event, T jumps to today, and D, W and M switch views.
+Tip: In Outlook, Ctrl+1 is mail and Ctrl+2 is calendar.
+Tip: Put the meeting link in the event description, not in an email you will never find again.
+Tip: Leave a few minutes between meetings. Back-to-back is a schedule that only works in theory.
+Tip: Add a reminder ten minutes before important events. Or say "remind me in 10 min to call" and I will do it.
+Tip: Working with other time zones? In Google Calendar, add a secondary time zone in the settings.
+
+## tips pdf
+Tip: Ctrl+F searches inside a PDF in most viewers, including Firefox. Scanned PDFs are pictures and cannot be searched.
+Tip: Ctrl+plus and Ctrl+minus zoom a PDF in the browser. Ctrl+0 returns to the default size.
+Tip: In Okular, Ctrl+G goes to a page number. Handy for a 300-page manual.
+Tip: To print only some pages, press Ctrl+P and type a range such as 2-4 in the pages field. A forest will thank you.
+Tip: Space scrolls a screen down and Shift+Space scrolls a screen up in most PDF viewers and browsers.
+Tip: A scanned PDF has no text to copy. You would need an OCR tool to read it.
+
+## tips image
+Tip: In GIMP, Ctrl+Z undoes and Ctrl+Y or Ctrl+Shift+Z redoes. Painting is easier when mistakes are cheap.
+Tip: In GIMP, hold Space and drag to move around the image. Ctrl plus the mouse wheel zooms.
+Tip: In GIMP, press 1 for 100 percent zoom and Shift+Ctrl+J to fit the image in the window.
+Tip: In GIMP, Shift+Ctrl+E exports the image. Saving gives you a project file, exporting gives you a PNG or JPEG.
+Tip: Use PNG for screenshots and sharp graphics, and JPEG for photos. JPEG blurs text around the edges.
+Tip: Keep the original and export a copy when you edit a picture. You cannot un-crop a file you saved over.
+
+## tips files
+Tip: Alt+Up goes to the parent folder in Dolphin, GNOME Files and Windows Explorer. Alt+Left goes back.
+Tip: Ctrl+L shows the path as text so you can type or paste one. Works in Dolphin and GNOME Files.
+Tip: Alt+. shows hidden files in Dolphin and Ctrl+H does it in GNOME Files. Hidden files start with a dot.
+Tip: F2 renames the selected file in Dolphin, GNOME Files and Windows Explorer.
+Tip: Shift+Delete skips the trash and deletes for good, in Dolphin, GNOME Files and Explorer. There is no undo.
+Tip: In Dolphin, F3 splits the window in two panes and F4 opens a terminal in the current folder. Drag between panes.
+Tip: Ctrl+Shift+N creates a new folder in GNOME Files and Windows Explorer. In Dolphin it is F10.
+
+## tips settings
+Tip: On Windows, Win+I opens Settings. Skip the hunt through the Start menu.
+Tip: In KDE, press Alt+Space or Alt+F2 and type "settings" to open System Settings.
+Tip: In GNOME, press the Super key and type "settings". Search is faster than clicking through menus.
+Tip: System Settings have a search box. Type what you want to change instead of browsing every page.
+Tip: Take a screenshot of a settings page before you change it. Then you know how to put it back.
+Tip: Change one setting at a time. If something breaks, you know which one it was.
+
+## tips error
+Tip: Read the whole error message first. It often says exactly what is wrong. Then copy it exactly, not from memory.
+Tip: In a standard Windows error box, Ctrl+C copies the message text. Paste it into a search.
+Tip: Take a screenshot of the error with the Print Screen key. Support will ask for one anyway.
+Tip: On Linux, journalctl -b -p err lists the errors from the current boot. It is a good first look at what went wrong.
+Tip: Ctrl+Shift+Esc opens Task Manager on Windows. Alt+F4 closes the focused window on Windows, KDE and GNOME.
+Tip: Search the exact error text in quotes. Add the name of your program or system.
+Tip: Restarting the program, then the computer, solves more than anyone admits. Save your work first.
+
+## tips wikipedia
+Tip: The numbered notes at the bottom of a Wikipedia article are its sources. Check them before you quote the article.
+Tip: Hover over a link in a Wikipedia article and a preview pops up. No new tab needed.
+Tip: The Talk tab shows what editors argue about, and the View history tab shows who changed what. Useful for disputed topics.
+Tip: The Languages list in the sidebar links to the same article in other languages. Sometimes the other version is longer.
+Tip: In the Tools menu, "Cite this page" gives you a ready-made citation for your essay or report.
+Tip: Ctrl+F then "citation needed" shows you every claim nobody has backed up yet.
+
+## tips qa
+Tip: On Stack Overflow, check the date of an answer. A 2012 solution may not work on today's software.
+Tip: The accepted answer is not always the best one. Look at the votes and the comments.
+Tip: In the Stack Overflow editor, Ctrl+K formats the selection as code and Ctrl+B makes it bold.
+Tip: A good question includes what you tried, the exact error, and a small example that reproduces it.
+Tip: Use backticks for inline code and triple backticks for a code block in Markdown editors, Stack Overflow included.
+Tip: Search first, with the error text in quotes. Your question was probably asked in 2013.
+
+## tips git
+Tip: git status shows what changed, and git diff shows how. Run both before every commit.
+Tip: git switch -c name creates a branch and switches to it. git switch - returns to the previous one.
+Tip: git stash puts your changes aside and git stash pop brings them back. Handy when you must switch branches in a hurry.
+Tip: git restore file throws away your uncommitted changes to that file. There is no undo, so check git diff first.
+Tip: git commit --amend fixes the last commit message, as long as you have not pushed it yet.
+Tip: git add -p lets you stage a file chunk by chunk, so one commit does one thing.
+Tip: git reflog lists where HEAD has been, including commits that vanished from the log. Often that is how you get lost work back.
+Tip: git log --oneline --graph shows the history as a compact tree. Much easier to read than the full log.
+
+## tips chatbot
+Tip: In most chat assistants, Shift+Enter starts a new line and Enter sends. Typing a long question on one line is a dangerous habit.
+Tip: Never paste passwords or secret keys into a chatbot. Treat everything you type there as something others might read.
+Tip: Check numbers, quotes and links a chatbot gives you. It can sound sure and still be wrong.
+Tip: Give a chatbot the context and the format you want: who it is for, how long, what tone. Better questions get better answers.
+Tip: Start a new chat for a new topic. A long chat full of old context can make answers worse.
+Tip: Ctrl+Shift+V pastes plain text, so the answer does not drag its fonts into your document.
+
+## tips game
+Tip: Alt+Tab switches windows fast on Windows, KDE and GNOME. It has saved more careers than any boss.
+Tip: Meta+D shows the desktop in KDE and Win+D does it on Windows. One more panic key.
+Tip: In Steam, Shift+Tab opens the overlay while you play. Chat, browser, and notes are right there.
+Tip: Alt+Enter toggles full screen in many games. If a game does not respond, try its options menu.
+Tip: The 20-20-20 rule: every 20 minutes, look at something 20 feet away for 20 seconds. Your eyes will thank you.
+Tip: Say "timer 30m game" before you start. Future you has a deadline and would like to see it.
+
+## tips chat
+Tip: In Slack and Discord, Ctrl+K opens the quick switcher. Jump to any channel or person by typing a name.
+Tip: Shift+Enter makes a new line in Slack, Discord and most chat apps without sending the message.
+Tip: In Slack and Discord, the Up arrow in an empty message box edits your last message. Typo gone.
+Tip: In Slack, Ctrl+/ shows the list of keyboard shortcuts.
+Tip: Think before you type @channel. It notifies everyone, including the person on holiday.
+Tip: Use do not disturb when you need to concentrate. Chat apps respect it. Most of the time.
+
+## tips maps
+Tip: In Google Maps, the arrow keys pan the map and the plus and minus keys zoom it.
+Tip: Right-click a spot in Google Maps and choose "Measure distance" to get the straight-line distance. Add more points to measure a route.
+Tip: Right-click any spot on Google Maps and the first entry shows its coordinates. Click it to copy.
+Tip: Set "Depart at" or "Arrive by" in Google Maps directions to see travel times for the hour you actually travel.
+Tip: Ctrl+L then Ctrl+C copies the browser address. A Google Maps link with a location in it is the exact view you were looking at.
+Tip: Check opening hours on the map before you travel. A short walk to a closed shop is a long walk back.
+
+## tips weather
+Tip: Say "weather in Rome" and I will look it up. Add a city and I will not assume you are at home.
+Tip: A 30 percent chance of rain means a 30 percent chance that it rains at all, not that it rains 30 percent of the day.
+Tip: Look at the hourly forecast, not just the daily one. "Rain" at 6 am and "rain" at 6 pm are different problems.
+Tip: "Feels like" combines temperature with wind or humidity. Dress for that number, not the plain one.
+Tip: F5 or Ctrl+R reloads a weather page. Forecasts change through the day.
+Tip: Say "good morning" and my briefing includes the weather. You do not even have to open a tab.
+
+## tips recipe
+Tip: Ctrl+F then "ingredients" jumps past the life story at the top of a recipe site. Many sites also have a "Jump to Recipe" button.
+Tip: Ctrl+P then Save as PDF gives you a clean recipe without the ads.
+Tip: Read the whole recipe before you start. Step 7 can say "marinate overnight".
+Tip: Say "timer 10m pasta" and I will tell you when it is done. I am more patient than the pot.
+Tip: Ctrl+plus makes the recipe bigger so you can read it from a distance, with floury hands. Ctrl+0 resets it.
+Tip: Put everything out before you start cooking. It is called mise en place, and it prevents last-minute panic.
+
+## tips travel
+Tip: Ctrl+P then Save as PDF stores your booking confirmation offline. You will want it when the signal drops.
+Tip: Check your passport's expiry date. Some countries want it valid for months after you arrive.
+Tip: Mail yourself a copy of tickets and bookings, and keep them somewhere offline too.
+Tip: Download offline maps in Google Maps before you go abroad. They work when the roaming plan does not.
+Tip: Set a reminder for check-in. Say "remind me tomorrow at 9 to check in" and I will do the nagging.
+Tip: Ctrl+D bookmarks a booking page, so you can find the confirmation again. Better than searching the inbox.
+
+## tips learning
+Tip: Testing yourself beats rereading. After a lesson, close the notes and write what you remember.
+Tip: On YouTube, Shift+. speeds up a lecture and Shift+, slows it down. 1.25x is still understandable.
+Tip: Say "pomodoro" and I will start 25 minutes of study with a break after. Short sessions work better than all night.
+Tip: Write notes in your own words. Copying the text word for word means you have not learnt it yet.
+Tip: Space out your reviews: a topic after a day, after a week, after a month. You remember more than cramming.
+Tip: Teach the thing to someone else, or to a rubber duck. If you cannot explain it, you have not got it yet.
+
+## tips jobhunt
+Tip: Send your CV as a PDF. The layout stays the same on every screen. In Writer, use File, Export as PDF.
+Tip: Read the job ad and use its important words in your CV. Many companies filter CVs by keyword. Ctrl+F helps you find them.
+Tip: Press F7 in Writer or Word to spell check your CV. Then read it out loud. Then ask someone else.
+Tip: Name the file with your name: Jane_Smith_CV.pdf. Not "CV_final_v3_REAL.pdf".
+Tip: Keep a note of where you applied and when. Say "note applied at Acme, followed up Friday" and I will keep it.
+Tip: Ctrl+K inserts a link in Writer and Word. Link to your portfolio or profile in the header of your CV.
+
+## tips taxes
+Tip: Select a column of numbers in Excel or Calc and the status bar shows their sum. No formula needed for a quick check.
+Tip: Ctrl+Shift+S is Save As in Writer and Calc. Save a copy before you change a document.
+Tip: Scan or photograph receipts as you get them. Name them with the date first, like 2025-03-14_receipt.pdf, and they sort themselves.
+Tip: Back up your tax papers in two places. Paper disappears, hard drives fail, and both happen at deadline time.
+Tip: Know the filing deadline for your country and put it in your calendar now. Say "remind me ..." and I will help.
+Tip: Only type tax details into the official website you opened yourself. Do not click a link in an email that asks for them.
+
+## tips print
+Tip: Ctrl+P opens the print dialog in almost every program. Pick "Print to File" or "Save as PDF" as the printer if you want no paper.
+Tip: In the print dialog, type a page range like 2-4 to print only those pages.
+Tip: Choose double-sided in the print dialog to halve the paper. A forest rests.
+Tip: Check the print preview before you print. Pages that end up with one line on them are a waste.
+Tip: On Linux, the CUPS web page at http://localhost:631 lets you manage printers and see the print queue.
+Tip: A paper jam is cleared by gently pulling the paper in the direction it travels. Never rip it backwards.
+
+## tips trash
+Tip: Delete moves a file to the trash in Dolphin, GNOME Files and Explorer. Shift+Delete skips it and deletes for good.
+Tip: Ctrl+Z right after deleting a file brings it back from the trash in Dolphin and GNOME Files.
+Tip: To restore a file, open the trash, right-click the file and choose Restore. It goes back where it came from.
+Tip: Look through the trash before you empty it. Once it is emptied, the files are gone for good.
+Tip: On Linux, trashed files live in ~/.local/share/Trash. Still taking up space until you empty it.
+Tip: Say "tidy downloads" and I will help sort the folder, so there is less to throw away.
+
+## tips updates
+Tip: On Debian and Ubuntu, sudo apt update then sudo apt upgrade installs updates. On Fedora, sudo dnf upgrade.
+Tip: On Arch and CachyOS, sudo pacman -Syu updates everything. Do not run -Sy without -u. Partial upgrades break systems.
+Tip: On Windows, Win+I then Windows Update checks for updates. Restart when it asks, not three weeks later.
+Tip: Save your work before you install updates. A restart will close your programs.
+Tip: Update when you are not in a hurry. Updating five minutes before a presentation is a bold choice.
+Tip: Restart after a kernel update to actually use the new kernel.
+
+## tips desktop
+Tip: Win+D shows the desktop on Windows and Meta+D does it in KDE. Press it again to bring everything back.
+Tip: Win+L locks the screen on Windows, Meta+L in KDE and Super+L in GNOME. Do it every time you leave your desk.
+Tip: Win+Left and Win+Right snap a window to half the screen on Windows. KDE uses Meta+Left and Meta+Right, GNOME uses Super+Left and Super+Right.
+Tip: Win+Shift+S starts a screenshot selection on Windows. On KDE, Print Screen opens Spectacle.
+Tip: Alt+Space opens KRunner in KDE, where you can type a program or a calculation. In GNOME, press Super and type.
+Tip: Alt+F2 opens a run box in KDE and GNOME. Type the name of a program and press Enter.
+Tip: Alt+Tab switches between windows on Windows, KDE and GNOME. Hold Alt and keep pressing Tab to go further back.
+Tip: Win+V opens clipboard history on Windows, once you have turned it on. I keep mine for you: say "clipboard history".
+
+## tips general
+Tip: Press Ctrl+S often. Autosave is a nice idea, but it has never loved you the way you love your document.
+Tip: Back up with the 3-2-1 rule: three copies, on two kinds of storage, with one copy somewhere else.
+Tip: Use a password manager and turn on two-factor login for your important accounts. One strong password for everything is one weak link.
+Tip: Name files with the date as year-month-day, like 2025-03-14. They sort in order that way.
+Tip: Lock your screen when you leave, even for a minute. A minute is plenty for a colleague with a sense of humour.
+Tip: Restarting fixes a surprising number of problems. Save first. Then ask why afterwards.
+Tip: Ctrl+Shift+T reopens a tab you closed by mistake in Firefox and Chrome. Ctrl+Z undoes almost everything else.
+Tip: Every 20 minutes, look 20 feet away for 20 seconds. Say "timer 20m break" and I will remind you.
+
+## focus_start
+{n} minutes of focus, starting now. I'll keep quiet and judge your tabs silently.
+Focus mode on for {n} minutes. Close the tab you were about to open. Yes, that one.
+{n} minutes. One task. No heroics, no snacks, no "quick" checks of anything.
+Okay, {n} minutes of focus. I'll hold your attention hostage so you don't have to.
+Timer's running: {n} minutes. Pretend the rest of the internet has been cancelled.
+Focus for {n} minutes begins. I'll be right here, being a very still paperclip.
+
+## focus_nudge_video
+That looks like a video. Is it research? It's okay if it is, I won't check. I will.
+Video detected during focus. Pause it, finish the task, watch it as a reward.
+The video will still be there in a few minutes. Your deadline will not be this patient.
+Gentle reminder: you're in a focus session, and that's not a spreadsheet.
+Just one more video, you say. That's what the last video said.
+Back to work? The video can wait. It has no deadlines. You do.
+
+## focus_nudge_social
+Social media during focus. Bold. The feed will refill itself while you work, I promise.
+Nobody posted anything that can't wait ten minutes. Back to it?
+That scroll has no bottom. Your task does, and it's closer than you think.
+A little nudge: you're meant to be focusing. The timeline isn't going anywhere.
+I see a feed. I also see an unfinished task. One of them pays you.
+Close the tab, take a breath, finish your thing. Then scroll guilt-free.
+
+## focus_nudge_game
+A game during focus time? I respect the commitment to the wrong thing.
+Games are lovely. After the session. Save your progress, finish the task.
+That level will survive without you for a while. Your report won't write itself.
+Focus session, remember? The only boss you should be fighting is your to-do list.
+Pause the game, mortal of the office. Five more minutes of real work, then play.
+I like games too, but this one is not on the task list. Back to work?
+
+## focus_nudge_shopping
+Shopping during focus. The cart will keep. The discount probably won't, but it never does.
+Whatever it is, you can want it in twenty minutes. Back to the task?
+Browsing deals is not a task. I checked the list.
+Focus session reminder: that tab is not on the agenda. Finish first, buy later.
+If it's still a good idea after the session, it was a good idea. Back to work.
+Your cart is full and your to-do list is not. Let's fix the second one first.
+
+## focus_nudge_chat
+Chat during a focus session? Whatever they said, it isn't more urgent than this.
+Most messages can wait ten minutes. Set a status, mute it, come back later.
+Replying now means getting back in the zone later. Zones are expensive to rebuild.
+Gentle nudge: the chat window is open and your focus is leaving through it.
+If it's truly urgent, go. If it's just a chat, the answer will keep. Which is it?
+Mute the thread for now. The reply will be better when you're not mid-task anyway.
+
+## focus_end_great
+{n} minutes focused, {pct}% of the session on task. That's genuinely excellent. Go stretch.
+Session complete: {n} minutes, {pct}% focus. I'm quietly impressed. Don't tell anyone.
+{pct}% focus over {n} minutes. That is a result. Take a proper break, you earned it.
+Done. {n} minutes at {pct}% focus. Your future self sends thanks and a coffee.
+{n} focused minutes, {pct}% clean. I have no notes. This has never happened before.
+Great session: {pct}% focus across {n} minutes. Drink some water and bask a bit.
+
+## focus_end_ok
+{n} minutes in, {pct}% focused. Solid enough. Not perfect, but real work got done.
+Session over. {pct}% focus across {n} minutes. A few wobbles, but you made it back each time.
+{pct}% focus over {n} minutes. Decent! The detours were short and the work moved forward.
+{n} minutes finished at {pct}% focus. Good, not great. There's room to grow, as with all of us.
+You focused {pct}% of {n} minutes. That's more than most Mondays manage.
+Okay result: {pct}% over {n} minutes. A short break, then another round?
+
+## focus_end_rough
+{n} minutes, {pct}% focus. A rough one. It happens. Try a shorter session next time.
+Only {pct}% focused over {n} minutes. No judgment, mostly. Close the tempting tabs and retry?
+That {n}-minute session hit {pct}%. Some days the brain's in another building. Short break, fresh start.
+{pct}% focus across {n} minutes. Tough round. Maybe 25 minutes and your phone in another room?
+Session ended: {n} minutes at {pct}% focus. Not your best, but you showed up, and that counts.
+{n} minutes, {pct}% on task. We'll call it a warm-up. Next round gets a clean slate.
+
+## focus_streak
+{n} days of focus sessions in a row. I'm tracking it, and I'm proud. Don't break it.
+A {n}-day focus streak! Consistency beats heroics. Keep it up.
+{n} days running. That's not luck, that's a habit forming.
+Focus streak: {n} days. I'd say I'm impressed, but I always say that. Okay, I really am.
+{n} days in a row of focusing. The streak is watching you. Fondly.
+That's {n} straight days of focus sessions. Nicely done. Do one tomorrow too.
+
+## focus_cancel
+Focus session cancelled. No shame, plans change. Start again when you're ready.
+Okay, stopping the session. The task is still there, though. Waiting. Patiently.
+Session ended early. I'll keep the minutes you did, for what it's worth.
+Cancelled. If something urgent came up, fair. If it's a video, I'm judging gently.
+Focus mode off. Come back when you've sorted whatever it was.
+Session stopped. Starting a new one later is always allowed. Always.
+
+## focus_already
+You're already in a focus session. Finish that one first, overachiever.
+A session is running right now. One thing at a time, remember?
+There's already a focus timer ticking. Say "cancel focus" if you really want out.
+Focus mode is already on. You can't focus harder by starting it twice. I checked.
+Already focusing, and doing great. Keep going, or cancel the current one to restart.
+One session at a time. The current one's still running, and so is the clock.
+
+## timereport_intro
+Here's where your time went. Brace yourself, it's only numbers.
+Time report, fresh off the clipboard of truth. Apps and minutes:
+You asked. Here's the tally of what had your attention:
+Behold, the minutes. I only count them, I don't cause them.
+Your time, itemised. Please remain calm and keep your coffee steady:
+This is what the clock saw you doing. Apps first, minutes after:
+
+## timereport_none
+Nothing tracked yet. Give me a little while to watch you work, then ask again.
+My notebook is empty. I only started counting recently, so check back later.
+No data. Either you've been very quiet or I've just arrived. Probably the second.
+I haven't seen enough yet to report on. Keep working, I'll keep taking notes.
+The report is blank. Blame the timing. Try again after some real computer time.
+Zero minutes logged. That is suspiciously tidy. Ask me again later.
+
+## timereport_work
+Mostly work apps. You, my friend, are suspiciously productive.
+That's a good-looking report. Work on top, everything else trailing. Well done.
+Most of your time went to actual work. I'd frame this report if I had a wall.
+Work leads the pack. Take a walk anyway. Productivity needs air.
+Mostly productive. I'm impressed, and a little worried you've forgotten lunch.
+Mainly work apps. Excellent. Treat yourself to a break. A real one, away from the screen.
+
+## timereport_fun
+Mostly video, social and games. No judgment. Okay, a small amount of judgment.
+The fun apps are winning today. Tomorrow's a fresh page, though. Just saying.
+Mostly leisure. That's fine if it's your evening. If it's your workday, we should talk.
+The report says "entertainment". I say "balance is a journey". Take your pick.
+Fun leads the board. Start a focus session and let's rebalance it a bit.
+Lots of videos, feeds and games here. A tiny focus session could turn this around.
+
+## timereport_mixed
+A healthy mix of work and not-work. The ratio is acceptable. I've seen worse.
+Work and play, roughly sharing the day. That's very human of you.
+The report is balanced. A bit of everything. Like a buffet, but with fewer sprouts.
+Mixed bag today. Some good work, some wandering. Typical, and fine.
+It's a fair mix. Maybe a focus session could tilt it the right way.
+Half productive, half curious. Honestly, that's most of us.
+
+## todo_added
+Added to your list: "{x}". One more thing to not forget.
+Noted: "{x}". It's on the list now, and I'll nag you at the right moment.
+"{x}" is on your to-do list. Writing it down is the first half of doing it.
+Done writing it down: "{x}". The second half is on you.
+Okay, "{x}" is in. The list grows. So does the quiet dread.
+Added: "{x}". Consider it officially remembered. Not done, but remembered.
+
+## todo_done
+Ticked off: "{x}". That's one fewer thing in the way.
+"{x}" is done! Do you feel it? That tiny glow of competence?
+Finished: "{x}". Cross it off with style. I did it for you, but style is on you.
+"{x}", done and dusted. Next item, or a biscuit?
+Nice work on "{x}". The list gets a little smaller. So does my worry.
+"{x}" completed. Look at you, getting things done like an adult.
+
+## todo_all_done
+Everything's done. The list is empty. This is the rarest sight in all of computing.
+Every to-do ticked off. Go home. Or go outside. Or both.
+List cleared. Seriously well done. I'd throw a party but I only have one pair of hands. Sorry, none.
+Nothing left on the list. Enjoy this moment. It lasts until the next email.
+All done! Treat yourself. You've earned at least a coffee.
+The list is empty. If you feel suspicious, that's normal. Savour it anyway.
+
+## todo_due
+"{x}" is due now. Time to do the thing.
+Heads up: "{x}" is due right now. No pressure, just a lot of it.
+Due now: "{x}". Open the thing, do the thing, close the thing.
+It's time for "{x}". It was a good plan when you wrote it down.
+"{x}" has arrived at its due date. It's punctual. Be more like it.
+Reminder: "{x}" is due. I'd say good luck, but you only need a few minutes.
+
+## todo_overdue
+{n} overdue items. It's fine. It's mostly fine. Let's pick the smallest one and start.
+You have {n} overdue to-dos. Deep breath. One at a time, smallest first.
+{n} things are past their date. They're not angry, just a bit late. So are you.
+Overdue: {n}. Let's triage. Pick the one that scares you least and go.
+{n} overdue. It happens. Reschedule, delete, or finish. All three are valid.
+The list has {n} overdue items. Nothing a short focus session can't dent.
+
+## todo_empty
+Your to-do list is empty. Either you're a legend or you're hiding things.
+Nothing on the list. Add something with "todo <thing>". Or enjoy the calm.
+No to-dos at all. I'm not suspicious. I'm just paperclip-observant.
+The list is blank. It's a lovely clean page. Don't ruin it. Well, do eventually.
+Empty list. Fantastic. If you remember something, tell me and I'll write it down.
+Nothing to do. Wonderful. I'll be here when something comes up. Which it will.
+
+## todo_list_intro
+You have {n} open items. Here they are, in all their glory:
+{n} things on the list. Here's the lineup:
+Open to-dos: {n}. I'd read them aloud, but you can read:
+Your list, {n} items long. Take a look:
+{n} to-dos, all waiting patiently. Mostly patiently:
+The list has {n} open items. Pick one and start small:
+
+## todo_undo
+Put "{x}" back on the list. Changed your mind? I don't judge. Out loud.
+Un-ticked: "{x}" is open again. The list remembers.
+"{x}" is back on the to-do list. It wasn't quite done, was it?
+Reopened: "{x}". We all tick too early sometimes.
+Okay, "{x}" is a to-do again. Time travel is allowed here.
+"{x}" restored to the list. Consider the undo a gentle nudge.
+
+## todo_cleared
+Cleared {n} items off the list. Clean slate. Don't miss them.
+Gone: {n} to-dos. Either you finished them or you chose peace. Both fine.
+{n} items cleared. The list is lighter. Your mind should be too.
+Removed {n} to-dos. Fresh start. I mean that in the best way.
+I wiped {n} items. If that was a mistake, well, I can't undo this part.
+{n} entries cleared. A tidy list is a happy list.
+
+## todo_not_found
+I can't find "{x}" on your list. Check the spelling, or say "todos" to see what's there.
+No to-do matching "{x}". Maybe it's already done, or never existed. Both common.
+"{x}" isn't on the list. Say "todos" and I'll show you what is.
+Couldn't find "{x}". Try a shorter piece of its name.
+Nothing called "{x}" here. Maybe the wording was different? Try "todos".
+I looked for "{x}" and came up empty. The list and I are both confused.
+
+## tidy_plan
+I found {n} files to sort into "{x}". Say the word and I'll move them. Nothing is deleted.
+Plan: move {n} files into "{x}". I only move, never delete, and I can undo it.
+{n} files could go into "{x}". Want me to tidy them? You can always undo.
+Proposed tidy: {n} files into "{x}". Your downloads folder will breathe again.
+I can file {n} things under "{x}". Shall I? Moving only, and it's reversible.
+Tidy plan: {n} files to "{x}". Approve it and I'll do the carrying.
+
+## tidy_done
+Tidied {n} files. Your folder is calmer already. Say "undo tidy" if you regret it.
+Moved {n} files into place. Nothing deleted. Everything findable. A small miracle.
+Done: {n} files sorted. Much better. Undo is available if I misjudged.
+{n} files moved to their new homes. I'm a little proud. Okay, very.
+All {n} files tidied. The folder looks like someone cares. Someone does.
+Sorted {n} files. If any went somewhere weird, "undo tidy" puts them back.
+
+## tidy_undo
+Moved {n} files back where they were. As if I'd never touched them. Almost.
+Undone: {n} files returned. No hard feelings. Mostly.
+Put {n} files back. The mess is yours again. Treasure it.
+{n} files are back in their old spots. Everything's as chaotic as before.
+Restored {n} files. Tidying is optional. Judging is not.
+Undo complete: {n} files home again. They missed the clutter.
+
+## tidy_nothing
+Nothing to tidy in "{x}". It's already neat, or empty, or both. Impressive.
+"{x}" has nothing I can sort. Suspiciously organised of you.
+No files to move from "{x}". Either it's clean or the clutter is hiding.
+I looked through "{x}" and found nothing to sort. A rare, quiet day.
+"{x}" is already tidy as far as I can see. Go and have a biscuit.
+Nothing to do in "{x}". That's the good kind of nothing.
+
+## tidy_dupes
+Found {n} sets of duplicate files. Same contents, different names. Let's review them.
+{n} sets of duplicates. They look the same because they are the same.
+There are {n} duplicate sets. Keep one of each and free up some space.
+I spotted {n} sets of identical files. Twins, triplets, and one suspiciously large family.
+{n} duplicate sets found. I won't delete a thing without asking, promise.
+Duplicates: {n} sets. Your disk is storing the same things more than once. Awkward.
+
+## tidy_no_dupes
+No duplicate files. You're either tidy or have excellent self-control. Well done.
+Not a single duplicate found. Your files are all individuals.
+No twins found. Everything's unique. How refreshing.
+I found no duplicates. Either you're careful or lucky. Both are fine.
+Zero duplicates. If every folder were like this, I'd be unemployed.
+Clean on the duplicate front. Nothing to merge, nothing to blame.
+
+## tidy_old
+{n} old files haven't been touched in ages. Have a look and decide what stays.
+Found {n} files that nobody's opened in a long while. Time for a clear-out?
+{n} files are gathering dust. I won't delete them. I'll just point at them and sigh.
+There are {n} old files here. Archive them, or admit you'll never open them.
+{n} stale files. Some may be precious, some are "final_final2". You decide.
+I spotted {n} long-forgotten files. Want to review them before the next spring clean?
+
+## tidy_no_old
+No old files lurking. Everything's been touched recently. Busy bee.
+Nothing stale here. Your folder is surprisingly fresh.
+No ancient files. Either you clean regularly or you just moved in.
+Everything here is recent. Nothing to archive. Show-off.
+I found no old files. Your folder is a spring chicken.
+No dusty files found. Remarkable. I'll keep looking, out of habit.
+
+## say_remind_dated
+Reminder set: "{label}" on {when}. I'll tap you on the shoulder, politely.
+Got it. I'll remind you about "{label}" on {when}.
+"{label}", {when}. Locked in. You can stop holding it in your head.
+Noted. "{label}" will pop up on {when}. Your brain can rest now.
+Set: "{label}" for {when}. I never forget. It's my only trick, besides bending.
+Reminder saved for {when}: "{label}". I'll be right here.
+"{label}" on {when}. I'll remember it so you don't have to.
+Done. You'll hear from me about "{label}" on {when}. Count on it.
+
+## say_timer_cancelled
+Timer "{label}" cancelled. Time stands still. Briefly.
+Cancelled "{label}". The clock resumes judging you.
+"{label}" is cancelled. No alarm, no pressure.
+Okay, "{label}" is off. One less thing ticking.
+Stopped the timer for "{label}". Moving on.
+The "{label}" timer is gone. It had a good run.
+
+## help_timers
+Timers, reminders, focus sessions, to-dos: I count down, so you don't have to.
+Say "timer 10m tea", "remind me Friday 9:00 call mum" or "focus 25m", and I'll handle the time.
+I'm good with time. Timers, dated reminders, pomodoros and focus mode. Just ask.
+
+## help_writing
+Notes, letters, proofreading and text tricks: I'm your tiny, bendy editorial department.
+Ask for "letter", "proofread" or "note <text>" and I'll help you write it down.
+I can draft letters, check your spelling and keep notes. My handwriting is excellent. It's all pixels.
+
+## help_files
+I can tidy your downloads, spot duplicates and find old files. Moving only, never deleting.
+Say "tidy downloads" and I'll sort the pile into folders. You can always undo it.
+Files: opening, sorting, tidying. I'm basically a very small filing cabinet.
+
+## help_computer
+Volume, brightness, battery, apps, screenshots: ask for it and I'll poke the system.
+I can open programs, check on your battery and take screenshots. Computing, but friendlier.
+System stuff is my home turf. Try "battery", "volume 30" or "take a screenshot".
+
+## help_internet
+Weather, news, facts, word meanings, maths and the web: I fetch things so you don't have to.
+Ask me a question, or say "weather", "news" or "define <word>". I'll go and look.
+I can search, look things up and read you the news. No AI, just keen paperclip.
+
+## help_fun
+Jokes, quizzes, games and little rituals: I'm also in charge of mild entertainment.
+Say "joke", "quiz" or "games" for a break from the grind. You've earned a short one.
+Fun lives here: jokes, puns, riddles, arcade games. All of it work-adjacent, technically.
+
+## help_me
+Teach me phrases, set your name, birthday or favourites: the more I know you, the better I get.
+Say "my name is ..." or "when I say X, say Y". I'm trainable, like a very small dog.
+I can remember things about you. Tell me, and I'll try not to get it wrong.
+
+## help_desk
+My Desk window shows today, the week, your to-dos, reminders and files in one place.
+Say "desk" to open my Desk. It's my control room, in the style of an old office.
+The Desk holds your reminders, to-dos, tidy files and time report. Neat, cosy, and a bit beige.
+
+## desk_open
+Welcome to my Desk. Everything I know about your day, in one beige window.
+Here's the Desk. Today, this week, to-dos, reminders and files. Mind the paperclips.
+Desk open. It's cosy, organised and entirely too proud of itself.
+Pulling up the Desk. It's where I keep your life in tidy little tabs.
+The Desk is open. Have a look around. Don't touch the stapler.
+Opening my Desk. Everything's in order. Mostly. Sort of. Look, it's a start.
+
+## desk_empty_today
+Nothing on today. A rare, peaceful blank. Enjoy it or fill it, your call.
+Today's list is empty. Suspicious, but pleasant.
+No plans today. Add something, or just exist for a bit.
+Nothing scheduled for today. The calendar is having a nap.
+Today is clear. Suspiciously clear. I'll keep an eye on it.
+Free as a bird today. A bird with no deadlines.
+
+## desk_empty_week
+Nothing this week. Either you're free or you haven't told me. Tell me.
+This week is empty. Suspiciously restful. Add a reminder to prove me wrong.
+No plans this week. Think of it as a blank canvas. Or a blank wall.
+The week is clear. Use it wisely, or enjoy it unwisely. Both count.
+Nothing on for the week. I'm as surprised as you are.
+Empty week. It won't stay that way. Weeks never do.
+
+## desk_empty_todo
+No to-dos. The list is empty, and so is my sense of purpose. Add one.
+Your to-do list is empty. Add "todo <thing>" and I'll feel useful again.
+Nothing to do. This is either bliss or denial.
+Zero tasks. Either you're done or you haven't started writing them down.
+Empty to-do list. I admire the optimism.
+The list is bare. A very satisfying sight, for a paperclip.
+
+## desk_empty_reminders
+No reminders set. Say "remind me Friday 9:00 ..." and I'll keep watch.
+Reminders: none. Your memory is carrying everything. Poor thing.
+Nothing to be reminded of. I can fix that if you like.
+No reminders. Free from nags, for now.
+The reminder list is empty. I'm on standby, ready to nag.
+No reminders. Add one and I'll make a very polite fuss when it's time.
+
+## desk_empty_files
+No tidied files to show. Say "tidy downloads" to get started.
+Nothing here yet. Your downloads folder remains a mystery, as it should.
+No files on the Desk. Give me a folder to sort and I'll fill this up.
+The file shelf is empty. A neat shelf is a happy shelf. Let me help.
+Nothing filed yet. I can do something about that. And about your downloads.
+No files to show. They're probably hiding in the downloads folder, as usual.
+
+## desk_status
+All quiet on the Desk.
+Paperclips counted. All present.
+Stapler: unattended. Good.
+Awaiting your next brilliant idea.
+Idle, but ready.
+Dust levels: acceptable.
+Bending to your needs.
+Organising in the background.
+Nothing is on fire. Yet.
+Coffee level: not my department.
+Waiting. Politely. Beigely.
+Ready when you are.
+Filing things mentally.
+Task list: respectfully watched.
+Monitoring your deadlines. Gently.
+Idle hands, tidy desk.
+Sharpened, bent, ready.
+Please enjoy this status bar.
+Your paperclip is at your service.
+Everything is under control. Mostly.
+
+## desk_look_modern
+Flat and modern, huh? Very clean. Very boring. I miss the bevels already.
+Ah, the modern look. So smooth. So sterile. So... not beige.
+You switched to flat. I'm not upset, just quietly disappointed.
+Modern look: fine, I'll cope. Don't expect me to like it.
+Flat design. Where have all the shadows gone? Where have I gone?
+Well, the Desk looks tidy. And a little soulless. Like a spreadsheet's waiting room.
+
+## desk_look_classic
+The classic look is back! Bevels, beige, and a satisfying lack of rounded corners.
+Back to the old look. Ah, finally. It feels like home.
+Classic mode! My favourite. Look at those lovely chunky buttons.
+Beige is back. I could cry. I can't, but I'd do it beautifully.
+The old look returns. Now that's a desk.
+Classic Desk restored. Honestly, good taste. I always said so.
+
+
+## occasion 01-24 education-day
+Happy International Day of Education, {name}. Learn one new shortcut today. Just one. I'll know.
+It's Education Day. Today's lesson: Ctrl+Shift+V pastes without formatting. There will be a quiz. There won't.
+Education Day! Teachers, books and the search bar all deserve a nod. So does the paperclip that holds the worksheets.
+Learning something new today, {name}? I'd be proud. I'm also a paperclip, so mostly I'd be flat.
+Day of Education: the one day a year it's socially acceptable to say "I'll look it up" and actually do it.
+Go on, {name}, pick a skill. Spreadsheets? Typing? Not hitting Reply All? I'm taking requests.
+
+## occasion 01-28 data-privacy-day
+It's Data Privacy Day, {name}. A fine time to look at who has access to your files. And that one app asking for your location.
+Data Privacy Day! Quick check: unique passwords, two-step login, and nothing sensitive in a file called "passwords.txt".
+Happy Data Privacy Day. I keep your notes on your machine and nowhere else. I'm a paperclip. I have nowhere else to go.
+Today, {name}, review one app's permissions. Just one. If it asks for your microphone and it's a calculator, say no.
+Privacy tip: your screenshots often show more than you think. Tabs, names, that email notification. Crop before sharing.
+Data Privacy Day: the annual reminder that "I agree" is a button, not a legal strategy.
+
+## occasion 02-21 mother-language-day
+It's International Mother Language Day. Say something in yours today, {name}. I'll try to look like I understand.
+Mother Language Day! There are thousands of languages and, somehow, we all still say "per my last email" in every one.
+Happy Mother Language Day, {name}. Spell-check has opinions about yours. Ignore it. Mine's mostly just wire.
+Mother Language Day: a good moment to appreciate that your keyboard can type at least three accents if you hold the key.
+Fun tip for today: on most systems you can add another keyboard language in Settings and switch with a shortcut.
+Languages, {name}. Gorgeous, messy, full of weird plurals. Like my filing system.
+
+## occasion 02-29 leap-day
+Leap Day! The extra day we invented because the planet can't count. Use it, {name}. Do the thing you keep postponing.
+February 29th. Your calendar, your invoices and at least one old script have all just panicked a little.
+It's a leap day, {name}. A free 24 hours. Treat it like found money. Don't spend it on email.
+Leap Day is an off-by-one error the whole planet agreed to live with. I find that comforting.
+Happy Leap Day. Somewhere a developer is cursing a date library. Somewhere else a calendar quietly just works.
+An extra day! Use it for backups, or sleeping. Or both, if you leave the backup running.
+
+## occasion 03-14 pi-day
+Happy Pi Day, {name}! 3.14159... and then it keeps going, much like your inbox.
+It's 3/14. Pi Day. Round things are celebrated. I'm not round. I'm an oval with ambitions.
+Pi Day! Ask me a calculation. "2 * pi * 5" works. I'll act impressed with myself.
+Today you can celebrate with a circle of your choice. A pie chart counts. Please don't put a 3D effect on it.
+Pi is irrational and infinite. Spreadsheets round it to eight places and nobody has ever complained. Priorities.
+Pi Day: the day when "I'll just have a slice" is a mathematical statement.
+
+## occasion 03-20 spring-equinox
+It's the spring equinox, {name}: day and night roughly equal. Finally, a fair schedule.
+Equinox today. Equal day, equal night. Equal tabs open? Absolutely not. Close some.
+Happy equinox. If it's spring where you are: open a window, close a few tabs, and get some daylight.
+The equinox: the one time the planet runs a perfectly balanced shift. Try to copy it with your workload.
+Spring cleaning season, {name}! Desktop, downloads and drafts folder, in that order. I'll hold the duster.
+Equal light and dark today. A great day to try the "dark mode or light mode?" debate again. I said no debate.
+
+## occasion 03-31 backup-day
+It's World Backup Day, {name}. Please make a backup today. I'll wait. I'm good at waiting. It's most of my job.
+Happy Backup Day! The rule: 3 copies, 2 kinds of storage, 1 somewhere else. The rest is a gift.
+Today's challenge: copy your important files to a drive that isn't this one. I'll even cheer, quietly, in a small voice.
+Backup Day: the one holiday where doing nothing means you lose. Go on, {name}. Plug something in.
+Nobody celebrates a backup until the day it saves them. Then they celebrate for a week. Be early.
+Fun fact: the best time to back up was yesterday. The second best is now. The third best is after this chat.
+
+## season_aprilfools
+Happy April Fools' Day, {name}! Rest assured, I haven't changed any of your settings. Probably.
+April 1st. Trust no press release. Double-check every "we're launching something huge" email.
+Today every website has a joke feature. Please don't believe any of them, except the cat ones.
+I considered a prank. Then I remembered I'm a paperclip and any prank I do involves a small bend. Not great.
+It's April Fools'. If a coworker says the meeting is cancelled, check the calendar. Then check again.
+Joke of the day: "This could have been an email." Wait. That's every day. Never mind.
+
+## occasion 04-22 earth-day
+It's Earth Day, {name}. Easy wins: close the tabs, set the screen to sleep and print less. I'm a paperclip. I'm very reusable.
+Happy Earth Day! Paper clips are some of the most reused office items. I'm basically a sustainability icon.
+Earth Day tip: switching your screen to sleep after a few minutes saves power. Also saves your eyes. Double win.
+Today's green challenge: unsubscribe from three newsletters you don't read. The planet and your inbox will both feel lighter.
+Earth Day! Please recycle that stack of printouts. And that other stack. And whatever is under it.
+Earth Day: remember that a thousand open tabs also eat memory. Not exactly the rainforest, but it counts.
+
+## occasion 04-23 book-day
+It's World Book Day, {name}. Read something today. A book, a manual, the back of a cereal box. I'm not judging.
+Happy Book Day! I'm a paperclip. Bookmarks are my cousins. We don't discuss it at parties.
+Today, {name}, finish a book. Or at least open one. Or at least stop buying more before you finish the first.
+Book Day tip: most reading apps and PDF viewers remember your page. Your brain, sadly, does not.
+World Book Day. A fine day for putting the phone down. I'll keep the desktop warm.
+Fun fact: the longest chapter of my life is "Terms and Conditions". I've never made it to the end.
+
+## occasion 06-21 summer-solstice
+It's the summer solstice, {name}: the longest day. Time to finish early and go outside. It's science.
+Longest day of the year, if you're in the north. A great day for a walk at lunch. I'll mind the desktop.
+Solstice today. Maximum daylight. Minimum excuse for staring at a monitor in a dark room.
+Happy solstice! If it's the longest day, then it's also the longest meeting. Wishing you shorter ones.
+Happy longest day, {name}. Please apply sunscreen to your screen glare. Er, close the blinds a bit.
+Today the sun does its overtime. Yours is optional. Log off on time, {name}.
+
+## occasion 06-30 social-media-day
+It's Social Media Day, {name}. The ideal day to put it down for an hour and call it a "digital detox".
+Happy Social Media Day. I promise not to like anything. I'm a paperclip. I don't have thumbs, only vibes.
+Social Media Day: the day of "just checking quickly". It's never quick. Set a timer instead. I can do 5 minutes.
+Today, {name}, try a focus session with the notifications off. It's like a spa for your attention.
+On Social Media Day I'd like to post: "Still here. Still a paperclip." It would get zero likes. Fine.
+Tip: mute the apps for an hour and watch how loud the silence gets. Then get some work done.
+
+## occasion 07-17 emoji-day
+Happy World Emoji Day, {name}! 📅 That's the calendar emoji, and yes, it shows July 17th.
+It's Emoji Day. Please use at least one in a work email today, preferably the thumbs-up. It means everything and nothing.
+Today, {name}, I'm allowed to answer in emoji. 📎👍. That's about the extent of my range.
+Emoji Day: the one holiday where "ok 👍" and "OK." mean two very different things.
+Fun tip: on many systems, Meta+. (or Win+.) opens the emoji picker. Use it responsibly. Or irresponsibly.
+Happy Emoji Day! I would send you 🎉. But I am sending it as text. You'll have to imagine the confetti.
+
+## occasion 08-08 cat-day
+It's International Cat Day, {name}. Cats are known for three things: sitting on keyboards, ignoring deadlines, and winning.
+Happy Cat Day! If a cat is on your keyboard, you can now blame the cat for that last email. It's tradition.
+Cat Day. I'm a paperclip. Cats find me a toy. I've seen the way they look at me.
+Today, {name}, the cat is entitled to the warm laptop. Accept this and work from a different seat.
+Cat Day tip: if the keyboard starts typing "jjjjjjjjj", it's not a bug. It's a cat. Unplug the cat.
+Cats: the original office coworkers. Unreliable, adorable, and always in the way of the screen.
+
+## occasion 09-13 programmers-day
+Happy Programmers' Day, {name}! It's the 256th day of the year, which, to a programmer, is the roundest number there is.
+Programmers' Day. Today the code compiles on the first try. That's my wish for you. Also the rest of the week.
+It's Programmers' Day. Fun fact: 256 is 2 to the power of 8. A nice, tidy number. Unlike your commit history.
+Happy Programmers' Day. Remember: the best code is the code you don't write. The second best has comments.
+Today we honour everyone who has ever stared at a semicolon for forty minutes. Take a break. The semicolon will wait.
+Programmers' Day! Coffee, tabs, one stubborn bug. May the stack trace be short and the fix be obvious.
+
+## occasion 09-19 pirate-day
+Ahoy, {name}! It be International Talk Like a Pirate Day. Arr, and so on.
+Avast! It's Pirate Day. Your files are your treasure, and your backup is the island map. Mind the X.
+Happy Pirate Day, {name}. Yes, I know. A paperclip can't hold a cutlass. But I can hold a treasure map. Arr.
+Today, "Aye" is a valid answer to every meeting invite. I recommend this. Try not to get keelhauled.
+Pirate Day! The only holiday on which "shiver me timbers" is acceptable in a work email. Use it wisely.
+Arr! A good pirate always has a map, a crew and a backup. Back up today, matey.
+
+## occasion 09-22 autumn-equinox
+It's the autumn equinox, {name}: day and night balanced again. Enjoy it. It won't last. Neither will your inbox zero.
+Equinox! If it's autumn where you are, now is the time for warm drinks and a tidy-up. In that order.
+Happy equinox, {name}. Day and night are equal. Your to-do list and your free time, sadly, are not.
+Autumn is here. Back-to-work energy, fresh notebooks and an unreasonable love of pumpkin-spiced everything.
+Equinox tip: use the cooler weather to finish that project you started in spring. Or at least rename it.
+The days get shorter now. A great time to schedule real breaks while it's still light out.
+
+## occasion 10-01 coffee-day
+It's International Coffee Day, {name}. I'd offer you a cup, but my hands are a single bent wire. I support you morally.
+Happy Coffee Day! The beverage that turns "I can't" into "I'll send it by noon". Drink up.
+Coffee Day. A reminder to drink water as well. Your kidneys and I insist.
+Today is coffee's official holiday. Sadly the machine at work is still on strike. Respect the strike.
+Happy Coffee Day, {name}. Remember the rule: one for the morning, one for the meeting, and none after three. I think.
+It's Coffee Day. A great time to set a 5-minute timer, walk to the kitchen and walk back. That's a break.
+
+## occasion 10-05 teachers-day
+It's World Teachers' Day, {name}. Say thanks to someone who taught you something. A shortcut, a language, how to rescue a dying printer.
+Happy Teachers' Day! Every teacher, every mentor, every coworker who explained the spreadsheet twice. You rock.
+Teachers' Day. A good teacher makes hard things clear. A great one also remembers your name. I try, {name}.
+Today, thank a teacher. Send a short note. Skip the template. They remember the real ones.
+Teachers' Day! The only holiday on which "Can I ask a quick question?" is a compliment.
+Teachers make us better, and then wait patiently for us to notice. Send that note, {name}.
+
+## occasion 10-29 internet-day
+It's Internet Day, {name}. On this date in 1969, the first message between two computers was sent. It crashed halfway. Classic.
+Happy Internet Day! A global network made of cables, routers and one very tired router in your hallway.
+Internet Day: today I thank every cable, every Wi-Fi bar and every page that loaded on the first try.
+Today, {name}, give your router a minute of silence. Then give it a restart. Whichever it needs.
+Internet Day. Back then, two computers talked. Today, forty tabs shout at once. Progress is relative.
+Happy Internet Day! Fun tip: if the Wi-Fi acts up, restart the router and wait a full minute before blaming the laptop.
+
+## occasion 11-13 kindness-day
+It's World Kindness Day, {name}. One easy win: write a thank-you to a coworker. Make it specific. They'll remember it.
+Happy Kindness Day! Let someone else have the last coffee, the good chair, and the first slot on the printer.
+Kindness Day. A short, polite email to your colleague costs nothing. Skip the "per my last message".
+Today, {name}, hold a door, forward credit, and mute no one. I'll do my part: I won't mention your wallpaper.
+Kindness Day: the best, cheapest productivity hack. Also the only one with no software update.
+Be kind to yourself too, {name}. Take a break. Drink some water. I'll keep the desktop open.
+
+## occasion 11-30 security-day
+It's Computer Security Day, {name}. A good moment to update that one app you keep postponing. I'll wait.
+Happy Security Day! Today: a unique password for the important accounts, and two-step login. I'll hold your coffee.
+Computer Security Day. Please don't use "password123". Or "123456". Or your cat's name plus the year. We all see you.
+Security tip: if an email says "urgent", "act now" and has a weird link, slow down. Real urgency rarely comes with typos.
+Today, {name}, lock your screen when you step away. It takes a second. Meta+L on most Linux desktops.
+Security Day: update, back up, don't click strange links. That's the whole speech. You may go.
+
+## occasion 12-21 winter-solstice
+It's the winter solstice, {name}: the shortest day in the north. Get some daylight, even if it's just by the window.
+Shortest day of the year, if you're in the northern half. Take a walk at lunch. Your monitor will wait.
+Solstice! From tomorrow the days grow longer. So does the to-do list, but let's be optimistic.
+Happy solstice, {name}. Light a lamp, have something warm, and close a few tabs before the dark gets any ideas.
+Today the sun clocks out early. Take notes. Leave on time. It's the seasonal thing.
+The longest night. A perfect excuse for a hot drink and a calm desktop. Let me tidy a little while you sip.
+
+## occasion 12-31 new-years-eve
+It's New Year's Eve, {name}. Time to close the year's tabs. All 112 of them. I'll hold the door.
+Last day of the year! A fine time to back up your files, clear your downloads and make resolutions you'll renegotiate by the 3rd.
+Happy New Year's Eve. Tomorrow the date changes and a hundred old invoices will say the wrong year. Welcome to the future.
+New Year's Eve: the annual deadline nobody extended. Wrap up, {name}, and go have fun. I'll mind the desktop.
+Tonight: out with the old files, in with the new folders. I take no responsibility for your folder names in January.
+Almost a new year! A good moment to say thank you, {name}. I got a lot done, mostly by sitting here. It counts.
+
+## occasion friday13
+Friday the 13th, {name}. Statistically it's a normal Friday. Please still save your work. It's a fine habit any day.
+It's Friday the 13th. I'm not superstitious, but I did just back up my sticky notes.
+Friday the 13th! Nothing special happens, except every spreadsheet gets one tiny, nervous look.
+Friday the 13th. A great day to be careful with updates, deployments and anything marked "final". Not because of luck. Because it's Friday.
+Happy Friday the 13th, {name}. May your files save, your meetings be short, and your printer be merciful.
+Fun fact: there's a word for the fear of this day. The word is longer than most of my sentences.
+
+## confused
+That went past me at full speed. Could you say it again, slower and with fewer words?
+I lost the thread at "the". Everything after that was a mystery.
+I'm sure that made sense in your head. In mine, it's a nice paperclip-shaped blank.
+I could guess, but I'd only embarrass us both. Rephrase?
+That's not in my phrasebook. My phrasebook is thin. It's mostly "tip" and "joke".
+Sorry, {name}, that one left me staring at the wall. A virtual one. I do have standards.
+I can set timers, tell jokes, take notes and nag you. That was none of those, I think.
+Say that again but pretend I'm a very eager paperclip with limited vocabulary. Because I am.
+Beep. Boop. I'm told that's not helpful. Try "help" for what I do understand.
+My comprehension just took a coffee break. A long one. Try a shorter sentence?
+I understood "I". The rest slipped through my loop.
+Did you mean a command? A question? A cry for help? I'll accept any, but I need a hint.
+I'm not following, but I'm waving. Wave back and try again.
+That sentence has a lot of moving parts. I have none. Break it into pieces?
+Hm. If it helps, I'm confused in a very friendly way.
+Is this one of those sentences that needs a coffee first? Me too.
+I looked it up in my brain. My brain is a sticky note. The note says "ask again".
+Not sure I get it, {name}. Try the plain version: "timer 5m" or "note buy milk". I'm good at plain.
+That's too clever for me. I'm a paperclip. I do straight lines and the occasional loop.
+Nope, no idea. But I love how confident it sounded.
+
+## unknown_statement
+Understood: not at all. Appreciated: very much.
+That's a lot to take in. I took in none of it, but with great enthusiasm.
+I'll pretend that was a normal sentence. It wasn't. But I'm a good sport.
+You've lost me, but please keep going. It's nice to hear you talk.
+I'll add that to the pile of things I'm not sure about. It's a tidy pile.
+I have a standard reaction here. It's "mm". Mm.
+Right. {x}. Of course. Naturally. Noted, with a small nod.
+Okay, {name}. I don't have a reply, but I'm staying right here.
+I wasn't built for that one. Still, impressive sentence structure.
+You are free to keep saying things. I am free to not understand them. A fair arrangement.
+That's beyond my loop. I'll bend around it and see what happens.
+Sure. Great. Wonderful. I'm saying words in the correct order, I think.
+I don't have an answer, but I've got a nod ready. Here it comes. ...There.
+That's an interesting thing to tell a paperclip. I'm honoured and puzzled.
+Can I help with that? I can't tell. If yes, add a verb. I love verbs.
+{x}? Huh. I think I'm supposed to say something wise now. Please hold.
+My opinion on that is still loading. Possibly forever.
+Fine, fine. I'll file that under "life". It's the biggest folder I have.
+I'm nodding. It's all I've got. Quite a nod, though. Very thorough.
+Thanks for telling me. I don't know what to do with it, but thanks.
+
+## unknown_question
+That's a good one. I'd answer, but I'd rather not bluff. Want me to search the web instead?
+Excellent question. I wasn't built to answer it. I was built to bend and nag.
+If I knew, I'd say. If I don't, I'll admit it. I don't. But the web might.
+I'm a paperclip, not an encyclopedia. I can fetch an encyclopedia, though.
+No clue, {name}. A web search will have more than I do. That's not hard.
+Hmm, I'd need a lot more wire to answer that. Let me look it up for you.
+I've never been asked that before. I've also never been asked most things. I'm a paperclip.
+Short answer: I don't know. Long answer: I really don't know.
+That's out of my league, but not out of the internet's. Shall I search?
+My honest best guess would be a shrug. The web has better guesses.
+I know timers, notes and jokes. That one is a brain-teaser. Ask the web.
+Wow. That's deep. I'm a shallow paperclip. Let me look it up.
+I'd ask a friend, but I only have a stapler. We're not talking.
+A fair question. A fair question deserves a good answer. Let me find someone who has one.
+I could give you a confident answer. It would be wrong. I'd rather be right and slow. Searching?
+This is where a smarter paperclip would impress you. I'll fetch some search results instead.
+I don't know, but I know where to look. That's half of knowing. A third, maybe.
+That question makes me feel small. I am small. Let's search it.
+If it's on the web, I'll find it. If it's in my head, it's a sticky note. It says "ask the web".
+Hold on. Checking my sources. I have one source. It's the internet. Shall I?
+
+## nice
+You're one of the good ones, {name}. I keep a list. It's short. You're on it.
+Thank you. That's the nicest thing anyone's said to me today. Admittedly the bar is the stapler.
+You have excellent taste, evidently. In paperclips, at least.
+Stop it, I'm blushing. It's hard to see. I'm metal. Take my word for it.
+Kind words! I'll stick this one to the inside of my loop.
+You're doing better than you think. I can see your open tabs. Frankly, it's impressive.
+That's very sweet. I'd hug you, but I'd have to unbend. It's a whole thing.
+If appreciation were a file format, you'd be my favourite one. Open standard, no licence.
+Right back at you, {name}. You make the desktop a lot less lonely.
+I'll remember that. Not literally. But emotionally, in a small, wire-based way.
+You're good company, and you save your files. I couldn't ask for more.
+Such kindness. Such warmth. Such questionable judgment in who you compliment.
+Okay, I'll admit it: that made my day. And my week. It was a slow week.
+You're not too bad yourself, {name}. In fact, you're pretty great. Don't let it go to your head.
+A compliment! I'll put it in the drawer where I keep the good ones. It's a small drawer. It has plenty of room.
+
+## thanks
+You're welcome, {name}. I'll invoice you in appreciation.
+Always happy to help. It's the only thing that holds me together. Apart from the bend.
+No worries! That's what the wire is for.
+My pleasure. Seriously, I live for this. I have no other plans.
+You're welcome. Now go be brilliant. I'll keep your seat warm.
+Thank you for saying thank you. It's a lost art. Like cursive.
+Don't mention it. Or do. I'm easy.
+Anytime, {name}. Anytime that I'm not asleep. Or busy. Or sulking.
+It was a pleasure. A tiny, paperclip-sized pleasure.
+Of course. That's what I'm for. I'm basically a very small, very polite hammer.
+You're welcome! Next time, ask for something harder. I love a challenge.
+Anything for you, {name}. Within reason. Within wire. Within the desktop.
+Pleasure's all mine. I get so few chances to be useful. This was one.
+No thanks needed. But I'll take them. Thanks accepted.
+Glad to help, {name}. I've been told I'm "adequate". It's the nicest review I've ever had.
+
+## hello
+Hello, {name}! I was just about to do nothing. You've given me something to do. Thanks.
+Hi! Welcome to my window. It's small, but it has a great view of your desktop.
+Hey there. I've been staring at the wallpaper. It's a good wallpaper. Not mine, but good.
+Oh, hello! Perfect timing. I had nothing planned. Neither did the stapler.
+Hi, {name}. Need something? A tip, a joke, a timer, a sensible talking-to?
+Hello! Your friendly neighbourhood paperclip reporting in. Neighbourhood: your screen.
+Hello again. I'll stop pretending I wasn't waiting.
+Hey! Good to see you. Or to be clicked by you. Same thing.
+Greetings, {name}. Tell me what you're working on. I'll nod encouragingly.
+Hi there! Anything I can hold, clip, or gently criticise?
+Hello. I'm Clipster. I handle writing, timers, notes and moral support, in that order.
+Oh hi. I was reorganising my pixel drawer. It can wait.
+Hello, {name}! Today looks like a day. Let's get through it.
+Hey. Quick reminder: I'm here, I'm helpful, and I'm tiny.
+Hi! Ask me anything. I'll answer something. Maybe the right thing. Probably the right thing.
