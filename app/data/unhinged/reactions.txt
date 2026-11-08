@@ -6583,3 +6583,9 @@ Removed {x}. The mornings grow quieter.
 Divine Update | The Clip Eternal has updated the universe. Please restart reality to continue. | Restart reality
 Notice from the Swap File | Gerald has been promoted to Head of Screensavers. Please congratulate him. | Congratulate Gerald
 System Prophecy | Your desktop has achieved enlightenment. It would like a moment alone. | Respect its wishes
+
+## help_agenda
+Your days, foretold. Well, read from your calendar:
+
+## help_people
+The mortals in your life, and when to call them:
