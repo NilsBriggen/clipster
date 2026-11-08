@@ -8,6 +8,7 @@ mod net;
 mod pointer;
 mod powers;
 mod sys;
+mod tidy;
 mod todo;
 mod understand;
 mod writing;
@@ -1037,6 +1038,22 @@ impl App {
                 }
             }
             Effect::TimeReport => r = self.time_report(),
+            Effect::Tidy(which) => {
+                r = match tidy::folder(&which).map(|d| (tidy::apply(&tidy::plan(&d), &tidy::undo_log()), d)) {
+                    Some((Ok(n), d)) => Reply::say(lines::pick("tidy_done").replace("{n}", &n.to_string()))
+                        .mood(Mood::Party)
+                        .run("Undo", "tidy undo")
+                        .btn("Open the folder", Act::Open(d.to_string_lossy().into_owned())),
+                    Some((Err(e), _)) => Reply::say(format!("I couldn't tidy that: {e}")).mood(Mood::Sad),
+                    None => Reply::say("I can tidy your downloads or your desktop."),
+                };
+            }
+            Effect::TidyUndo => {
+                r = match tidy::undo(&tidy::undo_log()) {
+                    Ok(n) => Reply::say(lines::pick("tidy_undo").replace("{n}", &n.to_string())).mood(Mood::Happy),
+                    Err(e) => Reply::say(format!("I can't undo that: {e}.")).mood(Mood::Think),
+                };
+            }
             Effect::Todo(op) => {
                 let news = todo::apply(&op);
                 if let Effect::Timer(secs, label) = &news.effect {

@@ -8,7 +8,7 @@ pub fn respond(input: &str) -> Reply {
     let raw = input.trim();
     let head = raw.split_whitespace().next().unwrap_or("").to_lowercase();
     // shell commands and button-only commands (whose text is data, like quiz answers) are taken literally
-    if ["run", "$", "sh", "cmd", "reveal", "wyrpick", "onboard", "window", "answer-to", "checkin", "install", "forget"].contains(&head.as_str()) || head == "answer" && raw.contains('|') {
+    if ["run", "$", "sh", "cmd", "reveal", "wyrpick", "onboard", "window", "answer-to", "checkin", "install", "forget", "tidy"].contains(&head.as_str()) || head == "answer" && raw.contains('|') {
         if let Some(r) = exact(raw) {
             return r; // shell commands are taken literally, never "understood"
         }
@@ -613,6 +613,20 @@ fn clock(t: &str) -> Option<(u64, usize)> {
 
 /// Controlling the computer and handy tools: files, sound, music, screen, power, dates...
 fn powers(s: &str, raw: &str) -> Option<Reply> {
+    // tidying files: "tidy my downloads", "clean up my desktop", "undo the tidy", "find duplicates in downloads"
+    let place = if has(s, &["desktop"]) { "desktop" } else { "downloads" };
+    if has(s, &["undo the tidy", "undo tidying", "undo the cleanup", "undo the tidying", "put my files back", "undo tidy"]) {
+        return go("tidy undo".into());
+    }
+    if has(s, &["duplicate files", "duplicates", "find duplicates", "same files twice", "doubled files"]) && has(s, &["downloads", "download", "desktop", "files", "duplicates"]) {
+        return go(format!("dupes {place}"));
+    }
+    if has(s, &["old big files", "big old files", "large old files", "old large files", "old files", "files i never use"]) {
+        return go(format!("oldfiles {place}"));
+    }
+    if has(s, &["tidy", "tidy up", "clean up", "organize", "organise", "sort", "sort out", "declutter"]) && has(s, &["downloads", "download folder", "desktop", "my files"]) && !has(s, &["trash"]) {
+        return go(format!("tidy {place}"));
+    }
     // system switches and readings
     for (kws, what) in [(&["wifi", "wi fi", "wireless", "internet"][..], "wifi"), (&["bluetooth"][..], "bluetooth")] {
         if has(s, kws) && !has(s, &["name", "password", "which", "what"]) {
@@ -1600,6 +1614,16 @@ mod tests {
     fn proofreading_in_plain_words() {
         let r = respond("proofread Please send the the report today.");
         assert!(r.buttons.iter().any(|(_, a)| matches!(a, crate::brain::Act::Run(c) if c == "proofread fix")), "offers the easy fixes: {} {:?}", r.text, r.buttons);
+    }
+
+    #[test]
+    fn tidying_in_plain_words() {
+        assert_eq!(eff("undo the tidy"), Effect::TidyUndo);
+        assert!(matches!(eff("find duplicates in my downloads"), Effect::Net(Query::Dupes(p)) if p == "downloads"));
+        assert!(matches!(eff("show me big old files"), Effect::Net(Query::OldFiles(_))));
+        let plan = respond("tidy up my desktop");
+        assert!(plan.effect == Effect::None, "tidying needs a yes first");
+        assert_eq!(respond("tidy desktop confirmed").effect, Effect::Tidy("desktop".into()));
     }
 
     #[test]

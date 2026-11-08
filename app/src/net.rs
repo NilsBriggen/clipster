@@ -54,6 +54,8 @@ pub enum Query {
     RandomWiki,
     Briefing,
     Update, // is there a newer Clipster?
+    Dupes(String),    // duplicate files in a folder ("downloads", "desktop")
+    OldFiles(String), // big files nobody touched for months
 }
 
 pub fn answer(q: &Query) -> Reply {
@@ -634,6 +636,30 @@ fn fetch(q: &Query) -> Result<Reply, String> {
             .mood(Mood::Sly)
             .btn("Copy address", Act::Copy(ip))
             .run("Show my local network addresses", "lan"))
+        }
+        Query::Dupes(which) | Query::OldFiles(which) => {
+            let dir = crate::tidy::folder(which).ok_or("I can look in your downloads or on your desktop")?;
+            let open_dir = Act::Open(dir.to_string_lossy().into_owned());
+            if let Query::Dupes(_) = q {
+                let groups = crate::tidy::duplicates(&dir);
+                if groups.is_empty() {
+                    return Ok(Reply::say(lines::pick("tidy_no_dupes")).mood(Mood::Happy));
+                }
+                let list: String = groups.iter().take(6).map(|g| format!("\n• {}", g.iter().map(|p| p.file_name().unwrap_or_default().to_string_lossy().to_string()).collect::<Vec<_>>().join(" = "))).collect();
+                let mut r = Reply::say(format!("{}{list}", lines::pick("tidy_dupes").replace("{n}", &groups.len().to_string()))).mood(Mood::Think);
+                for g in groups.iter().take(3) {
+                    if let Some(p) = g.get(1) {
+                        r = r.btn(&format!("Show {}", p.file_name().unwrap_or_default().to_string_lossy()), Act::Open(p.parent().unwrap_or(&dir).to_string_lossy().into_owned()));
+                    }
+                }
+                return Ok(r.btn("Open the folder", open_dir));
+            }
+            let old = crate::tidy::old_big(&dir);
+            if old.is_empty() {
+                return Ok(Reply::say(lines::pick("tidy_no_old")).mood(Mood::Happy));
+            }
+            let list: String = old.iter().take(6).map(|(p, size)| format!("\n• {} ({} MB)", p.file_name().unwrap_or_default().to_string_lossy(), size / 1024 / 1024)).collect();
+            Ok(Reply::say(format!("{}{list}", lines::pick("tidy_old").replace("{n}", &old.len().to_string()))).mood(Mood::Think).btn("Open the folder", open_dir))
         }
         Query::Update => {
             let latest = latest_version()?;

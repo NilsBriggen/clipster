@@ -54,6 +54,8 @@ pub enum Effect {
     Focus(u64, String),              // a focus session: seconds, what it's for
     FocusStop,
     TimeReport,                      // where today's time went, by window kind
+    Tidy(String),                    // move a folder's files into subfolders by type (after a yes)
+    TidyUndo,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -238,6 +240,11 @@ pub fn exact(input: &str) -> Option<Reply> {
         }
         "iss" => return Some(net(Query::Iss, "Looking up... way up...")),
         "aboutme" => return Some(facts()),
+        "tidy" if rest == "undo" => return Some(Reply::say("").effect(Effect::TidyUndo)),
+        "tidy" if rest.ends_with(" confirmed") => return Some(Reply::say("").effect(Effect::Tidy(rest.trim_end_matches(" confirmed").to_string()))),
+        "tidy" if rest.is_empty() || crate::tidy::folder(rest).is_some() => return Some(tidy_plan(rest)),
+        "dupes" => return Some(net(Query::Dupes(rest.to_string()), "Comparing your files byte by byte. I love this kind of work.")),
+        "oldfiles" => return Some(net(Query::OldFiles(rest.to_string()), "Digging for big old files...")),
         "focus" if ["stop", "end", "cancel", "off", "done"].contains(&rest) => return Some(Reply::say("").effect(Effect::FocusStop)),
         "focus" => {
             let (secs, label) = parse_dur(rest).map(|(s, l)| (s, l.trim().trim_start_matches("on ").trim_start_matches("for ").to_string())).unwrap_or((25 * 60, rest.to_string()));
@@ -603,6 +610,24 @@ pub fn react_clip(text: &str) -> Option<Reply> {
     None
 }
 
+
+/// "tidy downloads": what would move where, and a Yes button (nothing moves before that).
+pub fn tidy_plan(which: &str) -> Reply {
+    let name = if which.trim().is_empty() { "downloads" } else { which.trim() };
+    let Some(dir) = crate::tidy::folder(name) else { return Reply::say("I can tidy your downloads or your desktop. Which one?").run("Downloads", "tidy downloads").run("Desktop", "tidy desktop") };
+    let plan = crate::tidy::plan(&dir);
+    let label = dir.file_name().map(|n| n.to_string_lossy().to_string()).unwrap_or_else(|| name.to_string());
+    if plan.is_empty() {
+        return Reply::say(lines::pick("tidy_nothing").replace("{x}", &label)).mood(Mood::Happy);
+    }
+    let mut counts: std::collections::BTreeMap<String, usize> = Default::default();
+    for (_, to) in &plan {
+        *counts.entry(to.parent().and_then(|p| p.file_name()).map(|n| n.to_string_lossy().to_string()).unwrap_or_default()).or_insert(0) += 1;
+    }
+    let list: String = counts.iter().map(|(c, n)| format!("\n• {n} → {c}")).collect();
+    let text = lines::pick("tidy_plan").replace("{n}", &plan.len().to_string()).replace("{x}", &label);
+    Reply::say(format!("{text}{list}")).mood(Mood::Think).run("Yes, tidy it", &format!("tidy {name} confirmed")).btn("Not now", Act::Hide)
+}
 
 /// Everything he knows about you, as a list ("what do you know about me").
 pub fn facts() -> Reply {
