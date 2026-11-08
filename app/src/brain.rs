@@ -50,6 +50,7 @@ pub enum Effect {
     Forget(Vec<String>),             // fact keys to drop; empty = all of them
     Checkin(String),                 // the daily "how are you?": great, okay, meh or rough
     InstallUpdate,                   // download the newest version, put it in place and restart
+    Todo(crate::todo::Op),           // a change to the to-do list (applied by the app: it writes todo.txt)
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -408,8 +409,14 @@ pub fn exact(input: &str) -> Option<Reply> {
         "timers" => return Some(Reply::say("").effect(Effect::ListTimers)),
         "cancel" | "stop" if rest.is_empty() || rest == "all" => return Some(Reply::say(lines::pick("say_cancel")).effect(Effect::CancelTimers)),
         "cancel" => return Some(Reply::say(lines::pick("say_timer_cancelled").replace("{label}", rest)).effect(Effect::CancelTimer(rest.to_string()))),
-        "note" | "remember" | "todo" => return Some(note_add(rest)),
-        "notes" | "todos" => return Some(notes_list()),
+        "note" | "remember" => return Some(note_add(rest)),
+        "notes" => return Some(notes_list()),
+        "todo" | "to-do" if !rest.is_empty() => return Some(Reply::say("").effect(Effect::Todo(crate::todo::Op::Add(rest.to_string())))),
+        "todo" | "to-do" | "todos" if rest.is_empty() => return Some(crate::todo::list()),
+        "todos" if rest == "clear" => return Some(crate::todo::clear_confirm()),
+        "todos" if rest == "clear confirmed" => return Some(Reply::say("").effect(Effect::Todo(crate::todo::Op::ClearFinished))),
+        "done" if !rest.is_empty() => return Some(Reply::say("").effect(Effect::Todo(crate::todo::Op::Done(rest.to_string())))),
+        "undone" if !rest.is_empty() => return Some(Reply::say("").effect(Effect::Todo(crate::todo::Op::Undone(rest.to_string())))),
         // notes are only wiped after a yes, and only when it's clearly about them ("forget it" is not)
         "forget" if rest == "notes confirmed" => return Some(notes_clear()),
         "forget" if rest.is_empty() || ["notes", "my notes", "all notes", "all my notes", "the notes", "my list", "the list"].contains(&rest.to_lowercase().as_str()) => {

@@ -8,6 +8,7 @@ mod net;
 mod pointer;
 mod powers;
 mod sys;
+mod todo;
 mod understand;
 mod watch;
 
@@ -909,6 +910,13 @@ impl App {
             Effect::Repeat(secs, label) => self.timers.push((Instant::now() + Duration::from_secs(secs), label, secs)),
             Effect::SetName(n) => self.name = n,
             Effect::Checkin(answer) => r = self.checkin_answer(&answer),
+            Effect::Todo(op) => {
+                let news = todo::apply(&op);
+                if let Effect::Timer(secs, label) = &news.effect {
+                    self.timers.push((Instant::now() + Duration::from_secs(*secs), label.clone(), 0));
+                }
+                r = Reply { effect: Effect::None, ..news };
+            }
             Effect::InstallUpdate if !net::can_self_update() || self.screenshot.is_some() => {
                 r = Reply::say(lines::pick("say_update_failed").replace("{error}", "I can only replace myself as an AppImage or on Windows")).btn("Open the download page", Act::Open(net::RELEASES.into()));
             }

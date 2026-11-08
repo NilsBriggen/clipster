@@ -864,26 +864,48 @@ fn extras(s: &str, raw: &str) -> Option<Reply> {
 }
 
 fn notes(s: &str, raw: &str) -> Option<Reply> {
-    let about_notes = has(s, &["notes", "note", "to do", "to do list", "list", "todos", "reminders"]);
+    let about_todos = has(s, &["to do", "to do list", "todo", "todos", "todo list", "list", "tasks"]) && !has(s, &["notes", "note"]);
+    let about_notes = has(s, &["notes", "note", "reminders"]) || about_todos;
     if about_notes && has(s, &["delete", "clear", "erase", "remove", "wipe", "forget", "empty", "reset"]) && !s.starts_with("note ") {
-        return go("forget notes".into()); // asks first
+        // the to-do list only ever loses finished items, and both ask first
+        return go(if about_todos { "todos clear" } else { "forget notes" }.into());
     }
-    if s == "notes" || has(s, &["my notes", "show notes", "list notes", "read notes", "my to do", "my to do list", "my list", "my todos", "what is on my list", "what did i ask you to remember", "what did i tell you to remember", "what do i need to do", "what should i remember", "all notes"]) {
+    // "done call anna", "mark the report as done", "tick off milk"
+    if let Some(what) = after(s, &["done with ", "mark off ", "tick off ", "check off ", "cross off "]).or_else(|| {
+        s.strip_prefix("mark ").and_then(|r| r.strip_suffix(" as done").or_else(|| r.strip_suffix(" done")).or_else(|| r.strip_suffix(" as finished")))
+    }) {
+        return go(format!("done {}", keep(raw, what.trim_start_matches("the "))));
+    }
+    let adding = s.starts_with("add ") || s.starts_with("put ");
+    if !adding && has(s, &["my to do", "my to do list", "my list", "my todos", "my todo list", "my tasks", "what is on my list", "what do i need to do", "what is on my to do list", "what do i have to do", "show my list"]) {
+        return go("todos".into());
+    }
+    if s == "notes" || has(s, &["my notes", "show notes", "list notes", "read notes", "what did i ask you to remember", "what did i tell you to remember", "what should i remember", "all notes"]) {
         return go("notes".into());
+    }
+    if let Some(what) = after(s, &["to do ", "todo ", "add to my list ", "add to my to do list ", "put on my list ", "new task ", "add a task "]).filter(|w| !w.is_empty()) {
+        return go(format!("todo {}", keep(raw, what)));
     }
     const P: &[&str] = &[
         "note that ", "note to self ", "note down ", "note: ", "note ", "make a note that ", "make a note to ", "make a note of ",
         "make a note ", "take a note that ", "take a note ", "write down that ", "write down ", "jot down ", "remember that ",
         "remember to ", "remember ", "do not let me forget to ", "do not let me forget ", "add a note ", "save a note ",
-        "new note ", "to do ", "write a note ",
+        "new note ", "write a note ",
     ];
     if let Some(what) = after(s, P).filter(|w| !w.is_empty()) {
         return go(format!("note {}", keep(raw, what)));
     }
-    // "add milk to my list"
-    let (what, list) = s.strip_prefix("add ")?.rsplit_once(" to ")?;
-    has(list, &["list", "notes", "to do", "to do list", "shopping list", "todos"]).then(|| ())?;
-    go(format!("note {}", keep(raw, what)))
+    // "add milk to my list" (a to-do), "add the code to my notes" (a note)
+    let rest = s.strip_prefix("add ").or_else(|| s.strip_prefix("put "))?;
+    const LISTS: &[&str] = &[
+        " to my to do list", " to the to do list", " to my todo list", " to my todos", " to my tasks", " to my shopping list", " to the shopping list",
+        " to my list", " to the list", " on my list", " on my to do list", " on the list",
+    ];
+    if let Some(what) = rest.strip_suffix(" to my notes").or_else(|| rest.strip_suffix(" to the notes")) {
+        return go(format!("note {}", keep(raw, what)));
+    }
+    let what = LISTS.iter().find_map(|l| rest.strip_suffix(l))?;
+    go(format!("todo {}", keep(raw, what)))
 }
 
 const MATH_WORDS: &[(&str, &str)] = &[
@@ -1555,6 +1577,19 @@ mod tests {
         assert_eq!(eff("forget notes"), respond("forget notes").effect, "notes keep their own forget");
         assert!(!matches!(eff("forget my notes"), Effect::Forget(_)));
         assert!(!text("what's my ip").contains("told me"), "not a question about facts");
+    }
+
+    #[test]
+    fn todos_in_plain_words() {
+        use crate::todo::Op;
+        assert_eq!(eff("add call Anna to my to do list"), Effect::Todo(Op::Add("call Anna".into())));
+        assert_eq!(eff("todo send the report by friday"), Effect::Todo(Op::Add("send the report by friday".into())));
+        assert_eq!(eff("add milk to my list"), Effect::Todo(Op::Add("milk".into())));
+        assert_eq!(eff("mark the report as done"), Effect::Todo(Op::Done("report".into())));
+        assert_eq!(eff("tick off milk"), Effect::Todo(Op::Done("milk".into())));
+        assert_eq!(eff("done call Anna"), Effect::Todo(Op::Done("call Anna".into())));
+        assert!(!matches!(eff("clear my to do list"), Effect::Todo(_)), "asks first");
+        assert!(matches!(eff("note buy milk"), Effect::None), "notes are still notes");
     }
 
     #[test]

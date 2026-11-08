@@ -739,6 +739,7 @@ fn fetch(q: &Query) -> Result<Reply, String> {
                 .run("Another random one!", "randomwiki"))
         }
         Query::Briefing => {
+            let todos = crate::todo::summary();
             let now = chrono::Local::now();
             let hello = match chrono::Timelike::hour(&now) {
                 5..=11 => "Good morning",
@@ -751,6 +752,9 @@ fn fetch(q: &Query) -> Result<Reply, String> {
                 let lines: Vec<&str> = w.text.lines().collect();
                 text += &format!("\n{}\n{}", lines.first().unwrap_or(&""), lines.get(2).unwrap_or(&""));
             }
+            if let Some(t) = &todos {
+                text += &format!("\n{t}");
+            }
             if let Ok(v) = get(&format!("https://api.wikimedia.org/feed/v1/wikipedia/en/onthisday/selected/{}", now.format("%m/%d"))) {
                 if let Some(e) = v["selected"].as_array().and_then(|a| a.choose(&mut rand::thread_rng())) {
                     text += &format!("\n📅 On this day in {}: {}", e["year"], s(&e["text"]));
@@ -759,7 +763,9 @@ fn fetch(q: &Query) -> Result<Reply, String> {
             if let Ok(v) = get("https://dummyjson.com/quotes/random") {
                 text += &format!("\n💬 “{}” — {}", s(&v["quote"]), s(&v["author"]));
             }
-            Ok(Reply::say(text).mood(Mood::Happy).run("What's in the news?", "news").run("Full weather forecast", "weather").run("Tell me a joke to start the day", "joke"))
+            let r = Reply::say(text).mood(Mood::Happy);
+            let r = if todos.is_some() { r.run("My to-do list", "todos") } else { r };
+            Ok(r.run("What's in the news?", "news").run("Full weather forecast", "weather").run("Tell me a joke to start the day", "joke"))
         }
         Query::Animal(kind) => {
             let url = match kind.as_str() {
