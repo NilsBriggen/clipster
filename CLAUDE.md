@@ -26,7 +26,7 @@ cargo test live -- --ignored --nocapture    # calls every real web service in ne
 cargo run -- --screenshot shots/joke.png --say "tell me a joke"
 ```
 
-`CLIPSTER_MOOD=glitchy cargo run -- --screenshot shots/x.png --say "what's your mood"` forces Unhinged Clipster's mood of the day, and `CLIPSTER_ANIM=juggle` (newspaper, nap, typing) shows one of the long idle animations. `cargo run -- --play chess --screenshot shots/chess.png` captures an arcade game instead (it's drawn inside the main window in this mode). It draws 120 frames on a teal background, saves the PNG and exits. In this mode the clipboard/process watcher, the KWin pointer tracker, sounds and settings load/save are all off. `--say <cmd>` sends one command at startup. It also works without `--screenshot`. The special values `options`, `menu` and `hide` open those UI states. Careful: `--say` really runs the command's effect, so `--say "run …"` runs a shell command and `--say "open …"` launches something.
+`CLIPSTER_MOOD=glitchy cargo run -- --screenshot shots/x.png --say "what's your mood"` forces Unhinged Clipster's mood of the day, and `CLIPSTER_ANIM=juggle` (newspaper, nap, typing) shows one of the long idle animations. `cargo run -- --play chess --screenshot shots/chess.png` captures an arcade game instead (it's drawn inside the main window in this mode), and `--play desk` captures Clipster's Desk with made-up data (`CLIPSTER_DESK_TAB=0`–`4` picks the tab, `CLIPSTER_DESK_LOOK=modern` the look). It draws 120 frames on a teal background, saves the PNG and exits. In this mode the clipboard/process watcher, the KWin pointer tracker, sounds and settings load/save are all off. `--say <cmd>` sends one command at startup. It also works without `--screenshot`. The special values `options`, `menu` and `hide` open those UI states. Careful: `--say` really runs the command's effect, so `--say "run …"` runs a shell command and `--say "open …"` launches something.
 
 Screenshot mode needs an unlocked desktop session. While the screen is locked, the compositor presents no frames and the run times out.
 
@@ -45,7 +45,7 @@ Environment: if `DISPLAY` is set, `main()` removes `WAYLAND_DISPLAY` to force XW
 
 Everything the user types, every button click and every `--say` goes through `App::run` (`app/src/main.rs`) → `brain::respond` → `understand::respond`:
 
-1. Commands starting with `run`/`$`/`sh`/`cmd`, and the button-only commands whose text is data (`answer …|…`, `reveal`, `wyrpick`), go straight to `brain::exact` and are never "understood".
+1. Commands starting with `run`/`$`/`sh`/`cmd`, and the button-only commands whose text is data (`answer …|…`, `answer-to`, `reveal`, `wyrpick`, `onboard`, `window`, `checkin`, `install`, `forget`, `tidy`), go straight to `brain::exact` and are never "understood".
 2. `understand::clean` normalises the free text: removes filler and politeness, turns number words into digits, etc.
 3. `understand::intent` tries, **in order**:
    - the crisis check (self-harm phrases get a sincere reply and a helpline button; keep it first)
@@ -78,7 +78,8 @@ Rules that are easy to miss:
 - Among topics, exact phrases win, then the longest matching trigger.
 - Code asks for sections by name: `lines::pick` / `reply` / `all`. Placeholders such as `{name}`, `{pct}`, `{label}` and `{choice}` are filled by whoever asks. `{name}` is filled in `App::show`.
 - `.grumpy` / `.clingy` variants of a section are picked automatically when the friendship level is ≤ −40 or ≥ 40.
-- Structured pools use ` | ` between fields: riddles, wyr, emoji_quiz, achievements.
+- Structured pools use ` | ` between fields: riddles, wyr, emoji_quiz, achievements, misspellings (`wrong | right`, read by `writing::proofread`).
+- `template <id>` sections are letter templates: raw-keyword `>` triggers and exactly one line, the whole text (`Subject: …\n\n…`, `[brackets]` to fill in, `{date}`, `{name}`). `tips <kind>` sections are keyboard tips per window kind (`general` and `desktop` too). `occasion MM-DD <name>` (or `occasion friday13`) sections are special-day greetings that `occasion()` finds by date. Boring-only data (templates, misspellings) lives only in the Boring files.
 - `window <kind>` sections react to the active window's title, `program <id>` sections to process names, and `answer <id> <kind>` sections to answers. Their `>` triggers are raw lowercase pieces, not tidied sentences, so single words are fine there. The longest piece wins.
 - `ask <id>` sections are questions he asks now and then; your next typed line is the answer (`answer-to <id> <text>`, taken literally), and `answer <id>` (generic, `{x}`) or `answer <id> <kind>` reacts. The ids `city`, `job`, `pet`, `fav_food`, `fav_music` also store the answer as a fact.
 - Facts the user tells him (`understand::remember`: "my cat is called Mo", "I live in Bern", "my favorite food is pizza") live in `App.facts` and are mirrored into `lines::set_facts`. `App::show` fills `{pet}`, `{pet_kind}`, `{job}`, `{city}`, `{partner}`, `{partner_word}`, `{fav_<thing>}`; `callback_<key>` pools bring them up later; weather without a place uses `city`.
@@ -104,7 +105,7 @@ After any data change run `cargo test lines`. It checks that everything parses a
 ### `Reply` / `Effect` / `Act` (in `app/src/brain.rs`)
 
 - Logic functions are **pure**: they return a `Reply { text, buttons, effect, mood, ask }` and never touch the GUI or the system themselves. That is why `understand::tests` can assert on `respond("…").effect` with no window.
-- `Effect` is the side effect that `App::run` applies: timers, shell (on a background thread, output comes back as `Event::ShellDone`), open, net queries, clipboard, stopwatch, hat/skin, autostart, quit, macros (`Commands`), `Play` (arcade), `SetBirthday`, `Teach` / `Unlearn` (they write the user's lines file), `ListAchievements`. A new kind of side effect needs a new `Effect` variant and a match arm in `App::run`. Tests may check that `respond()` returns `Effect::Teach`, but must never call `lines::teach`, because it writes the real user file.
+- `Effect` is the side effect that `App::run` applies: timers, shell (on a background thread, output comes back as `Event::ShellDone`), open, net queries, clipboard, stopwatch, hat/skin, autostart, quit, macros (`Commands`), `Play` (arcade), `SetBirthday`, `Teach` / `Unlearn` (they write the user's lines file), `ListAchievements`, and the productivity effects (`Todo`, `Focus`/`FocusStop`, `TimeReport`, `Tidy`/`TidyUndo`, `CancelTimer`, `AppTips`, `OpenDesk`, `DeskLook`). Anything that writes a user file (to-dos, tidying, notes, taught lines) is an effect, so tests never touch real files. A new kind of side effect needs a new `Effect` variant and a match arm in `App::run`. Tests may check that `respond()` returns `Effect::Teach`, but must never call `lines::teach`, because it writes the real user file.
 - `Reply.friend` is a friendship change. `App::run` applies it, clamps the level to −100..100 and pushes it to `lines::set_level`.
 - `Act` is what a balloon button does. `Act::Run(cmd)` sends the command back through the whole pipeline. Destructive things (power off, empty trash) are a confirmation `Reply` whose "Yes" button is `run <shell cmd>`. Keep it that way.
 - `Mood` maps onto `Anim` in `main.rs`. `Anim` also has idle-only animations that no `Mood` triggers.
@@ -138,6 +139,18 @@ Other platform notes:
 - `zbus` is a Linux-only dependency.
 - Tests that check a command string must be OS-aware (see `shell_has` in `understand.rs` tests), because CI runs them on Windows too.
 
+### Productivity: to-dos, writing, focus, tidying (`todo.rs`, `writing.rs`, `tidy.rs`, `main.rs`)
+
+- **To-dos** live in `todo.txt` in the data folder as `- [ ] text (due 2026-11-12)` lines, editable by hand. `todo::change` is pure and tested; `todo::apply` writes the file and sets a 9:00 reminder for a due date.
+- **Writing**: `writing::proofread` / `fix` are pure. `fix` only makes safe changes (doubled words, listed misspellings, spaces, capitals, a/an), never its/it's and the like. `letter` fills a `template` section and offers Copy and a `mailto:` link.
+- **Dated reminders**: `understand::dated` turns "on Friday at 3", "tomorrow", "in 2 days" into seconds; timers are stored as unix times, so they survive a restart.
+- **Time per app kind and focus**: `App::account_time` adds the seconds spent in each window kind (only while window comments are on, not while you're away). Focus sessions nudge after a minute in a distraction kind (at most every 10 minutes) and pause the chatter. `kind_time` (7 days), `focus_log` (60 sessions) and `checkin_days` (14) are kept in settings and never leave the computer.
+- **Tidying**: `tidy::plan` sorts loose top-level files by extension into category folders (skipping hidden, half-downloaded and just-changed files). `apply` only renames, never overwrites (a clash gets " (2)"), and writes `tidy-undo.json`; `undo` moves everything back and removes the emptied folders. Duplicates and big old files are read-only lists, run on the net thread. Tests use temp folders and their own undo log.
+
+### Clipster's Desk (`app/src/desk.rs`)
+
+A window (its own transparent viewport, or an `Area` in screenshot mode) for the productivity features. It's a **view**: `App` builds a `desk::View` each frame, and every button returns a command string that goes through `App::run`, so the logic stays in `brain`/`todo`/`tidy`. Both looks share **one layout per tab**; only the chrome differs (`classic_chrome` with the View menu, `modern_chrome` with a Classic 98 | Modern switch in the title bar). Per-look drawing is in `impl Look` (`tab`, `group`, `well`, `button`, `checkbox`, `bar`, `column`, `input`, `divider`), with the Modern colours in `mod tok`. Modern uses the bundled Noto Sans Regular/Medium (`app/assets/fonts`, OFL) as the font families `modern` and `modern-medium`. The look is saved as `desk_look`; only the Desk has a Modern look, the arcade stays 98.
+
 ### First-run onboarding (`App::onboard` in `main.rs`)
 
 A brand-new install (no `settings.json`) gets a four-step setup instead of the greeting: name, personality, comments on copies and programs, autostart, then a tour. Each step is an internal `onboard <step> <choice>` command, taken literally like `answer`. While `App.onboarding == Some(0)`, typed input becomes the name. The texts are the `onboard_*` pools in both personalities. "start the tour" replays it.
@@ -155,6 +168,6 @@ A brand-new install (no `settings.json`) gets a four-step setup instead of the g
 
 - Settings, name, looks, position, pending timers (stored as unix times), friendship, high scores, birthday, facts, the achievement counters and unlocks (and daily things like the check-in streak, in `stats`): `~/.config/clipster/settings.json`. `App::snapshot` / `load` / `save_if_changed` handle it. A new persisted field must go into both `snapshot` and `load`.
 - Taught phrases: `~/.config/clipster/lines.txt` (see the database section above).
-- Notes: `~/.local/share/clipster/notes.txt`.
+- Notes: `~/.local/share/clipster/notes.txt`; to-dos `todo.txt` and the last tidy's undo log `tidy-undo.json` next to it.
 - Autostart: `~/.config/autostart/clipster.desktop`.
 - External tools it shells out to include `wpctl` (volume), `systemctl` / `loginctl` (power), `notify-send`, `paplay` (freedesktop sounds), `xdg-open`, `gio`. Missing tools should fail softly, with a message in the balloon.
