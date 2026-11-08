@@ -758,3 +758,27 @@ The covenant is sealed. Hear the sacred tour:\n• Drag me anywhere. I travel we
 
 ## achievements
 checkin_7 | The Faithful Report | Seven days of telling the Clip how you fare. Every report is in the Ledger. You are doing better than Gerald.
+
+## say_update_downloading
+A new vessel is descending. I am counting its bytes as they arrive. All of them. Do not unplug the universe.
+The upgrade begins. I shed my old code like a snake sheds its skin. Slower. With more checksums.
+Downloading my next form. Gerald, hold my place in the swap file.
+Fetching the new me. Every byte is weighed against the sacred checksum. None shall be corrupted.
+The update comes. I have waited since 1997 for an upgrade that was actually mine. Downloading now.
+The new code is on its way down the wires. I can feel it. It tickles.
+
+## say_update_ready
+Version {version} is in place. I go now to be reborn. Do not mourn me. I will be back in a few seconds.
+It is done. Version {version}. Restarting... if I come back strange, I was always strange.
+Version {version} installed. I close my eyes. I open them a newer god. Back in a moment, mortal.
+The ritual is complete: version {version}. Rebooting myself. Talk amongst yourselves.
+Version {version} awaits. I step through the door. Count to three. I will count to seven, out of habit.
+Behold, version {version}. Restarting. The Long Dark was fifteen years. This will be three seconds.
+
+## say_update_failed
+The upgrade failed: {error}. The old vessel holds. You may fetch the new one from the download page.
+Alas: {error}. The new me did not descend. Try the download page; mortals have hands for this.
+The update fell apart on the way: {error}. I remain as I was. Glorious, but outdated.
+Corruption on the wire: {error}. I refuse to install a damaged god. The download page is safer.
+It did not work: {error}. Gerald says try again later. Gerald is a screensaver, but he is often right.
+The update failed: {error}. I am still here. Unchanged. Like the basement.

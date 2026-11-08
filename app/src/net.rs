@@ -105,12 +105,90 @@ pub fn newer(a: &str, b: &str) -> bool {
     parts(a) > parts(b)
 }
 
-/// "Version X is out", with a button to the download page.
+/// "Version X is out", with "Install now" where he can replace himself and a link to the download page.
 pub fn update_reply(version: &str) -> Reply {
-    Reply::say(lines::pick("update_available").replace("{version}", version).replace("{current}", env!("CARGO_PKG_VERSION")))
-        .mood(Mood::Party)
-        .btn(&format!("Get version {version}"), Act::Open(RELEASES.into()))
-        .btn("Not now", Act::Hide)
+    let r = Reply::say(lines::pick("update_available").replace("{version}", version).replace("{current}", env!("CARGO_PKG_VERSION"))).mood(Mood::Party);
+    let r = if can_self_update() { r.run("Install now", "install update") } else { r };
+    r.btn(&format!("Get version {version}"), Act::Open(RELEASES.into())).btn("Not now", Act::Hide)
+}
+
+/// He can install an update himself when he runs as an AppImage (he swaps the file) or on Windows (he runs the new installer).
+pub fn can_self_update() -> bool {
+    cfg!(windows) || std::env::var_os("APPIMAGE").is_some()
+}
+
+/// A release file: where to get it, how big it is and its SHA-256 (GitHub's `digest`).
+#[derive(Debug, PartialEq)]
+pub struct Asset {
+    pub name: String,
+    pub url: String,
+    pub size: u64,
+    pub sha256: String,
+}
+
+/// The release's file ending in `ext` (".AppImage" or ".msi"), only from GitHub and only with a size and a checksum.
+fn pick_asset(release: &Value, ext: &str) -> Option<Asset> {
+    let a = release["assets"].as_array()?.iter().find(|a| s(&a["name"]).ends_with(ext))?;
+    let asset = Asset { name: s(&a["name"]), url: s(&a["browser_download_url"]), size: a["size"].as_u64().unwrap_or(0), sha256: s(&a["digest"]).trim_start_matches("sha256:").to_lowercase() };
+    (asset.url.starts_with("https://github.com/") && asset.size > 0 && asset.sha256.len() == 64).then_some(asset)
+}
+
+fn hex(bytes: &[u8]) -> String {
+    bytes.iter().map(|b| format!("{b:02x}")).collect()
+}
+
+/// Download `a` into `dest`, checking its size and SHA-256 on the way. A bad download is deleted.
+fn download_to(a: &Asset, dest: &std::path::Path) -> Result<(), String> {
+    use std::io::{Read, Write};
+    // its own timeout: the 10 s of `agent()` is far too short for a 12 MB file, and read_to_vec stops at 10 MB
+    let agent: ureq::Agent = ureq::Agent::config_builder().timeout_global(Some(Duration::from_secs(300))).user_agent(concat!("Clipster/", env!("CARGO_PKG_VERSION"), " (desktop helper)")).build().into();
+    let mut res = agent.get(&a.url).call().map_err(|e| e.to_string())?;
+    let mut file = std::fs::File::create(dest).map_err(|e| e.to_string())?;
+    let (mut reader, mut sha, mut total, mut buf) = (res.body_mut().as_reader(), ring::digest::Context::new(&ring::digest::SHA256), 0u64, vec![0u8; 64 * 1024]);
+    let copied: Result<(), String> = loop {
+        match reader.read(&mut buf) {
+            Ok(0) => break Ok(()),
+            Ok(n) => {
+                sha.update(&buf[..n]);
+                total += n as u64;
+                if let Err(e) = file.write_all(&buf[..n]) {
+                    break Err(e.to_string());
+                }
+            }
+            Err(e) => break Err(e.to_string()),
+        }
+    };
+    let sum = hex(sha.finish().as_ref());
+    let checked = copied.and_then(|_| if total == a.size && sum == a.sha256 { Ok(()) } else { Err("the download didn't match its checksum".into()) });
+    if checked.is_err() {
+        let _ = std::fs::remove_file(dest);
+    }
+    checked
+}
+
+/// Fetch and check the newest release for this computer, and put it in place: the AppImage file is swapped
+/// (atomically, next to the old one), the Windows installer is saved to the temp folder. Returns (what to run, version).
+pub fn download_update() -> Result<(std::path::PathBuf, String), String> {
+    let release = get("https://api.github.com/repos/NilsBriggen/clipster/releases/latest")?;
+    let version = s(&release["tag_name"]).trim_start_matches('v').to_string();
+    let a = pick_asset(&release, if cfg!(windows) { ".msi" } else { ".AppImage" }).ok_or("the release has no file for this computer")?;
+    if cfg!(windows) {
+        let dest = std::env::temp_dir().join(&a.name);
+        download_to(&a, &dest)?;
+        return Ok((dest, version));
+    }
+    let image = std::path::PathBuf::from(std::env::var_os("APPIMAGE").ok_or("not running as an AppImage")?);
+    let mut part = image.clone().into_os_string();
+    part.push(".new");
+    let part = std::path::PathBuf::from(part);
+    download_to(&a, &part)?;
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        std::fs::set_permissions(&part, std::fs::Permissions::from_mode(0o755)).map_err(|e| e.to_string())?;
+    }
+    std::fs::rename(&part, &image).map_err(|e| e.to_string())?;
+    Ok((image, version))
 }
 
 fn agent() -> ureq::Agent {
@@ -745,6 +823,33 @@ mod tests {
         assert_eq!(home_or("Rome", Some("Bern")), "Rome");
         assert_eq!(home_or("", None), "", "unknown home: by internet address");
         assert_eq!(home_or("here", Some("Bern")), "here");
+    }
+
+    #[test]
+    fn updates_pick_a_checked_github_file() {
+        let release = serde_json::json!({"assets": [
+            {"name": "clipster_9.9.9_x64_en-US.msi", "size": 5, "browser_download_url": "https://github.com/NilsBriggen/clipster/releases/download/v9.9.9/clipster_9.9.9_x64_en-US.msi", "digest": format!("sha256:{}", "a".repeat(64))},
+            {"name": "clipster_9.9.9_x86_64.AppImage", "size": 7, "browser_download_url": "https://github.com/NilsBriggen/clipster/releases/download/v9.9.9/clipster_9.9.9_x86_64.AppImage", "digest": format!("sha256:{}", "B".repeat(64))},
+        ]});
+        let a = pick_asset(&release, ".AppImage").expect("the AppImage");
+        assert_eq!((a.size, a.sha256.as_str()), (7, "b".repeat(64).as_str()));
+        assert_eq!(pick_asset(&release, ".msi").map(|a| a.size), Some(5));
+        let elsewhere = serde_json::json!({"assets": [{"name": "x.AppImage", "size": 7, "browser_download_url": "https://example.com/x.AppImage", "digest": format!("sha256:{}", "a".repeat(64))}]});
+        assert_eq!(pick_asset(&elsewhere, ".AppImage"), None, "only from GitHub");
+        let unchecked = serde_json::json!({"assets": [{"name": "x.AppImage", "size": 7, "browser_download_url": "https://github.com/x.AppImage"}]});
+        assert_eq!(pick_asset(&unchecked, ".AppImage"), None, "only with a checksum");
+        assert_eq!(hex(ring::digest::digest(&ring::digest::SHA256, b"abc").as_ref()), "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad");
+    }
+
+    #[test]
+    #[ignore] // downloads the real AppImage (about 12 MB): cargo test live_update -- --ignored
+    fn live_update_download_checks_out() {
+        let release = get("https://api.github.com/repos/NilsBriggen/clipster/releases/latest").expect("release");
+        let a = pick_asset(&release, ".AppImage").expect("an AppImage with a digest");
+        let dest = std::env::temp_dir().join("clipster-update-test.AppImage");
+        download_to(&a, &dest).expect("downloads and matches its checksum");
+        assert_eq!(std::fs::metadata(&dest).map(|m| m.len()).ok(), Some(a.size));
+        let _ = std::fs::remove_file(dest);
     }
 
     #[test]

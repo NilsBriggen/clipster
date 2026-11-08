@@ -1698,3 +1698,12 @@ All set! Quick tour:\n• Drag me anywhere you like.\n• Right-click me for my 
 
 ## achievements
 checkin_7 | Checked In | Seven days in a row you told me how you are. I wrote it all down. In pencil, in case things get better.
+
+## say_update_downloading
+Downloading the new version. Checking every byte, too. Don't unplug anything.
+
+## say_update_ready
+Version {version} is installed. Restarting... see you on the other side.
+
+## say_update_failed
+The update didn't work out: {error}. You can still get it from the download page.

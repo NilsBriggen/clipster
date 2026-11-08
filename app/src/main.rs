@@ -135,6 +135,7 @@ struct App {
     facts: std::collections::BTreeMap<String, String>, // what you told him: "pet", "city", "fav_food"…
     last_cmd: Option<String>,               // the last command worth repeating ("again", "another one")
     waiting: Option<(String, Instant)>,     // he asked you something (`## ask <id>`): your next line is the answer
+    quit_at: Option<Instant>,               // close then (to restart into an update)
     checkin: bool,                             // ask how you're doing once a day
     notice_windows: bool,                      // comment on what the active window is
     window_kind: Option<String>,               // the active window's kind (`## window <kind>`), and since when
@@ -189,6 +190,22 @@ fn checkin_streaks(stats: &std::collections::BTreeMap<String, u64>, today: u64, 
         (true, _) => 1,
     };
     (streak, run)
+}
+
+/// After an update: what to start once this window has closed (the new AppImage, or the Windows installer).
+static RELAUNCH: std::sync::Mutex<Option<std::path::PathBuf>> = std::sync::Mutex::new(None);
+
+/// Start the new version after the old one is gone, so its KWin script and D-Bus name are free again.
+fn relaunch() {
+    let Some(path) = RELAUNCH.lock().ok().and_then(|mut r| r.take()) else { return };
+    if cfg!(windows) {
+        // the installer replaces this program, so it runs after we exit; then Clipster starts again
+        let exe = std::env::current_exe().unwrap_or_default();
+        let script = format!("Start-Process msiexec -ArgumentList '/i','\"{}\"','/passive' -Wait; Start-Process '{}'", path.display(), exe.display());
+        let _ = sys::shell(&script).spawn();
+    } else {
+        let _ = std::process::Command::new(&path).spawn();
+    }
 }
 
 /// "again", "another one", "one more": the current balloon's own "Another…" button, else the last command.
@@ -282,6 +299,7 @@ impl App {
             facts: Default::default(),
             last_cmd: None,
             waiting: None,
+            quit_at: None,
             window_kind: None,
             window_since: Instant::now(),
             window_said: Default::default(),
@@ -891,6 +909,16 @@ impl App {
             Effect::Repeat(secs, label) => self.timers.push((Instant::now() + Duration::from_secs(secs), label, secs)),
             Effect::SetName(n) => self.name = n,
             Effect::Checkin(answer) => r = self.checkin_answer(&answer),
+            Effect::InstallUpdate if !net::can_self_update() || self.screenshot.is_some() => {
+                r = Reply::say(lines::pick("say_update_failed").replace("{error}", "I can only replace myself as an AppImage or on Windows")).btn("Open the download page", Act::Open(net::RELEASES.into()));
+            }
+            Effect::InstallUpdate => {
+                let (tx, ctx2) = (self.tx.clone(), ctx.clone());
+                std::thread::spawn(move || {
+                    let _ = tx.send(Event::Installed(net::download_update()));
+                    ctx2.request_repaint();
+                });
+            }
             Effect::Remember(facts) => {
                 self.facts.extend(facts);
                 lines::set_facts(&self.facts);
@@ -1135,6 +1163,17 @@ impl App {
                 }
                 Event::Program(p) if self.notice_programs => self.pipe_up(brain::react_program(&p)),
                 Event::Title(t) => self.window_title(&t),
+                Event::Installed(Ok((path, version))) => {
+                    self.show(Reply::say(lines::pick("say_update_ready").replace("{version}", &version)).mood(Mood::Party));
+                    if let Ok(mut r) = RELAUNCH.lock() {
+                        *r = Some(path);
+                    }
+                    self.quit_at = Some(now + Duration::from_secs(3)); // long enough to read it
+                }
+                Event::Installed(Err(e)) => {
+                    let r = Reply::say(lines::pick("say_update_failed").replace("{error}", &e)).mood(Mood::Sad);
+                    self.show(r.btn("Open the download page", Act::Open(net::RELEASES.into())));
+                }
                 Event::Battery(p) if self.notice_health => self.pipe_up(brain::react_battery(p)),
                 Event::Busy(l) if self.notice_health => self.pipe_up(brain::react_busy(l)),
                 Event::Update(v) if net::newer(&v, env!("CARGO_PKG_VERSION")) => self.update = Some(v),
@@ -1159,6 +1198,11 @@ impl App {
                 self.sound("message");
                 self.show(net::update_reply(&v));
             }
+        }
+        if self.quit_at.is_some_and(|q| now >= q) {
+            self.quit_at = None;
+            self.save_if_changed();
+            ctx.send_viewport_cmd(egui::ViewportCommand::Close);
         }
         // once a day, a couple of minutes in, when you're around and he's not mid-conversation: how are you?
         let today = chrono::Datelike::num_days_from_ce(&chrono::Local::now().date_naive()) as u64;
@@ -2244,7 +2288,9 @@ fn main() -> eframe::Result {
         ..Default::default()
     };
 
-    eframe::run_native("Clipster", options, Box::new(move |cc| Ok(Box::new(App::new(cc, screenshot, say, play)))))
+    let result = eframe::run_native("Clipster", options, Box::new(move |cc| Ok(Box::new(App::new(cc, screenshot, say, play)))));
+    relaunch();
+    result
 }
 
 #[cfg(test)]

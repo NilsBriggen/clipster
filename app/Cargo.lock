@@ -628,6 +628,7 @@ dependencies = [
  "eframe",
  "image",
  "rand",
+ "ring",
  "serde_json",
  "ureq",
  "zbus",

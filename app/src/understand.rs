@@ -8,7 +8,7 @@ pub fn respond(input: &str) -> Reply {
     let raw = input.trim();
     let head = raw.split_whitespace().next().unwrap_or("").to_lowercase();
     // shell commands and button-only commands (whose text is data, like quiz answers) are taken literally
-    if ["run", "$", "sh", "cmd", "reveal", "wyrpick", "onboard", "window", "answer-to", "checkin"].contains(&head.as_str()) || head == "answer" && raw.contains('|') {
+    if ["run", "$", "sh", "cmd", "reveal", "wyrpick", "onboard", "window", "answer-to", "checkin", "install"].contains(&head.as_str()) || head == "answer" && raw.contains('|') {
         if let Some(r) = exact(raw) {
             return r; // shell commands are taken literally, never "understood"
         }
@@ -1297,6 +1297,7 @@ fn system(s: &str) -> Option<Reply> {
         (&["on this day", "this day in history", "today in history", "history today", "happened on this day", "historical events", "happened today in history"][..], "onthisday"),
         (&["news", "headlines", "current events", "what is happening in the world", "what is going on in the world"][..], "news"),
         (&["iss", "space station", "international space station", "astronauts", "people in space"][..], "iss"),
+        (&["install the update", "install update", "update now", "update yourself now", "install the new version"][..], "install update"),
         (&["check for updates", "check for update", "check for a new version", "is there an update", "is there a new version", "update clipster", "update yourself", "new version of clipster", "what version are you", "which version are you", "your version", "clipster version"][..], "updates"),
         (&["holiday", "holidays", "public holiday", "bank holiday", "day off", "days off"][..], "holiday"),
         (&["local ip", "lan", "local network", "wifi address", "network interfaces"][..], "lan"),

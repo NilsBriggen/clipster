@@ -48,6 +48,7 @@ pub enum Effect {
     Remember(Vec<(String, String)>), // facts about the user: ("pet", "Mo"), ("pet_kind", "cat")
     Forget(Vec<String>),             // fact keys to drop; empty = all of them
     Checkin(String),                 // the daily "how are you?": great, okay, meh or rough
+    InstallUpdate,                   // download the newest version, put it in place and restart
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -245,6 +246,9 @@ pub fn exact(input: &str) -> Option<Reply> {
         // shows the comment for a window title, e.g. "window Untitled 1 - LibreOffice Writer" (for trying it out)
         "window" => return Some(lines::window_kind(rest).map(|k| react_window(&k)).unwrap_or_else(|| Reply::say("No comment on that window."))),
         "updates" | "update" => return Some(net(Query::Update, "Checking for a newer me...")),
+        "install" if ["update", "the update", "updates"].contains(&rest.to_lowercase().as_str()) => {
+            return Some(Reply::say(lines::pick("say_update_downloading")).mood(Mood::Search).effect(Effect::InstallUpdate));
+        }
         "holiday" | "holidays" => return Some(net(Query::Holiday, "Checking the calendar for days off...")),
         "dog" | "cat" | "fox" => return Some(net(Query::Animal(head.clone()), "Finding a cute one...")),
         "sun" | "sunrise" | "sunset" => return Some(net(Query::Place(Kind::Sun, rest.into()), "Checking where the sun is...")),

@@ -12,6 +12,7 @@ pub enum Event {
     Answer(u64, crate::brain::Reply), // an online answer for request number N
     Update(String),                   // a newer version is out
     Title(String),                    // the window you're working in (or its title) changed
+    Installed(Result<(std::path::PathBuf, String), String>), // the update is in place (what to run, version), or why not
 }
 
 /// `titles`: also watch the active window's title (where the KWin script doesn't report it).
