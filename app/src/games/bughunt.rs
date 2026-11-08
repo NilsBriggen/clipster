@@ -203,6 +203,9 @@ impl Hunt {
         if self.started.is_none() && self.grid.placed {
             self.started = Some(self.now);
         }
+        if !opened.is_empty() {
+            out.push(Outcome::Sound(if opened.len() > 1 { "clear" } else { "tick" }));
+        }
         let far = opened.iter().map(|&(_, r)| r).max().unwrap_or(0);
         let step = if far > 0 { (RIPPLE / far as f64).min(0.04) } else { 0.0 };
         for &(c, ring) in &opened {
@@ -406,6 +409,7 @@ impl Game for Hunt {
             if right {
                 if let Some(i) = under {
                     self.grid.flag(i);
+                    f.out.push(Outcome::Sound("flag"));
                 }
             }
         }
@@ -567,7 +571,8 @@ mod tests {
         h.grid.set_bugs(&[80]);
         let mut out = vec![];
         h.click(0, &mut out);
-        assert_eq!(out, [Outcome::Moment("bughunt", "cascade")]);
+        assert_eq!(crate::games::without_sounds(&out), [Outcome::Moment("bughunt", "cascade")]);
+        assert!(out.contains(&Outcome::Sound("clear")), "a cascade sounds like one");
         assert_eq!(h.grid.state, State::Won);
         h.finish(Some(30), &mut out);
         assert!(out.contains(&Outcome::Won("bughunt")));

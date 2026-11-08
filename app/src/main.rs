@@ -384,7 +384,9 @@ impl App {
             return;
         }
         self.show(r);
-        self.sound("message");
+        if !self.arcade.is_open() {
+            self.sound("message"); // in a game the game's own sounds are enough
+        }
         self.auto_hide = Some(Instant::now() + reading_time(&self.balloon.as_ref().map(|b| b.text.clone()).unwrap_or_default()));
     }
 
@@ -476,7 +478,14 @@ impl App {
     /// Clipster watches you play: comments, and cheers for high scores.
     fn game_event(&mut self, o: games::Outcome) {
         use games::Outcome::*;
+        match &o {
+            Sound(s) => return self.blip(s),
+            Won(_) => self.blip("win"),
+            Lost(_) => self.blip("lose"),
+            _ => {}
+        }
         let r = match o {
+            Sound(_) => return,
             Start(g) => {
                 self.stat("games", 1);
                 self.announce_unlocks();
@@ -519,6 +528,13 @@ impl App {
             }
         };
         self.pipe_up(r);
+    }
+
+    /// An arcade sound (see `sys::play_blip`), following the "Play sounds" setting.
+    fn blip(&self, name: &str) {
+        if self.sounds && self.screenshot.is_none() {
+            sys::play_blip(name);
+        }
     }
 
     fn sound(&self, name: &str) {

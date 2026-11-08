@@ -198,6 +198,9 @@ impl Bytes {
         }
         let Some(s) = shift(&mut self.grid, dir) else { return false };
         self.score += s.gained;
+        if s.gained > 0 {
+            self.events.push(Outcome::Sound("merge"));
+        }
         let top = s.merged.iter().map(|&(r, c)| self.grid[r][c]).max().unwrap_or(0);
         if top > self.biggest {
             self.biggest = top;

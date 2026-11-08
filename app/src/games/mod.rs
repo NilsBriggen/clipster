@@ -24,6 +24,13 @@ pub enum Outcome {
     Lost(&'static str),
     Time(String, u32), // a finished round's time in seconds, under a best-time key like "bughunt-expert" (lower is better)
     Moment(&'static str, &'static str), // something worth a comment mid-game: (game, what), e.g. ("paperjam", "quad")
+    Sound(&'static str), // a short arcade sound: drop, clear, merge, flap, point, flag, tick (win/lose come with Won/Lost)
+}
+
+/// What a game reported, without its sounds (for tests that compare whole lists).
+#[cfg(test)]
+pub fn without_sounds(out: &[Outcome]) -> Vec<Outcome> {
+    out.iter().filter(|o| !matches!(o, Outcome::Sound(_))).cloned().collect()
 }
 
 /// (command name, window title)

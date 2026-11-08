@@ -270,6 +270,7 @@ impl Merge {
         let b = self.items.remove(j);
         let a = self.items.remove(i);
         self.merges += 1;
+        out.push(Outcome::Sound("merge"));
         self.merge_cool = MERGE_GAP;
         let at = (a.p + b.p) / 2.0; // the same size, so this is where they touch
         let tier = a.tier + 1;
@@ -638,8 +639,8 @@ impl Game for Merge {
             }
             let rr = TIERS[self.cur].0;
             self.aim = self.aim.clamp(rr, W - rr);
-            if pressed.is_some() || drop_key {
-                self.drop_at(self.aim);
+            if (pressed.is_some() || drop_key) && self.drop_at(self.aim) {
+                f.out.push(Outcome::Sound("drop"));
             }
         }
         let was = self.over;

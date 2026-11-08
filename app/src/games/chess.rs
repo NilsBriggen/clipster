@@ -712,6 +712,7 @@ impl Chess {
         self.played.push(Ply { san: san(&before, m), before, mv: m, took });
         (self.sel, self.drag, self.promo, self.scroll) = (None, None, None, 0.0);
         self.slide = slide.then_some(Slide { mv: m, took, took_at, k: 0.0 });
+        out.push(Outcome::Sound(if took != 0 { "point" } else { "tick" }));
         self.end = self.verdict();
         if !self.vs_clipster() {
             return; // two players: nothing for Clipster to keep score of

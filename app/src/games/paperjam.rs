@@ -341,6 +341,7 @@ impl Jam {
         let (before, level) = (self.board, self.level());
         let n = self.clear_lines();
         if n == 0 {
+            self.events.push(Outcome::Sound("drop"));
             self.spawn();
             return;
         }
@@ -351,6 +352,7 @@ impl Jam {
         self.cleared = (0..ROWS).filter(|&y| !before[y].contains(&0)).collect();
         self.wait = CLEAR;
         self.shreds = true;
+        self.events.push(Outcome::Sound("clear"));
         let (text, size, color) = match n {
             1 => ("Shredded!", 28.0, Color32::from_rgb(255, 236, 140)),
             2 => ("Double!", 28.0, Color32::from_rgb(255, 236, 140)),

@@ -97,6 +97,10 @@ pub mod win {
         pub fn GetForegroundWindow() -> isize;
         pub fn GetWindowTextW(w: isize, text: *mut u16, max: i32) -> i32;
     }
+    #[link(name = "winmm")]
+    extern "system" {
+        pub fn PlaySoundW(sound: *const u16, module: isize, flags: u32) -> i32;
+    }
 }
 
 // ---------- what you're working in ----------
@@ -278,6 +282,89 @@ pub fn play_sound(name: &str) {
     }
 }
 
+/// The arcade's little sounds: (name, [(start Hz, end Hz, milliseconds)]); 0 Hz = a burst of noise.
+const BLIPS: &[(&str, &[(f32, f32, u32)])] = &[
+    ("drop", &[(220.0, 110.0, 60)]),
+    ("clear", &[(523.0, 523.0, 55), (659.0, 659.0, 55), (784.0, 784.0, 55), (1047.0, 1047.0, 90)]),
+    ("merge", &[(440.0, 880.0, 90)]),
+    ("flap", &[(300.0, 620.0, 45)]),
+    ("point", &[(988.0, 988.0, 40), (1319.0, 1319.0, 90)]),
+    ("flag", &[(1200.0, 1200.0, 30)]),
+    ("tick", &[(880.0, 880.0, 22)]),
+    ("win", &[(523.0, 523.0, 100), (659.0, 659.0, 100), (784.0, 784.0, 100), (1047.0, 1047.0, 260)]),
+    ("lose", &[(0.0, 0.0, 120), (392.0, 392.0, 150), (330.0, 330.0, 150), (262.0, 262.0, 300)]),
+];
+
+/// A tiny 98-style sound as WAV bytes (16-bit mono, 22 050 Hz): square waves with a quick fade. `None` = unknown name.
+pub fn blip_wav(name: &str) -> Option<Vec<u8>> {
+    const RATE: u32 = 22_050;
+    let (_, parts) = BLIPS.iter().find(|(n, _)| *n == name)?;
+    let mut samples: Vec<i16> = vec![];
+    let mut noise = 0x1234_5678u32;
+    for &(f0, f1, ms) in *parts {
+        let n = RATE * ms / 1000;
+        let mut phase = 0.0f32;
+        for i in 0..n {
+            let k = i as f32 / n as f32;
+            let env = (1.0 - k).powf(0.6) * (i as f32 / 60.0).min(1.0); // no clicks at the start, a short fade out
+            let v = if f0 == 0.0 {
+                noise ^= noise << 13;
+                noise ^= noise >> 17;
+                noise ^= noise << 5;
+                (noise as f32 / u32::MAX as f32) * 2.0 - 1.0
+            } else {
+                phase = (phase + (f0 + (f1 - f0) * k) / RATE as f32).fract();
+                if phase < 0.5 { 1.0 } else { -1.0 }
+            };
+            samples.push((v * env * 0.22 * i16::MAX as f32) as i16);
+        }
+    }
+    let data = samples.len() as u32 * 2;
+    let mut w = Vec::with_capacity(44 + data as usize);
+    for (tag, n) in [(&b"RIFF"[..], 36 + data)] {
+        w.extend_from_slice(tag);
+        w.extend_from_slice(&n.to_le_bytes());
+    }
+    w.extend_from_slice(b"WAVEfmt ");
+    w.extend_from_slice(&16u32.to_le_bytes());
+    w.extend_from_slice(&1u16.to_le_bytes()); // PCM
+    w.extend_from_slice(&1u16.to_le_bytes()); // mono
+    w.extend_from_slice(&RATE.to_le_bytes());
+    w.extend_from_slice(&(RATE * 2).to_le_bytes());
+    w.extend_from_slice(&2u16.to_le_bytes());
+    w.extend_from_slice(&16u16.to_le_bytes());
+    w.extend_from_slice(b"data");
+    w.extend_from_slice(&data.to_le_bytes());
+    samples.iter().for_each(|s| w.extend_from_slice(&s.to_le_bytes()));
+    Some(w)
+}
+
+/// Play one of the arcade sounds without waiting. Made once into the cache folder, since no sound files ship.
+pub fn play_blip(name: &str) {
+    let Some(dir) = dirs::cache_dir().map(|d| d.join("clipster").join("sounds")) else { return };
+    let path = dir.join(format!("{name}.wav"));
+    if !path.exists() {
+        let Some(wav) = blip_wav(name) else { return };
+        if std::fs::create_dir_all(&dir).and_then(|_| std::fs::write(&path, wav)).is_err() {
+            return;
+        }
+    }
+    #[cfg(windows)]
+    {
+        use std::os::windows::ffi::OsStrExt;
+        let wide: Vec<u16> = path.as_os_str().encode_wide().chain(Some(0)).collect();
+        // SND_FILENAME | SND_ASYNC | SND_NODEFAULT: from the file, don't wait, no beep if it fails
+        unsafe { win::PlaySoundW(wide.as_ptr(), 0, 0x0002_0000 | 0x0001 | 0x0002) };
+    }
+    #[cfg(not(windows))]
+    for player in ["paplay", "pw-play", "aplay"] {
+        if let Ok(mut child) = command(player).arg(&path).stderr(std::process::Stdio::null()).spawn() {
+            std::thread::spawn(move || child.wait()); // no zombies left behind
+            break;
+        }
+    }
+}
+
 /// A desktop notification (Linux). On Windows the balloon and the flashing taskbar button do the job.
 pub fn notify(text: &str) {
     if !cfg!(windows) {
@@ -337,6 +424,17 @@ pub fn os_name() -> String {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn arcade_sounds_are_real_wavs() {
+        let w = super::blip_wav("win").expect("a known sound");
+        assert_eq!(&w[..4], b"RIFF");
+        assert_eq!(&w[8..16], b"WAVEfmt ");
+        let samples = (100 + 100 + 100 + 260) * 22_050 / 1000;
+        assert_eq!(w.len(), 44 + samples * 2, "header plus 16-bit samples");
+        assert!(super::BLIPS.iter().all(|(n, _)| super::blip_wav(n).is_some()));
+        assert!(super::blip_wav("kazoo").is_none());
+    }
+
     use super::*;
 
     #[test]

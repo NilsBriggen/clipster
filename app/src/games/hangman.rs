@@ -101,6 +101,7 @@ impl Hang {
     fn press(&mut self, c: char, best: Option<u32>, out: &mut Vec<Outcome>) {
         let was = self.unbent();
         let Some(hit) = self.guess(c) else { return };
+        out.push(Outcome::Sound(if hit { "point" } else { "drop" }));
         if hit {
             (self.pop, self.hit) = (0.0, idx(c));
         } else {
@@ -413,7 +414,7 @@ mod tests {
         }
         assert_eq!(h.streak, 1);
         assert!(!h.record, "1 doesn't beat a best of 1");
-        assert_eq!(out, vec![Outcome::Won("hangman"), Outcome::Score("hangman", 1)]);
+        assert_eq!(crate::games::without_sounds(&out), vec![Outcome::Won("hangman"), Outcome::Score("hangman", 1)]);
         // two more wins: the third brings a streak comment and a record
         for _ in 0..2 {
             let streak = h.streak;
@@ -435,7 +436,7 @@ mod tests {
         for c in "abcdfg".chars() {
             h.press(c, None, &mut out);
         }
-        assert_eq!(out, vec![Outcome::Moment("hangman", "last")]);
+        assert_eq!(crate::games::without_sounds(&out), vec![Outcome::Moment("hangman", "last")]);
         h.press('h', None, &mut out);
         assert_eq!(out.last(), Some(&Outcome::Lost("hangman")));
         assert_eq!(h.streak, 0);

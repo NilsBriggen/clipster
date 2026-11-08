@@ -347,6 +347,7 @@ impl Glide {
         }
         for closest in cleared {
             self.score += 1;
+            out.push(Outcome::Sound("point"));
             self.pop = 0.0;
             if self.score.is_multiple_of(10) {
                 out.push(Outcome::Moment("clipglide", "ten"));
@@ -767,8 +768,8 @@ impl Game for Glide {
                     _ => false,
                 })
             });
-        if flap {
-            self.flap();
+        if flap && self.flap() {
+            f.out.push(Outcome::Sound("flap"));
         }
         let was = self.state;
         for _ in 0..self.steps.take(f.dt) {
