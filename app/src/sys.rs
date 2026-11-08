@@ -130,7 +130,9 @@ pub fn active_title() -> Option<String> {
 pub fn battery() -> Option<(u8, bool)> {
     for e in std::fs::read_dir("/sys/class/power_supply").ok()?.flatten() {
         let p = e.path();
-        if std::fs::read_to_string(p.join("type")).is_ok_and(|t| t.trim() == "Battery") {
+        // scope "Device" is a wireless mouse or keyboard, not the laptop's battery
+        let device = std::fs::read_to_string(p.join("scope")).is_ok_and(|s| s.trim() == "Device");
+        if !device && std::fs::read_to_string(p.join("type")).is_ok_and(|t| t.trim() == "Battery") {
             let pct = std::fs::read_to_string(p.join("capacity")).ok()?.trim().parse().ok()?;
             let charging = std::fs::read_to_string(p.join("status")).is_ok_and(|s| s.trim() != "Discharging");
             return Some((pct, charging));

@@ -143,6 +143,10 @@ const HELP: &[(&str, &str, &str)] = &[
     ("desk", "🗂 Clipster's Desk", "• open my desk: today's focus and time per app, the week, your to-dos, timers and notes, and tidying files, in one window\n• It comes in Classic 98, or a modern look for the faint of heart (View menu)"),
 ];
 
+/// Windows: temp files whose creation and change dates are both over a week old (files in use are skipped).
+/// Both dates, because files unpacked from an archive keep their old change date.
+pub const TEMP_CLEAR: &str = r#"run $d=(Get-Date).AddDays(-7); Get-ChildItem $env:TEMP -Recurse -File -Force -ErrorAction SilentlyContinue | Where-Object { $_.LastWriteTime -lt $d -and $_.CreationTime -lt $d } | Remove-Item -Force -ErrorAction SilentlyContinue; 'Old temp files cleared! 🧹'"#;
+
 pub fn help() -> Reply {
     let mut r = Reply::say(
         "Just talk to me normally, typos and all: \"remind me to call mom at 5pm\", \"how many cups in a gallon?\", \"check my text\", \"open my desk\". None of it is AI, I promise.\n\nI also watch what you copy and which programs you open, and I comment. Press Meta+C anywhere to call me, double-click me for a trick, and use the up arrow to repeat what you typed. A few secrets are hidden in here too. 🥚\n\nPick a topic:",
@@ -493,7 +497,7 @@ pub fn exact(input: &str) -> Option<Reply> {
         "bigfiles" if cfg!(windows) => return Some(shell(r#"Get-ChildItem "$HOME\Downloads" -Recurse -File -ErrorAction SilentlyContinue | Sort-Object Length -Descending | Select-Object -First 10 @{n='MB';e={[math]::Round($_.Length/1MB,1)}},Name | Format-Table -AutoSize | Out-String"#, "The chunkiest things in your Downloads:")),
         "bigfiles" => return Some(shell("du -ah ~/Downloads 2>/dev/null | sort -rh | head -n 11", "The chunkiest things in your Downloads (the first line is the whole folder):")),
         "cache" if cfg!(windows) => {
-            return Some(shell(r#"'{0:N0} MB of temporary files' -f ((Get-ChildItem $env:TEMP -Recurse -File -ErrorAction SilentlyContinue | Measure-Object Length -Sum).Sum/1MB)"#, "Your temp folder (programs make new files when they need them, so clearing is safe):").run("Clear temp files", r#"run Remove-Item "$env:TEMP\*" -Recurse -Force -ErrorAction SilentlyContinue; 'Temp files cleared! 🧹'"#));
+            return Some(shell(r#"'{0:N0} MB of temporary files' -f ((Get-ChildItem $env:TEMP -Recurse -File -ErrorAction SilentlyContinue | Measure-Object Length -Sum).Sum/1MB)"#, "Your temp folder. I only clear files older than a week, so nothing a program is still using (like a fresh installer) goes:").run("Clear old temp files", TEMP_CLEAR));
         }
         "cache" => return Some(shell("du -sh ~/.cache 2>/dev/null; du -sh ~/.cache/* 2>/dev/null | sort -rh | head -n 6", "Your cache (programs rebuild it, so it's mostly safe to clear):").run("Clear thumbnails", "run rm -rf ~/.cache/thumbnails/* && echo 'Thumbnails cleared! 🧹'")),
         "options" | "settings" | "prefs" => return Some(Reply::say("Here's what you can change:").btn("Open options", Act::Options)),

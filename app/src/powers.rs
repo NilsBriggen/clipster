@@ -165,7 +165,7 @@ pub fn power(rest: &str) -> Reply {
 pub fn trash() -> Reply {
     Reply::say("Empty the trash? Everything in it will be gone forever. Like my dignity after the 90s.")
         .mood(Mood::Shock)
-        .run("Yes, empty it", if cfg!(windows) { "run Clear-RecycleBin -Force -ErrorAction SilentlyContinue; 'Trash emptied! 🗑'" } else { "run gio trash --empty && echo 'Trash emptied! 🗑'" })
+        .run("Yes, empty it", if cfg!(windows) { "run Clear-RecycleBin -Force -ErrorAction SilentlyContinue; 'Trash emptied! 🗑'" } else { "run { gio trash --empty 2>/dev/null || ktrash6 --empty 2>/dev/null || ktrash5 --empty; } && echo 'Trash emptied! 🗑'" })
         .btn("Show me the trash first", Act::Open(if cfg!(windows) { "shell:RecycleBinFolder" } else { "trash:///" }.into()))
         .btn("No, keep it", Act::Hide)
 }

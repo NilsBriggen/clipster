@@ -176,7 +176,7 @@ mod windows {
                     super::moved_to(&p, pt.x as f32, pt.y as f32, &ctx);
                 }
                 let down = |key: i32| unsafe { GetAsyncKeyState(key) } as u16 & 0x8000 != 0;
-                let combo = down(0x11) && down(0x12) && down(0x43); // Ctrl + Alt + C
+                let combo = down(0x11) && down(0xA4) && down(0x43); // Ctrl + left Alt + C (right Alt is AltGr: "ć" on a Polish keyboard)
                 if combo && !held {
                     s.store(true, Ordering::Relaxed);
                     ctx.request_repaint();
