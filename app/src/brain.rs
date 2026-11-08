@@ -236,6 +236,10 @@ pub fn exact(input: &str) -> Option<Reply> {
         }
         "iss" => return Some(net(Query::Iss, "Looking up... way up...")),
         "aboutme" => return Some(facts()),
+        "answer-to" => {
+            let (id, text) = rest.split_once(' ').unwrap_or((rest, ""));
+            return Some(crate::understand::answer_to(id, text));
+        }
         // shows the comment for a window title, e.g. "window Untitled 1 - LibreOffice Writer" (for trying it out)
         "window" => return Some(lines::window_kind(rest).map(|k| react_window(&k)).unwrap_or_else(|| Reply::say("No comment on that window."))),
         "updates" | "update" => return Some(net(Query::Update, "Checking for a newer me...")),

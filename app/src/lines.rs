@@ -55,6 +55,7 @@ static LEVEL: AtomicI32 = AtomicI32::new(0); // friendship, -100..100
 static PERSONA_UNHINGED: AtomicBool = AtomicBool::new(true);
 static DAY_MOOD: AtomicUsize = AtomicUsize::new(usize::MAX); // index into MOODS, MAX = none
 static FACTS: RwLock<std::collections::BTreeMap<String, String>> = RwLock::new(std::collections::BTreeMap::new());
+static LAST_TOPIC: RwLock<String> = RwLock::new(String::new()); // the chat topic he answered last, for "tell me more"
 
 /// What the user told him about themselves ("pet", "city", "fav_food"…), mirrored from the app's settings.
 pub fn set_facts(f: &std::collections::BTreeMap<String, String>) {
@@ -370,7 +371,40 @@ pub fn topic(s: &str, user: bool) -> Option<Reply> {
     let hit = pool()
         .find(|t| t.exact.iter().any(|e| e == s))
         .or_else(|| pool().filter_map(|t| Some((longest(t)?, t))).min_by_key(|(n, _)| std::cmp::Reverse(*n)).map(|(_, t)| t))?;
+    if !user {
+        *LAST_TOPIC.write().unwrap_or_else(|e| e.into_inner()) = hit.name.clone();
+    }
     Some(to_reply_from(hit, flavoured(&db, &hit.name).unwrap_or(hit)))
+}
+
+/// "tell me more": another line from the chat topic he answered last.
+pub fn more() -> Option<Reply> {
+    let name = LAST_TOPIC.read().unwrap_or_else(|e| e.into_inner()).clone();
+    (!name.is_empty()).then(|| reply(&name))
+}
+
+/// The questions he can ask you: the ids of the `## ask <id>` sections.
+pub fn asks() -> Vec<String> {
+    db().iter().filter(|s| !s.lines.is_empty()).filter_map(|s| s.name.strip_prefix("ask ").map(String::from)).collect()
+}
+
+/// His reaction to the answer `t` (tidied) to question `id`, with the answer's kind ("" = no specific one).
+/// A `## answer <id> <kind>` whose piece appears in it wins (longest piece first), else the generic `## answer <id>` with `{x}`.
+pub fn answer(id: &str, t: &str, x: &str) -> Option<(String, Reply)> {
+    let db = db();
+    let s = answer_section(&db, id, t)?;
+    let kind = s.name.strip_prefix(&format!("answer {id} ")).unwrap_or("").to_string();
+    Some((kind, to_reply_x(s, s, Some(x))))
+}
+
+fn answer_section<'a>(db: &'a [Section], id: &str, t: &str) -> Option<&'a Section> {
+    let (padded, generic, pre) = (format!(" {t} "), format!("answer {id}"), format!("answer {id} "));
+    db.iter()
+        .filter(|s| s.name.starts_with(&pre) && !s.lines.is_empty())
+        .filter_map(|s| s.triggers.iter().filter(|k| padded.contains(&format!(" {} ", k.to_lowercase()))).map(|k| k.len()).max().map(|n| (n, s)))
+        .max_by_key(|(n, _)| *n)
+        .map(|(_, s)| s)
+        .or_else(|| db.iter().find(|s| s.name == generic && !s.lines.is_empty()))
 }
 
 const USER_HEADER: &str = "# Things you taught Clipster. Same format as his own lines (see app/src/lines.rs).\n# \"when I say X, say Y\" in his box adds to this file. Lines starting with # are ignored.\n";
@@ -583,6 +617,18 @@ mod tests {
             }
         }
         assert!(broken.is_empty(), "{} problems: {broken:#?}", broken.len());
+    }
+
+    #[test]
+    fn answers_find_their_reaction() {
+        let mut v = vec![];
+        parse("## answer drink\nNice, {x}.\n\n## answer drink tea\n> tea | green tea\nTea!\n\n## answer drink no\n> no | nothing\nNothing?\n", false, &mut v);
+        let name = |t: &str| answer_section(&v, "drink", t).map(|s| s.name.clone());
+        assert_eq!(name("i drink green tea").as_deref(), Some("answer drink tea"));
+        assert_eq!(name("nothing really").as_deref(), Some("answer drink no"));
+        assert_eq!(name("coffee").as_deref(), Some("answer drink"), "anything else gets the generic reaction");
+        assert_eq!(name("notea"), Some("answer drink".into()), "pieces are whole words");
+        assert!(answer_section(&v, "lunch", "soup").is_none());
     }
 
     #[test]

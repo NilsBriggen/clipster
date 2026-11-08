@@ -8,7 +8,7 @@ pub fn respond(input: &str) -> Reply {
     let raw = input.trim();
     let head = raw.split_whitespace().next().unwrap_or("").to_lowercase();
     // shell commands and button-only commands (whose text is data, like quiz answers) are taken literally
-    if ["run", "$", "sh", "cmd", "reveal", "wyrpick", "onboard", "window"].contains(&head.as_str()) || head == "answer" && raw.contains('|') {
+    if ["run", "$", "sh", "cmd", "reveal", "wyrpick", "onboard", "window", "answer-to"].contains(&head.as_str()) || head == "answer" && raw.contains('|') {
         if let Some(r) = exact(raw) {
             return r; // shell commands are taken literally, never "understood"
         }
@@ -216,6 +216,44 @@ fn remember(raw: &str) -> Option<Reply> {
     recall(t)
 }
 
+/// "why?", "really?", "tell me more": about whatever he just said.
+fn followup(raw: &str) -> Option<Reply> {
+    let t = tidy_words(raw);
+    match t.trim_end_matches(['.', ',']).trim() {
+        "why" | "why not" | "how come" | "but why" | "why though" | "why is that" => Some(Reply::say(lines::pick("followup_why")).mood(Mood::Sly)),
+        "really" | "seriously" | "are you sure" | "for real" | "is that true" | "no way" => Some(Reply::say(lines::pick("followup_really")).mood(Mood::Wink)),
+        "tell me more" | "go on" | "continue" | "and then" | "more about that" | "explain" | "elaborate" | "keep going" => {
+            Some(lines::more().unwrap_or_else(|| Reply::say(lines::pick("followup_more")).mood(Mood::Think)))
+        }
+        _ => None,
+    }
+}
+
+/// What you typed after he asked you something (`## ask <id>`): his reaction, and the fact if it was a fact question
+/// (the ids "city", "job", "pet", "fav_food", "fav_music" are also fact keys).
+pub fn answer_to(id: &str, text: &str) -> Reply {
+    let t = tidy_words(text);
+    let t = t.trim_end_matches(['.', ',', '!']).trim();
+    let (kind, mut r) = lines::answer(id, t, &lines::reflect(t)).unwrap_or_else(|| (String::new(), lines::reply("confused")));
+    let no = kind == "no" || ["no", "nope", "none", "nothing", "not really", "nah", "no idea", "i do not know", "dunno"].iter().any(|n| t == *n || t.starts_with(&format!("{n} ")));
+    if let Some(Effect::Remember(f)) = remember(text).map(|r| r.effect) {
+        r.effect = Effect::Remember(f); // "I have a cat called Mo", said as an answer
+    } else if !no && t.split_whitespace().count() <= 4 {
+        let strip = |pre: &[&str]| keep(text, pre.iter().find_map(|p| t.strip_prefix(p)).unwrap_or(t).trim());
+        let fact: Vec<(&str, String)> = match id {
+            "city" => vec![("city", strip(&["i am in ", "in ", "near ", "from "]))],
+            "job" => vec![("job", strip(&["i am ", "i work as "]))],
+            "fav_food" | "fav_music" => vec![(id, strip(&["i like ", "i love ", "probably ", "definitely "]))],
+            "pet" if t.split_whitespace().count() <= 2 && !PETS.iter().any(|p| has(t, &[p])) => vec![("pet", keep(text, t)), ("pet_kind", "pet".into())],
+            _ => vec![],
+        };
+        if fact.iter().all(|(_, v)| !v.is_empty()) && !fact.is_empty() {
+            r.effect = Effect::Remember(fact.into_iter().map(|(k, v)| (k.to_string(), v)).collect());
+        }
+    }
+    r
+}
+
 /// "what's my cat called?", "where do I live?", "what is my favorite food?": answered from the facts.
 fn recall(t: &str) -> Option<Reply> {
     if !(t.starts_with("what") || t.starts_with("where") || t.starts_with("do you remember")) {
@@ -296,6 +334,9 @@ fn intent(s: &str, raw: &str) -> Option<Reply> {
     }
     if let Some(r) = lines::topic(s, true) {
         return Some(r); // what the user taught me comes first
+    }
+    if let Some(r) = followup(raw) {
+        return Some(r); // "why?", "really?", "tell me more" are about what he just said
     }
     if let Some(r) = brain::egg(s) {
         return Some(r); // 🥚
@@ -1437,6 +1478,21 @@ mod tests {
         assert_eq!(eff("forget notes"), respond("forget notes").effect, "notes keep their own forget");
         assert!(!matches!(eff("forget my notes"), Effect::Forget(_)));
         assert!(!text("what's my ip").contains("told me"), "not a question about facts");
+    }
+
+    #[test]
+    fn follow_ups_and_answers() {
+        for s in ["why?", "really?", "tell me more", "go on"] {
+            assert!(!matches!(eff(s), Effect::Net(_)), "{s} is about what he said, not a lookup");
+        }
+        assert_eq!(answer_to("city", "Bern").effect, told(&[("city", "Bern")]));
+        assert_eq!(answer_to("city", "in New York").effect, told(&[("city", "New York")]));
+        assert_eq!(answer_to("job", "I'm a teacher").effect, told(&[("job", "a teacher")]));
+        assert_eq!(answer_to("pet", "Mo").effect, told(&[("pet", "Mo"), ("pet_kind", "pet")]));
+        assert_eq!(answer_to("pet", "I have a cat called Mo").effect, told(&[("pet", "Mo"), ("pet_kind", "cat")]));
+        assert_eq!(answer_to("pet", "nope").effect, Effect::None, "no pet, no fact");
+        assert_eq!(answer_to("lunch", "soup").effect, Effect::None, "not a fact question");
+        assert_eq!(respond("answer-to city Zurich").effect, told(&[("city", "Zurich")]), "taken literally");
     }
     fn text(s: &str) -> String {
         respond(s).text

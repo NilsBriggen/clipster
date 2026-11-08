@@ -119,6 +119,8 @@ struct App {
     notice_clip: bool,
     notice_programs: bool,
     facts: std::collections::BTreeMap<String, String>, // what you told him: "pet", "city", "fav_food"…
+    last_cmd: Option<String>,               // the last command worth repeating ("again", "another one")
+    waiting: Option<(String, Instant)>,     // he asked you something (`## ask <id>`): your next line is the answer
     notice_windows: bool,                      // comment on what the active window is
     window_kind: Option<String>,               // the active window's kind (`## window <kind>`), and since when
     window_since: Instant,
@@ -155,6 +157,21 @@ struct App {
     next_update_check: Instant,
     update: Option<String>,        // a newer version that's out
     update_told: String,           // the version he last told you about (once per version)
+}
+
+/// "again", "another one", "one more": the current balloon's own "Another…" button, else the last command.
+fn repeat_command(typed: &str, balloon: Option<&Reply>, last: Option<&str>) -> Option<String> {
+    const AGAIN: &[&str] = &["again", "another", "another 1", "1 more", "more", "do it again", "once more", "1 more time", "next", "again please", "more please", "another please"];
+    if !AGAIN.contains(&understand::tidy_words(typed).trim_end_matches(['.', ',']).trim()) {
+        return None;
+    }
+    let button = balloon.and_then(|b| {
+        b.buttons.iter().find_map(|(label, act)| match act {
+            Act::Run(c) if !c.starts_with("answer ") && ["another", "again", "more", "next"].iter().any(|w| label.to_lowercase().contains(w)) => Some(c.clone()),
+            _ => None,
+        })
+    });
+    button.or_else(|| last.map(String::from))
 }
 
 /// (id, counter, how many). Titles and quips live in the "achievements" section.
@@ -230,6 +247,8 @@ impl App {
             notice_programs: true,
             notice_windows: true,
             facts: Default::default(),
+            last_cmd: None,
+            waiting: None,
             window_kind: None,
             window_since: Instant::now(),
             window_said: Default::default(),
@@ -321,6 +340,30 @@ impl App {
         self.show(r);
         self.sound("message");
         self.auto_hide = Some(Instant::now() + reading_time(&self.balloon.as_ref().map(|b| b.text.clone()).unwrap_or_default()));
+    }
+
+    /// Now and then (at most 3 times a day) he asks you something instead of chattering.
+    fn ask_due(&self) -> bool {
+        let today = chrono::Datelike::num_days_from_ce(&chrono::Local::now().date_naive()) as u64;
+        let asked = if self.stats.get("ask_day") == Some(&today) { self.stats.get("ask_count").copied().unwrap_or(0) } else { 0 };
+        asked < 3 && !self.quiet() && self.input.is_empty() && self.onboarding.is_none() && rand::thread_rng().gen_bool(0.2)
+    }
+
+    /// Ask one of the `## ask <id>` questions (fact questions only while the fact is unknown) and wait for the answer.
+    fn ask_something(&mut self) {
+        use rand::seq::SliceRandom;
+        let ids: Vec<String> = lines::asks().into_iter().filter(|id| !self.facts.contains_key(id)).collect();
+        let Some(id) = ids.choose(&mut rand::thread_rng()).cloned() else { return };
+        let today = chrono::Datelike::num_days_from_ce(&chrono::Local::now().date_naive()) as u64;
+        if self.stats.insert("ask_day".into(), today) != Some(today) {
+            self.stats.insert("ask_count".into(), 0);
+        }
+        *self.stats.entry("ask_count".into()).or_insert(0) += 1;
+        self.show(lines::reply(&format!("ask {id}")).mood(Mood::Think));
+        self.sound("message");
+        self.focus_input = true;
+        self.auto_hide = Some(Instant::now() + Duration::from_secs(120)); // an unanswered question doesn't hang around
+        self.waiting = Some((id, Instant::now()));
     }
 
     /// Something about you he remembered ("How's Mo?"), for a fact he knows and has lines for.
@@ -691,6 +734,10 @@ impl App {
 
     fn run(&mut self, ctx: &egui::Context, cmd: &str) {
         let mut r = brain::respond(cmd);
+        let first = cmd.split_whitespace().next().unwrap_or("").to_lowercase();
+        if matches!(r.effect, Effect::None | Effect::Net(_)) && !["answer", "answer-to", "onboard", "window", "checkin"].contains(&first.as_str()) {
+            self.last_cmd = Some(cmd.to_string()); // harmless to do again
+        }
         if r.friend != 0 {
             self.friendship = (self.friendship + r.friend as i32).clamp(-100, 100);
             lines::set_level(self.friendship);
@@ -890,6 +937,7 @@ impl App {
     }
 
     fn act(&mut self, ctx: &egui::Context, a: Act) {
+        self.waiting = None; // a click instead of an answer: the question is off
         match a {
             Act::Run(c) => self.run(ctx, &c),
             Act::Open(t) => {
@@ -1042,7 +1090,9 @@ impl App {
             self.pipe_up(brain::react_late());
         }
         if now >= self.next_tip {
-            if self.tips_every > 0 && self.balloon.is_none() {
+            if self.tips_every > 0 && self.balloon.is_none() && !self.memory_waiting() && self.ask_due() {
+                self.ask_something();
+            } else if self.tips_every > 0 && self.balloon.is_none() {
                 let nudge = self.memory_waiting();
                 if nudge {
                     let today = chrono::Datelike::num_days_from_ce(&chrono::Local::now().date_naive()) as u64;
@@ -1274,7 +1324,11 @@ impl App {
             }
             self.hist_idx = self.history.len();
             // during setup, the first thing typed is the user's name
-            let cmd = if self.onboarding == Some(0) { format!("onboard name {cmd}") } else { cmd };
+            let cmd = match self.waiting.take() {
+                _ if self.onboarding == Some(0) => format!("onboard name {cmd}"),
+                Some((id, at)) if at.elapsed() < Duration::from_secs(120) => format!("answer-to {id} {cmd}"),
+                _ => repeat_command(&cmd, self.balloon.as_ref(), self.last_cmd.as_deref()).unwrap_or(cmd),
+            };
             self.run(ctx, &cmd);
             self.focus_input = !self.arcade.wants_focus(); // a game just opened: the keyboard is the game's
         }
@@ -2019,6 +2073,16 @@ fn main() -> eframe::Result {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn again_repeats_the_right_thing() {
+        let joke = Reply::say("A joke.").run("Another one!", "joke").run("Something else", "help");
+        assert_eq!(repeat_command("another one", Some(&joke), Some("weather")).as_deref(), Some("joke"), "the balloon's own Another button");
+        assert_eq!(repeat_command("Again!", None, Some("weather")).as_deref(), Some("weather"), "else the last command");
+        let quiz = Reply::say("Q?").run("Paris", "answer Paris|Paris|quiz");
+        assert_eq!(repeat_command("one more", Some(&quiz), None), None, "never picks an answer button");
+        assert_eq!(repeat_command("another word for happy", Some(&joke), None), None, "only the bare phrase");
+    }
 
     #[test]
     fn moods_stay_all_day_and_lean_unhinged() {
