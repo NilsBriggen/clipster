@@ -56,6 +56,9 @@ pub enum Effect {
     TimeReport,                      // where today's time went, by window kind
     AppTips,                         // a tip for the app you're in (the app knows which)
     Pref(String, String),            // a setting changed on the Desk's Settings tab: key, value
+    Goals,                           // how today is going against the focus goal and the daily limits
+    Wrapup,                          // the end-of-day card on the Desk
+    Review(bool),                    // the week in review (true = copy it as text)
     OpenDesk(String),                // Clipster's Desk, on this tab ("" = where it was): stats, to-dos, reminders, upkeep
     DeskLook(bool),                  // the Desk's look: true = modern, false = classic 98
     Tidy(String),                    // move a folder's files into subfolders by type (after a yes)
@@ -147,6 +150,30 @@ const HELP: &[(&str, &str, &str)] = &[
 /// Windows: temp files whose creation and change dates are both over a week old (files in use are skipped).
 /// Both dates, because files unpacked from an archive keep their old change date.
 pub const TEMP_CLEAR: &str = r#"run $d=(Get-Date).AddDays(-7); Get-ChildItem $env:TEMP -Recurse -File -Force -ErrorAction SilentlyContinue | Where-Object { $_.LastWriteTime -lt $d -and $_.CreationTime -lt $d } | Remove-Item -Force -ErrorAction SilentlyContinue; 'Old temp files cleared! 🧹'"#;
+
+/// "2 hours", "90 min", "1h30" or a bare "45" (minutes) -> minutes, at most 16 hours.
+fn minutes(s: &str) -> Option<u64> {
+    // "30 minutes a day" (tidied to "1 day"), "per day", "each day", "daily": only the amount counts
+    let cut = [" a day", " 1 day", " per ", " each ", " every ", " daily", "/day"].iter().filter_map(|w| s.find(w)).min().unwrap_or(s.len());
+    let s = s[..cut].trim();
+    let mins = match s.parse::<u64>() {
+        Ok(m) => m,
+        Err(_) => parse_dur(s).map(|(secs, _)| secs / 60)?,
+    };
+    (mins > 0).then_some(mins.min(16 * 60))
+}
+
+/// "youtube", "social media", "gaming" -> the window kind a daily limit is for.
+pub fn budget_kind(word: &str) -> Option<&'static str> {
+    match word.trim().trim_start_matches("my ").trim_start_matches("the ") {
+        "video" | "videos" | "youtube" | "streaming" | "netflix" => Some("video"),
+        "social" | "social media" | "socials" | "instagram" | "facebook" | "reddit" => Some("social"),
+        "game" | "games" | "gaming" => Some("game"),
+        "shopping" | "online shopping" => Some("shopping"),
+        "chat" | "chats" | "chatting" | "messages" | "messaging" => Some("chat"),
+        _ => None,
+    }
+}
 
 pub fn help() -> Reply {
     let mut r = Reply::say(
@@ -248,6 +275,37 @@ pub fn exact(input: &str) -> Option<Reply> {
         }
         "iss" => return Some(net(Query::Iss, "Looking up... way up...")),
         "aboutme" => return Some(facts()),
+        // goals and daily limits: "goal 120", "goal off", "budget video 30", "goals"
+        "goal" | "goals" if rest.is_empty() || rest == "status" => return Some(Reply::say("").effect(Effect::Goals)),
+        "goal" if ["off", "0", "none"].contains(&rest) => return Some(Reply::say(lines::pick("goal_off")).mood(Mood::Think).effect(Effect::Pref("goal".into(), "0".into()))),
+        "goal" => {
+            let mins = minutes(rest)?;
+            return Some(Reply::say(lines::pick("goal_set").replace("{x}", &fmt_dur(mins * 60))).mood(Mood::Happy).effect(Effect::Pref("goal".into(), mins.to_string())));
+        }
+        "budget" => {
+            let (what, amount) = rest.split_once(' ').unwrap_or((rest, ""));
+            let kind = budget_kind(what)?;
+            if ["off", "0", "none"].contains(&amount) {
+                return Some(Reply::say(lines::pick("budget_off").replace("{x}", &kind_name(kind))).effect(Effect::Pref("budget".into(), format!("{kind} 0"))));
+            }
+            let mins = minutes(amount)?;
+            return Some(Reply::say(lines::pick("budget_set").replace("{x}", &kind_name(kind)).replace("{n}", &mins.to_string())).mood(Mood::Happy).effect(Effect::Pref("budget".into(), format!("{kind} {mins}"))));
+        }
+        // the start and end of the day, and the week
+        "planday" if rest == "done" => {
+            let today = chrono::Local::now().date_naive();
+            let n = crate::todo::load().iter().filter(|i| i.top_today(today)).count();
+            return Some(Reply::say(lines::pick("plan_day_done").replace("{n}", &n.to_string())).mood(Mood::Happy));
+        }
+        "planday" => {
+            if crate::todo::load().iter().all(|i| i.done) {
+                return Some(Reply::say(lines::pick("plan_day_empty")).mood(Mood::Think).run("Open the Desk", "desk todo"));
+            }
+            return Some(Reply::say(lines::pick("plan_day_intro")).mood(Mood::Happy).effect(Effect::OpenDesk("plan".into())));
+        }
+        "wrapup" if rest == "bye" => return Some(Reply::say(lines::pick("wrapup_goodnight")).mood(Mood::Love)),
+        "wrapup" => return Some(Reply::say("").effect(Effect::Wrapup)),
+        "review" => return Some(Reply::say("").effect(Effect::Review(rest == "copy"))),
         "pref" => {
             let (key, value) = rest.split_once(' ').unwrap_or((rest, ""));
             return Some(Reply::say("").effect(Effect::Pref(key.to_string(), value.to_string())));

@@ -2,6 +2,7 @@
 
 mod brain;
 mod desk;
+mod plan;
 mod fun;
 mod games;
 mod lines;
@@ -394,6 +395,8 @@ impl App {
                 app.desk_sample = Some(desk::sample());
                 app.desk.set_tab(&std::env::var("CLIPSTER_DESK_TAB").unwrap_or_default());
                 app.desk_modern = std::env::var("CLIPSTER_DESK_LOOK").as_deref() == Ok("modern");
+                app.focus_goal = 120; // so the pictures show a goal and a limit
+                app.budgets.insert("video".into(), 30);
             }
         } else if let Some(game) = play {
             app.arcade.open(&game);
@@ -566,8 +569,54 @@ impl App {
         if [3, 7, 14, 30].contains(&streak) {
             text = format!("{text} {}", lines::pick("focus_streak").replace("{n}", &streak.to_string()));
         }
+        if let Some(cheer) = self.goal_check() {
+            text = format!("{text}\n\n{cheer}");
+        }
         let again = if f.label.is_empty() { "focus 25m".to_string() } else { format!("focus 25m {}", f.label) };
         Reply::say(text).mood(if pct >= 60 { Mood::Party } else { Mood::Think }).run("Another 25 minutes", &again).run("Open the Desk", "desk")
+    }
+
+    /// Seconds focused today, the running session included.
+    fn focus_today(&self) -> u64 {
+        let running = self.focus.as_ref().map_or(0, |f| Instant::now().duration_since(f.start).as_secs().saturating_sub(f.distracted));
+        plan::focus_today(&self.focus_log, chrono::Local::now().date_naive(), running)
+    }
+
+    /// "how am I doing on my goals?": the focus goal and each daily limit.
+    fn goals(&mut self) -> Reply {
+        self.account_time();
+        if self.focus_goal == 0 && self.budgets.is_empty() {
+            return Reply::say(lines::pick("goals_none")).mood(Mood::Think).run("Open Settings", "desk settings");
+        }
+        let mut text = if self.focus_goal > 0 {
+            lines::pick("goal_status").replace("{n}", &(self.focus_today() / 60).to_string()).replace("{x}", &brain::fmt_dur(self.focus_goal * 60))
+        } else {
+            String::new()
+        };
+        let day = self.kind_time.get(&today_key()).cloned().unwrap_or_default();
+        for (kind, mins) in &self.budgets {
+            let used = day.get(kind).copied().unwrap_or(0) / 60;
+            text += &format!("\n• {}: {used} of {mins} min{}", brain::kind_name(kind), if used >= *mins { " (used up)" } else { "" });
+        }
+        Reply::say(text.trim_start().to_string()).mood(Mood::Think).run("Open the Desk", "desk today")
+    }
+
+    /// When today's focus first reaches the goal: the cheer (and the streak), once a day.
+    fn goal_check(&mut self) -> Option<String> {
+        let today = chrono::Datelike::num_days_from_ce(&chrono::Local::now().date_naive()) as u64;
+        if self.focus_goal == 0 || self.stats.get("goal_last_day") == Some(&today) || self.focus_today() < self.focus_goal * 60 {
+            return None;
+        }
+        let streak = match self.stats.get("goal_last_day") {
+            Some(&d) if d + 1 == today => self.stats.get("goal_streak").copied().unwrap_or(0) + 1,
+            _ => 1,
+        };
+        self.stats.extend([("goal_last_day".into(), today), ("goal_streak".into(), streak)]);
+        let mut text = lines::pick("goal_met").replace("{x}", &brain::fmt_dur(self.focus_goal * 60));
+        if streak >= 2 {
+            text = format!("{text} {}", lines::pick("goal_streak").replace("{n}", &streak.to_string()));
+        }
+        Some(text)
     }
 
     /// "where did my time go today?"
@@ -1171,8 +1220,36 @@ impl App {
                     }
                     _ => {}
                 }
-                self.desk_status = lines::pick("settings_saved");
-                silent = true;
+                // from the Desk: a word in its status bar; typed ("set my focus goal to 2 hours"): his answer
+                if r.text.is_empty() {
+                    self.desk_status = lines::pick("settings_saved");
+                    silent = true;
+                }
+            }
+            Effect::Goals => r = self.goals(),
+            Effect::Wrapup => {
+                let today = chrono::Local::now().date_naive();
+                let n = todo::load().iter().filter(|i| i.done && i.done_on == Some(today)).count();
+                self.desk_status = lines::pick("desk_status");
+                self.desk.open();
+                self.desk.set_tab("wrapup");
+                r = Reply::say(lines::pick("wrapup_intro").replace("{n}", &n.to_string())).mood(Mood::Happy);
+            }
+            Effect::Review(copy) => {
+                self.account_time();
+                let w = plan::week(&self.kind_time, &self.focus_log, &todo::load(), &self.checkin_days, chrono::Local::now().date_naive());
+                let text = plan::week_lines(&w).join("\n");
+                if copy {
+                    ctx.copy_text(text.clone());
+                    self.ignore_clip = text;
+                    self.desk_status = lines::pick("review_copied");
+                    silent = true;
+                } else {
+                    self.desk_status = lines::pick("desk_status");
+                    self.desk.open();
+                    self.desk.set_tab("week");
+                    r = Reply::say(format!("{} {}\n\n{text}", lines::pick("review_intro"), lines::pick(plan::week_verdict(&w)))).mood(Mood::Happy).btn("Copy as text", Act::Copy(text));
+                }
             }
             Effect::DeskLook(modern) => {
                 self.desk_modern = modern;
@@ -1535,6 +1612,32 @@ impl App {
         // time per app kind, and the focus session: its end, and a nudge when you drift off for a minute
         if now.duration_since(self.kind_mark) > Duration::from_secs(30) {
             self.account_time();
+            // a daily limit used up: one gentle word per kind per day (not during focus, which has its own)
+            if self.focus.is_none() && self.screenshot.is_none() && self.balloon.is_none() {
+                let day = self.kind_time.get(&today_key()).cloned().unwrap_or_default();
+                let over = self.budgets.iter().find(|(k, m)| day.get(*k).copied().unwrap_or(0) >= *m * 60 && self.stats.get(&format!("budget_{k}_day")) != Some(&today));
+                if let Some((kind, mins)) = over.map(|(k, m)| (k.clone(), *m)) {
+                    self.stats.insert(format!("budget_{kind}_day"), today);
+                    let text = lines::pick("budget_over").replace("{x}", &brain::kind_name(&kind)).replace("{n}", &mins.to_string());
+                    self.pipe_up(Reply::say(text).mood(Mood::Sly).run("How am I doing?", "goals").btn("Thanks, Clipster", Act::Hide));
+                }
+            }
+        }
+        // the evening wrap-up (after 5 pm, on a day with two hours tracked) and the week in review (Friday afternoon or the weekend)
+        let idle = self.screenshot.is_none() && self.balloon.is_none() && self.focus.is_none() && !self.quiet() && self.input.is_empty() && !self.desk.is_open()
+            && self.onboarding.is_none() && now.duration_since(self.last_touch) < Duration::from_secs(600);
+        if idle && now.duration_since(self.kind_mark) < Duration::from_secs(1) {
+            let clock = chrono::Local::now();
+            let (hour, weekday) = (chrono::Timelike::hour(&clock), chrono::Datelike::weekday(&clock).number_from_monday());
+            let tracked: u64 = self.kind_time.get(&today_key()).map_or(0, |d| d.values().sum());
+            let week = plan::week_number(clock.date_naive());
+            if self.wrapup && hour >= 17 && tracked >= 2 * 3600 && self.stats.get("wrapup_day") != Some(&today) {
+                self.stats.insert("wrapup_day".into(), today);
+                self.pipe_up(Reply::say(lines::pick("wrapup_offer")).mood(Mood::Happy).run("Wrap up my day", "wrapup").btn("Not today", Act::Hide));
+            } else if (weekday == 5 && hour >= 15 || weekday >= 6) && self.stats.get("days").copied().unwrap_or(0) >= 3 && self.stats.get("review_week") != Some(&week) {
+                self.stats.insert("review_week".into(), week);
+                self.pipe_up(Reply::say(lines::pick("review_offer")).mood(Mood::Happy).run("Show me my week", "review").btn("Not now", Act::Hide));
+            }
         }
         if self.focus.as_ref().is_some_and(|f| now >= f.until) {
             let r = self.finish_focus(false);

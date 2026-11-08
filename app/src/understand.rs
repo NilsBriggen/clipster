@@ -427,6 +427,34 @@ const TIMER_WORDS: &[&str] = &[
 ];
 
 fn timers(s: &str, raw: &str) -> Option<Reply> {
+    // goals and daily limits (before focus sessions, so "focus goal 2 hours" isn't a session)
+    if has(s, &["no focus goal", "remove my focus goal", "turn off my focus goal", "delete my focus goal", "remove the focus goal"]) {
+        return go("goal off".into());
+    }
+    if let Some(rest) = after(s, &["set my focus goal to ", "set my daily focus goal to ", "set a focus goal of ", "set the focus goal to ", "my focus goal is ", "focus goal of ", "focus goal to ", "focus goal "]) {
+        return go(format!("goal {rest}"));
+    }
+    if has(s, &["how am i doing on my goals", "how are my goals", "goal progress", "my goals", "my daily limits", "my limits", "my focus goal"]) {
+        return go("goals".into());
+    }
+    for (prefix, off) in [("limit ", false), ("set a limit for ", false), ("set a daily limit for ", false), ("no limit for ", true), ("remove the limit for ", true), ("remove my limit for ", true), ("stop limiting ", true)] {
+        if let Some(rest) = s.strip_prefix(prefix) {
+            let (what, amount) = if off { (rest, "off") } else { rest.split_once(" to ").or_else(|| rest.split_once(" at ")).unwrap_or((rest, "")) };
+            if let Some(kind) = crate::brain::budget_kind(what.trim_end_matches(" time").trim_end_matches(" limit")) {
+                return go(format!("budget {kind} {}", if amount.is_empty() { "off" } else { amount }));
+            }
+        }
+    }
+    // the start and end of the day, and the week
+    if has(s, &["plan my day", "plan the day", "plan today", "plan my morning", "morning plan", "help me plan my day"]) {
+        return go("planday".into());
+    }
+    if has(s, &["wrap up my day", "wrap up the day", "wrap up today", "end my day", "end of my day", "end of the day", "close out my day", "wrap up"]) {
+        return go("wrapup".into());
+    }
+    if has(s, &["week in review", "weekly review", "review my week", "how was my week", "my week so far", "sum up my week", "summary of my week"]) {
+        return go("review".into());
+    }
     // focus sessions: "focus for 45 minutes on the report", "help me focus", "stop focusing"
     if has(s, &["stop focusing", "end focus", "end the focus", "stop the focus", "cancel focus", "cancel the focus", "focus off", "end my focus session"]) {
         return go("focus stop".into());
@@ -1631,6 +1659,31 @@ mod tests {
         }
         assert!(matches!(respond("desk week").effect, Effect::OpenDesk(t) if t == "week"));
         assert!(!matches!(respond("desk lamp").effect, Effect::OpenDesk(_)), "only real tab names");
+    }
+
+    #[test]
+    fn goals_limits_and_the_day_in_plain_words() {
+        let pref = |s: &str| match respond(s).effect {
+            Effect::Pref(k, v) => format!("{k} {v}"),
+            e => format!("{e:?}"),
+        };
+        assert_eq!(pref("set my focus goal to 2 hours"), "goal 120");
+        assert_eq!(pref("focus goal 90 minutes"), "goal 90", "a goal, not a focus session");
+        assert_eq!(pref("goal 45"), "goal 45");
+        assert_eq!(pref("remove my focus goal"), "goal 0");
+        assert_eq!(pref("limit video to 30 minutes a day"), "budget video 30");
+        assert_eq!(pref("limit social media to 20 minutes"), "budget social 20");
+        assert_eq!(pref("no limit for youtube"), "budget video 0");
+        assert!(!respond("set my focus goal to 2 hours").text.is_empty(), "typed: he answers");
+        assert_eq!(respond("how am i doing on my goals").effect, Effect::Goals);
+        assert_eq!(respond("wrap up my day").effect, Effect::Wrapup);
+        assert_eq!(respond("my week in review").effect, Effect::Review(false));
+        assert_eq!(respond("review copy").effect, Effect::Review(true));
+        let plan = respond("plan my day");
+        assert!(matches!(&plan.effect, Effect::OpenDesk(t) if t == "plan") || plan.buttons.iter().any(|b| b.0 == "Open the Desk"), "plan my day: {}", plan.text);
+        assert!(matches!(respond("todo #3 star").effect, Effect::Todo(crate::todo::Op::StarAt(3))));
+        assert!(matches!(respond("todo #2 edit call Anna").effect, Effect::Todo(crate::todo::Op::EditAt(2, t)) if t == "call Anna"));
+        assert!(matches!(respond("todo water the plants every monday").effect, Effect::Todo(crate::todo::Op::Add(_))));
     }
 
     #[test]
