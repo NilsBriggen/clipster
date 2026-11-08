@@ -54,6 +54,25 @@ static DB: RwLock<Vec<Section>> = RwLock::new(Vec::new());
 static LEVEL: AtomicI32 = AtomicI32::new(0); // friendship, -100..100
 static PERSONA_UNHINGED: AtomicBool = AtomicBool::new(true);
 static DAY_MOOD: AtomicUsize = AtomicUsize::new(usize::MAX); // index into MOODS, MAX = none
+static FACTS: RwLock<std::collections::BTreeMap<String, String>> = RwLock::new(std::collections::BTreeMap::new());
+
+/// What the user told him about themselves ("pet", "city", "fav_food"…), mirrored from the app's settings.
+pub fn set_facts(f: &std::collections::BTreeMap<String, String>) {
+    *FACTS.write().unwrap_or_else(|e| e.into_inner()) = f.clone();
+}
+
+pub fn facts() -> std::collections::BTreeMap<String, String> {
+    FACTS.read().unwrap_or_else(|e| e.into_inner()).clone()
+}
+
+pub fn fact(key: &str) -> Option<String> {
+    FACTS.read().unwrap_or_else(|e| e.into_inner()).get(key).cloned()
+}
+
+/// Fill `{pet}`, `{city}`, `{fav_food}`… with what he knows.
+pub fn fill_facts(text: &str) -> String {
+    FACTS.read().unwrap_or_else(|e| e.into_inner()).iter().fold(text.to_string(), |t, (k, v)| t.replace(&format!("{{{k}}}"), v))
+}
 
 fn db() -> RwLockReadGuard<'static, Vec<Section>> {
     static LOAD: Once = Once::new();

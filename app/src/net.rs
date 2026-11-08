@@ -235,9 +235,15 @@ fn wiki(q: &str) -> Result<Reply, String> {
         .btn("Search the web too", web))
 }
 
+/// No place given: the city the user said they live in, if they did ("here" still means where this computer is).
+fn home_or<'a>(place: &'a str, home: Option<&'a str>) -> &'a str {
+    if place.is_empty() { home.unwrap_or("") } else { place }
+}
+
 /// "" = wherever this computer is (by its internet address), else a place name.
 fn locate(place: &str) -> Result<(String, f64, f64), String> {
-    let place = place.split(',').next().unwrap_or("").trim();
+    let home = lines::fact("city");
+    let place = home_or(place.split(',').next().unwrap_or("").trim(), home.as_deref());
     if place.is_empty() || ["here", "my area", "my location", "where i am"].contains(&place) {
         let v = get("https://ipinfo.io/json")?;
         let (lat, lon) = s(&v["loc"]).split_once(',').map(|(a, b)| (a.parse().unwrap_or(0.0), b.parse().unwrap_or(0.0))).ok_or("no location")?;
@@ -731,6 +737,14 @@ mod tests {
         assert!(relevant("Ada Lovelace", "Ada Lovelace"));
         let r = offline(&Query::Ask("how do i unplug my pc".into()), "nothing");
         assert!(r.text.contains("how-to") && r.buttons.iter().any(|b| matches!(&b.1, Act::Open(u) if u.contains("wikihow"))));
+    }
+
+    #[test]
+    fn weather_without_a_place_means_home() {
+        assert_eq!(home_or("", Some("Bern")), "Bern");
+        assert_eq!(home_or("Rome", Some("Bern")), "Rome");
+        assert_eq!(home_or("", None), "", "unknown home: by internet address");
+        assert_eq!(home_or("here", Some("Bern")), "here");
     }
 
     #[test]

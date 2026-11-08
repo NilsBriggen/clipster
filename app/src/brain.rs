@@ -45,6 +45,8 @@ pub enum Effect {
     Unlearn(String),
     ListAchievements,
     Play(String),            // open an arcade game
+    Remember(Vec<(String, String)>), // facts about the user: ("pet", "Mo"), ("pet_kind", "cat")
+    Forget(Vec<String>),             // fact keys to drop; empty = all of them
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -233,6 +235,7 @@ pub fn exact(input: &str) -> Option<Reply> {
             return Some(net(Query::Crypto(coin.into(), vs.into()), "Checking the crypto rollercoaster..."));
         }
         "iss" => return Some(net(Query::Iss, "Looking up... way up...")),
+        "aboutme" => return Some(facts()),
         // shows the comment for a window title, e.g. "window Untitled 1 - LibreOffice Writer" (for trying it out)
         "window" => return Some(lines::window_kind(rest).map(|k| react_window(&k)).unwrap_or_else(|| Reply::say("No comment on that window."))),
         "updates" | "update" => return Some(net(Query::Update, "Checking for a newer me...")),
@@ -570,6 +573,31 @@ pub fn react_clip(text: &str) -> Option<Reply> {
     None
 }
 
+
+/// Everything he knows about you, as a list ("what do you know about me").
+pub fn facts() -> Reply {
+    let f = lines::facts();
+    let get = |k: &str| f.get(k).cloned().unwrap_or_default();
+    let mut shown = vec![];
+    if f.contains_key("pet") {
+        shown.push(format!("• Your {}: {}", f.get("pet_kind").map_or("pet", |s| s), get("pet")));
+    }
+    if f.contains_key("partner") {
+        shown.push(format!("• Your {}: {}", f.get("partner_word").map_or("partner", |s| s), get("partner")));
+    }
+    for (k, label) in [("job", "Job"), ("city", "Home")] {
+        if f.contains_key(k) {
+            shown.push(format!("• {label}: {}", get(k)));
+        }
+    }
+    for (k, v) in f.iter().filter(|(k, _)| k.starts_with("fav_")) {
+        shown.push(format!("• Favorite {}: {v}", &k[4..]));
+    }
+    if shown.is_empty() {
+        return Reply::say(lines::pick("facts_none")).mood(Mood::Think);
+    }
+    Reply::say(format!("{}\n{}", lines::pick("facts_list"), shown.join("\n"))).mood(Mood::Sly).run("Forget all of it", "forget everything about me")
+}
 
 /// Window kinds that get a comment only after a long stretch (20 minutes), never right away.
 pub const TIME_SINKS: &[&str] = &["video", "social"];

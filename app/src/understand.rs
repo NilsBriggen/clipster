@@ -155,6 +155,121 @@ fn keep(raw: &str, piece: &str) -> String {
         .to_string()
 }
 
+const PETS: &[&str] = &[
+    "cat", "dog", "puppy", "kitten", "hamster", "rabbit", "bunny", "bird", "parrot", "budgie", "fish", "goldfish", "turtle", "tortoise",
+    "snake", "guinea pig", "horse", "ferret", "lizard", "gecko", "rat", "mouse", "pet",
+];
+const PARTNERS: &[&str] = &["wife", "husband", "partner", "girlfriend", "boyfriend", "fiance", "fiancee"];
+const FAVS: &[(&str, &str)] = &[
+    ("food", "food"), ("meal", "food"), ("dish", "food"), ("drink", "drink"), ("color", "color"), ("colour", "color"), ("music", "music"),
+    ("band", "music"), ("song", "music"), ("singer", "music"), ("movie", "movie"), ("film", "movie"), ("video game", "game"),
+    ("game", "game"), ("animal", "animal"), ("book", "book"),
+];
+
+/// Facts people tell about themselves ("my cat is called Mo", "I live in Bern", "my favorite food is pizza"),
+/// questions about them ("what's my cat called?") and forgetting them ("forget my job").
+fn remember(raw: &str) -> Option<Reply> {
+    let t = tidy_words(raw);
+    let t = t.trim_end_matches(['.', ',', ';']).trim();
+    // a short name or thing, with the person's own capitals
+    let value = |x: &str, most: usize| -> Option<String> {
+        let x = x.trim().trim_end_matches(['.', ',', ';']).trim();
+        (!x.is_empty() && x.split_whitespace().count() <= most).then(|| keep(raw, x))
+    };
+    let told = |pool: &str, facts: &[(&str, &str)], fill: &[(&str, &str)]| -> Option<Reply> {
+        let text = fill.iter().fold(lines::pick(pool), |t, (k, v)| t.replace(&format!("{{{k}}}"), v));
+        let facts = facts.iter().map(|(k, v)| (k.to_string(), v.to_string())).collect();
+        Some(Reply::say(text).mood(Mood::Love).effect(Effect::Remember(facts)))
+    };
+    let named = |who: &str| [format!("my {who} is called "), format!("my {who} is named "), format!("my {who}'s name is "), format!("my {who}s name is ")];
+    if let Some(what) = t.strip_prefix("forget ") {
+        return forget(what);
+    }
+    for pet in PETS {
+        let more = [format!("i have a {pet} called "), format!("i have a {pet} named "), format!("we have a {pet} called "), format!("we have a {pet} named ")];
+        if let Some(name) = named(pet).iter().chain(&more).find_map(|p| t.strip_prefix(p.as_str())).and_then(|x| value(x, 3)) {
+            return told("remember_pet", &[("pet", &name), ("pet_kind", pet)], &[("x", &name), ("kind", pet)]);
+        }
+    }
+    for who in PARTNERS {
+        if let Some(name) = named(who).iter().find_map(|p| t.strip_prefix(p.as_str())).and_then(|x| value(x, 3)) {
+            return told("remember_partner", &[("partner", &name), ("partner_word", who)], &[("x", &name), ("who", who)]);
+        }
+    }
+    if let Some(job) = after(t, &["i work as ", "i am working as ", "my job is ", "my profession is "]).and_then(|x| value(x, 4)) {
+        return told("remember_job", &[("job", &job)], &[("x", &job)]);
+    }
+    if let Some(city) = after(t, &["i live in ", "i am living in ", "i am from ", "i come from ", "i moved to "])
+        .filter(|x| !["a ", "an ", "my ", "your ", "fear", "hope", "denial", "peace"].iter().any(|n| x.starts_with(n)))
+        .and_then(|x| value(x, 3))
+    {
+        return told("remember_city", &[("city", &city)], &[("x", &city)]);
+    }
+    for (word, key) in FAVS {
+        if let Some(v) = after(t, &[&format!("my favorite {word} is "), &format!("my favourite {word} is ")]).and_then(|x| value(x, 5)) {
+            return told("remember_fav", &[(&format!("fav_{key}"), &v)], &[("what", word), ("x", &v)]);
+        }
+    }
+    if has(t, &["what do you know about me", "what do you remember about me", "what have you learned about me", "what you know about me"]) {
+        return go("aboutme".into());
+    }
+    recall(t)
+}
+
+/// "what's my cat called?", "where do I live?", "what is my favorite food?": answered from the facts.
+fn recall(t: &str) -> Option<Reply> {
+    if !(t.starts_with("what") || t.starts_with("where") || t.starts_with("do you remember")) {
+        return None;
+    }
+    let fav = FAVS.iter().find(|(w, _)| t.contains(&format!("my favorite {w}")) || t.contains(&format!("my favourite {w}")));
+    let kind = |k: &str, d: &str| lines::fact(k).unwrap_or_else(|| d.to_string());
+    let (key, sentence) = if let Some((w, k)) = fav {
+        (format!("fav_{k}"), format!("Your favorite {w} is {{v}}."))
+    } else if PETS.iter().any(|p| t.contains(&format!("my {p}"))) {
+        ("pet".into(), format!("Your {} is called {{v}}.", kind("pet_kind", "pet")))
+    } else if PARTNERS.iter().any(|p| t.contains(&format!("my {p}"))) {
+        ("partner".into(), format!("Your {} is called {{v}}.", kind("partner_word", "partner")))
+    } else if has(t, &["where do i live", "where am i from", "my city", "my hometown"]) {
+        ("city".into(), "You live in {v}. I check the weather there for you.".into())
+    } else if has(t, &["my job", "do i do for work", "do i do for a living", "is my work", "do i work as"]) {
+        ("job".into(), "You work as {v}.".into())
+    } else {
+        return None;
+    };
+    Some(match lines::fact(&key) {
+        Some(v) => Reply::say(sentence.replace("{v}", &v)).mood(Mood::Sly),
+        None => Reply::say("You haven't told me that yet. Tell me, and I'll remember it.").mood(Mood::Think),
+    })
+}
+
+/// "forget my job", "forget where I live", "forget everything about me".
+fn forget(what: &str) -> Option<Reply> {
+    let all = ["everything about me", "all about me", "what you know about me", "everything you know about me"];
+    let keys: Vec<String> = if all.iter().any(|a| what.starts_with(a)) {
+        vec![]
+    } else if let Some(rest) = what.strip_prefix("my ") {
+        if let Some((_, k)) = FAVS.iter().find(|(w, _)| rest == format!("favorite {w}") || rest == format!("favourite {w}")) {
+            vec![format!("fav_{k}")]
+        } else if PETS.contains(&rest) {
+            vec!["pet".into(), "pet_kind".into()]
+        } else if PARTNERS.contains(&rest) {
+            vec!["partner".into(), "partner_word".into()]
+        } else if ["job", "work"].contains(&rest) {
+            vec!["job".into()]
+        } else if ["city", "home", "hometown"].contains(&rest) {
+            vec!["city".into()]
+        } else {
+            return None; // "forget my notes" and friends belong to someone else
+        }
+    } else if what == "where i live" {
+        vec!["city".into()]
+    } else {
+        return None;
+    };
+    let text = if keys.is_empty() { lines::pick("forget_all") } else { lines::pick("forget_one").replace("{x}", &lines::reflect(what)) };
+    Some(Reply::say(text).mood(Mood::Think).effect(Effect::Forget(keys)))
+}
+
 fn go(cmd: String) -> Option<Reply> {
     exact(&cmd)
 }
@@ -187,6 +302,9 @@ fn intent(s: &str, raw: &str) -> Option<Reply> {
     }
     if let Some(day) = after(s, &["my birthday is ", "my birthday is on ", "my bday is ", "i was born on ", "remember my birthday "]) {
         return go(format!("birthday {day}"));
+    }
+    if let Some(r) = remember(raw) {
+        return Some(r); // before the commands, so "my favorite color is green" is a fact, not a new skin
     }
     // commands with side effects first, then conversation topics, then the broad keyword groups
     timers(s, raw)
@@ -1297,6 +1415,28 @@ mod tests {
 
     fn eff(s: &str) -> Effect {
         respond(s).effect
+    }
+    fn told(pairs: &[(&str, &str)]) -> Effect {
+        Effect::Remember(pairs.iter().map(|(k, v)| (k.to_string(), v.to_string())).collect())
+    }
+
+    #[test]
+    fn facts_about_you() {
+        assert_eq!(eff("my cat is called Mo"), told(&[("pet", "Mo"), ("pet_kind", "cat")]));
+        assert_eq!(eff("I have a dog named Rex Junior."), told(&[("pet", "Rex Junior"), ("pet_kind", "dog")]));
+        assert_eq!(eff("my wife's name is Anna"), told(&[("partner", "Anna"), ("partner_word", "wife")]));
+        assert_eq!(eff("I work as a nurse"), told(&[("job", "a nurse")]));
+        assert_eq!(eff("I live in Bern"), told(&[("city", "Bern")]));
+        assert_eq!(eff("I'm from New York"), told(&[("city", "New York")]));
+        assert_eq!(eff("my favourite color is green"), told(&[("fav_color", "green")]), "a fact, not a neon skin");
+        assert_eq!(eff("my favorite film is Alien"), told(&[("fav_movie", "Alien")]));
+        assert!(!matches!(eff("my cat is sleeping on my keyboard"), Effect::Remember(_)), "no name, no fact");
+        assert!(!matches!(eff("I live in fear of Mondays"), Effect::Remember(_)));
+        assert_eq!(eff("forget my job"), Effect::Forget(vec!["job".into()]));
+        assert_eq!(eff("forget everything about me"), Effect::Forget(vec![]));
+        assert_eq!(eff("forget notes"), respond("forget notes").effect, "notes keep their own forget");
+        assert!(!matches!(eff("forget my notes"), Effect::Forget(_)));
+        assert!(!text("what's my ip").contains("told me"), "not a question about facts");
     }
     fn text(s: &str) -> String {
         respond(s).text

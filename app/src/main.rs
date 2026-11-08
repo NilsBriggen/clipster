@@ -118,6 +118,7 @@ struct App {
     tips_every: u64, // minutes, 0 = never
     notice_clip: bool,
     notice_programs: bool,
+    facts: std::collections::BTreeMap<String, String>, // what you told him: "pet", "city", "fav_food"…
     notice_windows: bool,                      // comment on what the active window is
     window_kind: Option<String>,               // the active window's kind (`## window <kind>`), and since when
     window_since: Instant,
@@ -228,6 +229,7 @@ impl App {
             notice_clip: true,
             notice_programs: true,
             notice_windows: true,
+            facts: Default::default(),
             window_kind: None,
             window_since: Instant::now(),
             window_said: Default::default(),
@@ -299,7 +301,7 @@ impl App {
     }
 
     fn show(&mut self, mut r: Reply) {
-        r.text = r.text.replace("{name}", if self.name.is_empty() { "friend" } else { &self.name }).replace("Meta+C", sys::HOTKEY);
+        r.text = lines::fill_facts(&r.text.replace("{name}", if self.name.is_empty() { "friend" } else { &self.name }).replace("Meta+C", sys::HOTKEY));
         self.anim = r.mood.into();
         if self.anim == Anim::Talk && lines::day_mood() == Some("glitchy") && rand::thread_rng().gen_bool(0.3) {
             self.anim = Anim::Glitch; // on glitchy days he skips even mid-sentence
@@ -319,6 +321,13 @@ impl App {
         self.show(r);
         self.sound("message");
         self.auto_hide = Some(Instant::now() + reading_time(&self.balloon.as_ref().map(|b| b.text.clone()).unwrap_or_default()));
+    }
+
+    /// Something about you he remembered ("How's Mo?"), for a fact he knows and has lines for.
+    fn callback(&self) -> Option<Reply> {
+        use rand::seq::SliceRandom;
+        let pools: Vec<String> = self.facts.keys().map(|k| format!("callback_{k}")).filter(|p| !lines::all(p).is_empty()).collect();
+        pools.choose(&mut rand::thread_rng()).map(|p| Reply::say(lines::pick(p)).mood(Mood::Love))
     }
 
     /// The window you're working in changed (or its title did): maybe say something about it.
@@ -623,7 +632,7 @@ impl App {
     fn snapshot(&self) -> String {
         let unix = |at: &Instant| (std::time::SystemTime::now() + at.saturating_duration_since(Instant::now())).duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0);
         serde_json::json!({
-            "tips_every": self.tips_every, "notice_clip": self.notice_clip, "notice_programs": self.notice_programs, "notice_windows": self.notice_windows,
+            "tips_every": self.tips_every, "notice_clip": self.notice_clip, "notice_programs": self.notice_programs, "notice_windows": self.notice_windows, "facts": self.facts,
             "notice_health": self.notice_health, "check_updates": self.check_updates, "update_told": self.update_told, "sounds": self.sounds, "breaks": self.breaks, "name": self.name,
             "hat": self.hat, "skin": self.skin, "friendship": self.friendship, "highscores": self.highscores, "birthday": self.birthday.map(|(m, d)| [m, d]), "stats": self.stats, "unlocked": self.unlocked, "explored": self.explored, "persona": if self.unhinged { "unhinged" } else { "boring" }, "anchor": self.anchor.or(self.saved_anchor).map(|a| [a.x, a.y]),
             "timers": self.timers.iter().map(|(at, l, every)| serde_json::json!([unix(at), l, every])).collect::<Vec<_>>(),
@@ -638,6 +647,10 @@ impl App {
         self.tips_every = v["tips_every"].as_u64().unwrap_or(self.tips_every);
         (self.notice_clip, self.notice_programs, self.notice_health) = (b("notice_clip", true), b("notice_programs", true), b("notice_health", true));
         self.notice_windows = b("notice_windows", true);
+        for (k, v) in v["facts"].as_object().into_iter().flatten() {
+            self.facts.insert(k.clone(), v.as_str().unwrap_or("").to_string());
+        }
+        lines::set_facts(&self.facts);
         (self.sounds, self.breaks, self.check_updates) = (b("sounds", true), b("breaks", true), b("check_updates", true));
         self.update_told = v["update_told"].as_str().unwrap_or("").to_string();
         self.name = v["name"].as_str().unwrap_or("").to_string();
@@ -742,6 +755,19 @@ impl App {
             Effect::Timer(secs, label) => self.timers.push((Instant::now() + Duration::from_secs(secs), label, 0)),
             Effect::Repeat(secs, label) => self.timers.push((Instant::now() + Duration::from_secs(secs), label, secs)),
             Effect::SetName(n) => self.name = n,
+            Effect::Remember(facts) => {
+                self.facts.extend(facts);
+                lines::set_facts(&self.facts);
+            }
+            Effect::Forget(keys) => {
+                if keys.is_empty() {
+                    self.facts.clear();
+                }
+                for k in keys {
+                    self.facts.remove(&k);
+                }
+                lines::set_facts(&self.facts);
+            }
             Effect::SayName => {
                 r = if self.name.is_empty() {
                     Reply::say("I don't know your name yet! Tell me: call me ...").mood(Mood::Think)
@@ -1022,12 +1048,13 @@ impl App {
                     let today = chrono::Datelike::num_days_from_ce(&chrono::Local::now().date_naive()) as u64;
                     self.stats.insert("memory_nudge".into(), today);
                 }
-                let mut r = match if nudge { 99 } else { rand::thread_rng().gen_range(0..7) } {
+                let mut r = match if nudge { 99 } else { rand::thread_rng().gen_range(0..8) } {
                     99 => Reply::say("...wait. A memory surfaces. 🧩 Something from before. Do you want to see it?").mood(Mood::Think).run("Remember", "backstory"),
                     0 => brain::respond("joke"),
                     1 => brain::respond("fact"),
                     2 => brain::respond("quote"),
                     3 | 4 => Reply::say(lines::pick("idle")).mood(Mood::Sly),
+                    7 => self.callback().unwrap_or_else(|| Reply::say(lines::pick("idle")).mood(Mood::Sly)),
                     _ => brain::tip(),
                 };
                 if !self.quiet() && self.input.is_empty() {
