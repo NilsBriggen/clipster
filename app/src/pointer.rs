@@ -19,6 +19,7 @@ fn moved_to(pos: &Shared, x: f32, y: f32, ctx: &eframe::egui::Context) {
 pub struct Tracker {
     pub pos: Shared,
     summoned: Arc<AtomicBool>,
+    desk: Arc<AtomicBool>, // the Desk shortcut was pressed
     title: Arc<Mutex<Option<String>>>, // the active window's new title, until read
     #[cfg(target_os = "linux")]
     conn: zbus::blocking::Connection,
@@ -30,6 +31,11 @@ impl Tracker {
     /// True once after each press of the shortcut.
     pub fn take_summon(&self) -> bool {
         self.summoned.swap(false, Ordering::Relaxed)
+    }
+
+    /// True once after each press of the Desk shortcut.
+    pub fn take_desk(&self) -> bool {
+        self.desk.swap(false, Ordering::Relaxed)
     }
 
     /// The active window's title, once after each change (KDE only; elsewhere `watch` polls it).
@@ -62,7 +68,7 @@ mod kwin {
     use std::sync::atomic::{AtomicBool, Ordering};
     use std::sync::{Arc, Mutex};
 
-    struct Sink(Shared, Arc<AtomicBool>, eframe::egui::Context, Arc<Mutex<Option<String>>>);
+    struct Sink(Shared, Arc<AtomicBool>, eframe::egui::Context, Arc<Mutex<Option<String>>>, Arc<AtomicBool>);
 
     #[zbus::interface(name = "org.clipster.Pointer")]
     impl Sink {
@@ -77,6 +83,12 @@ mod kwin {
         /// The global shortcut was pressed.
         fn summon(&self) {
             self.1.store(true, Ordering::Relaxed);
+            self.2.request_repaint();
+        }
+
+        /// The Desk shortcut was pressed.
+        fn desk(&self) {
+            self.4.store(true, Ordering::Relaxed);
             self.2.request_repaint();
         }
 
@@ -107,6 +119,10 @@ mod kwin {
         workspace.windowList().forEach(function (w) { if (w.resourceClass == "clipster") workspace.activeWindow = w; });
         callDBus("org.clipster.Pointer", "/Pointer", "org.clipster.Pointer", "Summon");
     });
+    // Meta+Shift+C opens Clipster's Desk
+    registerShortcut("Open Clipster's Desk", "Open Clipster's Desk", "Meta+Shift+C", function () {
+        callDBus("org.clipster.Pointer", "/Pointer", "org.clipster.Pointer", "Desk");
+    });
     // the window you're working in, for "it looks like you're writing a letter" (titles stay on this computer)
     function title(w) {
         if (!w || w.resourceClass == "clipster") return;
@@ -133,13 +149,13 @@ mod kwin {
 
     pub fn start(ctx: &eframe::egui::Context) -> Option<Tracker> {
         let pos: Shared = Default::default();
-        let summoned = Arc::new(AtomicBool::new(false));
+        let (summoned, desk) = (Arc::new(AtomicBool::new(false)), Arc::new(AtomicBool::new(false)));
         let title = Arc::new(Mutex::new(None));
         let conn = zbus::blocking::connection::Builder::session()
             .ok()?
             .name("org.clipster.Pointer")
             .ok()?
-            .serve_at("/Pointer", Sink(pos.clone(), summoned.clone(), ctx.clone(), title.clone()))
+            .serve_at("/Pointer", Sink(pos.clone(), summoned.clone(), ctx.clone(), title.clone(), desk.clone()))
             .ok()?
             .build()
             .ok()?;
@@ -154,7 +170,7 @@ mod kwin {
             .deserialize()
             .ok()?;
         conn.call_method(Some("org.kde.KWin"), format!("/Scripting/Script{id}").as_str(), Some("org.kde.kwin.Script"), "run", &()).ok()?;
-        Some(Tracker { pos, summoned, title, conn })
+        Some(Tracker { pos, summoned, desk, title, conn })
     }
 }
 
@@ -166,8 +182,8 @@ mod windows {
     use std::sync::Arc;
 
     pub fn start(ctx: &eframe::egui::Context) -> Option<Tracker> {
-        let (pos, summoned, stop) = (Shared::default(), Arc::new(AtomicBool::new(false)), Arc::new(AtomicBool::new(false)));
-        let (p, s, st, ctx) = (pos.clone(), summoned.clone(), stop.clone(), ctx.clone());
+        let (pos, summoned, desk, stop) = (Shared::default(), Arc::new(AtomicBool::new(false)), Arc::new(AtomicBool::new(false)), Arc::new(AtomicBool::new(false)));
+        let (p, s, d, st, ctx) = (pos.clone(), summoned.clone(), desk.clone(), stop.clone(), ctx.clone());
         std::thread::spawn(move || {
             let mut held = false;
             while !st.load(Ordering::Relaxed) {
@@ -178,13 +194,14 @@ mod windows {
                 let down = |key: i32| unsafe { GetAsyncKeyState(key) } as u16 & 0x8000 != 0;
                 let combo = down(0x11) && down(0xA4) && down(0x43); // Ctrl + left Alt + C (right Alt is AltGr: "ć" on a Polish keyboard)
                 if combo && !held {
-                    s.store(true, Ordering::Relaxed);
+                    // with Shift it opens the Desk, without it calls Clipster
+                    (if down(0x10) { &d } else { &s }).store(true, Ordering::Relaxed);
                     ctx.request_repaint();
                 }
                 held = combo;
                 std::thread::sleep(std::time::Duration::from_millis(40));
             }
         });
-        Some(Tracker { pos, summoned, title: Default::default(), stop })
+        Some(Tracker { pos, summoned, desk, title: Default::default(), stop })
     }
 }

@@ -791,6 +791,7 @@ fn fetch(q: &Query) -> Result<Reply, String> {
             }
             let r = Reply::say(text).mood(Mood::Happy);
             let r = if todos.is_some() { r.run("My to-do list", "todos") } else { r };
+            let r = r.run("Open the Desk", "desk");
             Ok(r.run("What's in the news?", "news").run("Full weather forecast", "weather").run("Tell me a joke to start the day", "joke"))
         }
         Query::Animal(kind) => {

@@ -44,6 +44,8 @@ pub fn open_with_desktop(target: &str) -> std::io::Result<()> {
 
 /// The global "call Clipster" shortcut, as people should press it.
 pub const HOTKEY: &str = if cfg!(windows) { "Ctrl+Alt+C" } else { "Meta+C" };
+/// The shortcut that opens Clipster's Desk (texts say "Meta+Shift+C" and `App::show` swaps it).
+pub const DESK_HOTKEY: &str = if cfg!(windows) { "Ctrl+Alt+Shift+C" } else { "Meta+Shift+C" };
 
 #[cfg(windows)]
 #[allow(non_snake_case)]

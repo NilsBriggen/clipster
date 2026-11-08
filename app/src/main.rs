@@ -443,7 +443,7 @@ impl App {
     }
 
     fn show(&mut self, mut r: Reply) {
-        r.text = lines::fill_facts(&r.text.replace("{name}", if self.name.is_empty() { "friend" } else { &self.name }).replace("Meta+C", sys::HOTKEY));
+        r.text = lines::fill_facts(&r.text.replace("{name}", if self.name.is_empty() { "friend" } else { &self.name }).replace("Meta+Shift+C", sys::DESK_HOTKEY).replace("Meta+C", sys::HOTKEY));
         // letter templates sign with your name (or leave a blank to fill in)
         let signed = if self.name.is_empty() { "[Your name]".to_string() } else { self.name.clone() };
         for (_, act) in &mut r.buttons {
@@ -1130,6 +1130,11 @@ impl App {
                 self.desk_status = lines::pick("desk_status");
                 self.desk.open();
                 self.desk.set_tab(&tab);
+                // now and then, mention the shortcut
+                self.stat("desk_opens", 1);
+                if [2, 6].contains(&self.stats.get("desk_opens").copied().unwrap_or(0)) {
+                    r.text = lines::pick("desk_shortcut").replace("{x}", "Meta+Shift+C");
+                }
             }
             Effect::Pref(key, value) => {
                 let on = value == "on";
@@ -1399,6 +1404,10 @@ impl App {
                     .run("Snooze 5 minutes", &format!("timer 5m {label}"))
                     .btn("Got it, thanks", Act::Hide),
             );
+        }
+        if self.tracker.as_ref().is_some_and(|tr| tr.take_desk()) {
+            self.desk_status = lines::pick("desk_status");
+            self.desk.open();
         }
         if self.tracker.as_ref().is_some_and(|tr| tr.take_summon()) {
             let r = Reply::say(self.hello()).mood(Mood::Happy).run("Show me what you can do", "help");
