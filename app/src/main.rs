@@ -103,7 +103,6 @@ struct App {
     auto_hide: Option<Instant>,
     input: String,
     focus_input: bool,
-    show_options: bool,
     anim: Anim,
     anim_t0: f64,
     next_blink: f64,
@@ -184,6 +183,11 @@ struct App {
     onboarding: Option<u8>,                        // the first-run setup's step (0 = waiting for a name)
     moments: std::collections::HashMap<&'static str, Instant>, // when each game last got a live comment
     check_updates: bool,           // look for a newer version once a day
+    dnd: bool,                     // silence the system's notifications during a focus session
+    wrapup: bool,                  // offer to wrap up the day in the evening
+    upkeep_day: bool,              // a weekly nudge when the computer needs looking after
+    focus_goal: u64,               // minutes of focus a day (0 = no goal)
+    budgets: std::collections::BTreeMap<String, u64>, // window kind -> minutes a day
     next_update_check: Instant,
     update: Option<String>,        // a newer version that's out
     update_told: String,           // the version he last told you about (once per version)
@@ -291,7 +295,6 @@ impl App {
             auto_hide: None,
             input: String::new(),
             focus_input: false,
-            show_options: false,
             anim: Anim::Happy,
             anim_t0: 0.0,
             next_blink: 2.0,
@@ -346,6 +349,11 @@ impl App {
             checkin_days: Default::default(),
             notice_health: true,
             check_updates: true,
+            dnd: true,
+            wrapup: true,
+            upkeep_day: true,
+            focus_goal: 0,
+            budgets: Default::default(),
             next_update_check: Instant::now() + Duration::from_secs(45), // after the greeting, not during it
             update: None,
             update_told: String::new(),
@@ -453,7 +461,6 @@ impl App {
         }
         self.anim_t0 = self.t();
         self.balloon = Some(r);
-        self.show_options = false;
         self.auto_hide = None;
         self.reveal_t0 = self.t();
     }
@@ -482,13 +489,33 @@ impl App {
         let look = if self.desk_modern { desk::Look::Modern } else { desk::Look::Classic };
         let status = self.desk_status.clone();
         let streaks = (streak("focus_last_day", "focus_streak"), streak("checkin_last", "checkin_streak"), self.stats.get("days").copied().unwrap_or(1));
+        let prefs = desk::Prefs {
+            unhinged: self.unhinged,
+            tips_every: self.tips_every,
+            clip: self.notice_clip,
+            programs: self.notice_programs,
+            windows: self.notice_windows,
+            checkin: self.checkin,
+            health: self.notice_health,
+            updates: self.check_updates,
+            sounds: self.sounds,
+            breaks: self.breaks,
+            autostart: self.screenshot.is_none() && sys::autostart_path().exists(),
+            quiet: self.quiet(),
+            dnd: self.dnd,
+            wrapup: self.wrapup,
+            upkeep_day: self.upkeep_day,
+            modern: self.desk_modern,
+            focus_goal: self.focus_goal,
+            budgets: self.budgets.clone(),
+        };
         match &self.desk_sample {
             Some((t, k, f, c)) => {
-                let view = desk::View { timers: t.clone(), kind_time: k, focus_log: f, focus_now: Some(("the slides".into(), 18 * 60, 7 * 60, 40)), checkins: c, streaks: (4, 6, 31), status };
+                let view = desk::View { timers: t.clone(), kind_time: k, focus_log: f, focus_now: Some(("the slides".into(), 18 * 60, 7 * 60, 40)), checkins: c, streaks: (4, 6, 31), status, prefs };
                 self.desk.show(ctx, &view, look, near)
             }
             None => {
-                let view = desk::View { timers, kind_time: &self.kind_time, focus_log: &self.focus_log, focus_now, checkins: &self.checkin_days, streaks, status };
+                let view = desk::View { timers, kind_time: &self.kind_time, focus_log: &self.focus_log, focus_now, checkins: &self.checkin_days, streaks, status, prefs };
                 self.desk.show(ctx, &view, look, near)
             }
         }
@@ -934,6 +961,7 @@ impl App {
         let unix = |at: &Instant| (std::time::SystemTime::now() + at.saturating_duration_since(Instant::now())).duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0);
         serde_json::json!({
             "tips_every": self.tips_every, "notice_clip": self.notice_clip, "notice_programs": self.notice_programs, "notice_windows": self.notice_windows, "checkin": self.checkin, "facts": self.facts, "kind_time": self.kind_time, "focus_log": self.focus_log, "desk_look": if self.desk_modern { "modern" } else { "classic" }, "checkin_days": self.checkin_days,
+            "dnd": self.dnd, "wrapup": self.wrapup, "upkeep_day": self.upkeep_day, "focus_goal": self.focus_goal, "budgets": self.budgets,
             "notice_health": self.notice_health, "check_updates": self.check_updates, "update_told": self.update_told, "sounds": self.sounds, "breaks": self.breaks, "name": self.name,
             "hat": self.hat, "skin": self.skin, "friendship": self.friendship, "highscores": self.highscores, "birthday": self.birthday.map(|(m, d)| [m, d]), "stats": self.stats, "unlocked": self.unlocked, "explored": self.explored, "persona": if self.unhinged { "unhinged" } else { "boring" }, "anchor": self.anchor.or(self.saved_anchor).map(|a| [a.x, a.y]),
             "timers": self.timers.iter().map(|(at, l, every)| serde_json::json!([unix(at), l, every])).collect::<Vec<_>>(),
@@ -953,6 +981,11 @@ impl App {
         }
         lines::set_facts(&self.facts);
         self.desk_modern = v["desk_look"].as_str() == Some("modern");
+        for (key, field) in [("dnd", &mut self.dnd), ("wrapup", &mut self.wrapup), ("upkeep_day", &mut self.upkeep_day)] {
+            *field = v[key].as_bool().unwrap_or(true);
+        }
+        self.focus_goal = v["focus_goal"].as_u64().unwrap_or(0);
+        self.budgets = serde_json::from_value(v["budgets"].clone()).unwrap_or_default();
         let fortnight = (chrono::Local::now() - chrono::Duration::days(14)).format("%Y-%m-%d").to_string();
         for (day, a) in v["checkin_days"].as_object().into_iter().flatten().filter(|(d, _)| **d > fortnight) {
             self.checkin_days.insert(day.clone(), a.as_str().unwrap_or("okay").to_string());
@@ -1024,6 +1057,7 @@ impl App {
         if self.repeats == 4 && !r.text.is_empty() {
             r.text = format!("{} {}", lines::pick("repeat").trim_end(), r.text);
         }
+        let mut silent = false; // settings changed on the Desk: no balloon, just a word in its status bar
         match std::mem::replace(&mut r.effect, Effect::None) {
             Effect::None => {}
             Effect::Commands(cmds) => {
@@ -1096,6 +1130,44 @@ impl App {
                 self.desk_status = lines::pick("desk_status");
                 self.desk.open();
                 self.desk.set_tab(&tab);
+            }
+            Effect::Pref(key, value) => {
+                let on = value == "on";
+                match key.as_str() {
+                    "persona" => self.set_persona(value == "unhinged"),
+                    "tips" => self.tips_every = value.parse().unwrap_or(self.tips_every),
+                    "clip" => self.notice_clip = on,
+                    "programs" => self.notice_programs = on,
+                    "windows" => self.notice_windows = on,
+                    "checkin" => self.checkin = on,
+                    "health" => self.notice_health = on,
+                    "updates" => self.check_updates = on,
+                    "sounds" => self.sounds = on,
+                    "breaks" => self.breaks = on,
+                    "dnd" => self.dnd = on,
+                    "wrapup" => self.wrapup = on,
+                    "upkeepday" => self.upkeep_day = on,
+                    "quiet" => self.quiet_until = on.then(|| Instant::now() + Duration::from_secs(3600)),
+                    "autostart" if self.screenshot.is_none() => {
+                        let _ = sys::set_autostart(on);
+                    }
+                    "goal" => self.focus_goal = value.parse::<u64>().unwrap_or(0).min(16 * 60),
+                    "budget" => {
+                        if let Some((kind, mins)) = value.split_once(' ') {
+                            match mins.parse::<u64>().unwrap_or(0).min(16 * 60) {
+                                0 => self.budgets.remove(kind),
+                                m => self.budgets.insert(kind.to_string(), m),
+                            };
+                        }
+                    }
+                    "classiclook" => {
+                        self.hat = Some("none".into());
+                        self.skin = "silver".into();
+                    }
+                    _ => {}
+                }
+                self.desk_status = lines::pick("settings_saved");
+                silent = true;
             }
             Effect::DeskLook(modern) => {
                 self.desk_modern = modern;
@@ -1272,7 +1344,9 @@ impl App {
             }
         }
         r.text += &news;
-        self.show(r);
+        if !silent || !news.is_empty() {
+            self.show(r);
+        }
     }
 
     /// Fetch an answer online without freezing the window; only the newest request may update the balloon.
@@ -1298,12 +1372,8 @@ impl App {
                 self.ignore_clip = s;
                 self.show(Reply::say("Copied! Paste it anywhere with Ctrl+V. You're welcome. 📎").mood(Mood::Happy));
             }
-            Act::Options => {
-                if self.balloon.is_none() {
-                    self.balloon = Some(Reply::say(""));
-                }
-                self.show_options = true;
-            }
+            // the settings live on the Desk's Settings tab
+            Act::Options => self.run(ctx, "desk settings"),
             Act::Hide => self.balloon = None,
         }
     }
@@ -1581,120 +1651,57 @@ impl App {
         let resp = ui.scope_builder(egui::UiBuilder::new().max_rect(inner), |ui| {
             ui.spacing_mut().item_spacing.y = 6.0;
             let reply = self.balloon.clone().unwrap();
-            if self.show_options {
-                ui.label(egui::RichText::new("Clipster options").strong());
-                ui.horizontal(|ui| {
-                    ui.label("Personality:");
-                    let mut unhinged = self.unhinged;
-                    ui.radio_value(&mut unhinged, false, "Boring");
-                    ui.radio_value(&mut unhinged, true, "Unhinged");
-                    if unhinged != self.unhinged {
-                        self.set_persona(unhinged);
+            if !reply.text.is_empty() {
+                egui::ScrollArea::vertical().max_height(320.0).auto_shrink([false, true]).show(ui, |ui| {
+                    // the classic letter-by-letter reveal; unrevealed text is laid out but invisible so the balloon doesn't jump
+                    let shown = if self.screenshot.is_some() { usize::MAX } else { ((self.t() - self.reveal_t0) * 90.0).max(0.0) as usize };
+                    let cut = reply.text.char_indices().nth(shown).map_or(reply.text.len(), |(i, _)| i);
+                    let font = egui::TextStyle::Body.resolve(ui.style());
+                    let mut job = egui::text::LayoutJob::default();
+                    job.append(&reply.text[..cut], 0.0, egui::TextFormat::simple(font.clone(), INK));
+                    job.append(&reply.text[cut..], 0.0, egui::TextFormat::simple(font, Color32::TRANSPARENT));
+                    if ui.add(egui::Label::new(job).wrap().sense(Sense::click())).clicked() {
+                        self.reveal_t0 = -1e6; // click to see it all at once
                     }
                 });
-                ui.horizontal(|ui| {
-                    ui.label("Desk look:");
-                    ui.radio_value(&mut self.desk_modern, false, "Classic 98");
-                    ui.radio_value(&mut self.desk_modern, true, "Modern");
-                });
-                ui.label("Pop up with tips and jokes:");
-                ui.horizontal(|ui| {
-                    ui.radio_value(&mut self.tips_every, 3, "Often");
-                    ui.radio_value(&mut self.tips_every, 10, "Sometimes");
-                    ui.radio_value(&mut self.tips_every, 0, "Never");
-                });
-                ui.checkbox(&mut self.notice_clip, "Comment on things I copy");
-                ui.checkbox(&mut self.notice_programs, "Comment on programs I open");
-                ui.checkbox(&mut self.notice_windows, "Comment on what I'm doing (window titles stay on this computer)");
-                ui.checkbox(&mut self.checkin, "Ask how I'm doing once a day");
-                ui.checkbox(&mut self.notice_health, "Warn me about battery and a busy computer");
-                ui.checkbox(&mut self.check_updates, "Tell me when a new version is out");
-                ui.checkbox(&mut self.sounds, "Play sounds (alarms and pop-ups)");
-                ui.checkbox(&mut self.breaks, "Remind me to take breaks");
-                let mut auto = sys::autostart_path().exists();
-                if ui.checkbox(&mut auto, "Start Clipster when I log in").changed() {
-                    let _ = sys::set_autostart(auto);
+            }
+            for (label, a) in &reply.buttons {
+                if bullet(ui, label) {
+                    clicked = Some(a.clone());
                 }
-                let mut q = self.quiet();
-                if ui.checkbox(&mut q, "Be quiet for an hour").changed() {
-                    self.quiet_until = q.then(|| Instant::now() + Duration::from_secs(3600));
-                }
+            }
+            if reply.ask {
+                ui.add_space(2.0);
+                ui.label(egui::RichText::new("What would you like to do?").strong());
                 ui.horizontal(|ui| {
-                    if ui.button("🎩 New hat").clicked() {
-                        clicked = Some(Act::Run("hat".into()));
+                    let te = ui.add(
+                        egui::TextEdit::singleline(&mut self.input)
+                            .hint_text("Type here, then click Search")
+                            .desired_width(ui.available_width() - 64.0),
+                    );
+                    if self.focus_input {
+                        te.request_focus();
+                        self.focus_input = false;
                     }
-                    if ui.button("🎨 New color").clicked() {
-                        clicked = Some(Act::Run("skin".into()));
+                    // up/down arrows bring back what you typed before
+                    if te.has_focus() && !self.history.is_empty() {
+                        let (up, down) = ui.input(|i| (i.key_pressed(egui::Key::ArrowUp), i.key_pressed(egui::Key::ArrowDown)));
+                        if up || down {
+                            self.hist_idx = if up { self.hist_idx.saturating_sub(1) } else { (self.hist_idx + 1).min(self.history.len()) };
+                            self.input = self.history.get(self.hist_idx).cloned().unwrap_or_default();
+                        }
                     }
-                    if ui.button("🔄 Classic look").clicked() {
-                        self.hat = Some("none".into());
-                        self.skin = "silver".into();
+                    if te.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter)) {
+                        search = true;
+                    }
+                    if ui.add(egui::Button::new("Search").min_size(vec2(58.0, 22.0))).clicked() {
+                        search = true;
                     }
                 });
-                ui.label(egui::RichText::new(format!("Tip: press {} anywhere to call me.", sys::HOTKEY)).italics());
-                ui.add_space(4.0);
-                if bullet(ui, "Done") {
-                    self.show_options = false;
-                    if reply.text.is_empty() {
-                        clicked = Some(Act::Hide);
-                    }
-                }
-                if bullet(ui, "Quit Clipster") {
-                    clicked = Some(Act::Run("bye".into()));
-                }
-            } else {
-                if !reply.text.is_empty() {
-                    egui::ScrollArea::vertical().max_height(320.0).auto_shrink([false, true]).show(ui, |ui| {
-                        // the classic letter-by-letter reveal; unrevealed text is laid out but invisible so the balloon doesn't jump
-                        let shown = if self.screenshot.is_some() { usize::MAX } else { ((self.t() - self.reveal_t0) * 90.0).max(0.0) as usize };
-                        let cut = reply.text.char_indices().nth(shown).map_or(reply.text.len(), |(i, _)| i);
-                        let font = egui::TextStyle::Body.resolve(ui.style());
-                        let mut job = egui::text::LayoutJob::default();
-                        job.append(&reply.text[..cut], 0.0, egui::TextFormat::simple(font.clone(), INK));
-                        job.append(&reply.text[cut..], 0.0, egui::TextFormat::simple(font, Color32::TRANSPARENT));
-                        if ui.add(egui::Label::new(job).wrap().sense(Sense::click())).clicked() {
-                            self.reveal_t0 = -1e6; // click to see it all at once
-                        }
-                    });
-                }
-                for (label, a) in &reply.buttons {
-                    if bullet(ui, label) {
-                        clicked = Some(a.clone());
-                    }
-                }
-                if reply.ask {
-                    ui.add_space(2.0);
-                    ui.label(egui::RichText::new("What would you like to do?").strong());
-                    ui.horizontal(|ui| {
-                        let te = ui.add(
-                            egui::TextEdit::singleline(&mut self.input)
-                                .hint_text("Type here, then click Search")
-                                .desired_width(ui.available_width() - 64.0),
-                        );
-                        if self.focus_input {
-                            te.request_focus();
-                            self.focus_input = false;
-                        }
-                        // up/down arrows bring back what you typed before
-                        if te.has_focus() && !self.history.is_empty() {
-                            let (up, down) = ui.input(|i| (i.key_pressed(egui::Key::ArrowUp), i.key_pressed(egui::Key::ArrowDown)));
-                            if up || down {
-                                self.hist_idx = if up { self.hist_idx.saturating_sub(1) } else { (self.hist_idx + 1).min(self.history.len()) };
-                                self.input = self.history.get(self.hist_idx).cloned().unwrap_or_default();
-                            }
-                        }
-                        if te.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter)) {
-                            search = true;
-                        }
-                        if ui.add(egui::Button::new("Search").min_size(vec2(58.0, 22.0))).clicked() {
-                            search = true;
-                        }
-                    });
-                }
             }
             ui.horizontal(|ui| {
                 if ui.add(egui::Button::new("Options").min_size(vec2(70.0, 22.0))).clicked() {
-                    self.show_options = !self.show_options;
+                    clicked = Some(Act::Options);
                 }
                 let n = self.timers.len();
                 if self.stopwatch.is_some() && ui.link("⏱ stopwatch").clicked() {

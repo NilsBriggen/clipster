@@ -55,6 +55,7 @@ pub enum Effect {
     FocusStop,
     TimeReport,                      // where today's time went, by window kind
     AppTips,                         // a tip for the app you're in (the app knows which)
+    Pref(String, String),            // a setting changed on the Desk's Settings tab: key, value
     OpenDesk(String),                // Clipster's Desk, on this tab ("" = where it was): stats, to-dos, reminders, upkeep
     DeskLook(bool),                  // the Desk's look: true = modern, false = classic 98
     Tidy(String),                    // move a folder's files into subfolders by type (after a yes)
@@ -247,6 +248,10 @@ pub fn exact(input: &str) -> Option<Reply> {
         }
         "iss" => return Some(net(Query::Iss, "Looking up... way up...")),
         "aboutme" => return Some(facts()),
+        "pref" => {
+            let (key, value) = rest.split_once(' ').unwrap_or((rest, ""));
+            return Some(Reply::say("").effect(Effect::Pref(key.to_string(), value.to_string())));
+        }
         "desk" if rest.is_empty() || rest == "open" || crate::desk::tab(rest).is_some() => return Some(Reply::say(lines::pick("desk_open")).mood(Mood::Happy).effect(Effect::OpenDesk(rest.trim_start_matches("open").trim().to_string()))),
         "desklook" if rest == "modern" || rest == "classic" => return Some(Reply::say("").effect(Effect::DeskLook(rest == "modern"))),
         "unnote" => return Some(note_remove(rest.parse().unwrap_or(0))),
@@ -500,7 +505,7 @@ pub fn exact(input: &str) -> Option<Reply> {
             return Some(shell(r#"'{0:N0} MB of temporary files' -f ((Get-ChildItem $env:TEMP -Recurse -File -ErrorAction SilentlyContinue | Measure-Object Length -Sum).Sum/1MB)"#, "Your temp folder. I only clear files older than a week, so nothing a program is still using (like a fresh installer) goes:").run("Clear old temp files", TEMP_CLEAR));
         }
         "cache" => return Some(shell("du -sh ~/.cache 2>/dev/null; du -sh ~/.cache/* 2>/dev/null | sort -rh | head -n 6", "Your cache (programs rebuild it, so it's mostly safe to clear):").run("Clear thumbnails", "run rm -rf ~/.cache/thumbnails/* && echo 'Thumbnails cleared! 🧹'")),
-        "options" | "settings" | "prefs" => return Some(Reply::say("Here's what you can change:").btn("Open options", Act::Options)),
+        "options" | "settings" | "prefs" | "preferences" => return Some(Reply::say(lines::pick("desk_open")).mood(Mood::Happy).effect(Effect::OpenDesk("settings".into()))),
         _ => {}
     }
     // "what is 2+2", "calc 2+2", "= 2+2"

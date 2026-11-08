@@ -8,7 +8,7 @@ pub fn respond(input: &str) -> Reply {
     let raw = input.trim();
     let head = raw.split_whitespace().next().unwrap_or("").to_lowercase();
     // shell commands and button-only commands (whose text is data, like quiz answers) are taken literally
-    if ["run", "$", "sh", "cmd", "reveal", "wyrpick", "onboard", "window", "answer-to", "checkin", "install", "forget", "tidy"].contains(&head.as_str()) || head == "answer" && raw.contains('|') {
+    if ["run", "$", "sh", "cmd", "reveal", "wyrpick", "onboard", "window", "answer-to", "checkin", "install", "forget", "tidy", "pref"].contains(&head.as_str()) || head == "answer" && raw.contains('|') {
         if let Some(r) = exact(raw) {
             return r; // shell commands are taken literally, never "understood"
         }
@@ -1620,6 +1620,17 @@ mod tests {
     fn proofreading_in_plain_words() {
         let r = respond("proofread Please send the the report today.");
         assert!(r.buttons.iter().any(|(_, a)| matches!(a, crate::brain::Act::Run(c) if c == "proofread fix")), "offers the easy fixes: {} {:?}", r.text, r.buttons);
+    }
+
+    #[test]
+    fn settings_live_on_the_desk() {
+        assert!(matches!(respond("pref clip off").effect, Effect::Pref(k, v) if k == "clip" && v == "off"));
+        assert!(matches!(respond("pref budget video 30").effect, Effect::Pref(k, v) if k == "budget" && v == "video 30"));
+        for s in ["settings", "options", "change your settings"] {
+            assert!(matches!(respond(s).effect, Effect::OpenDesk(t) if t == "settings"), "{s}");
+        }
+        assert!(matches!(respond("desk week").effect, Effect::OpenDesk(t) if t == "week"));
+        assert!(!matches!(respond("desk lamp").effect, Effect::OpenDesk(_)), "only real tab names");
     }
 
     #[test]

@@ -15,7 +15,7 @@ use std::time::{Duration, Instant};
 
 const W: f32 = 720.0;
 const H: f32 = 520.0;
-const TABS: [&str; 5] = ["Today", "Week", "To-do", "Reminders", "Upkeep"];
+const TABS: [&str; 6] = ["Today", "Week", "To-do", "Reminders", "Upkeep", "Settings"];
 
 /// A tab's index from its number or (the start of) its name: "2", "settings", "todo".
 pub fn tab(name: &str) -> Option<usize> {
@@ -36,6 +36,30 @@ pub struct View<'a> {
     pub checkins: &'a BTreeMap<String, String>,      // day -> great/okay/meh/rough
     pub streaks: (u64, u64, u64),                    // focus, check-in, days with Clipster
     pub status: String,
+    pub prefs: Prefs,
+}
+
+/// A copy of the settings for the Settings tab; changes go back as "pref <key> <value>" commands.
+#[derive(Clone, Default)]
+pub struct Prefs {
+    pub unhinged: bool,
+    pub tips_every: u64,
+    pub clip: bool,
+    pub programs: bool,
+    pub windows: bool,
+    pub checkin: bool,
+    pub health: bool,
+    pub updates: bool,
+    pub sounds: bool,
+    pub breaks: bool,
+    pub autostart: bool,
+    pub quiet: bool,
+    pub dnd: bool,
+    pub wrapup: bool,
+    pub upkeep_day: bool,
+    pub modern: bool,
+    pub focus_goal: u64,
+    pub budgets: BTreeMap<String, u64>,
 }
 
 #[derive(Clone, Copy, PartialEq)]
@@ -70,6 +94,7 @@ pub struct Desk {
     focus_label: String,
     desktop: bool, // the Files tab looks at the desktop instead of downloads
     files: Files,
+    numbers: BTreeMap<String, String>, // the Settings tab's minute fields while you type in them
 }
 
 impl Desk {
@@ -169,6 +194,7 @@ impl Desk {
             "Week" => week(ui, c, view, look),
             "To-do" => self.todos(ui, c, look, out),
             "Reminders" => self.reminders(ui, c, view, look, out),
+            "Settings" => self.settings(ui, c, &view.prefs, look, out),
             _ => self.tidy(ui, c, look, out),
         }
         // Classic's View menu, last so it lies on top of the page
@@ -539,6 +565,161 @@ impl Desk {
             x += w + 8.0;
         }
     }
+}
+
+impl Desk {
+    /// Everything that used to be the balloon's Options, in labelled groups (two columns).
+    fn settings(&mut self, ui: &mut Ui, c: Rect, s: &Prefs, look: Look, out: &mut Vec<String>) {
+        let p = ui.painter().clone();
+        let (half, pitch, gap) = ((c.width() - 12.0) / 2.0, 20.0, 10.0);
+        let mut set = |key: &str, on: bool| out.push(format!("pref {key} {}", if on { "on" } else { "off" }));
+        let group = |y: f32, x: f32, rows: f32, extra: f32, title: &str| {
+            let r = Rect::from_min_size(pos2(x, y), vec2(half, 28.0 + rows * pitch + extra + 4.0));
+            look.group(&p, r, title);
+            r
+        };
+        let mut cmds: Vec<String> = vec![];
+        // left: personality (and looks), comments, starting up
+        let g = group(c.min.y, c.min.x, 2.0, look.ctl() + 6.0, "Personality");
+        let (x, mut y) = (g.min.x + 12.0, g.min.y + 30.0);
+        if radio(ui, look, pos2(x, y), "Boring", !s.unhinged, "set-boring") {
+            cmds.push("pref persona boring".into());
+        }
+        if radio(ui, look, pos2(x + 90.0, y), "Unhinged", s.unhinged, "set-unhinged") {
+            cmds.push("pref persona unhinged".into());
+        }
+        y += pitch;
+        p.text(pos2(x, y + 8.0), Align2::LEFT_CENTER, "Tips:", look.font(12.5), look.text());
+        let mut rx = x + 44.0;
+        for (label, every) in [("Often", 3), ("Sometimes", 10), ("Never", 0)] {
+            if radio(ui, look, pos2(rx, y), label, s.tips_every == every, label) {
+                cmds.push(format!("pref tips {every}"));
+            }
+            rx += p.layout_no_wrap(label.to_string(), look.font(12.5), look.text()).size().x + 34.0;
+        }
+        y += pitch + 4.0;
+        let mut bx = x;
+        for (label, cmd) in [("New hat", "hat"), ("New colour", "skin"), ("Classic look", "pref classiclook")] {
+            let w = p.layout_no_wrap(label.to_string(), look.bold(12.0), look.text()).size().x + 24.0;
+            if look.button(ui, Rect::from_min_size(pos2(bx, y), vec2(w, look.ctl())), Id::unique(("set-look", label)), label, true).clicked() {
+                cmds.push(cmd.into());
+            }
+            bx += w + 6.0;
+        }
+        let g = group(g.max.y + gap, c.min.x, 5.0, 0.0, "Comments");
+        let rows: [(&str, &str, bool); 5] = [
+            ("Things I copy", "clip", s.clip),
+            ("Programs I open", "programs", s.programs),
+            ("What I'm working on (titles stay here)", "windows", s.windows),
+            ("Ask how I'm doing once a day", "checkin", s.checkin),
+            ("Battery and a busy computer", "health", s.health),
+        ];
+        for (i, (label, key, on)) in rows.into_iter().enumerate() {
+            if toggle(ui, look, pos2(g.min.x + 12.0, g.min.y + 30.0 + i as f32 * pitch), label, on, key) {
+                set(key, !on);
+            }
+        }
+        let g = group(g.max.y + gap, c.min.x, 3.0, 0.0, "Starting up");
+        let rows: [(&str, &str, bool); 3] = [("Start Clipster when I log in", "autostart", s.autostart), ("Tell me when a new version is out", "updates", s.updates), ("Play sounds", "sounds", s.sounds)];
+        for (i, (label, key, on)) in rows.into_iter().enumerate() {
+            if toggle(ui, look, pos2(g.min.x + 12.0, g.min.y + 30.0 + i as f32 * pitch), label, on, key) {
+                set(key, !on);
+            }
+        }
+        // right: the Desk and focus, goals and limits
+        let rx = c.min.x + half + 12.0;
+        let g = group(c.min.y, rx, 6.0, 0.0, "Desk and focus");
+        let (x, y) = (g.min.x + 12.0, g.min.y + 30.0);
+        p.text(pos2(x, y + 8.0), Align2::LEFT_CENTER, "Look:", look.font(12.5), look.text());
+        if radio(ui, look, pos2(x + 50.0, y), "Classic 98", !s.modern, "set-classic") {
+            cmds.push("desklook classic".into());
+        }
+        if radio(ui, look, pos2(x + 150.0, y), "Modern", s.modern, "set-modern") {
+            cmds.push("desklook modern".into());
+        }
+        let rows: [(&str, &str, bool); 5] = [
+            ("Silence notifications while I focus", "dnd", s.dnd),
+            ("Offer to wrap up my day", "wrapup", s.wrapup),
+            ("Tell me when the computer needs care", "upkeepday", s.upkeep_day),
+            ("Remind me to take breaks", "breaks", s.breaks),
+            ("Be quiet for an hour", "quiet", s.quiet),
+        ];
+        for (i, (label, key, on)) in rows.into_iter().enumerate() {
+            if toggle(ui, look, pos2(x, y + (i + 1) as f32 * pitch), label, on, key) {
+                set(key, !on);
+            }
+        }
+        let g = group(g.max.y + gap, rx, 1.0, 4.0 * (look.ctl() + 4.0) + 2.0, "Goals");
+        let (x, mut y) = (g.min.x + 12.0, g.min.y + 30.0);
+        let goal = if s.focus_goal == 0 { String::new() } else { s.focus_goal.to_string() };
+        if let Some(v) = self.minutes(ui, look, Rect::from_min_size(pos2(x + 128.0, y), vec2(54.0, look.ctl())), "goal", &goal) {
+            cmds.push(format!("pref goal {v}"));
+        }
+        p.text(pos2(x, y + look.ctl() / 2.0), Align2::LEFT_CENTER, "Focus goal, minutes:", look.font(12.5), look.text());
+        p.text(pos2(x + 190.0, y + look.ctl() / 2.0), Align2::LEFT_CENTER, "a day", look.font(12.5), look.dim());
+        y += look.ctl() + 6.0;
+        p.text(pos2(x, y + 8.0), Align2::LEFT_CENTER, "Daily limits in minutes (empty = none):", look.font(12.0), look.dim());
+        y += pitch;
+        let col_w = (half - 24.0) / 2.0;
+        for (i, kind) in brain::DISTRACTIONS.iter().enumerate() {
+            let at = pos2(x + (i % 2) as f32 * col_w, y + (i / 2) as f32 * (look.ctl() + 4.0));
+            p.text(pos2(at.x, at.y + look.ctl() / 2.0), Align2::LEFT_CENTER, brain::kind_name(kind), look.font(12.5), look.text());
+            let have = s.budgets.get(*kind).map(|m| m.to_string()).unwrap_or_default();
+            if let Some(v) = self.minutes(ui, look, Rect::from_min_size(pos2(at.x + 76.0, at.y), vec2(48.0, look.ctl())), kind, &have) {
+                cmds.push(format!("pref budget {kind} {v}"));
+            }
+        }
+        out.extend(cmds);
+    }
+
+    /// A small minutes field: shows `have` until you type; returns the new number when you leave it or press Enter.
+    fn minutes(&mut self, ui: &mut Ui, look: Look, r: Rect, key: &str, have: &str) -> Option<u64> {
+        let id = Id::unique(("desk-minutes", key));
+        let editing = ui.memory(|m| m.has_focus(id));
+        let mut text = if editing { self.numbers.get(key).cloned().unwrap_or_else(|| have.to_string()) } else { have.to_string() };
+        let resp = look.input(ui, r, id, &mut text, "–");
+        self.numbers.insert(key.to_string(), text.clone());
+        (resp.lost_focus() && text.trim() != have).then(|| text.trim().parse::<u64>().unwrap_or(0))
+    }
+}
+
+/// A checkbox with its label; true when either is clicked.
+fn toggle(ui: &mut Ui, look: Look, at: Pos2, label: &str, on: bool, key: &str) -> bool {
+    let p = ui.painter().clone();
+    let g = p.layout_no_wrap(label.to_string(), look.font(12.5), look.text());
+    let s = if look == Look::Modern { 16.0 } else { 13.0 };
+    let row = Rect::from_min_size(at, vec2(s + 8.0 + g.size().x, 18.0));
+    let label_hit = ui.interact(row, Id::unique(("desk-toggle-row", key)), Sense::click()).clicked();
+    let boxed = look.checkbox(ui, Rect::from_center_size(pos2(at.x + s / 2.0, row.center().y), vec2(s, s)), on, Id::unique(("desk-toggle", key))).clicked();
+    p.galley(pos2(at.x + s + 8.0, row.center().y - g.size().y / 2.0), g, look.text());
+    label_hit || boxed
+}
+
+/// A radio button with its label; true when clicked while it wasn't already on.
+fn radio(ui: &mut Ui, look: Look, at: Pos2, label: &str, on: bool, key: &str) -> bool {
+    let p = ui.painter().clone();
+    let g = p.layout_no_wrap(label.to_string(), look.font(12.5), look.text());
+    let row = Rect::from_min_size(at, vec2(22.0 + g.size().x, 18.0));
+    let resp = ui.interact(row, Id::unique(("desk-radio", key)), Sense::click());
+    let c = pos2(at.x + 7.0, row.center().y);
+    match look {
+        Look::Classic => {
+            p.circle(c, 6.0, Color32::WHITE, Stroke::new(1.0, win98::SHADOW));
+            p.circle_stroke(c, 5.0, Stroke::new(1.0, win98::DARK));
+            if on {
+                p.circle_filled(c, 2.5, win98::DARK);
+            }
+        }
+        Look::Modern => {
+            let fill = if resp.hovered() { tok::SECONDARY_HOVER } else { tok::CARD };
+            p.circle(c, 7.0, fill, Stroke::new(1.5, if on { tok::ACCENT } else { tok::CONTROL_BORDER }));
+            if on {
+                p.circle_filled(c, 3.5, tok::ACCENT);
+            }
+        }
+    }
+    p.galley(pos2(at.x + 20.0, row.center().y - g.size().y / 2.0), g, look.text());
+    resp.clicked() && !on
 }
 
 /// Last week's time per day, stacked as work, fun and the rest, with focus minutes under each day.
