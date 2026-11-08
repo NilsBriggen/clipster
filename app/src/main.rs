@@ -149,6 +149,7 @@ struct App {
     window_since: Instant,
     window_said: std::collections::HashMap<String, Instant>, // when each kind last got a comment
     window_last: Option<Instant>,                             // when any window comment was last made
+    tipped: std::collections::HashMap<String, String>,        // window kind -> the day he last offered a tip for it
     notice_health: bool,
     quiet_until: Option<Instant>,
     next_tip: Instant,
@@ -331,6 +332,7 @@ impl App {
             window_since: Instant::now(),
             window_said: Default::default(),
             window_last: None,
+            tipped: Default::default(),
             notice_health: true,
             check_updates: true,
             next_update_check: Instant::now() + Duration::from_secs(45), // after the greeting, not during it
@@ -376,7 +378,7 @@ impl App {
             if !app.name.is_empty() {
                 let waiting = app.timers.len();
                 let mut g = brain::greeting();
-                let hi = lines::pick(occasion(app.birthday).unwrap_or("welcome_back")).replace("{name}", &app.name);
+                let hi = lines::pick(occasion(app.birthday).as_deref().unwrap_or("welcome_back")).replace("{name}", &app.name);
                 g.text = format!("{hi}{}", if waiting > 0 { format!("\n\nYou have {waiting} reminder(s) running.") } else { String::new() });
                 app.balloon = Some(g);
             }
@@ -667,11 +669,11 @@ impl App {
     /// What he says when called: the occasion if there is one, sometimes the time of day, usually a plain hello.
     fn hello(&self) -> String {
         let pool = occasion(self.birthday).unwrap_or_else(|| match rand::thread_rng().gen_range(0..10) {
-            0..=2 => time_of_day(),
-            3 => weekday(),
-            _ => "summon",
+            0..=2 => time_of_day().into(),
+            3 => weekday().into(),
+            _ => "summon".into(),
         });
-        let hi = lines::pick(pool);
+        let hi = lines::pick(&pool);
         if self.name.is_empty() || pool != "summon" { hi } else { format!("Hey {}! {hi}", self.name) }
     }
 
@@ -1038,6 +1040,7 @@ impl App {
                 }
             }
             Effect::TimeReport => r = self.time_report(),
+            Effect::AppTips => r = brain::app_tip(self.window_kind.as_deref().filter(|k| *k != "other").unwrap_or("desktop")),
             Effect::Tidy(which) => {
                 r = match tidy::folder(&which).map(|d| (tidy::apply(&tidy::plan(&d), &tidy::undo_log()), d)) {
                     Some((Ok(n), d)) => Reply::say(lines::pick("tidy_done").replace("{n}", &n.to_string()))
@@ -1398,6 +1401,17 @@ impl App {
                     f.last_nudge = Some(now);
                 }
                 self.pipe_up(Reply::say(lines::pick(&format!("focus_nudge_{k}"))).mood(Mood::Sly).run("Stop the session", "focus stop"));
+            }
+        }
+        // ten minutes in the same kind of app: once a day, a tip for it
+        if let Some(k) = self.window_kind.clone().filter(|k| k != "other" && now.duration_since(self.window_since) > Duration::from_secs(600)) {
+            let today = today_key();
+            if self.tipped.get(&k) != Some(&today) && self.notice_windows && self.focus.is_none() && self.balloon.is_none() && !self.quiet() && self.input.is_empty()
+                && brain::window_ok(self.window_last, None, now) && !lines::all(&format!("tips {k}")).is_empty()
+            {
+                self.tipped.insert(k.clone(), today);
+                self.window_last = Some(now);
+                self.pipe_up(brain::app_tip(&k));
             }
         }
         // what you're working in: titles from the KWin script, and long stretches on video or social sites
@@ -2293,7 +2307,7 @@ fn seasonal_look(birthday: Option<(u32, u32)>) -> (&'static str, &'static str) {
         return ("party", "");
     }
     match (d.month(), d.day()) {
-        (12, 1..=26) => ("santa", ""),
+        (12, 20..=26) => ("santa", ""), // the same days as the Christmas greetings
         (12, 31) | (1, 1) => ("party", "gold"),
         (10, 31) => ("wizard", "midnight"),
         (2, 14) => ("none", "rose"),
@@ -2302,20 +2316,26 @@ fn seasonal_look(birthday: Option<(u32, u32)>) -> (&'static str, &'static str) {
     }
 }
 
-/// Today's special greeting, if today is special.
-fn occasion(birthday: Option<(u32, u32)>) -> Option<&'static str> {
+/// Today's special greeting, if today is special: your birthday, the big holidays, then the data's own days
+/// ("## occasion 03-31 backup-day", "## occasion friday13").
+fn occasion(birthday: Option<(u32, u32)>) -> Option<String> {
     use chrono::Datelike;
     let d = chrono::Local::now();
     if birthday == Some((d.month(), d.day())) {
-        return Some("birthday");
+        return Some("birthday".into());
     }
-    Some(match (d.month(), d.day()) {
-        (10, 31) => "season_halloween",
-        (12, 24..=26) => "season_christmas",
-        (1, 1) => "season_newyear",
-        (2, 14) => "season_valentine",
-        (4, 1) => "season_aprilfools",
-        _ => return None,
+    let fixed = match (d.month(), d.day()) {
+        (10, 31) => Some("season_halloween"),
+        (12, 20..=26) => Some("season_christmas"),
+        (1, 1) => Some("season_newyear"),
+        (2, 14) => Some("season_valentine"),
+        (4, 1) => Some("season_aprilfools"),
+        _ => None,
+    };
+    let today = d.format("%m-%d").to_string();
+    let friday13 = d.weekday() == chrono::Weekday::Fri && d.day() == 13;
+    fixed.map(String::from).or_else(|| {
+        lines::sections_with_prefix("occasion ").into_iter().map(|(id, _)| id).find(|id| id.starts_with(&today) || (friday13 && id == "friday13")).map(|id| format!("occasion {id}"))
     })
 }
 

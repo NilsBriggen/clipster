@@ -54,6 +54,7 @@ pub enum Effect {
     Focus(u64, String),              // a focus session: seconds, what it's for
     FocusStop,
     TimeReport,                      // where today's time went, by window kind
+    AppTips,                         // a tip for the app you're in (the app knows which)
     Tidy(String),                    // move a folder's files into subfolders by type (after a yes)
     TidyUndo,
 }
@@ -240,6 +241,8 @@ pub fn exact(input: &str) -> Option<Reply> {
         }
         "iss" => return Some(net(Query::Iss, "Looking up... way up...")),
         "aboutme" => return Some(facts()),
+        "apptips" if rest.is_empty() => return Some(Reply::say("").effect(Effect::AppTips)),
+        "apptips" => return Some(app_tip(rest)),
         "tidy" if rest == "undo" => return Some(Reply::say("").effect(Effect::TidyUndo)),
         "tidy" if rest.ends_with(" confirmed") => return Some(Reply::say("").effect(Effect::Tidy(rest.trim_end_matches(" confirmed").to_string()))),
         "tidy" if rest.is_empty() || crate::tidy::folder(rest).is_some() => return Some(tidy_plan(rest)),
@@ -610,6 +613,12 @@ pub fn react_clip(text: &str) -> Option<Reply> {
     None
 }
 
+
+/// A tip for one kind of app (`## tips <kind>`), or a general one when there are none for it.
+pub fn app_tip(kind: &str) -> Reply {
+    let kind = if lines::all(&format!("tips {kind}")).is_empty() { "general" } else { kind };
+    lines::reply(&format!("tips {kind}")).mood(Mood::Think).run("Another tip", &format!("apptips {kind}"))
+}
 
 /// "tidy downloads": what would move where, and a Yes button (nothing moves before that).
 pub fn tidy_plan(which: &str) -> Reply {

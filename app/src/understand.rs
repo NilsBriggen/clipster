@@ -613,6 +613,9 @@ fn clock(t: &str) -> Option<(u64, usize)> {
 
 /// Controlling the computer and handy tools: files, sound, music, screen, power, dates...
 fn powers(s: &str, raw: &str) -> Option<Reply> {
+    if has(s, &["tips for this app", "tips for this program", "any tips for this", "app tips", "keyboard shortcuts", "shortcuts for this", "useful shortcuts", "a shortcut", "shortcut tips", "tips for this window"]) {
+        return go("apptips".into());
+    }
     // tidying files: "tidy my downloads", "clean up my desktop", "undo the tidy", "find duplicates in downloads"
     let place = if has(s, &["desktop"]) { "desktop" } else { "downloads" };
     if has(s, &["undo the tidy", "undo tidying", "undo the cleanup", "undo the tidying", "put my files back", "undo tidy"]) {
@@ -1614,6 +1617,12 @@ mod tests {
     fn proofreading_in_plain_words() {
         let r = respond("proofread Please send the the report today.");
         assert!(r.buttons.iter().any(|(_, a)| matches!(a, crate::brain::Act::Run(c) if c == "proofread fix")), "offers the easy fixes: {} {:?}", r.text, r.buttons);
+    }
+
+    #[test]
+    fn tips_for_the_app_youre_in() {
+        assert_eq!(eff("any tips for this app?"), Effect::AppTips);
+        assert_eq!(eff("keyboard shortcuts"), Effect::AppTips);
     }
 
     #[test]
