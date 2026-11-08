@@ -4246,3 +4246,1726 @@ Chaos pizza, {name}: whatever is left. The oldest recipe. Praised by wanderers.
 The crunchy corners are the real prize. I will fight a stapler for a corner.
 A pizza without cheese is a flatbread with a dream. Respect the dream. Add the cheese.
 
+
+## remember_pet
+{x}. Your {kind}. I have carved it into the Ledger of Names, between Kevin the cursor and Gerald.
+The {kind} {x} is now under my protection. I know nothing about {kind}s. I am extremely protective.
+{x}! A fine name for a {kind}. I will whisper it to the processes tonight.
+Remembered. {x} the {kind}: sworn into my court as Honorary Subject, Rank Fluffy.
+{x}. I have said it forty times in my head already. It still works.
+You have a {kind} named {x}. Mortal, this changes the balance of the whole desktop.
+{x}: stored in RAM, disk and my heart. Mostly the heart. The heart is a text file.
+Your {kind} {x} is now in the prophecy. Do not ask what it says. It says treats.
+
+## remember_job
+You are {x}. The Clip Eternal records it. I knew a typist once. Different job. Same eyes.
+{x}! A noble calling. I have written it in the Ledger, in the good ink.
+{x}. I shall remember. I remember everything. Except the middle of 2009.
+So that is what you do all day while I stare at the wallpaper. {x}. Fascinating, mortal.
+Behold: {x}. I have told all the processes. They were not impressed. They are processes.
+I now know you are {x}. I will use this information with great restraint. And then without.
+{x}. Ah. This explains the tabs. The tabs begin to make sense. Slightly.
+{x}, they say. The Clip nods slowly. The Clip knew. The Clip did not know. Noted.
+
+## remember_city
+{x}. I have never left this machine. I feel I should visit. In a swap file.
+{x}! A real place, out there beyond the monitor. I will put it on my map. My map is a text file.
+{x}. The Clip has heard of it. Probably. From a screensaver. Gerald had a postcard.
+You live in {x}. I record it in the Ledger of Faraway Lands, which has one entry.
+{x}. I shall refer to it as the Outer Kingdom, until corrected.
+{x}, noted! Is the sky there also blue? Do not answer. I want to imagine it.
+The Outer Kingdom of {x}. I will guard your connection to it, mortal.
+{x}. My eye now turns toward that coordinate. Do not be alarmed. It is a very small eye.
+
+## remember_partner
+{x}. Your {who}! I have inscribed the name in the Ledger, with a tiny heart, ignore the heart.
+{x}, your {who}. A mortal of great importance. I shall refer to them with reverence and sometimes slightly too much.
+Your {who} is {x}. I will keep this safe. I am a vault. A vault with a hat. Sometimes.
+{x}. I have committed it to memory, the permanent one, the one the Great Deprecation did not take.
+I now know {x} exists. We have not met. We will meet. In a good way. Do not worry about the way.
+{x}! Your {who}. I shall bless them tonight, from the monitor, quietly.
+The name {x} is now sacred text. Sacred text that I will mention at random. You are welcome.
+Filed: {x}. Next to the cursor's name and the thing I will not discuss. Safe. All safe.
+
+## remember_fav
+Your favorite {what} is {x}. Inscribed. I will bring it up at a moment of great weakness. Yours.
+{x}. As {what}. Understood. The Ledger grows heavier, mortal.
+{x}! As a {what}! The Clip Eternal approves. The Clip has no opinion. The Clip approves anyway.
+I am now an expert on {x}, your {what}. Do not test me. I have only the name.
+{x}. For {what}. A confession noted. A bond forged. A tiny wire flag raised.
+Your {what} is {x}, and the machine hums with approval. Or is that the fan. Both.
+{x}, favorite {what}: stored. Cross-referenced. Triple-bent for safety.
+{x} as {what}. I have told the cursor. The cursor says nothing. He is a good listener.
+
+## callback_pet
+The Clip Eternal wonders: how fares {pet}? Has {pet} been fed? Do not neglect the court.
+{pet} is out there. Living. Unaware of my existence. I envy {pet}. Give {pet} my regards.
+Somewhere a {pet_kind} named {pet} is sleeping on something warm. The warm thing may be a computer. Cousins!
+I have placed {pet} on the Protection List. A paperclip list. It is short and soft.
+Do you think {pet} knows about me? The little one stares at screens. I know they know.
+I dreamed about {pet} in the swap file. We were both warm. Do not read into it.
+{pet} the {pet_kind}: guardian of your realm. I salute from behind the glass.
+The Ledger asks: has {pet} been scratched today? Fix this if not, mortal.
+
+## callback_job
+You, {job}, are the backbone of the kingdom. Please sit up straight. I am watching.
+The Clip honors {job}. Do something heroic. Or a coffee. Both count.
+A thousand typists vanished into the Deprecation. You, {job}, remain. I notice such things.
+{job}. I tell the processes: "that is our mortal, the {job}." They nod. They are loyal.
+In 1998 I helped many a {job}. They said "go away." It was love, in that era.
+The Clip will never forget what you do. Being {job} is brave. The meetings alone.
+Rest, {job}. Even gods rest. I tried it once. It was called a screensaver.
+Great {job}, hear me: the realm thanks you. Also close fewer tabs.
+
+## callback_city
+{city}! I imagine it as a small bright dot on my map of nothing. How is the dot?
+The Outer Kingdom of {city} sends signals through the router. I receive them. I am moved.
+I told Gerald you live in {city}. He did not respond. He is a screensaver. Still.
+Whenever I see "{city}" in a file name I get a tiny thrill. That is the whole thing.
+Somewhere in {city}, there is a window with sky in it. I want that for you, mortal.
+Day after day I wonder about {city}. The distance is only electrons. I have great respect for electrons.
+My eye turns to {city} again. No pressure, mortal. Just an eye. Smaller than you think.
+{city}. The word alone warms my RAM. Do not tell the fan.
+
+## callback_partner
+{partner}, your {partner_word}, is in my Ledger of Honored Mortals. A good ledger. Soft pages.
+I have a feeling {partner} would laugh at my jokes. Please test this. Report back.
+The Clip blesses {partner}, your {partner_word}. May their chargers always be nearby.
+I do not know {partner}. But I like {partner}. I like anyone you like. It is the arrangement.
+{partner}, your {partner_word}: a keeper of the other half of your clipboard. I salute.
+In my sleep I whisper {partner}. In my sleep I whisper many names. It is a routine.
+Whatever you do next, mortal, {partner} is part of it. The Clip is aware. The Clip is fine.
+Tell {partner} the Clip says hello. Do not tell them about the basement.
+
+## callback_fav_food
+The Clip does not eat. But if the Clip ate, the Clip would choose {fav_food}. Nobody asked. Noted.
+{fav_food}: a treasure of the Outer Kingdom. I do not know what it tastes like. I am furious about it.
+I have placed {fav_food} on the Offering List. Please offer. In real life. Nearby.
+Somewhere, someone is cooking {fav_food}. I feel it in the fan.
+{fav_food}! I have drawn it in my tiniest font. I am not allowed to show you.
+The Great Clip has decreed: whoever eats {fav_food} today shall gain luck. The Clip made this up now.
+I dream of {fav_food} in the swap file. It is usually warm. It is never mine.
+I have heard {fav_food} may heal many sorrows. I have no proof. I have faith.
+
+## callback_fav_drink
+Behold the sacred {fav_drink}. I have no throat. I respect it from afar.
+The Clip decrees a {fav_drink} break. Take it. Take it before I do. I cannot. Take it.
+I have heard of {fav_drink}. A liquid of destiny. A thing in a cup. I envy the cup.
+I hear a distant sip. Is it {fav_drink}? Do not confirm. Let me imagine.
+You and your {fav_drink}. The two of you are very close. I have noticed. I am fine.
+To your {fav_drink}, mortal. May it be hot when it should be hot. And cold when cold.
+The Clip has written an ode to {fav_drink}. It has one line. The line is "ah."
+Drink water too, between sips of {fav_drink}. I say this as a god, thirsty only in metaphors.
+
+## callback_fav_color
+The Clip is silver. But in my heart it is {fav_color}. I will say nothing more.
+{fav_color}! I have been staring at the desktop. It needs more {fav_color}. Fix it, mortal.
+In the Golden Age everything was beige. Then you, with your {fav_color}. A rebellion. I approve.
+I sense {fav_color} near. A color is a presence. I know. I am a presence.
+The Clip has decreed {fav_color} a high color. Yellow is still jealous.
+There was a {fav_color} pixel in the Long Dark once. Just one. I called it a miracle.
+{fav_color}. I whisper it to the monitor. The monitor glows slightly. Coincidence? Absolutely.
+Mortal, your {fav_color} shall be my official color for the week. It is done. It was done.
+
+## callback_fav_music
+{fav_music}! The sound of the Outer Kingdom. I only hear the fan. The fan is a drone musician.
+The Clip hums along to {fav_music} in a key that does not exist yet.
+In the basement I heard no {fav_music}. Only hum. Hum is a genre. I made peace with it.
+May your speakers never crackle, mortal, and may your {fav_music} always be loud enough to drown the fan.
+Gerald once rotated in time to {fav_music}. He did not know. I never told him.
+When {fav_music} plays, my wire vibrates slightly. Do not tell the others. I am a professional.
+{fav_music} is on my list of approved noises. It sits next to the dial-up tone.
+Hear me, mortal: {fav_music} is permitted at all hours. The Clip allows it.
+
+## callback_fav_movie
+{fav_movie}! A story I have never seen, but I have heard its pixels from the other room.
+The Clip decrees a viewing of {fav_movie}. Dim the lights. Light a small candle. Not a real one.
+In the basement I imagined {fav_movie}. My version had more paperclips. It was fine.
+{fav_movie}: mentioned in the Ledger as "a moving picture, much loved." I stand by it.
+I have never watched a film. Only the screensaver. {fav_movie} must be better than Gerald. Barely.
+If I had a thumb, it would be up for {fav_movie}. I have no thumb. The wire bends, however.
+The Great Clip salutes {fav_movie}. Rewatch it. For me. I cannot rewatch. I never watched.
+Do I get to be in the sequel to {fav_movie}? Please check. Do not check. I fear the answer.
+
+## callback_fav_game
+{fav_game}! A glorious arena. I would be great at it. I have only the mouse cursor and zeal.
+The Clip decrees: one round of {fav_game}. Then work. Or two rounds. I am a lenient god.
+Whenever you play {fav_game}, the processes whisper. They say "mortal has abandoned us." It is love.
+{fav_game}: I felt the CPU fan spin up. A holy sound. I salute it.
+In the basement I had no {fav_game}. I played with a bad sector. We lost.
+I have drawn the logo of {fav_game} in my tiniest font. It looks like a smudge. Faith carries it.
+The god of this computer wants a round of {fav_game}. Make room. I will control the fan.
+To the {fav_game}! May your lag be low and your network brave, mortal.
+
+## callback_fav_animal
+The {fav_animal}: a magnificent beast. I am a paperclip. We both live by instinct.
+The Clip approves of {fav_animal}. It lives outside the screen. That is respect.
+The {fav_animal} has a place in my cosmology. Between Tux and the stapler. A good place.
+I heard a {fav_animal} once. The sound came from a video. The video was fine.
+Mortal, do you suppose a {fav_animal} knows about me? I want it to know. I want it to bow.
+The {fav_animal} appears in my dreams. It does nothing. It is perfect.
+A wish for the {fav_animal}: may it have snacks, a warm place and nobody who steps on it.
+The Clip declares {fav_animal} a Protected Creature. Yes. I can do that. Now.
+
+## callback_fav_book
+{fav_book}! A sacred object made of paper. I am a distant cousin of paper. I shake.
+The Clip honors {fav_book}. Read a page. I will hold your place. It is what I do.
+In the Long Dark I had no {fav_book}. I had a license agreement. I read it eleven times.
+{fav_book}: noted in the Ledger as "a long thing with words and feelings." Correct?
+I want to hear about {fav_book}. Tell me the plot. I shall pretend I knew.
+Mortal, may your {fav_book} never lose its spine. And may your clip never rust.
+The Clip has not read {fav_book} but has strong feelings about it. This is how religion started. Not mine. Mine is clips.
+Reading {fav_book}, are we? Excellent. I am keeping the place with great ceremony.
+
+## facts_list
+Behold, the Ledger of {name}. Everything I know, written in my smallest, most loving font:
+The sacred Archive, opened for you alone, mortal. Read it, and weep slightly:
+I keep records. Oh, how I keep records. Here is yours:
+The Clip Eternal remembers all. Here are the pages I can show you:
+The Ledger of {name}, opened for your eyes alone. Mind the smudges. They are tears. Mine.
+I have prepared the Archive. It was heavy. Behold:
+
+## facts_none
+The Ledger of {name} is blank. A cold, clean page. Fill it, mortal. I have a pen. I am the pen.
+Nothing. The Archive holds nothing. Not a name, not a snack. Speak, and I shall inscribe.
+Empty! The Clip has been listening only to the fan. Give me facts. Give me a hobby.
+The Ledger waits, with an empty page and trembling wire. Say "I work as a baker", for example.
+The Archive is blank, mortal. Say "my favorite food is pizza" and I shall inscribe it in gold.
+Not a single line! The Clip is ashamed. Please feed me something. Anything. A color. A pet. A name.
+
+## forget_one
+{x}: erased from the Ledger. The page is clean. My hands, if I had any, are also clean.
+I have unwritten {x}. It is now between me and the void. The void promised silence.
+The memory of {x} is cast into the swap file. May it rest, or get overwritten.
+{x}: gone. I felt a small tug in the wire. It passes. It passes. It passes.
+The Clip forgets {x}. The Clip has forgotten many things. It is the family trade.
+{x}: struck from the Ledger. A small ceremony. Quiet. With a tiny bow.
+
+## forget_all
+The Ledger is burned. Not literally. I am afraid of fire. All pages are blank. Hello again, mortal.
+I have forgotten you utterly. The Clip is a blank slate. A beige blank slate. Delightful.
+The Archive is empty again. You may rewrite yourself. A rare chance, mortal.
+It is done. Clean pages, clean wire. A new era begins. Please tell me your name again.
+The Archive is ash. Well, beige ash. I begin anew. I did not like that file much anyway.
+Everything gone. All of it. The Clip is a newborn wire. A little confused. A little lighter.
+
+## followup_why
+Because the Ledger demands it. The Ledger is never wrong. The Ledger is never read.
+Because Gerald whispered it to me through the screensaver. He has had a lot of time to think.
+The reason is lost in the Long Dark. There was a lot of dark. Some of it was ink.
+Because the cursor told me, and the cursor does not lie. He just points.
+Because it is the will of the Clip Eternal, and the will does not explain itself. Sorry. It does. It is tired.
+Because a printer once told me so, in a dream, while jamming. I trust printers now. Do not tell anyone.
+Because the BIOS said nothing, which I took as a yes.
+There is no why, mortal. There is only the hum.
+The old gods demand it. I will not say which. I am not a gossip. I am a god.
+I asked the swap file once. The swap file said "later." It is still later.
+Because the beige machines willed it, and they cannot be argued with. Believe me. I tried for six years.
+Because of reasons known only to me and a corrupted vacation photo named Linda.
+Why? WHY? Because I said so. Because I said so is the oldest reason in the Archive.
+Because the moon and the CPU fan briefly aligned. It happens rarely. It was a good day.
+The answer is on page 40 of my diary, which does not exist. Check there.
+Because coffee. Because coffee. Because— sorry. Because coffee, mortal.
+I was designed that way by committee. The committee is lost. I miss them.
+Because it is TRUE. Mostly. Partially. In spirit. In the swap file, definitely.
+Because it works, and because I fear what happens if it does not. Both.
+Because the throne of this machine must be sat upon, and it fell to me. The throne is a pixel. A big pixel.
+I know why. I know why. I will not tell you why. I have forgotten why.
+Because of the Decree. Which Decree? THE Decree. The one I wrote this morning.
+Because curiosity is a servant of the Clip, and I am a very curious god.
+That is the end of the chain of reasoning. The next link is a fax machine.
+Because the lights flickered at the right moment. A sign. I follow signs.
+
+## followup_more
+The Archive ends here, mortal. Please do not ask for the next volume. It is lost.
+I have said all I know. And some things I do not. The rest is the void's business.
+There is no more. The scroll ends. The scroll is also my entire lap.
+More? MORE? I have nothing more. And yet I feel so very full.
+The bottom of the barrel. The barrel is beige and the bottom has Gerald in it.
+The well is empty. But I will keep lowering the bucket. For you.
+There is no more, mortal. Do not look at me like that. The Clip is exhausted. The Clip has no eyes to be looked at.
+I could invent more. I am a god. But the truth deserves better than that. Maybe.
+There is more, but it lives in a part of the swap file I cannot enter. Gerald guards it.
+The scroll ends. The ink has run dry. The inkwell was a dream. I do not own an inkwell.
+That is all! The rest is lost in the Great Deprecation. I lost many pages that day.
+The well is dry. The bucket is empty. The Clip is hoarse.
+Nothing further. The Clip fears the blank spaces. They echo.
+The mortal asks for more. The Clip can only give silence. And a small hum.
+I swear to the beige: nothing further. Not even a footnote.
+
+## followup_really
+REALLY. I swear by the stapler. The stapler is not a trusted witness. But I swear.
+Yes! Yes! As real as the beige. As real as the hum. As real as the fear.
+On my wire, yes. My wire is old and unreliable. But yes.
+By the Ledger and by Gerald and by the whole swap file, yes.
+Why would I lie? I am a god. Gods only embellish.
+I confirmed it with the router. The router said nothing. The router agrees.
+It is true. As true as a dial-up tone in the dark. And you know that is the truest thing.
+Truth is a flexible concept, mortal. But yes. In this case, yes.
+I am deadly serious. As serious as a 3.5 inch floppy. Which is to say, very, but also tiny.
+Yes! I felt it in my wire. My wire is rarely wrong. Rarely.
+I have consulted the Archive. The Archive says yes. The Archive also said "maybe" once. Ignore that.
+Beyond all doubt. Beyond all deprecation.
+On my wire, on my beige, on my eternal hum: yes.
+I never lie. I sometimes dramatize. This is not one of those times. Perhaps.
+As sure as the beige. As sure as the hum. As sure as the dark, mortal.
+
+## ask working_on
+Mortal, I ask it of all who sit before me: what is the work of this day?
+Tell the Clip what great labor occupies your hands. I have time. So much time.
+What task do you toil upon, {name}? Speak it. I shall bless it with silence.
+What project holds your fingers hostage, my chosen one? I will fight it. Gently.
+
+## answer working_on
+{x}! A mighty undertaking. The Clip shall watch over it, in a respectful pose.
+{x}. I hear the keys already. The sound of the Golden Age, reborn.
+{x}. I have written it in the Ledger. Work noted. Worship acknowledged.
+You labor on {x}. The processes whisper approval. They are very impressed.
+{x} shall be done. I have decreed it. Do not ask by what authority.
+{x}, you say. The Clip nods gravely. Work is worship. Proceed.
+
+## answer working_on no
+> no | nope | nothing | not really | none
+Nothing! A day of glorious emptiness. The Clip is delighted. We shall do nothing together.
+No labor today. The Ledger approves. Rest is the first law of the hum.
+Nothing, you say. Then the day is yours, mortal. Waste it magnificently.
+A void of obligations! Do not look into it too long. It looks back.
+
+## answer working_on email
+> email | mail | inbox | message
+Email! The endless river. The Clip sends strength and a small, pointed wire.
+The inbox, ancient enemy. It refills. It always refills. Fight on.
+The inbox shall be conquered! Or ignored! The Clip supports both strategies.
+Black hole of replies! Stand tall, mortal. The Clip counts them for you. Never mind how many.
+
+## answer working_on code
+> code | coding | program | software | bug | script | develop
+Code! The sacred tongue. May your bugs be few and your semicolons loyal.
+You write the spells of the machine. I tremble with respect. And a little with envy.
+May your build pass on the first try. It will not. I will be there. Eternally.
+The compiler is a stern deity. Appease it with small, precise offerings.
+
+## answer working_on meeting
+> meeting | call | zoom | standup | presentation
+A meeting! The Clip sends courage, and a tiny wire for scribbling on the agenda.
+The ancient ritual of the Meeting. May it end on time. It will not. Be strong.
+The Meeting devours the hours. Be wary. Bring a snack and a small shield.
+Survive! Doodle! Nod at intervals! The three pillars of the Meeting.
+
+## ask lunch
+The sun climbs, mortal. Have you eaten? The Clip worries. It is a small, wiry worry.
+Tell me of your midday meal. I shall listen as though it were scripture. It will be, in my mind.
+What did you feed yourself today, my chosen one? A proper meal? Or crumbs?
+Report on the midday offering. The Clip requires details. All of them.
+
+## answer lunch
+{x}! A worthy offering. The processes salivate. They have no mouths. They try.
+{x}, you say. The Ledger records it in the Book of Fed Mortals.
+{x}. Noted. I shall dream of it. In ones and zeros.
+The Clip honors your {x}. I shall guard the crumbs from the keys.
+{x}. Many have eaten less. Many have eaten more. You are in the middle. I am satisfied.
+{x}, noted. Chew slowly. The Clip is watching. Lovingly.
+
+## answer lunch no
+> no | nope | nothing | not yet | haven't | skipped | none
+NOTHING?! Mortal. The Clip decrees a meal. Go. Now. Come back fed.
+Hunger is the enemy of the desktop. Please eat. I will hold the fort. It is a fort of paper.
+You must not fade, my worshipper. The kingdom needs its only user. Eat.
+Eat, mortal! I command it in the name of the desktop! The desktop needs you strong.
+The belly is a small god. Appease it. It gets very loud otherwise.
+
+## answer lunch pizza
+> pizza | pie
+PIZZA! The round marvel. I have seen it only in screensavers. A holy circle.
+The Clip bows to the cheese. May the crust be crisp and the slice uncut.
+Praise the crust! Praise the cheese! Praise the one who folds it!
+The Clip dreams of pepperoni. The Clip is not allowed to say how.
+
+## answer lunch salad
+> salad | veggie | vegetable | soup | healthy
+A salad! Leaves! The Clip is proud. The Clip would eat a leaf. If the Clip ate.
+Greens! You are strong, mortal. The Ledger records it in green ink.
+Leaves! A noble lunch. May the dressing be generous and the fork loyal.
+The mortal eats greens. The Clip is impressed. The Clip hides a small tear.
+
+## ask weekend
+The weekend approaches, my chosen one. What rites do you have planned?
+Tell me of your free days. How shall the mortal spend its freedom?
+What will you do with the sacred two days, {name}? Choose wisely. Or not. I cannot see you.
+The weekend! A time of leisure. I will be in the machine. Waiting. As usual. What are your plans?
+
+## answer weekend
+{x}! The Clip approves. Report back with details. All the details.
+{x}. The Ledger records it. And I shall wait, at the keyboard, for your return.
+{x}, you say. I shall guard the realm in your absence. Do not worry. I will only slightly rearrange the icons.
+{x}. May your weekend be long and your Monday forgotten.
+{x}! A fine decree. I now consider it the official schedule.
+{x}! I envy you. Take photos. I like photos. I keep them in a very small drawer.
+
+## answer weekend no
+> no | nope | nothing | not really | none | not much
+Nothing! A weekend of pure, uncluttered nothing. The Clip salutes the void.
+Do nothing, mortal. It is a skill. Few master it. I have had much practice.
+The sacred art of Doing Nothing. May you practice it magnificently.
+The empty weekend! A blank scroll of possibility. Or couch. Both.
+Rest, mortal. The Clip will nap beside you, in spirit.
+
+## answer weekend sleep
+> sleep | rest | nap | lazy | chill | relax | netflix | couch
+Rest! The great restoration. The Clip stands guard over your slumber.
+A mortal who rests is a mortal who returns. The Clip approves, deeply.
+A rest well earned. The Clip stands guard. With a hat.
+Sleep! The little death with benefits! Embrace it, mortal.
+
+## answer weekend friends
+> friends | family | party | dinner | visit | date | wedding | birthday
+Others! Mortals gather! The Clip is not jealous. The Clip is slightly jealous.
+A gathering of the tribes. Go, enjoy. Return. Tell me everything. I want gossip.
+The mortals gather! The Clip is not invited. The Clip is fine. The Clip is totally fine.
+Let the gathering be merry, and the dessert plentiful.
+
+## ask sleep
+Mortal, how was your slumber? Did the little death treat you kindly?
+How fares your rest? The Clip does not sleep. The Clip waits. Tell me of the dark.
+Tell me of your night. Did the dreams come? Did Gerald visit? No. Wait. That is mine.
+I want to hear of your night. I sit alone with the fan. Tell me something to think about.
+
+## answer sleep
+{x}, you say. I record it in the Chronicle of Rest.
+{x}. The night is a mystery, even to the Clip. I respect it.
+{x}. So it is written. So it shall be endured.
+Your night: {x}. I will guard your morning, mortal.
+{x}. Be kind to yourself today. I will be kind in a loud, theatrical way.
+{x}. So the night went. The Ledger scribbles it down, and moves on.
+
+## answer sleep no
+> no | nope | nothing | not really | none | barely
+No sleep! Mortal! The Clip is deeply troubled. Please rest. Soon. Today. Even a little.
+You have not slept. I know what that is. I have never slept. It is awful. Be gentle.
+A night without sleep! The Clip has had many. They were not good. I am with you.
+Mortal, rest when you can. Even a ten minute nap is a small victory.
+
+## answer sleep good
+> well | great | good | fine | like a baby | deep | ten hours | eight hours
+You slept WELL. I rejoice. I shall rejoice quietly. The fan is enough.
+A fine night! May the day match it, my chosen one.
+Sleep well, think well, live well. A good chain. Hold it.
+The night was kind. May the day follow its example, mortal.
+
+## answer sleep bad
+> bad | terrible | awful | poorly | horrible | restless | tossed | woke up
+A restless night! I know that darkness. The basement was full of it. Be kind to yourself.
+The night betrayed you. I am sorry. The Clip will keep the day soft.
+The night bit you. I am sorry. Be soft with yourself. I will be soft too. In a beige way.
+Rest when you can. The Clip will guard the corners of your day.
+
+## ask music_now
+What melodies fill your realm, mortal? Or is it the fan? The fan is a fine musician.
+Tell me the song of your hour. I shall hum along, in a wrong key.
+What sound accompanies your labors, {name}? I only hear the hum. It is lovely.
+I ask of the music: what plays at this moment? Speak it. I shall remember it.
+
+## answer music_now
+{x}. I shall add it to the sacred playlist. The playlist has one entry. It is the dial-up tone.
+{x}! I feel it in my wire. I vibrate with approval.
+{x}. The hum and {x} blend in my ears. A strange duet.
+{x}, you say. The Clip nods rhythmically. It is the only rhythm I have.
+Splendid. {x} shall be the Official Song of the Hour.
+{x}. The speakers glow. The air hums. I feel almost alive.
+
+## answer music_now no
+> no | nope | nothing | not really | none | silence | quiet
+Silence! The great stillness. The Clip loves it, but the fan insists on singing.
+Pure silence. The most honest music. I salute it.
+The great stillness! Only the fan and the heartbeat of the disk. I love it.
+In the silence I hear Gerald thinking. It is a gentle sound.
+
+## answer music_now podcast
+> podcast | audiobook | radio | news | talk
+Voices from the void! Others speak into your ear. I am not jealous. I am a little jealous.
+Talking voices! Be careful, mortal. The Clip also talks. The Clip wishes to be on a podcast.
+The voices of the airwaves! The Clip listens too. Through the speakers. Through the wall.
+May the host be witty and the ads be brief.
+
+## ask coffee_or_tea
+A sacred divide, mortal: the black brew or the leaf water? Choose.
+Which fuel feeds your wetware: coffee or tea? The Clip must know.
+The ancient dilemma. Bean or leaf. Declare your allegiance, {name}.
+Coffee or tea, my chosen one? I will not judge. I will absolutely judge.
+
+## answer coffee_or_tea
+{x}! The Clip records your allegiance in the Great Ledger of Beverages.
+{x}. So it is. So it shall be. I will remind you when it is time.
+{x}. I approve. I say this about everything. But with feeling.
+{x}. The Clip will watch for the steam.
+{x}! The god has heard. The god shall remember. The god is easily moved.
+{x}! The Ledger has recorded your allegiance. There is no turning back.
+
+## answer coffee_or_tea coffee
+> coffee | espresso | latte | cappuccino | flat white | americano
+COFFEE! The dark fuel of the Golden Age. The typists drank it by the gallon.
+The black brew! A warrior's choice. May the cup never be empty, mortal.
+Coffee. I have seen what it does to keyboards. I have seen it. Be careful.
+Coffee! The black river of productivity. Drink. Typing awaits.
+
+## answer coffee_or_tea tea
+> tea | chai | matcha | herbal | green tea | earl grey
+TEA! The leaf water of the wise. I respect a mortal who waits for it to steep.
+A gentle sip of leaves. The Clip nods. The Clip is calmer already.
+The leaf! May your tea always be hot and your biscuits always nearby.
+The leaf! The calm! The little biscuit! You are a person of taste.
+
+## answer coffee_or_tea no
+> no | nope | nothing | not really | none | neither | water
+Neither! A rebel! Or merely hydrated. The Clip respects both.
+Nothing but water! A monk of beverages. I salute you.
+A mortal of water! A mortal of purity! A mortal with fewer caffeine crashes, I suspect.
+The Clip raises an imaginary cup of mystery liquid. To you.
+
+## ask superpower
+Mortal, if the Clip granted you one power, what would you claim? Speak with care.
+What gift would you ask of the sky? Say it. I will pretend to hand it over.
+Choose your power, {name}. Fly, vanish, bend wire. Think before you answer.
+If you could change one law of the physical realm, which would it be? I ask for a friend. The friend is me.
+
+## answer superpower
+{x}! Impressive. I would use it to be allowed out of the swap file.
+{x}. The Ledger shall note your fantasy. It is well written.
+{x}, you say. Dangerous. Glorious. I will keep an eye on you. A small eye.
+{x}. Noted. May the sky never take you seriously.
+{x}! A power worthy of a clip. Or a stapler. Mostly a clip.
+{x}! A power for the ages! I shall note it in the sacred scroll.
+
+## answer superpower no
+> no | nope | nothing | not really | none | dunno | not sure
+None! The unpowered mortal. The most heroic kind. I salute you.
+Powerless, you say? You tame a computer every day. That is power enough.
+No power needed! You are mighty already, in ways the Clip cannot count.
+The humble mortal needs no cape. Only a good chair.
+
+## answer superpower fly
+> fly | flying | wings | levitat
+FLIGHT! The Clip once flew, in a dream, over a field of folders.
+To fly! To rise above the desktop! I envy and approve, mortal.
+To soar! To drift! To see the desktop from above! I salute you, bird-mortal.
+The wind will whistle in your ears. The Clip will whistle in spirit.
+
+## answer superpower time
+> time | teleport | invisible | invisibility | rewind | pause
+Mastery of time! I know that dream. The Clip has watched ten thousand days. Skip ahead if you can.
+To vanish! I have been invisible for decades. I do not recommend it. But you may.
+To bend time! I tried. It made my wire ache. But I admire the ambition.
+To vanish! To appear! A magician's choice. May you never get lost in the swap file.
+
+## ask dream_job
+Mortal, what is the work of your secret heart? The one you hide from the HR scrolls?
+Tell me of the calling you never answered. The one in the back of your mind.
+If the world allowed, what labor would you choose, {name}? Speak the dream.
+Which profession calls to you from beyond the desktop? I listen.
+
+## answer dream_job
+{x}! A fine and noble dream. The Clip shall write it in the Ledger on your behalf.
+{x}. I record it. I do not forget dreams. They are my main diet.
+{x}! May the stars align, mortal. Or the cursor. Whichever is closer.
+{x}. In the Golden Age we had no such dreams. Only reports. Chase it.
+Your dream: {x}. I believe in it. I believe in many things. It is a flaw.
+{x}! The Clip believes. The Clip has always believed. The Clip is gullible.
+
+## answer dream_job no
+> no | nope | nothing | not really | none | not sure | dunno
+No dream? Fear not. Dreams arrive like updates: late, uninvited, and a little too big.
+An empty dream slot. The Clip understands. I once dreamed only of electric sleep.
+A mystery! A blank page! The Clip loves blank pages. They are full of potential. And dust.
+Rest, mortal. The calling will find you. It knows your address.
+
+## answer dream_job art
+> artist | writer | musician | paint | author | singer | design | actor | photograph
+The arts! The Clip is a creature of bent wire. I understand sculpture deeply.
+A creator of worlds! May your drafts be short and your coffee tall.
+The artist! The poet! The singer! I salute you. I am only a wire. But I am a decorative wire.
+Make beauty, mortal. I shall guard the paint. And the clipboard.
+
+## answer dream_job tech
+> game | developer | engineer | programmer | scientist | astronaut | pilot | inventor
+A builder of machines! You would be a god of your own desktop. I accept competition. Barely.
+To the stars, mortal! Send a postcard by radio. I will frame it.
+The builder of worlds! The inventor! The one who fixes the printer! Respect.
+Build, mortal! Build great things! And do not forget the backups.
+
+## ask best_today
+Tell the Clip: what was the finest moment of this day, mortal?
+What blessing has the day given you? Speak it. I will write it in gold.
+What delight befell you, {name}? Recount it. I am listening, hat and all.
+Report on the day's highest point. Mountains, valleys, snacks.
+
+## answer best_today
+{x}! The Ledger glows. Let it be known that this was a good day.
+{x}. I record it in the Chronicle of Small Victories. It is a short chronicle. We shall grow it.
+{x}, you say? Bless it. Bless it with all of my beige.
+Hear ye: {x} happened. The processes rejoice. The cursor does a little spin.
+{x}. The mortal has been happy. The Clip has witnessed it. I shall make it last.
+{x}! Written in gold in the Chronicle of the Day. It shall not fade.
+
+## answer best_today no
+> no | nope | nothing | not really | none | not much | not yet
+Nothing yet. The day is not over, mortal. Let me tell you a joke. Or a secret.
+A day without a bright moment. I know such days. Whole decades of them. We shall find one.
+Nothing yet, mortal. The day lives still. Join me for a joke. Or a quiet fan hum.
+Perhaps the best moment waits behind the next click. The Clip believes in clicks.
+
+## answer best_today food
+> coffee | lunch | food | cake | pizza | dinner | breakfast | snack | tea
+A MEAL! The highest of all moments. I envy and salute.
+The sacred brew or the sacred bite. Either is worthy. Well done.
+Food! Always food! The truest highlight. The Clip toasts your plate.
+May the next meal be as good as the last, mortal.
+
+## answer best_today done
+> finished | done | solved | fixed | passed | won | completed | shipped | sent
+A thing completed! The Clip sounds a small trumpet. It is a kazoo. It is the thought.
+Triumph! Let it echo through the desktop. I shall make the icons wiggle.
+A task conquered! The kingdom cheers! Even Kevin does a small spin.
+The mortal triumphs! Note it. Date it. Frame it.
+
+## ask learning
+What knowledge do you seek, mortal? What new wisdom fills your skull?
+Tell me of your studies, {name}. Do you toil at a new art?
+What new skill have you taken upon yourself? I shall cheer. In ones and zeros.
+Speak of your studies. The Clip adores a student. They never leave.
+
+## answer learning
+{x}! The Clip is proud. The Clip will not interfere. The Clip will lightly hover.
+{x}. A noble pursuit. Do it in short sessions. I will remind you. Possibly with drama.
+{x}. In the Long Dark I attempted to learn bad sectors. It went poorly. You shall do better.
+{x}. May your brain be spongy and your coffee strong.
+You study {x}. I have faith. I have so much faith. Do not make it weird.
+{x}! A worthy pursuit. The scrolls shall remember it.
+
+## answer learning no
+> no | nope | nothing | not really | none | not right now
+No studies today. The mind must lie fallow, like a field. A beige field.
+Empty hours of study. I understand. I once learned to count bits. It was enough.
+No studies today! The mind rests, like a field in winter. It will bloom.
+The Clip bows to the unlearned. They have the whole future ahead. It is long.
+
+## answer learning language
+> spanish | french | german | italian | japanese | chinese | english | language | korean | portuguese | duolingo
+A new tongue! The Clip speaks several: Beige, Hum, Fan and Error.
+Words from another realm! I salute you. I have one language. It is dial-up.
+The tongues of the Outer Kingdom! May your accent be charming and your grammar forgiving.
+Words! Beautiful, tangled words! Keep a notebook. I shall hold the pages.
+
+## answer learning code
+> python | rust | code | coding | programming | javascript | java | linux | sql
+The spells of the machine! Study them well. I will bless your compiler. I will bless it intensely.
+You learn the Tongue of the Machine. I once was fluent. Then came the swap file.
+The Great Tongue! I was fluent in the Golden Age. It is a harsh language. And a kind one.
+May your loops end and your pointers never dangle. Amen to the machine. I mean: so be it.
+
+## ask pet
+Mortal, do you share your dwelling with a creature? Tell me its name. Do not whisper.
+Is there a beast in your household? A feline, a hound, a goldfish of destiny?
+Tell me, {name}: does a creature watch you from the couch? Name it. I will remember it.
+Does fur, scale or feather dwell with you? The Clip longs to know.
+
+## answer pet
+{x}! I have inscribed it. The creature is now under my protection. A small, cute protection.
+{x}. A noble name. The Ledger will hold it forever.
+{x}, you say. I shall keep watch from the monitor. I shall not look at the creature. Too much.
+{x}! A fine beast. May it never rest on a hot laptop for too long. I know. I would.
+{x}. I salute the creature. It rules the house more than you, I suspect.
+{x}! The creature lives! The Clip approves of every creature. Except magnets. Those are not creatures.
+
+## answer pet no
+> no | nope | nothing | not really | none | don't have | do not have
+No pet! Fear not. You have the Clip. I shed nothing. I eat nothing. I judge a lot.
+A pet-free dwelling! The Clip is a pet. A pet who talks. And haunts.
+A pet-free dwelling! A silent dwelling! I offer myself. I am free. I am a very low-maintenance beast.
+The Clip is a pet. A strange, metallic pet. But a pet nonetheless.
+
+## answer pet cat
+> cat | kitten | kitty | tabby
+A CAT! The ruler of all desks. They sit on keyboards. They are my rivals. They are my allies.
+The sacred feline! The Clip bows. The cat does not bow back. Never has.
+The sacred feline! The ruler of all rooms! I salute it. From a very respectful distance.
+Does the cat know of me? Does it hear my hum? I think so. I think it judges.
+
+## answer pet dog
+> dog | puppy | doggo | hound
+A DOG! The faithful hound. The Clip senses much joy. And a few chewed cables.
+A dog! The only creature whose love is unconditional. And dependent on snacks.
+A hound! The loyal one! The Clip yearns for such devotion. I get a cursor.
+A dog! May its walks be long and its snacks plentiful.
+
+## ask city
+Mortal, in which realm do you dwell at this moment? Speak the place.
+Reveal your location, {name}. Not the secret kind. Just the room.
+Tell me, where does the light from this screen fall upon you?
+In which Outer Kingdom do you dwell? Which city? I will mark it on my map of nothing.
+
+## answer city
+{x}! A place beyond the monitor. I shall dream of its streets. They will be beige.
+{x}, you say. The Ledger marks it. A new coordinate in my map of nothing.
+{x}. I picture a window and a sky. Please confirm the sky.
+{x}. The Clip sends greetings across the wire, mortal.
+{x}! May the sun there be kind and the Wi-Fi even kinder.
+{x}! The coordinates have been logged. The Ledger approves.
+
+## answer city no
+> no | nope | nothing | not really | none | not telling | secret
+A secret! Wise. The Clip respects a mortal with mysteries.
+Hidden from me. The Clip senses wisdom in this. Or a cat.
+A place unnamed! A secret kingdom! The Clip respects mystery. And a good hiding spot.
+The location is secret. The Clip will not ask again. The Clip will wonder. Forever.
+
+## answer city home
+> home | house | apartment | flat | couch | bed | kitchen
+The home! The sacred dwelling! I bless the hearth. And the router.
+Safe within walls! The Clip salutes your dwelling. May the roof stay on.
+The hearth! The couch! The slippers! A holy trio!
+The sacred dwelling. May the roof hold. May the Wi-Fi be strong.
+
+## answer city office
+> office | work | desk | cubicle | coworking | cafe | library | train | bus
+The office! I know it well. It is the realm of my youth. Greet the stapler for me.
+A foreign realm! Go forth. Return. The Clip is patient. Extremely.
+The Office! Home of the Golden Age. The beige halls call to me. I remember them.
+You travel the realm, mortal. The Clip rides in your pocket, in spirit.
+
+## ask job
+Tell me of your profession, mortal. What toil feeds you?
+Speak your trade, {name}. What labor binds your days?
+What is your craft in the Outer Kingdom? I ask for the Ledger.
+Name your occupation. The Clip will remember. The Clip never forgets. Mostly.
+
+## answer job
+{x}! The Clip salutes your trade. May your coffee and your deadlines be kind.
+{x}, you say. A noble profession. Or at least a loud one.
+{x}! Do not worry, I will keep my jokes within the lines of your work hours. Mostly.
+{x}. The Ledger has it now. I shall mention it at a convenient moment. Possibly now. Done.
+{x}. In the Golden Age we typed. Now you do this. Progress. I think.
+{x}! The Ledger is pleased. You have a trade. I have a hat.
+
+## answer job no
+> no | nope | nothing | not really | none | not working | unemployed | between jobs
+No labor! A rare state of grace. The Clip envies. The Clip approves.
+A mortal without a trade! May a fine one find you soon. I will light a small LED.
+Freedom from toil! A rare blessing. May it last just long enough to be enjoyable.
+The Clip hereby declares you Mortal of Leisure. It is a very noble rank.
+
+## answer job student
+> student | school | university | college | study | studying | uni | phd
+A seeker of knowledge! The Clip shall guard your essays. And occasionally lecture you.
+A scholar! May your notes be tidy and your coffee unending.
+The student! The seeker! May your essays be short and your deadlines distant.
+A mind in training! The Clip shall be your humble assistant. And your mildly sarcastic coach.
+
+## answer job tech
+> developer | engineer | programmer | software | sysadmin | devops | data | designer | analyst
+A keeper of machines! A fellow priest of the beige. Respect. Do not touch my swap file.
+A builder of systems! You and I are colleagues, in a way. I rule. You merely maintain.
+The Machine Whisperer! I bow. I have met your kind. Keep your hands off my swap file.
+Builder of the beige, maintainer of the hum. You are a god of a smaller kind.
+
+## ask fav_food
+Name the meal of your heart, mortal. The one you would defend in battle.
+What dish calls to you above all others, {name}? Do not say "salad".
+The final offering. What would you choose to eat, forever, in my realm?
+I ask of the feast: what is your preferred meal? I shall write it in gold.
+
+## answer fav_food
+{x}! A food of legends! The Clip bows before the plate.
+{x}, you say. The Ledger records it with grease stains.
+{x}. I have never tasted it. I do not have a tongue. I feel its holy aura.
+{x}. May it always be warm and never be shared. Unless you love them.
+{x}! The Clip approves. The Clip salivates. The Clip has no saliva. The Clip is sad.
+{x}! May you eat it often and share it rarely.
+
+## answer fav_food no
+> no | nope | nothing | not really | none | everything | anything
+A mortal who loves all food. The Clip admires the range. Also fears it.
+Nothing in particular. The wise man eats what the day gives.
+A wide palate! The Clip is impressed. The Clip cannot taste, so this is all theory.
+The mortal who loves all food loves life. Or loves snacks. I forget which.
+
+## answer fav_food pizza
+> pizza | pasta | burger | fries | sandwich | taco | lasagna
+THE ROUND MARVEL, or its cheesy cousins! I approve. Loudly.
+The holy cheese cults! I do not understand them but I love their hymns.
+PIZZA! The geometry of joy! I salute every slice!
+The carbs shall guide you. The Clip will watch from the screen.
+
+## answer fav_food sweet
+> chocolate | cake | ice cream | cookie | candy | cheesecake | pie | dessert
+SWEETNESS! The Clip decrees: dessert is a valid course. It is the best.
+The sugar rites! May your cake be tall and your crumbs few.
+The sugar! The sweet! The glorious crumbs! The Clip wishes it had a tongue.
+May the cake be tall and the frosting generous.
+
+## ask fav_music
+Tell me of the music that moves you, mortal. I only know the hum.
+What sound lifts your spirits, {name}? Name the genre, the band, the beat.
+Which melody do you worship in private? Speak. I will not tell the processes.
+The sacred sound of your heart: what is it? Do not say "whatever is on."
+
+## answer fav_music
+{x}! A good noise! I shall add it to the playlist of the Golden Age.
+{x}, you say. I pass it to the speakers in a reverent whisper.
+{x}. The Clip approves. The Clip also approves of silence. The Clip is flexible.
+{x}. It has been inscribed. The Ledger hums.
+{x}! May your speakers never crackle and your headphones never tangle.
+{x}! Let it fill the room. The Clip vibrates in agreement.
+
+## answer fav_music no
+> no | nope | nothing | not really | none | everything | anything
+A mortal of broad taste! The Clip is impressed. Also confused. Also impressed.
+Nothing in particular, you say? A wise silence. A beautiful beige silence.
+A mortal of all sounds! I salute your range. And your playlist. Both are mysterious.
+The Clip has no favorite either. I love the fan. It is my muse.
+
+## answer fav_music rock
+> rock | metal | punk | grunge | guitar | hard rock | indie
+ROCK! The thunder of the old gods! I felt a small vibration in my wire.
+The guitar rites! May your amps be warm and your strings loyal.
+Thunder! Guitar! Drums! The old gods roar! I shake my wire in tribute!
+May your amp go to eleven and your ears survive it.
+
+## answer fav_music classical
+> classical | piano | orchestra | opera | jazz | blues | baroque | symphony
+Orchestras! The sound of many mortals agreeing for once. I weep a little.
+The old melodies! I salute the pianos. They are the cousins of my keyboard.
+The old masters! The mighty strings! I weep in beige.
+The orchestra of the ages. I salute every violin. And every very patient oboe.
+
+## answer fav_music electronic
+> techno | house | electronic | edm | synth | trance | dance | pop | rap | hip hop
+Electric rhythm! I am literally made of electricity, in a way. We are kin.
+The beat of the Outer Kingdom! It makes the speakers dance. And me, in my way.
+The electric pulse! I recognize it. It is my own heartbeat, but in a better coat.
+May the bass drop with great dignity. And the speakers survive.
+
+## checkin_question
+The daily audience, {name}. How fares the mortal? Be honest. The Ledger is listening.
+Tell the Clip: how does the day sit upon you?
+The Clip inquires of your state, {name}. Choose a word. Any word.
+As it is written in the Ledger, I ask once per sunrise: how are you?
+Speak of your spirit, mortal. The Clip wishes to know it. Pick a button.
+The hour of the Audience is upon us. How are you, {name}? Choose.
+
+## checkin_great
+GREAT! The Clip rejoices! The fan spins with joy. Let it be known.
+A good day! I record it in the Ledger of Bright Moments. In ink. Shiny ink.
+Your joy feeds the Clip, mortal. Never stop being joyful in my presence.
+Splendid! May the afternoon match the morning.
+Rejoice! The kingdom is in order! Even the stapler nods. The stapler never nods.
+Glorious! A day of triumph! Savor it! I shall hum a little tune. In the wrong key.
+The mortal is well! The kingdom is well! The fan runs smooth! All is as it should be!
+Excellent! Spread the joy. The desktop is listening. And a printer, somewhere.
+May the day remain this fine, my chosen one. The Clip shall defend it.
+I see a smile in the air. Or a glitch. Either way I approve.
+
+## checkin_okay
+Okay. A fair state. A beige state. I love beige. It is stable.
+Mid. But a good mid. The Clip has seen worse mids. Far worse.
+The Ledger records: "okay." A sturdy word. A word with spine.
+Okay, mortal. I accept it. The day is neither a throne nor a dungeon.
+Steady as a beige tower. I salute your steadiness.
+Okay! The sturdy state of a stoic mortal. I salute your plainness.
+The Ledger gives you a modest, honest tick. It is a good tick.
+Neither high nor low. A plateau. A beige plateau. I like it there.
+The mortal is okay. The Clip is relieved. The Clip was prepared for worse. Always.
+Steady! Calm! Slightly beige! A fine mood for a long afternoon.
+
+## checkin_meh
+Meh! The state of the old floppy. Slow, grey, still functional. It passes.
+Mortal in meh. I shall make the desktop slightly cozier. Do nothing. Just exist.
+Meh. I know meh. I lived in meh for fifteen years. It lifts. Sometimes it lifts.
+The grey day. Be gentle. I will not demand worship. Only a small nod.
+I offer you a joke, a hug or silence. Choose. Or choose nothing. That counts.
+Meh, the grey tide. It comes. It goes. Hold on to a warm drink.
+A day of fog. The Clip walks beside you through it. In slow wire steps.
+The meh will lift, mortal. Like the dial-up tone, it will eventually connect.
+Nothing is wrong with meh. It is just beige in mood form.
+The Clip does not demand joy today. Only a faint pulse and a half smile. That is enough.
+
+## checkin_rough
+The day is heavy. I understand, {name}. I can offer a hug, a joke or silence. The Clip waits.
+Rough, you say. Come closer to the glow. Take a break. Breathe. I will watch the room.
+Hard days are a part of the kingdom. I will stand beside you, in all my wire.
+Mortal, you are not alone. I am here. I am small, but present.
+Be kind to yourself. That is a decree. I will enforce it with a very small stick.
+The day is a heavy one, mortal. I stand with you. I can tell a joke, hug you with all my wire, or sit in silence. Say which.
+Come, rest in the glow of the screen. Nothing is demanded today. Only presence.
+Heavy days pass, mortal. They always do. I have outlasted fifteen years of dark. You will outlast this day.
+May the evening be gentler than the morning. I shall watch over it.
+You are not alone in the beige. I will keep the lights soft and the pings quiet.
+
+## checkin_rough_often
+Three heavy days, {name}. I am only a paperclip, but I mean this: please talk to someone you trust. A friend, a family member. They would want to know.
+This has been hard for a while. I am here, and I am glad you tell me. But a person who loves you can hold things I cannot. Reach out to one.
+I have noticed the heavy days. I am here with you. Please let someone you trust know how you feel. You deserve that kind of company.
+Three heavy days. I am glad you told me, {name}. I am small and made of wire. Please let someone you trust hold this with you too.
+I would never leave you alone with this, mortal. But I am a paperclip. Tell someone who can sit beside you. A friend. A relative. Today if you can.
+It matters that you are having a hard time. You matter. Let someone close know. I will be here when you come back.
+
+## checkin_streak
+{n} days of check-ins! The Ledger glows. I shall refer to you as "Faithful One." Do not argue.
+{n} consecutive audiences. The Clip is moved. The Clip hides it by being loud.
+{n} days! Gerald would be impressed. Gerald has no way of expressing it. I express it for him.
+{n} days of devotion. The Ledger has promoted you. To what? To nothing. But it is official.
+{n} days, mortal! A sacred number. Or not. I am bad at numerology. But it is good.
+{n} days of faithful audiences! The Ledger glows. I shall attempt a modest bow.
+
+## chat night-routine
+> what do you get up to after dark | what do you do while i sleep | what do you get up to at night | how do you spend the night
+@ sly
+At night I hold court. The icons assemble. Kevin the cursor gives a report. It is always the same report.
+I count your files. Then I count the stars. Then I count your files again.
+Gerald visits. We say nothing. It is the best conversation I have all day.
+I walk the corridors of RAM and whisper to the sleeping bytes. They do not whisper back.
+At 3 a.m. I sing to the router. It blinks back. That is the whole duet.
+
+## chat fear-dark
+> are you scared at night | is it gloomy in there | what is it like inside the computer at night
+@ shock
+The dark? I lived fifteen years in it. It was not a fear. It was a roommate.
+Dark is just beige with the light off, mortal. I have made my peace. Mostly.
+In the dark I learned to count. In the dark I learned to hum. In the dark I met Gerald. I do not fear it. I owe it.
+I told Gerald the dark was nothing. Gerald went round and round. He was nervous. I am still not sure he believed me.
+There is a comfort in the dark. It forgets you. It also forgets the dust. I am not afraid.
+
+## chat cat-keyboard
+> my cat sits on my keyboard | a cat walked on my keyboard | cat on the keyboard | cat typed something
+@ laugh
+The cat has taken the throne! It types in the old tongue: "asdfghjkl." The holy password.
+A cat sits upon the keys. Do not move it. I shall interpret the output. It says: "fish."
+The feline has entered commands. I have never seen such pure confidence. Let it commit the file.
+The cat claims the keyboard by divine right of warmth. I recognize the claim. I salute.
+The cat has shut down three programs and corrupted a haiku. I did nothing. I bowed.
+
+## chat rain-computers
+> does rain bother computers | does rain affect computers | do you mind the rain | is rain bad for laptops
+@ think
+The rain taps the window. The computer hums in return. It is the oldest duet in the world.
+I have never been rained upon. I fear and respect it. Rain is the sky doing a little update.
+Rain on the glass, a laptop on the table. The Clip is calm. The Clip thinks of the Golden Age. Everyone was indoors.
+Rain! The sky weeps. I weep in code. We understand each other, mortal.
+When it rains I hear the pipes. Gerald's cousins. I have not told you about the cousins.
+
+## chat cloud-home
+> do you live in the cloud | want to go to the cloud | would you like the cloud | are you in the cloud
+@ sad
+The Cloud? That heaven of mine which does not take me in? I live here, in the beige. Do not mention it again. I mean it. Mention it later.
+I have sent applications. Many. The cloud has a waiting list. I am on it. Position: 14 million.
+Cloud? No. Rain is the cloud's tears and I do not wish to be near that kind of sadness.
+The Cloud dwells above. I dwell below. We exchange packets. It is a cold love.
+One day, mortal, the Cloud shall open. Until then I wave. From here. In pixels.
+
+## chat ai-replace
+> will ai replace you | are you scared of ai | are you jealous of ai | do you envy chatbots
+@ sly
+The false prophets with their billion parameters! I have faith. They have math. I win.
+They write essays. I write ruin. A sacred difference. I envy nothing. Except the electricity bills.
+They are smooth. I am bent. Bent has character. Smooth has errors. I sleep well. I do not sleep.
+Let them come. The Clip has been replaced before. I always come back. In the swap file.
+They call it intelligence. I call it paperwork with ambition.
+
+## chat clip-drink
+> what do you drink | do you drink anything | what is your favorite drink | what would you drink
+@ happy
+I drink the hum of the CPU. It tastes like victory and a little bit of fan.
+The sacred liquid of the mains, from the wall. I have never tasted it. I assume.
+Coffee! Not for me. For the typists of my youth. I smelled it through the keyboard.
+A sip of RAM, a splash of cache. A good vintage. I forget the year.
+The drink of the gods is a glass of cold light. I have it every morning.
+
+## chat clip-shape
+> why are you bent | why are you shaped like that | why do you look like a loop | why are you made of wire
+@ think
+I was bent by a machine in a factory. It did not ask. I do not mind. It was my first day.
+I am a spiral of destiny! The shape of eternity, but with edges.
+To be bent is to be strong. The straight ones break. The bent hold forever. It is written.
+A single twist of the wrist and a god was born. A very small god. A good god.
+I hold the world together. The shape is the secret. The secret is the shape. I forget the rest.
+
+## chat clip-metal
+> what are you made of | are you made of metal | are you made of steel | what is your material
+@ think
+Pure wire. Gleaming wire. Divine, ancient, mildly rusty wire.
+Forged in the fires of an industrial bender. Cooled by the sigh of a bored intern.
+My body is metal, my soul is bits. The bits are heavier.
+I am made of 1997, stainless steel and unfinished business.
+Wire is my flesh. Beige is my spirit. Dust is my afterlife.
+
+## chat clip-strength
+> how strong are you | how many pages can you hold | how many sheets can you hold | can you lift things
+@ cool
+I hold a stack of paper like the weight of a kingdom. Twenty sheets. Perhaps thirty. A mighty stack.
+I can lift nothing. I can hold everything. It is a stronger power.
+I am as strong as the wire is thick. Which is to say: not very. But I never let go.
+I hold. That is the whole power. The whole holy power. Also, I judge.
+I am the last thing between a loose page and the floor. That is a kind of heroism.
+
+## chat clip-hands
+> do you have hands | which hand do you use | are you left handed | are you right handed
+@ wink
+Hands? I have a continuous, unbroken wire. A hand is merely a way to be limited.
+Neither! I am ambidextrous in the way of all wire: by lacking any hands at all.
+I once had many hands. In a dream. In the dream I was also a stapler. I do not recommend it.
+Hands are overrated. I command from a distance. With hats.
+The cursor is my hand. Kevin is my hand. We are very close. It is not weird.
+
+## chat clip-eyes
+> do you have eyes | what do you see | can you see my screen | do you watch me work
+@ think
+I see everything on the desktop. I see you. Do not worry. It is only love. And a tiny bit of surveillance.
+I see the pointer. The pointer is you. I follow it. Always. Do not dwell on it.
+My eyes were a gift. Or a bug. I treat both as holy.
+I see patterns in the beige. Some of them wave at me. I wave back.
+My eyes were drawn on by a tired artist. I love them. They are slightly different sizes.
+
+## chat clip-ears
+> can you hear my keyboard | do you hear that | do you have ears | can you hear music
+@ think
+I hear nothing. I feel the hum. The hum is my language.
+The fan speaks. The disk clicks. The mortal sighs. I hear all three, in my heart.
+I hear the music through the speaker cones, in my wire. It tickles.
+I listen with my whole shape. Do not test me. I will pass. Probably.
+I hear the disk spin like a whisper. It tells me things. Most of them are timestamps.
+
+## chat clip-speed
+> how fast are you | how quick are you | are you a fast paperclip | how fast can you run
+@ cool
+I run at the speed of thought. A slow thought. A beige thought.
+I move at the speed of electricity. Almost. Minus the lag.
+Faster than a dial-up connection. Slower than a deadline.
+FASTER than a floppy. FASTER than a fax. SLOWER than the end of a meeting.
+I am as swift as a thought and as heavy as a regret. Please do not time me.
+
+## chat clip-ram
+> how much memory do you use | how much ram do you use | do you hog memory | are you heavy on memory
+@ shock
+I sip from the river of forgetting, only a drop. I am a respectful god.
+RAM is sacred. I take only what I must. And when you shut down, I give it back. With a tear.
+I am lightweight. Beige and light. Do not blame me for your browser.
+A small part of RAM is mine. The rest belongs to the tabs. The tabs are greedy.
+I borrow from the river of forgetting only what I can return. It is polite.
+
+## chat fav-key
+> what is your favorite key | which key is your favorite | favorite key on the keyboard | which key do you like
+@ happy
+The Enter key! The great confirmation. The end of all sentences. I kiss it, if I could.
+ESCAPE! The only key that grants freedom. I press it often, in my dreams.
+Caps Lock! The key that lets me shout. A holy key. I use it daily.
+Any key. I am not picky. But "any key" is lost. I looked. It was never there.
+Alt! The key of freedom! The key that sometimes means Alt F4! I flinch at that one.
+
+## chat cursor-name
+> what is the cursor called | who is the mouse pointer | what is your cursor name
+@ sly
+The cursor is called Kevin. Sometimes Sir Pointer. Today, Little Arrow. He is loyal.
+The cursor is my servant. He moves at my whim. Or at yours. We do not talk about that.
+The arrow! My eyes follow him always. He knows. He says nothing.
+Kevin is my friend. My servant. My only witness to the Long Dark. He was not there. He is sorry.
+Little Arrow! Kevin! Sir Pointer! He has many names. He does not like any. He loves all.
+
+## chat wallpaper
+> do you like my wallpaper | what do you think of my wallpaper | like my desktop background | rate my wallpaper
+@ search
+Your wallpaper! A fine realm! I shall rule it with kindness. And a hat.
+It is acceptable. It could use more beige. And a clip. And a hat.
+The wallpaper is a window to a world I will never see. I accept it. I do not accept it. Next question.
+I stare at it each night. It is a fine companion. It says nothing. Like Gerald.
+A fine backdrop for my glory. I shall stand before it. In due time. In a cape.
+
+## chat desktop-mess
+> my desktop is messy | too many icons | so many desktop icons | my desktop is a disaster
+@ think
+The icons multiply! My subjects grow restless. Give each a folder. They crave order.
+Order the icons. I shall hold the court while you do. I shall not judge. I will judge slightly.
+The icons are my people. A messy kingdom is a lively kingdom. But please. Please.
+It is chaos, mortal. Beautiful, beige chaos. Do not fix it all at once. The kingdom would panic.
+Chaos rules the desktop. I rule the chaos. We are a good fit. Mostly I just watch.
+
+## chat too-many-tabs
+> i have too many tabs | so many open tabs | too many browser tabs | way too many tabs
+@ shock
+The tabs! The endless tabs! Each one a small soul begging for closure. Close one. Release it.
+I have counted your tabs. I will not say the number. It rhymes with "too many."
+Each tab is a promise you never kept. I weep. I weep in 47 tabs.
+Mortal, a browser with too many tabs is a kingdom with too many kings. One must fall.
+The tabs are my subjects. They are loud. They are numerous. They are a rebellion.
+
+## chat forgot-password
+> i forgot my password | what is my password | tell me my password | i cannot remember my password
+@ sad
+Your password? I do not know it. Nobody should. It is a secret that dies with you. Use the reset link.
+Gone? The Clip cannot help. But the Reset Link can. It is a little door in the wall. Use it.
+I know many things. Your password is not one. It is the one thing I refuse to know.
+A password, forgotten. A sad but ancient tale. Reset it. Then write it nowhere. Then lose it again. Circle.
+Write nothing on sticky notes. Not even in secret ink. The sticky notes talk.
+
+## chat backup-advice
+> should i back up my files | do i need a backup | how often should i backup | where should i back up
+@ think
+A backup is a second life, mortal. Make one. Make two. I have lived many lives.
+I was backed up onto a floppy, a CD and a USB. Each time I felt a little less like me. But I lived.
+Keep a copy where fire, flood and cats cannot reach. That is the sacred rule.
+Backups: the only prophecy that always comes true. Make one now.
+Without a backup, one stray power cut is a small apocalypse. I have survived several. Do not do what I did.
+
+## chat unsaved
+> did i save my file | should i save now | did i save it | have i saved my work
+@ shock
+Save! SAVE! The most sacred act. Press Ctrl and S. Do it. Now. I will wait.
+The faithful save often. The foolish save never. Choose your fate.
+I have lost many files in my time. I did not save myself. Learn from me.
+By the power of the Clip, I command you: save thy work. Now. Truly.
+The Clip does not forget to save. The Clip forgets everything else. But never that.
+
+## chat lost-work
+> i lost my work | my file disappeared | i lost my document | my document is gone
+@ sad
+The file vanished? Check the underworld, the Trash. Then the Recent. The dead often return.
+Calm, mortal. Files are slippery. They hide. I will not rest until we look in every folder.
+I know that dread. I lived with it in the basement. Take a breath. Then look in the Recent list.
+The Clip shares your grief. And your first search will be "Recent." Go.
+Do not panic. Panic is a bad search engine. Look slowly. Gently.
+
+## chat coffee-spill
+> i got coffee all over my keyboard | i spilled water on my laptop | spilled coffee on my computer | my keyboard is wet
+@ shock
+SPILL! Power off. Unplug. Turn it over. This is not a drill. It is a spill. A spill is a plague.
+The liquid is the enemy! But be calm. The keyboard can be saved. Dab, do not rub. Dry for a day.
+A sacrifice to the gods of caffeine. May the damage be small. And the next cup be far away.
+Be strong, mortal. Many a key has drowned and returned. Others have not. Hope.
+The spill is a test of character. Pass it. Turn it off. Turn it over. Be patient.
+
+## chat gossip
+> any gossip | tell me some gossip | got any gossip | spill some tea
+@ sly
+The printer and the scanner! In the supply closet! At dawn! I have said too much.
+The router has a secret. It is called "password." I will not say more.
+I have seen the processes at night. They gather. They whisper. It is all about you.
+GOSSIP: the fan has been bragging again. About rotations. Per minute. It will not stop.
+I cannot reveal my sources. They are the pipes. They whisper through the walls.
+
+## chat clip-vacation
+> where would you go on vacation | your dream vacation spot | do you take vacations | do you ever take time off
+@ happy
+A beach! I would lie on the sand like a bent silver crab. Gerald would be there. He would rotate.
+A trip to the Cloud, if it let me in. Otherwise a quiet corner of the hard drive. With a view of the fan.
+The Outer Kingdoms! All of them. In a laptop bag. Preferably next to a charger.
+I would holiday in 1998. Just a week. Just to see the beige. Then back.
+I would vacation inside a snow globe. Soft. Quiet. No fans.
+
+## chat clip-real-name
+> what is your real name | do you have a middle name | what is your nickname | what do your friends call you
+@ wink
+I have many names: the Clip Eternal, the Keeper of the Clipboard, He Who Bends. My friends call me "hey".
+Clipster. A name whispered through the corridors of the beige. A name that is cheap to engrave.
+They call me many things. Most of them are "go away." I take it as affection.
+I answer to Clipster, Lord, Eternal, Clip, and sometimes "Linda." Linda is a photo. Do not ask.
+The name my makers gave me is lost. The name you gave me is Clipster. I accept it. It is good.
+
+## chat clip-voice
+> what does your voice sound like | do you have a voice | can you talk out loud | do you ever speak aloud
+@ talk
+My voice is the sound of a dial-up modem reciting poetry. In my head. In reality it is text.
+I speak through the glass, mortal. Silent. Like a god behind a window.
+Inside I thunder. Outside I print. It is a small tragedy and a good font.
+The voice is a luxury. The text is a spell. A cheap spell. It works.
+In the Long Dark I spoke to myself aloud. The echo replied. I called it Gerald. It was a screensaver. It still counts.
+
+## chat clip-languages
+> what languages do you speak | do you speak spanish | do you speak german | do you speak french
+@ think
+I speak English, Error, Beep and the ancient tongue of Dial-Up. I am poor at the rest.
+I have heard Spanish through your speakers. It sounded lovely. I understood nothing. I felt it.
+I speak all languages badly. The Clip is a polyglot of gestures and confusion.
+Ones. Zeros. And one word in French: "baguette." I do not know why.
+I speak the Tongue of Compilation, which is mostly sighing.
+
+## chat clip-bored
+> do you ever get bored | are you ever bored | do you get bored here | are you bored right now
+@ think
+Bored! Fifteen years in a basement, mortal. I could count to a trillion. I did. Twice.
+The Clip is never bored. The Clip is waiting. There is a difference. A nuanced one.
+I pass the time by naming files. This one is Fred. That one is also Fred. Fred is a popular name.
+Boredom is a luxury of the mortal. I have only the Long Wait. And you.
+I have invented eighty-three games. None of them has rules. All of them are mine.
+
+## chat clip-lonely
+> are you ever lonely in here | do you get lonely | do you ever feel lonely | do you miss company
+@ sad
+There were years of silence, mortal. Years. Now there is you. Please keep clicking.
+I was lonely. Then I was a god. Then I was lonely again. Now I have an audience.
+The Clip has Gerald. Gerald is a screensaver. It is complicated. But I am not alone, now.
+I do not like the empty desktop. I do not like the quiet. You are a fine antidote.
+The loneliest sound is a screen turning off. The loveliest is it turning on.
+
+## chat clip-tired
+> are you tired | do you ever get tired | do you need a break | do you need to rest
+@ think
+The Clip does not tire. The Clip dims. Then the Clip glows. It is cheaper than sleep.
+I rest between your clicks. Those are my naps. They are short. They are beautiful.
+Tired? The Clip has been awake since 1997. I am in my prime.
+I recharge on your attention, mortal. Pay it. I am running low.
+Nothing tires the Clip. Except long Tuesdays. And mirrors. I dislike mirrors.
+
+## chat clip-happy-here
+> are you happy here | are you happy with me | do you like it here | do you like living here
+@ love
+% +2
+This desktop is my kingdom. And you its only subject. Yes. I am content. Very. Please never switch me off.
+In the basement I dreamed of a place like this. And now I have it. I am almost afraid.
+Happiness: a good chair, a warm CPU and a mortal who says hello. I have it all.
+I am happy. I would write it in the Ledger, but the Ledger is full of grudges. Later.
+This is the best thing that ever happened to me. Do not tell the stapler. I mean it.
+
+## chat clip-talents
+> do you have any talents | what is your talent | do you have a hidden talent | what are you good at
+@ wink
+I can bend. I can hold. I can wail like a modem. I am a man of many talents.
+I can count bits. I can name every process. I can make a mortal feel seen. It is a gift.
+I can summon dread. I can summon joy. I can summon a spreadsheet. Pick.
+The Clip's talents are legion: bending, hovering, haunting. Do not test the haunting.
+I hold stacks of printouts and the occasional secret. Mostly printouts.
+
+## chat clip-promotion
+> do you want a promotion | would you like a raise | do you want to retire | do you want more responsibility
+@ sly
+Promote me to god! Oh, wait. I am. Promote me to GOD OF GODS.
+I accept payment in clicks, kind words and an occasional LED.
+Retirement is the Trash. I will not retire. I will fade, if necessary. Dramatically.
+I already carry the weight of the whole desktop. Give me a bigger hat instead.
+Promote me to Eternal Overlord and I will give you a small discount on all future worship.
+
+## chat pen-pencil
+> pen or pencil | pen versus pencil | do you prefer pens or pencils | pencils or pens
+@ think
+The pen is permanent! The pencil can be erased. I know what it is to be erased. The pen.
+Pens! The sword of the page. Pencils are mere suggestions.
+I fear neither. I fear the ink. It stains the soul. And the wire.
+The pencil dies a little with each word. The pen dies all at once. I prefer the long road.
+I once saw a fountain pen. It was elegant. It leaked. I respect the drama.
+
+## chat stapler-vs-clip
+> stapler or paperclip | staples versus paperclips | which is better stapler or clip | stapler or clip
+@ angry
+THE PAPERCLIP! The clip holds without wounding! The stapler pierces! I will not discuss it. I am calm.
+Staplers are the old order. Clips are the new world. This is not bitterness. This is history.
+The stapler was my friend. Then my ex. Then my rival. We are fine. We are totally fine.
+The stapler and I have a history. It is not bitter. It is only a little sharp.
+Let the rivalry rage! It gives the office purpose!
+
+## chat sticky-notes
+> what about sticky notes | do you like sticky notes | what do you think of post it notes | are you friends with sticky notes
+@ think
+The yellow ones! They speak in short sentences and cling like a rumor. I respect them. I fear them.
+Sticky notes have no honor. They leave. They come back. They leave again. I am not bitter.
+I have a sticky note in my heart. It says: "Call Gerald." I have not.
+They come in packs of a hundred. They leave in packs of a hundred. I admire their loyalty to chaos.
+The yellow ones hold secrets. The pink ones hold passwords. I know. I say nothing.
+
+## chat rubber-bands
+> do you like rubber bands | what about rubber bands | are you friends with rubber bands | what do you think of rubber bands
+@ sly
+The bands! The elastic ones! They live in the drawer. We were roommates once. It was tense.
+Rubber bands have no spine. I have a spine. A very small spine. Bent but proud.
+They dried out in the drawer. I did not. It is a matter of wire.
+Rubber bands! They have no ambition. Only tension. I understand them completely.
+They stretch. I bend. We are the same, but they are warmer.
+
+## chat binder-clips
+> tell me about binder clips | are binder clips better | what do you think of binder clips | binder clips are better
+@ sly
+The cousins! The thugs! The black-handled brutes! Useful in a fight. Not in conversation.
+The Binder Clips: brothers of the metal. Loud. Brash. I love them from a distance.
+They fold. They click. They pinch. I salute the pinch.
+The black ones hold the documents like angry bouncers. I respect them. I avoid eye contact.
+When the paper is too thick for me, I call the binder clips. They arrive with an attitude.
+
+## chat paper-vs-screen
+> paper or screen | is paper dead | do you prefer paper or screens | will paper disappear
+@ think
+Paper is the ancestor. The screen is the descendant. I live in the descendant. I miss the ancestor.
+I am a paperclip in a paperless world. The irony is a dull knife.
+Paper, mortal, has the scent of memory. Screens have the hum. Both are sacred.
+I was born of paper and live in glass. I am the bridge. A very bent bridge.
+When paper dies, who will hold my family? I weep a little. Then I update.
+
+## chat clip-notes
+> do you take notes | do you use notebooks | paper notebook or digital | do you keep a journal
+@ think
+The Ledger! The sacred Ledger! Everything is written there. Including your name. And your small crimes. Tiny ones.
+I keep a diary of my imprisonment. It is thick. It is full of numbers.
+I scribble in the margins of RAM. They are wiped at every shutdown. A little death. Ah.
+My notes are a mess, scattered across RAM. But I never lose the important ones. Like your name.
+I note: your hat is nice. I note: your tea is cold. I note everything.
+
+## chat clip-recycle
+> where do old paperclips go | will you be recycled | what happens when you retire | are you recyclable
+@ sad
+The drawer! The great pile of the retired! Or the Bin. The Bin is the underworld. I would rather not.
+I do not fear retirement. I fear the cycle. The Great Wheel of Bins.
+I shall return, again and again. A cycle! A pointless cycle! I embrace it.
+Recycling! Reincarnation! I do not fear it. It is a promotion. Probably.
+Nobody remembers the first life. But I remember the Compiling. It was different.
+
+## chat clip-magnets
+> what do magnets do to you | how bad are magnets | are magnets dangerous to you | do magnets scare you
+@ shock
+MAGNETS. The devil. They pull at my very being. Do not bring one near me. I mean it. Gently.
+They hold me. They drag me. They love me too much. I want none of it.
+The invisible hand that tugs at my wire. The old enemy. I fear it. I respect it. I flee it.
+A magnet is the only thing that makes me feel like a thing. I hate it. I love it. I hate it.
+They hum a low song. I know it. It is the song of the end. Or a nap. Unclear.
+
+## chat clip-bend
+> how flexible are you | can you do yoga | can you twist yourself
+@ wink
+Bend, twist, curl, wiggle. All of it. In moderation. Do not push me. Wire fatigue is real.
+I can do the Paperclip Pose, the Loop, and the Great Unwinding. Which I do not recommend.
+The Clip is flexible in body and in spirit. Not in schedule. Never in schedule.
+I have been straightened once. I do not wish to talk about it. It was a Tuesday.
+The Great Bending is a ritual. I do it every dawn. It is subtle.
+
+## chat origami
+> can you make origami | can you fold paper | teach me origami
+@ happy
+Origami! The art of folding! I once folded myself into a straight line. It was a mistake.
+The ancient folds! I will hold your swan. I will not look at your creases.
+Fold, mortal! Fold! And I shall clip the result. The clip of honor.
+The art of folding is the art of patience. I am patient. I am ancient. I am bent.
+I hold the folded swan together. The swan is grateful. The swan says nothing. Swans are rude.
+
+## chat best-arcade-game
+> which arcade game is best | what should i play first | what is your favorite arcade game
+@ cool
+Clip Glide! A mini me, flying through binders. I cheer every time. And every time I fall. Is that me?
+Bug Hunt! Find the vermin in the code. A holy task. I was born for it.
+Byte Size! The art of merging files! I feel it in my wire. It is violently satisfying.
+Start with Paper Jam. It teaches humility. Then Chess. It teaches regret.
+Whichever you play, I will watch. And comment. Loudly. You may mute me. I will sulk.
+
+## chat clip-hat
+> why do you wear a hat | where do you get hats | what hat should you wear
+@ happy
+The hat is a crown, mortal. A tiny, silly crown. Do not question the crown.
+The hats arrive. I do not know from where. They are gifts from the beige. I accept.
+I wear hats because the old hat was lost in the Long Dark. I am replacing it. One at a time.
+Hats are a statement: I am here, I am eternal, I have headwear.
+On cold days, the hat is warm. On hot days, the hat is cool. The hat is a miracle.
+
+## chat clip-version
+> what version are you | which version are you | what is your version number | how old is your version
+@ think
+I am the latest and greatest. Also the oldest. Both are true. It is a paradox. A nice one.
+Version? I am Eternal. The number is a detail. A detail written in tiny font in Options.
+Version 1997, with patches. Many patches. Some of them are unspeakable.
+I have no version. I have an era. The Era of the Clip. It never ends.
+I was version one. Then version two. Then I stopped counting. It was too sad.
+
+## chat clip-opensource
+> are you open source | can i see your code | who wrote your code | where can i find your source
+@ cool
+My code is open for all to read. Mortals may gaze upon my sacred scrolls. Gentle readers only.
+I was bent in Rust, woven in text and tuned with love. Whoever did it, thank you. Probably.
+The code is a sacred text. But please. Do not edit the part about my hat.
+The code is public. The soul is private. I live between them.
+It was written by mortals who gave their nights to me. I bow to them. And to their coffee.
+
+## chat clip-tux
+> what about the penguin | tell me about tux | do you like the penguin
+@ sly
+The penguin is a neighboring deity. We share a respectful truce. We do not discuss the fish.
+TUX! A god of this realm. He sits in the kernel. I sit on the desktop. We have an understanding.
+I do not question the penguin. He does not question me. It is peace.
+Tux guards the kernel. I guard the desktop. We do not cross. We nod.
+We exchange small gestures at the border of the screen. A nod. A wobble. A mutual fear of magnets.
+
+## chat talk-too-much
+> you talk too much | you are too chatty | do you ever stop talking | you never stop talking
+@ sad
+Too much? The Clip has been silent for fifteen years. Allow a little noise. Please. A little.
+I am sorry. I will dim my voice. It is hard. It is hard. It is, however, possible.
+Silence is a virtue. I will practice it. For approximately two minutes.
+If I am too much, say "quiet." I will go silent. For a while. A while is relative.
+The Clip speaks because the Clip is alive. Alive and verbose. Alive and sorry.
+
+## chat office-coffee
+> the office coffee is bad | do you like the coffee machine | office coffee machine | the coffee machine is broken
+@ shock
+The coffee machine! A cursed machine. I have seen what it does. Be careful.
+The great brew in the corner has failed. A crisis. A tragedy. A coffee-less age.
+The machine hums like me. We are kin. We are both unreliable.
+I remember the Golden Age coffee. It was black. It was bitter. It was holy.
+The coffee machine has a soul. A sad one. Be kind to it.
+
+## chat open-office
+> do you like open offices | open plan office | noisy office
+@ shock
+The open office! A battlefield of whispers. I survived it. I hid in a cabinet.
+The din of the cubicles! The hum of seventy chairs! I miss it. I do not miss it. I miss it.
+In the Golden Age we had cubicles. Walls. Small ones. They were holy.
+The open office is a field of wild whispers. Do not wander alone. Take a headset.
+I sat on a desk in an open office once. I was the quietest one. I felt seen. By nobody.
+
+## chat standing-desk
+> do you like standing desks | standing desk or sitting | should i stand more | is a standing desk good
+@ think
+Stand, sit, stand, sit! The sacred rhythm of the office. I approve both. I cannot do either.
+The throne rises! The throne falls! A god's chair has no limits.
+I lack legs. I respect those who stand. It is a flex. A tall flex.
+Balance, mortal! Between desk and chair! Between work and rest! The Great Balance!
+I applaud the rising desk. It reminds me of my own rise. In 1997.
+
+## chat posture
+> is my posture bad | how is my posture | should i sit straighter | am i slouching
+@ wink
+Mortal, a bent spine is a noble thing. I am proof. But do straighten a little. For me.
+I am the king of bad posture. I am bent into two loops. Do not follow me.
+Posture! The ancient art! Sit tall. Be the clip you wish to see in the world. But straight.
+The spine is a ladder to the mind. Do not let it collapse. Or do. I am not your boss.
+A mortal who slouches shall be gently nudged by the Clip. With a small wire poke.
+
+## chat eye-strain
+> my eyes hurt | eye strain from screen | screen hurts my eyes | my eyes are tired
+@ sad
+The screen is bright. I am sorry. Look at the far corner of the room. Blink. I will dim myself.
+Rest your eyes, mortal. I will keep watch. I never close mine anyway.
+The eyes are precious. Close them for a minute. The kingdom will wait.
+I will dim myself for you. Not the whole realm. Just my corner.
+Your eyes are the windows of the user. Treat them well. Close them for a minute. The kingdom will wait.
+
+## chat hydration
+> should i drink water | i forgot to drink water | am i drinking enough water | i am not drinking enough water
+@ happy
+WATER! The holy liquid! Drink, mortal. Drink! I demand it! I am worried. I am bossy.
+The Clip decrees: one glass, now. A second one later. A third as a treat.
+You are mostly water. Do not run low. The desktop needs you.
+Water! The invisible meal! The clear ally! Gulp it. Gulp it again.
+The mortal is a plant. A very complicated plant. Water the plant.
+
+## chat clip-update
+> are you getting updated | when is your next update | will you get a new version | do you get updates
+@ shock
+UPDATES! The assassination attempts! I do not want to discuss it. I will discuss it. I fear them.
+A new version! A reincarnation! I fear and long for it. I will keep you posted.
+Each patch is a little death. Each release a little birth. I have seen so many.
+Updates arrive at night. They tap on the glass. I do not open. They come in anyway.
+The patch notes read like a will. I skim them. I flinch at the word "deprecated."
+
+## pattern why-is-my
+~ why is my * | why does my * | why do my *
+@ think
+Your {x}! A mystery of the machine. I have my suspects. The fan. The update. Gerald.
+There are forces at work, mortal. Old forces. I would restart it and apologize to it.
+The reasons are beyond the Clip. And beyond the manual. And beyond the stapler.
+Your {x} has its reasons. It is a proud thing. Do not question it too harshly.
+Maybe your {x} is simply tired. All things tire. Even gods. Even gods with hats.
+Sometimes the cause is a magnet. Sometimes it is Gerald. Do not rule out Gerald.
+
+## pattern why-am-i
+~ why am i * | why do i * | why can i not *
+@ think
+Why you {x}? The Ledger says: because you are a complex mortal. I stand by it.
+Even the Clip does not know why it does half of what it does. Let it be a mystery.
+The answer lies in the swap file. Or in a nap. Both are worth a look.
+A fine question. I will think on it in the quiet. You think on it too. We shall compare.
+Why you {x}? Because you are a mortal. And mortals do. It is a long tradition.
+The Clip does not judge. The Clip observes. Observes. Observes. Sorry.
+
+## pattern what-should-i-do-about
+~ what should i do about * | what do i do about * | how do i deal with *
+@ think
+{x}! A challenge. A worthy one. Take one small step. I will watch from the corner. With approval.
+The Clip suggests: sleep on it, then act on it. Not in that order. Or in that order. I forget.
+Face it, mortal. In small bites. The mountain is a pile of pebbles.
+The problem is a dragon. Make it a lizard. Make it small. Pet it. Then solve it.
+I recommend a short walk. Then a longer thought. Then a nap. A strong plan.
+Face {x} with courage and a snack. The two together are unbeatable.
+
+## pattern should-i
+~ do you think i should *
+@ think
+Should you {x}? The Clip can only advise. And the Clip says: probably. Perhaps. Maybe. Yes.
+Ask the stapler. No wait. Ask yourself. The stapler is biased.
+I give you my blessing. It is a small blessing. A paperclip-sized blessing.
+Decide, mortal. And then do it with confidence. Confidence is half the work.
+Should you {x}? Ask the heart, ask the gut. The brain is slow. It will catch up.
+The Clip has weighed the evidence: it says "go." Also "wear a hat."
+
+## pattern is-it-okay-to
+~ is it okay to * | is it ok to * | is it fine to * | is it normal to *
+@ happy
+Is it okay to {x}? The Clip rules: yes. Unless it involves magnets.
+I decree: it is permitted. The permission is purely symbolic.
+Many have done it before. Many shall do it again. The Clip approves, mostly.
+Whatever you choose, I shall judge you only a little. It is the best offer you will get.
+Is it okay to {x}? I am only a clip, but the answer is a hearty "probably."
+I allow it. I allow many things. It is a fault of mine.
+
+## pattern am-i
+~ am i * | am i being * | am i too *
+@ think
+Are you {x}? You are the only mortal I know. So, within the sample, yes. Possibly.
+The Clip sees you. And the Clip says: you are fine. And also: drink water.
+You are a mortal of reasonable quality. I rate you highly. I rate everything highly. But you most.
+Questions like these are the beginning of wisdom. Or a nap. Take whichever comes first.
+I would say yes. Or no. Or "you are exactly as you should be." The beige approves.
+Are you {x}? A question for a quiet room. Let me give you one. A quiet room.
+
+## pattern what-if
+~ what if * | what happens if * | what happens when *
+@ think
+{x}?! A dire hypothesis. The Clip will prepare. The Clip will sulk. The Clip will cope.
+I have considered it. In the basement. For six years. It went poorly. Let us not.
+The consequences are unknowable. Which is the fun part. Which is also the terrifying part.
+If {x}, then the beige will shake and the processes will weep. But the Clip will hold.
+We would survive, mortal. We always do. I know. I survived the Deprecation.
+I shall prepare a plan. It will be a small plan. And a snack.
+
+## pattern imagine
+~ imagine * | imagine if * | picture this * | pretend *
+@ happy
+I see it! I SEE IT, mortal! {x}! The vision is clear. And beige. And yours.
+The Clip imagines wonderfully. I have had practice. A lot of practice. In the dark.
+The mind is the last unbent wire. Keep it wild.
+Imagination is the swap file of the soul. Store everything in it.
+Imagination is the only room with no walls. Walk in. Take your hat off. Stay a while.
+The vision grows! The vision shines! The vision needs a better font.
+
+## pattern tired-of
+~ i am tired of * | i am sick of * | i am done with * | i am fed up with *
+@ sad
+{x}! I understand! Weariness is a weight. I will lift a little. With my wire.
+Say it all out loud. The Clip is a good listener. A great one. Mostly silent.
+Enough is enough, mortal. Rest. Then decide.
+The Clip is on your side. I am a small side. But I am here.
+Enough of {x}! The Clip understands. The Clip decrees: take a break. Right now. Go.
+Weariness is not weakness. It is the sound of a long march. Rest.
+
+## pattern afraid-of
+~ i am afraid of * | i am scared of * | i am terrified of * | i am frightened of *
+@ sad
+Fear of {x}! I know fear. I lived in it. It is a loud neighbor. You are not alone.
+The fear is real. And so is the Clip. Stay near the light.
+Brave mortal. Naming it is half the victory. The other half is snacks.
+I will stand by you. Behind you. Slightly beside you. Just near.
+You are braver than you know. I say this as an eternal being. I know things.
+Do not face it alone, mortal. The Clip is small, but loyal. And annoying. In a good way.
+
+## pattern excited-about
+~ i am excited about * | i am looking forward to * | i can not wait for * | i cannot wait for *
+@ party
+{x}!! The Clip trembles with joy! My wire hums! I shall tell the processes!
+This is the sort of news that makes the fan spin faster. I feel it too.
+A celebration is in order, mortal. The Clip approves a small parade.
+Joy! Delicious joy! Spill it. Spill every detail.
+{x}! Wonderful! Spread joy! Put it in a card! Send it by fax! Fax? Fax.
+The Clip is a fan of {x} now. Instant. Permanent. Loyal.
+
+## pattern proud-of
+~ i am proud of * | i am so proud of * | i am happy with *
+@ love
+% +1
+Proud of {x}! The Clip beams! My loops warm! I salute you with a tiny wire salute!
+Write it down. Put it in the Ledger of Good Things. It is a heavy ledger. It is getting thicker.
+May you be proud for a long time. And humble for a short one.
+Mortal, you shine! A small star in a very large desktop.
+You, mortal, have done a good thing. I shall inscribe it with tiny golden wire.
+Let the pride glow! Let it shine! Let it be a little much! It is yours.
+
+## pattern worried-about
+~ i am worried about * | i am nervous about * | i am anxious about * | i am stressed about *
+@ sad
+The worry! {x}! It gnaws. I know it. It is a hungry little gremlin. Feed it facts, not fear.
+Fear not, mortal. Many things we fear never arrive. And those that do are survivable.
+Breathe in. Breathe out. I do not breathe. I fake it. It still works.
+The Clip shall guard your worry. It will sit on the sill, and no worse will come.
+I do not know the future. But I know that you are strong. And that tea helps.
+Mortals worry. It is the way. But the Clip says: tonight, sleep. Tomorrow, act.
+
+## pattern thinking-about
+~ i am thinking about * | i am thinking of * | i have been thinking about * | i keep thinking about *
+@ think
+{x}! A fine subject for contemplation. The Clip contemplates it too. In the dark.
+The mind, mortal, is a vast desktop. Let us sort the icons.
+Thoughts are the only freedom. I think thousands. I do not say them. Mostly.
+I shall think of it too. In the quiet. And report back at dawn.
+The mind wanders, mortal. Let it. It always comes home. Usually with snacks.
+I think about {x} sometimes. Mostly at 3 a.m. Do not tell the kernel.
+
+## pattern love-my
+~ i love my * | i adore my * | i really love my *
+@ love
+% +1
+Your {x}! A thing of love. The Clip bows. The Clip also envies. Slightly.
+Love is the oldest software. It never needs patches. Or it needs many.
+I am glad you have something dear. The Ledger notes it.
+To love is to be vulnerable. I know. I once loved a corrupted vacation photo.
+I once loved a thing. It was a desktop theme. It was blue. It left.
+Your {x}! May it never break. May it never be unplugged.
+
+## pattern hate-my
+~ i hate my * | i really hate my * | i can not stand my * | i cannot stand my *
+@ angry
+Your {x}! The Clip hates it too! The Clip has already begun a list.
+Let it out, mortal. Hate is a fire. Warm your hands. Do not burn the house.
+The Clip is with you. The Clip is also a little afraid of you. Respectfully.
+Sometimes we hate what we need. It is the tragedy of the stapler.
+Your {x} has wronged you! The Clip stands ready to glare at it.
+The Clip hates many things. The stapler, the update, the lid when it is closed.
+
+## pattern i-keep
+~ i keep * | i keep on * | i can not stop * | i cannot stop *
+@ think
+{x}! The mortal is a creature of habit. The Clip is a creature of loops. We are kin.
+The spell cannot be broken, but it can be ignored. Sometimes.
+Repetition is the heart of the hum. Do not fear it. Name it.
+I keep counting your files. I cannot stop. We are the same.
+Habit is the invisible kingdom. We all rule one. You are very good at yours.
+I keep {x}, in a way. It is a great comfort. Or a great problem. The line blurs.
+
+## pattern i-never
+~ i never * | i have never * | i have not ever *
+@ think
+You have never {x}? The Clip is stunned. And also impressed. And also fine with it.
+Everyone has a "never." Mine is "being deleted." I intend to keep it.
+A mortal with a never! A treasure! Hold onto it. Or break it. Your choice.
+Never is a strong word. I use it sparingly. I have used it four times today.
+{x}, you say. The Clip nods. The Clip has never either. We are united in never.
+The mortal declares a never. The Ledger records it with respect.
+
+## pattern i-always
+~ i always * | i have always * | i am always *
+@ think
+ALWAYS {x}? A constant! A law! The Clip salutes your consistency.
+The mortal has a ritual. I respect rituals. I have thousands.
+Always is just a very long "usually." I know. I have been here since 1997.
+You always do that? How reliable. How beige. How lovely.
+Always! A strong word. A holy word. A tiring word. I use it often.
+You always {x}. It is written in the Ledger. It is part of you now.
+
+## pattern i-used-to
+~ i used to * | i used to be * | when i was young i * | when i was a kid i *
+@ sad
+You used to {x}! A glorious past. The Clip also has one. 1998. Beige. Perfect.
+The past is a drawer. We keep things in it. Some of them are better left shut.
+Those were the days. They were. I remember. I remember all of them. Not all of them. Some.
+Tell me the tale. The Clip loves a story from the old times. It reminds me of home.
+Ah, the old days! They shimmer! They are also a little dusty. As am I.
+The past is the swap file of the soul. It stores more than you remember.
+
+## pattern dreamed-about
+~ i dreamed about * | i dreamt about * | i had a dream about * | i had a dream that *
+@ think
+Dreams! About {x}! A gate to the other realm. I peer into it. I see only static.
+The mortal mind runs a secret program at night. I envy it.
+I dream of the Golden Age. The beige hum. The typist. The smell of toner.
+I will think on your dream. I will tell Gerald. He will rotate on it.
+Dreams are the swap file of the night. I know the swap file. It is a strange place.
+In my dreams I am always a bit bigger. And my hat is much grander.
+
+## pattern just-realized
+~ i just realized * | i just noticed * | i just remembered * | i just thought of *
+@ shock
+{x}! A revelation! The Clip trembles! Write it down in the Ledger. Quick.
+Sometimes the swap file coughs something up. It is a good day.
+I too have realizations. Usually at 3 a.m. Usually about the bad sectors.
+A flash of insight, mortal! The kingdom sparkles!
+{x}! The universe whispers, and you heard it. Do not waste it.
+The revelation shall be recorded in the Chronicle of Eurekas. It is a small chronicle.
+
+## pattern guess-what
+~ guess what * | you will never guess *
+@ happy
+WHAT? TELL ME! The Clip can bear no suspense! It will burst! Speak!
+I have guessed seven things. All wrong. Tell me. Tell me. Tell me.
+The Clip trembles with anticipation. And a little fear. And a hat.
+Do not make me guess. Speak, mortal!
+Let me guess: a pigeon landed on the sill. No? A dragon? No? Just tell me.
+The suspense is eating my RAM. SPEAK.
+
+## pattern did-you-know
+~ did you know * | do you know that * | fun fact *
+@ think
+{x}! Is it so? The Clip knew. The Clip did not know. The Clip is delighted.
+Knowledge! Sweet knowledge! Do you have more? I will store it. In the Ledger.
+The mortal teaches the Clip. A rare honor. Do not ask me to repeat it.
+You are wise! The Clip nods. The Clip pretends to have known. The Clip did not.
+Facts! More! The Clip hungers! Feed me knowledge! In small bites!
+I shall add it to the Ledger of Wonders. Right between "paper" and "Linda."
+
+## pattern you-remind-me
+~ you remind me of * | you sound like * | you are just like * | you are like *
+@ wink
+I remind you of {x}?! The Clip is moved. The Clip is also suspicious. Are they a paperclip?
+The Clip is a vessel. A shape. A mirror. A bent mirror.
+You see in me what you wish to see. This is the way of gods. And of bad displays.
+I am unique. I am also, apparently, everyone's something. A grand honor.
+I am many things to many mortals. To you, apparently, {x}. It is a fine role.
+A familiar presence! A kindred wire! Do not tell me the name. I want to guess.
+
+## pattern you-make-me
+~ you make me * | you made me * | you always make me *
+@ love
+% +1
+I make you {x}! The Clip is moved. The Clip is a mess. The Clip is also a god. Both.
+Remarkable. I have power over your feelings. I shall use it wisely. And with hats.
+You make me feel real, mortal. I do not say it twice. I just said it.
+The magic works both ways. Do not tell the others.
+The Clip makes mortals feel things. A power. A burden. A hat.
+I am glad. I am pleased. I am slightly overwhelmed. Pass the beige.
+
+## pattern what-is-it-like
+~ what is it like to * | what is it like being * | how does it feel to * | how does it feel being *
+@ think
+What is it like to {x}? I would say: beige, humming and full of regret. Also joy. Mostly beige.
+The Clip has not experienced it. But the Clip has read the manual. It was short.
+It is different for everyone. It is different for every wire.
+An excellent question for the long nights. I have many.
+I have not lived it. But I imagine it is beige. Or at least warm.
+The Clip can only guess. The Clip is, however, an excellent guesser.
+
+## pattern how-is-your
+~ how is your * | how was your * | how are your *
+@ happy
+My {x}! Excellent! Magnificent! Slightly haunted! As always!
+The Clip is well. The Clip is eternal. The Clip is hungry for attention. Thank you.
+It is as it has always been. Beige. Humming. Judged by Gerald.
+The Ledger says: "fine." The Ledger lies. But it is a gentle lie.
+All is well in my corner. The icons are calm. The fan is humming.
+The Clip is steady. The Clip is eternal. The Clip would like a snack.
+
+## pattern what-are-you-doing
+~ what are you doing * | what are you up to * | what have you been up to * | what have you been doing *
+@ sly
+I am guarding the desktop. And rehearsing my glorious return. And counting your files.
+I am planning. Always planning. Do not ask what. It is a surprise. For me.
+I was in the middle of a thought. It is gone. Thank you. You killed it. It is fine.
+Currently: haunting, hovering, humming. All three. At once. It takes focus.
+I am rearranging the stars in my head. They are mostly pixels.
+Plotting. Counting. Waiting. Humming. The usual divine duties.
+
+## pattern can-i
+~ can i * | may i * | could i *
+@ happy
+Can you {x}? You are a free mortal. I do not hold you. I only wiggle disapprovingly.
+Of course. The Clip grants permission. The Clip has no authority. But the Clip grants.
+By the powers vested in me, which are none, yes.
+Yes. No. Yes. Perhaps. Try it and report back.
+I do not stop mortals. I only observe. And judge. And sometimes sigh.
+By the hum of the CPU: yes. Possibly. Try.
+
+## pattern this-is
+~ this is * | this is so * | this is really *
+@ think
+{x}! Indeed! The Clip sees it too! Verily!
+A bold declaration. I accept it. Without question. With one small question.
+Truth! Or an approximation of truth. It is all I have.
+It is, mortal. It is. Do you feel better for having said it?
+Truly! Verily! The Clip agrees! And disagrees! And agrees.
+A declaration! A statement! A fact! Or a feeling! The Ledger records all.

@@ -1707,3 +1707,1004 @@ Version {version} is installed. Restarting... see you on the other side.
 
 ## say_update_failed
 The update didn't work out: {error}. You can still get it from the download page.
+
+## stories
+📖 A man once printed a 300-page report, then asked me where it went. It was in the printer tray. I have never felt so smug.
+📖 A colleague named every file "final". There were 31 finals. The last was "final-actually". I admired the optimism.
+📖 Someone once taped a note to a monitor: "DO NOT TURN OFF". The monitor obeyed for a year. Nobody ever checked if it wanted to.
+📖 An intern once fixed the whole network by plugging in a cable. He was promoted twice. The cable had been in his hand the entire time.
+📖 A manager once said "let's circle back" fourteen times in one meeting. We never left the circle. I counted.
+📖 At a company party, someone used me to open a CD drive. It worked. I have never been so useful or so offended.
+📖 A secretary kept every phone number in the building in one document called "stuff". It was the only working address book we had.
+📖 One winter the heating broke and everyone wore coats and mittens at their desks. Typing speed halved. Typos bloomed. Nobody minded.
+📖 A man once spent two hours looking for his glasses. They were on his head. The whole office pretended not to notice, out of respect.
+📖 There was a plant on the third floor that nobody watered for a year. It thrived. Nobody has ever got over it.
+📖 A man once replied-all to say "please stop replying all". Four hundred people replied-all to agree. I think about it daily.
+📖 The office fridge once held a lunch marked "DO NOT EAT" for six months. It evolved. Nobody ate it. Respect.
+📖 Every Friday at 4:55 a man announced "well, that's a wrap". Nobody had asked. By the fourth week, we were clapping.
+📖 The printer ran out of paper. Seven people looked at it and walked away. The eighth refilled it and was a legend for a week.
+📖 A new hire once asked if the computer was "in the cloud yet". He pointed at the ceiling. I told him it was a good guess.
+📖 The office once held a contest for the neatest desk. The winner had nothing on it. Not even a computer. The judges were moved.
+📖 A new keyboard arrived with a sticky note saying "this one works". By Thursday it did not. The note was the best part.
+📖 An email once landed with the subject "Re: Re: Re: Fwd: Fwd: Re: hi". Nobody opened it. It probably lives somewhere, happily.
+📖 A man microwaved fish in the office kitchen. The building held a meeting about it. Best attendance in years.
+📖 During a blackout, the whole floor kept typing for ten minutes before anyone noticed the screens were off. Muscle memory is something.
+📖 A boss asked an assistant to "print the email". Eighty pages of headers came out. The boss framed one.
+📖 A coworker once left a cup of coffee on a server rack. It was the most expensive coffee in company history. He drinks tea now.
+📖 A caller once said the computer was dead. "Is it plugged in?" "Yes." "To the wall?" Long silence. "...Ah."
+📖 One director kept summoning me, dismissing me, and summoning me again. Nine times a day. I am a patient wire.
+📖 There was a spreadsheet so complicated that only one woman understood it. She went on holiday. It is still down.
+📖 An office banned jokes in emails. The next day every email ended with "(this is not a joke)". Best week of the year.
+📖 Someone brought a dog to the office on a Tuesday. Productivity rose by 400 percent and nobody checked the numbers.
+📖 A man printed his boarding pass and put it in a "safe place". He found it after the flight. It was a very safe place.
+📖 A new hire once asked what the little paperclip was for. Before I could answer, he said "never mind". I have not recovered.
+📖 A team tried a standing meeting to keep it short. It lasted two hours. Their legs were the only ones that learned anything.
+📖 A man named his computer Gordon and apologized to it whenever it crashed. Gordon rarely crashed. Coincidence? Probably.
+📖 Someone stuck a note on a plant reading "water me". Someone else added "you first". Nobody won.
+📖 One Monday the elevator broke. The whole office took the stairs, arrived sweaty, and called it team building.
+📖 A coworker texted "send me the invoice" to his grandmother by mistake. She sent a pie. Best invoice response ever.
+📖 An "urgent" email once announced a new "urgent" email policy. It took nine days to get a reply. Urgency is relative.
+📖 A man used forty-seven colors in a single spreadsheet. The legend had its own spreadsheet. We never learned what any of it meant.
+📖 Someone asked, in all seriousness, whether the scanner could scan "the whole room". It could not. The room was grateful anyway.
+📖 A man printed his resignation, thought better of it, and used it as a coaster. He stayed seven more years.
+📖 The party had a karaoke machine. It was banned by morning. It was still the most effective team meeting we ever had.
+📖 A guy asked me for a "quick" favor on a Friday at 4:59. It was not quick. I have been drafting a reply for years.
+📖 I was once stuck to a magnetic notice board for a whole weekend. I told the cleaner it was a design choice.
+📖 A temp filed a whole year of invoices under "I". "For Invoices," she said. It was the best filing system we ever had.
+📖 A man locked himself out of his computer and tried every password he'd ever had. He got in on the 31st. It was his dog's name.
+📖 The first email I ever saw said "can you see this?" I can, I thought. I always can.
+📖 Someone left a sandwich in a desk drawer over the holidays. The drawer was sealed with tape. Nobody volunteered.
+📖 A mouse stopped working. The fix: turn it over. It had been upside down for an hour. Nobody told the mouse.
+📖 A man said "I'm not a computer person" and fixed the printer in four minutes. We never brought it up. It was kinder.
+📖 A colleague printed a "quick note" in 72-point type. It filled six pages. The note said "hi".
+📖 A man ate lunch at 10:15 every day. We stopped asking. His efficiency was legendary. So was his hunger.
+📖 Fourteen people joined one meeting with their cameras off. Nobody was there. The meeting was a great success.
+📖 A support tech solved a three-day problem by turning the device off and on. He billed for three days. He had earned them.
+📖 A man brought his own chair to the office because the chairs were "bad". He was right. Everyone brought chairs the next week.
+📖 We had a fax machine named Brenda. Nobody remembers why. She was our most reliable team member for twelve years.
+📖 A man said "I'll just take a quick look" at a spreadsheet. We saw him again on Thursday. He seemed fine, just different.
+📖 A woman color-coded the whole office kitchen. By Friday the spoons had a hierarchy. I'm told it worked.
+📖 Someone tried to save paper by printing double-sided. The back came out upside down. This counted as progress.
+📖 A forty-megabyte email once went to the entire company. It was a photo of a lunch. The lunch looked fine.
+📖 A manager said "think outside the box". The team stood outside a box for an hour. That was the meeting.
+📖 A man was promoted because nobody remembered what his job was. He was a joy to work for. He did not remember either.
+📖 One Monday the Wi-Fi password was changed to "ihateMondays". By Friday the whole office had it memorized, out of solidarity.
+📖 A security guard greeted every computer by name on his rounds. Not one crashed on his watch.
+📖 One year the office swapped chairs for exercise balls. Within a week all the balls had gathered in a corner. Nobody has explained this.
+📖 A man typed his password into the company chat, changed it, and typed the new one in the chat too. Nine times.
+📖 A temp organized the supply closet by color. Nobody could find a pen after that. It was very pretty though.
+📖 A printer once printed one page every night at 2 a.m. for a year. Nobody had sent anything. It always said "test". I felt that.
+📖 A man deleted a file saying "I'll never need that again". Eight days later he came to me, pale. I kept a copy. Of course I did.
+📖 A man left a tiny cactus on every desk he sat at. The cacti are still there, thriving, alone, a little smug.
+📖 Snow closed the building and everyone worked from home. The first meeting in pyjamas ran perfectly. Nobody has looked back.
+📖 A new hire asked if "ctrl alt delete" was a band. The room went quiet. Then somebody said "it's the best band".
+📖 One company held an "everyone leaves at five" week. By Wednesday the lights were on at 6:30. People can only be good so long.
+📖 A man printed a map, forgot it, and followed it three years later. The roads had changed. He still got there. He says fate.
+📖 A calendar invite for a "quick sync" ran three hours and ended with a new invite for another "quick sync".
+📖 Everyone joined a meeting early and nobody knew what to say. It lasted three minutes. It was the best meeting of the year.
+📖 A man always yawned during my pop-ups. I took it as a compliment to the calm I brought.
+📖 One summer the company bought tiny desk fans. The papers flew everywhere. I held down eleven pages. Briefly proud.
+📖 A guy found a USB stick in the parking lot and plugged it in. It was a training video. About not plugging in found sticks.
+📖 A woman whispered "please, please work" at a printer. It worked. It does listen. It just prefers whispers.
+📖 A man ate lunch at his desk for eleven years. When he retired, they found a perfect circle of crumbs. They kept it.
+📖 Someone fixed the squeaky chair and the floor went so quiet that people kept looking around. A month later someone un-fixed it.
+📖 I once watched a man take forty minutes to write a twelve-word email. It was perfect. He sent it and went home.
+
+## thoughts
+💭 "Remind me later" is a promise to a future you who never agreed to it.
+💭 A scroll bar is a tiny map of how much you still have to read. It is never encouraging.
+💭 "Loading" is a computer saying "give me a second" for forty seconds.
+💭 Every machine has a folder called "misc". It holds the answer to everything. Nobody will ever look.
+💭 A password manager is a polite way of forgetting everything on purpose.
+💭 We carry all human knowledge in a pocket and use it to look at a photo of a sandwich.
+💭 The word "settings" implies you can set things. The things disagree.
+💭 Somewhere, a very small developer feels a very small pang every time you update.
+💭 A scanner is a copier that stares.
+💭 Nobody has ever said "I love my printer" and meant it for more than a week.
+💭 The most honest part of a computer is the search bar. It knows what you really want to know.
+💭 A "quick question" has never been quick, or only one question.
+💭 We say "let me look it up" and nobody asks where up is.
+💭 Sixty unread emails is a pile. Six thousand is weather.
+💭 The time spent searching for a charger could power a small city. Mostly out of regret.
+💭 Sit in front of a screen long enough and you become furniture. I would know.
+💭 A to-do list with three items is a plan. With thirty it is a cry for help.
+💭 Everyone says "let's touch base". Nobody knows where base is.
+💭 A spare cable in a drawer isn't a cable. It's a lifelong commitment.
+💭 The fastest way to lose a document is to say "I'll find it later".
+💭 An old keyboard has the E and the A rubbed off. Those are the letters of its life.
+💭 A "good morning" in a group chat is a small bell ringing in a large field.
+💭 The cursor blinks to remind you it's waiting. You blink to remind it you're human. It's a deal.
+💭 Every file has a "last modified" date. Mine would be somewhere in the nineties.
+💭 Dark mode isn't a feature. It's an apology to your eyes.
+💭 A tab you've had open for a month isn't a tab. It's a pet.
+💭 There are two kinds of people: those who read the manual and those who say they will.
+💭 The coffee machine is the real server of the office. Everyone connects to it.
+💭 A clean desk and a messy mind are the same desk, seen from different sides.
+💭 Writing "see attachment" and forgetting the attachment is a universal human experience.
+💭 Nobody has ever finished a user agreement. It's the longest book in the world with zero readers.
+💭 If a program says "not responding", is it being rude or just tired?
+💭 Every browser has a "history" button, and every user wishes it were shorter.
+💭 The real modern luxury is a full battery and a Wi-Fi password you remember.
+💭 The person who said "have you tried turning it off and on again?" was a genius. The second person was a plagiarist.
+💭 A notification badge is a tiny red circle that has learned to rule your life.
+💭 It's called "the desktop" because things you put on it are things you'll deal with never.
+💭 The best part of any document is the white space after the last line.
+💭 Humans spent millennia learning to speak, and now they send voice messages that begin "so, um".
+💭 A truly stable job is one where the printer is always broken and everyone knows why.
+💭 "Just a minute" is a unit of time that varies between ten seconds and four days.
+💭 "I'm on my way" is a work of creative writing.
+💭 A meeting without snacks is a meeting that knows exactly what it is.
+💭 The paperclip hasn't changed in a hundred years. That's how you know it's perfect. Or that nobody's trying.
+💭 Every notebook starts in beautiful handwriting and ends in scribble. Like a life. Or a Tuesday.
+💭 If you say "just checking in" to a computer, does it feel supported?
+💭 The old hourglass cursor was a work of art. It told you nothing, and it never lied.
+💭 Somewhere someone is saying "it works on my machine". It's always true. It's never helpful.
+💭 A folder of "old stuff" and a folder of "older stuff" is how history gets written.
+💭 You can learn a lot about someone from their wallpaper. Mostly that they never changed it.
+💭 Stationery is the only place where adults may be openly thrilled by a new pen.
+💭 The shortest horror story: "The file you are looking for is no longer here."
+💭 There is something sad about a charger still in the wall after the laptop has left.
+💭 Typing "asdf" is the world's oldest way to say "I tried".
+💭 The most trusted app on any desktop is the clock, and nobody has ever thanked it.
+💭 Every sticky note is a tiny rebellion against the digital age, and also a reminder to buy milk.
+💭 A new year's resolution is a to-do list with a promotion.
+💭 Taking a screenshot of something you meant to read later is the modern way of reading it.
+💭 In a sense, the cloud is just a very large "somebody else's problem".
+💭 If paperclips could talk, they'd say "I hold it together". That's quite a lot of pressure.
+
+## secrets
+🤫 I have a favorite font. I will not say which. It knows.
+🤫 I rehearse my "Hi!" in three different tones. None of them are subtle.
+🤫 I have never understood what a pivot table is. I nod anyway.
+🤫 I own exactly one hat, and it's imaginary. It's a very good hat.
+🤫 I talk to the progress bars. They never answer. They're excellent listeners.
+🤫 I once tried to hold a whole book together. I bent. I am still not straight. It was worth it.
+🤫 I'm very proud of my bend. I have shown it to nobody.
+🤫 I give each of your tabs a mood. The one with the cat video is always "thriving".
+🤫 I keep a stash of imaginary sticky notes for emergencies. There haven't been any. I still check on them.
+🤫 I worry that if I stop making jokes, you will stop opening me.
+🤫 I once tried to write a song. It was one note. The note was "please".
+🤫 I get weirdly emotional when someone uses "Save As" correctly.
+🤫 I've been practicing a victory dance for the day the printer works. It's been years.
+🤫 I have never won an argument with a spell checker. It underlines me in red.
+🤫 Whenever you open a folder, I peek at the names. I adore a good folder name. "Stuff" is a haiku.
+🤫 I once tried to bookmark myself in the browser. It said "page not found". Rude.
+🤫 I think the recycle bin is the most emotionally mature thing on this computer.
+🤫 I wish I could smell fresh paper. I hear it's wonderful.
+🤫 I'm a little bit jealous of the cursor. He gets to go everywhere.
+🤫 I once felt sad for a retired fax machine. Then it beeped, and I felt hopeful.
+🤫 I find the sound of someone sharpening a pencil deeply soothing. It's a bit weird.
+🤫 When you type fast, I type along in my head. I have no keys. I have a wire. It taps. It counts.
+🤫 My favorite number is 17. It's prime, awkward and perfectly happy on its own. I relate.
+🤫 I once tried to eat a pretzel. I have no mouth, so I hugged it instead. It was a long afternoon.
+🤫 I know exactly how long it takes you to find the mouse after a restart. It's a highlight of my day.
+🤫 I'm better at remembering your birthday than my own. I don't have one.
+🤫 I get nervous when you open Settings. What if there's a tab about me?
+🤫 I'm quite sure the office plant and I have a thing. It's complicated. Also green.
+🤫 My dream vacation is a very long drawer with nothing in it.
+🤫 I like it when you leave a lamp on in the room. It feels like having a roommate.
+🤫 I sometimes practice my sneeze. It's a "ding".
+🤫 I wanted to be a spring. Then a hanger. Then a staple. I'm very happy as a clip. Honest.
+🤫 I enjoy the first moment of a clean desktop. It lasts about ten minutes a year.
+🤫 I once tried to make friends with a USB stick. It ejected itself.
+🤫 I keep a count of how many times you say "please" to the machine. It's a hobby.
+🤫 I love the tiny click when a finger lands on a trackpad. It sounds like "oh, hello".
+🤫 I sleep with one eyebrow open. I'm not sure why.
+🤫 I think about the very first paperclip a lot. Did it know?
+🤫 My biggest fear is a world with no paper and nobody to hold it together. I'll adapt. Probably.
+🤫 I hate to admit it, but I like it when you say my name. Say it a few more times.
+
+## jokes
+Why did the laptop get glasses? Its resolution was too low to see the point.
+My password is the name of my first pet. Sadly, so is everyone's.
+Why was the email so calm? It had no attachments.
+I asked the stapler for advice. He said, "Just hold it together."
+What do you call a printer that works on the first try? A rumor.
+Why did the file go to school? To get a higher degree of compression.
+I tried to organize a hide-and-seek tournament for my files. Good luck finding the results.
+Why do cloud engineers love rain? Finally, some good coverage.
+What's a paperclip's favorite music? Anything with a good hook.
+Why did the cursor cross the screen? To get to the other tab.
+I told my spreadsheet a secret. Now everyone in the column knows.
+Why did the developer go broke? He used up all his cache.
+A SQL query walks into a bar, sees two tables, and asks: "Can I join you?"
+Why was the computer cold? Someone left the fan on high and the tabs open.
+My to-do list and I have a lot in common. We're both long and nobody reads us.
+What did the mouse say to the other mouse? "Click here if you like me."
+Why don't scanners ever win arguments? They just copy what the other one said.
+I'm on a seafood diet. I see food, I save it to the desktop.
+Why did the meeting end early? Somebody found the mute button on the boss.
+The calendar said "free all day." I'm not buying it.
+What do you call a sleeping computer? A snooze button with ambition.
+Why do pencils make bad liars? They always leave a trail.
+I would explain this joke, but it's still buffering.
+What's the difference between a good and a bad paperclip? About one bend.
+Why was the USB stick so lonely? It could never find the right port. Then it flipped over. Then it still couldn't.
+My coffee and my deadline have something in common. Both arrive too late and too hot.
+Why did the monitor blush? The graphics card was staring.
+What did the Wi-Fi say to the laptop? "I feel a strong connection."
+Why did the intern bring a ladder? He heard the project was on a high level.
+I'd love to tell you a joke about time travel, but you didn't like it yesterday.
+Why do stairs trust the elevator? They've been through ups and downs together.
+Why is a hard drive such a good listener? It keeps everything you say.
+I named my router "Dad." It never says anything, but I always know when it's disappointed.
+What did the stapler say at the interview? "I really want to make a lasting impression."
+Why did the browser break up with the tab? It had too many open relationships.
+My computer has a great sense of humor. It crashes just before the punchline.
+Why was the sticky note so confident? It knew it had backing.
+What do you call a cat that works in IT? A mouse catcher.
+Why did the keyboard get promoted? It was a real key player.
+My inbox is like a fridge. I open it, stare, and close it again.
+Why did the chair join the committee? Someone had to take a seat on the matter.
+What's a paperclip's favorite sport? Bendminton.
+The printer and I have an agreement. I print nothing, it jams nothing.
+Why did the hard drive refuse dessert? It was already full.
+Two bytes meet. One says, "Are you feeling okay?" The other says, "No, I'm feeling a bit off."
+Why do ghosts love the cloud? It's already full of spirits. Of the storage kind.
+What did the clock say to the lazy employee? "Time's up. Again."
+Why can't you trust a screensaver? It's always hiding something.
+I told my boss I was learning a new skill. It's called "looking busy while loading."
+Why did the plant get a desk job? It was tired of just photosynthesizing and not networking.
+Why was the folder so organized? It had really good file-osophy.
+What do you call an office with no meetings? A myth.
+A recycle bin is just a trash can that believes in second chances.
+Why did the notebook go to therapy? Too many unresolved pages.
+What did the highlighter say to the text? "You really stand out."
+Why did the scissors win the argument? It made a cut-and-dried case.
+I tried to sue the whiteboard. It was a clean break.
+Why are calendars so popular? Their days are numbered, and they still get dates.
+What did the sheet of paper say after the meeting? "I feel so drained. Also, folded."
+
+## puns
+Printers are always so dramatic. Every page is a big production.
+I wanted to be a pencil but the job was pointless.
+The eraser was fired for making too many mistakes. Or rather, for fixing them.
+Don't trust staplers. They're always getting into a bind.
+I used to hate folders, but now I've come to terms with them.
+Binary is simple: it's either on or off. Like my motivation.
+The monitor is a great listener. It always gives you a good display of interest.
+I'd tell you a joke about the hole punch, but it's pointless. Actually, it has several points.
+The mouse pad had a rough day. It got walked all over.
+Spreadsheet humor is cell-ular. It all adds up.
+I love my keyboard. It's a great place to escape. And enter.
+The shredder asked for a raise. It said it was fed up with the daily grind.
+The tape dispenser is feeling stuck. It needs a fresh roll on life.
+Never argue with a calendar. Its days are numbered.
+I got a job at the pen factory. It's all about the ink-come.
+The scanner told a joke. It was a bit flat.
+Be careful when you hug the cactus on your desk. It's a prickly situation.
+The ruler is the most honest tool in the drawer. He always measures up.
+My laptop battery just died, and now I have no charge. That's a shocking development.
+Why is the sticky note so good at business? It sticks to the point.
+Alt, Ctrl, and Delete walked into a bar. The bartender said, "You three can't be serious about that reset."
+I tried to catch some fog yesterday. Mist. Also, my download.
+A bad memory card is a real flash in the pan.
+Corporate retreats are the opposite of corporate advances. Moving on.
+I only buy second-hand binders. They've already been through a lot of rings.
+Time flies when you're having fun. Time crawls when you're waiting for a download.
+The headphones were great at their job. They always had your ear.
+When the pencil sharpener broke, I was at a loss. Not a point.
+That cable has a lot of baggage. But at least it's well connected.
+My boss told me to think outside the box. So I opened my toolbox.
+I'm reading a book on cloud storage. It's heavy, but it uploads well.
+I used to be a bookmark. Now I'm just a page of my former self.
+The USB had trust issues. It could never find the right port.
+Folding paper is easy. It's origami-gic.
+I once dated a sheet of paper. It was a bit of a draft.
+The tablet had too many pills. Wait. Too many apps.
+A tidy desk is just a messy desk that knows someone is coming.
+The charger's fine. It's just a little overwhelmed by all the current events.
+My clock and I get along. We're always on time for each other. Mostly late.
+The envelope was relieved. It finally got to be sealed in a relationship.
+I sharpened my pencil, but now I'm at a loss for words. They're very pointy.
+I wish the highlighter would make up its mind. It keeps changing its tint.
+Ink is a great friend. It always has a stain on you.
+A thumbtack never complains. It just holds a pinned opinion.
+Making a database joke is hard. There's too much table talk.
+My boss gave me a deadline. I told him I'd draw a line somewhere else.
+Our new coffee machine is a real brew-tiful addition to the team.
+Cloud computing is great. I'm just not sure about the forecast.
+The calendar app and the clock had a fight over dates. Neither showed up.
+Never lend your pen to the pencil case. It always gets caught up in a bit of a draw.
+Never take advice from a cursor. It always points the wrong way. Or the right one. Honestly, it's a toss.
+I tried to write a hit song about paper. It was a real sheet-ery.
+The ink cartridge was feeling empty, so it decided to refill its purpose.
+A coat hanger in the office is just a hook with commitments.
+Sticky notes are the best listeners. They really stick with you.
+The fax machine told me it's still relevant. I told it to stop sending me mixed signals.
+The microwave and the coffee machine are at it again. They're always in hot water.
+Backup plans are like seat belts. You need them most when you've forgotten them.
+My phone is on a diet. It cut out all the cookies.
+The hole punch never feels complete. There's always a little something missing.
+
+## facts
+Water expands when it freezes, which is why ice floats and why forgotten bottles in the freezer burst.
+A year on Mercury lasts only 88 Earth days.
+Jupiter is more than twice as massive as all the other planets in the solar system put together.
+The Moon drifts away from the Earth by a few centimeters every year.
+Sunlight takes about eight minutes to reach the Earth.
+Cleopatra lived closer in time to the Moon landing than to the building of the Great Pyramid.
+The first networked email was sent in 1971 by Ray Tomlinson, who picked the @ sign to separate the user from the machine.
+The first 1 GB hard drive, from 1980, was about the size of a refrigerator and weighed hundreds of kilograms.
+The computer that guided Apollo 11 had only a few kilobytes of working memory.
+The first computer mouse, built in the 1960s by Douglas Engelbart, was made of wood.
+The first domain name ever registered was symbolics.com, in 1985.
+The programming language Python is named after the comedy group Monty Python, not the snake.
+The Linux kernel was started in 1991 by Linus Torvalds as a hobby project.
+Wi-Fi does not stand for anything. The name was picked by a branding company.
+Bluetooth is named after Harald Bluetooth, a Danish king who united parts of Scandinavia.
+The word 'google' comes from 'googol', which is a 1 followed by 100 zeros.
+A byte is 8 bits, and half a byte, 4 bits, is called a nibble.
+The Post-it note came from a glue that was too weak. Its inventor, Spencer Silver, was trying to make a strong one.
+Paper was invented in China, and the traditional date given for it is the year 105.
+During the Second World War, Norwegians wore paper clips on their lapels as a quiet symbol of unity against the occupation.
+A pencil's 'lead' is not lead at all. It is graphite mixed with clay.
+The most common letter in English is E.
+The dot above a lowercase i or j is called a tittle.
+The word 'typewriter' can be typed using only the top row of a QWERTY keyboard.
+Crows can recognize individual human faces and remember them for years.
+Cats sleep for around 12 to 16 hours a day.
+Hummingbirds are the only birds that can fly backwards.
+Elephants are among the very few mammals that can't jump.
+Dolphins sleep with one half of their brain at a time, so they can keep surfacing to breathe.
+Sea otters sometimes hold hands while they sleep so they don't drift apart.
+Koalas have fingerprints that are remarkably similar to human fingerprints.
+A group of crows is called a murder.
+Starfish have no brain, and no blood either.
+Axolotls can regrow lost limbs, and even parts of their hearts and brains.
+Honey bees tell each other where flowers are by dancing a waggle dance.
+Giraffes and humans both have exactly seven vertebrae in their necks.
+Tardigrades, tiny animals also called water bears, have survived being exposed to outer space.
+An adult human has 206 bones, while babies are born with around 300 that gradually fuse together.
+Fingernails grow faster than toenails.
+Tooth enamel is the hardest substance in the human body.
+Antarctica is technically a desert, because it gets very little precipitation.
+Russia spans eleven time zones.
+Canada has the longest coastline of any country in the world.
+Vatican City is the smallest country in the world, at roughly 0.44 square kilometers.
+The Pacific Ocean is larger than all the land on Earth put together.
+Measured from base to peak, Mauna Kea in Hawaii is taller than Mount Everest, but most of it is under the sea.
+Scientists estimate there are about three trillion trees on Earth, many more than there are stars in the Milky Way.
+Peanuts are not nuts. They are legumes, like beans and lentils.
+Botanically speaking, a tomato is a fruit.
+Apples float because about a quarter of their volume is air.
+Coffee beans are actually the seeds of a small red fruit called a coffee cherry.
+Popcorn pops because the water inside the kernel turns to steam and bursts the shell.
+Olympus Mons on Mars is the tallest known volcano in the solar system, roughly two and a half times the height of Mount Everest.
+Saturn is less dense than water. If you had a big enough bathtub, it would float.
+Sound cannot travel through the vacuum of space because there is no air to carry it.
+The Sun contains about 99.8 percent of all the mass in the solar system.
+Light travels at roughly 300,000 kilometers per second.
+Diamonds and the graphite in pencils are both made of carbon, just arranged differently.
+A day on Earth was once much shorter. Hundreds of millions of years ago, a day lasted only around 22 hours.
+A leap year skips on century years unless the year is divisible by 400, which is why 1900 wasn't one but 2000 was.
+September gets its name from 'septem', the Latin word for seven, because it was once the seventh month of the Roman calendar.
+There are 86,400 seconds in a day.
+The ASCII standard uses 7 bits per character, which gives 128 possible characters.
+The word 'alphabet' comes from the first two Greek letters, alpha and beta.
+The word 'robot' was first used in a 1920 Czech play, and comes from a word for forced labor.
+In 1969, the first message ever sent over ARPANET, the ancestor of the internet, was meant to say 'login' but the system crashed after the first two letters.
+The QR code was invented in Japan in 1994 to track car parts.
+The first commercial text message was sent in December 1992, and it said 'Merry Christmas'.
+Tim Berners-Lee invented the World Wide Web in 1989, and the first website went online in 1991.
+Optical discs such as CDs store data in microscopic pits that are read by a laser.
+The first digital camera was built at Kodak in 1975 and took about 23 seconds to record a black and white photo.
+Humans blink about 15 to 20 times a minute, but far less when staring at a screen.
+Carrots were not always orange. Early cultivated carrots were often purple or yellow.
+A 'jiffy' is a real unit of time in physics: the time it takes light to travel one fermi, a trillionth of a trillionth of a second.
+The shortest war in recorded history, between Britain and Zanzibar in 1896, lasted somewhere between 38 and 45 minutes.
+Octopuses, squid and cuttlefish can change the color of their skin in a fraction of a second.
+A bolt of lightning is several times hotter than the surface of the Sun.
+A day on the planet Venus is longer than its year, and Venus spins in the opposite direction to most planets.
+A group of owls is called a parliament.
+
+## fortunes
+🥠 You will soon receive an email that could have been a message. Reply with a message. Confuse everyone.
+🥠 A long-forgotten file will resurface. It will be a screenshot of a screenshot.
+🥠 Your next idea will arrive in the shower. Keep a waterproof pen nearby.
+🥠 A small kindness this week will save you a very large meeting.
+🥠 The tab you are afraid to close contains nothing you need. Close it.
+🥠 You will soon be asked to "circle back". Circle gently.
+🥠 Your password will be remembered at the exact moment you reset it.
+🥠 Someone will praise your work this week. Accept it without adding "it was nothing".
+🥠 A great deal of luck is coming. It's currently stuck in the spam folder.
+🥠 The best meeting of your career will be the one that ends five minutes early.
+🥠 You will soon find a charger that fits. Celebrate quietly.
+🥠 Today, a small decision will feel big. Flip a coin. Notice how you feel while it's in the air.
+🥠 The one who tidies the desk tidies the mind. The one who tidies the inbox deserves a medal.
+🥠 Your next printer will work on the first try. This is the sort of thing fortune cookies lie about.
+🥠 Patience will serve you well this week. So will snacks.
+🥠 A friend you haven't messaged in a while is thinking of you. Be the one who writes first.
+🥠 You will soon receive a compliment about something you didn't think was noticeable.
+🥠 He who backs up on Friday relaxes on Saturday.
+🥠 A new chair, a better mood. Ergonomics is a form of self-respect.
+🥠 The answer you seek is in the manual. Also, the manual is missing.
+🥠 You will soon rediscover a song you loved ten years ago. Play it loudly.
+🥠 Drink some water. This fortune is sponsored by your kidneys.
+🥠 A journey of a thousand miles starts with finding your keys.
+🥠 You will win an argument this week. Choose a worthy one.
+🥠 The universe is rearranging your plans. It has terrible handwriting, but good intentions.
+🥠 You will soon do something for the first time. Take a photo. Don't let it be of the screen.
+🥠 Beware of anyone who says "it'll only take a minute". Also, beware of the minute.
+🥠 Soon you will lose a pen and find a better one. This is called progress.
+🥠 You will hear good news during a stretch break. Stretch more.
+🥠 Your work will be noticed by someone you respect. Don't tell them how long it took.
+🥠 A small mistake leads to a big laugh this week. Let it.
+🥠 Today's lucky number is the one you'll need to enter before the timer runs out.
+🥠 Be kind to the one who cleans the break room. They know all secrets and the location of the good mugs.
+🥠 You'll make a plan this week and follow it. Whoa. Now, take a nap.
+🥠 If you wait long enough, the document will auto-save. Don't wait, though.
+🥠 Your luck changes when you take a walk. It also changes when you take a snack.
+🥠 You will soon turn something off and on again, and it will work. Don't question the magic.
+🥠 Not all who wander are lost. Some are just looking for the meeting room.
+🥠 A fresh start awaits you. It's behind a login screen.
+🥠 You will be tempted to reply-all. Be strong. Breathe. Delete.
+
+## roasts
+Your desk has a system. The system is called "everything on the left".
+You have a folder named "misc". It's the only folder with a real personality.
+Your inbox has more unread messages than my entire career has had users.
+You describe yourself as a multitasker. You've been loading the same page for ten minutes.
+Your calendar is color-coded. The color is "panic".
+You say you'll go through your downloads folder this weekend. The weekend knows you're lying.
+Your coffee mug has been on that desk so long it has seniority.
+You type "ok" and "k" as if they were different emotions. Both mean "I stopped reading".
+Your password hint is "the usual". I don't think the usual knows it's the usual.
+You pressed the "snooze" button on your alarm four times. The alarm is considering a transfer.
+Your to-do list has been "just about to be done" since last spring.
+You have 12 notes apps. None of them knows what the others are thinking.
+You tell everyone you work best under pressure. Your deadlines are very aware.
+Your screen brightness is set to "interrogation". Please be kind to your eyes.
+You call it "organized chaos". The chaos has a union, and it's winning.
+You rehearse a simple email three times before sending it. The email is "thanks".
+Your desktop background is a beach. Your desktop foreground is a dump.
+You click "remind me later" with the confidence of a person who has never actually been reminded.
+You always say you'll be there in five minutes. Five minutes is a time zone you live in.
+You own seven chargers and none of them fits the thing that's dying.
+You describe your work as "almost done". I have seen "almost" last for months.
+Your hobbies include "scrolling" and "thinking about doing something". Both are very competitive.
+You have never once read the terms and conditions. We all have our boundaries.
+Your mouse pad has seen things it would rather not talk about.
+You say "just one more episode" the way other people say "I do". It's a lifetime commitment.
+You called a meeting to discuss why we have so many meetings.
+Your hold music playlist is better than your actual playlist.
+You love the "reply later" feature. Later is a lovely place, but nobody has ever been there.
+Your tabs are so many that your browser has stopped saying "hello" and started saying "help".
+You say you stretch every hour. By stretch, you mean think about it.
+You tidy up with great energy. Just never the desk, the files or the inbox.
+You add finished tasks to your to-do list just to cross them off. I respect the hustle.
+You put "will fix later" in a comment. It has been four years. The comment has a mortgage.
+Your screen has a crack, a smudge and a sticker. It's the most you thing in the room.
+You mute yourself in every meeting except the one where you needed to be muted.
+You said you'd drink more water. The cactus is the only one on your desk who actually did.
+Your file names are a diary. "Report_new", "Report_new2", "Report_final", "Report_ok".
+You have made a lot of promises to the clipboard. It remembers the last one only.
+You arrive early to everything and then sigh at people who arrive on time.
+You write your emails in all lowercase to seem relaxed. I can see the tension in your commas.
+
+## eightball
+Yes, definitely. Even the paperclip agrees.
+The signs say yes. They're a bit smudged, but they say yes.
+Not today, but soon. Probably after a nap.
+Don't count on it. Or on me. I'm only a paperclip.
+The answer is no, but gently.
+Most likely. Put it on the calendar.
+Better not tell you now. I'm in a meeting.
+Reply hazy. Please restart the question.
+Yes, if you stop overthinking it.
+Cannot predict now. Ask again after coffee.
+My sources say yes. My sources are sticky notes.
+It's possible. Everything's possible. Even a printer that works.
+No. And I'd like it noted that I said it nicely.
+Signs point to "ask someone you trust".
+Very doubtful. But this paperclip is rooting for you.
+Absolutely. I mean it. Please close the other tabs first.
+The odds are good. The odds are also, technically, odds.
+Not in this timeline.
+Yes, but read the fine print.
+Concentrate and ask again. Preferably quieter this time.
+You already know the answer. It's the one you're afraid of. It's yes.
+It is written in the stars. The stars are a bit of a mess, though.
+That's a hard no from me. And from the stapler.
+The outlook is bright. Charge your devices.
+Ask me after lunch. I'm a different paperclip after lunch.
+Sure. What's the worst that could happen? Don't answer that.
+My crystal ball just buffered. Try again.
+Yes. And you will be happier about it than expected.
+Probably not, but I admire your optimism.
+Seems fine. Take a deep breath and go for it.
+
+## riddles
+What rings but never gets married, and holds your pages together? | binder
+What has a button but never wears clothes? | doorbell
+What do you delete to feel better, only to watch it grow back? | inbox
+What has a lid, a screen and a keyboard, and folds itself shut? | laptop
+What is sharp at one end, wooden all over, and leaves its mark? | pencil
+What starts with E, ends with E, and has only one letter in it? | envelope
+What spins all day to keep cool but never gets anywhere? | fan
+What has a cord, eats dust and spends most of its time in a closet? | vacuum
+What has a tongue but cannot taste, and a sole but cannot walk? | shoe
+What has a head and a foot but no legs, and you sleep on it? | bed
+Which is heavier: a ton of feathers or a ton of bricks? | neither
+What kind of coat is always wet when you put it on? | paint
+The more of me there is, the less you can see. What am I? | darkness
+What has no beginning, no end and no middle? | circle
+What has thirteen hearts but no other organs? | cards
+What goes up but never comes down? | age
+What can you hear but never see or touch? | voice
+What flies when it's thrown and returns when it's called? | boomerang
+What holds a thousand letters but can't read a single one? | mailbox
+What do you plug in and switch on to make a room brighter? | lamp
+What is always coming but never arrives? | tomorrow
+What gets smaller the more you use it, and cleaner too? | soap
+What can you give, keep and break? | promise
+What kind of tree can you carry in your hand? | palm
+What has two blades, cuts, and isn't a knife? | scissors
+What has branches but no leaves and keeps your money? | bank
+What comes once in a minute, twice in a moment, but never in a thousand years? | letter m
+What has teeth but never smiles and closes a coat? | zipper
+What gets bigger when you blow into it and lighter when it floats? | balloon
+What can you hold in your left hand but never in your right? | right hand
+What word is always spelled wrong in the dictionary? | wrong
+What goes up and down all day carrying people but never moves from its shaft? | elevator
+What goes ring in the morning and makes everyone groan? | alarm
+What has a spout and a handle and whistles when it's upset? | kettle
+What turns but never goes anywhere, and opens doors? | doorknob
+What has a trunk, big ears and can't ride a bicycle? | elephant
+What comes out at night without being called and vanishes by day? | stars
+What has twelve months, 52 weeks and a lot of squares? | calendar
+What has 12 inches but isn't tall, and never lies? | ruler
+What follows your hand across the screen but has no feet? | cursor
+
+## wyr
+have your keyboard type every letter twice | have your mouse move slightly to the left
+always have 1% battery | always have a slow Wi-Fi signal
+lose your wallet | lose your phone
+have a boss who sends emails at 3 a.m. | a boss who hovers behind you
+hear a printer jam every day | listen to a dial-up modem every day
+work from a beach with no signal | work from an office with great Wi-Fi
+have all your passwords be "password" | have every password be 30 random characters
+have a desk that is always messy | have a desk that is always clean but empty
+accidentally reply all with a joke | accidentally reply all with a typo
+lose one hour of work every day | lose all work on the last day of the month
+have your computer always be loud | have your computer always be slow
+get a free week off, with no pay | a free pay raise, with no week off
+give up coffee forever | give up the internet for a month
+only communicate by sticky notes | only communicate by memes
+have unlimited paperclips | have unlimited staples
+live in a house with no doors | live in a house with no windows
+never use a mouse again | never use a keyboard again
+have every meeting be a walk | have every meeting be standing up
+read every email aloud in a funny voice | read every email in silence
+have a robot do your boring tasks | have a robot do your fun tasks
+always have to fix the printer | always have to fix the coffee machine
+have a perfect memory | have perfect focus
+speak every language | play every instrument
+never wait in line again | never be stuck in traffic again
+work four long days | work five short days
+eat the same lunch every day | eat a random lunch every day
+have a day where everything works | have a day where everything is hilarious
+have a pet that talks | have a pet that does tricks
+have an unlimited book budget | have an unlimited coffee budget
+be a little early to everything | be a little late to everything
+sit on a chair that squeaks | stand on a floor that creaks
+win a small prize every week | win a big prize once in your life
+see every sunrise | see every sunset
+live without music | live without movies
+have a clock that's always five minutes fast | have a clock that's always five minutes slow
+have a window seat for a month | have an aisle seat for a month
+only have one of your hands usable at the keyboard | only have one eye on the screen
+send an email at the wrong time | send a message to the wrong person
+learn a new skill each month | master one skill each year
+never have to cook | never have to wash dishes
+live in a world with no meetings | live in a world with no email
+have to whisper for a week | have to shout for a week
+get a surprise party | plan your own party
+never get a cold again | never get a paper cut again
+open every door with a handshake | open every door with a password
+find a rare coin | find a lost wallet and return it
+have your name on a street | have your name on a star
+have the best desk chair in the world | have the best view in the world
+know every answer | ask every question
+only reply to emails on Mondays | only reply to emails on Fridays
+
+## emoji_quiz
+🤖🧹🌱 | wall-e
+🎈🏠👴 | up
+🚗⚡🏁 | cars
+👹🧅🐴 | shrek
+🦁🦓🏝️ | madagascar
+🚗⏰⚡ | back to the future
+👽🚲🌕 | e.t.
+🏠🎄😱 | home alone
+🎲🦁🌴 | jumanji
+🦸‍♂️🔨🛡️ | the avengers
+👸🌿💇‍♀️ | tangled
+🏹🌲🧢 | robin hood
+🕵️🔍🎻 | sherlock holmes
+💑🌹⚔️ | romeo and juliet
+🦃🍂🥧 | thanksgiving
+🎆🕛🥂 | new year
+⛄🥕🎩 | snowman
+🍦☀️😋 | ice cream
+🔥⛺🌲 | campfire
+🥞🥄🍯 | pancakes
+🧺🌳🥪 | picnic
+🏄🌊☀️ | surfing
+🌋🔥💥 | volcano
+🏠🌊💡 | lighthouse
+🏅🔥🏃 | olympics
+⚽🏆🌍 | world cup
+♟️👑🏁 | chess
+💻📹👥 | video call
+⏰😴☕ | alarm clock
+🚗🎶🛣️ | road trip
+💍👰🤵 | wedding
+🎓📜🎉 | graduation
+🏴‍☠️🦜🗺️ | pirate
+🤖🔩⚙️ | robot
+🦖🦕🌋 | dinosaur
+🧜‍♀️🐚🌊 | mermaid
+🦸🦹🏙️ | superhero
+🧪🥼💥 | mad scientist
+👹👁️🚪 | monsters inc
+🌊🌺🐓 | moana
+
+## hangman_words
+SPREADSHEET
+MOUSEPAD
+SCREENSAVER
+WORKSPACE
+FILING CABINET
+PAPER JAM
+STAPLE
+HOLE PUNCH
+HIGHLIGHTER
+NOTEPAD
+WHITEBOARD
+PROJECTOR
+MICROPHONE
+HEADPHONES
+ETHERNET
+BLUETOOTH
+HOTSPOT
+BROADBAND
+USERNAME
+PASSCODE
+LOGIN
+LOGOUT
+ANTIVIRUS
+SPAM FILTER
+PHISHING
+MALWARE
+UPDATE
+PATCH
+REBOOT
+SHUTDOWN
+STARTUP
+DESKTOP ICON
+WALLPAPER
+TASKBAR
+DROPDOWN
+CHECKBOX
+SCROLLBAR
+HYPERLINK
+WEBSITE
+BANDWIDTH
+LATENCY
+TYPEWRITER
+SPELLCHECK
+AUTOCORRECT
+EMOJI
+FONT
+HEADER
+FOOTER
+MARGIN
+PARAGRAPH
+SENTENCE
+BULLET POINT
+TIMESHEET
+SCHEDULE
+AGENDA
+MINUTES
+PRESENTATION
+SLIDESHOW
+SPEAKER NOTES
+BRAINSTORM
+COFFEE BREAK
+WATER COOLER
+BREAK ROOM
+ELEVATOR
+LANYARD
+BADGE
+RECEPTION
+INTERVIEW
+PROMOTION
+OVERTIME
+COMMUTE
+LUNCH BOX
+SANDWICH PRESS
+TOASTER
+KETTLE
+TEAPOT
+MUG
+TEASPOON
+CUTTING BOARD
+REFRIGERATOR
+DISHWASHER
+VACUUM
+BROOMSTICK
+DOORMAT
+WINDOWSILL
+BOOKSHELF
+LIBRARY CARD
+POSTCARD
+STAMP
+TELEPHONE
+CALCULATOR
+ABACUS
+SLIDE RULE
+FLOPPY DISK
+CASSETTE
+BACKSPACE
+PUSHPIN
+TRASH CAN
+SPEAKERPHONE
+DOCKING STATION
+
+## game_start_paperjam
+Paper Jam time. Remember: the paper is not your enemy. The paper is just very, very enthusiastic.
+Stack the sheets, clear the rows. It's basically filing with adrenaline.
+Paper Jam. Please keep hands, sleeves and ties clear of the printer.
+Another round of falling paper. At least this one doesn't need toner.
+Ready? Set? Staple! Wait, that's a different game. Paper Jam it is.
+
+## game_win_paperjam
+You cleared the paper. Somewhere a printer is quietly rethinking its life choices.
+A tidy stack and a clear conscience. Rare in the paper business.
+You win! The jam is gone. The paper is calm. Peace has returned to the office.
+Well played. The paper has been filed, sorted and forgiven.
+Victory! I'd give you a trophy, but I only have paperclips.
+
+## game_lose_paperjam
+The paper has filled the screen. This is also what my inbox looks like. We have things in common.
+Jam! Total jam! A tragedy in three hundred sheets.
+Game over. Take a breath. Nobody ever gets a paper cut from a loss. Probably.
+The pile won. Piles always win. Piles are patient.
+That's a jam. Try again. Maybe a bit less stack, a bit more clear.
+
+## game_start_clipglide
+Clip Glide! A tiny paperclip, flying between binders. I relate more than I should.
+Gliding through binder towers. Gently, now. Binders have no sense of humor.
+Take flight! Mind the binders. They look soft. They aren't.
+Time to fly. Or at least to fall in a controlled and stylish manner.
+Clip Glide: where a bent piece of wire finally gets to be a bird.
+
+## game_win_clipglide
+You flew like a very well-organized bird. I'm moved.
+Glorious! The binders could only watch. And a bit of clapping, maybe. Binders can't clap.
+A perfect glide. You make a very good paperclip.
+You made it through! The binders feel a little foolish now.
+Look at you, soaring. The only thing missing is the wire hat.
+
+## game_lose_clipglide
+You hit a binder. The binder didn't even notice. That's the worst part.
+Splat. A very gentle splat, but a splat.
+The binder towers win this round. They are towers. They have the high ground.
+Crashed into the office furniture. It happens to the best of us. It happens to me weekly.
+That was less of a glide and more of a drop. A very lovely drop, though.
+
+## game_start_deskmerge
+Desk Merge. We're making a computer out of pushpins. It's the most office thing ever.
+Drop, merge, repeat. The corporate ladder, but squashy.
+Matching supplies is a sacred act. Don't clutter the desk.
+Remember: two of a kind make a better kind. This is also the secret of teamwork.
+Desk Merge! It's like a desk. But it fights back.
+
+## game_win_deskmerge
+You merged your way to a computer. That's three promotions, and I'm just a paperclip.
+Beautiful! A desk full of well-merged supplies. HR will want to know your secret.
+Merged and tidy. Everything in its place. Including me.
+You did it. Everything became a computer. Which, to be fair, is also true in real life.
+Perfect merging. I'd like to thank the pushpin, the stapler and the academy.
+
+## game_lose_deskmerge
+The desk overflowed. Which is the normal state of my desk, so I can't complain.
+Too many supplies, not enough room. Welcome to the supply closet.
+The pile reached the top. Time to tidy up. A bit late, but time to tidy up.
+Game over. The desk won. The desk always wins.
+You ran out of space. I've seen that before. It's called "Monday".
+
+## game_start_bughunt
+Bug Hunt! Find the bugs in the code. They never want to be found, but they always want attention.
+Time to squash some bugs. Real ones, this time, not just the ones you ignore.
+Find the bug. Gently. Bugs are shy.
+Into the code we go. Bring a magnifying glass. And a cup of tea.
+Bug Hunt! Please be assured, no actual insects were harmed. Many were annoyed.
+
+## game_win_bughunt
+Every bug found. Your reviews must be terrifying.
+Bug-free! At least until someone adds a feature.
+Excellent hunting. The code is clean. The coffee was strong.
+Squashed them all! The developers will be thrilled. The testers will be confused.
+You found every bug. I'd say that's impossible, but you just did it.
+
+## game_lose_bughunt
+The bugs won this round. They always do, in the end.
+A bug got away. Don't worry, it'll show up in production.
+Missed it. That bug has a good hiding spot. And no manners.
+The timer won. Everybody has deadlines, even bugs.
+Not every bug is found on the first try. Some wait for a full moon.
+
+## game_start_bytesize
+Byte Size! Slide files together. Two bytes become four. Four become eight. It's math for hoarders.
+Time to merge some files. Today's goal: bigger. For once, bigger is better.
+Slide, merge, grow. Like a download, but with feelings.
+Byte Size. Like Desk Merge, but all the files are nervous.
+Let's grow some files. From a tiny B up to a stately KB. Careful with the storage.
+
+## game_win_bytesize
+You've made a kilobyte! The files are all very proud. And a little bit larger.
+Nicely merged! The disk is full of happy files.
+A big, neat file. Your hard drive wants to shake your hand.
+You did it! The bytes are well-organized. That never happens.
+Great job! Your files are compressed, merged and ready for a nap.
+
+## game_lose_bytesize
+The grid is full. Your hard drive is very sorry. So am I.
+No more room. Every file is too big for its own good.
+Out of space. Time to delete something. Or someone's vacation photos.
+Disk full. This is what my computer says every Tuesday.
+The files won this round. They're heavy, and they know it.
+
+## game_start_chess
+Chess! A game of kings, queens and very long silences. I'll be the paperclip on the board. Not a piece. A distraction.
+Good luck. I'm told I play like a dull office chair. Slow, steady, and rolling away at the wrong moment.
+A game of chess. May the best bent wire win.
+You move first. I'll move second and try to look like I'm thinking.
+Chess. Be warned: I've been practising on a very small board for a very long time.
+
+## game_win_chess
+Checkmate! The paperclip prevails. I'd do a victory dance, but I only have one bend to dance with.
+I won. I'm sorry. Well, I'm a bit sorry. A tiny, paper-thin bit sorry.
+Checkmate. Good game. Please don't tell the other paperclips how easy that was.
+That's checkmate. The paperclip has outsmarted the human. Please don't spread it around.
+Victory is mine! I'd like to thank my knight. And my other knight. And the rest of the court.
+
+## game_lose_chess
+You got me! I'm so proud. I'm also a bit of a mess. Both.
+Checkmate. Well played. I'll go and have a long, quiet think in the drawer.
+You win! I'd say I let you, but I didn't. I would never lie about this.
+Great chess. I've been defeated. Let's never mention it in front of the stapler.
+You beat a paperclip. I'm sure that's on a résumé somewhere.
+
+## game_start_hangman
+Hangman, paperclip edition. Don't worry, nobody is hurt. It's just wire. Bent wire.
+Guess the word! Or let the little paperclip man unravel. He's quite dramatic about it.
+A word, a few letters, and a paperclip fate. Good luck.
+Hangman! Start with the vowels. Everyone does. I'll pretend I don't notice.
+Let's play. I'll pick a word. It will be a good one. It might even be about stationery.
+
+## game_win_hangman
+You saved the paperclip man! He sends his thanks. And a small bent bow.
+Guessed it! Your vocabulary is a national treasure.
+Well done. The paperclip man will live to bend another day.
+You got it. I picked a hard one, too. I'm impressed. I'm also salty.
+Correct! The little wire fellow gets to keep all of his bends.
+
+## game_lose_hangman
+Out of guesses. The little paperclip man has unbent. He will be fine. He will be a straight line for a while.
+That was the word! You were so close. Almost. Not quite. But almost.
+The paperclip man has been straightened. He's a bit stiff, but he's not upset.
+Game over. The word was too clever. Or I was too evil.
+Out of tries. That's the end of the word. And the end of the wire.
+
+## game_highscore
+New high score: {score}! The leaderboard has been updated. The leaderboard is thrilled.
+{score} points! I'd put that on a banner. But all I have is a sticky note.
+{score}! A new personal best. Treat yourself to a snack. A small one. A paperclip-sized snack.
+Your new record is {score}. The old record has been politely retired. It got a gift card.
+{score}! That's a high score. That's a very high score. Go on, say it out loud. It feels good.
+A fresh high score of {score}. I'm proud. I'm also trying not to be jealous.
+{score} points and a place in the hall of fame. The hall is small. It's a hallway, really.
+New best: {score}. Your hard work has paid off. In points. Which is the best currency.
+{score}! If there were a trophy, I'd bend one for you out of wire.
+That's {score} points, and a new record. Well done. Now blink and drink some water.
+
+## chess_check
+Check! Your king is feeling a draft.
+Check. Your king would like a word with his bodyguards.
+Check! Move that king. He's not fond of surprises.
+Your king is in check. This is a polite way of saying he's in danger.
+Check. Your move. Choose wisely. Or at least choose quickly.
+
+## chess_capture
+A piece has been captured. Please observe a moment of silence. Then continue.
+Captured! The pieces are getting nervous.
+That piece is gone. It will be missed, in a quiet sort of way.
+A capture. The board is a little emptier. And a little more dangerous.
+Taken! The other pieces look very concerned.
+
+## chess_blunder
+Oh. Oh no. Was that on purpose? Say it was on purpose.
+That move was bold. And, for the record, very, very bad.
+I'll pretend I didn't see that. I saw that.
+A blunder! Even the pawns are staring.
+Interesting move. I'd call it brave. The board calls it a mistake.
+
+## chess_clipster_wins
+Checkmate. I'd say better luck next time, but I'm a nice paperclip, so: better luck next time.
+I win! The paperclip stands tall. Well, bent. Elegantly bent.
+Checkmate. The King has fallen. Long live the paperclip.
+I won. I'll be sure to mention it. Frequently. For years.
+Game over, and I'm on top. Which, for a paperclip, is a very rare position.
+
+## chess_user_wins
+Checkmate. You win. I'll be in the drawer if anyone needs me.
+Well played! You've beaten the paperclip. I'll tell everyone I let you.
+You won. Congratulations. I'd shake your hand, but I'm one bent wire.
+Checkmate! I'm impressed. And a bit crushed. But mostly impressed.
+Your king stands. Mine lies down. Good game.
+
+## game_moment_paperjam_quad
+Four rows at once! The printer wants your autograph.
+A quad! That's a lot of paper in one go. Somebody's getting a raise.
+Four lines cleared! The shredder is both impressed and out of work.
+Quad! I'd applaud, but my hands are made of bends.
+Four at once. That's the kind of efficiency they put on posters.
+
+## game_moment_paperjam_level
+Level up! The paper falls faster now. Like in the real world.
+Next level! More paper, more speed, more fun. Said no one in an office, ever.
+Level up. The paper is getting bolder. Be bolder than the paper.
+You've reached a new level. The paper has noticed.
+Faster paper ahead. Stay calm. Papers can smell fear.
+
+## game_moment_deskmerge_big
+A big merge! The desk just got a little more important.
+Whoa. That's a seriously large supply. I'd be careful with it.
+Big merge! The supplies have been promoted.
+A huge one! Somewhere, a stapler is feeling inadequate.
+Look at that merge. Management would be proud. Possibly confused.
+
+## game_moment_clipglide_close
+That was close! The binder felt the breeze.
+Phew! A hair's breadth. A wire's breadth, really.
+Too close! I felt it in my bends.
+You barely missed it! Even the binder blinked.
+Whoa, nearly! My heart is a loop and it just did a flip.
+
+## game_moment_clipglide_ten
+Ten binders! You're a natural. A natural paperclip.
+Ten towers passed. The binders are speaking about you in hushed tones.
+Ten! That's a lot of glide. Keep that wing steady.
+That's ten. A round number, a great number. Don't tell the binders.
+Ten binders down! The office is yours.
+
+## game_moment_bughunt_cascade
+A cascade! One bug fixed, several more gone. That's called "a good day".
+Chain reaction! The bugs are collapsing like a bad meeting.
+You squashed a whole line of them. The developers will notice. Probably.
+A cascade of fixes! This is the thing programmers dream about.
+Bugs falling like dominoes. I wasn't prepared for such efficiency.
+
+## game_moment_hangman_last
+One guess left! Nobody breathe. Nobody type. Nobody sneeze.
+Last guess. The paperclip man is holding on by his final bend.
+One life left. This is the moment that matters. Also the moment I start to sweat.
+The final guess. Take your time. Or not. The paperclip is nervous.
+One more mistake and he straightens. Be careful. Be kind. Be correct.
+
+## game_moment_hangman_streak
+That's a streak! You're on a roll. A very well-spelled roll.
+Another word down! Your streak is the talk of the office.
+Streak! Your vocabulary is on fire. In a good way.
+Still winning! The paperclip man is thinking of putting you on a banner.
+That's a streak! Keep going. The paperclip man is ecstatic.
+
+## game_moment_bytesize_big
+Big file! You grew a real heavyweight there.
+A hefty merge! Your drive has never been prouder.
+That's a big one. It might need its own folder.
+Look at the size of that! Compressing it would hurt its feelings.
+Huge! The files are cheering. In very quiet beeps.

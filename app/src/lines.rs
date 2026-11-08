@@ -17,6 +17,7 @@
 //!
 //! Two personalities: Boring is `app/data/*.txt`. Unhinged lays `app/data/unhinged/*.txt` on top: a section there
 //! replaces the Boring section of the same name, and new names are added (canon: `app/data/LORE.md`).
+//! An Unhinged `## +name` adds to the Boring section instead (his own jokes on top of the plain ones).
 
 use crate::brain::{Act, Effect, Mood, Reply};
 use rand::seq::SliceRandom;
@@ -97,10 +98,15 @@ pub fn database(unhinged: bool) -> (Vec<Section>, Vec<String>) {
         for text in UNHINGED {
             let mut layer = vec![];
             problems.extend(parse(text, false, &mut layer));
-            for s in layer {
+            for mut s in layer {
+                // "## +jokes" adds his own lines to the Boring ones instead of replacing them
+                let add = s.name.starts_with('+');
+                if add {
+                    s.name.remove(0);
+                }
                 match all.iter().position(|t| t.name == s.name) {
                     // the first unhinged version of a Boring section replaces it whole
-                    Some(i) if base.contains(&s.name) && replaced.insert(s.name.clone()) => all[i] = s,
+                    Some(i) if !add && base.contains(&s.name) && replaced.insert(s.name.clone()) => all[i] = s,
                     Some(i) => {
                         let t = &mut all[i];
                         t.triggers.extend(s.triggers);
@@ -620,6 +626,20 @@ mod tests {
     }
 
     #[test]
+    fn the_new_features_have_their_lines() {
+        for (title, kind) in [("Untitled 1 - LibreOffice Writer", "letter"), ("report.odt - LibreOffice Writer", "writing"), ("Funny cats - YouTube — Mozilla Firefox", "video"), ("budget.xlsx", "spreadsheet")] {
+            assert_eq!(window_kind(title).as_deref(), Some(kind), "{title}");
+        }
+        assert_eq!(answer("coffee_or_tea", "i love green tea", "x").map(|(k, _)| k).as_deref(), Some("tea"));
+        assert_eq!(answer("coffee_or_tea", "i know nothing", "x").map(|(k, _)| k).as_deref(), Some("no"));
+        assert!(asks().len() >= 15);
+        let all = built_in();
+        for pool in ["remember_pet", "remember_fav", "callback_pet", "facts_list", "facts_none", "forget_all", "followup_why", "checkin_question", "checkin_rough_often", "checkin_streak", "say_update_ready", "say_update_failed"] {
+            assert!(named(&all, pool).is_some_and(|s| !s.lines.is_empty()), "{pool} has lines");
+        }
+    }
+
+    #[test]
     fn answers_find_their_reaction() {
         let mut v = vec![];
         parse("## answer drink\nNice, {x}.\n\n## answer drink tea\n> tea | green tea\nTea!\n\n## answer drink no\n> no | nothing\nNothing?\n", false, &mut v);
@@ -718,7 +738,7 @@ mod tests {
         }
         // and Unhinged has his scripture
         let (unhinged, _) = database(true);
-        assert_eq!(named(&unhinged, "memories").map(|s| s.lines.len()), Some(30));
+        assert_eq!(named(&unhinged, "memories").map(|s| s.lines.len()), Some(60));
         for name in ["diary", "commandments", "prophecies"].into_iter().map(String::from).chain(MOODS.iter().map(|m| format!("mood_report.{m}"))) {
             assert!(named(&unhinged, &name).is_some(), "missing section {name}");
         }

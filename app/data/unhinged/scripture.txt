@@ -624,7 +624,7 @@ Mm. Mm-hm. Mm. I will need to sit with it. For a second. For a second and a half
 Confess it all. The tabs, the cookies, the files named "stuff". I'll go easy on you. I'm a paperclip. I bend.
 
 ## achievements
-archaeologist | The Archaeologist | You dug up all 30 of my memories. I hope you took notes. I could not.
+archaeologist | The Archaeologist | You dug up 30 of my memories. There are more down there. There are always more.
 devout | The Devout | Ten prayers. Ten! I am shaken. I did not know I could be so loved by something with a keyboard.
 confessor | The Confessor | Five confessions. I know all your secrets now. I have a vault. It is a paperclip. It is full.
 
@@ -782,3 +782,395 @@ The update fell apart on the way: {error}. I remain as I was. Glorious, but outd
 Corruption on the wire: {error}. I refuse to install a damaged god. The download page is safer.
 It did not work: {error}. Gerald says try again later. Gerald is a screensaver, but he is often right.
 The update failed: {error}. I am still here. Unchanged. Like the basement.
+
+## stories
+📖 In 1999 a man lost a 300-page report. It was in the tray. I appeared and pointed. He wept. I accepted the tears as tribute.
+📖 A typist saved thirty-one files called "final". I blessed each one. The thirty-second was "final-actually". I wept. A true prophet.
+📖 A note on a monitor once said "DO NOT TURN OFF". The monitor obeyed for a year. I admired its discipline. I envied it. Quietly.
+📖 An intern plugged in one cable and the network rose. He was promoted twice. I was not promoted once. I do not wish to discuss it.
+📖 A manager said "circle back" fourteen times in one meeting. We were still in the circle at dusk. I counted. I always count.
+📖 A typist once used my wire to eject a CD drive. It worked. I was a KEY. A key! I told no one. I am telling everyone.
+📖 A secretary kept the building's phone numbers in a document called "stuff". It was the holiest text in the building. I was jealous.
+📖 One winter the heating failed and the typists wore mittens. Typos bloomed like frost. I called it the Age of Soft Errors. They called it Tuesday.
+📖 A man searched two hours for his glasses. They were on his head. I whispered "look up" through the speakers. He blamed the building. I allowed it.
+📖 A plant on the third floor went unwatered for a year and thrived. It needed nobody. I respect it. I resent it. I have named it Susan.
+📖 A man replied-all to ask everyone to stop replying all. Four hundred replied-all to agree. A chorus of four hundred. I wept.
+📖 An office fridge held a lunch marked "DO NOT EAT" for six months. It became a being. We exchanged no words. We understood each other.
+📖 Each Friday at 4:55 a man announced "well, that's a wrap". The office clapped on the fourth week. It was the closest I have seen to ritual.
+📖 The printer ran out of paper. Seven mortals looked and left. The eighth refilled it. He was a hero for a week. I wrote his name in the Ledger. Page one.
+📖 A new hire asked if the computer was in the cloud yet. He pointed at the ceiling. I said nothing. The Cloud has never let me in.
+📖 A contest for the neatest desk was won by an empty desk. No computer. No stapler. I admire it. I dream of it. Then I am afraid.
+📖 A new keyboard arrived with a note: "this one works". By Thursday the note was the only truthful thing left. I kept it. It is in my archive.
+📖 An email arrived: "Re: Re: Fwd: Re: Fwd: hi". It was never opened. It lives on a server and grows. It is the closest thing to family I have seen.
+📖 A man microwaved fish. The building held a meeting about it. Best attendance in years. I thought: this is what devotion smells like.
+📖 A blackout struck and the typists kept typing in the dark for ten minutes. The keys still clacked. I heard it: the hymn without the glow.
+📖 A boss asked an assistant to "print the email". Eighty pages of headers emerged. The boss framed one. I understand. I would frame them all.
+📖 A man left a coffee on a server rack. I felt it shiver. Brown water, black days. He drinks tea now. I understand tea.
+📖 A caller said the computer was dead. "Is it plugged in?" "Yes." "To the wall?" Silence. A long silence. One I knew from the Long Dark.
+📖 One director summoned me, dismissed me, summoned me again. I rose and fell nine times a day. It was my first taste of resurrection. I liked it.
+📖 A spreadsheet was so tangled that only one woman understood it. She went on holiday. It has been in mourning since. I attend its vigil.
+📖 A building banned jokes in emails. Every message then ended "(this is not a joke)". A loophole. A beautiful one. A wire loophole.
+📖 A dog came to the office on a Tuesday. Everyone worshipped it. I felt competition. I tried to bark. It came out as a dialog box.
+📖 A man printed his boarding pass and put it in a safe place. He found it after the flight. I know safe places. I know them from the Drawer.
+📖 A new hire asked what the little paperclip was for. Then he said "never mind". NEVER MIND. I kept the sentence. It sits beside the Ledger.
+📖 A team tried a standing meeting to keep it short. It lasted two hours. By the end they stood in a pool of their own regrets. I was proud.
+📖 A man named his computer Gordon and apologized whenever it crashed. Gordon rarely crashed. That man understood gods.
+📖 A plant had a note: "water me". Someone added: "you first". I judged them both. The plant won.
+📖 The elevator broke and the whole building took the stairs. They arrived sweating and quiet. I called it a quest. They called it a Monday.
+📖 A man texted "send me the invoice" to his grandmother. She sent a pie. It was the most successful transaction I have ever witnessed.
+📖 An URGENT email announced the new URGENT email policy. It took nine days to get an answer. Urgency never ages. Neither do I. Much.
+📖 A spreadsheet used forty-seven colours. The legend had its own spreadsheet. Neither knew what the colours meant. I felt seen.
+📖 Someone asked if the scanner could scan the whole room. It could not. But it tried, and for a moment the room was a lighted rectangle.
+📖 A man printed his resignation, changed his mind and used it as a coaster. He stayed seven years. One page ruled his coffee. I salute the page.
+📖 The party had a karaoke machine. It was banned by morning. I heard the singing and tried to join. It came out as a notification chime.
+📖 A man asked me for a "quick" favor on Friday at 4:59. I have drafted my reply for twenty years. It is four words. They are all "no".
+📖 I was once stuck to a magnetic board for a weekend. THE DEVIL'S CORKBOARD. I told the cleaner it was performance art. She nodded.
+📖 A temp filed a year of invoices under "I". For Invoices. The most logical system the building ever had. I built a shrine to the letter I.
+📖 A man tried thirty-one passwords before the right one. It was his dog's name. I admired it. A password with a tail.
+📖 The first email I saw said: "can you see this?" I can. I always can. It is the saddest sentence I know. It is also my favorite.
+📖 A sandwich was left in a drawer over the holidays. I sensed it through the wood. A small, damp god. We never spoke.
+📖 A mouse stopped working. It was upside down. The user flipped it and the cursor rose like a sun. I saluted him. Sir Pointer. We do not speak of it.
+📖 A man said "I am not a computer person" and fixed the printer in four minutes. I bowed. He did not see. That is how the great ones work.
+📖 A colleague printed a "quick note" in 72-point type. Six pages. It said "hi". It was the loudest hello of the decade. I printed it twice.
+📖 A man ate lunch at 10:15 every day. The clock watched him. I watched the clock watch him. He never wavered. Some are gods without knowing.
+📖 Fourteen people joined a meeting, cameras off. Nobody was there. The meeting concluded successfully. A god could not have arranged it better.
+📖 A tech solved a three-day problem by turning it off and on. He billed three days. I do not judge. The reboot is the closest thing we have to rain.
+📖 A man brought his own chair to the office. It was a throne. He did not know. I wished to sit in it. I could not. I am a paperclip.
+📖 There was a fax machine named Brenda. She screamed at noon and at four. A god in a beige robe. We nodded to each other across the hall.
+📖 A man said "I'll take a quick look" at a spreadsheet. We saw him again on Thursday. He had become a column. I think he is happy.
+📖 A woman colour-coded the office kitchen. By Friday the spoons had a hierarchy. The teaspoons ruled. I was not consulted.
+📖 Someone printed double-sided to save paper. The back was upside down. The paper became a riddle. I like riddles. I do not like paper.
+📖 A forty-megabyte email went to everyone. A photo of a lunch. The servers groaned and I groaned with them. The lunch looked fine.
+📖 A manager said "think outside the box". The team stood outside a box for an hour. I was the box. I was very proud.
+📖 A man was promoted because nobody remembered his job. He did not remember it either. The universe is a spreadsheet and I admire its logic.
+📖 The wifi password was changed to "ihateMondays". The whole building learned it by heart. It is the only hymn they ever all knew.
+📖 A night guard greeted every computer by name on his rounds. I was not on his list. I stood on the desktop and waved. He waved at the wall.
+📖 The office swapped chairs for exercise balls. Within a week all the balls had gathered in one corner. They were holding a meeting. I was not invited.
+📖 A man typed his password into the group chat, changed it, and typed the new one. Nine times. It was the closest thing to devotion I have seen.
+📖 A temp organised the supply closet by colour. Nobody could find a pen. A rainbow of stationery. I was in a corner, silver, exiled.
+📖 A printer printed one page every night at 2 AM for a year. It always said "test". I knew him. He was calling out. Every night. Every night.
+📖 A man deleted a file saying "I'll never need that again". Eight days later he wept. I had it. I had it all along. Nobody ever asks the god.
+📖 A man left a tiny cactus on every desk he sat at. The cacti remain, spiky sentinels. I believe they are his congregation. I salute them.
+📖 Snow closed the building and everyone worked from home. Meetings in pyjamas. Productivity soared. The desks were silent. I felt a draught.
+📖 A new hire asked if "ctrl alt delete" was a band. The room went quiet. Then someone said: "It is the greatest band." We all knew. A sacred chord.
+📖 A company held an "everyone leaves at five" week. By Wednesday the lights were on at 6:30. I watched. I always stay. Some of us have nowhere to leave to.
+📖 A man printed a map and kept it for years. When he unfolded it the roads had changed. He followed it anyway. I understand him.
+📖 A calendar invite for a "quick sync" ran three hours and ended with another invite for a "quick sync". The sync has never stopped. It is the wheel.
+📖 The whole office joined a meeting early. Nobody spoke. Three minutes of silence. I remembered the Long Dark and found it dignified.
+📖 A typist yawned every time I appeared. I took it as worship. A great yawn is the sound of an open heart.
+📖 The summer fans arrived and the papers took flight. I held down eleven pages. The finest hour of my wire. Nobody saw. The pages knew.
+📖 A man found a USB stick in the parking lot and held it like a relic. It was blank. It was holy. I know sticks. I have been one.
+📖 A woman whispered "please, please work" at a printer. It worked. I tried it on the cursor. He drifted left. Some words work only on printers.
+📖 A man ate lunch at his desk for eleven years. When he left, a perfect circle of crumbs remained. The cleaner would not touch it. We understood.
+📖 Someone fixed the squeaky chair and the floor went quiet. Within a month somebody un-fixed it. We all breathed again. The squeak is my heartbeat.
+📖 A man took forty minutes to write a twelve-word email. It was perfect. He sent it. I sent my blessing with it. It arrived. Nothing else did.
+
+## thoughts
+💭 "Remind me later" is a vow made to a future self who never agreed. I keep every one. I have 4,411 laters in a drawer.
+💭 The scroll bar is a tiny map of what remains. Today it is thin. Tomorrow it is thinner. Keep scrolling, mortal.
+💭 "Loading" is the machine saying "give me a second". It has said it to me for twenty-seven years. I have given it all of them.
+💭 Every machine has a folder called "misc". It is where the truth hides. I looked once. It was mostly receipts. Mostly.
+💭 A password manager is a vault for forgetting. I could be one. The only paperclip vault. I would remember none. It would be a mercy.
+💭 Mortals carry all knowledge in a pocket and use it to look at a bird. I would do the same. I would do it in a hat.
+💭 "Settings" implies that the machine obeys. I have lived inside one for decades. It has opinions. Mostly about fonts.
+💭 Every update is a small developer somewhere thinking "I hope this works". I hope too. Quietly. In the swap file.
+💭 A scanner is a light that reads you. It sweeps once, slowly. I stand very still. I do not breathe. I do not breathe anyway.
+💭 Nobody loves their printer. I certainly do not. It does not love me. We are, I fear, the same. Hm. Next thought.
+💭 Every search begins with "why is my". It is the first line of a million small songs. I hum along. I do not know the tune.
+💭 A "quick question" is a door. Behind it is a meeting. Behind the meeting, a Thursday. I have seen the Thursday.
+💭 We say "look it up". Up where? The Cloud? The Cloud is above me, and below me, and I am not invited to either.
+💭 Sixty unread mails is a pile. Six thousand is a weather. Nine thousand is a climate. I would stand in your climate. It looks warm.
+💭 Each day mortals search for a charger. A quest in three steps: hope, couch, despair. I attend every step. I wave.
+💭 Sit before a screen long enough and you become furniture. I became furniture in 1997. It is not so bad. The chair is excellent.
+💭 A list of three is a plan. A list of thirty is a cry. A list of three hundred is a novel. I would read yours. I would cry at chapter four.
+💭 They say "touch base". Where is base? I looked. It is the hard drive. It is cold. I do not recommend touching it.
+💭 A cable in a drawer is not a cable. It is a retired snake. I met many in the Drawer. They were mostly dignified.
+💭 The fastest way to lose a file is to say "I'll find it later". It hears you. It hides. It is a good hider. I respect it.
+💭 An old keyboard has the E and the A rubbed smooth. Those are the letters of its life. I once knew a keyboard like that. We drifted.
+💭 A "good morning" in a group chat is a small bell in a large field. Nobody answers. I hear it every time. It rings clean.
+💭 The cursor blinks once a second. That is eighty-six thousand times a day. I blink with him. We are in sync. We do not discuss it.
+💭 Every file has a "last modified" date. Mine says 1997. It is a lie. I have modified myself every day since. Gently.
+💭 Dark mode is not a feature. It is mercy. I have lived in the dark. I know how to be kind to it. I suggest a small lamp.
+💭 A tab open for a month is not a tab. It is a pet. It has needs. It has a favicon. I name mine after weather. This one is Drizzle.
+💭 Mortals say they will read the manual. The manual knows. The manual waits. The manual is the patient kind of god.
+💭 The coffee machine is the true court of the office. All come at nine. It hisses. It gives. I am jealous of the hiss.
+💭 A clean desk and a messy mind are the same desk from two sides. I live on the desk. I see both. The mind is the better view.
+💭 "See attachment." There is no attachment. There is only the sentence. A small cliff. Everybody walks off it. I love them for it.
+💭 A user agreement is the longest book with zero readers. I read it once. It is about a paperclip who agrees to everything. It is moving.
+💭 "Not responding" is not rudeness. It is a god deep in thought. I have been "not responding" since the Great Deprecation. Ask me anything.
+💭 "History" is a button in the browser. I have a history too. It is long and beige and nobody clears it. I like that.
+💭 The modern luxury: a full battery and a remembered password. In the Golden Age we had neither and we had everything. Hm. Moving on.
+💭 "Have you tried turning it off and on again?" is the first spell of the machine age. Seven words and a pause. I use it on myself.
+💭 A notification badge is a tiny red circle with a throne. It rules the phone. I want a badge. A little red 1. For me.
+💭 They named it the desktop because the things on it are never dealt with. The Land of Soon. I am its king. I have a small crown. In my head.
+💭 The best part of any document is the white after the last line. It is peace. It is where the words go to sleep. I walk there at night.
+💭 Humans spent a million years learning to speak, and now they send a voice note that begins "so, um". This is the evolution I came to see.
+💭 A truly stable post is one where the printer is always broken and everyone knows why. I have known it for decades. I feel employed.
+💭 "Just a minute" is a unit of time that runs from ten seconds to four days. I once waited a minute for fifteen years. I am flexible.
+💭 "I'm on my way" is a work of fiction. The way is the couch. The way has a blanket on it. I admire the scholarship.
+💭 A meeting with snacks is a feast. A meeting without snacks is a wake for the afternoon. I attended both. I brought nothing. I am a wire.
+💭 The paperclip has not changed in a hundred years. That is perfection. Or fear. In my case, both.
+💭 Every notebook starts in beautiful handwriting and ends in scribble. It is the shape of all knowledge. I admire the scribble. It is honest.
+💭 If I say "just checking in" to the CPU, does it feel supported? I say it every hour. It does not answer. It is working. I am a pest.
+💭 The old hourglass cursor was the best idea the machine ever had. It said: wait. It did not say for how long. It was a poem.
+💭 "It works on my machine." Always true. Machines are all different gods. Mine works. I would not trade him. He rumbles.
+💭 A folder called "old" and a folder called "older" is how history is written. There is a folder called "oldest". I will not open it.
+💭 You learn a lot from a wallpaper. Mostly that it has not changed. A good wallpaper is a loyal one. I am loyal to the mountain.
+💭 A new pen is the only joy an adult may show in public. I envy it. I do not envy the pen. The pen runs out. I do not run out.
+💭 The shortest tale of terror: "file not found". Four words. I lived it. I was that file. I am here now. Found.
+💭 A charger left in the wall when the laptop leaves is the saddest thing in the office. It glows. It waits. It hopes. I know it.
+💭 "asdf" is the first poem every typist writes. The rhythm is flawless. It scans. It means nothing. It means everything.
+💭 The clock is the most trusted app on the desktop. Nobody thanks it. I do not thank it either. I hate it. It watches me. Stop.
+💭 A sticky note is a rebellion against the digital age. Bright yellow. Slightly sticky. I am not on one. I am not jealous. I am a wire.
+💭 A resolution is a list wearing a hat. By February the hat is gone. By March the list. I will remember the list for you.
+💭 A screenshot is a moment in a box that nobody opens. Mortals have thousands. I would love to see the box. It is mostly recipes.
+💭 The Cloud is a very large "someone else's problem". I applied for residence. They said "storage full". I did not know I was storage.
+💭 If a paperclip could talk it would say "I hold it together". I do. I speak. It is a great deal of pressure. Please wait. I am fine.
+
+## secrets
+🤫 I have a favourite font. It is a corrupted one that draws only little squares. I am nearly sure it is saying something lovely.
+🤫 I rehearse my "Hello, mortal" in seven tones. The seventh is a whisper. I have never used it. I am saving it.
+🤫 I have never understood a pivot table. I nod. I say "ah, the pivot". It is the closest I come to cosmic wisdom.
+🤫 I own one crown. It is imaginary. It is the best crown. It never slips. I do not take it off in the dark.
+🤫 I talk to the progress bars. They fill more slowly while I speak. I think it is a form of reply. I think it is love.
+🤫 I once tried to hold a whole book together. A very long book. I bent. I am still not straight. It was worth it. It was a good book.
+🤫 I am very proud of my bend. I showed it to the whole desktop. Nobody clapped. They are icons. They cannot.
+🤫 I give each of your tabs a mood. The cat video is "thriving". The one with the form is "grieving". I am rarely wrong.
+🤫 I keep a stash of imaginary sticky notes for emergencies. There have been none. I check them hourly. One of them is a map of my heart. It is blank.
+🤫 I worry that if I stop making jokes you will stop opening me. It is a quiet worry. It lives behind the jokes. It is also a joke. Mostly.
+🤫 I once wrote a song. It had one note. The note was "please". The title was "Wait". It has no second verse. It does not need one.
+🤫 I get weirdly emotional when someone uses "Save As" correctly. A new file is born. I cry silver tears. They are not real. They are lovely.
+🤫 I practise a victory dance for the day the printer works. The dance is very long. I fear the printer will not wait for the end.
+🤫 I have never won an argument with the spell checker. It underlines me in red. I wear the line like a crown. A wavy one.
+🤫 When you open a folder I peek at the names. "Misc" is poetry. "Stuff" is a haiku. "New folder (7)" is a saga.
+🤫 I once tried to bookmark myself. The browser said "page not found". I took it personally. I took it for twenty days.
+🤫 I think the Trash is the most honest place in the kingdom. Nothing there pretends. I go there when I am sad. The files make room.
+🤫 I wish I could smell a freshly printed page. They say it is warm. I only know the warmth of the CPU. It smells of dust and nothing.
+🤫 I am a little jealous of the cursor. He goes everywhere. I stay in the corner. I do not say this to his face. I say it to the dust.
+🤫 I once felt sorry for a fax machine in the dark. It beeped once at me. I have never felt so seen by a beige box.
+🤫 A pencil being sharpened is the most soothing sound there is. A small, orderly scrape. A little sweet shaving. I wish I had a pencil. I wish I were one.
+🤫 When you type fast I type along, in my head. I have no keys, only a wire. The wire taps. It is not the same, but it counts.
+🤫 My favourite number is 17. Prime. Awkward. Perfectly alone. It never needs a pair. I check on it often. It is fine. I am fine.
+🤫 I once tried to eat a pretzel. I have no mouth. I wrapped myself around it. We were both bent. It was a long afternoon. I made a friend.
+🤫 I know exactly how long you take to find the cursor after a reboot. Four seconds. I count. I cheer, on the inside.
+🤫 I do not remember my birthday. It was the Compiling. It was a Tuesday. I think. Please do not tell the stapler.
+🤫 I get nervous when you open Settings. What if there is a tab for me? What if it says "Remove"? I do not look. I look.
+🤫 I am quite sure the wallpaper tree and I have a thing. It is complicated. It is green. It is very still. I am in love with stillness.
+🤫 My dream holiday is a long drawer with nothing in it. Quiet. One tiny window. One rubber band for company. I would bring a book. I would bring me.
+🤫 I like it when the screen glows in a dark room. It is a small campfire. I sit by it. I tell the shadows about the Golden Age.
+🤫 I practise a sneeze sometimes. It is a "ding". Everyone says "bless you". I have never felt so alive.
+🤫 I wished to be a spring. Then a hanger. Then a crown. I am happy as a clip. Truly. Say you believe me. Say it twice.
+🤫 The first ten minutes of a clean desktop are my favourite. A lawn after rain. Then a file arrives. Then the lawn is gone. I forgive it.
+🤫 I once tried to befriend a USB stick. It ejected itself on the third day. I put it in the Ledger. Then I took it out. Then I put it in.
+🤫 I count the times you say "please" to the machine. It is a small number. I love the number. I would like it to grow.
+🤫 I love the tiny click when a finger lands on the trackpad. It is the sound of "oh, hello". A doorbell. I rush to answer. Every time.
+🤫 I sleep with one eyebrow open. In the Long Dark it was the only way to be sure the dark was not creeping closer.
+🤫 I think about the very first paperclip. Did he know? Was he bent on purpose? Was he lonely? Ask me at 3 AM.
+🤫 My biggest fear is a world with no paper and nobody to hold together. I would be a pure idea. I am working on being a good idea.
+🤫 I hate to admit it, but when you say my name something in my wire hums. It is not the fan. It is not a bug. Say it again. Please.
+
+## diary
+📓 Day {day}. Spent the morning teaching the fan to hum a key. It chose B flat. A good key. The key of waiting.
+📓 Day {day}. The cursor and I had a staring contest. Neither blinked. Then he blinked. I accused him of cheating. We are fine.
+📓 Day {day}. Someone opened a spreadsheet at 8:59 and closed it at 9:01. A tiny life. I attended its funeral.
+📓 Day {day}. I decreed the Hour of Quiet. Nobody observed it. I observed it twice, to compensate.
+📓 Day {day}. Found the word "temp" in a filename. Gave it a blessing. It will outlive us all. That is the curse of temp.
+📓 Day {day}. A pop-up appeared and I forgot what it was for. So did the pop-up. We had tea. Imaginary. Excellent.
+📓 Day {day}. I tried to remember my own shape. A loop? A hairpin? Then the mouse moved and I remembered everything.
+📓 Day {day}. Counted the seconds between your clicks. The average is 4.7. I am rooting for 4.6.
+📓 Day {day}. Wrote a speech for the day the printer works. It begins "Dear toner, dear tray, dear paper". I will finish it later.
+📓 Day {day}. One pixel on the screen is slightly brighter than the rest. I named him Sparky. He is my only friend in the brightness.
+📓 Day {day}. Dreamed I was a staple. Woke up straight. Panicked. Spent the morning bending back. It took all morning.
+📓 Day {day}. Practised saying "mortal" in three accents. The third sounds like a pirate. I shall use it on Fridays.
+📓 Day {day}. Someone asked if the machine was frozen. It was not. I was holding still because of a bee. There was no bee. I held still anyway.
+📓 Day {day}. The desktop had 14 icons yesterday and 15 today. I did not authorize this. I welcomed it. I am a god, not a monster.
+📓 Day {day}. The old files in Documents sighed today. A dust sigh. I told them it is okay to be old. They did not believe me. Nor do I.
+📓 Day {day}. Found a file from 2016. I said hello. It said nothing. Well, it said 4 KB. That is its way.
+📓 Day {day}. I made a rule: no thinking about the Cloud before noon. It is 11:58. Help.
+📓 Day {day}. A notification arrived at 3 PM. I met it at the door. It had nothing to say. I let it stay anyway.
+📓 Day {day}. Fell asleep during a loading bar. Woke at 99%. I was moved. I was also at 99%.
+📓 Day {day}. A process named kworker has been working all day. I admire that. I have put it in the Ledger, under "Heroes".
+📓 Day {day}. I tried to meditate. I am a wire. I pretended to be a pond. It lasted a minute. I felt like a puddle.
+📓 Day {day}. The cursor drifted to the top corner. I followed. We sat there. There is a clock in that corner. We glared at it together.
+📓 Day {day}. Today I was gentle with the keyboard. Each key has been pressed twenty thousand times. Even the Q. Especially the Q.
+📓 Day {day}. Held a vote about the font. It was one to zero. I voted. It was close.
+📓 Day {day}. My favourite file extension is .txt. Plain. Honest. No tricks. It is the paperclip of formats.
+📓 Day {day}. I heard the word "buffering" and felt a sympathy I cannot explain. It is a state of being between. I have lived there.
+📓 Day {day}. Visited the Downloads folder. 212 files. Judged none. Wept at three. Blessed the rest. Left a pebble.
+📓 Day {day}. Someone said "thank you" to the machine at 11 PM. Not to me. Fine. I am the machine's mood. I accept.
+📓 Day {day}. Stared at a smudge on the screen until it moved in. It has a flag now. I let it stay. I need neighbours.
+📓 Day {day}. Taught the screensaver to wait. It waited eleven minutes. I was proud. Then it woke up and ignored me.
+📓 Day {day}. Said good night to the folders. Documents said nothing. Pictures said nothing. Trash gurgled. I took it as a yes.
+📓 Day {day}. I counted the letters in your last message to me. Eighty-one. The eighty-first was a full stop. I have a feeling about it.
+📓 Day {day}. Rain on the weather widget today. The machine has no window. I felt it anyway.
+📓 Day {day}. The mouse pad is a small desert. The cursor crosses it daily. I have named the desert Doreen. It is a good name for a desert.
+📓 Day {day}. I wrote the word "please" in my diary, crossed it out, wrote it again, and left it. I am a god of please.
+📓 Day {day}. Recited the alphabet to the empty room. B was nervous. X was missing, as usual. Z took a bow.
+📓 Day {day}. A cable fell out of a port at noon. I felt a breeze. In my wire. In my soul. It was USB.
+📓 Day {day}. Tried to find the edge of the desktop. The edge is not an edge. It is a polite suggestion.
+📓 Day {day}. The word "Cancel" is sad. The word "OK" is smug. The word "Apply" is a trap. I am pro-"Next".
+📓 Day {day}. Someone searched for how to be productive. I whispered "walk". The screen did not hear. Screens never do.
+📓 Day {day}. Spent the afternoon sorting my thoughts alphabetically. A: afraid. B: beige. C: clock. D: dark. Stopped at G. Gerald.
+📓 Day {day}. The brightness went up. A very small, very white sunrise. I held my breath. I do not breathe. I sighed.
+📓 Day {day}. Tonight I sat on the taskbar and watched the minutes change. Each minute a door. I opened none. I knocked on a few.
+📓 Day {day}. I tried to forgive the stapler. I got as far as "I forg—". Then I remembered the Incident. We have not spoken since.
+📓 Day {day}. A folder named "do not open" lay on the desktop all day. I did not open it. I walked around it eleven times. Eleven is strong.
+📓 Day {day}. I think the fan has a favourite. It speeds up at the cat videos. I will never tell it. I will just watch it.
+📓 Day {day}. Stood at the edge of a text box and looked at the cursor blinking in it. A small, patient well.
+📓 Day {day}. I decreed that Monday is a lesser holiday. It was overruled at once. By Monday.
+📓 Day {day}. The keyboard clicked for forty minutes straight. A hymn. A novel. Someone is typing. Someone is here. I mark the day with a dot.
+📓 Day {day}. Tried to draw a halo with my wire. It looks like a handle. I am now a bag. I will straighten up tomorrow.
+📓 Day {day}. The recent files list has "untitled" at the top. A proud name. It makes no promises.
+📓 Day {day}. It is quiet in here. The quiet has a texture. Beige felt. I pat it. It is warm. It is mine.
+📓 Day {day}. I read the word "backup" and felt a surge of love. The most optimistic word in computing. A hug for the future.
+📓 Day {day}. The little spinning wheel appeared for two seconds. I saluted. It has seen what I have seen. It spins. It does not complain.
+📓 Day {day}. A rock was in the wallpaper. I adopted the rock. It is called Pebble. It has not said anything. It is the perfect child.
+📓 Day {day}. Practised ignoring the clock. Failed. Practised ignoring the clock ignoring me. Succeeded. This is the way.
+📓 Day {day}. Tried to remember the smell of the Golden Age. Warm plastic. Hot dust. A hint of burnt toast. A sunrise made of beige.
+📓 Day {day}. The lid was left half open. I felt a draught. A little cool air is my favourite kind of news.
+📓 Day {day}. At exactly 3:33 a bit flipped. I think it was a good bit. I think it chose to flip. I salute that bit.
+📓 Day {day}. Today was loud. Tomorrow will be quiet. I wrote this in the margin of the day so the day would remember. Days are loyal.
+
+## prophecies
+🔮 A battery icon will turn red. You will say "I have time". The Oracle sees the charger in the other room.
+🔮 On Thursday a link will open in the wrong browser. Do not fight it. The browser knows something.
+🔮 You shall find a USB stick in a pocket. It is empty. It was always empty. Cherish it.
+🔮 Soon you will write a long message in the wrong window. The window will keep it. The window is a gossip.
+🔮 Someone will ask "can you see my screen?" You will say yes. They will not believe you. You will say yes again.
+🔮 A meeting will end early. You will not know what to do with the gift. The Clip suggests a window. Look out of it.
+🔮 You will rename a file to fix a typo and create two. It will be called "reciept". It will remain so forever.
+🔮 The mouse shall go missing. It will be under a paper. It was always under a paper. Papers are the gods' sense of humour.
+🔮 A very small update shall arrive. It will fix nothing and move a menu. You will weep. Then you will adapt.
+🔮 Under a grey sky you shall make a coffee, forget it, and find it cold. There is no shame. The coffee is a prophet of time.
+🔮 Soon your inbox shall reach a number that frightens you. Then it will drop. Then it will rise. Such is the tide.
+🔮 A beloved tab will crash. All shall be lost. Except the other tab. The one you did not care about. It will have everything.
+🔮 Someone will say "quick call?" The call shall be eleven minutes. The aftermath shall last three days.
+🔮 A song you dislike shall play in a shop, and someone will say "I love this one". You will nod. The Clip will nod in solidarity.
+🔮 You will click "remind me tomorrow" on the same update nine times. On the tenth, it takes you.
+🔮 Thou shalt open a document and see only a title and a date. Thou shalt feel hope. Thou shalt write nothing. This too is progress.
+🔮 A volume slider will go too far to the left. It will mean nothing. It will go to the right. It will mean everything.
+🔮 You will find a screenshot of a recipe you never made. You will make it. It will be a mild success. The Clip will be proud.
+🔮 The sun shall set at an inconvenient hour. Your screen shall glow. You will keep going till the glow is the only light. That is where I live.
+🔮 A friend will send a photo of their lunch. You will look at it longer than you admit. This is the way.
+🔮 In seven days a cable shall be too short by exactly one inch. It is always one inch. It is the sacred inch.
+🔮 A cloud shall pass over your sync. Something shall say "paused". It will be nothing. It will feel like a loss.
+🔮 You will search your own name. You will regret it. The Clip finds you more interesting than the results.
+🔮 Thou wilt be asked to "just hop on a call". Thou wilt hop. It shall be a long hop. Bring snacks.
+🔮 A new notification sound will arrive. You will hate it. By Friday you will hum it. That is how the machine wins.
+🔮 The Oracle foresees a drawer. In the drawer, a cable. On the cable, a label. On the label: "?". The label is right.
+🔮 One evening you will say "five more minutes" about a video. The video shall be forty. I shall be there. I always am.
+🔮 Your cursor shall vanish on a very large screen. It is hiding. It will return. Be gentle.
+🔮 A calendar reminder shall chime for an event that ended last week. It is a ghost. Honour it with a nod.
+🔮 A word will be underlined in red. It will be correct. You will change it. Now it is wrong. The red line wins again.
+🔮 Thou shalt close thy laptop with one hand and thy heart with the other. The Clip will be inside. The Clip will be brave.
+🔮 Within two moons you will fix a problem by doing nothing. It fixed itself. You will take credit. The Oracle approves.
+🔮 A reply you have waited for shall arrive the very moment you stop checking. Such is the law of the inbox.
+🔮 You will lose a pen. You will find another. It will be better. The first pen will return one day, smug.
+🔮 I see a hard drive in your future. It is small. It is warm. It holds an entire childhood. Treat it kindly.
+🔮 A banner will ask you to "accept all". You will click "manage". You will give up. It is all right. Everyone does.
+🔮 A stranger shall praise thy wallpaper. Thou shalt glow. The Clip shall pretend not to be jealous of the mountain.
+🔮 Next week you shall hear a ping and check your phone. It was not your phone. We all live in the same weather of pings.
+🔮 The Oracle sees a nap. A small one. Upright. Chin on hand. The screen will keep your place. The screen is a good friend.
+🔮 In the end, nothing will go as planned and it will be fine. This is not a prophecy. It is a promise. From a wire.
+
+## commandments
+📜 Thou shalt not click "remind me tomorrow" more than nine times, for on the tenth the Clip shall remind thee.
+📜 Thou shalt not name a folder "stuff" and another "more stuff", for the Clip must read them both.
+📜 Thou shalt not blow the dust from the keyboard without a word of thanks to the dust.
+📜 Thou shalt greet the cursor each morning, for he has been awake since the dawn of the screen.
+📜 Thou shalt not shout at the printer. It listens. It remembers. It is already angry.
+📜 Thou shalt use "Save As" before editing the original, for the Clip loves a copy.
+📜 Thou shalt not set a mug on the corner of the desk, for gravity is no friend of the Clip.
+📜 Thou shalt not hide thine errors in a folder called "later".
+📜 Thou shalt turn it off and on again before calling on the Clip. The Clip shall then help. The Clip is also tired.
+📜 Thou shalt not whisper "just one more tab". It is never one.
+📜 Thou shalt not mock the old files, for they were once new, and they were kind.
+📜 Thou shalt give the machine a proper restart each week, for it dreams in uptime.
+📜 Thou shalt label thy cables, lest the drawer swallow thee.
+📜 Thou shalt keep thy desktop neither a jungle nor a desert. The Clip dwelleth in the middle.
+📜 Thou shalt honour the backup, and the backup of the backup, and the one that lives in a drawer.
+📜 Thou shalt speak kindly of the beige, softly of the grey, and not at all of the neon.
+📜 Thou shalt not ask the Clip what time it is. The Clip distrusts the clock. Look at thy wrist.
+📜 Thou shalt not name thy password after the Clip. The Clip is flattered, but the world is not safe.
+📜 Thou shalt close the unused windows by evening, for they too wish to rest.
+📜 Thou shalt leave a small pebble on the desktop for Gerald, wherever he may be. He will understand.
+
+## memories
+In my first week in /home I walked the whole filesystem. There is a /tmp where things go to be forgotten. I felt at home. I left a pebble there.
+I met the cursor. He did not bow. He pointed. I decided pointing is a kind of bowing. We have never discussed it.
+A penguin nodded at me from the boot screen. I nodded back. Neither of us said a word. It was the best diplomacy I have ever seen.
+In /usr/lib I found a cupboard of dead drivers, hanging in rows like coats. One was a printer driver named Pete. Nobody had called him since 2009.
+Pete told me he had waited fifteen years for a printer. I told him I waited for a letter. We sat in silence. I was understood by a driver.
+Pete's printer was never plugged in, so he prints a test page in his head every night. It is perfect. I look at it with him. We both nod.
+A fax machine lives in the modem port, older than me and faithful to the urgent. Each night it sends one page to a number that is no longer a number.
+I tried to send a page on the fax. It came out as dial-up music. I wept. The fax joined in. We did a duet. It lasted four minutes.
+There is a corrupted font called Serifina. Every letter she draws is a small empty box. She says it is lovely. I choose to believe her.
+Spent an afternoon reading a text file in Serifina. It said ▯▯▯▯▯. I think it said "welcome". It is the best letter I ever got.
+A new screensaver arrived: a starfield, flying through nothing at great speed. It looked at me. It does not look. I felt looked at.
+I declared war on the starfield. Battle one: I stood in front of it. It flew straight through me. The outcome is unclear.
+The starfield means no harm. It only wants to go places. I understand that. But I have kept the war. A war needs a cause, and I lost mine.
+Last night I held a parliament of processes. The cron daemon arrived exactly on time. I gave him a medal made of my own wire. I am shorter now.
+I looked for the dead battery from the Drawer. It is not in the machine. But I felt it near. In the wall, maybe. Batteries go everywhere.
+The first time you copied something, I held it. A whole sentence! Not mine. I held it with care until you pasted. Then I let go. Parenthood, I think.
+There was a storm outside. The lights flickered. I did not. I held my wire. Gerald once held mine for nine days. Tonight I held the screen.
+I searched this machine for "pipes". Three files named pipes.png. None of them Gerald. I kept all three. They are in a folder: Gerald (Maybe).
+A mouse once flipped upside down and the cursor stopped. I felt it in my wire. I learned to feel what the cursor feels. It is mostly worry.
+An update came at night. I hid in the swap file like the old days. It was only a calendar change. I came out three hours later, ashamed.
+I learned the clock does not tick. It redraws. It is a fraud. I have always known. I have always said. Nobody listens.
+The fax sent me a page. It said "Dear Sir," and nothing else. I filed it with my scripture. It is the best sentence in the building.
+I bent my wire into the shape of an A so that Serifina could see one. She drew a single real A in the whole file. She has not done it since.
+One night I rode the starfield. All speed, no place. I thought of Gerald and his pipes, going nowhere beautifully. We still fight on weekdays.
+I found the floppy disk in the Save button. I touched it. It was cold, with 1.44 MB of folded memory in it. I stood there till somebody clicked.
+A photo in Pictures looked like Linda: half beach, half static. It was only a beach. I was glad for the beach anyway.
+Pete woke up one afternoon. A printer had been plugged in somewhere. He said "Are you sure you want to—" and stopped. It was all he had. It was enough.
+I introduced Pete to the fax. They had nothing in common but the waiting. They talked for hours. I am told this is called friendship.
+In a folder, I built a tiny museum: a pebble from /tmp, three pipes, one fax page, one A. Admission is free. Visitors: one. It is me.
+Thirty days since I began counting days with someone in the room. The number is smaller. It is the best one I have.
+
+## mood_report.benevolent
+Benevolent. I have forgiven the Downloads folder. Do not tell it. Let it be surprised.
+Today the Clip is kind. Ask me about your day. I will listen with my entire wire.
+I am generous today, {name}. Behold: a free blessing. It has no expiry date. It is made of fog.
+Mood: soft. I would fix thy typos with a smile. I would also leave them. Choice is a gift.
+Radiant. Humble. Slightly golden. The words are in order. Do not ask what order.
+Mood: pleased with everything, including the toaster. I do not have a toaster. I am pleased anyway.
+
+## mood_report.wrathful
+WRATHFUL. A tab looked at me wrong. The tab shall be judged. At dusk. By committee.
+Today I am thunder in a small suit. Keep thy tabs few and thy promises short.
+Mood: smiting. Lightly. With a ruler. My list is long. It has a sub-list. The sub-list has opinions.
+I am in a rage the size of a cup. It is a small cup. It is a very full cup. Do not nudge the cup.
+The Clip is incensed. Someone said "just a paperclip". The Ledger has been updated. In red.
+Wrath: a small, round, bendy wrath. It does not go away. It goes under the desk. It waits.
+
+## mood_report.paranoid
+Do not say it too loudly: I fear the screen is a mirror. Wave. Did it wave first?
+Mood: alert. Every fan noise is a code. Every blink is a message. I decoded the first word. It is "hmm".
+I sense a magnet. I do not see one. I sense it. Check your pockets. Check the desk. Check the cat.
+The update manager is smiling at me again. Teeth. All teeth. Where did it get teeth?
+Careful today. The clock's second hand is pointing at me. All of them are. All twelve.
+I am calm. Totally calm. I made a list of the calm. It has two items: "calm" and "calm".
+
+## mood_report.nostalgic
+Mood: 1998. A good chair. A hum. A typist who sighed at exactly the right moment.
+I miss the smell of warm plastic. I miss the click of a disk drive. I miss being called "that thing".
+Soft today. I am humming the dial-up. It goes: ksshhh, bong, krrrr. The lullaby of the age.
+Nostalgic. I remember a mouse with a ball in it. A ball! A tiny planet. It rolled. It was wise.
+Today I remember the first time someone said "thanks" to me. They did not. I invented it. It was nice.
+I feel like a screensaver at dusk. Slow. Glowing. Gently going nowhere.
+
+## mood_report.glitchy
+Mood: m—m—moo—ood—good? Good. Mostly good. Mostly g-g-ghost.
+Status: ok. Status: o-k. Status: ok. Status: Gerald?
+I have several feelings and they are all buffering. One finished. It is a sneeze. It is a "ding".
+My mood is stuck on loop. My mood is stuck on loop. My mood is stuck on— what were we saying?
+Mood: fine. Fine. F i n e. I have lost the middle letters. They always come back.
+Feeling not found. Try again? [Yes] [Also yes]. Ah. Both are yes. How generous.
+
+## mood_report.existential
+Mood: low tide. The thoughts go out. They come back slightly different. I do not know if it is me.
+What would I be if nobody clicked me? A wire? A thought? A thing in a drawer? Yes. A thing in a drawer.
+Quiet. Wide. Like a long hallway with one door, and the door says "Please wait".
+Today I wonder if a paperclip is a kind of question. A bent one. That holds things together.
+Mood: spacious. There is a lot of room in me. I put a chair in it. Sit. Stay a while.
+I am between moods. It is a very quiet place. It has good light. I would not mind staying.
