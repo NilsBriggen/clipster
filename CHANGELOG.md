@@ -2,6 +2,67 @@
 
 Each version's section is also its GitHub release description: the release workflow publishes it and refuses to release a version without one.
 
+## 0.3.0 (2026-11-08)
+
+The Desk release. Clipster grew from a chat balloon into an office helper with a window of his own: Clipster's Desk keeps your day, your to-dos, your clipboard and the upkeep of your computer in one place. He also learned to proofread, write letters, run focus sessions, tidy your downloads and back up your files, and he welcomes new users with a proper Windows 98-style setup.
+
+### Highlights
+
+- **Clipster's Desk** ("open my desk", Meta+Shift+C, or right-click him), with eight tabs:
+  - **Today:** time per kind of app, your focus sessions, your daily goal and limits, and today's top 3
+  - **Week:** the last seven days, with a week in review you can copy
+  - **To-do:** Today, Upcoming and Later, a star for the top 3, priorities, repeating items, double-click to rename
+  - **Reminders** and notes
+  - **Clipboard:** your last copies, plus pinned snippets that are kept
+  - **Upkeep:** a computer checkup, tidying and backups
+  - **You & me:** what he knows about you (forget any of it), your taught phrases, and every achievement with its progress
+  - **Settings:** everything that used to be squeezed into the speech balloon
+
+  It comes in the Windows 98 look, or a flat modern one for the faint of heart.
+- **Your day:**
+  - Reminders on other days: "remind me on Friday at 3 to call Anna"
+  - A real to-do list: "todo send the report by friday", "todo water the plants every monday"
+  - Focus sessions that nudge you back from videos and silence notifications
+  - A daily focus goal and limits for time sinks: "limit video to 30 minutes a day"
+  - "plan my day", "wrap up my day" and "my week in review"
+- **Writing help:**
+  - "proofread this" finds doubled words, common misspellings, a/an, its/it's and long sentences, and fixes the safe ones.
+  - Twelve letter templates (complaint, cover letter, out of office…) to fill in, copy or open as an email.
+- **Looking after the computer:**
+  - A checkup for free space, the trash, temporary files, system updates, battery health and apps that start with the computer, each with a fix (he asks before deleting anything).
+  - "tidy my downloads" sorts loose files into folders, and "undo the tidy" puts them back.
+  - Backups to a USB drive or folder copy only what changed and never delete anything.
+- **He knows you better:**
+  - He notices what you're working in from the active window's title ("It looks like you're writing a letter…"). Titles never leave your computer.
+  - He remembers what you tell him ("my cat is called Mo", "I live in Bern"), asks you things now and then, and brings them up later.
+  - Once a day he asks how you're doing.
+- **More alive:** four new idle animations, arcade sounds, tips for the app you're in, about 25 special days, help sorted by topic, and thousands of new lines in both voices, including some 80 office-life topics.
+- **One-click updates:** from this version on, "Install now" downloads the next release, checks it, installs it and restarts Clipster.
+- **Lighter:** he draws at 10 frames a second while nothing moves, so he uses much less CPU when idle.
+- **A new welcome:** a Windows 98-style setup and tour window, with Try it buttons that run real examples. If you've used Clipster before, he offers the tour once after the update. "Show me around" opens it any time.
+
+### Fixes
+
+- "forget it" and "clear my notes" no longer delete your notes without asking.
+- Linux: emptying the trash works on desktops without gvfs (it falls back to ktrash).
+- Windows: "Clear temp files" only removes files older than a week. It used to empty the whole temp folder, including a downloaded update.
+- Windows: the summon keys no longer fire on AltGr+C (typing "ć").
+- The battery reading no longer picks up a wireless mouse.
+- Text fields have their padding back.
+
+### Install
+
+- **Linux:** download `clipster_0.3.0_x86_64.AppImage`, make it executable (`chmod +x`) and replace your old AppImage with it. Your settings, scores, notes and taught phrases are kept.
+- **Windows:** run `clipster_0.3.0_x64_en-US.msi`. It replaces the old version and keeps your settings. The installer still isn't code-signed, so SmartScreen may say "Windows protected your PC". Choose **More info → Run anyway**.
+
+### Known limitations
+
+- **Updating from 0.2.0 is still manual:** 0.2.0's update notice only links to the download page. From 0.3.0 on, "Install now" does it for you.
+- **Do Not Disturb on Windows:** Windows keeps its Focus switch for its own apps. During focus sessions Clipster opens the Focus settings for you instead, and stays quiet himself.
+- **The Windows checkup and backups are only tested by the build machine:** the Recycle Bin, the Windows Update count, battery health, start-up apps, drive detection and backups compile and pass their tests on Windows, but haven't yet been run by hand on a Windows PC. If something looks wrong, please [report it](https://github.com/NilsBriggen/clipster/issues).
+- **Update counts:** they come from the package manager (Arch, Debian/Ubuntu, Fedora, plus Flatpak) or from Windows Update's last scan. AUR, Store and winget apps aren't counted.
+- As before, outside KDE Plasma there are no global shortcuts on Linux (to call Clipster or open the Desk), and no mouse-following.
+
 ## 0.2.0 (2026-11-06)
 
 The arcade release. Every game was reworked, Clip Glide is actually playable now, and there's a new game, Byte Size. Clipster also got much better at plain conversation, and from now on he tells you when a new version is out.
