@@ -1,6 +1,7 @@
 #![cfg_attr(all(windows, not(debug_assertions)), windows_subsystem = "windows")] // no console window behind him
 
 mod brain;
+mod desk;
 mod fun;
 mod games;
 mod lines;
@@ -150,6 +151,11 @@ struct App {
     window_said: std::collections::HashMap<String, Instant>, // when each kind last got a comment
     window_last: Option<Instant>,                             // when any window comment was last made
     tipped: std::collections::HashMap<String, String>,        // window kind -> the day he last offered a tip for it
+    desk: desk::Desk,
+    desk_modern: bool,                                        // the Desk in the modern look instead of Classic 98
+    desk_status: String,                                      // its status-bar quip, picked when it opens
+    desk_sample: Option<(Vec<(String, u64, u64)>, std::collections::BTreeMap<String, std::collections::BTreeMap<String, u64>>, Vec<FocusLog>, std::collections::BTreeMap<String, String>)>,
+    checkin_days: std::collections::BTreeMap<String, String>, // day -> great/okay/meh/rough (two weeks)
     notice_health: bool,
     quiet_until: Option<Instant>,
     next_tip: Instant,
@@ -333,6 +339,11 @@ impl App {
             window_said: Default::default(),
             window_last: None,
             tipped: Default::default(),
+            desk: Default::default(),
+            desk_modern: false,
+            desk_status: String::new(),
+            desk_sample: None,
+            checkin_days: Default::default(),
             notice_health: true,
             check_updates: true,
             next_update_check: Instant::now() + Duration::from_secs(45), // after the greeting, not during it
@@ -365,7 +376,18 @@ impl App {
             onboarding: None,
             moments: Default::default(),
         };
-        if let Some(game) = play {
+        if play.as_deref() == Some("desk") {
+            // --play desk: Clipster's Desk; with --screenshot it shows made-up data (CLIPSTER_DESK_TAB=0-4, CLIPSTER_DESK_LOOK=modern)
+            app.desk_status = lines::pick("desk_status");
+            app.desk.open();
+            if app.screenshot.is_some() {
+                cc.egui_ctx.set_embed_viewports(true);
+                app.desk.sample = true;
+                app.desk_sample = Some(desk::sample());
+                app.desk.set_tab(std::env::var("CLIPSTER_DESK_TAB").ok().and_then(|t| t.parse().ok()).unwrap_or(0));
+                app.desk_modern = std::env::var("CLIPSTER_DESK_LOOK").as_deref() == Ok("modern");
+            }
+        } else if let Some(game) = play {
             app.arcade.open(&game);
             if app.screenshot.is_some() {
                 cc.egui_ctx.set_embed_viewports(true); // draw the game inside the main window so the screenshot sees it
@@ -448,6 +470,30 @@ impl App {
         self.auto_hide = Some(Instant::now() + reading_time(&self.balloon.as_ref().map(|b| b.text.clone()).unwrap_or_default()));
     }
 
+    /// Clipster's Desk for this frame: what he knows, handed over as a view; returns the commands its buttons ran.
+    fn show_desk(&mut self, ctx: &egui::Context, near: Option<Rect>) -> Vec<String> {
+        let now = Instant::now();
+        self.account_time();
+        let today = chrono::Datelike::num_days_from_ce(&chrono::Local::now().date_naive()) as u64;
+        let streak = |last: &str, n: &str| if self.stats.get(last).is_some_and(|d| d + 1 >= today) { self.stats.get(n).copied().unwrap_or(0) } else { 0 };
+        let mut timers: Vec<(String, u64, u64)> = self.timers.iter().map(|(at, l, every)| (l.clone(), at.saturating_duration_since(now).as_secs(), *every)).collect();
+        timers.sort_by_key(|t| t.1);
+        let focus_now = self.focus.as_ref().map(|f| (f.label.clone(), f.until.saturating_duration_since(now).as_secs(), now.duration_since(f.start).as_secs(), f.distracted));
+        let look = if self.desk_modern { desk::Look::Modern } else { desk::Look::Classic };
+        let status = self.desk_status.clone();
+        let streaks = (streak("focus_last_day", "focus_streak"), streak("checkin_last", "checkin_streak"), self.stats.get("days").copied().unwrap_or(1));
+        match &self.desk_sample {
+            Some((t, k, f, c)) => {
+                let view = desk::View { timers: t.clone(), kind_time: k, focus_log: f, focus_now: Some(("the slides".into(), 18 * 60, 7 * 60, 40)), checkins: c, streaks: (4, 6, 31), status };
+                self.desk.show(ctx, &view, look, near)
+            }
+            None => {
+                let view = desk::View { timers, kind_time: &self.kind_time, focus_log: &self.focus_log, focus_now, checkins: &self.checkin_days, streaks, status };
+                self.desk.show(ctx, &view, look, near)
+            }
+        }
+    }
+
     /// Count the time since the last mark for the window kind you're in (only while you're around, and only
     /// while window comments are on: it comes from the same titles). Distraction time also counts against a focus session.
     fn account_time(&mut self) {
@@ -517,6 +563,7 @@ impl App {
         let answer = if ["great", "okay", "meh", "rough"].contains(&answer) { answer } else { "okay" };
         let today = chrono::Datelike::num_days_from_ce(&chrono::Local::now().date_naive()) as u64;
         self.stat(&format!("checkin_{answer}"), 1);
+        self.checkin_days.insert(today_key(), answer.to_string());
         let (streak, rough) = checkin_streaks(&self.stats, today, answer == "rough");
         self.stats.extend([("checkin_last".into(), today), ("checkin_streak".into(), streak), ("rough_run".into(), rough)]);
         if answer == "rough" {
@@ -886,7 +933,7 @@ impl App {
     fn snapshot(&self) -> String {
         let unix = |at: &Instant| (std::time::SystemTime::now() + at.saturating_duration_since(Instant::now())).duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0);
         serde_json::json!({
-            "tips_every": self.tips_every, "notice_clip": self.notice_clip, "notice_programs": self.notice_programs, "notice_windows": self.notice_windows, "checkin": self.checkin, "facts": self.facts, "kind_time": self.kind_time, "focus_log": self.focus_log,
+            "tips_every": self.tips_every, "notice_clip": self.notice_clip, "notice_programs": self.notice_programs, "notice_windows": self.notice_windows, "checkin": self.checkin, "facts": self.facts, "kind_time": self.kind_time, "focus_log": self.focus_log, "desk_look": if self.desk_modern { "modern" } else { "classic" }, "checkin_days": self.checkin_days,
             "notice_health": self.notice_health, "check_updates": self.check_updates, "update_told": self.update_told, "sounds": self.sounds, "breaks": self.breaks, "name": self.name,
             "hat": self.hat, "skin": self.skin, "friendship": self.friendship, "highscores": self.highscores, "birthday": self.birthday.map(|(m, d)| [m, d]), "stats": self.stats, "unlocked": self.unlocked, "explored": self.explored, "persona": if self.unhinged { "unhinged" } else { "boring" }, "anchor": self.anchor.or(self.saved_anchor).map(|a| [a.x, a.y]),
             "timers": self.timers.iter().map(|(at, l, every)| serde_json::json!([unix(at), l, every])).collect::<Vec<_>>(),
@@ -905,6 +952,11 @@ impl App {
             self.facts.insert(k.clone(), v.as_str().unwrap_or("").to_string());
         }
         lines::set_facts(&self.facts);
+        self.desk_modern = v["desk_look"].as_str() == Some("modern");
+        let fortnight = (chrono::Local::now() - chrono::Duration::days(14)).format("%Y-%m-%d").to_string();
+        for (day, a) in v["checkin_days"].as_object().into_iter().flatten().filter(|(d, _)| **d > fortnight) {
+            self.checkin_days.insert(day.clone(), a.as_str().unwrap_or("okay").to_string());
+        }
         // the last week of time per app kind, and the last 60 focus sessions
         let week_ago = (chrono::Local::now() - chrono::Duration::days(7)).format("%Y-%m-%d").to_string();
         for (day, kinds) in v["kind_time"].as_object().into_iter().flatten().filter(|(d, _)| **d > week_ago) {
@@ -1040,6 +1092,14 @@ impl App {
                 }
             }
             Effect::TimeReport => r = self.time_report(),
+            Effect::OpenDesk => {
+                self.desk_status = lines::pick("desk_status");
+                self.desk.open();
+            }
+            Effect::DeskLook(modern) => {
+                self.desk_modern = modern;
+                r = Reply::say(lines::pick(if modern { "desk_look_modern" } else { "desk_look_classic" })).mood(if modern { Mood::Sad } else { Mood::Party });
+            }
             Effect::AppTips => r = brain::app_tip(self.window_kind.as_deref().filter(|k| *k != "other").unwrap_or("desktop")),
             Effect::Tidy(which) => {
                 r = match tidy::folder(&which).map(|d| (tidy::apply(&tidy::plan(&d), &tidy::undo_log()), d)) {
@@ -1531,6 +1591,11 @@ impl App {
                         self.set_persona(unhinged);
                     }
                 });
+                ui.horizontal(|ui| {
+                    ui.label("Desk look:");
+                    ui.radio_value(&mut self.desk_modern, false, "Classic 98");
+                    ui.radio_value(&mut self.desk_modern, true, "Modern");
+                });
                 ui.label("Pop up with tips and jokes:");
                 ui.horizontal(|ui| {
                     ui.radio_value(&mut self.tips_every, 3, "Often");
@@ -1716,6 +1781,15 @@ impl eframe::App for App {
             self.frames += 1; // --play with --screenshot: just the game
             return self.take_screenshot(&ctx);
         }
+        if self.desk.is_open() {
+            for cmd in self.show_desk(&ctx, near) {
+                self.run(&ctx, &cmd);
+            }
+            if self.screenshot.is_some() {
+                self.frames += 1; // --play desk with --screenshot: just the Desk
+                return self.take_screenshot(&ctx);
+            }
+        }
 
         // ---- where everything goes: balloon beside/above the clip, flipped away from screen edges ----
         let size = if self.balloon.is_some() { vec2(FULL_W, (self.balloon_h + 20.0).max(MIN_H)) } else { vec2(CLIP_W, MIN_H) };
@@ -1862,7 +1936,7 @@ impl App {
 /// The right-click menu lives in the balloon, so it always has room.
 fn menu_reply() -> Reply {
     let mut r = Reply::say("What shall we do?");
-    for (label, cmd) in [("Tell me a joke", "joke"), ("Roast me", "roast"), ("Fun fact", "fact"), ("Quiz me!", "quiz"), ("Do a dance!", "dance"), ("What can you do?", "help"), ("Be quiet for an hour", "quiet")] {
+    for (label, cmd) in [("Open my desk", "desk"), ("Tell me a joke", "joke"), ("Roast me", "roast"), ("Fun fact", "fact"), ("Quiz me!", "quiz"), ("Do a dance!", "dance"), ("What can you do?", "help"), ("Be quiet for an hour", "quiet")] {
         r = r.run(label, cmd);
     }
     r = r.btn("Options", Act::Options).btn("Hide balloon", Act::Hide).run("Goodbye, Clipster", "bye");
@@ -2444,6 +2518,7 @@ fn setup_style(ctx: &egui::Context) {
     let fallback = fonts.families.get(&egui::FontFamily::Proportional).cloned().unwrap_or_default();
     fonts.families.entry(egui::FontFamily::Proportional).or_default().insert(0, "classic".into());
     fonts.families.insert(egui::FontFamily::Name("bold".into()), std::iter::once("classic-bold".to_string()).chain(fallback.iter().cloned()).collect());
+    fonts.families.insert(egui::FontFamily::Name("modern".into()), fallback.clone()); // the Desk's modern look: egui's own Ubuntu font
     // chess pieces and other symbols from one font on every system (Windows' Tahoma has no chess glyphs)
     let glyphs = ["emoji-icon-font", "NotoEmoji-Regular", "classic"].iter().filter(|n| fonts.font_data.contains_key(**n)).map(|n| n.to_string()).collect();
     fonts.families.insert(egui::FontFamily::Name("glyphs".into()), glyphs);
@@ -2487,7 +2562,11 @@ fn main() -> eframe::Result {
         viewport: egui::ViewportBuilder::default()
             .with_title("Clipster")
             .with_app_id("clipster")
-            .with_inner_size(if play.is_some() && screenshot.is_some() { [560.0, 640.0] } else { [FULL_W, 330.0] })
+            .with_inner_size(match (play.as_deref(), screenshot.is_some()) {
+                (Some("desk"), true) => [640.0, 490.0],
+                (Some(_), true) => [560.0, 640.0],
+                _ => [FULL_W, 330.0],
+            })
             .with_transparent(true)
             .with_decorations(false)
             .with_always_on_top()

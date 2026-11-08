@@ -8,7 +8,7 @@ mod clipglide;
 mod deskmerge;
 mod hangman;
 mod paperjam;
-mod win98;
+pub mod win98;
 
 use eframe::egui::{self, pos2, vec2, Event, Pos2, Rect, Sense, Ui, Vec2};
 use std::collections::BTreeMap;

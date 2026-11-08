@@ -55,6 +55,8 @@ pub enum Effect {
     FocusStop,
     TimeReport,                      // where today's time went, by window kind
     AppTips,                         // a tip for the app you're in (the app knows which)
+    OpenDesk,                        // Clipster's Desk, the window with stats, to-dos, reminders and files
+    DeskLook(bool),                  // the Desk's look: true = modern, false = classic 98
     Tidy(String),                    // move a folder's files into subfolders by type (after a yes)
     TidyUndo,
 }
@@ -241,6 +243,9 @@ pub fn exact(input: &str) -> Option<Reply> {
         }
         "iss" => return Some(net(Query::Iss, "Looking up... way up...")),
         "aboutme" => return Some(facts()),
+        "desk" if rest.is_empty() || rest == "open" => return Some(Reply::say(lines::pick("desk_open")).mood(Mood::Happy).effect(Effect::OpenDesk)),
+        "desklook" if rest == "modern" || rest == "classic" => return Some(Reply::say("").effect(Effect::DeskLook(rest == "modern"))),
+        "unnote" => return Some(note_remove(rest.parse().unwrap_or(0))),
         "apptips" if rest.is_empty() => return Some(Reply::say("").effect(Effect::AppTips)),
         "apptips" => return Some(app_tip(rest)),
         "tidy" if rest == "undo" => return Some(Reply::say("").effect(Effect::TidyUndo)),
@@ -665,6 +670,11 @@ pub fn facts() -> Reply {
 
 /// Window kinds that pull you away from a focus session.
 pub const DISTRACTIONS: &[&str] = &["video", "social", "game", "shopping", "chat"];
+/// Which group a window kind belongs to in the Desk's week chart: 0 work, 1 distractions, 2 everything else.
+pub fn kind_group(kind: &str) -> usize {
+    if WORK_KINDS.contains(&kind) { 0 } else if DISTRACTIONS.contains(&kind) { 1 } else { 2 }
+}
+
 const WORK_KINDS: &[&str] = &["code", "writing", "letter", "spreadsheet", "slides", "email", "inbox", "terminal", "pdf", "calendar", "meeting", "git", "qa", "jobhunt", "taxes", "learning", "files", "print"];
 
 /// A window kind as people would say it.
@@ -1161,6 +1171,21 @@ fn notes_list() -> Reply {
         .btn("Open notes file", Act::Open(notes_path().to_string_lossy().into_owned()))
         .btn("Copy all", Act::Copy(text))
         .run("Forget them all", "forget notes")
+}
+
+/// Remove note number `n` (as the Desk lists them: the non-empty lines).
+fn note_remove(n: usize) -> Reply {
+    let text = std::fs::read_to_string(notes_path()).unwrap_or_default();
+    let mut notes: Vec<&str> = text.lines().filter(|l| !l.trim().is_empty()).collect();
+    if n == 0 || n > notes.len() {
+        return Reply::say(format!("There's no note number {n}.")).run("Show my notes", "notes");
+    }
+    let gone = notes.remove(n - 1).to_string();
+    let rest: String = notes.iter().map(|l| format!("{l}\n")).collect();
+    match std::fs::write(notes_path(), rest) {
+        Ok(()) => Reply::say(format!("Gone: \"{gone}\"")).mood(Mood::Sly),
+        Err(e) => Reply::say(format!("I couldn't change your notes: {e}")).mood(Mood::Sad),
+    }
 }
 
 fn notes_confirm() -> Reply {

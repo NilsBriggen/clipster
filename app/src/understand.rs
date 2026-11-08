@@ -613,6 +613,9 @@ fn clock(t: &str) -> Option<(u64, usize)> {
 
 /// Controlling the computer and handy tools: files, sound, music, screen, power, dates...
 fn powers(s: &str, raw: &str) -> Option<Reply> {
+    if has(s, &["open my desk", "show my desk", "open the desk", "open desk", "clipster s desk", "clipsters desk", "my desk window", "focus stats", "my week stats", "show my week", "productivity stats"]) || s == "my desk" {
+        return go("desk".into());
+    }
     if has(s, &["tips for this app", "tips for this program", "any tips for this", "app tips", "keyboard shortcuts", "shortcuts for this", "useful shortcuts", "a shortcut", "shortcut tips", "tips for this window"]) {
         return go("apptips".into());
     }
