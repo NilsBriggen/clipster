@@ -1370,7 +1370,8 @@ impl App {
     fn run(&mut self, ctx: &egui::Context, cmd: &str) {
         // the Desk's buttons send exact commands: they're never re-read as a sentence ("todo clear the desk"
         // is a to-do, "cancel Pomodoro" cancels that timer)
-        let mut r = match std::mem::take(&mut self.literal) {
+        let from_desk = std::mem::take(&mut self.literal);
+        let mut r = match from_desk {
             true => brain::exact(cmd).unwrap_or_else(|| brain::respond(cmd)),
             false => brain::respond(cmd),
         };
@@ -1599,7 +1600,7 @@ impl App {
             }
             Effect::Todo(op) => {
                 // stars, priorities, edits and un-ticking on the Desk answer in its status bar, not a balloon
-                let quiet = matches!(op, todo::Op::StarAt(_) | todo::Op::PrioAt(_) | todo::Op::EditAt(..) | todo::Op::UndoneAt(_));
+                let quiet = matches!(op, todo::Op::StarAt(_) | todo::Op::PrioAt(_) | todo::Op::EditAt(..) | todo::Op::UndoneAt(_) | todo::Op::RemoveAt(_)) || (from_desk && matches!(op, todo::Op::AddTo(..) | todo::Op::ClearList(_)));
                 let (news, stale) = todo::apply(&op);
                 if let Some(label) = stale {
                     self.timers.retain(|(_, l, _)| *l != label); // finished or renamed: no reminder for it

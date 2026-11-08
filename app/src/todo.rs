@@ -1,6 +1,7 @@
 //! The to-do list: `todo.txt` in the data folder, one item per line, readable and editable by hand:
 //! `- [ ] ! call Anna (due 2026-11-12) (every monday) (top 2026-11-08)` and `- [x] buy milk (done 2026-11-08)`.
-//! `!` is high priority, `top` puts it in that day's top 3, `every` makes it come back. Changes come in as
+//! `!` is high priority, `top` puts it in that day's top 3, `every` makes it come back, `list` puts it on a named list
+//! (`- [ ] eggs (list shopping)`), which the to-do list itself leaves out. Changes come in as
 //! `brain::Effect::Todo` and are applied by the app.
 
 use crate::brain::{Act, Effect, Mood, Reply};
@@ -17,6 +18,7 @@ pub struct Item {
     pub every: Option<String>, // "day", "week", "month", "monday"…
     pub top: Option<NaiveDate>, // in this day's top 3
     pub done_on: Option<NaiveDate>,
+    pub list: Option<String>, // a named list ("shopping"), not the to-do list
 }
 
 impl Item {
@@ -41,6 +43,11 @@ pub enum Op {
     EditAt(usize, String),
     /// Today's unfinished top-3 items move to tomorrow (the end-of-day wrap-up).
     Tomorrow,
+    /// Items for a named list: (list, items).
+    AddTo(String, Vec<String>),
+    /// The ticked items of a named list go.
+    ClearList(String),
+    RemoveAt(usize),
 }
 
 pub fn path() -> PathBuf {
@@ -72,6 +79,7 @@ pub fn parse(text: &str) -> Vec<Item> {
                     "top" if date(value).is_some() => item.top = date(value),
                     "done" if date(value).is_some() => item.done_on = date(value),
                     "every" if valid_every(value) => item.every = Some(value.to_string()),
+                    "list" if !value.trim().is_empty() => item.list = Some(value.trim().to_lowercase()),
                     _ => break, // brackets that are part of the text
                 }
                 rest = head;
@@ -87,7 +95,7 @@ pub fn format(items: &[Item]) -> String {
         .iter()
         .map(|i| {
             let mut l = format!("- [{}] {}{}", if i.done { "x" } else { " " }, if i.prio { "! " } else { "" }, i.text);
-            for (key, value) in [("due", i.due.map(|d| d.to_string())), ("every", i.every.clone()), ("top", i.top.map(|d| d.to_string())), ("done", i.done_on.map(|d| d.to_string()))] {
+            for (key, value) in [("list", i.list.clone()), ("due", i.due.map(|d| d.to_string())), ("every", i.every.clone()), ("top", i.top.map(|d| d.to_string())), ("done", i.done_on.map(|d| d.to_string()))] {
                 if let Some(v) = value {
                     l += &format!(" ({key} {v})");
                 }
@@ -178,7 +186,7 @@ fn finish(items: &mut Vec<Item>, i: usize, today: NaiveDate) -> &'static str {
         items.push(Item { due: next, every: Some(every), top: None, done: false, done_on: None, ..items[i].clone() });
         return "todo_repeat";
     }
-    if items.iter().any(|i| !i.done) { "todo_done" } else { "todo_all_done" }
+    if items.iter().any(|i| !i.done && i.list.is_none()) { "todo_done" } else { "todo_all_done" }
 }
 
 /// Un-tick item `i`. A repeating one takes back the next occurrence it made, so there's only one again.
@@ -194,35 +202,85 @@ fn reopen(items: &mut Vec<Item>, i: usize) -> String {
     text
 }
 
+/// A new item from what was typed: "! " for important, "by friday", "every monday".
+fn new_item(text: &str, today: NaiveDate) -> Item {
+    let (text, prio) = match text.trim().strip_prefix("! ") {
+        Some(t) => (t.to_string(), true),
+        None => (text.trim().to_string(), false),
+    };
+    let (text, due) = split_due(&text, today);
+    let (text, repeat) = split_every(&text, today);
+    let (every, due) = match repeat {
+        Some((every, first)) => (Some(every), due.or(Some(first))),
+        None => (None, due),
+    };
+    Item { prio, text, due, every, ..Default::default() }
+}
+
+/// "eggs, milk and bread" -> eggs, milk, bread.
+/// shortcut: "mac and cheese" becomes two items too; type them one by one if that matters.
+pub fn split_items(s: &str) -> Vec<String> {
+    s.split(',').flat_map(|p| p.split(" and ")).map(|t| t.trim().trim_start_matches("and ").trim().to_string()).filter(|t| !t.is_empty()).collect()
+}
+
+/// "eggs", "eggs and milk", "eggs, milk and bread".
+fn and_list(v: &[String]) -> String {
+    match v {
+        [] => String::new(),
+        [one] => one.clone(),
+        [rest @ .., last] => format!("{} and {last}", rest.join(", ")),
+    }
+}
+
+/// The named lists, in the order they first appear.
+pub fn lists(items: &[Item]) -> Vec<String> {
+    let mut out: Vec<String> = vec![];
+    for l in items.iter().filter_map(|i| i.list.clone()) {
+        if !out.contains(&l) {
+            out.push(l);
+        }
+    }
+    out
+}
+
 /// Apply a change to the items; returns the reply's pool and what fills `{x}` / `{n}`.
 pub fn change(items: &mut Vec<Item>, op: &Op, today: NaiveDate) -> (&'static str, String) {
     let at = |n: usize, items: &Vec<Item>| n.checked_sub(1).filter(|i| *i < items.len());
     match op {
         Op::Add(text) => {
-            let (text, prio) = match text.trim().strip_prefix("! ") {
-                Some(t) => (t.to_string(), true),
-                None => (text.clone(), false),
-            };
-            let (text, due) = split_due(&text, today);
-            let (text, repeat) = split_every(&text, today);
-            let (every, due) = match repeat {
-                Some((every, first)) => (Some(every), due.or(Some(first))),
-                None => (None, due),
-            };
-            items.push(Item { prio, text: text.clone(), due, every, ..Default::default() });
+            let item = new_item(text, today);
+            let text = item.text.clone();
+            items.push(item);
             ("todo_added", text)
         }
+        Op::AddTo(list, texts) => {
+            let added: Vec<String> = texts.iter().filter(|t| !t.trim().is_empty()).map(|t| Item { list: Some(list.to_lowercase()), ..new_item(t, today) }).map(|i| {
+                let t = i.text.clone();
+                items.push(i);
+                t
+            }).collect();
+            ("list_added", and_list(&added))
+        }
+        Op::ClearList(list) => {
+            let before = items.len();
+            items.retain(|i| !(i.done && i.list.as_deref() == Some(list.as_str())));
+            ("list_cleared", (before - items.len()).to_string())
+        }
+        Op::RemoveAt(n) => match at(*n, items) {
+            Some(i) => ("todo_removed", items.remove(i).text),
+            None => ("todo_not_found", format!("#{n}")),
+        },
         Op::Done(q) => match find(items, q, false) {
             Some(i) => {
                 let pool = finish(items, i, today);
-                (pool, items[i].text.clone())
+                (if items[i].list.is_some() && pool != "todo_repeat" { "list_done" } else { pool }, items[i].text.clone())
             }
             None => ("todo_not_found", q.clone()),
         },
         Op::DoneAt(n) => match at(*n, items).filter(|i| !items[*i].done) {
             Some(i) => {
                 let pool = finish(items, i, today);
-                (pool, items[i].text.clone())
+                (if items[i].list.is_some() && pool != "todo_repeat" { "list_done" } else { pool }, items[i].text.clone())
             }
             None => ("todo_not_found", format!("#{n}")),
         },
@@ -272,7 +330,7 @@ pub fn change(items: &mut Vec<Item>, op: &Op, today: NaiveDate) -> (&'static str
         }
         Op::ClearFinished => {
             let before = items.len();
-            items.retain(|i| !i.done);
+            items.retain(|i| !i.done || i.list.is_some()); // a named list clears its own
             ("todo_cleared", (before - items.len()).to_string())
         }
     }
@@ -294,7 +352,11 @@ pub fn apply(op: &Op) -> (Reply, Option<String>) {
 }
 
 fn reply(op: &Op, pool: &str, x: &str, items: &[Item]) -> Reply {
-    let quiet = matches!(op, Op::StarAt(_) | Op::PrioAt(_) | Op::EditAt(..) | Op::UndoneAt(_));
+    let quiet = matches!(op, Op::StarAt(_) | Op::PrioAt(_) | Op::EditAt(..) | Op::UndoneAt(_) | Op::RemoveAt(_));
+    let label = match op {
+        Op::AddTo(l, _) | Op::ClearList(l) => l.clone(),
+        _ => String::new(),
+    };
     if pool != "todo_not_found" && pool != "todo_top_full" && !save(items) {
         return Reply::say("I couldn't write your to-do list. Is the disk full?").mood(Mood::Sad);
     }
@@ -302,12 +364,14 @@ fn reply(op: &Op, pool: &str, x: &str, items: &[Item]) -> Reply {
     let text = match pool {
         "todo_prio" => format!("\"{x}\" is {} now.", if items.iter().any(|i| i.text == x && i.prio) { "high priority" } else { "back to normal priority" }),
         "todo_unstarred" => format!("\"{x}\" is out of today's top 3."),
-        _ => lines::pick(pool).replace("{x}", x).replace("{n}", x),
+        "todo_removed" => format!("\"{x}\" is off the list."),
+        _ => lines::pick(pool).replace("{x}", x).replace("{n}", x).replace("{label}", &label),
     };
     let mut r = Reply::say(text).mood(if pool == "todo_not_found" || pool == "todo_top_full" { Mood::Think } else { Mood::Happy });
     // a reminder on the morning a new (or repeating) item is due
     let fresh = match op {
         Op::Add(_) => items.last(),
+        Op::AddTo(..) => items.last().filter(|i| i.due.is_some()),
         _ if pool == "todo_repeat" => items.last(),
         _ => None,
     };
@@ -324,6 +388,7 @@ fn reply(op: &Op, pool: &str, x: &str, items: &[Item]) -> Reply {
         return r; // from the Desk, which shows the list itself
     }
     match op {
+        Op::AddTo(l, _) | Op::ClearList(l) => r = r.run(&format!("Show the {l} list"), &format!("onlist {l}")),
         Op::Add(_) => r = r.run("Show my list", "todos"),
         Op::Done(_) if pool != "todo_not_found" => r = r.run("Undo", &format!("undone {x}")).run("Show my list", "todos"),
         Op::DoneAt(n) if pool != "todo_not_found" => r = r.run("Undo", &format!("todo #{n} undone")),
@@ -337,9 +402,9 @@ pub fn list() -> Reply {
     let items = load();
     let today = Local::now().date_naive();
     // (line number, item): the buttons name items by line, so their text is never re-read as a sentence
-    let mut open: Vec<(usize, &Item)> = items.iter().enumerate().filter(|(_, i)| !i.done).map(|(n, i)| (n + 1, i)).collect();
+    let mut open: Vec<(usize, &Item)> = items.iter().enumerate().filter(|(_, i)| !i.done && i.list.is_none()).map(|(n, i)| (n + 1, i)).collect();
     open.sort_by_key(|(_, i)| (!i.top_today(today), !i.prio, i.due.unwrap_or(NaiveDate::MAX)));
-    let finished = items.len() - open.len();
+    let finished = items.iter().filter(|i| i.done && i.list.is_none()).count();
     if open.is_empty() {
         let r = Reply::say(lines::pick(if finished > 0 { "todo_all_done" } else { "todo_empty" })).mood(Mood::Happy);
         return if finished > 0 { r.run("Clear finished", "todos clear") } else { r };
@@ -363,7 +428,35 @@ pub fn list() -> Reply {
     if finished > 0 {
         r = r.run(&format!("Clear {finished} finished"), "todos clear");
     }
+    for l in lists(&items).iter().take(2) {
+        r = r.run(&format!("The {l} list"), &format!("onlist {l}"));
+    }
     r.run("Open the Desk", "desk todo").btn("Open the file", Act::Open(path().to_string_lossy().into_owned()))
+}
+
+/// A named list ("what's on my shopping list"), each open item with a tick button.
+pub fn show_list(name: &str) -> Reply {
+    let items = load();
+    let rows: Vec<(usize, &Item)> = items.iter().enumerate().filter(|(_, i)| i.list.as_deref() == Some(name)).map(|(n, i)| (n + 1, i)).collect();
+    let open: Vec<&(usize, &Item)> = rows.iter().filter(|(_, i)| !i.done).collect();
+    let ticked = rows.len() - open.len();
+    if open.is_empty() {
+        let r = Reply::say(lines::pick("list_empty").replace("{label}", name)).mood(Mood::Think);
+        return if ticked > 0 { r.run(&format!("Clear {ticked} ticked"), &format!("onlist {name} clear")) } else { r };
+    }
+    let mut text = lines::pick("list_show").replace("{label}", name).replace("{n}", &open.len().to_string());
+    for (_, i) in &open {
+        text += &format!("\n☐ {}", i.text);
+    }
+    let mut r = Reply::say(text).mood(Mood::Write);
+    for (line, i) in open.iter().take(5) {
+        let short: String = i.text.chars().take(28).collect();
+        r = r.run(&format!("✔ {short}"), &format!("todo #{line} done"));
+    }
+    if ticked > 0 {
+        r = r.run(&format!("Clear {ticked} ticked"), &format!("onlist {name} clear"));
+    }
+    r.run("Open the Desk", "desk todo")
 }
 
 /// "Remove the finished ones?" (nothing goes without a yes).
@@ -379,7 +472,7 @@ pub fn clear_confirm() -> Reply {
 pub fn summary() -> Option<String> {
     let today = Local::now().date_naive();
     let items = load();
-    let open: Vec<&Item> = items.iter().filter(|i| !i.done).collect();
+    let open: Vec<&Item> = items.iter().filter(|i| !i.done && i.list.is_none()).collect();
     if open.is_empty() {
         return None;
     }
@@ -393,6 +486,30 @@ mod tests {
 
     fn day(m: u32, d: u32) -> NaiveDate {
         NaiveDate::from_ymd_opt(2026, m, d).unwrap()
+    }
+
+    #[test]
+    fn named_lists() {
+        let today = day(11, 9);
+        let mut items = parse("- [ ] call Anna\n");
+        assert_eq!(split_items("eggs, milk and bread"), vec!["eggs", "milk", "bread"]);
+        assert_eq!(split_items("sunscreen"), vec!["sunscreen"]);
+        let (pool, x) = change(&mut items, &Op::AddTo("shopping".into(), split_items("eggs, milk and bread")), today);
+        assert_eq!((pool, x.as_str()), ("list_added", "eggs, milk and bread"));
+        change(&mut items, &Op::AddTo("packing".into(), vec!["sunscreen".into()]), today);
+        assert_eq!(lists(&items), vec!["shopping", "packing"]);
+        assert_eq!(format(&items[1..2]), "- [ ] eggs (list shopping)\n");
+        assert_eq!(parse(&format(&items)), items, "the list tag round-trips");
+        let (pool, _) = change(&mut items, &Op::Done("milk".into()), today);
+        assert_eq!(pool, "list_done");
+        change(&mut items, &Op::Done("sunscreen".into()), today);
+        let (pool, n) = change(&mut items, &Op::ClearList("shopping".into()), today);
+        assert_eq!((pool, n.as_str()), ("list_cleared", "1"), "only the ticked ones of that list");
+        assert!(items.iter().any(|i| i.text == "sunscreen"), "the packing list keeps its ticked item");
+        let (pool, _) = change(&mut items, &Op::ClearFinished, today);
+        assert_eq!(pool, "todo_cleared");
+        assert!(items.iter().any(|i| i.text == "sunscreen"), "clearing the to-do list leaves named lists alone");
+        assert_eq!(change(&mut items, &Op::RemoveAt(1), today), ("todo_removed", "call Anna".to_string()));
     }
 
     #[test]

@@ -23,6 +23,7 @@ pub fn tab(name: &str) -> Option<usize> {
         "plan" => "todo".to_string(), // plan my day
         "wrapup" => "today".to_string(),
         "checkup" | "tidy" | "backup" | "startup" => "upkeep".to_string(),
+        t if t.starts_with("list ") => "todo".to_string(), // "list shopping": a named list on the To-do tab
         t => t.to_string(),
     };
     match t.parse::<usize>() {
@@ -136,6 +137,8 @@ pub struct Desk {
     numbers: BTreeMap<String, String>, // the Settings tab's minute fields while you type in them
     editing: Option<(usize, String)>,  // a to-do being renamed: its line, the new text so far
     planning: bool,                    // "plan my day": the To-do tab asks for today's top 3
+    list_tab: Option<String>,          // the To-do tab shows this named list instead of the to-dos
+    list_text: String,
     forget_all: bool,                  // the You & me tab's "are you sure?"
     upkeep_page: usize,                // Checkup, Tidy, Backup
     startup_list: bool,                // the Checkup page shows the start-up apps
@@ -169,6 +172,7 @@ impl Desk {
             self.tab = i;
         }
         self.planning = name == "plan";
+        self.list_tab = name.strip_prefix("list ").map(|l| l.trim().to_lowercase());
         self.wrapping = name == "wrapup";
         if let Some(page) = ["checkup", "tidy", "backup"].iter().position(|p| *p == name) {
             self.upkeep_page = page;
@@ -531,6 +535,32 @@ impl Desk {
     fn todos(&mut self, ui: &mut Ui, c: Rect, view: &View, look: Look, out: &mut Vec<String>) {
         let p = ui.painter().clone();
         let (today, ctl) = (chrono::Local::now().date_naive(), look.ctl());
+        // named lists get a chip each: My to-dos · Shopping · Packing
+        let names = todo::lists(&self.files.todos);
+        if self.list_tab.as_ref().is_some_and(|l| !names.contains(l)) {
+            self.list_tab = None;
+        }
+        let c = if names.is_empty() {
+            c
+        } else {
+            let mut x = c.min.x;
+            let chips = std::iter::once(None).chain(names.iter().map(Some));
+            for name in chips {
+                let label = name.map_or("My to-dos".to_string(), |n| n[..1].to_uppercase() + &n[1..]);
+                let w = p.layout_no_wrap(label.clone(), look.bold(12.5), look.text()).size().x + 28.0;
+                if x + w > c.max.x {
+                    break; // shortcut: lists that don't fit on the row are only reachable by chat
+                }
+                if look.tab(ui, Rect::from_min_size(pos2(x, c.min.y), vec2(w, look.tab_h())), &label, self.list_tab.as_ref() == name).clicked() {
+                    self.list_tab = name.cloned();
+                }
+                x += w + 6.0;
+            }
+            Rect::from_min_max(pos2(c.min.x, c.min.y + look.tab_h() + 10.0), c.max)
+        };
+        if let Some(name) = self.list_tab.clone() {
+            return self.named_list(ui, c, look, &name, out);
+        }
         let mut list = Rect::from_min_max(c.min, pos2(c.max.x, c.max.y - 108.0));
         // "plan my day": a banner asking for the top 3, with today's reminders
         if self.planning {
@@ -557,7 +587,7 @@ impl Desk {
         // Today (the top 3, then what's due), Upcoming (a week), Later, Done. Numbers are lines in the file (1-based).
         let week = today + chrono::Days::new(7);
         let mut groups: [(&str, Vec<usize>); 4] = [("Today", vec![]), ("Upcoming", vec![]), ("Later", vec![]), ("Done", vec![])];
-        for (i, it) in items.iter().enumerate() {
+        for (i, it) in items.iter().enumerate().filter(|(_, it)| it.list.is_none()) {
             let g = match it.due {
                 _ if it.done => 3,
                 _ if it.top_today(today) => 0,
@@ -677,11 +707,70 @@ impl Desk {
             self.todo_text.clear();
             self.todo_due.clear();
         }
-        let finished = items.iter().filter(|i| i.done).count();
+        let finished = items.iter().filter(|i| i.done && i.list.is_none()).count();
         if look.button(ui, Rect::from_min_size(pos2(c.min.x, y + 40.0), vec2(142.0, ctl)), Id::unique("desk-todo-clear"), &format!("Clear finished ({finished})"), finished > 0).clicked() {
             out.push("todos clear".into());
         }
         p.text(pos2(c.max.x, y + 40.0 + ctl / 2.0), Align2::RIGHT_CENTER, "☆ today's top 3 · ! important · double-click to rename", look.font(11.0), look.dim());
+    }
+
+    /// A named list (shopping, packing): tick, remove, add, clear the ticked ones.
+    fn named_list(&mut self, ui: &mut Ui, c: Rect, look: Look, name: &str, out: &mut Vec<String>) {
+        let p = ui.painter().clone();
+        let ctl = look.ctl();
+        let list = Rect::from_min_max(c.min, pos2(c.max.x, c.max.y - 64.0));
+        look.well(&p, list);
+        // open items first, then the ticked ones; numbers are lines in the file (1-based)
+        let mut rows: Vec<(usize, todo::Item)> = self.files.todos.iter().enumerate().filter(|(_, i)| i.list.as_deref() == Some(name)).map(|(n, i)| (n + 1, i.clone())).collect();
+        rows.sort_by_key(|(_, i)| i.done);
+        if rows.is_empty() {
+            p.text(list.center(), Align2::CENTER_CENTER, "Nothing on this list. Add something below.", look.font(12.5), look.dim());
+        }
+        let pitch = if look == Look::Modern { 28.0 } else { 22.0 };
+        let inner = list.shrink2(vec2(0.0, 6.0));
+        let fits = (inner.height() / pitch) as usize;
+        let first = self.first_row(ui, "named-list", list, rows.len(), fits);
+        let s = if look == Look::Modern { 16.0 } else { 13.0 };
+        for (n, (line, it)) in rows.iter().skip(first).take(fits).enumerate() {
+            let y = inner.min.y + n as f32 * pitch;
+            let cy = y + pitch / 2.0;
+            let row = Rect::from_min_max(pos2(list.min.x, y), pos2(list.max.x, y + pitch));
+            if look.checkbox(ui, Rect::from_center_size(pos2(list.min.x + 12.0 + s / 2.0, cy), vec2(s, s)), it.done, Id::unique(("desk-list", *line))).clicked() {
+                out.push(format!("todo #{line} {}", if it.done { "undone" } else { "done" }));
+            }
+            let x_r = Rect::from_center_size(pos2(list.max.x - 22.0, cy), vec2(18.0, 18.0));
+            let color = if it.done { look.dim() } else { look.text() };
+            let galley = clipped(&p, &it.text, look.font(12.5), color, x_r.min.x - list.min.x - 50.0);
+            let top = pos2(list.min.x + 38.0, cy - galley.size().y / 2.0);
+            if it.done {
+                p.hline(top.x..=top.x + galley.size().x, top.y + galley.size().y * 0.55, Stroke::new(1.0, look.dim()));
+            }
+            p.galley(top, galley, color);
+            if ui.rect_contains_pointer(row) {
+                if ui.interact(x_r, Id::unique(("desk-list-x", *line)), Sense::click()).clicked() {
+                    out.push(format!("todo #{line} remove"));
+                }
+                cross(&p, x_r.center(), 4.0, 1.5, look.dim());
+            }
+            if n + 1 < fits && first + n + 1 < rows.len() {
+                look.divider(&p, list.min.x + 12.0, list.max.x - 12.0, y + pitch);
+            }
+        }
+        scrollbar(&p, look, list, first, fits, rows.len());
+        let y = list.max.y + 14.0;
+        let add = Rect::from_min_size(pos2(c.max.x - 82.0, y), vec2(82.0, ctl));
+        p.text(pos2(c.min.x, y + ctl / 2.0), Align2::LEFT_CENTER, "Add:", look.font(12.5), look.text());
+        let text = look.input(ui, Rect::from_min_max(pos2(c.min.x + 40.0, y), pos2(add.min.x - 8.0, y + ctl)), Id::unique("desk-list-text"), &mut self.list_text, "eggs, milk and bread");
+        let enter = text.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter));
+        if (look.button(ui, add, Id::unique("desk-list-add"), "Add", !self.list_text.trim().is_empty()).clicked() || enter) && !self.list_text.trim().is_empty() {
+            out.push(format!("onlist {name} add {}", self.list_text.trim()));
+            self.list_text.clear();
+        }
+        let ticked = rows.iter().filter(|(_, i)| i.done).count();
+        if look.button(ui, Rect::from_min_size(pos2(c.min.x, y + ctl + 8.0), vec2(142.0, ctl)), Id::unique("desk-list-clear"), &format!("Clear ticked ({ticked})"), ticked > 0).clicked() {
+            out.push(format!("onlist {name} clear"));
+        }
+        p.text(pos2(c.max.x, y + ctl + 8.0 + ctl / 2.0), Align2::RIGHT_CENTER, "say \"add eggs to my shopping list\" to add from anywhere", look.font(11.0), look.dim());
     }
 
     /// Wheel scrolling for a list drawn row by row: the first row to show, kept per list.
@@ -1878,6 +1967,11 @@ fn sample_files(desktop: bool) -> Files {
         todo::Item { every: Some("week".into()), ..item("Water the office plant", d(2)) },
         item("Plan the team lunch", None),
         todo::Item { done: true, done_on: Some(today), ..item("Buy more paperclips", None) },
+        todo::Item { list: Some("shopping".into()), ..item("Coffee beans", None) },
+        todo::Item { list: Some("shopping".into()), ..item("Oat milk", None) },
+        todo::Item { list: Some("shopping".into()), done: true, ..item("Sticky notes (yellow, obviously)", None) },
+        todo::Item { list: Some("shopping".into()), ..item("A plant that forgives neglect", None) },
+        todo::Item { list: Some("packing".into()), ..item("Laptop charger", None) },
     ];
     let notes = ["Printer code: 4711", "Ask IT about the second monitor", "Gerald says hi"].iter().map(|s| s.to_string()).collect();
     let base = PathBuf::from(if desktop { "/home/you/Desktop" } else { "/home/you/Downloads" });

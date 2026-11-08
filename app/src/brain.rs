@@ -553,9 +553,22 @@ pub fn exact(input: &str) -> Option<Reply> {
                 "star" => Op::StarAt(n),
                 "prio" => Op::PrioAt(n),
                 "edit" => Op::EditAt(n, text.to_string()),
+                "remove" => Op::RemoveAt(n),
                 _ => return None,
             };
             return Some(Reply::say("").effect(Effect::Todo(op)));
+        }
+        // a named list: "onlist shopping", "onlist shopping add eggs, milk", "onlist shopping clear"
+        "onlist" if !rest.is_empty() => {
+            use crate::todo::Op;
+            let (name, what) = rest.split_once(' ').unwrap_or((rest, ""));
+            let name = name.to_lowercase();
+            return Some(match what.split_once(' ').unwrap_or((what, "")) {
+                ("", _) => crate::todo::show_list(&name),
+                ("clear", _) => Reply::say("").effect(Effect::Todo(Op::ClearList(name))),
+                ("add", items) if !items.trim().is_empty() => Reply::say("").effect(Effect::Todo(Op::AddTo(name, crate::todo::split_items(items)))),
+                _ => return None,
+            });
         }
         "todo" if rest == "tomorrow" => return Some(Reply::say("").effect(Effect::Todo(crate::todo::Op::Tomorrow))),
         "todo" | "to-do" if !rest.is_empty() => return Some(Reply::say("").effect(Effect::Todo(crate::todo::Op::Add(rest.to_string())))),

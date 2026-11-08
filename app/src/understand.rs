@@ -8,7 +8,7 @@ pub fn respond(input: &str) -> Reply {
     let raw = input.trim();
     let head = raw.split_whitespace().next().unwrap_or("").to_lowercase();
     // shell commands and button-only commands (whose text is data, like quiz answers) are taken literally
-    if ["run", "$", "sh", "cmd", "reveal", "wyrpick", "window", "answer-to", "checkin", "install", "forget", "tidy", "pref", "clip", "forgetfact", "startup", "upkeep", "backup"].contains(&head.as_str()) || head == "answer" && raw.contains('|') {
+    if ["run", "$", "sh", "cmd", "reveal", "wyrpick", "window", "answer-to", "checkin", "install", "forget", "tidy", "pref", "clip", "forgetfact", "startup", "upkeep", "backup", "onlist"].contains(&head.as_str()) || head == "answer" && raw.contains('|') {
         if let Some(r) = exact(raw) {
             return r; // shell commands are taken literally, never "understood"
         }
@@ -947,7 +947,37 @@ fn adding_todo(s: &str) -> bool {
     ["todo ", "to do ", "to-do "].iter().find_map(|p| s.strip_prefix(p)).is_some_and(|rest| !matches!(rest.trim(), "list" | "clear" | "clear list" | "delete" | "reset" | "empty" | "wipe" | "clear finished"))
 }
 
+/// "my shopping list", "the packing list": (the list's name, where "my"/"the" is). Never the to-do or reading list.
+fn named_list(s: &str) -> Option<(String, usize)> {
+    let w: Vec<&str> = s.split_whitespace().collect();
+    (0..w.len().saturating_sub(2))
+        .find(|&i| ["my", "the", "our"].contains(&w[i]) && w[i + 2] == "list" && !["todo", "to-do", "reading", "task", "tasks", "do"].contains(&w[i + 1]))
+        .map(|i| (w[i + 1].to_string(), i))
+}
+
+/// Named lists: "add eggs, milk and bread to my shopping list", "what's on the packing list", "clear my shopping list".
+fn named_lists(s: &str, raw: &str) -> Option<Reply> {
+    let (name, at) = named_list(s)?;
+    let w: Vec<&str> = s.split_whitespace().collect();
+    let first = w[0];
+    if ["add", "put"].contains(&first) && at + 3 == w.len() && at >= 2 && ["to", "on", "onto"].contains(&w[at - 1]) {
+        let items = w[1..at - 1].join(" ");
+        return (!items.is_empty()).then(|| go(format!("onlist {name} add {}", keep(raw, &items)))).flatten();
+    }
+    if ["clear", "empty", "wipe", "reset", "clean"].contains(&first) {
+        return go(format!("onlist {name} clear"));
+    }
+    let asks = ["what", "show", "read", "open", "check", "see", "view", "whats", "list"].contains(&first) || at == 0 && at + 3 == w.len();
+    if asks {
+        return go(format!("onlist {name}"));
+    }
+    None
+}
+
 fn notes(s: &str, raw: &str) -> Option<Reply> {
+    if let Some(r) = named_lists(s, raw) {
+        return Some(r);
+    }
     let about_todos = has(s, &["to do", "to do list", "todo", "todos", "todo list", "list", "tasks"]) && !has(s, &["notes", "note"]);
     let about_notes = has(s, &["notes", "note", "reminders"]) || about_todos;
     if about_notes && has(s, &["delete", "clear", "erase", "remove", "wipe", "forget", "empty", "reset"]) && !s.starts_with("note ") && !adding_todo(s) {
@@ -982,7 +1012,7 @@ fn notes(s: &str, raw: &str) -> Option<Reply> {
     // "add milk to my list" (a to-do), "add the code to my notes" (a note)
     let rest = s.strip_prefix("add ").or_else(|| s.strip_prefix("put "))?;
     const LISTS: &[&str] = &[
-        " to my to do list", " to the to do list", " to my todo list", " to my todos", " to my tasks", " to my shopping list", " to the shopping list",
+        " to my to do list", " to the to do list", " to my todo list", " to my todos", " to my tasks",
         " to my list", " to the list", " on my list", " on my to do list", " on the list",
     ];
     if let Some(what) = rest.strip_suffix(" to my notes").or_else(|| rest.strip_suffix(" to the notes")) {
@@ -1763,6 +1793,21 @@ mod tests {
         assert_eq!(eff("done call Anna"), Effect::Todo(Op::Done("call Anna".into())));
         assert!(!matches!(eff("clear my to do list"), Effect::Todo(_)), "asks first");
         assert!(matches!(eff("note buy milk"), Effect::None), "notes are still notes");
+    }
+
+    #[test]
+    fn named_lists_in_plain_words() {
+        use crate::todo::Op;
+        let add = |l: &str, items: &[&str]| Effect::Todo(Op::AddTo(l.into(), items.iter().map(|s| s.to_string()).collect()));
+        assert_eq!(eff("add eggs, milk and bread to my shopping list"), add("shopping", &["eggs", "milk", "bread"]));
+        assert_eq!(eff("put Sunscreen on the packing list"), add("packing", &["Sunscreen"]));
+        assert!(text("what's on my shopping list").len() > 0);
+        assert_eq!(respond("what's on my shopping list").buttons.len(), respond("onlist shopping").buttons.len());
+        assert_eq!(eff("clear my shopping list"), Effect::Todo(Op::ClearList("shopping".into())));
+        assert_eq!(eff("add milk to my list"), Effect::Todo(Op::Add("milk".into())), "no name: the to-do list");
+        assert!(!matches!(eff("clear my to do list"), Effect::Todo(Op::ClearList(_))));
+        assert!(!matches!(eff("add lunch with Anna to my calendar"), Effect::Todo(Op::AddTo(..))));
+        assert!(!matches!(eff("show my reading list"), Effect::Todo(_)), "the reading list is something else");
     }
 
     #[test]

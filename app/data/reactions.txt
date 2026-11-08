@@ -6109,3 +6109,28 @@ One window for all of it. Open it with "open my desk", with Meta+Shift+C, or fro
 
 ## welcome done
 That's the tour. Say "show me around" any time to see it again, or "help" for everything by topic.
+
+## list_added
+On the {label} list: {x}.
+Added {x} to your {label} list.
+{x}, on the {label} list. Done.
+
+## list_show
+Your {label} list, {n} to go:
+{n} things on the {label} list:
+The {label} list ({n}):
+
+## list_empty
+The {label} list is empty. Either you're done, or you haven't started.
+Nothing on the {label} list right now.
+Your {label} list is clear.
+
+## list_done
+Ticked off: {x}.
+{x}: got it.
+{x}, crossed off.
+
+## list_cleared
+Cleared {n} ticked items from the {label} list.
+{n} gone from the {label} list. Fresh start.
+The {label} list lost {n} ticked items.

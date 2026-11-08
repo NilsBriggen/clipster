@@ -6358,3 +6358,28 @@ Say "my cat is called Mo". I will remember Mo forever.
 It is done. Press the button and let us begin.
 Setup complete. Welcome, {name}. I am so glad you're here. Ahem.
 All set, mortal. I'm right here. I'm always right here.
+
+## list_added
+It is written on the {label} list, mortal: {x}.
+{x}. Inscribed on the sacred {label} list.
+The {label} list grows. {x}. I shall guard it.
+
+## list_show
+The {label} scroll. {n} tasks await:
+Behold the {label} list. {n} things remain:
+{n} items on the {label} list. Gerald counted them twice:
+
+## list_empty
+The {label} list is empty. A void. I know voids. This is a nice one.
+Nothing on the {label} list, mortal. Pure. Unwritten.
+The {label} list lies bare. Fill it, or rejoice.
+
+## list_done
+{x}. Struck from the list. It is finished.
+{x}: conquered.
+Crossed off: {x}. The list trembles.
+
+## list_cleared
+{n} ticked items cast from the {label} list into the void.
+The {label} list is purged of {n} completed things. Cleansing.
+{n} done things gone from the {label} list. They served well.
