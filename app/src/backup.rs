@@ -151,8 +151,14 @@ fn copy_one(from: &Path, to: &Path) -> std::io::Result<()> {
     let part = to.with_file_name(format!("{}.clipster-part", to.file_name().unwrap_or_default().to_string_lossy()));
     let result = (|| {
         std::fs::copy(from, &part)?;
-        let when = std::fs::metadata(from)?.modified()?;
-        std::fs::File::options().write(true).open(&part)?.set_modified(when)?;
+        let meta = std::fs::metadata(from)?;
+        // a read-only original makes a read-only copy: open it up to set the date, then put the flag back
+        let mut writable = meta.permissions();
+        #[allow(clippy::permissions_set_readonly_false)]
+        writable.set_readonly(false);
+        std::fs::set_permissions(&part, writable)?;
+        std::fs::File::options().write(true).open(&part)?.set_modified(meta.modified()?)?;
+        std::fs::set_permissions(&part, meta.permissions())?;
         // an old read-only copy (Windows keeps the flag) would refuse to be replaced
         if let Ok(m) = std::fs::metadata(to) {
             let mut p = m.permissions();
@@ -202,6 +208,9 @@ mod tests {
         let (src, dst) = (temp("src").join("Documents"), temp("dst"));
         write(&src.join("a.txt"), "first", 3600);
         write(&src.join("sub").join("b.txt"), "second", 3600);
+        let mut ro = std::fs::metadata(src.join("sub").join("b.txt")).unwrap().permissions();
+        ro.set_readonly(true); // like git's object files
+        std::fs::set_permissions(src.join("sub").join("b.txt"), ro).unwrap();
         #[cfg(unix)]
         std::os::unix::fs::symlink("/etc", src.join("link")).unwrap();
         let p = plan(std::slice::from_ref(&src), &dst, Limits::default()).unwrap();
@@ -222,7 +231,13 @@ mod tests {
         assert!(dst.join(FOLDER).join("Documents").join("mine.txt").exists(), "nothing is deleted");
         assert!(!a.with_file_name("a.txt.clipster-part").exists(), "no half files left");
         // someone edited the backup copy: it's left alone and reported
-        write(&dst.join(FOLDER).join("Documents").join("sub").join("b.txt"), "edited in the backup", 0);
+        let copy = dst.join(FOLDER).join("Documents").join("sub").join("b.txt");
+        let mut p = std::fs::metadata(&copy).unwrap().permissions();
+        assert!(p.readonly(), "a read-only file is backed up (and stays read-only)");
+        #[allow(clippy::permissions_set_readonly_false)]
+        p.set_readonly(false);
+        std::fs::set_permissions(&copy, p).unwrap();
+        write(&copy, "edited in the backup", 0);
         assert_eq!(plan(std::slice::from_ref(&src), &dst, Limits::default()).unwrap().conflicts, 1);
         // the backup can't be inside what it backs up
         assert!(plan(std::slice::from_ref(&src), &src.join("sub"), Limits::default()).is_err());

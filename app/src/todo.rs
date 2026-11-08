@@ -44,7 +44,7 @@ pub enum Op {
 }
 
 pub fn path() -> PathBuf {
-    dirs::data_dir().unwrap_or_else(std::env::temp_dir).join("clipster").join("todo.txt")
+    crate::brain::data_dir().join("todo.txt")
 }
 
 pub fn parse(text: &str) -> Vec<Item> {
@@ -152,6 +152,9 @@ fn split_every(text: &str, today: NaiveDate) -> (String, Option<(String, NaiveDa
 pub fn split_due(text: &str, today: NaiveDate) -> (String, Option<NaiveDate>) {
     for sep in [" by ", " due ", " before ", " on "] {
         if let Some((what, when)) = text.rsplit_once(sep) {
+            if ["today", "tonight", "this evening", "end of day"].contains(&when.trim().to_lowercase().as_str()) {
+                return (what.trim().to_string(), Some(today));
+            }
             if let Some((d, _)) = crate::powers::parse_day(&when.to_lowercase(), today) {
                 return (what.trim().to_string(), Some(d));
             }
@@ -172,11 +175,23 @@ fn finish(items: &mut Vec<Item>, i: usize, today: NaiveDate) -> &'static str {
     items[i].done_on = Some(today);
     if let Some(every) = items[i].every.clone() {
         let next = every_next(&every, items[i].due, today);
-        items[i].every = None; // the finished copy stays as history
         items.push(Item { due: next, every: Some(every), top: None, done: false, done_on: None, ..items[i].clone() });
         return "todo_repeat";
     }
     if items.iter().any(|i| !i.done) { "todo_done" } else { "todo_all_done" }
+}
+
+/// Un-tick item `i`. A repeating one takes back the next occurrence it made, so there's only one again.
+fn reopen(items: &mut Vec<Item>, i: usize) -> String {
+    let (text, every, due) = (items[i].text.clone(), items[i].every.clone(), items[i].due);
+    items[i].done = false;
+    items[i].done_on = None;
+    if every.is_some() {
+        if let Some(j) = items.iter().position(|x| !x.done && x.text == text && x.every == every && x.due > due && !std::ptr::eq(x, &items[i])) {
+            items.remove(j);
+        }
+    }
+    text
 }
 
 /// Apply a change to the items; returns the reply's pool and what fills `{x}` / `{n}`.
@@ -188,8 +203,8 @@ pub fn change(items: &mut Vec<Item>, op: &Op, today: NaiveDate) -> (&'static str
                 Some(t) => (t.to_string(), true),
                 None => (text.clone(), false),
             };
-            let (text, repeat) = split_every(&text, today);
             let (text, due) = split_due(&text, today);
+            let (text, repeat) = split_every(&text, today);
             let (every, due) = match repeat {
                 Some((every, first)) => (Some(every), due.or(Some(first))),
                 None => (None, due),
@@ -212,19 +227,11 @@ pub fn change(items: &mut Vec<Item>, op: &Op, today: NaiveDate) -> (&'static str
             None => ("todo_not_found", format!("#{n}")),
         },
         Op::Undone(q) => match find(items, q, true) {
-            Some(i) => {
-                items[i].done = false;
-                items[i].done_on = None;
-                ("todo_undo", items[i].text.clone())
-            }
+            Some(i) => ("todo_undo", reopen(items, i)),
             None => ("todo_not_found", q.clone()),
         },
-        Op::UndoneAt(n) => match at(*n, items) {
-            Some(i) => {
-                items[i].done = false;
-                items[i].done_on = None;
-                ("todo_undo", items[i].text.clone())
-            }
+        Op::UndoneAt(n) => match at(*n, items).filter(|i| items[*i].done) {
+            Some(i) => ("todo_undo", reopen(items, i)),
             None => ("todo_not_found", format!("#{n}")),
         },
         Op::StarAt(n) => match at(*n, items) {
@@ -272,19 +279,30 @@ pub fn change(items: &mut Vec<Item>, op: &Op, today: NaiveDate) -> (&'static str
 }
 
 /// Apply a change to the real list and say so (with a reminder for a due date, and Undo for a finished item).
-pub fn apply(op: &Op) -> Reply {
+pub fn apply(op: &Op) -> (Reply, Option<String>) {
     let today = Local::now().date_naive();
     let mut items = load();
+    // the item a change is about, before it changes: its morning reminder may have to go
+    let before = match op {
+        Op::DoneAt(n) | Op::EditAt(n, _) => n.checked_sub(1).and_then(|i| items.get(i)).map(|i| i.text.clone()),
+        Op::Done(q) => find(&items, q, false).map(|i| items[i].text.clone()),
+        _ => None,
+    };
     let (pool, x) = change(&mut items, op, today);
-    let quiet = matches!(op, Op::StarAt(_) | Op::PrioAt(_) | Op::EditAt(..) | Op::DoneAt(_) | Op::UndoneAt(_));
-    if pool != "todo_not_found" && pool != "todo_top_full" && !save(&items) {
+    let stale = before.filter(|_| ["todo_done", "todo_all_done", "todo_repeat", "todo_edited"].contains(&pool)).map(|t| format!("To-do: {t}"));
+    (reply(op, pool, &x, &items), stale)
+}
+
+fn reply(op: &Op, pool: &str, x: &str, items: &[Item]) -> Reply {
+    let quiet = matches!(op, Op::StarAt(_) | Op::PrioAt(_) | Op::EditAt(..) | Op::UndoneAt(_));
+    if pool != "todo_not_found" && pool != "todo_top_full" && !save(items) {
         return Reply::say("I couldn't write your to-do list. Is the disk full?").mood(Mood::Sad);
     }
     // a few pools are simple enough to say without data lines
     let text = match pool {
         "todo_prio" => format!("\"{x}\" is {} now.", if items.iter().any(|i| i.text == x && i.prio) { "high priority" } else { "back to normal priority" }),
         "todo_unstarred" => format!("\"{x}\" is out of today's top 3."),
-        _ => lines::pick(pool).replace("{x}", &x).replace("{n}", &x),
+        _ => lines::pick(pool).replace("{x}", x).replace("{n}", x),
     };
     let mut r = Reply::say(text).mood(if pool == "todo_not_found" || pool == "todo_top_full" { Mood::Think } else { Mood::Happy });
     // a reminder on the morning a new (or repeating) item is due
@@ -308,6 +326,7 @@ pub fn apply(op: &Op) -> Reply {
     match op {
         Op::Add(_) => r = r.run("Show my list", "todos"),
         Op::Done(_) if pool != "todo_not_found" => r = r.run("Undo", &format!("undone {x}")).run("Show my list", "todos"),
+        Op::DoneAt(n) if pool != "todo_not_found" => r = r.run("Undo", &format!("todo #{n} undone")),
         _ => r = r.run("Show my list", "todos"),
     }
     r
@@ -317,15 +336,16 @@ pub fn apply(op: &Op) -> Reply {
 pub fn list() -> Reply {
     let items = load();
     let today = Local::now().date_naive();
-    let mut open: Vec<&Item> = items.iter().filter(|i| !i.done).collect();
-    open.sort_by_key(|i| (!i.top_today(today), !i.prio, i.due.unwrap_or(NaiveDate::MAX)));
+    // (line number, item): the buttons name items by line, so their text is never re-read as a sentence
+    let mut open: Vec<(usize, &Item)> = items.iter().enumerate().filter(|(_, i)| !i.done).map(|(n, i)| (n + 1, i)).collect();
+    open.sort_by_key(|(_, i)| (!i.top_today(today), !i.prio, i.due.unwrap_or(NaiveDate::MAX)));
     let finished = items.len() - open.len();
     if open.is_empty() {
         let r = Reply::say(lines::pick(if finished > 0 { "todo_all_done" } else { "todo_empty" })).mood(Mood::Happy);
         return if finished > 0 { r.run("Clear finished", "todos clear") } else { r };
     }
     let mut text = lines::pick("todo_list_intro").replace("{n}", &open.len().to_string());
-    for i in &open {
+    for (_, i) in &open {
         let due = match i.due {
             Some(d) if d < today => format!(" (overdue since {})", d.format("%b %-d")),
             Some(d) if d == today => " (due today)".to_string(),
@@ -336,9 +356,9 @@ pub fn list() -> Reply {
         text += &format!("\n{mark} {}{due}{}", i.text, i.every.as_ref().map(|e| format!(" (every {e})")).unwrap_or_default());
     }
     let mut r = Reply::say(text).mood(Mood::Think);
-    for i in open.iter().take(5) {
+    for (line, i) in open.iter().take(5) {
         let short: String = i.text.chars().take(28).collect();
-        r = r.run(&format!("✔ {short}"), &format!("done {}", i.text));
+        r = r.run(&format!("✔ {short}"), &format!("todo #{line} done"));
     }
     if finished > 0 {
         r = r.run(&format!("Clear {finished} finished"), "todos clear");
@@ -414,8 +434,17 @@ mod tests {
         change(&mut items, &Op::Add("stand-up notes every day".into()), today);
         assert_eq!(items[1].due, Some(today), "a daily one starts today");
         assert_eq!(change(&mut items, &Op::DoneAt(1), today).0, "todo_repeat");
-        assert!(items[0].done && items[0].every.is_none(), "the finished copy is history");
+        assert!(items[0].done, "the finished copy is history");
         assert_eq!((items[2].due, items[2].done), (Some(day(11, 18)), false), "the next one is a week later");
+        // un-ticking it takes the next one back: still just one open
+        assert_eq!(change(&mut items, &Op::UndoneAt(1), today).0, "todo_undo");
+        assert_eq!(items.iter().filter(|i| i.text == "water the plants").count(), 1);
+        assert_eq!(change(&mut items, &Op::DoneAt(1), today).0, "todo_repeat");
+        let mut both = vec![];
+        change(&mut both, &Op::Add("call Anna every monday by friday".into()), today);
+        assert_eq!((both[0].text.as_str(), both[0].every.as_deref(), both[0].due), ("call Anna", Some("monday"), Some(day(11, 13))), "a repeat and a due date");
+        change(&mut both, &Op::Add("send the report by today".into()), today);
+        assert_eq!(both[1].due, Some(today));
         change(&mut items, &Op::Add("! pay rent every month".into()), today);
         assert!(items[3].prio);
         assert_eq!(every_next("month", Some(day(1, 31)), day(1, 31)), Some(day(2, 28)));

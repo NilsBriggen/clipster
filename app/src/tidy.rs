@@ -77,7 +77,7 @@ fn free_name(dir: &Path, name: &str, taken: &std::collections::HashSet<PathBuf>)
 
 /// Where the last tidy is written down, so it can be undone.
 pub fn undo_log() -> PathBuf {
-    dirs::data_dir().unwrap_or_else(std::env::temp_dir).join("clipster").join("tidy-undo.json")
+    crate::brain::data_dir().join("tidy-undo.json")
 }
 
 /// Move the files as planned and write the undo log. Returns how many moved.

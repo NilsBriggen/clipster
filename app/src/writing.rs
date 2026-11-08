@@ -20,6 +20,12 @@ pub enum Issue {
     Hard,
 }
 
+/// "über" -> "Über": the first letter in capitals, whatever its size in bytes.
+fn cap_first(word: &str) -> String {
+    let mut c = word.chars();
+    c.next().map(|f| f.to_uppercase().collect::<String>() + c.as_str()).unwrap_or_default()
+}
+
 /// The `misspellings` data pool: wrong -> right.
 pub fn misspellings() -> HashMap<String, String> {
     lines::all("misspellings").iter().filter_map(|l| l.split_once(" | ").map(|(w, r)| (w.trim().to_lowercase(), r.trim().to_string()))).collect()
@@ -136,14 +142,14 @@ pub fn fix(text: &str, wrong: &HashMap<String, String>) -> String {
             let mut word = match wrong.get(&b) {
                 Some(right) => {
                     let start = w.find(|c: char| c.is_alphanumeric()).unwrap_or(0);
-                    let end = w.rfind(|c: char| c.is_alphanumeric() || c == '\'').map_or(w.len(), |i| i + 1);
-                    let right = if w[start..].starts_with(|c: char| c.is_uppercase()) { right[..1].to_uppercase() + &right[1..] } else { right.clone() };
+                    let end = w.rfind(|c: char| c.is_alphanumeric() || c == '\'').map_or(w.len(), |i| i + w[i..].chars().next().map_or(1, char::len_utf8));
+                    let right = if w[start..].starts_with(|c: char| c.is_uppercase()) { cap_first(right) } else { right.clone() };
                     format!("{}{right}{}", &w[..start], &w[end..])
                 }
                 None => w.to_string(),
             };
             if cap && word.starts_with(|c: char| c.is_lowercase()) && !fixed.is_empty() {
-                word = word[..1].to_uppercase() + &word[1..];
+                word = cap_first(&word);
             }
             if let (Some(prev), Some(an)) = (fixed.last_mut(), wants_an(&word)) {
                 match (prev.as_str(), an) {
@@ -273,6 +279,12 @@ mod tests {
         assert_eq!(fix("i will definately  recieve the the parcel. it is an box.", &wrong()), "i will definitely receive the parcel. It is a box.");
         assert_eq!(fix("Definately. A apple a day.", &wrong()), "Definitely. An apple a day.");
         assert_eq!(fix("Its fine.", &wrong()), "Its fine.", "its/it's needs a human");
+    }
+
+    #[test]
+    fn accents_dont_break_the_fixes() {
+        assert_eq!(fix("Hello there. élan is fine. über cool", &wrong()), "Hello there. Élan is fine. Über cool");
+        assert!(!proofread("Ça va. über alles", &wrong()).is_empty() || true, "no panic");
     }
 
     #[test]

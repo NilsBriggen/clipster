@@ -652,12 +652,12 @@ pub fn pending_updates() -> Option<u32> {
     // never "pacman -Sy" ourselves: checkupdates syncs into a private database
     let system = run("checkupdates", "checkupdates", &[])
         .or_else(|| run("apt", "apt-get", &["-s", "-o", "Debug::NoLocking=true", "dist-upgrade"]))
-        .or_else(|| run("dnf", "dnf", &["check-update", "-q", "-C"]))
-        .flatten();
+        .or_else(|| run("dnf", "dnf", &["check-update", "-q", "-C"]));
     let flatpak = run("flatpak", "flatpak", &["remote-ls", "--updates", "--columns=application"]).flatten();
     match (system, flatpak) {
+        (Some(None), _) => None, // the package manager is there but couldn't tell (offline, locked): not "up to date"
         (None, None) => None,
-        (a, b) => Some(a.unwrap_or(0) + b.unwrap_or(0)),
+        (a, b) => Some(a.flatten().unwrap_or(0) + b.unwrap_or(0)),
     }
 }
 

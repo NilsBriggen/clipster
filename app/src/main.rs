@@ -196,6 +196,7 @@ struct App {
     explored: std::collections::BTreeSet<String>, // first words of things typed
     unhinged: bool,                                // personality: the trapped god (true) or the plain paperclip
     welcome: welcome::Welcome,                     // the setup and tour window
+    literal: bool,                                 // the next command comes from the Desk: take it as it is
     welcome_seen: String,                          // the version whose welcome or "what's new" was shown
     moments: std::collections::HashMap<&'static str, Instant>, // when each game last got a live comment
     check_updates: bool,           // look for a newer version once a day
@@ -478,6 +479,7 @@ impl App {
             explored: Default::default(),
             unhinged: true,
             welcome: Default::default(),
+            literal: false,
             welcome_seen: String::new(),
             moments: Default::default(),
         };
@@ -637,9 +639,13 @@ impl App {
     fn account_time(&mut self) {
         let now = Instant::now();
         let secs = now.duration_since(self.kind_mark).as_secs();
-        self.kind_mark = now;
+        if secs == 0 {
+            return; // called every frame while the Desk is open: wait for a whole second, keeping the mark
+        }
+        self.kind_mark += Duration::from_secs(secs); // the part of a second left over counts next time
         let away = self.tracker.is_some() && now.duration_since(self.last_move) > Duration::from_secs(300);
-        if secs == 0 || secs > 3600 || away || !self.notice_windows || self.screenshot.is_some() {
+        if secs > 3600 || away || !self.notice_windows || self.screenshot.is_some() {
+            self.kind_mark = now;
             return; // a long gap means the computer slept
         }
         let kind = self.window_kind.clone().unwrap_or_else(|| "other".into());
@@ -1078,7 +1084,15 @@ impl App {
     /// The welcome window was finished (apply what was picked) or cancelled (keep things as they are).
     fn welcome_done(&mut self, done: welcome::Done) {
         self.welcome_seen = env!("CARGO_PKG_VERSION").to_string();
-        let welcome::Done::Finish(s) = done else { return };
+        let s = match done {
+            welcome::Done::Finish(s) => s,
+            welcome::Done::Cancel(was_unhinged) => {
+                if was_unhinged != self.unhinged {
+                    self.set_persona(was_unhinged); // "keep things as they are"
+                }
+                return;
+            }
+        };
         let name: String = s.name.trim().chars().take(30).collect();
         if !name.is_empty() {
             self.name = name;
@@ -1303,7 +1317,12 @@ impl App {
     }
 
     fn run(&mut self, ctx: &egui::Context, cmd: &str) {
-        let mut r = brain::respond(cmd);
+        // the Desk's buttons send exact commands: they're never re-read as a sentence ("todo clear the desk"
+        // is a to-do, "cancel Pomodoro" cancels that timer)
+        let mut r = match std::mem::take(&mut self.literal) {
+            true => brain::exact(cmd).unwrap_or_else(|| brain::respond(cmd)),
+            false => brain::respond(cmd),
+        };
         let first = cmd.split_whitespace().next().unwrap_or("").to_lowercase();
         if matches!(r.effect, Effect::None | Effect::Net(_)) && !["answer", "answer-to", "window", "checkin"].contains(&first.as_str()) {
             self.last_cmd = Some(cmd.to_string()); // harmless to do again
@@ -1530,7 +1549,10 @@ impl App {
             Effect::Todo(op) => {
                 // stars, priorities, edits and un-ticking on the Desk answer in its status bar, not a balloon
                 let quiet = matches!(op, todo::Op::StarAt(_) | todo::Op::PrioAt(_) | todo::Op::EditAt(..) | todo::Op::UndoneAt(_));
-                let news = todo::apply(&op);
+                let (news, stale) = todo::apply(&op);
+                if let Some(label) = stale {
+                    self.timers.retain(|(_, l, _)| *l != label); // finished or renamed: no reminder for it
+                }
                 if let Effect::Timer(secs, label) = &news.effect {
                     self.timers.push((Instant::now() + Duration::from_secs(*secs), label.clone(), 0));
                 }
@@ -1876,7 +1898,9 @@ impl App {
                     self.backup_progress = None;
                     let r = match result {
                         Ok(s) => {
-                            self.backup_last = Some(backup::now());
+                            if s.errors.is_empty() {
+                                self.backup_last = Some(backup::now()); // a run with failures doesn't silence the reminder
+                            }
                             let mut text = if s.copied == 0 { lines::pick("backup_nothing_new") } else { lines::pick("backup_done").replace("{n}", &s.copied.to_string()).replace("{x}", &upkeep::size(s.bytes)) };
                             if s.conflicts > 0 {
                                 text = format!("{text} {}", lines::pick("backup_conflicts").replace("{n}", &s.conflicts.to_string()));
@@ -2271,6 +2295,7 @@ impl eframe::App for App {
         }
         if self.desk.is_open() {
             for cmd in self.show_desk(&ctx, near) {
+                self.literal = true;
                 self.run(&ctx, &cmd);
             }
             if self.screenshot.is_some() {

@@ -8,7 +8,7 @@ pub fn respond(input: &str) -> Reply {
     let raw = input.trim();
     let head = raw.split_whitespace().next().unwrap_or("").to_lowercase();
     // shell commands and button-only commands (whose text is data, like quiz answers) are taken literally
-    if ["run", "$", "sh", "cmd", "reveal", "wyrpick", "window", "answer-to", "checkin", "install", "forget", "tidy", "pref", "clip", "forgetfact", "startup"].contains(&head.as_str()) || head == "answer" && raw.contains('|') {
+    if ["run", "$", "sh", "cmd", "reveal", "wyrpick", "window", "answer-to", "checkin", "install", "forget", "tidy", "pref", "clip", "forgetfact", "startup", "upkeep", "backup"].contains(&head.as_str()) || head == "answer" && raw.contains('|') {
         if let Some(r) = exact(raw) {
             return r; // shell commands are taken literally, never "understood"
         }
@@ -427,6 +427,12 @@ const TIMER_WORDS: &[&str] = &[
 ];
 
 fn timers(s: &str, raw: &str) -> Option<Reply> {
+    // "todo remind Anna on friday", "todo wrap up the report": a to-do, whatever words it holds
+    if adding_todo(s) {
+        return None;
+    }
+    // commands only at the start of the sentence, so "i hate system updates" stays a conversation
+    let starts = |ps: &[&str]| ps.iter().any(|p| s == *p || s.starts_with(&format!("{p} ")));
     // goals and daily limits (before focus sessions, so "focus goal 2 hours" isn't a session)
     if has(s, &["no focus goal", "remove my focus goal", "turn off my focus goal", "delete my focus goal", "remove the focus goal"]) {
         return go("goal off".into());
@@ -434,7 +440,7 @@ fn timers(s: &str, raw: &str) -> Option<Reply> {
     if let Some(rest) = after(s, &["set my focus goal to ", "set my daily focus goal to ", "set a focus goal of ", "set the focus goal to ", "my focus goal is ", "focus goal of ", "focus goal to ", "focus goal "]) {
         return go(format!("goal {rest}"));
     }
-    if has(s, &["how am i doing on my goals", "how are my goals", "goal progress", "my goals", "my daily limits", "my limits", "my focus goal"]) {
+    if starts(&["how am i doing on my goals", "how are my goals", "goal progress", "my goals", "my daily limits", "my limits", "my focus goal", "show my goals"]) {
         return go("goals".into());
     }
     for (prefix, off) in [("limit ", false), ("set a limit for ", false), ("set a daily limit for ", false), ("no limit for ", true), ("remove the limit for ", true), ("remove my limit for ", true), ("stop limiting ", true)] {
@@ -446,8 +452,6 @@ fn timers(s: &str, raw: &str) -> Option<Reply> {
         }
     }
     // looking after the computer ("check for updates" is Clipster's own; these are the system's)
-    // as commands only (the start of the sentence), so "i hate system updates" stays a conversation
-    let starts = |ps: &[&str]| ps.iter().any(|p| s == *p || s.starts_with(&format!("{p} ")));
     if starts(&["computer checkup", "check up on my computer", "check my computer", "computer check up", "upkeep", "maintenance check", "look after my computer"]) {
         return go("upkeep".into());
     }
@@ -461,13 +465,13 @@ fn timers(s: &str, raw: &str) -> Option<Reply> {
         return go("desk upkeep".into());
     }
     // the start and end of the day, and the week
-    if has(s, &["plan my day", "plan the day", "plan today", "plan my morning", "morning plan", "help me plan my day"]) {
+    if starts(&["plan my day", "plan the day", "plan today", "plan my morning", "morning plan", "help me plan my day"]) {
         return go("planday".into());
     }
-    if has(s, &["wrap up my day", "wrap up the day", "wrap up today", "end my day", "end of my day", "end of the day", "close out my day", "wrap up"]) {
+    if starts(&["wrap up my day", "wrap up the day", "wrap up today", "end my day", "close out my day", "wrap up"]) || s == "end of the day" || s == "end of day" {
         return go("wrapup".into());
     }
-    if has(s, &["week in review", "weekly review", "review my week", "how was my week", "my week so far", "sum up my week", "summary of my week"]) {
+    if starts(&["week in review", "weekly review", "review my week", "how was my week", "my week so far", "sum up my week", "summary of my week", "my week in review", "show my week in review"]) {
         return go("review".into());
     }
     // focus sessions: "focus for 45 minutes on the report", "help me focus", "stop focusing"
@@ -937,10 +941,15 @@ fn extras(s: &str, raw: &str) -> Option<Reply> {
     None
 }
 
+/// "todo clear the desk", "to do: remind Anna": adding an item (not "todo list" or "todo clear").
+fn adding_todo(s: &str) -> bool {
+    ["todo ", "to do ", "to-do "].iter().find_map(|p| s.strip_prefix(p)).is_some_and(|rest| !matches!(rest.trim(), "list" | "clear" | "clear list" | "delete" | "reset" | "empty" | "wipe" | "clear finished"))
+}
+
 fn notes(s: &str, raw: &str) -> Option<Reply> {
     let about_todos = has(s, &["to do", "to do list", "todo", "todos", "todo list", "list", "tasks"]) && !has(s, &["notes", "note"]);
     let about_notes = has(s, &["notes", "note", "reminders"]) || about_todos;
-    if about_notes && has(s, &["delete", "clear", "erase", "remove", "wipe", "forget", "empty", "reset"]) && !s.starts_with("note ") {
+    if about_notes && has(s, &["delete", "clear", "erase", "remove", "wipe", "forget", "empty", "reset"]) && !s.starts_with("note ") && !adding_todo(s) {
         // the to-do list only ever loses finished items, and both ask first
         return go(if about_todos { "todos clear" } else { "forget notes" }.into());
     }
@@ -1703,6 +1712,19 @@ mod tests {
         assert!(matches!(respond("todo #3 star").effect, Effect::Todo(crate::todo::Op::StarAt(3))));
         assert!(matches!(respond("todo #2 edit call Anna").effect, Effect::Todo(crate::todo::Op::EditAt(2, t)) if t == "call Anna"));
         assert!(matches!(respond("todo water the plants every monday").effect, Effect::Todo(crate::todo::Op::Add(_))));
+    }
+
+    #[test]
+    fn desk_commands_and_todo_words_arent_hijacked() {
+        assert_eq!(respond("upkeep check").effect, Effect::UpkeepCheck);
+        assert!(respond("upkeep cleartemp").buttons.iter().any(|b| b.0.starts_with("Yes")));
+        for t in ["todo clear the desk", "todo wrap up the report", "todo review my week", "todo my goals", "todo remind Anna on friday", "to do empty the dishwasher"] {
+            assert!(matches!(respond(t).effect, Effect::Todo(crate::todo::Op::Add(_))), "{t}: {:?}", respond(t).effect);
+        }
+        assert!(matches!(respond("done wrap up report").effect, Effect::Todo(crate::todo::Op::Done(_))));
+        assert!(!matches!(respond("todo clear").effect, Effect::Todo(crate::todo::Op::Add(_))), "that's clearing the finished ones");
+        assert_eq!(respond("wrap up my day").effect, Effect::Wrapup);
+        assert_eq!(respond("how am i doing on my goals").effect, Effect::Goals);
     }
 
     #[test]

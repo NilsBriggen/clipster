@@ -50,7 +50,8 @@ pub struct Setup {
 
 pub enum Done {
     Finish(Setup),
-    Cancel,
+    /// Cancelled: the personality it was opened with (picking one applies at once, so Cancel puts it back).
+    Cancel(bool),
 }
 
 #[derive(Default)]
@@ -61,12 +62,13 @@ pub struct Welcome {
     first: usize, // 0 = with the setup pages, TOUR = the tour alone
     setup: Option<Setup>,
     seed: usize,
+    was_unhinged: bool,
 }
 
 impl Welcome {
     /// Open at `page` (0 = the whole setup, `TOUR` = just the tour) with the current settings filled in.
     pub fn open_at(&mut self, page: usize, setup: Setup) {
-        *self = Welcome { open: true, fresh: true, page, first: page, setup: Some(setup), seed: rand::random::<u8>() as usize };
+        *self = Welcome { open: true, fresh: true, page, first: page, was_unhinged: setup.unhinged, setup: Some(setup), seed: rand::random::<u8>() as usize };
     }
 
     pub fn is_open(&self) -> bool {
@@ -98,7 +100,7 @@ impl Welcome {
                 }
                 done = self.window(ui, clip, true, &mut out);
                 if ui.input(|i| i.viewport().close_requested()) {
-                    done = Some(Done::Cancel);
+                    done = Some(Done::Cancel(self.was_unhinged));
                 }
                 ui.ctx().request_repaint_after(std::time::Duration::from_millis(60)); // he moves
             });
@@ -116,7 +118,7 @@ impl Welcome {
         win98::panel(&p, win, win98::FACE, true);
         let bar = Rect::from_min_size(win.min + vec2(4.0, 4.0), vec2(W - 8.0, 22.0));
         if win98::title_bar(ui, bar, "Welcome to Clipster", drag) {
-            return Some(Done::Cancel);
+            return Some(Done::Cancel(self.was_unhinged));
         }
         let (id, chapter, heading, tries) = PAGES[self.page];
         // the left panel: Clipster, what he says, the chapters
@@ -238,7 +240,7 @@ impl Welcome {
         }
         let next = btn(ui, win.max.x - 198.0, if last { "Finish" } else { "Next >" }, true) || ui.input(|i| i.key_pressed(egui::Key::Enter)) && id != "name";
         if btn(ui, win.max.x - 100.0, "Cancel", true) || ui.input(|i| i.key_pressed(egui::Key::Escape)) {
-            return Some(Done::Cancel);
+            return Some(Done::Cancel(self.was_unhinged));
         }
         if next || (id == "name" && ui.input(|i| i.key_pressed(egui::Key::Enter))) {
             if last {

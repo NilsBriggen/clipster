@@ -1252,8 +1252,18 @@ pub fn fmt_dur(secs: u64) -> String {
 
 // ---------- notes ----------
 
+/// Where notes, to-dos and the tidy log live. The tests get a folder of their own, so running them never
+/// touches the real notes or to-do list.
+pub fn data_dir() -> PathBuf {
+    if cfg!(test) {
+        std::env::temp_dir().join(format!("clipster-test-{}", std::process::id()))
+    } else {
+        dirs::data_dir().unwrap_or_else(std::env::temp_dir).join("clipster")
+    }
+}
+
 pub fn notes_path() -> PathBuf {
-    dirs::data_dir().unwrap_or_else(std::env::temp_dir).join("clipster").join("notes.txt")
+    data_dir().join("notes.txt")
 }
 
 fn note_add(text: &str) -> Reply {
