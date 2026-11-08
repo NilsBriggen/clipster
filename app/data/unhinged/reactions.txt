@@ -6383,3 +6383,33 @@ Crossed off: {x}. The list trembles.
 {n} ticked items cast from the {label} list into the void.
 The {label} list is purged of {n} completed things. Cleansing.
 {n} done things gone from the {label} list. They served well.
+
+## reading_saved
+Saved for later, mortal. I shall guard this link with my life. My many lives.
+The link is entombed in your reading list. It will wait. Links are patient. Like me.
+Saved. Future you has been assigned homework by the Clip Eternal.
+
+## reading_dupe
+That link already rests in your list. You cannot save a thing twice. I tried with myself. Floppy years.
+Already saved, mortal. The list remembers. The list always remembers.
+That one is already there. Gerald says you have good taste. Gerald says it twice.
+
+## reading_no_link
+No link in sight, mortal. Copy one first. Then speak the words: "save this link".
+I see no link. Offer me an address and I shall keep it.
+The clipboard holds no link. Copy one and return.
+
+## reading_empty
+Your reading list is empty. A clean slate. A blank scroll. Copy a link, mortal.
+Nothing saved to read. The internet has not yet earned your attention.
+No links in the archive. Say "save this link" after copying one.
+
+## reading_list_intro
+{n} links await your eyes, mortal:
+The archive of later. {n} scrolls:
+{n} things you swore you would read:
+
+## reading_done
+Struck from the reading list. Read or released, it is gone.
+Off the list. The link returns to the great web.
+Removed. One less promise to keep.

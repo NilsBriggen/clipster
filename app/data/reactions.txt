@@ -6134,3 +6134,33 @@ Ticked off: {x}.
 Cleared {n} ticked items from the {label} list.
 {n} gone from the {label} list. Fresh start.
 The {label} list lost {n} ticked items.
+
+## reading_saved
+Saved for later. Later is a real time, I promise.
+On your reading list. It'll wait.
+Saved. Your future self has homework.
+
+## reading_dupe
+That one's already on your reading list.
+You saved that already. Twice the intention, same link.
+Already on the list. Patiently waiting.
+
+## reading_no_link
+I don't see a link. Copy one first, then say "save this link".
+No link to save. Copy the address, then ask again.
+Copy a link first and I'll keep it for later.
+
+## reading_empty
+Your reading list is empty. Copy a link and press Read later to save one.
+Nothing saved to read. The internet hasn't caught your eye yet.
+No saved links yet. Say "save this link" after copying one.
+
+## reading_list_intro
+{n} links waiting for you:
+Your reading list, {n} saved:
+{n} things you meant to read:
+
+## reading_done
+Off the reading list.
+Read, or let go. Either way, it's gone.
+Removed from your reading list.

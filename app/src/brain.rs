@@ -58,6 +58,7 @@ pub enum Effect {
     Pref(String, String),            // a setting changed on the Desk's Settings tab: key, value
     Goals,                           // how today is going against the focus goal and the daily limits
     Clip(String),                    // the Desk's Clipboard tab: "copy h3", "pin h3", "unpin p1", "clear"
+    Reading(String),                 // the reading list: "save <link>" (none = the newest copied link), "open 2", "done 2", "list"
     UpkeepCheck,                     // run the checkup (on a background thread)
     OpenSystem(String),              // the system's own "updater" or "startup" settings
     Startup(String, bool),           // an app that starts with the computer: on or off
@@ -320,6 +321,10 @@ pub fn exact(input: &str) -> Option<Reply> {
         "wrapup" => return Some(Reply::say("").effect(Effect::Wrapup)),
         "review" => return Some(Reply::say("").effect(Effect::Review(rest == "copy"))),
         "clip" if !rest.is_empty() => return Some(Reply::say("").effect(Effect::Clip(rest.to_string()))),
+        // the reading list: "readlater https://…" (or bare: the newest copied link), "reading", "reading done 2"
+        "readlater" => return Some(Reply::say("").effect(Effect::Reading(format!("save {rest}").trim().to_string()))),
+        "reading" if rest.is_empty() || rest == "list" => return Some(Reply::say("").effect(Effect::Reading("list".into()))),
+        "reading" if rest.starts_with("done ") || rest.starts_with("open ") => return Some(Reply::say("").effect(Effect::Reading(rest.to_string()))),
         // upkeep: the checkup, the system's updater and start-up apps, backups
         "upkeep" if rest == "check" => return Some(Reply::say("").effect(Effect::UpkeepCheck)),
         "upkeep" if rest == "cleartemp" => {
@@ -673,6 +678,7 @@ pub fn react_clip(text: &str) -> Option<Reply> {
         return Some(
             say("clip_link")
                 .btn("Open the link", Act::Open(t.to_string()))
+                .run("Read later", &format!("readlater {t}"))
                 .run("Make it shorter", &format!("shorten {t}"))
                 .run("Is that site up?", &format!("isdown {}", t.split('/').nth(2).unwrap_or(t)))
                 .btn("No thanks", Act::Hide),
@@ -1483,6 +1489,36 @@ fn expand_home(p: &str) -> PathBuf {
         Some(r) => dirs::home_dir().unwrap_or_default().join(r.trim_start_matches('/')),
         None => PathBuf::from(p),
     }
+}
+
+/// A single web link (what the reading list keeps).
+pub fn is_link(s: &str) -> bool {
+    let t = s.trim();
+    (t.starts_with("http://") || t.starts_with("https://")) && !t.contains(char::is_whitespace) && t.len() > 10
+}
+
+/// The reading list: newest first, the first few with an Open button.
+pub fn reading_list(items: &[(String, String)]) -> Reply {
+    if items.is_empty() {
+        return Reply::say(lines::pick("reading_empty")).mood(Mood::Read);
+    }
+    let mut text = lines::pick("reading_list_intro").replace("{n}", &items.len().to_string());
+    for (link, day) in items.iter().take(8) {
+        text += &format!("\n• {} ({day})", short_link(link));
+    }
+    let mut r = Reply::say(text).mood(Mood::Read);
+    for (link, _) in items.iter().take(3) {
+        let site = link.split('/').nth(2).unwrap_or(link).trim_start_matches("www.");
+        r = r.btn(&format!("Open {site}"), Act::Open(link.clone()));
+    }
+    r.run("Open the Desk", "desk links")
+}
+
+/// "https://www.example.com/a/long/path?x=1" -> "example.com/a/long/path", at most 60 characters.
+pub fn short_link(link: &str) -> String {
+    let t = link.trim_start_matches("https://").trim_start_matches("http://").trim_start_matches("www.");
+    let t = t.split(['?', '#']).next().unwrap_or(t).trim_end_matches('/');
+    if t.chars().count() > 60 { t.chars().take(59).collect::<String>() + "…" } else { t.to_string() }
 }
 
 fn looks_like_url(s: &str) -> bool {

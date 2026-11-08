@@ -1,4 +1,5 @@
 #![cfg_attr(all(windows, not(debug_assertions)), windows_subsystem = "windows")] // no console window behind him
+#![recursion_limit = "256"] // the settings snapshot is one big json! literal
 
 mod brain;
 mod backup;
@@ -168,7 +169,9 @@ struct App {
     dragging: bool,
     clip_history: Vec<String>,
     pins: Vec<String>, // clipboard snippets pinned on the Desk (saved; the history isn't)
+    reading: Vec<(String, String)>, // the reading list: (link, the day it was saved), newest first
     sample_clips: Vec<String>, // made-up copies for screenshots of the Desk
+    sample_reading: Vec<(String, String)>,
     upkeep: Option<(Instant, upkeep::Report)>, // the last checkup
     sample_upkeep: upkeep::Report,              // made-up readings for screenshots
     upkeep_running: bool,
@@ -440,6 +443,7 @@ impl App {
             dragging: false,
             clip_history: vec![],
             pins: vec![],
+            reading: vec![],
             upkeep: None,
             sample_upkeep: upkeep::Report {
                 startup: ["1Password", "LocalSend", "Nextcloud"].iter().map(|n| sys::StartupApp { id: format!("{n}.desktop"), name: n.to_string(), on: *n != "Nextcloud" }).collect(),
@@ -452,6 +456,7 @@ impl App {
             backup_result: String::new(),
             backup_progress: None,
             dnd_restore: None,
+            sample_reading: [("https://en.wikipedia.org/wiki/Paper_clip", "2026-11-07"), ("https://www.example.com/blog/how-to-run-a-meeting-that-ends-on-time?utm_source=news", "2026-11-05"), ("https://news.ycombinator.com/item?id=4711", "2026-11-02")].map(|(a, b)| (a.to_string(), b.to_string())).to_vec(),
             sample_clips: ["Printer code: 4711", "Meeting moved to 3 pm, room B", "https://example.com/quarterly-report", "Kind regards,\nSam", "SELECT * FROM paperclips WHERE bent = false;"].map(String::from).to_vec(),
             stopwatch: None,
             timers: vec![],
@@ -672,11 +677,11 @@ impl App {
         };
         match &self.desk_sample {
             Some((t, k, f, c)) => {
-                let view = desk::View { timers: t.clone(), kind_time: k, focus_log: f, focus_now: Some(("the slides".into(), 18 * 60, 7 * 60, 40)), checkins: c, streaks: (4, 6, 31), status, prefs, clips: &self.sample_clips, pins: &self.sample_clips[..2], me: sample_me(), upkeep: Some((&self.sample_upkeep, 120)), upkeep_running: false, backup_check: upkeep::backup_check(true, Some(backup::now() - 9 * 86_400), backup::now(), true), backup: desk::Backup { sources: &self.backup_sources, target: "/run/media/you/BACKUP", last: Some(backup::now() - 9 * 86_400), result: "214 copied (1.3 GB), 4120 unchanged", progress: None } };
+                let view = desk::View { timers: t.clone(), kind_time: k, focus_log: f, focus_now: Some(("the slides".into(), 18 * 60, 7 * 60, 40)), checkins: c, streaks: (4, 6, 31), status, prefs, clips: &self.sample_clips, pins: &self.sample_clips[..2], reading: &self.sample_reading, me: sample_me(), upkeep: Some((&self.sample_upkeep, 120)), upkeep_running: false, backup_check: upkeep::backup_check(true, Some(backup::now() - 9 * 86_400), backup::now(), true), backup: desk::Backup { sources: &self.backup_sources, target: "/run/media/you/BACKUP", last: Some(backup::now() - 9 * 86_400), result: "214 copied (1.3 GB), 4120 unchanged", progress: None } };
                 self.desk.show(ctx, &view, look, near)
             }
             None => {
-                let view = desk::View { timers, kind_time: &self.kind_time, focus_log: &self.focus_log, focus_now, checkins: &self.checkin_days, streaks, status, prefs, clips: &self.clip_history, pins: &self.pins, me: about_me(&self.facts, self.birthday, &self.stats, &self.unlocked, &self.highscores, self.friendship), upkeep: self.upkeep.as_ref().map(|(t, r)| (r, t.elapsed().as_secs())), upkeep_running: self.upkeep_running, backup_check: self.backup_check(), backup: desk::Backup { sources: &self.backup_sources, target: &self.backup_target, last: self.backup_last, result: &self.backup_result, progress: self.backup_progress } };
+                let view = desk::View { timers, kind_time: &self.kind_time, focus_log: &self.focus_log, focus_now, checkins: &self.checkin_days, streaks, status, prefs, clips: &self.clip_history, pins: &self.pins, reading: &self.reading, me: about_me(&self.facts, self.birthday, &self.stats, &self.unlocked, &self.highscores, self.friendship), upkeep: self.upkeep.as_ref().map(|(t, r)| (r, t.elapsed().as_secs())), upkeep_running: self.upkeep_running, backup_check: self.backup_check(), backup: desk::Backup { sources: &self.backup_sources, target: &self.backup_target, last: self.backup_last, result: &self.backup_result, progress: self.backup_progress } };
                 self.desk.show(ctx, &view, look, near)
             }
         }
@@ -1277,7 +1282,7 @@ impl App {
         let unix = |at: &Instant| (std::time::SystemTime::now() + at.saturating_duration_since(Instant::now())).duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0);
         serde_json::json!({
             "tips_every": self.tips_every, "notice_clip": self.notice_clip, "notice_programs": self.notice_programs, "notice_windows": self.notice_windows, "checkin": self.checkin, "facts": self.facts, "kind_time": self.kind_time, "focus_log": self.focus_log, "desk_look": if self.desk_modern { "modern" } else { "classic" }, "checkin_days": self.checkin_days,
-            "pins": self.pins, "welcome_seen": self.welcome_seen, "backup_sources": self.backup_sources, "backup_target": self.backup_target, "backup_last": self.backup_last, "backup_result": self.backup_result, "dnd_restore": self.dnd_restore, "dnd": self.dnd, "wrapup": self.wrapup, "upkeep_day": self.upkeep_day, "focus_goal": self.focus_goal, "budgets": self.budgets,
+            "pins": self.pins, "reading": self.reading, "welcome_seen": self.welcome_seen, "backup_sources": self.backup_sources, "backup_target": self.backup_target, "backup_last": self.backup_last, "backup_result": self.backup_result, "dnd_restore": self.dnd_restore, "dnd": self.dnd, "wrapup": self.wrapup, "upkeep_day": self.upkeep_day, "focus_goal": self.focus_goal, "budgets": self.budgets,
             "notice_health": self.notice_health, "check_updates": self.check_updates, "update_told": self.update_told, "sounds": self.sounds, "breaks": self.breaks, "name": self.name,
             "hat": self.hat, "skin": self.skin, "friendship": self.friendship, "highscores": self.highscores, "birthday": self.birthday.map(|(m, d)| [m, d]), "stats": self.stats, "unlocked": self.unlocked, "explored": self.explored, "persona": if self.unhinged { "unhinged" } else { "boring" }, "anchor": self.anchor.or(self.saved_anchor).map(|a| [a.x, a.y]),
             "timers": self.timers.iter().map(|(at, l, every)| serde_json::json!([unix(at), l, every])).collect::<Vec<_>>(),
@@ -1302,6 +1307,7 @@ impl App {
         }
         self.focus_goal = v["focus_goal"].as_u64().unwrap_or(0);
         self.pins = serde_json::from_value(v["pins"].clone()).unwrap_or_default();
+        self.reading = serde_json::from_value(v["reading"].clone()).unwrap_or_default();
         self.welcome_seen = v["welcome_seen"].as_str().unwrap_or_default().to_string();
         if let Ok(sources) = serde_json::from_value(v["backup_sources"].clone()) {
             self.backup_sources = sources;
@@ -1680,6 +1686,43 @@ impl App {
                 };
                 self.desk_status = pool.map(lines::pick).unwrap_or_default();
                 silent = true;
+            }
+            Effect::Reading(cmd) => {
+                let (verb, arg) = cmd.split_once(' ').unwrap_or((cmd.as_str(), ""));
+                let at = arg.trim_start_matches('#').parse::<usize>().ok().and_then(|n| n.checked_sub(1)).filter(|i| *i < self.reading.len());
+                match (verb, at) {
+                    ("save", _) => {
+                        // no link given: the newest one you copied
+                        let link = if arg.is_empty() { self.clip_history.iter().rev().find(|c| brain::is_link(c)).cloned() } else { Some(arg.to_string()) };
+                        r = match link {
+                            None => Reply::say(lines::pick("reading_no_link")).mood(Mood::Think),
+                            Some(l) if self.reading.iter().any(|(x, _)| *x == l) => Reply::say(lines::pick("reading_dupe")).mood(Mood::Wink).run("My reading list", "reading"),
+                            Some(l) => {
+                                self.reading.insert(0, (l, chrono::Local::now().format("%Y-%m-%d").to_string()));
+                                self.reading.truncate(200);
+                                Reply::say(lines::pick("reading_saved")).mood(Mood::Read).run("My reading list", "reading")
+                            }
+                        };
+                    }
+                    ("open", Some(i)) => {
+                        let link = self.reading[i].0.clone();
+                        if let Err(e) = open(&link) {
+                            self.desk_status = format!("I couldn't open that: {e}");
+                        }
+                        silent = from_desk;
+                    }
+                    ("done", Some(i)) => {
+                        self.reading.remove(i);
+                        let line = lines::pick("reading_done");
+                        if from_desk {
+                            self.desk_status = line;
+                            silent = true;
+                        } else {
+                            r = Reply::say(line).mood(Mood::Happy);
+                        }
+                    }
+                    _ => r = brain::reading_list(&self.reading),
+                }
             }
             Effect::SayName => {
                 r = if self.name.is_empty() {

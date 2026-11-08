@@ -24,6 +24,7 @@ pub fn tab(name: &str) -> Option<usize> {
         "wrapup" => "today".to_string(),
         "checkup" | "tidy" | "backup" | "startup" => "upkeep".to_string(),
         t if t.starts_with("list ") => "todo".to_string(), // "list shopping": a named list on the To-do tab
+        "links" => "clipboard".to_string(),                  // the saved links page
         t => t.to_string(),
     };
     match t.parse::<usize>() {
@@ -45,6 +46,7 @@ pub struct View<'a> {
     pub prefs: Prefs,
     pub clips: &'a [String], // the clipboard history, oldest first
     pub pins: &'a [String],
+    pub reading: &'a [(String, String)], // the reading list: (link, day saved), newest first
     pub me: Me,
     pub upkeep: Option<(&'a crate::upkeep::Report, u64)>, // the last checkup and how many seconds ago
     pub upkeep_running: bool,
@@ -138,6 +140,7 @@ pub struct Desk {
     editing: Option<(usize, String)>,  // a to-do being renamed: its line, the new text so far
     planning: bool,                    // "plan my day": the To-do tab asks for today's top 3
     list_tab: Option<String>,          // the To-do tab shows this named list instead of the to-dos
+    clip_page: usize,                  // the Clipboard tab: Copies, Saved links
     list_text: String,
     forget_all: bool,                  // the You & me tab's "are you sure?"
     upkeep_page: usize,                // Checkup, Tidy, Backup
@@ -173,6 +176,9 @@ impl Desk {
         }
         self.planning = name == "plan";
         self.list_tab = name.strip_prefix("list ").map(|l| l.trim().to_lowercase());
+        if name == "links" || name == "clipboard" {
+            self.clip_page = usize::from(name == "links");
+        }
         self.wrapping = name == "wrapup";
         if let Some(page) = ["checkup", "tidy", "backup"].iter().position(|p| *p == name) {
             self.upkeep_page = page;
@@ -1003,6 +1009,19 @@ impl Desk {
     fn clipboard(&mut self, ui: &mut Ui, c: Rect, view: &View, look: Look, out: &mut Vec<String>) {
         let p = ui.painter().clone();
         let ctl = look.ctl();
+        let mut x = c.min.x;
+        let saved = format!("Saved links ({})", view.reading.len());
+        for (i, name) in ["Copies", saved.as_str()].iter().enumerate() {
+            let w = p.layout_no_wrap(name.to_string(), look.bold(12.5), look.text()).size().x + 28.0;
+            if look.tab(ui, Rect::from_min_size(pos2(x, c.min.y), vec2(w, look.tab_h())), name, self.clip_page == i).clicked() {
+                self.clip_page = i;
+            }
+            x += w + 6.0;
+        }
+        let c = Rect::from_min_max(pos2(c.min.x, c.min.y + look.tab_h() + 10.0), c.max);
+        if self.clip_page == 1 {
+            return self.saved_links(ui, c, view, look, out);
+        }
         let bottom = c.max.y - ctl - 12.0;
         let left = Rect::from_min_max(c.min, pos2(c.min.x + ((c.width() - 12.0) * 0.58).round(), bottom));
         let right = Rect::from_min_max(pos2(left.max.x + 12.0, c.min.y), pos2(c.max.x, bottom));
@@ -1056,6 +1075,51 @@ impl Desk {
             out.push("clip clear".into());
         }
         p.text(pos2(c.max.x, c.max.y - ctl / 2.0), Align2::RIGHT_CENTER, "The history stays in memory only. Pinned snippets are saved.", look.font(11.0), look.dim());
+    }
+
+    /// The reading list: each link with Open and ✕.
+    fn saved_links(&mut self, ui: &mut Ui, c: Rect, view: &View, look: Look, out: &mut Vec<String>) {
+        let p = ui.painter().clone();
+        let ctl = look.ctl();
+        let card = Rect::from_min_max(c.min, pos2(c.max.x, c.max.y - ctl - 12.0));
+        look.group(&p, card, "Read later");
+        if view.reading.is_empty() {
+            let empty = crate::lines::all("reading_empty").first().cloned().unwrap_or_default();
+            let g = p.layout(empty, look.font(12.5), look.dim(), card.width() - 60.0);
+            p.galley(pos2(card.center().x - g.size().x / 2.0, card.min.y + 70.0), g, look.dim());
+        }
+        let pitch = ctl + 10.0;
+        let area = Rect::from_min_max(pos2(card.min.x + 12.0, card.min.y + 30.0), pos2(card.max.x - 12.0, card.max.y - 8.0));
+        let fits = (area.height() / pitch) as usize;
+        let first = self.first_row(ui, "links", card, view.reading.len(), fits);
+        for (n, (i, (link, day))) in view.reading.iter().enumerate().skip(first).take(fits).enumerate() {
+            let y = area.min.y + n as f32 * pitch;
+            let x_r = Rect::from_min_size(pos2(area.max.x - 26.0, y), vec2(26.0, ctl));
+            let open_r = Rect::from_min_size(pos2(x_r.min.x - 6.0 - 64.0, y), vec2(64.0, ctl));
+            if look.button(ui, x_r, Id::unique(("link-x", i)), "✕", true).clicked() {
+                out.push(format!("reading done {}", i + 1));
+            }
+            if look.button(ui, open_r, Id::unique(("link-open", i)), "Open", true).clicked() {
+                out.push(format!("reading open {}", i + 1));
+            }
+            // the site in bold, the rest of the address dim, the day on the right
+            let short = brain::short_link(link);
+            let (site, rest) = short.split_once('/').map(|(a, b)| (a.to_string(), format!("/{b}"))).unwrap_or((short.clone(), String::new()));
+            let day_w = p.text(pos2(open_r.min.x - 10.0, y + ctl / 2.0), Align2::RIGHT_CENTER, day, look.font(11.0), look.dim()).width();
+            let room = open_r.min.x - 20.0 - day_w - area.min.x;
+            let gs = clipped(&p, &site, look.bold(12.5), look.text(), room);
+            let sw = gs.size().x;
+            p.galley(pos2(area.min.x, y + ctl / 2.0 - gs.size().y / 2.0), gs, look.text());
+            if room - sw > 30.0 && !rest.is_empty() {
+                let gr = clipped(&p, &rest, look.font(12.5), look.dim(), room - sw);
+                p.galley(pos2(area.min.x + sw, y + ctl / 2.0 - gr.size().y / 2.0), gr, look.dim());
+            }
+            if n + 1 < fits && first + n + 1 < view.reading.len() {
+                look.divider(&p, area.min.x, area.max.x, y + pitch - 5.0);
+            }
+        }
+        scrollbar(&p, look, card, first, fits, view.reading.len());
+        p.text(pos2(c.min.x, c.max.y - ctl / 2.0), Align2::LEFT_CENTER, "Copy a link and press Read later, or say \"save this link\".", look.font(11.0), look.dim());
     }
 
     /// What he keeps about you: facts, taught phrases, achievements, scores and friendship.

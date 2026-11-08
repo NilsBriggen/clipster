@@ -8,7 +8,7 @@ pub fn respond(input: &str) -> Reply {
     let raw = input.trim();
     let head = raw.split_whitespace().next().unwrap_or("").to_lowercase();
     // shell commands and button-only commands (whose text is data, like quiz answers) are taken literally
-    if ["run", "$", "sh", "cmd", "reveal", "wyrpick", "window", "answer-to", "checkin", "install", "forget", "tidy", "pref", "clip", "forgetfact", "startup", "upkeep", "backup", "onlist"].contains(&head.as_str()) || head == "answer" && raw.contains('|') {
+    if ["run", "$", "sh", "cmd", "reveal", "wyrpick", "window", "answer-to", "checkin", "install", "forget", "tidy", "pref", "clip", "forgetfact", "startup", "upkeep", "backup", "onlist", "readlater"].contains(&head.as_str()) || head == "answer" && raw.contains('|') {
         if let Some(r) = exact(raw) {
             return r; // shell commands are taken literally, never "understood"
         }
@@ -978,6 +978,13 @@ fn notes(s: &str, raw: &str) -> Option<Reply> {
     if let Some(r) = named_lists(s, raw) {
         return Some(r);
     }
+    // the reading list: "save this link", "read it later", "my reading list"
+    if ["save this link", "save the link", "save that link", "save link", "read later", "read this later", "read it later", "save for later", "save it for later", "save this for later", "add to my reading list", "add this to my reading list", "add it to my reading list"].contains(&s) {
+        return go("readlater".into());
+    }
+    if has(s, &["reading list", "my saved links", "what did i save to read", "links i saved", "read later list"]) && !s.starts_with("add ") {
+        return go("reading".into());
+    }
     let about_todos = has(s, &["to do", "to do list", "todo", "todos", "todo list", "list", "tasks"]) && !has(s, &["notes", "note"]);
     let about_notes = has(s, &["notes", "note", "reminders"]) || about_todos;
     if about_notes && has(s, &["delete", "clear", "erase", "remove", "wipe", "forget", "empty", "reset"]) && !s.starts_with("note ") && !adding_todo(s) {
@@ -1793,6 +1800,18 @@ mod tests {
         assert_eq!(eff("done call Anna"), Effect::Todo(Op::Done("call Anna".into())));
         assert!(!matches!(eff("clear my to do list"), Effect::Todo(_)), "asks first");
         assert!(matches!(eff("note buy milk"), Effect::None), "notes are still notes");
+    }
+
+    #[test]
+    fn the_reading_list() {
+        assert_eq!(eff("save this link"), Effect::Reading("save".into()));
+        assert_eq!(eff("read it later"), Effect::Reading("save".into()));
+        assert_eq!(eff("show my reading list"), Effect::Reading("list".into()));
+        assert_eq!(respond("readlater https://example.com/a?b=1").effect, Effect::Reading("save https://example.com/a?b=1".into()));
+        assert_eq!(respond("reading done 2").effect, Effect::Reading("done 2".into()));
+        assert!(crate::brain::react_clip("https://example.org/article").unwrap().buttons.iter().any(|(l, _)| l == "Read later"));
+        assert_eq!(crate::brain::short_link("https://www.example.com/a/b/?utm=x"), "example.com/a/b");
+        assert!(crate::brain::is_link("https://example.com/x") && !crate::brain::is_link("see https://example.com"));
     }
 
     #[test]
