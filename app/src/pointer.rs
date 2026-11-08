@@ -7,6 +7,15 @@ use std::sync::{Arc, Mutex};
 
 pub type Shared = Arc<Mutex<Option<(f32, f32)>>>;
 
+/// Store a new pointer position; wake the window when it really moved, so the eyes follow even at the idle frame rate.
+fn moved_to(pos: &Shared, x: f32, y: f32, ctx: &eframe::egui::Context) {
+    let mut p = pos.lock().unwrap_or_else(|e| e.into_inner());
+    if p.is_none_or(|(ox, oy)| (ox - x).abs() + (oy - y).abs() > 2.0) {
+        ctx.request_repaint();
+    }
+    *p = Some((x, y));
+}
+
 pub struct Tracker {
     pub pos: Shared,
     summoned: Arc<AtomicBool>,
@@ -37,7 +46,7 @@ pub use kwin::start;
 #[cfg(windows)]
 pub use windows::start;
 #[cfg(not(any(target_os = "linux", windows)))]
-pub fn start() -> Option<Tracker> {
+pub fn start(_ctx: &eframe::egui::Context) -> Option<Tracker> {
     None
 }
 
@@ -47,14 +56,14 @@ mod kwin {
     use std::sync::atomic::{AtomicBool, Ordering};
     use std::sync::Arc;
 
-    struct Sink(Shared, Arc<AtomicBool>);
+    struct Sink(Shared, Arc<AtomicBool>, eframe::egui::Context);
 
     #[zbus::interface(name = "org.clipster.Pointer")]
     impl Sink {
         fn pos(&self, xy: &str) {
             if let Some((x, y)) = xy.split_once(',') {
                 if let (Ok(x), Ok(y)) = (x.parse(), y.parse()) {
-                    *self.0.lock().unwrap() = Some((x, y));
+                    super::moved_to(&self.0, x, y, &self.2);
                 }
             }
         }
@@ -62,6 +71,7 @@ mod kwin {
         /// The global shortcut was pressed.
         fn summon(&self) {
             self.1.store(true, Ordering::Relaxed);
+            self.2.request_repaint();
         }
     }
 
@@ -98,14 +108,14 @@ mod kwin {
         let _ = conn.call_method(Some("org.kde.KWin"), "/Scripting", Some("org.kde.kwin.Scripting"), "unloadScript", &(NAME,));
     }
 
-    pub fn start() -> Option<Tracker> {
+    pub fn start(ctx: &eframe::egui::Context) -> Option<Tracker> {
         let pos: Shared = Default::default();
         let summoned = Arc::new(AtomicBool::new(false));
         let conn = zbus::blocking::connection::Builder::session()
             .ok()?
             .name("org.clipster.Pointer")
             .ok()?
-            .serve_at("/Pointer", Sink(pos.clone(), summoned.clone()))
+            .serve_at("/Pointer", Sink(pos.clone(), summoned.clone(), ctx.clone()))
             .ok()?
             .build()
             .ok()?;
@@ -131,20 +141,21 @@ mod windows {
     use std::sync::atomic::{AtomicBool, Ordering};
     use std::sync::Arc;
 
-    pub fn start() -> Option<Tracker> {
+    pub fn start(ctx: &eframe::egui::Context) -> Option<Tracker> {
         let (pos, summoned, stop) = (Shared::default(), Arc::new(AtomicBool::new(false)), Arc::new(AtomicBool::new(false)));
-        let (p, s, st) = (pos.clone(), summoned.clone(), stop.clone());
+        let (p, s, st, ctx) = (pos.clone(), summoned.clone(), stop.clone(), ctx.clone());
         std::thread::spawn(move || {
             let mut held = false;
             while !st.load(Ordering::Relaxed) {
                 let mut pt = Point::default();
                 if unsafe { GetCursorPos(&mut pt) } != 0 {
-                    *p.lock().unwrap_or_else(|e| e.into_inner()) = Some((pt.x as f32, pt.y as f32));
+                    super::moved_to(&p, pt.x as f32, pt.y as f32, &ctx);
                 }
                 let down = |key: i32| unsafe { GetAsyncKeyState(key) } as u16 & 0x8000 != 0;
                 let combo = down(0x11) && down(0x12) && down(0x43); // Ctrl + Alt + C
                 if combo && !held {
                     s.store(true, Ordering::Relaxed);
+                    ctx.request_repaint();
                 }
                 held = combo;
                 std::thread::sleep(std::time::Duration::from_millis(40));

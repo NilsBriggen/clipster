@@ -235,7 +235,7 @@ impl App {
             sent_offset: Vec2::ZERO,
             anchor: None,
             settle: 0,
-            tracker: if screenshot.is_none() { pointer::start() } else { None },
+            tracker: if screenshot.is_none() { pointer::start(&cc.egui_ctx) } else { None },
             screenshot,
             say,
             frames: 0,
@@ -1350,7 +1350,10 @@ impl eframe::App for App {
             self.draw_balloon(ui, &ctx, eye, x0, x1, top, flip_left);
         }
 
-        ctx.request_repaint_after(Duration::from_millis(if self.anim == Anim::Sleep { 100 } else { 33 }));
+        // full speed only while something moves; otherwise a calm idle rate (the pointer tracker wakes him for the eyes)
+        let typing = self.balloon.as_ref().is_some_and(|b| (self.t() - self.reveal_t0) * 90.0 < b.text.chars().count() as f64);
+        let busy = !matches!(self.anim, Anim::Idle | Anim::Sleep) || typing || self.settle > 0 || self.frames < 30 || self.arcade.is_open() || pointer.is_some() || ctx.input(|i| i.pointer.any_down());
+        ctx.request_repaint_after(Duration::from_millis(if busy { 33 } else if self.anim == Anim::Sleep { 250 } else { 100 }));
         self.frames += 1;
         self.take_screenshot(&ctx);
     }
