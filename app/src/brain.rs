@@ -121,42 +121,36 @@ pub fn greeting() -> Reply {
     .btn("No, go away (I'll be back)", Act::Hide)
 }
 
+/// Help, by topic: (command word, button label, what to try).
+const HELP: &[(&str, &str, &str)] = &[
+    ("timers", "⏰ Timers, notes, to-dos", "• Timers: timer 5m tea, remind me in 10 min to stretch, remind me tomorrow at 3 to call Anna, on Friday at 9, in 2 days, every hour, pomodoro, timers, cancel the tea timer\n• Focus: focus 45 minutes on the report, where did my time go today?\n• To-dos: todo call Anna by Friday, what's on my list, done call Anna\n• Notes: note buy milk, notes, forget my notes\n• Time: days until christmas, what day is june 3, what date is in 90 days, start a stopwatch"),
+    ("writing", "✍ Writing", "• Proofread what you copied: check my text, proofread this, fix the easy ones\n• Letters and emails: write a complaint letter, cover letter, out of office, thank-you email\n• Words: another word for happy, what rhymes with orange, how do you spell definately, define serendipity\n• Text (or the clipboard): count, upper, lower, sort lines, remove duplicates, base64 hello, url encode, slug, sha256, mock this\n• Tricks: SOS in morse code, hello in binary, upside down hello"),
+    ("files", "📁 Files", "• Find: find the file called report, my latest download, biggest files in downloads, old big files\n• Tidy: tidy my downloads (or desktop), undo the tidy, find duplicates in downloads\n• Open: open firefox, open my downloads, open ~/Documents, open example.com\n• Trash: empty the trash, cache size, clipboard history, qr code for <link>"),
+    ("computer", "💻 Your computer", "• How it's doing: how's my computer doing, battery, uptime, disk, what's hogging my cpu, how much ram is firefox using\n• Control: louder, mute, volume 30, skip this song, what's playing, make the screen darker, take a screenshot (of an area), lock\n• Power: restart / shut down / sleep (I ask first), wifi off, bluetooth on, cpu temperature, which distro, my gpu\n• Shell: run <command>\n• Tips for the app you're in: any tips for this app?"),
+    ("internet", "🌍 Internet", "• Ask: why is the sky blue?, who was Ada Lovelace?, define serendipity\n• Live: weather in Rome, time in Tokyo, 100 dollars to euros, bitcoin price, news, tech news, on this day, next holiday, where is the ISS\n• Web: search cats, youtube lofi, map paris, is github down?, shorten <link>, what's my ip\n• Discover: what should I cook, recipe for lasagne, make me a drink, recommend a book about space, show me a dog / cat / fox, earthquakes, air quality, random xkcd"),
+    ("numbers", "🔢 Numbers", "• Math: 12*(3+4)^2, sqrt(2), 15% of 80, from 40 to 50 in percent\n• Convert: 5 km to miles, 70 f to c, 2 gb to mib, 3 m to bananas\n• Numbers: 255 in hex, 2024 in roman, tip 15% on 48, split 120 between 4, days between june 3 and christmas, 1700000000 to date\n• Random: roll 2d6, flip, pick pizza, tacos, password 20, 8ball <question>"),
+    ("fun", "🎲 Fun & games", "• Arcade (own window): play paper jam, clip glide, desk merge, bug hunt, byte size, chess, hangman\n• Games: riddle, would you rather, emoji quiz, quiz me, rock paper scissors, guess my number\n• Fun: joke, pun, roast, fact, fortune, shower thought, quote, advice, dance, hug, surprise me"),
+    ("me", "🙂 Me and you", "• Me: call me <name>, my birthday is june 3, my cat is called Mo, I live in Bern, what do you know about me, achievements, good morning\n• Teach me: when I say gm, say good morning · when I say work, open firefox and open code · what have you learned\n• Looks: wear a wizard hat, turn gold · be boring / be unhinged\n• Manners: be quiet, start with my computer, check for updates"),
+    ("desk", "🗂 Clipster's Desk", "• open my desk: today's focus and time per app, the week, your to-dos, timers and notes, and tidying files, in one window\n• It comes in Classic 98, or a modern look for the faint of heart (View menu)"),
+];
+
 pub fn help() -> Reply {
-    Reply::say(
-        "Just talk to me normally, typos and all: \"remind me to call mom at 5pm\", \"how many cups in a gallon?\", \"open my downloads\", \"is my computer slow?\". I do a LOT (and none of it is AI, I promise):\n\
-         • Math: 12*(3+4)^2, sqrt(2), 15% of 80\n\
-         • Convert: 5 km to miles, 70 f to c, 2 gb to mib, 3 m to bananas\n\
-         • Timers: timer 5m tea, remind me in 10 min to stretch, timers\n\
-         • Notes: note buy milk, notes, forget notes\n\
-         • Launch: open firefox, open ~/Downloads, open example.com\n\
-         • Ask me anything: why is the sky blue?, who was Ada Lovelace?, define serendipity\n\
-         • Live: weather in Rome, time in Tokyo, 100 dollars to euros, bitcoin price, news, tech news, on this day, next holiday, where is the ISS\n\
-         • Words: another word for happy, what rhymes with orange, how do you spell definately\n\
-         • Internet: is github down?, shorten <link>, what's my ip, show me a dog / cat / fox\n\
-         • Web: search cats, youtube lofi, map paris\n\
-         • Control: louder, mute, volume 30, skip this song, what's playing, make the screen darker, take a screenshot (of an area)\n\
-         • Files: find the file called report, my latest download, clipboard history, empty the trash, qr code for <link>\n\
-         • Time: days until christmas, what day is june 3, what date is in 90 days, start a stopwatch, pomodoro\n\
-         • System: battery, stats, uptime, disk, ip, top, lock, restart / shut down / sleep, run <command>\n\
-         • Text: count, upper, lower, reverse, mock <text>\n\
-         • Random: roll 2d6, flip, pick pizza, tacos, password 20, 8ball <question>\n\
-         • Fun: joke, pun, roast, fact, fortune, shower thought, quiz me, quote, advice, tip, dance, hug, shrug, tableflip, quiet, bye\n\
-         • Arcade (own window): play paper jam, clip glide, desk merge, bug hunt, byte size, chess, hangman\n\
-         • Games: riddle, would you rather, emoji quiz, rock paper scissors, guess my number, surprise me\n\
-         • Teach me: when I say gm, say good morning · when I say work, open firefox and open code · what have you learned\n\
-         • Numbers: 255 in hex, 2024 in roman, tip 15% on 48, split 120 between 4, days between june 3 and christmas, 1700000000 to date\n\
-         • Text tools (or the clipboard): base64 hello, url encode, slug, sort lines, remove duplicates, sha256\n\
-         • Powers: wifi off, bluetooth on, how much ram is firefox using, cpu temperature, biggest files in downloads, cache size, which distro, my gpu\n\
-         • Discover: what should I cook, recipe for lasagne, make me a drink, recommend a book about space, tell me about the show severance, pikachu pokemon\n\
-         • World: earthquakes, air quality, moon phase, random xkcd, cat fact, I'm bored, programming joke, chuck norris joke\n\
-         • Text tricks: SOS in morse code, hello in binary, upside down hello, leet hacker\n\
-         • Me: call me <name>, my birthday is june 3, do you like me, achievements, good morning (daily briefing), wear a wizard hat, turn gold, remind me every hour to drink water, start with my computer\n\n\
-         I also watch what you copy (links, JSON, errors, base64, timestamps...) and which programs you open, and I comment. Constantly. Press Meta+C anywhere to call me, double-click me for a trick, and use the up arrow to repeat what you typed. There are also a few secrets hidden in here. 🥚",
+    let mut r = Reply::say(
+        "Just talk to me normally, typos and all: \"remind me to call mom at 5pm\", \"how many cups in a gallon?\", \"check my text\", \"open my desk\". None of it is AI, I promise.\n\nI also watch what you copy and which programs you open, and I comment. Press Meta+C anywhere to call me, double-click me for a trick, and use the up arrow to repeat what you typed. A few secrets are hidden in here too. 🥚\n\nPick a topic:",
     )
-    .mood(Mood::Happy)
-    .run("Tell me a joke", "joke")
-    .run("How's my computer doing?", "stats")
-    .btn("Options", Act::Options)
+    .mood(Mood::Happy);
+    for (cmd, label, _) in HELP {
+        r = r.run(label, &format!("help {cmd}"));
+    }
+    r
+}
+
+/// One part of the help ("help files").
+pub fn help_topic(topic: &str) -> Option<Reply> {
+    let (cmd, _, what) = HELP.iter().find(|(c, l, _)| *c == topic || l.to_lowercase().contains(topic))?;
+    let pool = format!("help_{cmd}");
+    let intro = if lines::all(&pool).is_empty() { "Here's what I can do:".to_string() } else { lines::pick(&pool) };
+    Some(Reply::say(format!("{intro}\n{what}")).mood(Mood::Happy).run("Other topics", "help"))
 }
 
 pub fn respond(input: &str) -> Reply {
@@ -178,6 +172,7 @@ pub fn exact(input: &str) -> Option<Reply> {
         return Some(time_now());
     }
     match head.as_str() {
+        "help" if !rest.is_empty() => return help_topic(&rest.to_lowercase()).or_else(|| Some(help())),
         "" | "help" | "?" | "commands" | "menu" => return Some(help()),
         "hi" | "hello" | "hey" | "yo" | "sup" => return Some(greeting()),
         "joke" | "jokes" | "funny" => {
@@ -1102,13 +1097,8 @@ fn count(t: &str) -> Reply {
     if t.is_empty() {
         return Reply::say("Count what? Try: count the quick brown fox");
     }
-    Reply::say(format!(
-        "{} words, {} characters, {} lines. Riveting stuff.",
-        t.split_whitespace().count(),
-        t.chars().count(),
-        t.lines().count()
-    ))
-    .mood(Mood::Think)
+    let counts = format!("{} words, {} characters, {} lines", t.split_whitespace().count(), t.chars().count(), t.lines().count());
+    Reply::say(format!("{counts}. Riveting stuff.")).mood(Mood::Think).btn("Copy it", Act::Copy(counts))
 }
 
 pub fn mock(t: &str) -> String {
@@ -1182,12 +1172,14 @@ fn password(rest: &str) -> Reply {
 
 fn time_now() -> Reply {
     let now = chrono::Local::now();
-    Reply::say(format!("It's {}. {}", now.format("%H:%M on %A, %B %-d, %Y"), pick(&[
+    let stamp = now.format("%H:%M on %A, %B %-d, %Y").to_string();
+    Reply::say(format!("It's {stamp}. {}", pick(&[
         "Time flies when you're with a paperclip.",
         "Shouldn't you be doing something?",
         "Perfect time for a snack.",
     ])))
     .mood(Mood::Think)
+    .btn("Copy it", Act::Copy(stamp))
 }
 
 fn battery_text() -> String {

@@ -1283,6 +1283,22 @@ fn chance(s: &str) -> Option<Reply> {
 }
 
 fn chat(s: &str) -> Option<Reply> {
+    // "what can you do with files?", "help with writing": that part of the help
+    const TOPICS: &[(&[&str], &str)] = &[
+        (&["timer", "timers", "reminder", "reminders", "alarm", "alarms", "notes", "todo", "todos", "to do", "focus"], "timers"),
+        (&["writing", "write", "letters", "letter", "text", "proofread", "proofreading", "spelling", "words"], "writing"),
+        (&["files", "file", "folders", "folder", "downloads"], "files"),
+        (&["computer", "system", "pc", "laptop", "volume", "screen"], "computer"),
+        (&["internet", "web", "online", "weather", "news"], "internet"),
+        (&["math", "maths", "numbers", "conversions", "convert", "calculations", "units"], "numbers"),
+        (&["fun", "games", "game", "jokes"], "fun"),
+        (&["desk", "stats", "statistics"], "desk"),
+    ];
+    if has(s, &["what can you do", "help", "how do you work", "what can i ask", "features", "commands"]) {
+        if let Some((_, topic)) = TOPICS.iter().find(|(kws, _)| has(s, kws)) {
+            return go(format!("help {topic}"));
+        }
+    }
     if has(s, &["what can you do", "what do you do", "help", "commands", "how do you work", "how does this work", "features", "abilities", "skills", "menu", "what else", "instructions", "how to use you", "manual", "what can i ask", "what can i say"]) {
         return go("help".into());
     }
@@ -1542,6 +1558,14 @@ mod tests {
     }
 
     #[test]
+    fn help_by_topic() {
+        assert!(text("what can you do with files?").contains("tidy my downloads"));
+        assert!(text("help with writing").contains("check my text"));
+        assert!(respond("help").buttons.iter().any(|(_, a)| matches!(a, crate::brain::Act::Run(c) if c == "help desk")));
+        assert!(respond("count hello world").buttons.iter().any(|(l, _)| l == "Copy it"));
+    }
+
+    #[test]
     fn reminders_on_other_days() {
         let timer = |s: &str| match eff(s) {
             Effect::Timer(secs, label) => Some((secs, label)),
@@ -1698,7 +1722,7 @@ mod tests {
         assert!(text("give me a random number between 1 and 6").contains("between 1 and 6"));
         assert!(text("should I eat pizza or tacos").contains("I choose"));
         assert!(text("generate a 24 character password").lines().nth(1).is_some_and(|l| l.len() == 24));
-        assert!(text("what can you do").contains("Math"));
+        assert!(respond("what can you do").buttons.iter().any(|(_, a)| matches!(a, crate::brain::Act::Run(c) if c == "help numbers")), "help offers its topics");
         assert_eq!(keep("Note that Bob's birthday is Friday", "bob's birthday is friday"), "Bob's birthday is Friday");
         assert!(text("make HELLO lowercase").starts_with("hello"));
         assert!(matches!(eff("asdkjh qwe"), Effect::Net(Query::Ask(_))));

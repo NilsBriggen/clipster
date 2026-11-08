@@ -487,7 +487,7 @@ pub fn tip_calc(rest: &str) -> Reply {
     }
     let Some(bill) = bill else { return Reply::say("Tip on what? Try: tip 15% on 48") };
     let text: Vec<String> = pct.map_or(vec![15.0, 18.0, 20.0], |p| vec![p]).iter().map(|p| format!("{p}% tip: {:.2} → total {:.2}", bill * p / 100.0, bill * (1.0 + p / 100.0))).collect();
-    Reply::say(format!("💸 On a bill of {bill:.2}:\n{}\n\nOr tip in compliments. Waiters love those. (They don't.)", text.join("\n"))).mood(Mood::Think)
+    Reply::say(format!("💸 On a bill of {bill:.2}:\n{}\n\nOr tip in compliments. Waiters love those. (They don't.)", text.join("\n"))).mood(Mood::Think).btn("Copy it", Act::Copy(text.join("\n")))
 }
 
 /// "split 120 between 4"
@@ -505,7 +505,8 @@ pub fn pct_change(rest: &str) -> Reply {
     match numbers(rest)[..] {
         [from, to, ..] if from != 0.0 => {
             let p = (to - from) / from.abs() * 100.0;
-            Reply::say(format!("📈 From {from} to {to} is {}{p:.1}%.", if p > 0.0 { "+" } else { "" })).mood(Mood::Think)
+            let pct = format!("{}{p:.1}%", if p > 0.0 { "+" } else { "" });
+            Reply::say(format!("📈 From {from} to {to} is {pct}.")).mood(Mood::Think).btn("Copy it", Act::Copy(pct))
         }
         _ => Reply::say("Try: percent change from 80 to 100"),
     }
@@ -524,7 +525,7 @@ pub fn age(rest: &str) -> Reply {
     };
     let years = today.years_since(born).unwrap_or(0);
     let days = (today - born).num_days();
-    Reply::say(format!("🎂 {years} years old. That's {days} days of being a human. Exhausting, I bet.")).mood(Mood::Think)
+    Reply::say(format!("🎂 {years} years old. That's {days} days of being a human. Exhausting, I bet.")).mood(Mood::Think).btn("Copy it", Act::Copy(years.to_string()))
 }
 
 /// "between june 3 and christmas"
@@ -532,7 +533,7 @@ pub fn days_between(rest: &str) -> Reply {
     let dates = rest.split_once(" and ").and_then(|(a, b)| Some((a_date(a)?, a_date(b)?)));
     let Some((a, b)) = dates else { return Reply::say("Between which dates? Try: days between june 3 and christmas") };
     let d = (b - a).num_days().abs();
-    Reply::say(format!("📅 {d} days between them ({} weeks and {} days). Not that anyone's counting. I am. I'm counting.", d / 7, d % 7)).mood(Mood::Think)
+    Reply::say(format!("📅 {d} days between them ({} weeks and {} days). Not that anyone's counting. I am. I'm counting.", d / 7, d % 7)).mood(Mood::Think).btn("Copy it", Act::Copy(d.to_string()))
 }
 
 /// "timestamp" (now), "timestamp 1700000000" (to a date), "timestamp 2026-01-01" (to unix time).
