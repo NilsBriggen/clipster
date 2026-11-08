@@ -12,6 +12,7 @@ mod lines;
 mod net;
 mod pointer;
 mod powers;
+mod props;
 mod sys;
 mod tidy;
 mod todo;
@@ -65,6 +66,21 @@ enum Anim {
     Newspaper, // reading the paper, eyes over the top
     Nap,       // slumped on his notepad
     Typing,    // a tiny keyboard
+    // moods with props (see props.rs)
+    Alarm,
+    Gift,
+    Carry,
+    Read,
+    Write,
+    Fix,
+    Coffee,
+    // idle-only tricks (see props.rs)
+    Knit,
+    Plane,
+    Plant,
+    Yoyo,
+    Doodle,
+    Binoculars,
 }
 
 /// How long an animation plays before he's back to idle.
@@ -73,6 +89,11 @@ fn anim_len(a: Anim) -> f32 {
         Anim::Nap => 6.0,
         Anim::Newspaper => 4.0,
         Anim::Juggle | Anim::Typing => 3.0,
+        Anim::Alarm | Anim::Gift | Anim::Carry | Anim::Read | Anim::Write | Anim::Coffee => 3.6,
+        Anim::Fix => 3.4,
+        Anim::Knit => 4.5,
+        Anim::Plane | Anim::Plant | Anim::Doodle | Anim::Binoculars => 4.0,
+        Anim::Yoyo => 3.5,
         _ => 1.8,
     }
 }
@@ -97,8 +118,39 @@ impl From<Mood> for Anim {
             Mood::Party => Anim::Party,
             Mood::Sneeze => Anim::Sneeze,
             Mood::Glitch => Anim::Glitch,
+            Mood::Alarm => Anim::Alarm,
+            Mood::Gift => Anim::Gift,
+            Mood::Carry => Anim::Carry,
+            Mood::Read => Anim::Read,
+            Mood::Write => Anim::Write,
+            Mood::Fix => Anim::Fix,
+            Mood::Coffee => Anim::Coffee,
         }
     }
+}
+
+/// The CLIPSTER_ANIM names (screenshot mode): the longer idle tricks and the moods with props.
+fn anim_named(n: &str) -> Option<Anim> {
+    Some(match n {
+        "juggle" => Anim::Juggle,
+        "newspaper" => Anim::Newspaper,
+        "nap" => Anim::Nap,
+        "typing" => Anim::Typing,
+        "alarm" => Anim::Alarm,
+        "gift" => Anim::Gift,
+        "carry" => Anim::Carry,
+        "read" => Anim::Read,
+        "write" => Anim::Write,
+        "fix" => Anim::Fix,
+        "coffee" => Anim::Coffee,
+        "knit" => Anim::Knit,
+        "plane" => Anim::Plane,
+        "plant" => Anim::Plant,
+        "yoyo" => Anim::Yoyo,
+        "doodle" => Anim::Doodle,
+        "binoculars" => Anim::Binoculars,
+        _ => return None,
+    })
 }
 
 struct App {
@@ -521,13 +573,7 @@ impl App {
         app.refresh_mood(); // screenshots too: CLIPSTER_MOOD=glitchy shows a glitchy day
         if app.screenshot.is_some() {
             // CLIPSTER_ANIM=juggle (newspaper, nap, typing) shows one of the longer idle animations in a screenshot
-            let forced = match std::env::var("CLIPSTER_ANIM").as_deref() {
-                Ok("juggle") => Some(Anim::Juggle),
-                Ok("newspaper") => Some(Anim::Newspaper),
-                Ok("nap") => Some(Anim::Nap),
-                Ok("typing") => Some(Anim::Typing),
-                _ => None,
-            };
+            let forced = std::env::var("CLIPSTER_ANIM").ok().and_then(|n| anim_named(&n));
             if let Some(a) = forced {
                 (app.anim, app.anim_t0, app.balloon) = (a, 0.0, None);
             }
@@ -2099,11 +2145,12 @@ impl App {
             let mut tricks = vec![
                 Anim::Sway, Anim::Wiggle, Anim::LookAround, Anim::Wink, Anim::Yawn, Anim::Tap, Anim::Stretch, Anim::Cool, Anim::Sneeze, Anim::Music,
                 Anim::Juggle, Anim::Newspaper, Anim::Nap, Anim::Typing,
+                Anim::Knit, Anim::Plane, Anim::Plant, Anim::Yoyo, Anim::Doodle, Anim::Binoculars,
             ];
             // his mood of the day shows in what he does when nobody's looking
             tricks.extend(match lines::day_mood() {
                 Some("glitchy") => vec![Anim::Glitch, Anim::Glitch, Anim::Glitch, Anim::Glitch, Anim::Dizzy],
-                Some("paranoid") => vec![Anim::LookAround, Anim::LookAround, Anim::LookAround, Anim::Shock],
+                Some("paranoid") => vec![Anim::LookAround, Anim::LookAround, Anim::LookAround, Anim::Shock, Anim::Binoculars, Anim::Binoculars],
                 Some("existential") => vec![Anim::Sad, Anim::Sad, Anim::Yawn],
                 Some("wrathful") => vec![Anim::Angry, Anim::Angry, Anim::Angry],
                 Some("nostalgic") => vec![Anim::Music, Anim::Sway, Anim::Music],
@@ -2132,7 +2179,7 @@ impl App {
         } else if self.balloon.is_none() && now.duration_since(self.last_touch) > Duration::from_secs(240) && self.anim == Anim::Idle {
             self.anim = Anim::Sleep;
         }
-        if self.anim != Anim::Idle && self.anim != Anim::Sleep && t - self.anim_t0 > anim_len(self.anim) as f64 {
+        if self.anim != Anim::Idle && self.anim != Anim::Sleep && t - self.anim_t0 > anim_len(self.anim) as f64 && (self.screenshot.is_none() || props::pinned_at().is_none()) {
             self.anim = Anim::Idle;
         }
     }
@@ -2408,7 +2455,7 @@ impl eframe::App for App {
         let hat = self.hat.clone().unwrap_or_else(|| if season_hat != "none" { season_hat } else { god_hat }.into());
         let auto_skin = if season_skin.is_empty() { god_skin } else { season_skin };
         let skin = if self.skin == "silver" && !auto_skin.is_empty() { auto_skin } else { &self.skin };
-        let at = t - self.anim_t0 as f32;
+        let at = props::pinned_at().filter(|_| self.screenshot.is_some()).unwrap_or(t - self.anim_t0 as f32); // CLIPSTER_ANIM_AT in screenshots
         if self.anim == Anim::Glitch {
             let off = 2.0 + (at * 40.0).sin().abs() * 2.5;
             draw_clipster(ui.painter(), origin + vec2(-off, 0.0), t, at, self.anim, look, blink, "none", "_red");
@@ -2643,6 +2690,77 @@ fn draw_clipster(p: &egui::Painter, origin: Pos2, t: f32, at: f32, anim: Anim, l
                 extra = Some((if (at * 4.0) as i32 % 2 == 0 { "tap" } else { "tak" }, vec2(64.0, 104.0), ink));
             }
         }
+        Anim::Alarm => {
+            look = if at < 2.3 { vec2(0.8, 0.9) } else { vec2(0.7, -0.2) }; // the bell, then the watch
+            dy += if (0.3..2.1).contains(&at) && ((at - 0.3) / 0.6).fract() < 0.3 { 1.5 } else { 0.0 };
+            brow = if at < 2.3 { 1.0 } else { 3.0 };
+        }
+        Anim::Gift => {
+            let c = (at * 0.8).fract();
+            look = vec2(0.9, 0.1);
+            eye_s = 1.0 + 0.1 * (c < 0.7) as i32 as f32;
+            dy -= (c * PI / 0.45).sin().max(0.0) * (c < 0.45) as i32 as f32 * 2.0 * inout;
+            brow = 3.0;
+        }
+        Anim::Carry => {
+            dy -= (at * 7.0).sin().abs() * 2.2 * inout;
+            rot = (at * 3.5).sin() * 0.04 * inout;
+            look = vec2(0.7, 0.0);
+            brow = 1.0;
+        }
+        Anim::Read => {
+            look = vec2((at * 1.2).fract() * 1.6 - 0.8, 0.8); // along each line, then back
+            brow = 2.0;
+            tilt = 2.0;
+        }
+        Anim::Write => {
+            look = vec2((at * 3.7).sin() * 0.5, 0.9);
+            dy -= (at * 14.0).sin().abs() * 0.5 * inout;
+            brow = 1.0;
+        }
+        Anim::Fix => {
+            look = vec2(0.9, 0.8);
+            frown = 0.5 * inout;
+            rot = (at * 4.0).sin() * 0.02 * inout;
+            brow = 2.0;
+        }
+        Anim::Coffee => {
+            let s = 0.5 - 0.5 * (at * 2.0 * PI / 1.8).cos();
+            look = vec2(0.8, 0.5 - s);
+            closed = s > 0.8;
+            rot = -0.05 * s * inout;
+            brow = 1.0 + 2.0 * s;
+        }
+        Anim::Knit => {
+            look = vec2(0.6, 0.8);
+            rot = (at * 3.5).sin() * 0.03 * inout;
+            brow = 1.5;
+        }
+        Anim::Plane => {
+            look = if at < 1.7 { vec2(0.7, 0.4) } else { vec2(0.9, -0.3 + ((at - 1.7) / 2.3).min(1.0) * 0.5) };
+            dy -= if (1.6..2.0).contains(&at) { ((at - 1.6) * PI / 0.4).sin() * 2.5 } else { 0.0 };
+            brow = 2.0;
+        }
+        Anim::Plant => {
+            look = vec2(0.9, 0.5);
+            brow = 1.5;
+            rot = 0.03 * inout;
+        }
+        Anim::Yoyo => {
+            let u = 0.5 - 0.5 * (at * 2.0 * PI / 1.2).cos();
+            look = vec2(0.6, 0.1 + 0.9 * u);
+            brow = 1.5;
+        }
+        Anim::Doodle => {
+            look = vec2(0.7, 0.7);
+            rot = (at * 2.0).sin() * 0.03 * inout;
+            brow = 1.0;
+        }
+        Anim::Binoculars => {
+            look = vec2((at * 1.8 + 0.5).sin(), -0.1);
+            rot = (at * 1.8).sin() * 0.12 * inout;
+            brow = 2.0;
+        }
         Anim::Glitch => {
             // decades in a basement: he skips like a scratched CD
             jitter = ((at * 97.0).sin() * 3.0).round() * fade;
@@ -2836,6 +2954,19 @@ fn draw_clipster(p: &egui::Painter, origin: Pos2, t: f32, at: f32, anim: Anim, l
                 }
             }
         }
+        Anim::Alarm => props::alarm(p, &tf, at, inout, ink),
+        Anim::Gift => props::gift(p, &tf, at, inout, ink),
+        Anim::Carry => props::carry(p, &tf, at, inout, ink),
+        Anim::Read => props::read(p, &tf, at, inout, ink),
+        Anim::Write => props::write(p, &tf, at, inout, ink),
+        Anim::Fix => props::fix(p, &tf, at, inout, ink),
+        Anim::Coffee => props::coffee(p, &tf, at, inout, ink),
+        Anim::Knit => props::knit(p, &tf, at, inout, ink),
+        Anim::Plane => props::plane(p, &tf, at, inout, ink),
+        Anim::Plant => props::plant(p, &tf, at, inout, ink),
+        Anim::Yoyo => props::yoyo(p, &tf, at, inout, ink),
+        Anim::Doodle => props::doodle(p, &tf, at, inout, ink),
+        Anim::Binoculars => props::binoculars(p, &tf, at, inout, ink),
         _ => {}
     }
     if let Some((s, off, color)) = extra {
@@ -3108,6 +3239,20 @@ fn main() -> eframe::Result {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn new_moods_and_tricks_have_animations() {
+        for n in ["alarm", "gift", "carry", "read", "write", "fix", "coffee"] {
+            let m = lines::mood_named(n).unwrap_or_else(|| panic!("mood {n}"));
+            assert!(Anim::from(m) != Anim::Idle, "{n} animates");
+            assert!(anim_named(n) == Some(Anim::from(m)), "{n} env name matches its mood");
+        }
+        for n in ["juggle", "newspaper", "nap", "typing", "knit", "plane", "plant", "yoyo", "doodle", "binoculars"] {
+            let a = anim_named(n).unwrap_or_else(|| panic!("anim {n}"));
+            assert!(a != Anim::Idle && anim_len(a) >= 3.0 && anim_len(a) <= 6.0, "{n} runs 3-6 s");
+        }
+        assert!(anim_named("nonsense").is_none());
+    }
 
     #[test]
     fn checkin_streaks_count_days_in_a_row() {
