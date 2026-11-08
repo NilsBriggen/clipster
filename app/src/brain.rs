@@ -89,6 +89,13 @@ pub enum Mood {
     Party,
     Sneeze,
     Glitch,
+    Alarm,
+    Gift,
+    Carry,
+    Read,
+    Write,
+    Fix,
+    Coffee,
 }
 
 #[derive(Clone, Debug)]

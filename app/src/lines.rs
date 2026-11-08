@@ -214,6 +214,13 @@ pub fn mood_named(s: &str) -> Option<Mood> {
         "party" => Mood::Party,
         "sneeze" => Mood::Sneeze,
         "glitch" => Mood::Glitch,
+        "alarm" => Mood::Alarm,
+        "gift" => Mood::Gift,
+        "carry" => Mood::Carry,
+        "read" => Mood::Read,
+        "write" => Mood::Write,
+        "fix" => Mood::Fix,
+        "coffee" => Mood::Coffee,
         _ => return None,
     })
 }
