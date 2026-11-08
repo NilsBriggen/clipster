@@ -58,6 +58,8 @@ pub enum Effect {
     Pref(String, String),            // a setting changed on the Desk's Settings tab: key, value
     Goals,                           // how today is going against the focus goal and the daily limits
     Clip(String),                    // the Desk's Clipboard tab: "copy h3", "pin h3", "unpin p1", "clear"
+    Workday(String),                 // "start", "add <app or link>", "remove 2"
+    Prank,                           // the April Fools window (also "prank", to see it)
     People(String),                  // "add Anna", "birthday Anna|3 March", "email Anna|a@b.ch", "every mum|14", "met mum", "last mum", "mail Anna", "forget Anna", "list", "birthdays", "import [file]"
     Calendar(String),                // "add <link>", "remove 2", "refresh", "day 2026-11-13", "next", "free <unix time>"
     Reading(String),                 // the reading list: "save <link>" (none = the newest copied link), "open 2", "done 2", "list"
@@ -324,6 +326,9 @@ pub fn exact(input: &str) -> Option<Reply> {
         "review" => return Some(Reply::say("").effect(Effect::Review(rest == "copy"))),
         "clip" if !rest.is_empty() => return Some(Reply::say("").effect(Effect::Clip(rest.to_string()))),
         // the calendar: "calendar" (today), "calendar add <link>", "calendar day 2026-11-13", "calendar free <unix time>"
+        // start my workday: "workday", "workday add firefox", "workday remove 2"
+        "workday" => return Some(Reply::say("").effect(Effect::Workday(if rest.is_empty() { "start".into() } else { rest.to_string() }))),
+        "prank" if rest.is_empty() => return Some(Reply::say("").effect(Effect::Prank)),
         // people: "person birthday Anna|3 March", "people", "contacts import"
         "person" if !rest.is_empty() => return Some(Reply::say("").effect(Effect::People(rest.to_string()))),
         "people" => return Some(Reply::say("").effect(Effect::People(if rest.is_empty() { "list".into() } else { rest.to_string() }))),

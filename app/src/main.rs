@@ -174,6 +174,10 @@ struct App {
     pins: Vec<String>, // clipboard snippets pinned on the Desk (saved; the history isn't)
     reading: Vec<(String, String)>, // the reading list: (link, the day it was saved), newest first
     people: Vec<people::Person>,    // birthdays, keeping in touch, email addresses
+    workday: Vec<String>,           // what "start my workday" opens: apps and links
+    workday_ask: bool,              // offer it on weekday mornings
+    window_text: String,            // the active window's title, for comments that quote it ({title})
+    prank: Option<(String, String, String)>, // the April Fools window: title, message, button
     calendars: Vec<String>,         // calendar links (private iCal addresses) and .ics files
     events: Vec<calendar::Event>,   // their next weeks, read in the background
     calendar_at: Option<Instant>,   // when they were last read
@@ -185,6 +189,7 @@ struct App {
     sample_events: Vec<calendar::Event>,
     sample_calendars: Vec<String>,
     sample_people: Vec<people::Person>,
+    sample_workday: Vec<String>,
     upkeep: Option<(Instant, upkeep::Report)>, // the last checkup
     sample_upkeep: upkeep::Report,              // made-up readings for screenshots
     upkeep_running: bool,
@@ -458,6 +463,10 @@ impl App {
             pins: vec![],
             reading: vec![],
             people: vec![],
+            workday: vec![],
+            workday_ask: true,
+            window_text: String::new(),
+            prank: None,
             calendars: vec![],
             events: vec![],
             calendar_at: None,
@@ -478,6 +487,7 @@ impl App {
             dnd_restore: None,
             sample_events: sample_events(),
             sample_people: sample_people(),
+            sample_workday: ["firefox", "code ~/projects/report", "https://mail.example.com"].map(String::from).to_vec(),
             sample_calendars: vec!["https://calendar.google.com/calendar/ical/you/private-x/basic.ics".into()],
             sample_reading: [("https://en.wikipedia.org/wiki/Paper_clip", "2026-11-07"), ("https://www.example.com/blog/how-to-run-a-meeting-that-ends-on-time?utm_source=news", "2026-11-05"), ("https://news.ycombinator.com/item?id=4711", "2026-11-02")].map(|(a, b)| (a.to_string(), b.to_string())).to_vec(),
             sample_clips: ["Printer code: 4711", "Meeting moved to 3 pm, room B", "https://example.com/quarterly-report", "Kind regards,\nSam", "SELECT * FROM paperclips WHERE bent = false;"].map(String::from).to_vec(),
@@ -694,17 +704,18 @@ impl App {
             dnd: self.dnd,
             wrapup: self.wrapup,
             upkeep_day: self.upkeep_day,
+            workday_ask: self.workday_ask,
             modern: self.desk_modern,
             focus_goal: self.focus_goal,
             budgets: self.budgets.clone(),
         };
         match &self.desk_sample {
             Some((t, k, f, c)) => {
-                let view = desk::View { timers: t.clone(), kind_time: k, focus_log: f, focus_now: Some(("the slides".into(), 18 * 60, 7 * 60, 40)), checkins: c, streaks: (4, 6, 31), status, prefs, clips: &self.sample_clips, pins: &self.sample_clips[..2], reading: &self.sample_reading, me: sample_me(), upkeep: Some((&self.sample_upkeep, 120)), upkeep_running: false, backup_check: upkeep::backup_check(true, Some(backup::now() - 9 * 86_400), backup::now(), true), backup: desk::Backup { sources: &self.backup_sources, target: "/run/media/you/BACKUP", last: Some(backup::now() - 9 * 86_400), result: "214 copied (1.3 GB), 4120 unchanged", progress: None }, events: &self.sample_events, calendars: &self.sample_calendars, calendar_note: "Checked 4 min ago".into(), people: &self.sample_people };
+                let view = desk::View { timers: t.clone(), kind_time: k, focus_log: f, focus_now: Some(("the slides".into(), 18 * 60, 7 * 60, 40)), checkins: c, streaks: (4, 6, 31), status, prefs, clips: &self.sample_clips, pins: &self.sample_clips[..2], reading: &self.sample_reading, me: sample_me(), upkeep: Some((&self.sample_upkeep, 120)), upkeep_running: false, backup_check: upkeep::backup_check(true, Some(backup::now() - 9 * 86_400), backup::now(), true), backup: desk::Backup { sources: &self.backup_sources, target: "/run/media/you/BACKUP", last: Some(backup::now() - 9 * 86_400), result: "214 copied (1.3 GB), 4120 unchanged", progress: None }, events: &self.sample_events, calendars: &self.sample_calendars, calendar_note: "Checked 4 min ago".into(), people: &self.sample_people, workday: &self.sample_workday };
                 self.desk.show(ctx, &view, look, near)
             }
             None => {
-                let view = desk::View { timers, kind_time: &self.kind_time, focus_log: &self.focus_log, focus_now, checkins: &self.checkin_days, streaks, status, prefs, clips: &self.clip_history, pins: &self.pins, reading: &self.reading, me: about_me(&self.facts, self.birthday, &self.stats, &self.unlocked, &self.highscores, self.friendship), upkeep: self.upkeep.as_ref().map(|(t, r)| (r, t.elapsed().as_secs())), upkeep_running: self.upkeep_running, backup_check: self.backup_check(), backup: desk::Backup { sources: &self.backup_sources, target: &self.backup_target, last: self.backup_last, result: &self.backup_result, progress: self.backup_progress }, events: &self.events, calendars: &self.calendars, calendar_note: self.calendar_note(), people: &self.people };
+                let view = desk::View { timers, kind_time: &self.kind_time, focus_log: &self.focus_log, focus_now, checkins: &self.checkin_days, streaks, status, prefs, clips: &self.clip_history, pins: &self.pins, reading: &self.reading, me: about_me(&self.facts, self.birthday, &self.stats, &self.unlocked, &self.highscores, self.friendship), upkeep: self.upkeep.as_ref().map(|(t, r)| (r, t.elapsed().as_secs())), upkeep_running: self.upkeep_running, backup_check: self.backup_check(), backup: desk::Backup { sources: &self.backup_sources, target: &self.backup_target, last: self.backup_last, result: &self.backup_result, progress: self.backup_progress }, events: &self.events, calendars: &self.calendars, calendar_note: self.calendar_note(), people: &self.people, workday: &self.workday };
                 self.desk.show(ctx, &view, look, near)
             }
         }
@@ -930,6 +941,37 @@ impl App {
         };
         people::set_names(&self.people);
         r
+    }
+
+    /// The April Fools window: a 98 message box of its own with one button. Purely a joke; it changes nothing.
+    fn show_prank(&mut self, ctx: &egui::Context) {
+        let Some((title, message, button)) = self.prank.clone() else { return };
+        let lines = wrap_words(&message, 44);
+        let size = vec2(380.0, 96.0 + lines.len() as f32 * 18.0);
+        let draw = |ui: &mut egui::Ui| -> bool {
+            use games::win98;
+            let (r, _) = ui.allocate_exact_size(size, egui::Sense::hover());
+            win98::panel(ui.painter(), r, win98::FACE, true);
+            let bar = Rect::from_min_size(r.min + vec2(3.0, 3.0), vec2(size.x - 6.0, 18.0));
+            win98::gradient(ui.painter(), bar, win98::NAVY, win98::SKY);
+            ui.painter().text(pos2(bar.min.x + 6.0, bar.center().y), egui::Align2::LEFT_CENTER, &title, win98::bold(13.0), Color32::WHITE);
+            win98::draw_icon(ui.painter(), pos2(r.min.x + 32.0, bar.max.y + 30.0), win98::Icon::Info);
+            for (i, l) in lines.iter().enumerate() {
+                ui.painter().text(pos2(r.min.x + 62.0, bar.max.y + 22.0 + i as f32 * 18.0), egui::Align2::LEFT_CENTER, l, win98::font(13.0), win98::TEXT);
+            }
+            let bw = (ui.painter().layout_no_wrap(button.clone(), win98::font(13.0), win98::TEXT).size().x + 30.0).max(80.0);
+            let br = Rect::from_center_size(pos2(r.center().x, r.max.y - 22.0), vec2(bw, 23.0));
+            win98::button(ui, br, egui::Id::unique("prank-button"), &button, true).clicked() || ui.input(|i| i.key_pressed(egui::Key::Enter) || i.key_pressed(egui::Key::Escape))
+        };
+        let close = if ctx.embed_viewports() || self.screenshot.is_some() {
+            egui::Area::new(egui::Id::unique("clipster-prank")).fixed_pos(pos2(20.0, 20.0)).show(ctx, |ui| draw(ui)).inner
+        } else {
+            let builder = egui::ViewportBuilder::default().with_title(title.clone()).with_inner_size(size).with_decorations(false).with_resizable(false).with_always_on_top();
+            ctx.show_viewport_immediate(egui::ViewportId::from_hash_of("clipster-prank"), builder, |ui, _| draw(ui) || ui.input(|i| i.viewport().close_requested()))
+        };
+        if close {
+            self.prank = None;
+        }
     }
 
     /// The Agenda's word on the calendars: when they were read, or what went wrong.
@@ -1213,6 +1255,7 @@ impl App {
             return; // his own windows
         }
         let kind = lines::window_kind(title).or_else(|| Some("other".into()));
+        self.window_text = title.to_string();
         self.window_site = lines::window_site(title);
         if kind != self.window_kind {
             self.account_time(); // the time so far belongs to the window you just left
@@ -1236,7 +1279,9 @@ impl App {
         }
         self.window_last = Some(now);
         self.window_said.insert(pool.clone(), now);
-        self.pipe_up(brain::react_window(&pool));
+        let mut r = brain::react_window(&pool);
+        r.text = r.text.replace("{title}", &page_title(&self.window_text));
+        self.pipe_up(r);
     }
 
     /// Clipster watches you play: comments, and cheers for high scores.
@@ -1536,7 +1581,7 @@ impl App {
         let unix = |at: &Instant| (std::time::SystemTime::now() + at.saturating_duration_since(Instant::now())).duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0);
         serde_json::json!({
             "tips_every": self.tips_every, "notice_clip": self.notice_clip, "notice_programs": self.notice_programs, "notice_windows": self.notice_windows, "checkin": self.checkin, "facts": self.facts, "kind_time": self.kind_time, "focus_log": self.focus_log, "desk_look": if self.desk_modern { "modern" } else { "classic" }, "checkin_days": self.checkin_days,
-            "pins": self.pins, "reading": self.reading, "calendars": self.calendars, "people": self.people.iter().map(|p| p.to_json()).collect::<Vec<_>>(), "welcome_seen": self.welcome_seen, "backup_sources": self.backup_sources, "backup_target": self.backup_target, "backup_last": self.backup_last, "backup_result": self.backup_result, "dnd_restore": self.dnd_restore, "dnd": self.dnd, "wrapup": self.wrapup, "upkeep_day": self.upkeep_day, "focus_goal": self.focus_goal, "budgets": self.budgets,
+            "pins": self.pins, "reading": self.reading, "calendars": self.calendars, "people": self.people.iter().map(|p| p.to_json()).collect::<Vec<_>>(), "workday": self.workday, "workday_ask": self.workday_ask, "welcome_seen": self.welcome_seen, "backup_sources": self.backup_sources, "backup_target": self.backup_target, "backup_last": self.backup_last, "backup_result": self.backup_result, "dnd_restore": self.dnd_restore, "dnd": self.dnd, "wrapup": self.wrapup, "upkeep_day": self.upkeep_day, "focus_goal": self.focus_goal, "budgets": self.budgets,
             "notice_health": self.notice_health, "check_updates": self.check_updates, "update_told": self.update_told, "sounds": self.sounds, "breaks": self.breaks, "name": self.name,
             "hat": self.hat, "skin": self.skin, "friendship": self.friendship, "highscores": self.highscores, "birthday": self.birthday.map(|(m, d)| [m, d]), "stats": self.stats, "unlocked": self.unlocked, "explored": self.explored, "persona": if self.unhinged { "unhinged" } else { "boring" }, "anchor": self.anchor.or(self.saved_anchor).map(|a| [a.x, a.y]),
             "timers": self.timers.iter().map(|(at, l, every)| serde_json::json!([unix(at), l, every])).collect::<Vec<_>>(),
@@ -1565,6 +1610,8 @@ impl App {
         self.calendars = serde_json::from_value(v["calendars"].clone()).unwrap_or_default();
         self.people = v["people"].as_array().into_iter().flatten().filter_map(people::Person::from_json).collect();
         people::set_names(&self.people);
+        self.workday = serde_json::from_value(v["workday"].clone()).unwrap_or_default();
+        self.workday_ask = v["workday_ask"].as_bool().unwrap_or(true);
         self.welcome_seen = v["welcome_seen"].as_str().unwrap_or_default().to_string();
         if let Ok(sources) = serde_json::from_value(v["backup_sources"].clone()) {
             self.backup_sources = sources;
@@ -1766,6 +1813,7 @@ impl App {
                     "dnd" => self.dnd = on,
                     "wrapup" => self.wrapup = on,
                     "upkeepday" => self.upkeep_day = on,
+                    "workdayask" => self.workday_ask = on,
                     "quiet" => self.quiet_until = on.then(|| Instant::now() + Duration::from_secs(3600)),
                     "autostart" if self.screenshot.is_none() => {
                         let _ = sys::set_autostart(on);
@@ -1944,6 +1992,50 @@ impl App {
                 self.desk_status = pool.map(lines::pick).unwrap_or_default();
                 silent = true;
             }
+            Effect::Workday(cmd) => {
+                let (verb, arg) = cmd.split_once(' ').unwrap_or((cmd.as_str(), ""));
+                let arg = arg.trim();
+                r = match verb {
+                    "add" if !arg.is_empty() => {
+                        self.workday.retain(|w| w != arg);
+                        self.workday.push(arg.to_string());
+                        Reply::say(lines::pick("workday_added").replace("{x}", arg)).mood(Mood::Write)
+                    }
+                    "remove" => match arg.trim_start_matches('#').parse::<usize>().ok().and_then(|n| n.checked_sub(1)).filter(|i| *i < self.workday.len()) {
+                        Some(i) => {
+                            let w = self.workday.remove(i);
+                            Reply::say(lines::pick("workday_removed").replace("{x}", &w)).mood(Mood::Happy)
+                        }
+                        None => Reply::say("There's nothing with that number on your workday.").mood(Mood::Think),
+                    },
+                    _ if self.workday.is_empty() => Reply::say(lines::pick("workday_empty")).mood(Mood::Think).run("Set it up", "desk workday"),
+                    _ => {
+                        // each item through "open", so app names, menu entries, Start-menu names and links all work
+                        let mut failed = vec![];
+                        for item in self.workday.clone() {
+                            if let Some(Effect::Open(target)) = brain::exact(&format!("open {item}")).map(|r| r.effect) {
+                                if open(&target).is_err() {
+                                    failed.push(item);
+                                }
+                            }
+                        }
+                        let day = chrono::Datelike::num_days_from_ce(&chrono::Local::now().date_naive()) as u64;
+                        self.stats.insert("workday_day".into(), day);
+                        self.desk.set_tab("today");
+                        self.desk.open();
+                        let mut text = lines::pick("workday_start");
+                        if !failed.is_empty() {
+                            text += &format!("\n(I couldn't open: {})", failed.join(", "));
+                        }
+                        Reply::say(text).mood(Mood::Coffee).run("Focus 25 minutes", "focus 25m").run("Focus 50 minutes", "focus 50m").btn("Not now", Act::Hide)
+                    }
+                };
+                if from_desk && matches!(verb, "add" | "remove") {
+                    self.desk_status = r.text.clone();
+                    silent = true;
+                }
+            }
+            Effect::Prank => self.prank = prank_lines(),
             Effect::People(cmd) => {
                 r = self.people_command(&cmd);
                 if from_desk && matches!(cmd.split(' ').next(), Some("add" | "birthday" | "met" | "forget" | "email" | "every")) {
@@ -2175,8 +2267,21 @@ impl App {
                     .btn("Got it, thanks", Act::Hide),
             );
         }
+        // weekday mornings: offer to start the workday, the first time he sees you
+        let local = chrono::Local::now();
+        let day_num = chrono::Datelike::num_days_from_ce(&local.date_naive()) as u64;
+        let weekday = chrono::Datelike::weekday(&local).number_from_monday() <= 5;
+        if weekday && (6..12).contains(&chrono::Timelike::hour(&local)) && self.workday_ask && !self.workday.is_empty() && self.stats.get("workday_day") != Some(&day_num) && t > 90.0 && self.screenshot.is_none() {
+            self.stats.insert("workday_day".into(), day_num);
+            self.pipe_up(Reply::say(lines::pick("workday_offer")).mood(Mood::Coffee).run("Start my workday", "workday").btn("Not today", Act::Hide));
+        }
+        // 1 April: an obviously silly 98 window, once a year, after he's been around for a while
+        let year = chrono::Datelike::year(&local) as u64;
+        if (chrono::Datelike::month(&local), chrono::Datelike::day(&local)) == (4, 1) && t > 600.0 && self.stats.get("prank_year") != Some(&year) && self.screenshot.is_none() && !self.quiet() {
+            self.stats.insert("prank_year".into(), year);
+            self.prank = prank_lines();
+        }
         // people: once a day after 8:00, a birthday coming up (or today), or someone you wanted to keep in touch with
-        let day_num = chrono::Datelike::num_days_from_ce(&chrono::Local::now().date_naive()) as u64;
         if chrono::Timelike::hour(&chrono::Local::now()) >= 8 && self.stats.get("people_day") != Some(&day_num) && t > 120.0 && !self.people.is_empty() && self.screenshot.is_none() {
             self.stats.insert("people_day".into(), day_num);
             let today = chrono::Local::now().date_naive();
@@ -2693,6 +2798,13 @@ impl eframe::App for App {
         if self.screenshot.is_some() && self.arcade.is_open() {
             self.frames += 1; // --play with --screenshot: just the game
             return self.take_screenshot(&ctx);
+        }
+        if self.prank.is_some() {
+            self.show_prank(&ctx);
+            if self.screenshot.is_some() {
+                self.frames += 1;
+                return self.take_screenshot(&ctx);
+            }
         }
         if self.welcome.is_open() {
             let (t, hat, skin) = (self.t() as f32, self.hat.clone().unwrap_or_else(|| "none".into()), self.skin.clone());
@@ -3357,6 +3469,35 @@ fn open(target: &str) -> std::io::Result<()> {
     sys::open_with_desktop(target)
 }
 
+/// A window title without the app's name: "Q3 report.ods - LibreOffice Calc" -> "Q3 report.ods", at most 40 characters.
+fn page_title(title: &str) -> String {
+    let first = [" — ", " - ", " | ", " – "].iter().filter_map(|sep| title.split_once(sep).map(|(a, _)| a)).min_by_key(|a| a.len()).unwrap_or(title).trim();
+    let t = if first.chars().count() >= 3 { first } else { title.trim() };
+    if t.chars().count() > 40 { t.chars().take(39).collect::<String>() + "…" } else if t.is_empty() { "this page".into() } else { t.to_string() }
+}
+
+/// One random `prank_dialog` line: (title, message, button).
+fn prank_lines() -> Option<(String, String, String)> {
+    let line = lines::pick("prank_dialog");
+    let mut parts = line.split(" | ").map(|s| s.trim().to_string());
+    Some((parts.next()?, parts.next()?, parts.next()?))
+}
+
+/// Text broken into lines of at most `width` characters, at spaces.
+fn wrap_words(text: &str, width: usize) -> Vec<String> {
+    let mut out: Vec<String> = vec![];
+    for w in text.split_whitespace() {
+        match out.last_mut() {
+            Some(l) if l.chars().count() + 1 + w.chars().count() <= width => {
+                l.push(' ');
+                l.push_str(w);
+            }
+            _ => out.push(w.to_string()),
+        }
+    }
+    out
+}
+
 /// Made-up people for screenshots of You & me.
 fn sample_people() -> Vec<people::Person> {
     let today = chrono::Local::now().date_naive();
@@ -3628,6 +3769,16 @@ fn main() -> eframe::Result {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn page_titles_and_wrapping() {
+        assert_eq!(page_title("Q3 report.ods - LibreOffice Calc"), "Q3 report.ods");
+        assert_eq!(page_title("How to fold a fitted sheet - YouTube — Mozilla Firefox"), "How to fold a fitted sheet");
+        assert_eq!(page_title("Konsole"), "Konsole");
+        assert_eq!(page_title("A - B"), "A - B", "too short to be a title: keep it all");
+        assert!(page_title(&"x".repeat(80)).chars().count() == 40);
+        assert_eq!(wrap_words("one two three four", 9), vec!["one two", "three", "four"]);
+    }
 
     #[test]
     fn new_moods_and_tricks_have_animations() {

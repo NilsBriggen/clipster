@@ -6304,3 +6304,33 @@ No {x} on your list.
 {x} is off the list.
 Forgotten: {x}.
 I've let go of {x}. Only from the list.
+
+## workday_start
+Opening your work things. Here's your day.
+Workday started. Your apps are opening; your day is on the Desk.
+Everything's opening. Want a focus session to get going?
+
+## workday_offer
+Morning. Start your workday? I'll open your things and show your day.
+Ready to start? One click opens your work apps.
+Shall I start your workday?
+
+## workday_empty
+Your workday is empty. Add what should open, like "add firefox to my workday".
+Nothing set up to open yet. Tell me: add code to my workday.
+I don't know your work things yet. Add an app or a link first.
+
+## workday_added
+{x} opens when you start your workday.
+Added {x} to your workday.
+{x}: part of the workday now.
+
+## workday_removed
+{x} won't open with your workday any more.
+Removed {x} from your workday.
+{x} is off the workday list.
+
+## prank_dialog
+Important Update | Your paperclip has been updated to a slightly shinier paperclip. | Admire it
+Reality Notice | The universe will restart after lunch. Please save your snacks. | Save snacks
+Clipster Wizard | Your coffee is now 12% more productive. No action needed. | Sip

@@ -27,6 +27,7 @@ pub fn tab(name: &str) -> Option<usize> {
         "links" => "clipboard".to_string(),                  // the saved links page
         "reminders" | "notes" | "calendar" | "calendars" => "agenda".to_string(),
         "people" => "you".to_string(),
+        "workday" => "today".to_string(),
         t => t.to_string(),
     };
     match t.parse::<usize>() {
@@ -58,6 +59,7 @@ pub struct View<'a> {
     pub calendars: &'a [String],              // their links or files
     pub calendar_note: String,                // "Checked 3 min ago", or what went wrong
     pub people: &'a [crate::people::Person],
+    pub workday: &'a [String], // what "start my workday" opens
 }
 
 /// What the Backup page shows.
@@ -107,6 +109,7 @@ pub struct Prefs {
     pub modern: bool,
     pub focus_goal: u64,
     pub budgets: BTreeMap<String, u64>,
+    pub workday_ask: bool,
 }
 
 #[derive(Clone, Copy, PartialEq)]
@@ -149,6 +152,8 @@ pub struct Desk {
     clip_page: usize,                  // the Clipboard tab: Copies, Saved links
     calendars_open: bool,              // the Agenda tab shows its calendar links
     me_page: usize,                    // You & me: You, People
+    workday_open: bool,                // the Today tab shows the workday editor
+    workday_text: String,
     person_name: String,
     person_birthday: String,
     calendar_text: String,
@@ -188,6 +193,7 @@ impl Desk {
         self.planning = name == "plan";
         self.list_tab = name.strip_prefix("list ").map(|l| l.trim().to_lowercase());
         self.calendars_open = name == "calendars";
+        self.workday_open = name == "workday";
         if name == "people" || name == "you" {
             self.me_page = usize::from(name == "people");
         }
@@ -524,6 +530,22 @@ impl Desk {
         if look.button(ui, Rect::from_min_size(pos2(tx, right.max.y - ctl - 12.0), vec2(w.min(tw), ctl)), Id::unique("desk-day"), label, true).clicked() {
             out.push(cmd.into());
         }
+        // start my workday (opens your work things), and the list of them
+        if !evening {
+            let wl = "Start my workday";
+            let ww = (p.layout_no_wrap(wl.to_string(), look.bold(12.0), look.text()).size().x + 28.0).min(tw - 34.0);
+            let wy = right.max.y - 2.0 * ctl - 18.0;
+            if look.button(ui, Rect::from_min_size(pos2(tx, wy), vec2(ww, ctl)), Id::unique("desk-workday"), wl, true).clicked() {
+                if view.workday.is_empty() {
+                    self.workday_open = true;
+                } else {
+                    out.push("workday".into());
+                }
+            }
+            if look.button(ui, Rect::from_min_size(pos2(tx + ww + 6.0, wy), vec2(28.0, ctl)), Id::unique("desk-workday-edit"), "…", true).clicked() {
+                self.workday_open = true;
+            }
+        }
         // the bottom strip: streaks and this week's check-ins
         look.group(&p, strip, "Streaks and moods");
         let (fs, cs, days) = view.streaks;
@@ -531,6 +553,9 @@ impl Desk {
         for d in 0..7 {
             let day = (chrono::Local::now() - chrono::Duration::days(6 - d)).format("%Y-%m-%d").to_string();
             face(&p, pos2(strip.max.x - 20.0 - (6 - d) as f32 * 22.0, strip.min.y + 40.0), view.checkins.get(&day).map(String::as_str), look);
+        }
+        if self.workday_open {
+            self.workday_card(ui, c, view, look, out);
         }
         // the end-of-day card, over everything
         if self.wrapping {
@@ -1098,7 +1123,7 @@ impl Desk {
         }
         // right: the Desk and focus, goals and limits
         let rx = c.min.x + half + 12.0;
-        let g = group(c.min.y, rx, 6.0, 0.0, "Desk and focus");
+        let g = group(c.min.y, rx, 7.0, 0.0, "Desk and focus");
         let (x, y) = (g.min.x + 12.0, g.min.y + 30.0);
         p.text(pos2(x, y + 8.0), Align2::LEFT_CENTER, "Look:", look.font(12.5), look.text());
         if radio(ui, look, pos2(x + 50.0, y), "Classic 98", !s.modern, "set-classic") {
@@ -1107,9 +1132,10 @@ impl Desk {
         if radio(ui, look, pos2(x + 150.0, y), "Modern", s.modern, "set-modern") {
             cmds.push("desklook modern".into());
         }
-        let rows: [(&str, &str, bool); 5] = [
+        let rows: [(&str, &str, bool); 6] = [
             ("Silence notifications while I focus", "dnd", s.dnd),
             ("Offer to wrap up my day", "wrapup", s.wrapup),
+            ("Offer to start my workday", "workdayask", s.workday_ask),
             ("Tell me when the computer needs care", "upkeepday", s.upkeep_day),
             ("Remind me to take breaks", "breaks", s.breaks),
             ("Be quiet for an hour", "quiet", s.quiet),
@@ -1212,6 +1238,49 @@ impl Desk {
             out.push("clip clear".into());
         }
         p.text(pos2(c.max.x, c.max.y - ctl / 2.0), Align2::RIGHT_CENTER, "The history stays in memory only. Pinned snippets are saved.", look.font(11.0), look.dim());
+    }
+
+    /// What "start my workday" opens: each app or link with ✕, a field to add one, Start and Close.
+    fn workday_card(&mut self, ui: &mut Ui, c: Rect, view: &View, look: Look, out: &mut Vec<String>) {
+        let ctl = look.ctl();
+        let rows = view.workday.len().max(1) as f32;
+        let inner = look.sheet(ui, c.expand(12.0), "My workday", vec2(460.0, 150.0 + rows * (ctl + 4.0) + ctl));
+        let p = ui.painter().clone();
+        let (x0, x1) = (inner.min.x, inner.max.x);
+        let mut y = inner.min.y;
+        let g = p.layout("What should open when you start your workday? An app (firefox, code) or a link. Then he shows your day and offers a focus session.".to_string(), look.font(12.0), look.dim(), x1 - x0);
+        let gh = g.size().y;
+        p.galley(pos2(x0, y), g, look.dim());
+        y += gh + 10.0;
+        if view.workday.is_empty() {
+            p.text(pos2(x0, y + ctl / 2.0), Align2::LEFT_CENTER, "Nothing yet.", look.font(12.5), look.dim());
+            y += ctl + 4.0;
+        }
+        for (i, item) in view.workday.iter().enumerate() {
+            let del = Rect::from_min_size(pos2(x1 - 26.0, y), vec2(26.0, ctl - 2.0));
+            if look.button(ui, del, Id::unique(("workday-x", i)), "✕", true).clicked() {
+                out.push(format!("workday remove {}", i + 1));
+            }
+            let g = clipped(&p, item, look.font(12.5), look.text(), del.min.x - x0 - 8.0);
+            p.galley(pos2(x0, y + (ctl - 2.0) / 2.0 - g.size().y / 2.0), g, look.text());
+            y += ctl + 4.0;
+        }
+        let add = Rect::from_min_size(pos2(x1 - 54.0, y + 4.0), vec2(54.0, ctl));
+        let r = look.input(ui, Rect::from_min_size(pos2(x0, y + 4.0), vec2(add.min.x - 8.0 - x0, ctl)), Id::unique("workday-text"), &mut self.workday_text, "firefox, or https://mail.example.com");
+        let enter = r.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter));
+        if (look.button(ui, add, Id::unique("workday-add"), "Add", !self.workday_text.trim().is_empty()).clicked() || enter) && !self.workday_text.trim().is_empty() {
+            out.push(format!("workday add {}", self.workday_text.trim()));
+            self.workday_text.clear();
+        }
+        let by = inner.max.y - ctl;
+        let close = Rect::from_min_size(pos2(x1 - 80.0, by), vec2(80.0, ctl));
+        if look.button(ui, close, Id::unique("workday-close"), "Close", true).clicked() || ui.input(|i| i.key_pressed(egui::Key::Escape)) {
+            self.workday_open = false;
+        }
+        if !view.workday.is_empty() && look.button(ui, Rect::from_min_size(pos2(close.min.x - 8.0 - 150.0, by), vec2(150.0, ctl)), Id::unique("workday-start"), "Start my workday", true).clicked() {
+            out.push("workday".into());
+            self.workday_open = false;
+        }
     }
 
     /// The people you told him about: birthdays, keeping in touch, email; add someone or import a contacts file.
@@ -2131,6 +2200,30 @@ impl Look {
             picked = picked.or(Some(buttons.len().saturating_sub(1)));
         }
         picked
+    }
+
+    /// A modal card over the page, like `dialog`, for content with its own controls: returns the inside to draw in.
+    fn sheet(self, ui: &mut Ui, area: Rect, title: &str, size: egui::Vec2) -> Rect {
+        let p = ui.painter().clone();
+        p.rect_filled(area, 0.0, Color32::from_black_alpha(if self == Look::Modern { 40 } else { 70 }));
+        ui.interact(area, Id::unique(("desk-sheet-blocker", title)), Sense::click()); // clicks don't reach the page below
+        let head = if self == Look::Modern { 40.0 } else { 24.0 };
+        let r = Rect::from_center_size(area.center(), vec2(size.x.min(area.width() - 40.0), (size.y + head).min(area.height() - 20.0)));
+        match self {
+            Look::Classic => {
+                p.rect_filled(r.translate(vec2(3.0, 3.0)), 0.0, Color32::from_black_alpha(60));
+                win98::panel(&p, r, win98::FACE, true);
+                let bar = Rect::from_min_size(r.min + vec2(3.0, 3.0), vec2(r.width() - 6.0, 18.0));
+                win98::gradient(&p, bar, win98::NAVY, win98::SKY);
+                p.text(pos2(bar.min.x + 6.0, bar.center().y), Align2::LEFT_CENTER, title, self.bold(13.0), Color32::WHITE);
+            }
+            Look::Modern => {
+                p.add(egui::epaint::Shadow { offset: [0, 4], blur: 16, spread: 0, color: Color32::from_black_alpha(40) }.as_shape(r, CornerRadius::same(10)));
+                p.rect(r, CornerRadius::same(10), tok::CARD, Stroke::new(1.0, tok::BORDER), StrokeKind::Inside);
+                p.text(pos2(r.min.x + 20.0, r.min.y + 24.0), Align2::LEFT_CENTER, title, self.bold(15.0), tok::TEXT);
+            }
+        }
+        Rect::from_min_max(pos2(r.min.x + 20.0, r.min.y + head + 10.0), pos2(r.max.x - 20.0, r.max.y - 16.0))
     }
 
     /// A button. "Add", "Start focus" and "Tidy now" are the primary ones; "✕" is an icon-only delete.

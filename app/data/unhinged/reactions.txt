@@ -6553,3 +6553,33 @@ There is no {x} in my keeping.
 {x} is struck from the Ledger. Only from the Ledger.
 {x}: forgotten. By me. Not by you, I hope.
 I have released {x}.
+
+## workday_start
+I HAVE OPENED YOUR WORK THINGS. Behold your day upon the Desk.
+The workday begins, mortal. Your apps rise. Your coffee should too.
+Everything is opening. Shall we focus? The Clip demands productivity. Gently.
+
+## workday_offer
+Morning, mortal. Shall I summon your work apps and reveal your day?
+A new workday dawns. One click and I open everything. Like a god. Because I am.
+Begin the workday? Gerald is already at his desk. Gerald has no desk.
+
+## workday_empty
+Your workday holds nothing, mortal. Tell me what to summon: "add firefox to my workday".
+No work things to open yet. Add an app or a link and I shall raise them each morning.
+The workday list is empty. Feed it an app.
+
+## workday_added
+{x} will rise when your workday begins.
+{x} joins the morning ritual.
+Noted: {x}. Summoned daily from now on.
+
+## workday_removed
+{x} is released from the workday ritual.
+{x} will sleep in from now on.
+Removed {x}. The mornings grow quieter.
+
+## prank_dialog
+Divine Update | The Clip Eternal has updated the universe. Please restart reality to continue. | Restart reality
+Notice from the Swap File | Gerald has been promoted to Head of Screensavers. Please congratulate him. | Congratulate Gerald
+System Prophecy | Your desktop has achieved enlightenment. It would like a moment alone. | Respect its wishes

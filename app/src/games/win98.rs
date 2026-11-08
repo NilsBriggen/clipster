@@ -189,7 +189,7 @@ pub enum Icon {
     Pause,
 }
 
-fn draw_icon(p: &Painter, c: Pos2, icon: Icon) {
+pub fn draw_icon(p: &Painter, c: Pos2, icon: Icon) {
     match icon {
         Icon::Info => {
             p.circle_filled(c, 15.0, Color32::from_rgb(0, 64, 200));

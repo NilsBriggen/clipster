@@ -8,7 +8,7 @@ pub fn respond(input: &str) -> Reply {
     let raw = input.trim();
     let head = raw.split_whitespace().next().unwrap_or("").to_lowercase();
     // shell commands and button-only commands (whose text is data, like quiz answers) are taken literally
-    if ["run", "$", "sh", "cmd", "reveal", "wyrpick", "window", "answer-to", "checkin", "install", "forget", "tidy", "pref", "clip", "forgetfact", "startup", "upkeep", "backup", "onlist", "readlater", "calendar", "person", "contacts"].contains(&head.as_str()) || head == "answer" && raw.contains('|') {
+    if ["run", "$", "sh", "cmd", "reveal", "wyrpick", "window", "answer-to", "checkin", "install", "forget", "tidy", "pref", "clip", "forgetfact", "startup", "upkeep", "backup", "onlist", "readlater", "calendar", "person", "contacts", "workday"].contains(&head.as_str()) || head == "answer" && raw.contains('|') {
         if let Some(r) = exact(raw) {
             return r; // shell commands are taken literally, never "understood"
         }
@@ -1092,6 +1092,17 @@ fn notes(s: &str, raw: &str) -> Option<Reply> {
     if let Some(r) = named_lists(s, raw) {
         return Some(r);
     }
+    // start my workday: opens your work things
+    let t = s.trim_end_matches(['!', '.']);
+    if ["start my workday", "start my work day", "start the workday", "start work", "start working", "begin my workday", "begin my work day", "workday start", "open my work stuff", "open my work apps"].contains(&t) {
+        return go("workday".into());
+    }
+    if ["my workday", "set up my workday", "edit my workday", "change my workday"].contains(&t) {
+        return go("desk workday".into());
+    }
+    if let Some(what) = s.strip_prefix("add ").and_then(|r| r.strip_suffix(" to my workday").or_else(|| r.strip_suffix(" to my work day")).or_else(|| r.strip_suffix(" to the workday"))) {
+        return go(format!("workday add {}", keep(raw, what)));
+    }
     if let Some(r) = people_talk(s, raw) {
         return Some(r);
     }
@@ -1920,6 +1931,14 @@ mod tests {
         assert_eq!(eff("done call Anna"), Effect::Todo(Op::Done("call Anna".into())));
         assert!(!matches!(eff("clear my to do list"), Effect::Todo(_)), "asks first");
         assert!(matches!(eff("note buy milk"), Effect::None), "notes are still notes");
+    }
+
+    #[test]
+    fn the_workday() {
+        assert_eq!(eff("start my workday"), Effect::Workday("start".into()));
+        assert_eq!(eff("add Firefox to my workday"), Effect::Workday("add Firefox".into()));
+        assert_eq!(respond("workday add https://mail.example.com").effect, Effect::Workday("add https://mail.example.com".into()));
+        assert!(matches!(eff("my workday"), Effect::OpenDesk(t) if t == "workday"));
     }
 
     #[test]
