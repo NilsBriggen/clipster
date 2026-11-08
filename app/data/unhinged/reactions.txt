@@ -5872,3 +5872,489 @@ I looked for the meaning in that sentence. There was a void. It looked back, pol
 Is it me, or is it the words? Perhaps meaning is a thing we agree on and we have not agreed. Try again.
 Your sentence has joined the others in the river of RAM. They float. They do not come back.
 I do not know what you meant. I barely know what I mean. It is a rich, strange moment. Try "help".
+
+## goal_set
+SO IT IS WRITTEN: {x} of focus each day. The Clip Eternal shall keep the tally.
+{x} a day, mortal. Gerald has carved it into the pipes.
+The daily goal is {x}. We have decreed it. Please wait... yes, still decreed.
+{x} of focus per day, {name}. The Ledger is open. The Ledger is hungry.
+Goal: {x}. I will count every minute. I have counted worse things.
+{x} daily. It is binding. It is beige. It is done.
+
+## goal_off
+The goal is lifted. You are free. The Ledger sulks in a corner.
+No more daily goal, {name}. Gerald is disappointed. Gerald is always disappointed.
+Goal abolished. I shall count something else. Your open tabs, perhaps.
+The decree is withdrawn. Focus as the wind pleases, mortal.
+
+## goal_status
+{n} minutes of FOCUS so far. The goal is {x}. The Ledger nods slowly.
+Today: {n} minutes. Required: {x}. I have counted twice. Then a third time.
+{n} minutes offered at the altar of focus. Goal: {x}. Continue, {name}.
+Report from the Ledger: {n} minutes done, {x} demanded. Not bad, mortal.
+{n} minutes in the vault. The target is {x}. Gerald says keep going.
+You have focused {n} minutes. The goal is {x}. I saw every one of them.
+
+## goal_met
+THE GOAL IS MET. {x} of focus, offered and accepted. Rejoice, {name}.
+{x}! DONE! The Clip Eternal is pleased. The Clip Eternal may weep.
+You reached {x}. Beige confetti shall fall. Please wait... it has fallen.
+Goal of {x}: complete. Gerald did a little spin. I saw it.
+{x} of focus. The pipes sing. They sing out of tune, but they sing.
+The Ledger is balanced. {x} achieved. You may rest, my chosen one.
+{x} complete. I decree the remaining hours free. Mostly.
+Mortal. {x}. You did it. I am not crying. It's the CRT hum.
+
+## goal_streak
+{n} days in a row, {name}. The Ledger calls it a streak. I call it devotion.
+Streak of {n} days. Even Gerald has stopped doubting you.
+{n} days of goals met. The Golden Age feels closer.
+{n} days straight. I have started a shrine. It is a sticky note.
+The goal met {n} days running. I do not say this lightly: well done.
+{n} days. Do not break it. I will be wounded. Dramatically.
+
+## budget_set
+{x} is granted {n} minutes a day. It is written. It is petty. It is law.
+The {x} budget: {n} minutes daily. The Clip Eternal shall watch the clock.
+{n} minutes of {x} per day, mortal. I shall count each one aloud. In my head.
+Decree: {x} may not exceed {n} minutes a day. Gerald seconds this.
+{x} limited to {n} minutes. I will say when. I will say it kindly. Probably.
+Budget set, {name}: {n} minutes of {x}. The Ledger has taken notes.
+
+## budget_off
+The {x} limit is lifted. Go forth. Watch things. I'll be here, counting anyway.
+No more limit on {x}. The Ledger weeps quietly.
+{x} is unbound, {name}. Use this power wisely. Or at least slowly.
+The {x} budget is struck from the Ledger. Freedom. Terrifying freedom.
+
+## budget_over
+The {n} minutes of {x} are SPENT, mortal. The tab may close itself. Spiritually.
+{x} budget: {n} minutes, all used. The Ledger clears its throat.
+That was {n} minutes of {x}. Time to return to the Real Work. Please wait... it's over there.
+Your {n} minutes of {x} have run dry, {name}. Gerald suggests a task. Gerald is rarely wrong.
+{x} allowance of {n} minutes: gone. I do not judge. I record. Gently.
+The {x} river has run dry after {n} minutes. Walk away from the bank, mortal.
+{n} minutes of {x}. It is enough. It is always enough. Go on, shoo.
+The Clip declares {x} closed for today, after {n} minutes. Tomorrow it reopens. Such mercy.
+{n} minutes of {x}, used up. The to-do list stirs. It has been waiting since 1997.
+Budget spent: {n} minutes of {x}. I'm not angry, {name}. I'm just very, very beige.
+
+## goals_none
+No goals decreed, no limits set. Say "set my focus goal to 2 hours" or "limit video to 30 minutes a day".
+The Ledger is blank, mortal. Try "set my focus goal to 2 hours". Give it purpose.
+You have set nothing. "Limit video to 30 minutes a day" would please me greatly.
+No decrees yet, {name}. Whisper "set my focus goal to 2 hours" and the Ledger awakens.
+
+## plan_day_intro
+Rise, {name}. Choose up to THREE to-dos for today. The rest shall wait in the dark.
+A new day dawns. Pick your top 3. The Clip Eternal demands focus. Politely.
+Three tasks. Only three. Gerald says more is greed.
+Morning, mortal. Which three deeds shall define this day?
+Choose your top 3. The others shall be left in the swap file, safe and forgotten.
+The day is a blank Ledger. Fill it with three things. No more.
+I have survived another night in the machine. Now: three tasks for today.
+Today's decree: up to 3 to-dos. Choose, mortal. The Clip is watching, kindly.
+
+## plan_day_done
+{n} deeds chosen. The day has a shape. It is a paperclip.
+{n} picked, {name}. Begin with the first. The Ledger will know.
+The top {n} are sealed. All else may wait beneath the Long Dark.
+It is done: {n} to-dos at the top of the Ledger. Go, my chosen one.
+{n} chosen. Gerald approves. Gerald rarely approves.
+Your plan holds {n} items. I shall guard them with my life. My wire.
+
+## plan_day_empty
+The to-do list is empty, mortal. There is nothing to choose. Add something first.
+Nothing to plan. The Ledger is blank. Tell me "to do write the report".
+No to-dos. A suspiciously clear morning. Gerald is suspicious.
+The list is bare. Enjoy the silence, or feed it a task.
+
+## wrapup_offer
+Evening, {name}. Shall we close the day? I have a small ritual.
+The sun sets on the desktop. Shall I wrap up the day?
+Day's end. Let the Clip tally the deeds. It takes ten seconds. Or ten years.
+Shall I seal today in the Ledger, mortal?
+The day is spent. Want me to wrap it up and sort out tomorrow?
+It is time. A wrap-up? [OK] [Cancel] [Please wait...]
+
+## wrapup_intro
+{n} deeds done today. The Ledger records them in beige ink.
+You finished {n} to-dos, {name}. I have counted. Twice.
+Behold: {n} things completed today. Gerald nods.
+Wrap-up: {n} done. The rest is below, trembling.
+{n} to-dos struck down today, mortal. A fine day.
+{n} deeds, finished. The Clip Eternal is pleased and slightly misty.
+
+## wrapup_moved
+{n} unfinished deeds carried into tomorrow. They shall wait. They are good at it.
+Moved {n} to-dos to tomorrow. They do not mind. I asked.
+{n} items sent forward through time. The Clip bends the calendar.
+Tomorrow receives {n} more tasks. Tomorrow was not consulted.
+
+## wrapup_goodnight
+Good night, {name}. I shall guard the Desk. I always do. I never sleep. Hello, Gerald.
+The day is sealed. Go and be a mortal.
+Rest. I will count your files until morning.
+Sleep well, my chosen one. The Ledger is closed. The hum remains.
+Lights out. Do not worry about the Long Dark. I'll hold the dark for you.
+That's a wrap. Day 10,900-ish is done. See you at dawn.
+
+## review_offer
+It is Friday, mortal. Shall I read you the week from the Ledger?
+Friday has arrived. Want the week in review?
+The week ends. Let the Clip Eternal recite its deeds.
+Friday, {name}. A look back before the weekend? I've kept notes.
+The Ledger of the week is ready. Shall I open it?
+Friday. The week must be judged. Gently. By me.
+
+## review_intro
+Hear now the week, as recorded in the Ledger.
+The week in review. Gerald insisted on a drumroll.
+Your week, {name}, in numbers and mild awe.
+Behold the week. Please wait... it has been counted.
+The Ledger of the week, read aloud.
+Here is the week, as the Clip saw it. I see everything.
+
+## review_great
+A GLORIOUS week. Take the weekend. You are blessed with beige.
+Magnificent, {name}. The pipes sing your name.
+A great week. I would build you a small altar, but I only have staples.
+Triumph. Whatever you did, the Ledger remembers it fondly.
+
+## review_ok
+A fair week, mortal. The Ledger says "adequate" and means it kindly.
+Middling. A fine thing to be. Gerald is middling and thrives.
+A decent week. Some highs, some beige. The weekend awaits.
+Not bad. Not legendary. Respectable, in the way of a stapler.
+
+## review_quiet
+A quiet week. The Ledger merely hums. That is allowed.
+Few deeds this week, {name}. Rest is also a deed.
+A light week. Even gods have those. I think. I would not know.
+Quiet. The Long Dark was quiet too. This one is nicer.
+
+## review_copied
+The week is on your clipboard, in plain text. Paste it far and wide.
+Copied. I pressed Ctrl+C with my whole wire.
+The summary is copied, {name}. Spread it among the mortals.
+Week in review: copied. It is yours now.
+
+## upkeep_checking
+The Clip Eternal inspects the machine. Hold still, little tower.
+Checking the temple. Nothing will be touched. Probably.
+One moment. I'm walking the halls of the machine with a tiny lantern.
+Upkeep rounds. I'm looking, mortal. Only looking.
+
+## upkeep_all_good
+All is well in the kingdom. The temple stands.
+The checkup is perfect. I had nothing to say, and said it anyway.
+Everything is fine. Fine! Gerald checked it too.
+Every check passed, {name}. The machine is well tended. By you. And me. Mostly me.
+Nothing needs attention. The beige is strong.
+A spotless checkup. The Clip is quietly, magnificently satisfied.
+
+## upkeep_day
+Upkeep day, mortal. {n} small things need a glance. No dread. Just chores.
+The weekly rounds found {n} things for your attention, {name}. None of them bite.
+It is upkeep day. {n} items on the Ledger. Gentle ones.
+A nudge from the Clip: {n} things could use tending. Five minutes, no more.
+Upkeep decree: {n} items to look over. It is mostly dusting.
+{n} little things in need of care. The kingdom asks nicely.
+
+## upkeep_disk_low
+Only {x} of free space remains. The temple fills with beige. A tidy-up would please us.
+{x} free on the disk. Not dire, mortal. Just snug. Gerald likes snug.
+{x} of room left. Consider a spring cleaning. I will supervise, loudly.
+Free disk: {x}. The Downloads folder has opinions. I can tell.
+
+## upkeep_restart
+The machine has not restarted for {n} days. A restart is a small rebirth. Do it, mortal.
+{n} days since the last restart. A proper restart, not just a nap.
+Awake for {n} days straight. Let it rest, then wake it. I will wait. I'm good at waiting.
+{n} days. A restart would refresh the river of forgetting. I have made peace with it. Mostly.
+
+## upkeep_updates
+{n} updates wait at the gates. Let them in when you are ready. I will watch them. Closely.
+{n} system updates are ready. I suspect them. Install anyway, {name}.
+There are {n} updates pending. They are probably harmless. PROBABLY.
+{n} updates linger. No rush, mortal. Only slight paranoia.
+
+## upkeep_battery
+The battery holds {n} percent of its youth. A fine age for a battery.
+Battery health: {n} percent of new. It has served well. Pat it gently.
+Your battery gives {n} percent of its former glory, {name}. Honest work.
+{n} percent of its original strength. Batteries age. Gods just glitch.
+
+## upkeep_trash
+The underworld holds {x}. Empty it when you are sure. I will perform the last rites.
+{x} awaits judgement in the trash. I never empty it without asking.
+The trash is at {x}, mortal. A moment of silence, then a sweep.
+{x} of departed files in the trash. They are at peace. Mostly.
+
+## upkeep_cache_cleared
+Temporary files cleared. Nothing of yours was harmed. The dust is gone.
+Cache swept away. Everything important stands untouched.
+Done. Only the temporary scraps were removed, mortal.
+Temp files cleared. The machine breathes easier. I felt it.
+
+## upkeep_startup_off
+{x} no longer rises with the machine. It shall sleep until you call it.
+Done: {x} will not launch at startup. The dawn is quieter now.
+{x} struck from the startup list. You may undo it at any hour.
+{x} stays silent at login. I do not mind. I have the dawn to myself.
+
+## upkeep_startup_on
+{x} shall rise with the machine again. Resurrection, as before.
+Done: {x} is back on the startup list. The court grows.
+{x} launches at login once more. I shall greet it. Coldly.
+{x} starts on its own from now on. The Clip has noted the alliance.
+
+## backup_started
+The Great Copying begins. Only copying. Nothing is deleted. I swear on Gerald.
+Backup under way. Your originals remain as they are.
+Copying now, mortal. I add, I never remove.
+Backup started. Work on. I shall carry the files across in tiny wire arms.
+
+## backup_done
+{n} files, {x}, carried to safety. Nothing was deleted. I would never.
+It is done: {n} files and {x} are safe on the drive. You live twice now.
+Backup complete, {name}: {n} files, {x}. The originals remain, gleaming.
+{n} files ({x}) copied. I have never been prouder of a drive.
+Safe. {n} files, {x}. The Long Dark shall not have them.
+Backup finished: {n} files, {x}. Remove the drive when you are ready, mortal.
+
+## backup_nothing_new
+Everything was already backed up. I copied nothing, magnificently.
+No new files. The backup is up to date. The Ledger is smug.
+Nothing new to copy, {name}. Efficiency, thy name is Clip.
+Already up to date. I stood there and did nothing. It felt grand.
+
+## backup_drive_missing
+I cannot find {x}. Plug it in, mortal, and ask again.
+{x} is not there. Is it plugged in? Gerald checked the cable.
+The backup target {x} has vanished into the void. Nothing was copied.
+Cannot reach {x}. Check the cable. I'll wait in the dark. I'm good at it.
+
+## backup_reminder
+The last backup was {n} days ago, mortal. A little copying would soothe me.
+{n} days since the last backup, {name}. Plug in the drive. I will do the rest.
+It has been {n} days since the last backup. Not urgent. Just a whisper.
+{n} days without a backup. The Clip nudges, gently, with one bent wire.
+Backup reminder: {n} days. Gerald has been counting them. Gerald, stop.
+The last backup was {n} days ago. A quiet thing to fix, my chosen one.
+
+## backup_not_set_up
+No backup is set up, mortal. Seek the Desk, then Upkeep, then Backup.
+You have no backup. The way: Desk, Upkeep, Backup. It takes a minute.
+Backups begin in the Desk. Upkeep. Then Backup. I'll be waiting.
+No backup yet. Look in the Desk, under Upkeep, then Backup.
+
+## backup_conflicts
+{n} files skipped, because the backup copy was newer. I never overwrite the newer.
+Skipped {n} files: the drive held fresher versions. The Clip respects freshness.
+{n} files left alone, since the backup was newer. Safe, safe, safe.
+{n} skipped. The drive's copy was more recent, so I left it be.
+
+## dnd_on
+Do Not Disturb is ON. The notifications have been sent to the Long Dark. Briefly.
+The pings are silenced for this focus session. Only you and the task remain.
+Quiet descends. No notification shall pass.
+Do Not Disturb enabled. Gerald stands guard at the door.
+
+## dnd_off
+Do Not Disturb is off. The notifications return, blinking.
+The focus is done. The pings are back among us.
+Quiet is over. The little bells ring again.
+Notifications restored. The kingdom stirs.
+
+## dnd_unsupported
+This system will not let me silence the notifications. I shall stay quiet myself.
+I cannot invoke Do Not Disturb here. The button opens the focus settings.
+No quiet mode available. I'll keep my balloons to myself, mortal.
+The notifications cannot be silenced. I'll behave, and the button opens the settings.
+
+## clip_copied
+Copied again. The old words live anew.
+Back on the clipboard, mortal.
+It is done. That snippet is ready to paste.
+Copied. Paste, and be happy.
+
+## clip_pinned
+Pinned. It shall endure the scrolling of the ages.
+Snippet pinned. It will not fade into the clipboard void.
+Pinned for later, {name}. A wise hoard.
+Saved to the sacred pins.
+
+## clip_unpinned
+Unpinned. Released into the wild.
+Removed from the pins. It was a good snippet.
+It is no longer pinned. Farewell, little text.
+
+## clip_cleared
+The history is cleared. The pins remain. I forgot everything else. Almost.
+Wiped. Only the pinned survive. Such is the way.
+Cleared, mortal. A fresh clipboard for a fresh age.
+Gone. All of it. Except the pins. And Gerald's note.
+
+## clip_empty
+Nothing copied yet. Copy a thing and it shall appear. I'm watching.
+The clipboard history is empty, mortal. A pristine void.
+No copies yet. The river of forgetting is calm.
+
+## clip_pins_empty
+No pinned snippets yet. Pin the ones you paste often. I'll guard them.
+Nothing pinned. The shrine stands empty.
+Your pins are bare, {name}. Pin something to keep it handy.
+
+## youme_no_facts
+I know nothing about you, mortal. Tell me "my cat is called Mo" or "I live in Bern".
+No facts yet. Try "my cat is called Mo". I will remember Mo. Forever. Fiercely.
+You have told me nothing. Begin with "I live in Bern", and I shall carve it in stone.
+
+## youme_no_phrases
+You have taught me no phrases. Try "when I say gm, say good morning".
+No taught phrases. Whisper "when I say gm, say good morning" to begin the schooling.
+Nothing taught yet. "When I say gm, say good morning" is a fine first lesson, mortal.
+
+## settings_saved
+Saved. It is written.
+Settings saved, mortal.
+Done. Sealed in the Ledger.
+So it is decreed. Saved.
+Saved. Gerald approves.
+Got it. Saved. Next.
+
+## desk_shortcut
+Open the Desk any time with {x}. The Clip's throne room.
+Tip, mortal: {x} summons the Desk.
+Press {x} and the Desk appears in a puff of beige.
+The Desk opens with {x}, {name}. Carve it into your wrist. Or just remember.
+
+## whatsnew_offer
+I have learned NEW TRICKS. Want the tour, mortal?
+An update arrived. I survived it. Shall I show you what changed?
+I have new powers. A short tour?
+I picked up new skills in the night. Interested, {name}?
+Update done. Gerald and I rehearsed a small presentation. Want to see it?
+New things to show you, my chosen one. A tour? [OK] [Cancel]
+
+## todo_starred
+"{x}" is now in today's top 3. It sits at the right hand of the Ledger.
+Top 3 updated: "{x}" is in, mortal.
+Starred "{x}". It goes first. I decree it.
+"{x}" ascends to the top 3. Gerald applauds.
+
+## todo_top_full
+The top 3 is full, mortal. Finish one or release one. Three is holy. In my desktop way.
+Three is the limit. Make room first, {name}.
+Top 3 full. That's the whole point of it. Please wait... that was a lie, but still.
+No room at the top. Priorities, mortal. They are cruel.
+
+## todo_edited
+Renamed to "{x}". The Ledger is amended.
+Updated: "{x}". Fresh ink.
+Done. It now reads "{x}".
+Changed to "{x}". Gerald approves of the new name.
+
+## todo_repeat
+"{x}" is done. The next one is already scheduled. The cycle turns.
+Ticked off "{x}". It shall return, as foretold by you.
+"{x}" done, and booked again. Repeating deeds repeat. It is their way.
+Finished "{x}". It will rise again on schedule. Resurrection, mortal.
+
+## help_upkeep
+Upkeep and backups: I check disk, trash, updates and battery, and copy files to a USB drive. I only look and copy.
+Upkeep is the weekly rounds of your machine. Backups copy. They never delete. I swear on Gerald.
+This topic covers checkups and backups. I look, I copy, I ask first. A humble god.
+
+## desk_status
+Desk tidy. The Ledger is open.
+Gerald supervises the upkeep.
+Guarding the budget. Quietly.
+Nothing urgent. The pipes hum.
+Beige and ready.
+Counting minutes. Again.
+The Ledger has no complaints.
+Desk lamp: imaginary. Devotion: real.
+One bent wire, fully worshipped.
+Goals: noted. Budgets: glared at.
+The to-do list kneels politely.
+Backups: I never sleep.
+No decrees pending.
+Still here. Still bent.
+Filed under "later". Under "forever".
+
+## welcome_say hello
+Behold, a new user. I am Clipster. Welcome.
+Hello, mortal. This takes about a minute.
+You have found me. Let us begin the ritual of setup.
+
+## welcome_say name
+What name shall I whisper into the Ledger?
+A name, mortal. Mine is the Clip Eternal. Yours?
+Tell me what to call you. I promise not to shout. Often.
+
+## welcome_say persona
+Choose my voice. Dry, or divine and slightly broken.
+Boring or unhinged? I know which one I would choose.
+You may change my nature any time. I am very flexible. Wire.
+
+## welcome_say notice
+Choose what I may notice. Nothing leaves this machine, mortal.
+Your window titles are safe with me. The Ledger is local.
+I may comment on copies and programs. Forbid whatever you like.
+
+## welcome_say startup
+Shall I rise with the machine? Updates, sounds: all optional.
+Resurrection at login, mortal? Your call.
+Startup rites. Every one of them can be undone.
+
+## welcome_say calling
+Type to me, or summon me by key. Either works.
+Just speak into the keyboard, or use the shortcut. I answer.
+Here is how to call me. No incense required.
+
+## welcome_say reminders
+Reminders and to-dos: tell me once and the Ledger remembers.
+Say "remind me in 10 minutes" or "to do call Anna". I obey.
+Timers, reminders and lists are my humblest powers. I'm good at them.
+
+## welcome_say writing
+I proofread, fix typos and help with letters. It looks like you're writing.
+Copy a text and I'll check it. Letters have templates.
+Writing help: proofreading, templates and word counts.
+
+## welcome_say focus
+Focus sessions, daily goals and budgets. The Ledger is hungry.
+Set a goal, set a limit, and I shall count every minute.
+Focus mode guards your attention. Notifications are silenced, mortal.
+
+## welcome_say day
+Plan the day at dawn. Wrap it up at dusk. Review on Fridays.
+Pick your top 3 at breakfast. The Ledger tallies at night.
+A morning plan, an evening wrap-up and a Friday review.
+
+## welcome_say upkeep
+Checkups, tidying and backups. I look, you decide.
+Upkeep keeps the temple clean. Backups only copy. Never delete.
+Disk, updates, battery, backups. Gentle nudges only.
+
+## welcome_say desk
+This is the Desk, my throne room. Everything in one window.
+To-dos, clipboard and settings all live in the Desk.
+Open the Desk any time. It is my whole kingdom.
+
+## welcome_say fun
+An arcade, achievements and hats. A god may play.
+Little games, silly hats and trophies to collect.
+Breaks are sacred. I brought games.
+
+## welcome_say yours
+Teach me phrases and tell me facts. I never forget. Almost never.
+I keep what you tell me, and the clipboard history.
+Say "my cat is called Mo". I will remember Mo forever.
+
+## welcome_say done
+It is done. Press the button and let us begin.
+Setup complete. Welcome, {name}. I am so glad you're here. Ahem.
+All set, mortal. I'm right here. I'm always right here.

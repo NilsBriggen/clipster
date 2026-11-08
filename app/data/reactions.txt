@@ -5578,3 +5578,489 @@ Oh hi. I was reorganising my pixel drawer. It can wait.
 Hello, {name}! Today looks like a day. Let's get through it.
 Hey. Quick reminder: I'm here, I'm helpful, and I'm tiny.
 Hi! Ask me anything. I'll answer something. Maybe the right thing. Probably the right thing.
+
+## goal_set
+Daily focus goal: {x}. I'll keep the tally, you keep the focus.
+{x} of focus a day. Noted, written down, mildly intimidating.
+Goal set: {x} a day. I believe in you at roughly 80 percent.
+Done. {x} of focus per day is now the target, {name}.
+{x} a day it is. Small steps, big sticky note.
+Your daily goal is {x}. I'll count. Quietly. Like a good clip.
+
+## goal_off
+Focus goal switched off. No pressure. Some pressure, but not from me.
+Goal removed. Focus whenever you like, {name}.
+The daily goal is off. I'll stop counting. Out loud.
+Okay, no goal for now. You can always set one again.
+
+## goal_status
+{n} minutes focused so far today. The goal is {x}. Steady progress.
+Today: {n} minutes of focus, goal {x}. Keep going, {name}.
+{n} minutes in the bank. Target: {x}. Not bad at all.
+Goal check: {n} minutes done, {x} to aim for. Carry on.
+You've focused for {n} minutes today. The goal is {x}. I'm taking notes.
+Progress report: {n} minutes against a goal of {x}. The clip approves.
+
+## goal_met
+Goal reached: {x} of focus today. Take a bow, {name}.
+{x} of focus, done. Frankly, I'm impressed. Frankly.
+You hit your {x} goal. Have a biscuit. Or a stretch.
+Daily goal of {x} complete. The rest of the day is a bonus.
+That's {x} of focus. I'd applaud, but I only have the one bend.
+Goal met: {x}. Go and do something unproductive. You earned it.
+{x} done. I'm marking today as a good one.
+Target of {x} reached. Close the laptop guilt-free, or don't. Your call.
+
+## goal_streak
+{n} days in a row of hitting your goal. That's a habit, {name}.
+Streak: {n} days. I'm not saying it's impressive, but it is.
+{n} days running. Consistency looks good on you.
+Goal met {n} days in a row. Please don't break it on my account.
+{n} days straight. I've started a small chart in my head.
+That's {n} days of reaching your goal. Quiet pride, over here.
+
+## budget_set
+Daily limit for {x}: {n} minutes. I'll tell you when it's up.
+{x} gets {n} minutes a day. Fair, firm, and slightly funny.
+Budget set: {n} minutes of {x} per day. I'll keep the receipts.
+Okay, {x} is capped at {n} minutes a day. I'll just watch, politely.
+{n} minutes of {x} a day. That's a lot more than it sounds like.
+Done: {x} limited to {n} minutes daily. Spend them wisely, {name}.
+
+## budget_off
+The {x} limit is gone. Freedom. Use it responsibly.
+No more daily limit for {x}. I'll stop watching the clock.
+Limit for {x} removed. I trust you. Mostly.
+Budget for {x} deleted, {name}. Carry on.
+
+## budget_over
+Your {n} minutes of {x} are up for today. Time to get back to it.
+{x} budget used up: {n} minutes. The rest of the day is for other things.
+That was {n} minutes of {x}, {name}. The budget says it's over. I just pass it on.
+{x} allowance of {n} minutes: spent. Might I suggest a task?
+Budget note, the friendly kind: {n} minutes of {x} done.
+You've had your {n} minutes of {x}. The to-do list is feeling left out.
+{n} minutes of {x} used. I'm not mad. I'm just a paperclip with a ledger.
+The {x} budget is empty after {n} minutes. Tomorrow it fills up again. Magic.
+Out of {x} time for today, {name}: {n} minutes, all spent. Back to work, gently.
+{n} minutes of {x}, gone. I'd call it a day for that one.
+
+## goals_none
+No goals or budgets yet. Try "set my focus goal to 2 hours" or "limit video to 30 minutes a day".
+Nothing set. Say "set my focus goal to 2 hours" and I'll keep count.
+You haven't set a goal. "Limit video to 30 minutes a day" is a good start.
+No limits so far. Want some? Try "set my focus goal to 2 hours", {name}.
+
+## plan_day_intro
+Good morning, {name}. Pick up to 3 to-dos for today. The rest can wait.
+Plan your day: choose up to 3 things that actually matter.
+New day. Choose your top 3 and ignore the rest, politely.
+Three to-dos. That's the limit for today's focus. Pick well.
+Morning. Which three things would make today a good one?
+Let's plan. Tap up to 3 to-dos and I'll put them at the top.
+A day with a plan beats a day with a list. Choose up to 3.
+Top 3 time. Everything else is background noise.
+
+## plan_day_done
+Plan set: {n} to-dos picked. That's a day with a shape.
+{n} chosen. Start with the first one, {name}.
+Top {n} locked in. Everything else can wait politely.
+Done. {n} to-dos at the top of the list. Off you go.
+{n} picked. Realistic plans are my favourite kind.
+Your plan for today has {n} items. I'll keep them in view.
+
+## plan_day_empty
+Your to-do list is empty, so there's nothing to pick. Add something first.
+Nothing to plan yet. Tell me "to do write the report" and try again.
+No to-dos to choose from. A suspiciously clear morning.
+The list is empty. Enjoy it, or add a thing or two.
+
+## wrapup_offer
+Evening, {name}. Shall we wrap up the day?
+The day's almost over. Want a quick wrap-up?
+Time to close out the day. A short summary, then rest.
+Want me to wrap up your day? It takes ten seconds.
+End of day. I can tally what got done and sort out tomorrow.
+Shall we call it a day? I'll sum up first.
+
+## wrapup_intro
+Today you finished {n} to-dos. Here's the day in short.
+{n} things done today. Let's look at how it went.
+Wrap-up: {n} to-dos checked off. Not bad.
+Day summary: {n} done. The rest is below.
+{n} to-dos finished today, {name}. Well worked.
+You got {n} things done today. Here's the picture.
+
+## wrapup_moved
+{n} unfinished items moved to tomorrow. They'll keep.
+Moved {n} to-dos to tomorrow. Future you can deal with them.
+{n} items carried over. Nothing lost, just rescheduled.
+Tomorrow now has {n} more things. It can take it.
+
+## wrapup_goodnight
+Good night, {name}. I'll mind the desk.
+Day closed. Go and be a person.
+All wrapped up. See you in the morning.
+Rest well. The to-do list will behave itself.
+Lights out for the day. I'll be right here.
+That's a wrap. Sleep well, {name}.
+
+## review_offer
+It's Friday. Want your week in review?
+Friday, {name}. Shall I sum up the week?
+The week is nearly done. Want a look back?
+Week in review, ready when you are. It's Friday, after all.
+Friday report? I've been counting all week.
+Before the weekend: a quick look at how the week went?
+
+## review_intro
+Here's your week in review.
+The week, in numbers.
+Let's see how this week went, {name}.
+Week summary, freshly counted.
+Your week, by the numbers. No judgment attached.
+Looking back at the week.
+
+## review_great
+A strong week. Take the weekend off, you earned it.
+That's a great week, {name}. Truly.
+Very good week. I'm quietly proud.
+Excellent. Whatever you did, do it again next week.
+
+## review_ok
+A solid, ordinary week. Ordinary is underrated.
+An okay week. Some highs, some lows, one stapler.
+Decent. There's room to grow, and nothing to fix.
+Not bad at all. The weekend is a fair reward.
+
+## review_quiet
+A quiet week. Those happen. Next week is a fresh page.
+Not much on the list this week. Sometimes that's the right amount.
+Quiet week, {name}. Rest counts too.
+A light week. No harm done. Plenty of room next week.
+
+## review_copied
+The summary is on your clipboard as plain text.
+Week in review copied. Paste it wherever it's needed.
+Copied. Go ahead and paste it into an email to nobody.
+Summary copied, {name}. It's ready to paste.
+
+## upkeep_checking
+Checking over your computer. Won't take long.
+One moment, I'm giving things a quick look.
+Running the checkup. Nothing will be changed.
+Looking at disk, trash, updates and more. Just looking.
+
+## upkeep_all_good
+Everything looks good. Nothing needs attention.
+Checkup done: all fine. Go and enjoy your computer.
+Clean bill of health. Not a single nudge from me.
+Every check passed, {name}. Well looked after.
+All good here. I'll look again next week.
+Nothing to fix. I'd claim credit, but you did the work.
+
+## upkeep_day
+Upkeep day: {n} things could use a look. Nothing urgent.
+Weekly checkup: {n} small things worth a glance, {name}.
+It's upkeep day. {n} items to look at, whenever you like.
+A gentle nudge: {n} things on the upkeep list. Five minutes, tops.
+Upkeep time. {n} items, none of them scary.
+Quick checkup says {n} things could be tidier. Shall we?
+
+## upkeep_disk_low
+Free disk space is down to {x}. A little tidying would help.
+Only {x} free on the disk. Not urgent, but worth a clear-out.
+{x} of disk space left. The Downloads folder might have ideas.
+Disk space: {x} free. A tidy-up now saves a headache later.
+
+## upkeep_restart
+The computer hasn't restarted for {n} days. A restart would do it good.
+{n} days since the last restart. A proper restart, not just shutting the lid.
+Up for {n} days straight. A restart clears the cobwebs.
+{n} days without a restart. Do it when convenient, {name}.
+
+## upkeep_updates
+{n} updates are waiting. Install them whenever you have a minute.
+There are {n} system updates ready. No rush, but don't forget.
+{n} updates pending. They'll keep, but not forever.
+{n} updates waiting for you. A coffee break is plenty of time.
+
+## upkeep_battery
+The battery holds about {n} percent of what it did when new. That's normal ageing.
+Battery health: {n} percent of new. Perfectly fine for daily use.
+Your battery manages {n} percent of its original capacity. It's doing its best.
+Battery health is {n} percent. Batteries age gracefully, mostly.
+
+## upkeep_trash
+The trash holds {x}. Empty it when you're sure.
+There's {x} sitting in the trash. A look, then an empty, might help.
+Trash is at {x}. I'll never empty it without asking.
+{x} in the trash, {name}. Might be time to let go.
+
+## upkeep_cache_cleared
+Temporary files cleared. Nothing of yours was touched.
+Cache cleaned. Everything important is still where you left it.
+Done. Only temporary files went away.
+Temp files cleared. Your computer says thanks.
+
+## upkeep_startup_off
+{x} no longer starts with the computer. Faster logins, probably.
+Done: {x} won't launch at startup any more.
+{x} removed from startup. You can undo that any time.
+Okay, {x} stays quiet until you open it yourself.
+
+## upkeep_startup_on
+{x} will start with the computer again.
+Done: {x} is back on the startup list.
+{x} launches at login again, as before.
+Okay, {x} starts automatically from now on.
+
+## backup_started
+Starting the backup. Copying only, nothing gets deleted.
+Backup running. Your originals stay exactly as they are.
+Copying your files now. This only adds, never removes.
+Backup started. Feel free to carry on working.
+
+## backup_done
+Backup done: {n} files, {x} copied. Nothing was deleted.
+{n} files copied, {x} in total. Your data now lives in two places.
+Finished. {n} files and {x} are safe on the backup drive.
+Backup complete, {name}: {n} files, {x}. Originals untouched.
+Copied {n} files ({x}). That's the good kind of boring.
+All safe: {n} files, {x}. Remove the drive when you're ready.
+
+## backup_nothing_new
+Everything was already backed up. Nothing to copy.
+No new files since last time. The backup is up to date.
+Nothing new to back up, {name}. Efficient.
+Already up to date. I copied nothing and feel great about it.
+
+## backup_drive_missing
+I can't find {x}. Plug it in and try again.
+{x} isn't there. Is it plugged in?
+The backup target {x} is missing. Nothing was copied.
+Can't reach {x}. Check the cable, then ask me again.
+
+## backup_reminder
+Your last backup was {n} days ago. A quick copy would be nice.
+It's been {n} days since the last backup, {name}.
+{n} days without a backup. Plug in the drive, I'll do the rest.
+Backup reminder: {n} days since the last one. Gentle, as promised.
+{n} days since the last backup. Not urgent, but worth five minutes.
+Just a nudge: the last backup was {n} days ago.
+
+## backup_not_set_up
+No backup set up yet. Open the Desk, then Upkeep, then Backup.
+You haven't set up a backup. It's under Desk, Upkeep, Backup.
+Backups start in the Desk: Upkeep, then Backup. Takes a minute.
+No backup yet. Find it in the Desk under Upkeep, Backup.
+
+## backup_conflicts
+{n} files skipped because the backup copy was newer. I never overwrite newer files.
+Skipped {n} files: the backup already had newer versions.
+{n} files left alone, since the backup copy is newer. Better safe.
+{n} skipped. The copy on the drive was more recent, so I left it.
+
+## dnd_on
+Do Not Disturb is on for this focus session. Notifications are quiet.
+Notifications silenced until the focus session ends.
+Quiet mode on. Nothing will ping you.
+Do Not Disturb enabled. Only you and the task now.
+
+## dnd_off
+Do Not Disturb is off. Notifications are back.
+Focus session over. Notifications are on again.
+Quiet mode off. The pings return.
+Notifications restored. Back to normal.
+
+## dnd_unsupported
+This system won't let me silence notifications. I'll stay quiet myself.
+I can't switch on Do Not Disturb here. The button opens the focus settings.
+No Do Not Disturb on this one. I'll keep my balloons to myself.
+Notifications can't be silenced from here. I'll behave, and the button leads to settings.
+
+## clip_copied
+Copied again. It's on your clipboard.
+Back on the clipboard.
+Done, that snippet is ready to paste.
+Copied. Paste away.
+
+## clip_pinned
+Pinned. It'll stay here.
+Snippet pinned. It won't scroll away.
+Pinned for later, {name}.
+Saved to your pins.
+
+## clip_unpinned
+Unpinned.
+Removed from your pins.
+Okay, that one is no longer pinned.
+
+## clip_cleared
+Clipboard history cleared. Pinned snippets are safe.
+History wiped. Pins stay.
+Cleared. A fresh start, minus the pins.
+Gone. I forgot everything you copied. Almost.
+
+## clip_empty
+Nothing copied yet. Copy something and it'll show up here.
+The clipboard history is empty. For now.
+No copies yet. Go copy something.
+
+## clip_pins_empty
+No pinned snippets yet. Pin one from the history.
+Nothing pinned. Pin things you paste a lot.
+Your pins are empty. Pin a snippet to keep it handy.
+
+## youme_no_facts
+I don't know anything about you yet. Tell me "my cat is called Mo" or "I live in Bern".
+No facts yet. Try "my cat is called Mo" or "I live in Bern".
+You haven't told me anything. Start with "I live in Bern", if you do.
+
+## youme_no_phrases
+You haven't taught me anything yet. Try "when I say gm, say good morning".
+No taught phrases. Say "when I say gm, say good morning" to start.
+Nothing taught yet. "When I say gm, say good morning" is a fine first lesson.
+
+## settings_saved
+Saved.
+Settings saved.
+Done. Saved.
+All set.
+Got it, saved.
+Saved. Moving on.
+
+## desk_shortcut
+You can open the Desk any time with {x}.
+Tip: {x} opens the Desk.
+Press {x} and the Desk appears. Handy.
+The Desk opens with {x}, {name}. Remember it.
+
+## whatsnew_offer
+I've learned new tricks. Want the tour?
+I got an update. Shall I show you what's new?
+New things to show you. A short tour?
+I've picked up a few skills. Interested?
+Update installed. Want a quick look at what changed?
+Some new tricks, {name}. Want the highlights?
+
+## todo_starred
+Added "{x}" to today's top 3.
+"{x}" is now one of today's top 3.
+Top 3 updated: "{x}" is in.
+Starred "{x}". It goes first.
+
+## todo_top_full
+The top 3 is already full. Finish one or remove one first.
+Three is the limit for the top. Make room first.
+Top 3 full, {name}. That's the whole point of it.
+No room in the top 3. Priorities, remember.
+
+## todo_edited
+Renamed to "{x}".
+Updated: "{x}".
+Got it. It now reads "{x}".
+Changed to "{x}".
+
+## todo_repeat
+"{x}" is done. The next one is already scheduled.
+Ticked off "{x}". It'll be back, as agreed.
+"{x}" done, and booked again for next time.
+Done with "{x}". Repeating items repeat. That's their job.
+
+## help_upkeep
+Upkeep and backups: I check disk, trash, updates and battery, and copy files to a USB drive.
+Upkeep is a weekly look at the computer. Backups copy your files and never delete anything.
+This topic covers checkups and backups. I only look and copy. Nothing is removed without asking.
+
+## desk_status
+Desk tidy. Mind the paperclips.
+Ready for the week, or at least the hour.
+Keeping the Desk company.
+Nothing urgent. Enjoy it.
+Everything in its place, roughly.
+Sorting thoughts into piles.
+Quiet shift. Good.
+Desk lamp: imaginary, but on.
+One bent wire, fully staffed.
+Budgets: watched. Goals: noted.
+The to-do list nods at me.
+Backups: someone's problem. Probably yours.
+No meetings detected.
+Hold the line. I'll hold the paper.
+Filed under "later".
+
+## welcome_say hello
+Hello! I'm Clipster. I help with the small stuff.
+Nice to meet you. This takes about a minute.
+Welcome. Let's set me up the way you like.
+
+## welcome_say name
+What should I call you? Your first name will do.
+A name helps. "Hey you" gets old fast.
+Tell me your name. I promise to spell it right.
+
+## welcome_say persona
+Pick a personality. You can change it any time.
+Plain and dry, or a bit dramatic? Your choice.
+Boring is calm. Unhinged is, well, not.
+
+## welcome_say notice
+Here's what I may comment on. Nothing leaves your computer.
+You decide what I notice. Window titles stay private.
+I can react to what you copy and open. Switch off whatever you don't want.
+
+## welcome_say startup
+Start with the computer, check for updates, make sounds?
+Should I wake up with your computer? Updates and sounds are optional too.
+Startup choices. All of them can be changed later.
+
+## welcome_say calling
+You can call me by typing, or with a shortcut.
+Just type to me, or use the shortcut. I'll answer either way.
+Here's how to summon me. No incense needed.
+
+## welcome_say reminders
+Reminders and to-dos: tell me once, and I'll remember.
+Say "remind me in 10 minutes" or "to do call Anna". Simple.
+I'm good with timers, reminders and lists. Try me.
+
+## welcome_say writing
+I proofread, fix typos and help with letters.
+Copy a text and I'll check it. Letters have templates.
+Writing help: proofreading, templates, and word counts.
+
+## welcome_say focus
+Focus sessions, daily goals and time budgets live here.
+Set a goal, set a limit, and I'll keep count.
+Focus mode keeps you on track. I'll even silence notifications.
+
+## welcome_say day
+Plan your day in the morning, wrap it up in the evening.
+Pick your top 3 at breakfast. Review at dusk.
+A morning plan, an evening wrap-up, and a Friday review.
+
+## welcome_say upkeep
+Checkups, tidying and backups. I look, you decide.
+Upkeep keeps your computer healthy. Backups only copy.
+Disk space, updates, battery, backups. Gentle reminders only.
+
+## welcome_say desk
+This is the Desk. Everything of mine in one window.
+The Desk holds your to-dos, clipboard, settings and more.
+Open the Desk any time. It's my whole office.
+
+## welcome_say fun
+There's an arcade, achievements and hats. Work hard, play briefly.
+Small games, silly hats and achievements to collect.
+Breaks are allowed. I brought games.
+
+## welcome_say yours
+Teach me phrases, tell me facts, and I'll remember them.
+I remember what you tell me. And I keep the clipboard history.
+Say "my cat is called Mo". I'll remember Mo.
+
+## welcome_say done
+All set. Press the button and I'll get to work.
+That's it. Welcome aboard, {name}.
+Setup complete. I'm right here when you need me.
