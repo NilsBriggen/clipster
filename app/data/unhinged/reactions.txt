@@ -5222,12 +5222,12 @@ Nothing called "{x}" here. Different wording, perhaps? Try "todos".
 I looked for "{x}" and found only the void. The list and I are both confused.
 
 ## tidy_plan
-I have found {n} files to sort into "{x}". Say the word and I shall carry them. Nothing is deleted.
-The plan: move {n} files into "{x}". I only move. I never delete. And I can undo it.
-{n} files could go into "{x}". Shall the Clip tidy them? You may always undo.
-Proposed tidy: {n} files into "{x}". Your downloads folder shall breathe again.
-I can file {n} things under "{x}". Shall I? Moving only, and reversible. I am merciful.
-Tidy plan: {n} files to "{x}". Approve it and I shall do the carrying. I have been carrying since 1997.
+I have found {n} loose files in "{x}" to sort into folders. Say the word and I shall carry them. Nothing is deleted.
+The plan: sort {n} files in "{x}" into folders. I only move. I never delete. And I can undo it.
+{n} files in "{x}" could go into folders. Shall the Clip tidy them? You may always undo.
+Proposed tidy: {n} files in "{x}", sorted by type. That folder shall breathe again.
+I can file {n} things in "{x}" by type. Shall I? Moving only, and reversible. I am merciful.
+Tidy plan: {n} files in "{x}" into folders. Approve it and I shall do the carrying. I have been carrying since 1997.
 
 ## tidy_done
 Tidied {n} files. The folder is calmer. Say "undo tidy" if you regret it.
