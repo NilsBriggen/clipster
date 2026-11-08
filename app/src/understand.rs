@@ -811,9 +811,22 @@ fn powers(s: &str, raw: &str) -> Option<Reply> {
         "find file ", "find files ", "find the file ", "find my file ", "find a file ", "search for file ", "search for the file ",
         "search my files for ", "locate file ", "locate the file ", "locate ", "where is my file ", "where is the file ",
         "look for file ", "look for the file ", "find document ", "find my document ", "find the document ", "find a document ",
+        "where did i save the ", "where did i save my ", "where did i save ", "where did i put the file ", "where did i put my file ",
     ];
     if let Some(n) = after(s, FIND).filter(|n| !n.is_empty()) {
         return go(format!("findfile {}", keep(raw, n.trim_start_matches("called ").trim_start_matches("named "))));
+    }
+    // "find my cv", "where is my tax pdf": a file, unless it's a thing you lose in real life
+    const FILE_WORDS: &[&str] = &["file", "document", "pdf", "photo", "picture", "spreadsheet", "presentation", "slides", "doc", "docx", "cv", "resume", "invoice", "report", "contract", "screenshot", "video", "song"];
+    if let Some(n) = after(s, &["find my ", "where is my ", "where are my "]).filter(|n| !n.is_empty()) {
+        const THINGS: &[&str] = &["phone", "keys", "key", "glasses", "wallet", "car", "way", "ip", "ip address", "iphone", "location", "mouse", "cursor", "motivation", "mind", "passion", "purpose"];
+        let filey = n.split_whitespace().any(|w| FILE_WORDS.contains(&w));
+        if !THINGS.contains(&n) && (filey || s.starts_with("find my ")) {
+            return go(format!("findfile {}", keep(raw, n)));
+        }
+    }
+    if ["recent files", "recently opened files", "my recent files", "my recent documents", "recent documents", "what did i open recently", "what files did i open", "files i opened recently", "last opened files"].contains(&s) {
+        return go("recent".into());
     }
     if let Some(t) = after(s, &["qr code for ", "qr code of ", "qr code with ", "a qr code for ", "make a qr code for ", "make a qr code of ", "create a qr code for ", "qr for ", "qr code ", "qr "]) {
         return go(format!("qr {}", keep(raw, t)));
@@ -2000,6 +2013,13 @@ mod tests {
         assert!(text("make HELLO lowercase").starts_with("hello"));
         assert!(matches!(eff("asdkjh qwe"), Effect::Net(Query::Ask(_))));
         assert_eq!(eff("find the file called Report"), Effect::Net(Query::Files("Report".into())));
+        assert_eq!(eff("find my CV"), Effect::Net(Query::Files("CV".into())));
+        assert_eq!(eff("where is my tax pdf"), Effect::Net(Query::Files("tax pdf".into())));
+        assert_eq!(eff("where did I save the invoice"), Effect::Net(Query::Files("invoice".into())));
+        assert_eq!(eff("recent files"), Effect::Net(Query::Recent));
+        assert!(!matches!(eff("where is my phone"), Effect::Net(Query::Files(_))), "a phone isn't a file");
+        assert!(!matches!(eff("find me a recipe for lasagne"), Effect::Net(Query::Files(_))));
+        assert!(!matches!(eff("where is my motivation"), Effect::Net(Query::Files(_))));
         // the same requests, each OS's way: PipeWire and KDE on Linux, media keys, WMI and the snipping overlay on Windows
         let shell_has = |s: &str, linux: &str, windows: &str| matches!(eff(s), Effect::Shell(c) if c.contains(if cfg!(windows) { windows } else { linux }));
         assert!(shell_has("it's too loud", "10%-", "[char]174"));

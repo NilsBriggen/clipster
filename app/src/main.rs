@@ -4,6 +4,7 @@
 mod brain;
 mod backup;
 mod desk;
+mod find;
 mod plan;
 mod upkeep;
 mod welcome;

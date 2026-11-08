@@ -42,6 +42,26 @@ pub fn open_with_desktop(target: &str) -> std::io::Result<()> {
     }
 }
 
+/// Files opened recently, newest first: (name, what to open). Linux reads the desktop's recently-used list;
+/// Windows lists its Recent folder, whose shortcuts open their file when opened themselves.
+pub fn recent_files() -> Vec<(String, std::path::PathBuf)> {
+    if cfg!(windows) {
+        let Some(dir) = std::env::var_os("APPDATA").map(|a| std::path::PathBuf::from(a).join("Microsoft").join("Windows").join("Recent")) else { return vec![] };
+        let mut links: Vec<(std::time::SystemTime, String, std::path::PathBuf)> = std::fs::read_dir(dir)
+            .into_iter()
+            .flatten()
+            .flatten()
+            .filter(|e| e.path().extension().is_some_and(|x| x.eq_ignore_ascii_case("lnk")))
+            .map(|e| (e.metadata().and_then(|m| m.modified()).unwrap_or(std::time::UNIX_EPOCH), e.path().file_stem().unwrap_or_default().to_string_lossy().into_owned(), e.path()))
+            .collect();
+        links.sort_by(|a, b| b.0.cmp(&a.0));
+        links.into_iter().map(|l| (l.1, l.2)).collect()
+    } else {
+        let xbel = dirs::data_dir().map(|d| d.join("recently-used.xbel")).and_then(|p| std::fs::read_to_string(p).ok()).unwrap_or_default();
+        crate::find::parse_xbel(&xbel).into_iter().filter(|p| p.is_file()).map(|p| (p.file_name().unwrap_or_default().to_string_lossy().into_owned(), p)).collect()
+    }
+}
+
 /// The global "call Clipster" shortcut, as people should press it.
 pub const HOTKEY: &str = if cfg!(windows) { "Ctrl+Alt+C" } else { "Meta+C" };
 /// The shortcut that opens Clipster's Desk (texts say "Meta+Shift+C" and `App::show` swaps it).

@@ -51,6 +51,7 @@ pub enum Query {
     Spell(String),
     Animal(String),
     Files(String),
+    Recent, // files opened recently
     RandomWiki,
     Briefing,
     Update, // is there a newer Clipster?
@@ -745,14 +746,37 @@ fn fetch(q: &Query) -> Result<Reply, String> {
             Ok(Reply::say(format!("It's spelled: {best}")).mood(Mood::Think).btn("Copy it", Act::Copy(best)))
         }
         Query::Files(name) => {
-            let found = find_files(name);
+            let home = dirs::home_dir().ok_or("I can't find your home folder")?;
+            let found = crate::find::search(&home, name, 5);
             if found.is_empty() {
-                return Ok(Reply::say(format!("I searched your home folder, but no file name contains \"{name}\". Did it run away?")).mood(Mood::Think));
+                return Ok(Reply::say(lines::pick("find_none").replace("{x}", name)).mood(Mood::Think).run("Files I opened recently", "recent"));
             }
-            let mut r = Reply::say(format!("Found {} file{} matching \"{name}\" (click to open):", found.len(), if found.len() == 1 { "" } else { "s" })).mood(Mood::Happy);
-            for p in found {
-                let label = format!("{}  ({})", p.file_name().unwrap_or_default().to_string_lossy(), p.parent().map(|d| d.to_string_lossy().replace(&*dirs::home_dir().unwrap_or_default().to_string_lossy(), "~")).unwrap_or_default());
-                r = r.btn(&label, Act::Open(p.to_string_lossy().into_owned()));
+            let mut text = lines::pick("find_found").replace("{n}", &found.len().to_string()).replace("{x}", name);
+            for p in &found {
+                text += &format!("\n• {}", crate::find::tilde(p));
+            }
+            let mut r = Reply::say(text).mood(Mood::Search);
+            for p in &found {
+                r = r.btn(&format!("Open {}", p.file_name().unwrap_or_default().to_string_lossy()), Act::Open(p.to_string_lossy().into_owned()));
+            }
+            if let Some(dir) = found[0].parent() {
+                r = r.btn("Show the first in its folder", Act::Open(dir.to_string_lossy().into_owned()));
+            }
+            Ok(r)
+        }
+        Query::Recent => {
+            let files = crate::sys::recent_files();
+            if files.is_empty() {
+                return Ok(Reply::say(lines::pick("recent_none")).mood(Mood::Think));
+            }
+            let mut text = lines::pick("recent_intro");
+            for (name, _) in files.iter().take(8) {
+                text += &format!("\n• {name}");
+            }
+            let mut r = Reply::say(text).mood(Mood::Search);
+            for (name, p) in files.iter().take(5) {
+                let short: String = name.chars().take(32).collect();
+                r = r.btn(&format!("Open {short}"), Act::Open(p.to_string_lossy().into_owned()));
             }
             Ok(r)
         }
@@ -804,36 +828,6 @@ fn fetch(q: &Query) -> Result<Reply, String> {
             Ok(Reply::say(format!("Here's a random {kind} for you! Adorable. Almost as cute as me.")).effect(Effect::Open(url)).mood(Mood::Happy).run("Another one!", kind))
         }
     }
-}
-
-/// Up to 8 files under home whose name contains `name`, skipping hidden and build folders.
-// shortcut: walks at most 40k entries so it stays quick; use a file index (locate) if people have huge homes.
-fn find_files(name: &str) -> Vec<std::path::PathBuf> {
-    let needle = name.trim().to_lowercase();
-    let mut out = vec![];
-    if needle.is_empty() {
-        return out;
-    }
-    let mut queue: std::collections::VecDeque<std::path::PathBuf> = dirs::home_dir().into_iter().collect();
-    let mut seen = 0;
-    while let Some(dir) = queue.pop_front() {
-        for e in std::fs::read_dir(&dir).into_iter().flatten().flatten() {
-            seen += 1;
-            let fname = e.file_name().to_string_lossy().to_lowercase();
-            if fname.starts_with('.') || ["node_modules", "target", "__pycache__", "appdata"].contains(&fname.as_str()) {
-                continue;
-            }
-            match e.file_type() {
-                Ok(t) if t.is_dir() => queue.push_back(e.path()),
-                Ok(t) if t.is_file() && fname.contains(&needle) => out.push(e.path()),
-                _ => {}
-            }
-            if out.len() >= 8 || seen > 40_000 {
-                return out;
-            }
-        }
-    }
-    out
 }
 
 #[cfg(test)]

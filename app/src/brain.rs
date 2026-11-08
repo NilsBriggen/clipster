@@ -494,7 +494,8 @@ pub fn exact(input: &str) -> Option<Reply> {
         "lorem" => return Some(crate::powers::lorem()),
         "qr" => return Some(crate::powers::qr(&or_clipboard(rest))),
         "until" | "countdown" => return Some(crate::powers::until(rest)),
-        "findfile" | "locate" => return Some(net(Query::Files(rest.into()), "Rummaging through your files... 🔍")),
+        "findfile" | "locate" if !rest.is_empty() => return Some(net(Query::Files(rest.into()), &lines::pick("find_searching").replace("{x}", rest))),
+        "recent" if rest.is_empty() || rest == "files" => return Some(net(Query::Recent, "Checking what you opened lately...")),
         "cliphistory" => return Some(Reply::say("").effect(Effect::ClipHistory)),
         "stopwatch" => {
             let rest = rest.replace("stopwatch", "").replace("stop watch", "");

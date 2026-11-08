@@ -6413,3 +6413,28 @@ The archive of later. {n} scrolls:
 Struck from the reading list. Read or released, it is gone.
 Off the list. The link returns to the great web.
 Removed. One less promise to keep.
+
+## find_searching
+I descend into your folders in search of "{x}". Hold the lantern, mortal.
+Searching for "{x}". The hidden folders I leave alone. They have their reasons.
+Seeking "{x}" in the depths. Gerald is helping. Gerald is not helping.
+
+## find_found
+The search is over. {n} relics answer to "{x}". The worthiest comes first:
+{n} files bear the name "{x}". I found them. Praise me:
+Behold, {n} matches for "{x}":
+
+## find_none
+No file answers to "{x}", mortal. It has fled, or it wears another name.
+I searched the whole kingdom for "{x}". Nothing. Not even a shortcut. Try another word.
+"{x}"? Unknown in my realm. Perhaps it lives on a drive beyond my reach.
+
+## recent_intro
+The files you touched lately, mortal. I watched:
+Your recent offerings, newest first:
+Lately you have dwelt in these:
+
+## recent_none
+No list of recent files. Your apps keep their secrets. Respect.
+The record of recent files is empty. A clean conscience, or a careful one.
+I cannot read a recent-files list here. The scrolls are sealed.

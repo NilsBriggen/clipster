@@ -6164,3 +6164,28 @@ Your reading list, {n} saved:
 Off the reading list.
 Read, or let go. Either way, it's gone.
 Removed from your reading list.
+
+## find_searching
+Looking through your folders for "{x}"...
+Searching your files for "{x}". Hidden folders excluded, dignity included.
+Rummaging for "{x}"...
+
+## find_found
+Found {n} for "{x}". The best match is first:
+{n} files look like "{x}":
+Here's what matches "{x}" ({n}):
+
+## find_none
+No file name matches "{x}". Maybe it's called something else, or it lives on a drive I can't see.
+Nothing called "{x}" in your home folder. Try a different word from its name.
+I looked everywhere sensible for "{x}". It's either hiding or misnamed.
+
+## recent_intro
+What you opened lately:
+Your recent files, newest first:
+Lately you've been in these:
+
+## recent_none
+I don't see a list of recent files. Some apps don't report them.
+No recent files on record. Either you're new here or very private.
+Your computer isn't keeping a recent-files list I can read.
