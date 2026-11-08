@@ -361,7 +361,10 @@ pub fn exact(input: &str) -> Option<Reply> {
             return Some(crate::understand::answer_to(id, text));
         }
         // shows the comment for a window title, e.g. "window Untitled 1 - LibreOffice Writer" (for trying it out)
-        "window" => return Some(lines::window_kind(rest).map(|k| react_window(&k)).unwrap_or_else(|| Reply::say("No comment on that window."))),
+        "window" => {
+            let pool = lines::window_site(rest).or_else(|| lines::window_kind(rest).map(|k| format!("window {k}")));
+            return Some(pool.map(|p| react_window(&p)).unwrap_or_else(|| Reply::say("No comment on that window.")));
+        }
         "updates" | "update" => return Some(net(Query::Update, "Checking for a newer me...")),
         "install" if ["update", "the update", "updates"].contains(&rest.to_lowercase().as_str()) => {
             return Some(Reply::say(lines::pick("say_update_downloading")).mood(Mood::Search).effect(Effect::InstallUpdate));
@@ -788,12 +791,21 @@ pub fn kind_group(kind: &str) -> usize {
     if WORK_KINDS.contains(&kind) { 0 } else if DISTRACTIONS.contains(&kind) { 1 } else { 2 }
 }
 
-const WORK_KINDS: &[&str] = &["code", "writing", "letter", "spreadsheet", "slides", "email", "inbox", "terminal", "pdf", "calendar", "meeting", "git", "qa", "jobhunt", "taxes", "learning", "files", "print"];
+const WORK_KINDS: &[&str] = &["code", "writing", "letter", "spreadsheet", "slides", "email", "inbox", "terminal", "pdf", "calendar", "meeting", "git", "qa", "jobhunt", "taxes", "learning", "files", "print", "notes", "design", "editing", "database", "diagrams", "remote", "projects", "translate", "docs", "cloud"];
 
 /// A window kind as people would say it.
 pub fn kind_name(kind: &str) -> String {
     match kind {
         "letter" => "New documents".into(),
+        "editing" => "Video editing".into(),
+        "modeling" => "3D modeling".into(),
+        "virtual" => "Virtual machines".into(),
+        "remote" => "Remote desktop".into(),
+        "ebooks" => "E-books".into(),
+        "translate" => "Translation".into(),
+        "docs" => "Documentation".into(),
+        "food" => "Food delivery".into(),
+        "cloud" => "Cloud storage".into(),
         "qa" => "Q&A sites".into(),
         "git" => "Code hosting".into(),
         "howto" => "How-to searches".into(),
@@ -829,9 +841,9 @@ pub fn window_ok(last_any: Option<std::time::Instant>, last_same: Option<std::ti
     last_any.is_none_or(|t| since(t, 180)) && last_same.is_none_or(|t| since(t, 1800))
 }
 
-/// What to say about the window kind `kind` (a `## window <kind>` section).
-pub fn react_window(kind: &str) -> Reply {
-    lines::reply(&format!("window {kind}")).btn("Thanks, Clipster", Act::Hide)
+/// What to say about a window: `section` is its `## site …` or `## window <kind>` section.
+pub fn react_window(section: &str) -> Reply {
+    lines::reply(section).btn("Thanks, Clipster", Act::Hide)
 }
 
 pub fn react_program(name: &str) -> Reply {

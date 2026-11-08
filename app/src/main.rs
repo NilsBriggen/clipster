@@ -162,6 +162,7 @@ struct App {
     notice_windows: bool,                      // comment on what the active window is
     window_kind: Option<String>,               // the active window's kind (`## window <kind>`), and since when
     window_since: Instant,
+    window_site: Option<String>, // the active window's `## site …` section, when one matches
     window_said: std::collections::HashMap<String, Instant>, // when each kind last got a comment
     window_last: Option<Instant>,                             // when any window comment was last made
     tipped: std::collections::HashMap<String, String>,        // window kind -> the day he last offered a tip for it
@@ -436,6 +437,7 @@ impl App {
             kind_mark: Instant::now(),
             window_kind: None,
             window_since: Instant::now(),
+            window_site: None,
             window_said: Default::default(),
             window_last: None,
             tipped: Default::default(),
@@ -906,6 +908,7 @@ impl App {
             return; // his own windows
         }
         let kind = lines::window_kind(title).or_else(|| Some("other".into()));
+        self.window_site = lines::window_site(title);
         if kind != self.window_kind {
             self.account_time(); // the time so far belongs to the window you just left
             (self.window_kind, self.window_since) = (kind.clone(), Instant::now());
@@ -921,12 +924,14 @@ impl App {
         if !self.notice_windows || self.t() < 60.0 || self.balloon.is_some() || self.quiet() || !self.input.is_empty() || self.focus.is_some() {
             return;
         }
-        if !brain::window_ok(self.window_last, self.window_said.get(kind).copied(), now) {
+        // a site has its own lines and its own cooldown, so one YouTube comment doesn't silence all video comments
+        let pool = self.window_site.clone().unwrap_or_else(|| format!("window {kind}"));
+        if !brain::window_ok(self.window_last, self.window_said.get(&pool).copied(), now) {
             return;
         }
         self.window_last = Some(now);
-        self.window_said.insert(kind.to_string(), now);
-        self.pipe_up(brain::react_window(kind));
+        self.window_said.insert(pool.clone(), now);
+        self.pipe_up(brain::react_window(&pool));
     }
 
     /// Clipster watches you play: comments, and cheers for high scores.

@@ -241,7 +241,7 @@ pub fn parse(text: &str, user: bool, out: &mut Vec<Section>) -> Vec<String> {
         };
         let s = &mut out[i];
         // process names and window-title pieces are matched as they are, not tidied like sentences
-        let program = ["program ", "window ", "answer ", "template ", "tips "].iter().any(|p| s.name.starts_with(p));
+        let program = ["program ", "window ", "site ", "answer ", "template ", "tips "].iter().any(|p| s.name.starts_with(p));
         // triggers are tidied exactly like what people type, so "what's" in the file matches "whats" typed
         let mut list = |rest: &str, exact: bool| -> Vec<String> {
             let mut out = vec![];
@@ -564,18 +564,38 @@ pub fn programs() -> Vec<String> {
     db().iter().filter(|s| s.name.starts_with("program ")).flat_map(|s| s.triggers.clone()).collect()
 }
 
-/// Which `## window <kind>` a window title belongs to: the longest matching piece wins.
+/// Which `## window <kind>` a window title belongs to: the longest matching piece wins,
+/// and a `## site <kind> <id>` piece counts for its kind.
 pub fn window_kind(title: &str) -> Option<String> {
     kind_in(&db(), title)
 }
 
-fn kind_in(db: &[Section], title: &str) -> Option<String> {
+/// The `## site <kind> <id>` section a window title belongs to (its whole name), if any.
+pub fn window_site(title: &str) -> Option<String> {
+    site_in(&db(), title)
+}
+
+/// The longest title piece among `## window`/`## site` sections: (section, kind).
+fn best_piece<'a>(db: &'a [Section], title: &str, sites_only: bool) -> Option<(&'a Section, &'a str)> {
     let t = title.to_lowercase();
     db.iter()
-        .filter_map(|s| s.name.strip_prefix("window ").filter(|_| !s.lines.is_empty()).map(|k| (k, s)))
-        .flat_map(|(k, s)| s.triggers.iter().filter(|tr| t.contains(&tr.to_lowercase())).map(move |tr| (tr.len(), k)))
-        .max_by_key(|(n, _)| *n)
-        .map(|(_, k)| k.to_string())
+        .filter(|s| !s.lines.is_empty())
+        .filter_map(|s| match s.name.strip_prefix("site ") {
+            Some(rest) => rest.split_once(' ').map(|(k, _)| (s, k)),
+            None if !sites_only => s.name.strip_prefix("window ").map(|k| (s, k)),
+            None => None,
+        })
+        .flat_map(|(s, k)| s.triggers.iter().filter(|tr| t.contains(&tr.to_lowercase())).map(move |tr| (tr.len(), s, k)))
+        .max_by_key(|(n, _, _)| *n)
+        .map(|(_, s, k)| (s, k))
+}
+
+fn kind_in(db: &[Section], title: &str) -> Option<String> {
+    best_piece(db, title, false).map(|(_, k)| k.to_string())
+}
+
+fn site_in(db: &[Section], title: &str) -> Option<String> {
+    best_piece(db, title, true).map(|(s, _)| s.name.clone())
 }
 
 /// What to say when the program `comm` starts.
@@ -682,6 +702,25 @@ mod tests {
         assert_eq!(kind_in(&v, "Untitled 1 - LibreOffice Writer").as_deref(), Some("letter"), "the longest piece wins");
         assert_eq!(kind_in(&v, "report.docx - Word").as_deref(), Some("writing"));
         assert_eq!(kind_in(&v, "Konsole"), None);
+        parse("## site projects trello\n> - trello\nCards!\n\n## window projects\n> kanban\nBoards.\n", false, &mut v);
+        assert_eq!(kind_in(&v, "Sprint 4 | Kanban - Trello").as_deref(), Some("projects"), "a site decides the kind");
+        assert_eq!(site_in(&v, "Sprint 4 | Kanban - Trello").as_deref(), Some("site projects trello"));
+        assert_eq!(site_in(&v, "report.docx - Word"), None);
+    }
+
+    #[test]
+    fn sites_are_well_formed() {
+        let all = built_in();
+        let kinds: Vec<&str> = all.iter().filter_map(|s| s.name.strip_prefix("window ")).collect();
+        for s in all.iter().filter(|s| s.name.starts_with("site ")) {
+            let rest = &s.name["site ".len()..];
+            let kind = rest.split_once(' ').map(|(k, _)| k);
+            assert!(kind.is_some_and(|k| kinds.contains(&k)), "{}: needs a known window kind (site <kind> <id>)", s.name);
+            assert!(!s.triggers.is_empty() && !s.lines.is_empty(), "{}: needs title pieces and lines", s.name);
+            for t in &s.triggers {
+                assert!(t.chars().count() >= 4, "{}: title piece \"{t}\" is too short, it would match too much", s.name);
+            }
+        }
     }
 
     #[test]
