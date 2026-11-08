@@ -6234,3 +6234,73 @@ No luck reading that calendar right now.
 I don't know your calendar yet. Paste its private iCal link on the Agenda tab (Calendars…), or say "add my calendar" and the link.
 No calendar linked. Find its secret iCal address in your calendar's settings and give it to me.
 Link your calendar and I'll know your day. Its iCal link is in the calendar's settings.
+
+## person_added
+{x} is on your list now.
+Added {x}.
+I'll remember {x}.
+
+## birthday_set
+{x}'s birthday: {when}. I'll remind you a few days before.
+Noted: {x}, {when}. You'll get a heads-up.
+{when} for {x}. I won't let you forget.
+
+## birthday_soon
+{x}'s birthday is in {n} days. Time for a present or at least a plan.
+Heads-up: {x}'s birthday in {n} days.
+In {n} days it's {x}'s birthday.
+
+## birthday_today
+It's {x}'s birthday today!
+Today is {x}'s birthday. A message goes a long way.
+{x} has a birthday today. Say something nice.
+
+## keep_in_touch_set
+I'll nudge you if you haven't talked to {x} in {n} days.
+Keep in touch with {x}: every {n} days. Noted.
+Every {n} days, {x}. I'll keep count.
+
+## keep_in_touch_due
+It's been {n} days since you talked to {x}. Maybe today?
+{x}: {n} days since your last chat.
+You wanted to keep in touch with {x}. It's been {n} days.
+
+## contact_logged
+Nice. I'll note you talked to {x} today.
+Logged: you and {x}, today.
+Good. {x} is up to date.
+
+## last_contact
+You last talked to {x} {n} days ago.
+{n} days since you and {x} last talked.
+Last contact with {x}: {n} days ago.
+
+## last_contact_never
+I don't know when you last talked to {x}. Tell me next time: "I called {x}".
+No record of talking to {x} yet.
+I haven't logged a chat with {x} yet.
+
+## contacts_imported
+Imported {n} people from your contacts.
+{n} people added or updated.
+Done: {n} contacts are on your list.
+
+## contacts_none_found
+I didn't find a contacts file (.vcf) in Downloads, Documents or on the desktop. Export one from your contacts app first.
+No .vcf file anywhere I looked. Export your contacts as vCard and try again.
+I need a contacts file (.vcf) in Downloads, Documents or on the desktop.
+
+## people_empty
+No people yet. Tell me "Anna's birthday is on 3 March", or import your contacts.
+I don't know anyone of yours yet. Add someone below or import a contacts file.
+Your people list is empty.
+
+## person_unknown
+I don't know anyone called {x}. Add them on the You & me tab, or tell me their birthday.
+Who's {x}? Not on my list yet.
+No {x} on your list.
+
+## person_forgotten
+{x} is off the list.
+Forgotten: {x}.
+I've let go of {x}. Only from the list.

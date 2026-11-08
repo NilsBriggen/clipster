@@ -8,7 +8,7 @@ pub fn respond(input: &str) -> Reply {
     let raw = input.trim();
     let head = raw.split_whitespace().next().unwrap_or("").to_lowercase();
     // shell commands and button-only commands (whose text is data, like quiz answers) are taken literally
-    if ["run", "$", "sh", "cmd", "reveal", "wyrpick", "window", "answer-to", "checkin", "install", "forget", "tidy", "pref", "clip", "forgetfact", "startup", "upkeep", "backup", "onlist", "readlater", "calendar"].contains(&head.as_str()) || head == "answer" && raw.contains('|') {
+    if ["run", "$", "sh", "cmd", "reveal", "wyrpick", "window", "answer-to", "checkin", "install", "forget", "tidy", "pref", "clip", "forgetfact", "startup", "upkeep", "backup", "onlist", "readlater", "calendar", "person", "contacts"].contains(&head.as_str()) || head == "answer" && raw.contains('|') {
         if let Some(r) = exact(raw) {
             return r; // shell commands are taken literally, never "understood"
         }
@@ -1039,8 +1039,60 @@ fn agenda(s: &str, raw: &str) -> Option<Reply> {
     go(format!("calendar free {at}"))
 }
 
+/// The people in your life: "Anna's birthday is on 3 March", "keep in touch with mum every 2 weeks", "I called mum".
+fn people_talk(s: &str, raw: &str) -> Option<Reply> {
+    let r = raw.trim().trim_end_matches(['.', '!', '?']).replace('’', "'");
+    let lower = r.to_lowercase();
+    // "<name>'s birthday is (on) <date>", "my mum's email is …" (but "my birthday is" stays your own)
+    for (what, cmd) in [("'s birthday is ", "birthday"), ("'s birthday's ", "birthday"), ("'s email is ", "email"), ("'s email address is ", "email"), ("'s e-mail is ", "email")] {
+        if let Some(i) = lower.find(what) {
+            let name = r[..i].trim();
+            let name = name.strip_prefix("my ").or_else(|| name.strip_prefix("My ")).unwrap_or(name).trim();
+            let value = r[i + what.len()..].trim();
+            if !name.is_empty() && name.split_whitespace().count() <= 3 && !value.is_empty() {
+                return go(format!("person {cmd} {name}|{value}"));
+            }
+        }
+    }
+    // "keep in touch with mum every 2 weeks"
+    if let Some(rest) = after(s, &["keep in touch with ", "stay in touch with "]) {
+        let (who, when) = rest.split_once(" every ")?;
+        let n: u32 = when.split_whitespace().next().and_then(|w| w.parse().ok()).unwrap_or(1);
+        let days = if when.contains("week") { n * 7 } else if when.contains("month") { n * 30 } else { n };
+        return go(format!("person every {}|{days}", keep(raw, who)));
+    }
+    // "i called mum", "i talked to anna": only for someone he knows
+    if let Some(who) = after(s, &["i just called ", "i called ", "i talked to ", "i spoke to ", "i spoke with ", "i talked with ", "i met ", "i saw ", "i texted ", "i messaged ", "i emailed ", "i visited ", "i caught up with ", "just called ", "just talked to "]) {
+        if crate::people::known(who) {
+            return go(format!("person met {}", keep(raw, who)));
+        }
+    }
+    if let Some(who) = after(s, &["when did i last talk to ", "when did i last speak to ", "when did i last call ", "when did i last see ", "when did i last text ", "when did i last meet ", "when did i last hear from "]) {
+        return go(format!("person last {}", keep(raw, who)));
+    }
+    if let Some(who) = after(s, &["email ", "write to ", "send an email to ", "write an email to ", "mail "]) {
+        if crate::people::known(who) {
+            return go(format!("person mail {}", keep(raw, who)));
+        }
+    }
+    let t = s.trim_end_matches('?');
+    if ["upcoming birthdays", "whose birthday is next", "any birthdays coming up", "birthdays coming up", "next birthday", "whose birthday is coming up", "who has a birthday soon"].contains(&t) {
+        return go("people birthdays".into());
+    }
+    if ["import contacts", "import my contacts", "import a contacts file", "import my address book"].contains(&t) {
+        return go("contacts import".into());
+    }
+    if ["my people", "people i know", "who do you know", "show my people", "my contacts"].contains(&t) {
+        return go("people".into());
+    }
+    None
+}
+
 fn notes(s: &str, raw: &str) -> Option<Reply> {
     if let Some(r) = named_lists(s, raw) {
+        return Some(r);
+    }
+    if let Some(r) = people_talk(s, raw) {
         return Some(r);
     }
     if let Some(r) = agenda(s, raw) {
@@ -1868,6 +1920,20 @@ mod tests {
         assert_eq!(eff("done call Anna"), Effect::Todo(Op::Done("call Anna".into())));
         assert!(!matches!(eff("clear my to do list"), Effect::Todo(_)), "asks first");
         assert!(matches!(eff("note buy milk"), Effect::None), "notes are still notes");
+    }
+
+    #[test]
+    fn people_in_plain_words() {
+        assert_eq!(eff("Anna's birthday is on 3 March"), Effect::People("birthday Anna|on 3 March".into()));
+        assert_eq!(eff("my mum's birthday is March 3rd"), Effect::People("birthday mum|March 3rd".into()));
+        assert_eq!(eff("Ben's email is ben@example.org"), Effect::People("email Ben|ben@example.org".into()));
+        assert_eq!(eff("keep in touch with Mum every 2 weeks"), Effect::People("every Mum|14".into()));
+        assert_eq!(eff("my birthday is june 3"), Effect::SetBirthday(6, 3), "your own birthday is still yours");
+        assert_eq!(eff("upcoming birthdays"), Effect::People("birthdays".into()));
+        crate::people::set_names(&[crate::people::Person::new("Mum")]);
+        assert_eq!(eff("I called mum"), Effect::People("met mum".into()));
+        assert!(!matches!(eff("I talked to my boss"), Effect::People(_)), "only people he knows");
+        assert_eq!(eff("when did I last talk to Mum"), Effect::People("last Mum".into()));
     }
 
     #[test]

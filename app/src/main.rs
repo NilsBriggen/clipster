@@ -4,6 +4,7 @@
 mod brain;
 mod backup;
 mod calendar;
+mod people;
 mod desk;
 mod find;
 mod plan;
@@ -172,6 +173,7 @@ struct App {
     clip_history: Vec<String>,
     pins: Vec<String>, // clipboard snippets pinned on the Desk (saved; the history isn't)
     reading: Vec<(String, String)>, // the reading list: (link, the day it was saved), newest first
+    people: Vec<people::Person>,    // birthdays, keeping in touch, email addresses
     calendars: Vec<String>,         // calendar links (private iCal addresses) and .ics files
     events: Vec<calendar::Event>,   // their next weeks, read in the background
     calendar_at: Option<Instant>,   // when they were last read
@@ -182,6 +184,7 @@ struct App {
     sample_reading: Vec<(String, String)>,
     sample_events: Vec<calendar::Event>,
     sample_calendars: Vec<String>,
+    sample_people: Vec<people::Person>,
     upkeep: Option<(Instant, upkeep::Report)>, // the last checkup
     sample_upkeep: upkeep::Report,              // made-up readings for screenshots
     upkeep_running: bool,
@@ -454,6 +457,7 @@ impl App {
             clip_history: vec![],
             pins: vec![],
             reading: vec![],
+            people: vec![],
             calendars: vec![],
             events: vec![],
             calendar_at: None,
@@ -473,6 +477,7 @@ impl App {
             backup_progress: None,
             dnd_restore: None,
             sample_events: sample_events(),
+            sample_people: sample_people(),
             sample_calendars: vec!["https://calendar.google.com/calendar/ical/you/private-x/basic.ics".into()],
             sample_reading: [("https://en.wikipedia.org/wiki/Paper_clip", "2026-11-07"), ("https://www.example.com/blog/how-to-run-a-meeting-that-ends-on-time?utm_source=news", "2026-11-05"), ("https://news.ycombinator.com/item?id=4711", "2026-11-02")].map(|(a, b)| (a.to_string(), b.to_string())).to_vec(),
             sample_clips: ["Printer code: 4711", "Meeting moved to 3 pm, room B", "https://example.com/quarterly-report", "Kind regards,\nSam", "SELECT * FROM paperclips WHERE bent = false;"].map(String::from).to_vec(),
@@ -695,11 +700,11 @@ impl App {
         };
         match &self.desk_sample {
             Some((t, k, f, c)) => {
-                let view = desk::View { timers: t.clone(), kind_time: k, focus_log: f, focus_now: Some(("the slides".into(), 18 * 60, 7 * 60, 40)), checkins: c, streaks: (4, 6, 31), status, prefs, clips: &self.sample_clips, pins: &self.sample_clips[..2], reading: &self.sample_reading, me: sample_me(), upkeep: Some((&self.sample_upkeep, 120)), upkeep_running: false, backup_check: upkeep::backup_check(true, Some(backup::now() - 9 * 86_400), backup::now(), true), backup: desk::Backup { sources: &self.backup_sources, target: "/run/media/you/BACKUP", last: Some(backup::now() - 9 * 86_400), result: "214 copied (1.3 GB), 4120 unchanged", progress: None }, events: &self.sample_events, calendars: &self.sample_calendars, calendar_note: "Checked 4 min ago".into() };
+                let view = desk::View { timers: t.clone(), kind_time: k, focus_log: f, focus_now: Some(("the slides".into(), 18 * 60, 7 * 60, 40)), checkins: c, streaks: (4, 6, 31), status, prefs, clips: &self.sample_clips, pins: &self.sample_clips[..2], reading: &self.sample_reading, me: sample_me(), upkeep: Some((&self.sample_upkeep, 120)), upkeep_running: false, backup_check: upkeep::backup_check(true, Some(backup::now() - 9 * 86_400), backup::now(), true), backup: desk::Backup { sources: &self.backup_sources, target: "/run/media/you/BACKUP", last: Some(backup::now() - 9 * 86_400), result: "214 copied (1.3 GB), 4120 unchanged", progress: None }, events: &self.sample_events, calendars: &self.sample_calendars, calendar_note: "Checked 4 min ago".into(), people: &self.sample_people };
                 self.desk.show(ctx, &view, look, near)
             }
             None => {
-                let view = desk::View { timers, kind_time: &self.kind_time, focus_log: &self.focus_log, focus_now, checkins: &self.checkin_days, streaks, status, prefs, clips: &self.clip_history, pins: &self.pins, reading: &self.reading, me: about_me(&self.facts, self.birthday, &self.stats, &self.unlocked, &self.highscores, self.friendship), upkeep: self.upkeep.as_ref().map(|(t, r)| (r, t.elapsed().as_secs())), upkeep_running: self.upkeep_running, backup_check: self.backup_check(), backup: desk::Backup { sources: &self.backup_sources, target: &self.backup_target, last: self.backup_last, result: &self.backup_result, progress: self.backup_progress }, events: &self.events, calendars: &self.calendars, calendar_note: self.calendar_note() };
+                let view = desk::View { timers, kind_time: &self.kind_time, focus_log: &self.focus_log, focus_now, checkins: &self.checkin_days, streaks, status, prefs, clips: &self.clip_history, pins: &self.pins, reading: &self.reading, me: about_me(&self.facts, self.birthday, &self.stats, &self.unlocked, &self.highscores, self.friendship), upkeep: self.upkeep.as_ref().map(|(t, r)| (r, t.elapsed().as_secs())), upkeep_running: self.upkeep_running, backup_check: self.backup_check(), backup: desk::Backup { sources: &self.backup_sources, target: &self.backup_target, last: self.backup_last, result: &self.backup_result, progress: self.backup_progress }, events: &self.events, calendars: &self.calendars, calendar_note: self.calendar_note(), people: &self.people };
                 self.desk.show(ctx, &view, look, near)
             }
         }
@@ -791,6 +796,140 @@ impl App {
             let _ = tx.send(Event::Calendar(events, problems));
             ctx.request_repaint();
         });
+    }
+
+    /// "add Anna", "birthday Anna|3 March", "email Anna|a@b.ch", "every mum|14", "met mum", "last mum", "mail Anna",
+    /// "forget Anna", "list", "birthdays", "import [file]".
+    fn people_command(&mut self, cmd: &str) -> Reply {
+        let (verb, arg) = cmd.split_once(' ').unwrap_or((cmd, ""));
+        let (name, value) = arg.split_once('|').map(|(a, b)| (a.trim(), b.trim())).unwrap_or((arg.trim(), ""));
+        let today = chrono::Local::now().date_naive();
+        let say = |pool: &str, who: &str| lines::pick(pool).replace("{x}", who);
+        let at = self.people.iter().position(|p| p.name.eq_ignore_ascii_case(name));
+        let r = match verb {
+            "add" if !name.is_empty() => match at {
+                Some(_) => Reply::say(format!("{name} is on your list already.")).mood(Mood::Wink),
+                None => {
+                    self.people.push(people::Person::new(name));
+                    Reply::say(say("person_added", name)).mood(Mood::Write)
+                }
+            },
+            "birthday" => match people::parse_birthday(value, today) {
+                Some(b) => {
+                    let i = at.unwrap_or_else(|| {
+                        self.people.push(people::Person::new(name));
+                        self.people.len() - 1
+                    });
+                    self.people[i].birthday = Some(b);
+                    Reply::say(say("birthday_set", &self.people[i].name).replace("{when}", &people::birthday_text(b))).mood(Mood::Gift).run("Upcoming birthdays", "people birthdays")
+                }
+                None => Reply::say(format!("When is {name}'s birthday? Try: {name}'s birthday is on 3 March")).mood(Mood::Think),
+            },
+            "email" if value.contains('@') && value.contains('.') && !value.contains(' ') => {
+                let i = at.unwrap_or_else(|| {
+                    self.people.push(people::Person::new(name));
+                    self.people.len() - 1
+                });
+                self.people[i].email = Some(value.to_string());
+                Reply::say(format!("Got it: {}'s email is {value}.", self.people[i].name)).mood(Mood::Write).run(&format!("Email {}", self.people[i].name), &format!("person mail {}", self.people[i].name))
+            }
+            "email" => Reply::say("That doesn't look like an email address.").mood(Mood::Think),
+            "every" => match value.parse::<u32>().ok().filter(|n| *n > 0) {
+                Some(days) => {
+                    let i = at.unwrap_or_else(|| {
+                        self.people.push(people::Person::new(name));
+                        self.people.len() - 1
+                    });
+                    self.people[i].every = Some(days);
+                    self.people[i].last.get_or_insert(today); // the clock starts now
+                    Reply::say(say("keep_in_touch_set", &self.people[i].name).replace("{n}", &days.to_string())).mood(Mood::Love)
+                }
+                None => Reply::say("How often? Try: keep in touch with mum every 2 weeks").mood(Mood::Think),
+            },
+            "met" => match at {
+                Some(i) => {
+                    self.people[i].last = Some(today);
+                    Reply::say(say("contact_logged", &self.people[i].name)).mood(Mood::Happy)
+                }
+                None => Reply::say(say("person_unknown", name)).mood(Mood::Think),
+            },
+            "last" => match at.map(|i| &self.people[i]) {
+                Some(p) => match p.last {
+                    Some(d) => Reply::say(say("last_contact", &p.name).replace("{n}", &(today - d).num_days().to_string())).mood(Mood::Think).run("I talked to them today", &format!("person met {}", p.name)),
+                    None => Reply::say(say("last_contact_never", &p.name)).mood(Mood::Think).run("I talked to them today", &format!("person met {}", p.name)),
+                },
+                None => Reply::say(say("person_unknown", name)).mood(Mood::Think),
+            },
+            "mail" => match at.map(|i| &self.people[i]) {
+                Some(p) if p.email.is_some() => Reply::say(format!("Writing to {}...", p.name)).mood(Mood::Write).effect(Effect::Open(format!("mailto:{}", p.email.clone().unwrap_or_default()))),
+                Some(p) => Reply::say(format!("I don't have {0}'s email address. Tell me: {0}'s email is …", p.name)).mood(Mood::Think),
+                None => Reply::say(say("person_unknown", name)).mood(Mood::Think),
+            },
+            "forget" => match at {
+                Some(i) => {
+                    let p = self.people.remove(i);
+                    Reply::say(say("person_forgotten", &p.name)).mood(Mood::Sad)
+                }
+                None => Reply::say(say("person_unknown", name)).mood(Mood::Think),
+            },
+            "import" => {
+                let path = arg.trim();
+                if path.is_empty() {
+                    // .vcf files at the top of Downloads, Documents and the desktop
+                    let found: Vec<std::path::PathBuf> = [dirs::download_dir(), dirs::document_dir(), dirs::desktop_dir()]
+                        .into_iter()
+                        .flatten()
+                        .flat_map(|d| std::fs::read_dir(d).into_iter().flatten().flatten().map(|e| e.path()))
+                        .filter(|p| p.extension().is_some_and(|x| x.eq_ignore_ascii_case("vcf")))
+                        .collect();
+                    match found.as_slice() {
+                        [] => return Reply::say(lines::pick("contacts_none_found")).mood(Mood::Think),
+                        [one] => return self.people_command(&format!("import {}", one.display())),
+                        many => {
+                            let mut r = Reply::say(format!("I found {} contacts files. Which one?", many.len())).mood(Mood::Think);
+                            for p in many.iter().take(5) {
+                                r = r.run(&p.file_name().unwrap_or_default().to_string_lossy(), &format!("contacts import {}", p.display()));
+                            }
+                            return r;
+                        }
+                    }
+                }
+                match std::fs::read_to_string(path) {
+                    Ok(text) => {
+                        let n = people::merge(&mut self.people, people::parse_vcf(&text));
+                        Reply::say(lines::pick("contacts_imported").replace("{n}", &n.to_string())).mood(Mood::Write).run("Upcoming birthdays", "people birthdays").run("Open You & me", "desk people")
+                    }
+                    Err(e) => Reply::say(format!("I couldn't read that file: {e}")).mood(Mood::Shock),
+                }
+            }
+            "birthdays" => {
+                let mut soon: Vec<(i64, &people::Person)> = self.people.iter().filter_map(|p| p.next_birthday(today).map(|(d, _)| (d, p))).filter(|(d, _)| *d <= 60).collect();
+                soon.sort_by_key(|s| s.0);
+                if soon.is_empty() {
+                    Reply::say("No birthdays in the next two months that I know of. Tell me: Anna's birthday is on 3 March.").mood(Mood::Think)
+                } else {
+                    let list: String = soon.iter().take(8).map(|(d, p)| format!("\n🎂 {} – {}", p.name, match d { 0 => "today!".to_string(), 1 => "tomorrow".to_string(), d => format!("in {d} days") })).collect();
+                    Reply::say(format!("Coming up:{list}")).mood(Mood::Gift).run("Open You & me", "desk people")
+                }
+            }
+            _ => {
+                if self.people.is_empty() {
+                    return Reply::say(lines::pick("people_empty")).mood(Mood::Think).run("Import contacts", "contacts import");
+                }
+                let mut text = format!("I know {} people.", self.people.len());
+                let mut soon: Vec<(i64, &people::Person)> = self.people.iter().filter_map(|p| p.next_birthday(today).map(|(d, _)| (d, p))).filter(|(d, _)| *d <= 30).collect();
+                soon.sort_by_key(|s| s.0);
+                for (d, p) in soon.iter().take(3) {
+                    text += &format!("\n🎂 {} in {d} days", p.name);
+                }
+                for p in self.people.iter().filter(|p| p.due(today).is_some()).take(3) {
+                    text += &format!("\n💬 You wanted to keep in touch with {}", p.name);
+                }
+                Reply::say(text).mood(Mood::Love).run("Open You & me", "desk people")
+            }
+        };
+        people::set_names(&self.people);
+        r
     }
 
     /// The Agenda's word on the calendars: when they were read, or what went wrong.
@@ -1397,7 +1536,7 @@ impl App {
         let unix = |at: &Instant| (std::time::SystemTime::now() + at.saturating_duration_since(Instant::now())).duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0);
         serde_json::json!({
             "tips_every": self.tips_every, "notice_clip": self.notice_clip, "notice_programs": self.notice_programs, "notice_windows": self.notice_windows, "checkin": self.checkin, "facts": self.facts, "kind_time": self.kind_time, "focus_log": self.focus_log, "desk_look": if self.desk_modern { "modern" } else { "classic" }, "checkin_days": self.checkin_days,
-            "pins": self.pins, "reading": self.reading, "calendars": self.calendars, "welcome_seen": self.welcome_seen, "backup_sources": self.backup_sources, "backup_target": self.backup_target, "backup_last": self.backup_last, "backup_result": self.backup_result, "dnd_restore": self.dnd_restore, "dnd": self.dnd, "wrapup": self.wrapup, "upkeep_day": self.upkeep_day, "focus_goal": self.focus_goal, "budgets": self.budgets,
+            "pins": self.pins, "reading": self.reading, "calendars": self.calendars, "people": self.people.iter().map(|p| p.to_json()).collect::<Vec<_>>(), "welcome_seen": self.welcome_seen, "backup_sources": self.backup_sources, "backup_target": self.backup_target, "backup_last": self.backup_last, "backup_result": self.backup_result, "dnd_restore": self.dnd_restore, "dnd": self.dnd, "wrapup": self.wrapup, "upkeep_day": self.upkeep_day, "focus_goal": self.focus_goal, "budgets": self.budgets,
             "notice_health": self.notice_health, "check_updates": self.check_updates, "update_told": self.update_told, "sounds": self.sounds, "breaks": self.breaks, "name": self.name,
             "hat": self.hat, "skin": self.skin, "friendship": self.friendship, "highscores": self.highscores, "birthday": self.birthday.map(|(m, d)| [m, d]), "stats": self.stats, "unlocked": self.unlocked, "explored": self.explored, "persona": if self.unhinged { "unhinged" } else { "boring" }, "anchor": self.anchor.or(self.saved_anchor).map(|a| [a.x, a.y]),
             "timers": self.timers.iter().map(|(at, l, every)| serde_json::json!([unix(at), l, every])).collect::<Vec<_>>(),
@@ -1424,6 +1563,8 @@ impl App {
         self.pins = serde_json::from_value(v["pins"].clone()).unwrap_or_default();
         self.reading = serde_json::from_value(v["reading"].clone()).unwrap_or_default();
         self.calendars = serde_json::from_value(v["calendars"].clone()).unwrap_or_default();
+        self.people = v["people"].as_array().into_iter().flatten().filter_map(people::Person::from_json).collect();
+        people::set_names(&self.people);
         self.welcome_seen = v["welcome_seen"].as_str().unwrap_or_default().to_string();
         if let Ok(sources) = serde_json::from_value(v["backup_sources"].clone()) {
             self.backup_sources = sources;
@@ -1803,6 +1944,13 @@ impl App {
                 self.desk_status = pool.map(lines::pick).unwrap_or_default();
                 silent = true;
             }
+            Effect::People(cmd) => {
+                r = self.people_command(&cmd);
+                if from_desk && matches!(cmd.split(' ').next(), Some("add" | "birthday" | "met" | "forget" | "email" | "every")) {
+                    self.desk_status = r.text.clone();
+                    silent = true;
+                }
+            }
             Effect::Calendar(cmd) => {
                 r = self.calendar_command(ctx, &cmd);
                 if from_desk && matches!(cmd.split(' ').next(), Some("add" | "remove" | "refresh")) {
@@ -2026,6 +2174,31 @@ impl App {
                     .run("Snooze 5 minutes", &format!("timer 5m {label}"))
                     .btn("Got it, thanks", Act::Hide),
             );
+        }
+        // people: once a day after 8:00, a birthday coming up (or today), or someone you wanted to keep in touch with
+        let day_num = chrono::Datelike::num_days_from_ce(&chrono::Local::now().date_naive()) as u64;
+        if chrono::Timelike::hour(&chrono::Local::now()) >= 8 && self.stats.get("people_day") != Some(&day_num) && t > 120.0 && !self.people.is_empty() && self.screenshot.is_none() {
+            self.stats.insert("people_day".into(), day_num);
+            let today = chrono::Local::now().date_naive();
+            let birthday = self.people.iter().filter_map(|p| p.next_birthday(today).map(|(d, _)| (d, p))).filter(|(d, _)| *d == 0 || *d == 3).min_by_key(|(d, _)| *d).map(|(d, p)| (d, p.clone()));
+            let due = self.people.iter().filter_map(|p| p.due(today).map(|n| (n, p.clone()))).max_by_key(|(n, _)| *n);
+            if let Some((d, p)) = birthday {
+                let text = if d == 0 { lines::pick("birthday_today").replace("{x}", &p.name) } else { lines::pick("birthday_soon").replace("{x}", &p.name).replace("{n}", &d.to_string()) };
+                let mut r = Reply::say(text).mood(Mood::Gift);
+                if let Some(e) = &p.email {
+                    r = r.btn(&format!("Email {}", p.name), Act::Open(format!("mailto:{e}?subject=Happy%20birthday!")));
+                }
+                if d > 0 {
+                    r = r.run("To-do: a present", &format!("todo present for {} by {}", p.name, (today + chrono::Days::new(d as u64 - 1)).format("%Y-%m-%d")));
+                }
+                self.pipe_up(r.btn("Thanks", Act::Hide));
+            } else if let Some((n, p)) = due {
+                let mut r = Reply::say(lines::pick("keep_in_touch_due").replace("{x}", &p.name).replace("{n}", &n.to_string())).mood(Mood::Love).run("Talked to them", &format!("person met {}", p.name));
+                if p.email.is_some() {
+                    r = r.run(&format!("Email {}", p.name), &format!("person mail {}", p.name));
+                }
+                self.pipe_up(r.btn("Later", Act::Hide));
+            }
         }
         // calendars: read again every 15 minutes; a heads-up 10 minutes before each timed event (like a reminder, it
         // comes through quiet mode and focus)
@@ -3182,6 +3355,18 @@ fn open(target: &str) -> std::io::Result<()> {
         return if cfg!(windows) { sys::open_with_desktop(target) } else { sys::command("gtk-launch").arg(target).spawn().map(|_| ()) };
     }
     sys::open_with_desktop(target)
+}
+
+/// Made-up people for screenshots of You & me.
+fn sample_people() -> Vec<people::Person> {
+    let today = chrono::Local::now().date_naive();
+    let soon = today + chrono::Days::new(3);
+    vec![
+        people::Person { birthday: Some((Some(1990), chrono::Datelike::month(&soon), chrono::Datelike::day(&soon))), email: Some("anna@example.com".into()), ..people::Person::new("Anna Muster") },
+        people::Person { every: Some(14), last: Some(today - chrono::Days::new(16)), ..people::Person::new("Mum") },
+        people::Person { birthday: Some((None, 7, 4)), email: Some("ben@example.org".into()), ..people::Person::new("Ben Keller") },
+        people::Person { every: Some(30), last: Some(today - chrono::Days::new(3)), birthday: Some((None, 12, 24)), ..people::Person::new("Cleo") },
+    ]
 }
 
 /// Made-up appointments for screenshots of the Agenda.

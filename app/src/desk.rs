@@ -26,6 +26,7 @@ pub fn tab(name: &str) -> Option<usize> {
         t if t.starts_with("list ") => "todo".to_string(), // "list shopping": a named list on the To-do tab
         "links" => "clipboard".to_string(),                  // the saved links page
         "reminders" | "notes" | "calendar" | "calendars" => "agenda".to_string(),
+        "people" => "you".to_string(),
         t => t.to_string(),
     };
     match t.parse::<usize>() {
@@ -56,6 +57,7 @@ pub struct View<'a> {
     pub events: &'a [crate::calendar::Event], // the calendars' next weeks
     pub calendars: &'a [String],              // their links or files
     pub calendar_note: String,                // "Checked 3 min ago", or what went wrong
+    pub people: &'a [crate::people::Person],
 }
 
 /// What the Backup page shows.
@@ -146,6 +148,9 @@ pub struct Desk {
     list_tab: Option<String>,          // the To-do tab shows this named list instead of the to-dos
     clip_page: usize,                  // the Clipboard tab: Copies, Saved links
     calendars_open: bool,              // the Agenda tab shows its calendar links
+    me_page: usize,                    // You & me: You, People
+    person_name: String,
+    person_birthday: String,
     calendar_text: String,
     list_text: String,
     forget_all: bool,                  // the You & me tab's "are you sure?"
@@ -183,6 +188,9 @@ impl Desk {
         self.planning = name == "plan";
         self.list_tab = name.strip_prefix("list ").map(|l| l.trim().to_lowercase());
         self.calendars_open = name == "calendars";
+        if name == "people" || name == "you" {
+            self.me_page = usize::from(name == "people");
+        }
         if name == "links" || name == "clipboard" {
             self.clip_page = usize::from(name == "links");
         }
@@ -1206,6 +1214,93 @@ impl Desk {
         p.text(pos2(c.max.x, c.max.y - ctl / 2.0), Align2::RIGHT_CENTER, "The history stays in memory only. Pinned snippets are saved.", look.font(11.0), look.dim());
     }
 
+    /// The people you told him about: birthdays, keeping in touch, email; add someone or import a contacts file.
+    fn people_page(&mut self, ui: &mut Ui, c: Rect, view: &View, look: Look, out: &mut Vec<String>) {
+        let p = ui.painter().clone();
+        let ctl = look.ctl();
+        let today = chrono::Local::now().date_naive();
+        let card = Rect::from_min_max(c.min, pos2(c.max.x, c.max.y - 2.0 * ctl - 22.0));
+        look.group(&p, card, "People");
+        if view.people.is_empty() {
+            let empty = crate::lines::all("people_empty").first().cloned().unwrap_or_default();
+            let g = p.layout(empty, look.font(12.5), look.dim(), card.width() - 60.0);
+            p.galley(pos2(card.center().x - g.size().x / 2.0, card.min.y + 70.0), g, look.dim());
+        }
+        // soonest birthday first, then the rest by name
+        let mut order: Vec<(usize, &crate::people::Person)> = view.people.iter().enumerate().collect();
+        order.sort_by_key(|(_, q)| (q.next_birthday(today).map_or(i64::MAX, |b| b.0), q.name.to_lowercase()));
+        let pitch = ctl + 10.0;
+        let area = Rect::from_min_max(pos2(card.min.x + 12.0, card.min.y + 30.0), pos2(card.max.x - 12.0, card.max.y - 8.0));
+        let fits = (area.height() / pitch) as usize;
+        let first = self.first_row(ui, "people", card, order.len(), fits);
+        for (n, (i, q)) in order.iter().skip(first).take(fits).enumerate() {
+            let y = area.min.y + n as f32 * pitch;
+            let cy = y + ctl / 2.0;
+            let mut bx = area.max.x;
+            let mut button = |label: &str, cmd: String, key: &str| {
+                let w = if label == "✕" { 26.0 } else { p.layout_no_wrap(label.to_string(), look.bold(12.0), look.text()).size().x + 20.0 };
+                bx -= w;
+                if look.button(ui, Rect::from_min_size(pos2(bx, y), vec2(w, ctl)), Id::unique((key, *i)), label, true).clicked() {
+                    out.push(cmd);
+                }
+                bx -= 6.0;
+            };
+            button("✕", format!("person forget {}", q.name), "person-x");
+            if q.email.is_some() {
+                button("Email", format!("person mail {}", q.name), "person-mail");
+            }
+            if q.every.is_some() {
+                button("Talked today", format!("person met {}", q.name), "person-met");
+            }
+            // name in bold, then what's coming: the birthday, keeping in touch
+            let mut bits = vec![];
+            if let (Some(b), Some((d, age))) = (q.birthday, q.next_birthday(today)) {
+                let when = match d {
+                    0 => "birthday today!".to_string(),
+                    1 => "birthday tomorrow".to_string(),
+                    d if d <= 30 => format!("birthday in {d} days"),
+                    _ => format!("birthday {}", crate::people::birthday_text((None, b.1, b.2))),
+                };
+                bits.push(match age { Some(a) if d <= 30 => format!("{when} (turns {a})"), _ => when });
+            }
+            if let (Some(every), Some(last)) = (q.every, q.last) {
+                let since = (today - last).num_days();
+                bits.push(format!("every {every} days · last {}", match since { 0 => "today".to_string(), 1 => "yesterday".to_string(), d => format!("{d} days ago") }));
+            }
+            let gn = clipped(&p, &q.name, look.bold(12.5), look.text(), (bx - area.min.x) * 0.45);
+            let nw = gn.size().x;
+            p.galley(pos2(area.min.x, cy - gn.size().y / 2.0), gn, look.text());
+            let due = q.due(today).is_some() || q.next_birthday(today).is_some_and(|b| b.0 <= 3);
+            let gb = clipped(&p, &bits.join(" · "), look.font(12.0), if due { look.accent() } else { look.dim() }, bx - area.min.x - nw - 16.0);
+            p.galley(pos2(area.min.x + nw + 12.0, cy - gb.size().y / 2.0), gb, if due { look.accent() } else { look.dim() });
+            if n + 1 < fits && first + n + 1 < order.len() {
+                look.divider(&p, area.min.x, area.max.x, y + pitch - 5.0);
+            }
+        }
+        scrollbar(&p, look, card, first, fits, order.len());
+        // add someone
+        let y = card.max.y + 12.0;
+        let add = Rect::from_min_size(pos2(c.max.x - 64.0, y), vec2(64.0, ctl));
+        let bday = Rect::from_min_size(pos2(add.min.x - 8.0 - 150.0, y), vec2(150.0, ctl));
+        p.text(pos2(c.min.x, y + ctl / 2.0), Align2::LEFT_CENTER, "Name:", look.font(12.5), look.text());
+        let n = look.input(ui, Rect::from_min_max(pos2(c.min.x + 48.0, y), pos2(bday.min.x - 70.0, y + ctl)), Id::unique("person-name"), &mut self.person_name, "Anna");
+        p.text(pos2(bday.min.x - 62.0, y + ctl / 2.0), Align2::LEFT_CENTER, "birthday", look.font(12.5), look.text());
+        let b = look.input(ui, bday, Id::unique("person-bday"), &mut self.person_birthday, "3 March");
+        let enter = (n.lost_focus() || b.lost_focus()) && ui.input(|i| i.key_pressed(egui::Key::Enter));
+        let name = self.person_name.trim().to_string();
+        if (look.button(ui, add, Id::unique("person-add"), "Add", !name.is_empty()).clicked() || enter) && !name.is_empty() {
+            let bd = self.person_birthday.trim();
+            out.push(if bd.is_empty() { format!("person add {name}") } else { format!("person birthday {name}|{bd}") });
+            self.person_name.clear();
+            self.person_birthday.clear();
+        }
+        let y2 = y + ctl + 10.0;
+        if look.button(ui, Rect::from_min_size(pos2(c.min.x, y2), vec2(140.0, ctl)), Id::unique("person-import"), "Import contacts…", true).clicked() {
+            out.push("contacts import".into());
+        }
+        p.text(pos2(c.max.x, y2 + ctl / 2.0), Align2::RIGHT_CENTER, "say \"keep in touch with mum every 2 weeks\" or \"I called mum\"", look.font(11.0), look.dim());
+    }
+
     /// The reading list: each link with Open and ✕.
     fn saved_links(&mut self, ui: &mut Ui, c: Rect, view: &View, look: Look, out: &mut Vec<String>) {
         let p = ui.painter().clone();
@@ -1254,6 +1349,19 @@ impl Desk {
     /// What he keeps about you: facts, taught phrases, achievements, scores and friendship.
     fn you_and_me(&mut self, ui: &mut Ui, c: Rect, view: &View, look: Look, out: &mut Vec<String>) {
         let p = ui.painter().clone();
+        let mut x = c.min.x;
+        let label = format!("People ({})", view.people.len());
+        for (i, name) in ["You", label.as_str()].iter().enumerate() {
+            let w = p.layout_no_wrap(name.to_string(), look.bold(12.5), look.text()).size().x + 28.0;
+            if look.tab(ui, Rect::from_min_size(pos2(x, c.min.y), vec2(w, look.tab_h())), name, self.me_page == i).clicked() {
+                self.me_page = i;
+            }
+            x += w + 6.0;
+        }
+        let c = Rect::from_min_max(pos2(c.min.x, c.min.y + look.tab_h() + 10.0), c.max);
+        if self.me_page == 1 {
+            return self.people_page(ui, c, view, look, out);
+        }
         let (ctl, half) = (look.ctl(), ((c.width() - 12.0) / 2.0).round());
         let first_line = |pool: &str| crate::lines::all(pool).first().cloned().unwrap_or_default();
         let me = &view.me;

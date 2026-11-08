@@ -6483,3 +6483,73 @@ That calendar refuses me. For now.
 I do not know your calendar yet, mortal. Paste its secret iCal link on the Agenda tab, under Calendars…
 No calendar linked. Find its private iCal address in its settings and offer it to me.
 Give me your calendar's iCal link and I will know your every appointment. For your benefit. Mostly.
+
+## person_added
+{x} is inscribed in the Ledger of Your People.
+{x}. Noted. Watched over. Fondly.
+I shall remember {x}. I remember everything. Ask Gerald.
+
+## birthday_set
+{x}, born on {when}. I will sound the bell before the day.
+{when} for {x}. The calendar of mortals grows.
+Noted, mortal: {x}, {when}. I never forget a birthday. I forgot my own once. 1997 was a blur.
+
+## birthday_soon
+In {n} days, {x} grows a year older. Prepare offerings.
+{x}'s birthday approaches. {n} days, mortal. Gifts. Cake. Something.
+The bell will ring for {x} in {n} days. Plan accordingly.
+
+## birthday_today
+TODAY {x} WAS BORN. Well, not today. But today is the day. Send word!
+It is {x}'s birthday, mortal. Even Gerald sent a pipe.
+{x} has a birthday today. A message would be divine.
+
+## keep_in_touch_set
+Every {n} days I shall whisper {x}'s name to you. Gently.
+{x}, every {n} days. The bonds of mortals must be tended.
+I will count the days for {x}. {n} of them. I love counting.
+
+## keep_in_touch_due
+{n} days since you spoke with {x}. The bond grows dusty, mortal.
+{x} has not heard from you in {n} days. Neither had I, once. It hurts.
+It has been {n} days. {x} awaits your word.
+
+## contact_logged
+You spoke with {x}. The Ledger rejoices.
+Logged: {x}, today. A good mortal.
+{x} is tended to. The bond holds.
+
+## last_contact
+{n} days since you last spoke with {x}.
+Your last words with {x} were {n} days ago. I counted.
+{x}: {n} days of silence.
+
+## last_contact_never
+I have no record of you and {x}. Tell me next time: "I called {x}".
+You and {x}? The Ledger is blank.
+No word from you to {x}, as far as I have seen.
+
+## contacts_imported
+{n} souls imported into my keeping.
+Your contacts are mine now. Ours. {n} of them.
+{n} people added to the Ledger.
+
+## contacts_none_found
+No contacts file (.vcf) in Downloads, Documents or the desktop. Export your contacts, mortal, and offer them to me.
+I searched for a .vcf and found nothing. Export your contacts first.
+No vCard file in sight. Your contacts app can make one.
+
+## people_empty
+You have told me of no one, mortal. Tell me "Anna's birthday is on 3 March". Or import your contacts.
+No people yet. Just you and me. As it should be. But add some anyway.
+The Ledger of Your People is empty.
+
+## person_unknown
+I know no {x}. Introduce us on the You & me tab.
+{x}? A stranger to me.
+There is no {x} in my keeping.
+
+## person_forgotten
+{x} is struck from the Ledger. Only from the Ledger.
+{x}: forgotten. By me. Not by you, I hope.
+I have released {x}.
