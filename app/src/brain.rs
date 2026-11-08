@@ -233,6 +233,8 @@ pub fn exact(input: &str) -> Option<Reply> {
             return Some(net(Query::Crypto(coin.into(), vs.into()), "Checking the crypto rollercoaster..."));
         }
         "iss" => return Some(net(Query::Iss, "Looking up... way up...")),
+        // shows the comment for a window title, e.g. "window Untitled 1 - LibreOffice Writer" (for trying it out)
+        "window" => return Some(lines::window_kind(rest).map(|k| react_window(&k)).unwrap_or_else(|| Reply::say("No comment on that window."))),
         "updates" | "update" => return Some(net(Query::Update, "Checking for a newer me...")),
         "holiday" | "holidays" => return Some(net(Query::Holiday, "Checking the calendar for days off...")),
         "dog" | "cat" | "fox" => return Some(net(Query::Animal(head.clone()), "Finding a cute one...")),
@@ -568,6 +570,20 @@ pub fn react_clip(text: &str) -> Option<Reply> {
     None
 }
 
+
+/// Window kinds that get a comment only after a long stretch (20 minutes), never right away.
+pub const TIME_SINKS: &[&str] = &["video", "social"];
+
+/// Window comments: at most one every 3 minutes, and the same kind at most every 30.
+pub fn window_ok(last_any: Option<std::time::Instant>, last_same: Option<std::time::Instant>, now: std::time::Instant) -> bool {
+    let since = |t: std::time::Instant, secs| now.duration_since(t) >= std::time::Duration::from_secs(secs);
+    last_any.is_none_or(|t| since(t, 180)) && last_same.is_none_or(|t| since(t, 1800))
+}
+
+/// What to say about the window kind `kind` (a `## window <kind>` section).
+pub fn react_window(kind: &str) -> Reply {
+    lines::reply(&format!("window {kind}")).btn("Thanks, Clipster", Act::Hide)
+}
 
 pub fn react_program(name: &str) -> Reply {
     let r = lines::program(name).unwrap_or_else(|| Reply::say("Something just started.")).mood(Mood::Shock);
@@ -1207,6 +1223,17 @@ pub fn url_encode(s: &str) -> String {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn window_comments_keep_their_distance() {
+        use std::time::{Duration, Instant};
+        let now = Instant::now() + Duration::from_secs(4000);
+        let ago = |s| Some(now - Duration::from_secs(s));
+        assert!(super::window_ok(None, None, now));
+        assert!(!super::window_ok(ago(60), None, now), "one every 3 minutes");
+        assert!(!super::window_ok(ago(600), ago(600), now), "the same kind every 30 minutes");
+        assert!(super::window_ok(ago(600), ago(2000), now));
+    }
+
     use super::*;
 
     #[test]

@@ -118,6 +118,11 @@ struct App {
     tips_every: u64, // minutes, 0 = never
     notice_clip: bool,
     notice_programs: bool,
+    notice_windows: bool,                      // comment on what the active window is
+    window_kind: Option<String>,               // the active window's kind (`## window <kind>`), and since when
+    window_since: Instant,
+    window_said: std::collections::HashMap<String, Instant>, // when each kind last got a comment
+    window_last: Option<Instant>,                             // when any window comment was last made
     notice_health: bool,
     quiet_until: Option<Instant>,
     next_tip: Instant,
@@ -167,8 +172,10 @@ impl App {
     fn new(cc: &eframe::CreationContext, screenshot: Option<String>, say: Option<String>, play: Option<String>) -> Self {
         setup_style(&cc.egui_ctx);
         let (tx, rx) = channel();
+        let tracker = if screenshot.is_none() { pointer::start(&cc.egui_ctx) } else { None };
         if screenshot.is_none() {
-            watch::spawn(tx.clone(), cc.egui_ctx.clone());
+            // the KWin script reports window titles on KDE; everywhere else the watcher asks for them
+            watch::spawn(tx.clone(), cc.egui_ctx.clone(), cfg!(windows) || tracker.is_none());
             if std::env::var_os("APPIMAGE").is_some() && sys::autostart_path().exists() {
                 let _ = sys::set_autostart(true); // a new AppImage (or a moved one) keeps starting at login
             }
@@ -220,6 +227,11 @@ impl App {
             tips_every: 10,
             notice_clip: true,
             notice_programs: true,
+            notice_windows: true,
+            window_kind: None,
+            window_since: Instant::now(),
+            window_said: Default::default(),
+            window_last: None,
             notice_health: true,
             check_updates: true,
             next_update_check: Instant::now() + Duration::from_secs(45), // after the greeting, not during it
@@ -235,7 +247,7 @@ impl App {
             sent_offset: Vec2::ZERO,
             anchor: None,
             settle: 0,
-            tracker: if screenshot.is_none() { pointer::start(&cc.egui_ctx) } else { None },
+            tracker,
             screenshot,
             say,
             frames: 0,
@@ -307,6 +319,34 @@ impl App {
         self.show(r);
         self.sound("message");
         self.auto_hide = Some(Instant::now() + reading_time(&self.balloon.as_ref().map(|b| b.text.clone()).unwrap_or_default()));
+    }
+
+    /// The window you're working in changed (or its title did): maybe say something about it.
+    fn window_title(&mut self, title: &str) {
+        if title.eq_ignore_ascii_case("clipster") || games::NAMES.iter().any(|(_, t)| *t == title) {
+            return; // his own windows
+        }
+        let kind = lines::window_kind(title);
+        if kind != self.window_kind {
+            (self.window_kind, self.window_since) = (kind.clone(), Instant::now());
+        }
+        if let Some(k) = kind.filter(|k| !brain::TIME_SINKS.contains(&k.as_str())) {
+            self.window_comment(&k);
+        }
+    }
+
+    fn window_comment(&mut self, kind: &str) {
+        let now = Instant::now();
+        // not in the first minute (you just started him), not over a conversation, and not too often
+        if !self.notice_windows || self.t() < 60.0 || self.balloon.is_some() || self.quiet() || !self.input.is_empty() {
+            return;
+        }
+        if !brain::window_ok(self.window_last, self.window_said.get(kind).copied(), now) {
+            return;
+        }
+        self.window_last = Some(now);
+        self.window_said.insert(kind.to_string(), now);
+        self.pipe_up(brain::react_window(kind));
     }
 
     /// Clipster watches you play: comments, and cheers for high scores.
@@ -452,7 +492,7 @@ impl App {
                 Reply::say(lines::pick("onboard_manners")).mood(Mood::Sly).run("Comment away", "onboard manners yes").run("Keep quiet", "onboard manners no")
             }
             "manners" => {
-                (self.notice_clip, self.notice_programs) = (choice == "yes", choice == "yes");
+                (self.notice_clip, self.notice_programs, self.notice_windows) = (choice == "yes", choice == "yes", choice == "yes");
                 self.onboarding = Some(3);
                 Reply::say(lines::pick("onboard_autostart")).mood(Mood::Love).run("Yes, start with my computer", "onboard autostart yes").run("Not now", "onboard autostart no")
             }
@@ -583,7 +623,7 @@ impl App {
     fn snapshot(&self) -> String {
         let unix = |at: &Instant| (std::time::SystemTime::now() + at.saturating_duration_since(Instant::now())).duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0);
         serde_json::json!({
-            "tips_every": self.tips_every, "notice_clip": self.notice_clip, "notice_programs": self.notice_programs,
+            "tips_every": self.tips_every, "notice_clip": self.notice_clip, "notice_programs": self.notice_programs, "notice_windows": self.notice_windows,
             "notice_health": self.notice_health, "check_updates": self.check_updates, "update_told": self.update_told, "sounds": self.sounds, "breaks": self.breaks, "name": self.name,
             "hat": self.hat, "skin": self.skin, "friendship": self.friendship, "highscores": self.highscores, "birthday": self.birthday.map(|(m, d)| [m, d]), "stats": self.stats, "unlocked": self.unlocked, "explored": self.explored, "persona": if self.unhinged { "unhinged" } else { "boring" }, "anchor": self.anchor.or(self.saved_anchor).map(|a| [a.x, a.y]),
             "timers": self.timers.iter().map(|(at, l, every)| serde_json::json!([unix(at), l, every])).collect::<Vec<_>>(),
@@ -597,6 +637,7 @@ impl App {
         let b = |k: &str, d: bool| v[k].as_bool().unwrap_or(d);
         self.tips_every = v["tips_every"].as_u64().unwrap_or(self.tips_every);
         (self.notice_clip, self.notice_programs, self.notice_health) = (b("notice_clip", true), b("notice_programs", true), b("notice_health", true));
+        self.notice_windows = b("notice_windows", true);
         (self.sounds, self.breaks, self.check_updates) = (b("sounds", true), b("breaks", true), b("check_updates", true));
         self.update_told = v["update_told"].as_str().unwrap_or("").to_string();
         self.name = v["name"].as_str().unwrap_or("").to_string();
@@ -930,6 +971,7 @@ impl App {
                     }
                 }
                 Event::Program(p) if self.notice_programs => self.pipe_up(brain::react_program(&p)),
+                Event::Title(t) => self.window_title(&t),
                 Event::Battery(p) if self.notice_health => self.pipe_up(brain::react_battery(p)),
                 Event::Busy(l) if self.notice_health => self.pipe_up(brain::react_busy(l)),
                 Event::Update(v) if net::newer(&v, env!("CARGO_PKG_VERSION")) => self.update = Some(v),
@@ -953,6 +995,15 @@ impl App {
                 self.update_told = v.clone();
                 self.sound("message");
                 self.show(net::update_reply(&v));
+            }
+        }
+        // what you're working in: titles from the KWin script, and long stretches on video or social sites
+        if let Some(t) = self.tracker.as_ref().and_then(|tr| tr.take_title()) {
+            self.window_title(&t);
+        }
+        if let Some(k) = self.window_kind.clone().filter(|k| brain::TIME_SINKS.contains(&k.as_str())) {
+            if now.duration_since(self.window_since) > Duration::from_secs(20 * 60) {
+                self.window_comment(&k);
             }
         }
         // comments he made on his own close by themselves, but not while you're reading (pointer on him) or typing
@@ -1063,6 +1114,7 @@ impl App {
                 });
                 ui.checkbox(&mut self.notice_clip, "Comment on things I copy");
                 ui.checkbox(&mut self.notice_programs, "Comment on programs I open");
+                ui.checkbox(&mut self.notice_windows, "Comment on what I'm doing (window titles stay on this computer)");
                 ui.checkbox(&mut self.notice_health, "Warn me about battery and a busy computer");
                 ui.checkbox(&mut self.check_updates, "Tell me when a new version is out");
                 ui.checkbox(&mut self.sounds, "Play sounds (alarms and pop-ups)");

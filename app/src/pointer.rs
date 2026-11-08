@@ -19,6 +19,7 @@ fn moved_to(pos: &Shared, x: f32, y: f32, ctx: &eframe::egui::Context) {
 pub struct Tracker {
     pub pos: Shared,
     summoned: Arc<AtomicBool>,
+    title: Arc<Mutex<Option<String>>>, // the active window's new title, until read
     #[cfg(target_os = "linux")]
     conn: zbus::blocking::Connection,
     #[cfg(windows)]
@@ -29,6 +30,11 @@ impl Tracker {
     /// True once after each press of the shortcut.
     pub fn take_summon(&self) -> bool {
         self.summoned.swap(false, Ordering::Relaxed)
+    }
+
+    /// The active window's title, once after each change (KDE only; elsewhere `watch` polls it).
+    pub fn take_title(&self) -> Option<String> {
+        self.title.lock().unwrap_or_else(|e| e.into_inner()).take()
     }
 }
 
@@ -54,9 +60,9 @@ pub fn start(_ctx: &eframe::egui::Context) -> Option<Tracker> {
 mod kwin {
     use super::{Shared, Tracker};
     use std::sync::atomic::{AtomicBool, Ordering};
-    use std::sync::Arc;
+    use std::sync::{Arc, Mutex};
 
-    struct Sink(Shared, Arc<AtomicBool>, eframe::egui::Context);
+    struct Sink(Shared, Arc<AtomicBool>, eframe::egui::Context, Arc<Mutex<Option<String>>>);
 
     #[zbus::interface(name = "org.clipster.Pointer")]
     impl Sink {
@@ -72,6 +78,11 @@ mod kwin {
         fn summon(&self) {
             self.1.store(true, Ordering::Relaxed);
             self.2.request_repaint();
+        }
+
+        /// The window you're working in got focus or a new title.
+        fn title(&self, t: &str) {
+            *self.3.lock().unwrap_or_else(|e| e.into_inner()) = Some(t.to_string());
         }
     }
 
@@ -96,6 +107,18 @@ mod kwin {
         workspace.windowList().forEach(function (w) { if (w.resourceClass == "clipster") workspace.activeWindow = w; });
         callDBus("org.clipster.Pointer", "/Pointer", "org.clipster.Pointer", "Summon");
     });
+    // the window you're working in, for "it looks like you're writing a letter" (titles stay on this computer)
+    function title(w) {
+        if (!w || w.resourceClass == "clipster") return;
+        callDBus("org.clipster.Pointer", "/Pointer", "org.clipster.Pointer", "Title", w.caption || "");
+    }
+    function follow(w) {
+        if (w) w.captionChanged.connect(function () { if (workspace.activeWindow == w) title(w); });
+    }
+    workspace.windowList().forEach(follow);
+    workspace.windowAdded.connect(follow);
+    workspace.windowActivated.connect(title);
+    title(workspace.activeWindow);
     workspace.cursorPosChanged.connect(function () {
         const now = Date.now();
         if (now - last < 30) return;
@@ -111,11 +134,12 @@ mod kwin {
     pub fn start(ctx: &eframe::egui::Context) -> Option<Tracker> {
         let pos: Shared = Default::default();
         let summoned = Arc::new(AtomicBool::new(false));
+        let title = Arc::new(Mutex::new(None));
         let conn = zbus::blocking::connection::Builder::session()
             .ok()?
             .name("org.clipster.Pointer")
             .ok()?
-            .serve_at("/Pointer", Sink(pos.clone(), summoned.clone(), ctx.clone()))
+            .serve_at("/Pointer", Sink(pos.clone(), summoned.clone(), ctx.clone(), title.clone()))
             .ok()?
             .build()
             .ok()?;
@@ -130,7 +154,7 @@ mod kwin {
             .deserialize()
             .ok()?;
         conn.call_method(Some("org.kde.KWin"), format!("/Scripting/Script{id}").as_str(), Some("org.kde.kwin.Script"), "run", &()).ok()?;
-        Some(Tracker { pos, summoned, conn })
+        Some(Tracker { pos, summoned, title, conn })
     }
 }
 
@@ -161,6 +185,6 @@ mod windows {
                 std::thread::sleep(std::time::Duration::from_millis(40));
             }
         });
-        Some(Tracker { pos, summoned, stop })
+        Some(Tracker { pos, summoned, title: Default::default(), stop })
     }
 }

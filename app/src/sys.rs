@@ -94,6 +94,28 @@ pub mod win {
     extern "system" {
         pub fn GetCursorPos(p: *mut Point) -> i32;
         pub fn GetAsyncKeyState(key: i32) -> i16;
+        pub fn GetForegroundWindow() -> isize;
+        pub fn GetWindowTextW(w: isize, text: *mut u16, max: i32) -> i32;
+    }
+}
+
+// ---------- what you're working in ----------
+
+/// The title of the window you're working in (Windows directly, X11 through `xprop`). `None` when unknown.
+/// It never leaves this computer.
+pub fn active_title() -> Option<String> {
+    #[cfg(windows)]
+    {
+        let mut buf = [0u16; 512];
+        let n = unsafe { win::GetWindowTextW(win::GetForegroundWindow(), buf.as_mut_ptr(), buf.len() as i32) };
+        (n > 0).then(|| String::from_utf16_lossy(&buf[..n as usize]))
+    }
+    #[cfg(not(windows))]
+    {
+        let out = |args: &[&str]| command("xprop").args(args).output().ok().map(|o| String::from_utf8_lossy(&o.stdout).into_owned());
+        let id = out(&["-root", "_NET_ACTIVE_WINDOW"])?.split_whitespace().last()?.to_string(); // "… window id # 0x3a00007"
+        let title = out(&["-id", &id, "_NET_WM_NAME"])?.split_once(" = ")?.1.trim().trim_matches('"').to_string();
+        (!title.is_empty()).then_some(title)
     }
 }
 

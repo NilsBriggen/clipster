@@ -2,7 +2,8 @@
 //! `~/.config/clipster/lines.txt` (things they taught him). The format, one item per line:
 //!
 //! ```text
-//! ## name             a section; "chat <id>" = conversation topic, "program <id>" = program reaction
+//! ## name             a section; "chat <id>" = conversation topic, "program <id>" = program reaction,
+//!                     "window <kind>" = reaction to the active window's title (triggers are lowercase pieces of titles)
 //! > a | b             trigger phrases (whole words, anywhere in the tidied sentence)
 //! = a | b             exact triggers (the whole tidied sentence)
 //! ~ i am * | i feel *  sentence patterns ("pattern <id>" sections): `*` captures words, replies use {x}
@@ -213,7 +214,8 @@ pub fn parse(text: &str, user: bool, out: &mut Vec<Section>) -> Vec<String> {
             continue;
         };
         let s = &mut out[i];
-        let program = s.name.starts_with("program ");
+        // process names and window-title pieces are matched as they are, not tidied like sentences
+        let program = ["program ", "window ", "answer "].iter().any(|p| s.name.starts_with(p));
         // triggers are tidied exactly like what people type, so "what's" in the file matches "whats" typed
         let mut list = |rest: &str, exact: bool| -> Vec<String> {
             let mut out = vec![];
@@ -498,6 +500,20 @@ pub fn programs() -> Vec<String> {
     db().iter().filter(|s| s.name.starts_with("program ")).flat_map(|s| s.triggers.clone()).collect()
 }
 
+/// Which `## window <kind>` a window title belongs to: the longest matching piece wins.
+pub fn window_kind(title: &str) -> Option<String> {
+    kind_in(&db(), title)
+}
+
+fn kind_in(db: &[Section], title: &str) -> Option<String> {
+    let t = title.to_lowercase();
+    db.iter()
+        .filter_map(|s| s.name.strip_prefix("window ").filter(|_| !s.lines.is_empty()).map(|k| (k, s)))
+        .flat_map(|(k, s)| s.triggers.iter().filter(|tr| t.contains(&tr.to_lowercase())).map(move |tr| (tr.len(), k)))
+        .max_by_key(|(n, _)| *n)
+        .map(|(_, k)| k.to_string())
+}
+
 /// What to say when the program `comm` starts.
 pub fn program(comm: &str) -> Option<Reply> {
     db().iter().find(|s| s.name.starts_with("program ") && s.triggers.iter().any(|t| t.eq_ignore_ascii_case(comm)) && !s.lines.is_empty()).map(to_reply)
@@ -548,6 +564,15 @@ mod tests {
             }
         }
         assert!(broken.is_empty(), "{} problems: {broken:#?}", broken.len());
+    }
+
+    #[test]
+    fn window_titles_find_their_kind() {
+        let mut v = vec![];
+        parse("## window writing\n> libreoffice writer | .docx\nWriting?\n\n## window letter\n> untitled 1 - libreoffice writer\nA letter!\n", false, &mut v);
+        assert_eq!(kind_in(&v, "Untitled 1 - LibreOffice Writer").as_deref(), Some("letter"), "the longest piece wins");
+        assert_eq!(kind_in(&v, "report.docx - Word").as_deref(), Some("writing"));
+        assert_eq!(kind_in(&v, "Konsole"), None);
     }
 
     #[test]

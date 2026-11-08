@@ -11,9 +11,11 @@ pub enum Event {
     ShellDone(String),
     Answer(u64, crate::brain::Reply), // an online answer for request number N
     Update(String),                   // a newer version is out
+    Title(String),                    // the window you're working in (or its title) changed
 }
 
-pub fn spawn(tx: Sender<Event>, ctx: eframe::egui::Context) {
+/// `titles`: also watch the active window's title (where the KWin script doesn't report it).
+pub fn spawn(tx: Sender<Event>, ctx: eframe::egui::Context, titles: bool) {
     std::thread::spawn(move || {
         // shortcut: polls the clipboard and /proc once a second; fine for a desktop pet, use OS events if it ever matters.
         let mut clip = arboard::Clipboard::new().ok();
@@ -21,6 +23,7 @@ pub fn spawn(tx: Sender<Event>, ctx: eframe::egui::Context) {
         let mut seen = crate::sys::running_programs();
         let mut warned_battery = false;
         let mut busy = 0;
+        let mut last_title = String::new();
         let send = |e: Event| {
             let ok = tx.send(e).is_ok();
             ctx.request_repaint();
@@ -46,6 +49,12 @@ pub fn spawn(tx: Sender<Event>, ctx: eframe::egui::Context) {
                     }
                 }
                 seen = now;
+            }
+            if titles && tick % 2 == 0 {
+                if let Some(t) = crate::sys::active_title().filter(|t| *t != last_title) {
+                    last_title = t.clone();
+                    send(Event::Title(t));
+                }
             }
             if tick % 30 == 0 {
                 match crate::sys::battery() {
