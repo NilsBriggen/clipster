@@ -355,7 +355,7 @@ pub fn plant(p: &Painter, tf: Tf, at: f32, io: f32, ink: Color32) {
     let y = (1.0 - io) * 25.0;
     let pour = win(at, 0.5, 1.0) * (1.0 - win(at, 3.0, 3.5));
     let grow = 0.85 + 0.15 * win(at, 1.0, 3.6);
-    let base = (64.0, 113.0 + y);
+    let base = (59.0, 113.0 + y); // 5 units further left than it'd like: the window is only so wide
     let green = rgb(80, 175, 80);
     for (dx, dh, w) in [(-9.0f32, 14.0f32, 4.0f32), (0.0, 22.0, 4.5), (9.0, 15.0, 4.0)] {
         let sway = (at * 2.0 + dx).sin() * 1.2;
@@ -365,10 +365,10 @@ pub fn plant(p: &Painter, tf: Tf, at: f32, io: f32, ink: Color32) {
         g.poly(&[base, (mid.0 - w, mid.1), tip, (mid.0 + w, mid.1)], green, rgb(40, 100, 50));
         g.ln(base, tip, 0.9, rgb(40, 100, 50));
     }
-    g.poly(&[(55.0, 112.0 + y), (73.0, 112.0 + y), (70.0, 129.0 + y), (58.0, 129.0 + y)], rgb(205, 105, 62), ink);
-    g.rect((64.0, 112.5 + y), 20.0, 3.5, 0.0, rgb(224, 130, 84), ink);
+    g.poly(&[(50.0, 112.0 + y), (68.0, 112.0 + y), (65.0, 129.0 + y), (53.0, 129.0 + y)], rgb(205, 105, 62), ink);
+    g.rect((59.0, 112.5 + y), 20.0, 3.5, 0.0, rgb(224, 130, 84), ink);
     // the can: body, handle, spout; pivots about its middle
-    let c = (76.0, 78.0 + y);
+    let c = (67.0, 78.0 + y);
     let a = -0.5 * pour;
     let r = |x: f32, yy: f32| rot(c, a, (c.0 + x, c.1 + yy));
     let handle: Vec<P2> = (0..=8)
