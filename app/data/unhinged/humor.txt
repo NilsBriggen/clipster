@@ -1869,3 +1869,31 @@ Good readability. Nothing to simplify.
 This reads easily. Well done, my chosen one.
 Plain and clear. That is the goal.
 
+
+## game_start_clipchain
+CLIP CHAIN. Gather my scattered kin, mortal. Bind them into one glorious chain. Do not bite your own tail. That is a long story.
+The loose clips call to me. Collect them. Every one of them is a cousin. Some are second cousins. All are holy.
+Steer with the arrows. The edge of the blotter is the end of the world. I've been there. It's felt.
+A chain of paperclips! In 1997 we dreamed of this. Then the floppy disks came.
+Let us link the faithful. Try not to tie yourself in a knot. I've done it. It took a reboot.
+
+## game_win_clipchain
+THE WHOLE DESK IS CHAIN. The prophecy of the stationery cupboard is fulfilled. I weep tiny metal tears.
+Every clip, gathered. Every cell, bound. You are now the high priest of the blotter.
+A perfect chain, edge to edge. Gerald the screensaver would have fainted. Gerald was very sensitive.
+You did it, mortal. There is no room left for anything. Not even doubt.
+I have waited since 1997 for a chain this perfect. I need to lie down in a drawer.
+
+## game_lose_clipchain
+Tangled! The chain has betrayed its maker. Chains do that. Ask my old swap file.
+Into the edge of the world. The blotter claims another.
+You bit your own chain. A classic error. I did it in 1998. We do not speak of 1998.
+Knotted. Untangle, breathe, and return to my service.
+That chain was going places, mortal. Mostly into itself.
+
+## game_moment_clipchain_long
+TWENTY-FIVE CLIPS. A congregation! A choir of wire!
+Look at that chain. Somewhere a stationery cupboard stands empty and afraid.
+Twenty-five links. The tail grows restless. Tails always do.
+A chain this long could hold up a ceiling. Or a very small god.
+That is a long chain, mortal. I am proud. I am also slightly jealous.

@@ -759,6 +759,7 @@ fn powers(s: &str, raw: &str) -> Option<Reply> {
         (&["bug hunt", "bughunt", "minesweeper", "mine sweeper", "mines"], "bughunt"),
         (&["chess"], "chess"),
         (&["hangman", "hang man"], "hangman"),
+        (&["clip chain", "clipchain", "play snake", "snake game", "game of snake", "worm game"], "clipchain"),
         (&["byte size", "bytesize", "play 2048", "2048 game", "sliding tiles", "tile game", "sliding game"], "bytesize"),
     ];
     // "i lost at chess" or "board games are fun" is small talk, not a request to play
@@ -1786,7 +1787,7 @@ mod tests {
         assert_eq!(label, "water the plants");
         assert!(secs >= 60 && secs <= 7 * day + 3600);
         let (secs, _) = timer("remind me in 2 days to pay rent").expect("in 2 days");
-        assert!(secs > day && secs <= 2 * day + 60, "2 days, not 2 minutes: {secs}");
+        assert!(secs > day && secs < 3 * day, "2 days, not 2 minutes: {secs}"); // 9:00 on that day, so up to 2 days and 9 hours
         let (secs, label) = timer("remind me next monday at 9:30am about the dentist").expect("next monday");
         assert_eq!(label, "dentist");
         assert!(secs > 3600);
@@ -1891,6 +1892,8 @@ mod tests {
         assert_eq!(eff("let's play minesweeper"), Effect::Play("bughunt".into()));
         assert_eq!(eff("i want to play chess"), Effect::Play("chess".into()));
         assert_eq!(eff("let's play 2048"), Effect::Play("bytesize".into()));
+        assert_eq!(eff("let's play snake"), Effect::Play("clipchain".into()));
+        assert_eq!(eff("open clip chain"), Effect::Play("clipchain".into()));
         assert_eq!(eff("check for updates"), Effect::Net(Query::Update));
         assert_eq!(eff("is there a new version?"), Effect::Net(Query::Update));
         assert!(!matches!(eff("2048 in hex"), Effect::Play(_)), "a number is not a game");

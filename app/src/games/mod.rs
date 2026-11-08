@@ -4,6 +4,7 @@
 mod bughunt;
 mod bytesize;
 mod chess;
+mod clipchain;
 mod clipglide;
 mod deskmerge;
 mod hangman;
@@ -42,6 +43,7 @@ pub const NAMES: &[(&str, &str)] = &[
     ("bytesize", "Byte Size"),
     ("chess", "Chess"),
     ("hangman", "Hangman"),
+    ("clipchain", "Clip Chain"),
 ];
 
 /// What a game gets from the arcade every frame.
@@ -115,6 +117,7 @@ fn make(name: &str) -> Box<dyn Game> {
         "bughunt" => Box::new(bughunt::Hunt::new()),
         "bytesize" => Box::new(bytesize::Bytes::new()),
         "chess" => Box::new(chess::Chess::new()),
+        "clipchain" => Box::new(clipchain::Chain::new()),
         _ => Box::new(hangman::Hang::new()),
     }
 }

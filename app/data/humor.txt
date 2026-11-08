@@ -3354,3 +3354,31 @@ writen | written
 yatch | yacht
 yesturday | yesterday
 youre | you're
+
+## game_start_clipchain
+Clip Chain. Pick up the loose clips, keep the chain tidy, and don't run into it. Simple. Like most things that go wrong.
+Every clip you pick up joins the chain. It's the most organised a desk has ever looked.
+Steer with the arrows. The edge of the blotter is not your friend.
+A chain of paperclips. Finally, a game about teamwork.
+Let's link some clips. Try not to tie yourself in a knot.
+
+## game_win_clipchain
+The whole desk is one chain. I've never seen anything so organised. I need a moment.
+You filled the blotter. Every single clip. Office supply stores will hear about this.
+A perfect chain, edge to edge. Frame it. Or at least don't tell IT.
+You did it. There's no room left for anything. Including my pride.
+Every cell, one chain. I didn't think that was possible, and I'm made of the stuff.
+
+## game_lose_clipchain
+Tangled. It happens to the best chains.
+Into the edge. The blotter wins this round.
+You bit your own chain. Classic paperclip mistake. Ask me how I know.
+Knotted up. Untangle, breathe, try again.
+That chain was going places. Mostly into itself.
+
+## game_moment_clipchain_long
+Twenty-five clips! That's a chain you could hang a lanyard on.
+Look at that chain. Somewhere a stationery cupboard is empty.
+Twenty-five links. Careful now, the tail has opinions.
+That's a long chain. Please don't try this with real clips in a meeting.
+A chain that long needs its own desk.
