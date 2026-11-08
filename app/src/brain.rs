@@ -1132,6 +1132,7 @@ pub fn fmt_dur(secs: u64) -> String {
         (0, 0, s) => format!("{s}s"),
         (0, m, 0) => format!("{m} min"),
         (0, m, s) => format!("{m} min {s}s"),
+        (h, 0, _) => format!("{h}h"),
         (h, m, _) => format!("{h}h {m}m"),
     }
 }

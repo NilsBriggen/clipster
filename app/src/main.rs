@@ -2512,13 +2512,20 @@ fn setup_style(ctx: &egui::Context) {
     // Wine's free Tahoma look-alike (LGPL, app/assets/fonts) gives the classic look on every system;
     // egui's own fonts stay behind it for emoji and symbols
     let mut fonts = egui::FontDefinitions::default();
-    for (name, bytes) in [("classic", &include_bytes!("../assets/fonts/wine-tahoma.ttf")[..]), ("classic-bold", &include_bytes!("../assets/fonts/wine-tahoma-bold.ttf")[..])] {
+    for (name, bytes) in [
+        ("classic", &include_bytes!("../assets/fonts/wine-tahoma.ttf")[..]),
+        ("classic-bold", &include_bytes!("../assets/fonts/wine-tahoma-bold.ttf")[..]),
+        ("modern", &include_bytes!("../assets/fonts/NotoSans-Regular.ttf")[..]),
+        ("modern-medium", &include_bytes!("../assets/fonts/NotoSans-Medium.ttf")[..]),
+    ] {
         fonts.font_data.insert(name.into(), std::sync::Arc::new(egui::FontData::from_static(bytes)));
     }
     let fallback = fonts.families.get(&egui::FontFamily::Proportional).cloned().unwrap_or_default();
     fonts.families.entry(egui::FontFamily::Proportional).or_default().insert(0, "classic".into());
-    fonts.families.insert(egui::FontFamily::Name("bold".into()), std::iter::once("classic-bold".to_string()).chain(fallback.iter().cloned()).collect());
-    fonts.families.insert(egui::FontFamily::Name("modern".into()), fallback.clone()); // the Desk's modern look: egui's own Ubuntu font
+    // each named family is its own font first, then egui's fonts for symbols
+    for (family, first) in [("bold", "classic-bold"), ("modern", "modern"), ("modern-medium", "modern-medium")] {
+        fonts.families.insert(egui::FontFamily::Name(family.into()), std::iter::once(first.to_string()).chain(fallback.iter().cloned()).collect());
+    }
     // chess pieces and other symbols from one font on every system (Windows' Tahoma has no chess glyphs)
     let glyphs = ["emoji-icon-font", "NotoEmoji-Regular", "classic"].iter().filter(|n| fonts.font_data.contains_key(**n)).map(|n| n.to_string()).collect();
     fonts.families.insert(egui::FontFamily::Name("glyphs".into()), glyphs);
