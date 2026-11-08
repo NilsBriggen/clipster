@@ -235,6 +235,9 @@ pub fn exact(input: &str) -> Option<Reply> {
         }
         "iss" => return Some(net(Query::Iss, "Looking up... way up...")),
         "aboutme" => return Some(facts()),
+        "proofread" if rest == "fix" => return Some(crate::writing::fix_clipboard()),
+        "proofread" => return Some(crate::writing::check(rest)),
+        "letter" | "template" => return Some(crate::writing::letter(rest)),
         "checkin" => return Some(Reply::say("").effect(Effect::Checkin(rest.to_lowercase()))),
         "answer-to" => {
             let (id, text) = rest.split_once(' ').unwrap_or((rest, ""));
@@ -716,7 +719,6 @@ fn quiet() -> Reply {
     Reply::say(lines::pick("say_quiet")).effect(Effect::Quiet(3600)).mood(Mood::Sad)
 }
 
-pub const LETTER: &str = "Dear Sir or Madam,\n\nI hope this letter finds you well, and not being followed by a paperclip.\n\n[Your important point here.]\n\nWarm regards,\n[Your name]";
 
 // ---------- calculator ----------
 

@@ -1245,6 +1245,11 @@ fn resolve(t: &str, raw: &str) -> String {
 }
 
 fn text_tools(s: &str, raw: &str) -> Option<Reply> {
+    // "check my text", "proofread this": what's on the clipboard
+    if has(s, &["proofread", "proof read", "check my text", "check this text", "check the text", "check my writing", "check my spelling", "spell check", "spellcheck", "check my grammar", "grammar check", "fix my text"]) {
+        let rest = after(s, &["proofread ", "proof read ", "spell check ", "spellcheck "]).filter(|r| r.split_whitespace().count() > 2).map(|r| keep(raw, r));
+        return go(format!("proofread {}", rest.unwrap_or_default()));
+    }
     const P: &[(&str, &str)] = &[
         ("uppercase ", "upper"), ("upper case ", "upper"), ("capitalize ", "upper"), ("all caps ", "upper"), ("caps ", "upper"),
         ("shout ", "upper"), ("lowercase ", "lower"), ("lower case ", "lower"), ("reverse ", "reverse"), ("backwards ", "reverse"),
@@ -1341,8 +1346,9 @@ fn chat(s: &str) -> Option<Reply> {
     if has(s, &["thank", "thanks", "cheers", "appreciate it", "ty", "thank you"]) {
         return go("thanks".into());
     }
-    if has(s, &["letter", "write an email", "write a email", "cover letter", "formal letter"]) {
-        return Some(Reply::say("It looks like you're writing a letter! Here's a classic opening I prepared earlier:").mood(Mood::Happy).btn("Copy a letter template", Act::Copy(brain::LETTER.into())));
+    // "write a complaint letter", "I need a cover letter", "out of office message"
+    if has(s, &["letter", "write an email", "write a email", "cover letter", "formal letter", "out of office", "email template", "letter template", "resignation", "write a note to my landlord"]) {
+        return go(format!("letter {}", crate::writing::template_for(s).unwrap_or_default()));
     }
     for (kws, cmd) in [
         (&["joke", "jokes", "funny", "laugh", "bored", "humor", "humour", "entertain me", "make me smile", "cheer me up", "something fun", "lol"][..], "joke"),
@@ -1577,6 +1583,12 @@ mod tests {
         assert_eq!(eff("forget notes"), respond("forget notes").effect, "notes keep their own forget");
         assert!(!matches!(eff("forget my notes"), Effect::Forget(_)));
         assert!(!text("what's my ip").contains("told me"), "not a question about facts");
+    }
+
+    #[test]
+    fn proofreading_in_plain_words() {
+        let r = respond("proofread Please send the the report today.");
+        assert!(r.buttons.iter().any(|(_, a)| matches!(a, crate::brain::Act::Run(c) if c == "proofread fix")), "offers the easy fixes: {} {:?}", r.text, r.buttons);
     }
 
     #[test]

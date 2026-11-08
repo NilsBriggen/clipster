@@ -1,0 +1,287 @@
+//! Writing help: an offline proofreader for what you copied, and letter/email templates (`## template <id>`).
+//! Rules only: a list of common misspellings, a few grammar patterns, sentence length and a readability score.
+
+use crate::brain::{url_encode, Act, Effect, Mood, Reply};
+use crate::lines;
+use std::collections::HashMap;
+
+#[derive(Clone, Debug, PartialEq)]
+pub enum Issue {
+    Doubled(String),
+    Misspelled(String, String),
+    AAn(String),
+    Its,
+    Your,
+    Then,
+    Spaces,
+    Capital,
+    Shouting,
+    Long(usize),
+    Hard,
+}
+
+/// The `misspellings` data pool: wrong -> right.
+pub fn misspellings() -> HashMap<String, String> {
+    lines::all("misspellings").iter().filter_map(|l| l.split_once(" | ").map(|(w, r)| (w.trim().to_lowercase(), r.trim().to_string()))).collect()
+}
+
+fn bare(w: &str) -> String {
+    w.trim_matches(|c: char| !c.is_alphanumeric() && c != '\'').to_lowercase()
+}
+
+/// "an hour", "a unicorn": h-words that sound like vowels, and vowel letters that sound like consonants.
+fn wants_an(word: &str) -> Option<bool> {
+    let w = bare(word);
+    let first = w.chars().next()?;
+    if !first.is_alphabetic() {
+        return None;
+    }
+    if ["hour", "honest", "honor", "honour", "heir"].iter().any(|h| w.starts_with(h)) {
+        return Some(true);
+    }
+    if ["one", "once", "uni", "use", "usu", "uti", "euro", "eu", "ur"].iter().any(|p| w.starts_with(p)) || first == 'u' {
+        return None; // depends on how it sounds: leave it alone
+    }
+    Some("aeio".contains(first))
+}
+
+/// Everything that looks off in `text`, most useful first.
+pub fn proofread(text: &str, wrong: &HashMap<String, String>) -> Vec<Issue> {
+    let mut out = vec![];
+    let words: Vec<&str> = text.split_whitespace().collect();
+    for pair in words.windows(2) {
+        let (a, b) = (bare(pair[0]), bare(pair[1]));
+        if a == b && !a.is_empty() && !["had", "that", "is", "ha", "bye", "no", "very"].contains(&a.as_str()) && !pair[0].ends_with(['.', ',', ';', ':', '!', '?']) {
+            out.push(Issue::Doubled(a.clone()));
+        }
+        match (a.as_str(), wants_an(pair[1])) {
+            ("a", Some(true)) | ("an", Some(false)) => out.push(Issue::AAn(pair[1].trim_matches(|c: char| !c.is_alphanumeric()).to_string())),
+            _ => {}
+        }
+        let followers = ["a", "an", "the", "been", "not", "going", "just", "very", "so", "time", "too", "really", "gonna"];
+        if a == "its" && followers.contains(&b.as_str()) || a == "it's" && b == "own" {
+            out.push(Issue::Its);
+        }
+        if a == "your" && ["welcome", "right", "wrong", "going", "not", "a", "the", "very", "so", "being", "gonna", "late"].contains(&b.as_str()) {
+            out.push(Issue::Your);
+        }
+        if b == "then" && (["more", "less", "rather", "other", "better", "worse", "fewer", "greater", "bigger", "smaller", "faster", "slower", "older", "younger"].contains(&a.as_str())) {
+            out.push(Issue::Then);
+        }
+    }
+    let mut seen = std::collections::HashSet::new();
+    for w in &words {
+        let b = bare(w);
+        if let Some(right) = wrong.get(&b).filter(|_| seen.insert(b.clone())) {
+            out.push(Issue::Misspelled(b, right.clone()));
+        }
+    }
+    if text.lines().any(|l| l.trim_start().contains("  ")) {
+        out.push(Issue::Spaces);
+    }
+    // a lowercase letter starting a sentence (not after "e.g." and friends)
+    let abbrev = ["e.g.", "i.e.", "etc.", "vs.", "approx.", "dr.", "mr.", "mrs.", "ms.", "no."];
+    if words.windows(2).any(|p| p[0].ends_with('.') && !abbrev.contains(&p[0].to_lowercase().as_str()) && p[1].chars().next().is_some_and(|c| c.is_lowercase())) {
+        out.push(Issue::Capital);
+    }
+    if text.contains("!!") || text.contains("??") || words.iter().filter(|w| w.len() >= 5 && w.chars().all(|c| c.is_uppercase() || !c.is_alphabetic()) && w.chars().any(|c| c.is_alphabetic())).count() >= 2 {
+        out.push(Issue::Shouting);
+    }
+    let sentences: Vec<usize> = text.split(['.', '!', '?']).map(|s| s.split_whitespace().count()).filter(|n| *n > 0).collect();
+    if let Some(&n) = sentences.iter().filter(|n| **n > 35).max() {
+        out.push(Issue::Long(n));
+    }
+    if words.len() >= 30 && readability(text) < 30.0 {
+        out.push(Issue::Hard);
+    }
+    out
+}
+
+/// Flesch reading ease (higher is easier; 60-70 is plain English).
+pub fn readability(text: &str) -> f32 {
+    let words: Vec<String> = text.split_whitespace().map(bare).filter(|w| !w.is_empty()).collect();
+    let sentences = text.split(['.', '!', '?']).filter(|s| !s.trim().is_empty()).count().max(1) as f32;
+    let syllables: usize = words.iter().map(|w| syllables(w)).sum();
+    let n = words.len().max(1) as f32;
+    206.835 - 1.015 * (n / sentences) - 84.6 * (syllables as f32 / n)
+}
+
+fn syllables(w: &str) -> usize {
+    let mut count = 0;
+    let mut prev = false;
+    for c in w.chars() {
+        let v = "aeiouy".contains(c);
+        if v && !prev {
+            count += 1;
+        }
+        prev = v;
+    }
+    if w.ends_with('e') && count > 1 {
+        count -= 1; // the silent e
+    }
+    count.max(1)
+}
+
+/// The safe fixes only: doubled words, listed misspellings, double spaces, a/an, capitals after a full stop.
+pub fn fix(text: &str, wrong: &HashMap<String, String>) -> String {
+    let mut out: Vec<String> = vec![];
+    let mut cap = true;
+    for line in text.split('\n') {
+        let mut fixed: Vec<String> = vec![];
+        for w in line.split(' ').filter(|w| !w.is_empty()) {
+            let b = bare(w);
+            if fixed.last().is_some_and(|p| bare(p) == b && !p.ends_with(['.', ',', ';', ':', '!', '?'])) && !["had", "that", "is", "ha", "bye", "no", "very"].contains(&b.as_str()) {
+                continue;
+            }
+            let mut word = match wrong.get(&b) {
+                Some(right) => {
+                    let start = w.find(|c: char| c.is_alphanumeric()).unwrap_or(0);
+                    let end = w.rfind(|c: char| c.is_alphanumeric() || c == '\'').map_or(w.len(), |i| i + 1);
+                    let right = if w[start..].starts_with(|c: char| c.is_uppercase()) { right[..1].to_uppercase() + &right[1..] } else { right.clone() };
+                    format!("{}{right}{}", &w[..start], &w[end..])
+                }
+                None => w.to_string(),
+            };
+            if cap && word.starts_with(|c: char| c.is_lowercase()) && !fixed.is_empty() {
+                word = word[..1].to_uppercase() + &word[1..];
+            }
+            if let (Some(prev), Some(an)) = (fixed.last_mut(), wants_an(&word)) {
+                match (prev.as_str(), an) {
+                    ("a", true) => *prev = "an".into(),
+                    ("A", true) => *prev = "An".into(),
+                    ("an", false) => *prev = "a".into(),
+                    ("An", false) => *prev = "A".into(),
+                    _ => {}
+                }
+            }
+            cap = word.ends_with(['.', '!', '?']) && !["e.g.", "i.e.", "etc.", "vs."].contains(&word.to_lowercase().as_str());
+            fixed.push(word);
+        }
+        out.push(fixed.join(" "));
+    }
+    out.join("\n")
+}
+
+/// "proofread" (what you copied, or text after the command): the issues, and a button to copy a fixed version.
+pub fn check(text: &str) -> Reply {
+    let text = crate::brain::or_clipboard(text);
+    if text.trim().is_empty() {
+        return Reply::say("Copy some text first (or type: proofread <text>), and I'll go through it with my red pen.").mood(Mood::Think);
+    }
+    let wrong = misspellings();
+    let issues = proofread(&text, &wrong);
+    let fixable = fix(&text, &wrong) != text;
+    if issues.is_empty() {
+        let easy = text.split_whitespace().count() >= 30 && readability(&text) > 70.0;
+        let r = Reply::say(format!("{}{}", lines::pick("proof_clean"), if easy { format!(" {}", lines::pick("proof_easy")) } else { String::new() }));
+        return if fixable { r.mood(Mood::Happy).run("Tidy the spacing", "proofread fix") } else { r.mood(Mood::Happy) };
+    }
+    let say = |pool: &str, x: &str, y: &str| lines::pick(pool).replace("{x}", x).replace("{y}", y).replace("{n}", x);
+    let mut text_out = lines::pick("proof_intro").replace("{n}", &issues.len().to_string());
+    for i in issues.iter().take(6) {
+        let line = match i {
+            Issue::Doubled(w) => say("proof_doubled", w, ""),
+            Issue::Misspelled(w, r) => say("proof_misspelled", w, r),
+            Issue::AAn(w) => say("proof_a_an", w, ""),
+            Issue::Its => say("proof_its", "", ""),
+            Issue::Your => say("proof_your", "", ""),
+            Issue::Then => say("proof_then", "", ""),
+            Issue::Spaces => say("proof_spaces", "", ""),
+            Issue::Capital => say("proof_capital", "", ""),
+            Issue::Shouting => say("proof_shouting", "", ""),
+            Issue::Long(n) => say("proof_long", &n.to_string(), ""),
+            Issue::Hard => say("proof_hard", "", ""),
+        };
+        text_out += &format!("\n• {line}");
+    }
+    let r = Reply::say(text_out).mood(Mood::Think);
+    let r = if fixable { r.run("Fix the easy ones", "proofread fix") } else { r };
+    r.run("Check again", "proofread")
+}
+
+/// "Fix the easy ones": the fixed text goes onto the clipboard.
+pub fn fix_clipboard() -> Reply {
+    let text = crate::brain::or_clipboard("");
+    let fixed = fix(&text, &misspellings());
+    if fixed == text {
+        return Reply::say("Nothing I can safely fix on my own. The rest needs your judgement.");
+    }
+    Reply::say(lines::pick("proof_fixed")).mood(Mood::Happy).effect(Effect::CopyNow(fixed))
+}
+
+/// Template ids with their keywords (`## template <id>` sections).
+pub fn template_for(sentence: &str) -> Option<String> {
+    let s = format!(" {} ", sentence.to_lowercase());
+    lines::sections_with_prefix("template ")
+        .into_iter()
+        .filter_map(|(id, triggers)| triggers.iter().filter(|t| s.contains(&format!(" {} ", t.to_lowercase()))).map(|t| t.len()).max().map(|n| (n, id)))
+        .max_by_key(|(n, _)| *n)
+        .map(|(_, id)| id)
+}
+
+/// A filled-in template: today's date in, `{name}` left for the app to fill.
+pub fn fill(template: &str, date: &str) -> String {
+    template.replace("{date}", date)
+}
+
+/// "letter complaint": a short preview, Copy, Open as email.
+pub fn letter(kind: &str) -> Reply {
+    let all = lines::sections_with_prefix("template ");
+    let id = all.iter().map(|(id, _)| id.clone()).find(|id| *id == kind.replace(' ', "_")).or_else(|| template_for(kind));
+    let Some(id) = id else {
+        let mut r = Reply::say(lines::pick("template_choose")).mood(Mood::Think);
+        for (id, _) in all.iter().take(12) {
+            r = r.run(&id.replace('_', " "), &format!("letter {id}"));
+        }
+        return r;
+    };
+    let Some(template) = lines::all(&format!("template {id}")).first().cloned() else { return Reply::say("I lost that template somewhere in the swap file.") };
+    let full = fill(&template, &chrono::Local::now().format("%B %-d, %Y").to_string());
+    let (subject, body) = full.split_once("\n\n").map(|(s, b)| (s.trim_start_matches("Subject: ").to_string(), b.to_string())).unwrap_or_default();
+    let preview: String = body.lines().filter(|l| !l.trim().is_empty()).take(3).collect::<Vec<_>>().join("\n");
+    Reply::say(format!("{}\n\n✉ {subject}\n{preview}\n…", lines::pick("template_intro")))
+        .mood(Mood::Happy)
+        .btn("Copy it", Act::Copy(full.clone()))
+        .btn("Open as email", Act::Open(format!("mailto:?subject={}&body={}", url_encode(&subject), url_encode(&body))))
+        .run("Another kind of letter", "letter")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn wrong() -> HashMap<String, String> {
+        [("recieve", "receive"), ("definately", "definitely")].iter().map(|(a, b)| (a.to_string(), b.to_string())).collect()
+    }
+
+    #[test]
+    fn finds_the_usual_suspects() {
+        let i = proofread("I will definately recieve the the package. its a big one and an box.", &wrong());
+        assert!(i.contains(&Issue::Doubled("the".into())));
+        assert!(i.contains(&Issue::Misspelled("definately".into(), "definitely".into())));
+        assert!(i.contains(&Issue::Misspelled("recieve".into(), "receive".into())));
+        assert!(i.contains(&Issue::Its));
+        assert!(i.contains(&Issue::AAn("box".into())));
+        assert!(i.contains(&Issue::Capital), "a sentence starting lowercase");
+        assert!(proofread("Your welcome. This is better then that.", &wrong()).contains(&Issue::Then));
+        assert!(proofread("It takes an hour. A unicorn helps. I had had enough.", &wrong()).is_empty(), "no false alarms: {:?}", proofread("It takes an hour. A unicorn helps. I had had enough.", &wrong()));
+        assert!(proofread("STOP DOING THAT!!", &wrong()).contains(&Issue::Shouting));
+    }
+
+    #[test]
+    fn fixes_only_what_is_safe() {
+        assert_eq!(fix("i will definately  recieve the the parcel. it is an box.", &wrong()), "i will definitely receive the parcel. It is a box.");
+        assert_eq!(fix("Definately. A apple a day.", &wrong()), "Definitely. An apple a day.");
+        assert_eq!(fix("Its fine.", &wrong()), "Its fine.", "its/it's needs a human");
+    }
+
+    #[test]
+    fn readability_scores_go_the_right_way() {
+        assert!(readability("The cat sat on the mat. It was warm. We had tea.") > readability("Notwithstanding considerable organisational heterogeneity, implementation necessitates comprehensive interdepartmental coordination."));
+    }
+
+    #[test]
+    fn templates_get_the_date() {
+        assert_eq!(fill("Dear [Name],\n{date}\n{name}", "May 3, 2026"), "Dear [Name],\nMay 3, 2026\n{name}");
+    }
+}

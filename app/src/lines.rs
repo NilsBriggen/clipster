@@ -241,7 +241,7 @@ pub fn parse(text: &str, user: bool, out: &mut Vec<Section>) -> Vec<String> {
         };
         let s = &mut out[i];
         // process names and window-title pieces are matched as they are, not tidied like sentences
-        let program = ["program ", "window ", "answer "].iter().any(|p| s.name.starts_with(p));
+        let program = ["program ", "window ", "answer ", "template ", "tips "].iter().any(|p| s.name.starts_with(p));
         // triggers are tidied exactly like what people type, so "what's" in the file matches "whats" typed
         let mut list = |rest: &str, exact: bool| -> Vec<String> {
             let mut out = vec![];
@@ -387,6 +387,11 @@ pub fn topic(s: &str, user: bool) -> Option<Reply> {
 pub fn more() -> Option<Reply> {
     let name = LAST_TOPIC.read().unwrap_or_else(|e| e.into_inner()).clone();
     (!name.is_empty()).then(|| reply(&name))
+}
+
+/// Sections named "<prefix><id>" with lines: (id, triggers). For templates, tips and the like.
+pub fn sections_with_prefix(prefix: &str) -> Vec<(String, Vec<String>)> {
+    db().iter().filter(|s| !s.lines.is_empty()).filter_map(|s| s.name.strip_prefix(prefix).map(|id| (id.to_string(), s.triggers.clone()))).collect()
 }
 
 /// The questions he can ask you: the ids of the `## ask <id>` sections.

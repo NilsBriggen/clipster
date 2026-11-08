@@ -10,6 +10,7 @@ mod powers;
 mod sys;
 mod todo;
 mod understand;
+mod writing;
 mod watch;
 
 use brain::{Act, Effect, Mood, Reply};
@@ -386,6 +387,17 @@ impl App {
 
     fn show(&mut self, mut r: Reply) {
         r.text = lines::fill_facts(&r.text.replace("{name}", if self.name.is_empty() { "friend" } else { &self.name }).replace("Meta+C", sys::HOTKEY));
+        // letter templates sign with your name (or leave a blank to fill in)
+        let signed = if self.name.is_empty() { "[Your name]".to_string() } else { self.name.clone() };
+        for (_, act) in &mut r.buttons {
+            if let Act::Copy(t) | Act::Open(t) = act {
+                if t.contains("{name}") {
+                    *t = t.replace("{name}", &signed);
+                } else if t.contains("%7Bname%7D") {
+                    *t = t.replace("%7Bname%7D", &brain::url_encode(&signed));
+                }
+            }
+        }
         self.anim = r.mood.into();
         if self.anim == Anim::Talk && lines::day_mood() == Some("glitchy") && rand::thread_rng().gen_bool(0.3) {
             self.anim = Anim::Glitch; // on glitchy days he skips even mid-sentence
