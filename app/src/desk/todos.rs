@@ -553,7 +553,11 @@ impl Desk {
         let field = |ui: &mut Ui, r: Rect, key: &str, value: &mut String, hint: &str, was: &str, cmd: &str, out: &mut Vec<String>| {
             let resp = look.input(ui, r, Id::unique(("desk-todo-card", key, line_no)), value, hint);
             if resp.lost_focus() && value.trim() != was {
-                out.push(format!("{n} {cmd} {}", if value.trim().is_empty() { "none" } else { value.trim() }));
+                if cmd == "edit" && value.trim().is_empty() {
+                    *value = was.to_string(); // an emptied name puts the old one back, it doesn't become "none"
+                } else {
+                    out.push(format!("{n} {cmd} {}", if value.trim().is_empty() { "none" } else { value.trim() }));
+                }
             }
         };
         // left: what, when, how often, where

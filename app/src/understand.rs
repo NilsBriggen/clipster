@@ -2779,7 +2779,7 @@ mod tests {
     #[ignore]
     fn probe() {
         for t in std::env::var("PROBE").unwrap_or_default().split(';') {
-            let r = respond(t);
+            let r = if std::env::var("EXACT").is_ok() { exact(t).unwrap_or_else(|| respond(t)) } else { respond(t) };
             println!("{t:?} -> {:?} | {} | {:?}", r.effect, r.text.chars().take(90).collect::<String>(), r.buttons.iter().map(|b| (&b.0, &b.1)).collect::<Vec<_>>());
         }
     }

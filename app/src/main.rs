@@ -936,7 +936,8 @@ impl App {
         // Upkeep's Right now: read every 3 seconds while that page is open; Space: counted once when it opens
         match self.desk.upkeep_page() {
             Some(1) if self.screenshot.is_none() && self.now_asked.is_none_or(|t| t.elapsed() > Duration::from_secs(3)) => {
-                self.now_asked = Some(now);
+                // the 3 s count from the end of the read (Event::Now sets it again); a slow PowerShell doesn't pile up
+                self.now_asked = Some(now + Duration::from_secs(30));
                 let (tx, ctx2) = (self.tx.clone(), ctx.clone());
                 std::thread::spawn(move || {
                     let _ = tx.send(Event::Now(Box::new(upkeep::now())));
@@ -3263,6 +3264,7 @@ impl App {
                             _ => format!("readlater {one}"),
                         };
                         self.macro_depth += 1;
+                        self.literal = true; // your copy is data: "remind me at 3" becomes a note, not a reminder
                         self.run(ctx, &cmd);
                         self.macro_depth -= 1;
                         ""
@@ -3490,7 +3492,9 @@ impl App {
                             let title = self.reading_titles.get(&link).cloned().unwrap_or_else(|| brain::short_link(&link));
                             let line = todo::load().len() + 1;
                             let due = if when.trim().is_empty() { String::new() } else { format!(" by {}", when.trim()) };
+                            self.literal = true; // the title and link are data (a "?" in the link stays)
                             self.run(ctx, &format!("todo Read: {title}{due}"));
+                            self.literal = true;
                             self.run(ctx, &format!("todo #{line} link {link}"));
                             return;
                         }
@@ -4025,7 +4029,10 @@ impl App {
                     self.calendar_names = names;
                     self.show_calendars();
                 }
-                Event::Now(reading) => self.now_reading = Some(*reading),
+                Event::Now(reading) => {
+                    self.now_reading = Some(*reading);
+                    self.now_asked = Some(Instant::now());
+                }
                 Event::Picked(what, path) => {
                     let p = path.display().to_string();
                     let cmd = match what.as_str() {
