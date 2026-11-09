@@ -5044,3 +5044,9 @@ The stopwatch is on. Say "stop" when you're done, or when you've given up. Both 
 Downloading the new version. Sit tight; I'll restart when it's done. Mostly gracefully.
 Update on its way. I'll check it's intact before I swap it in. A paperclip trusts, but verifies.
 Fetching a newer me. It's like a haircut, but for the whole body.
+
+## timers_done
+These are due now:
+Several reminders at once:
+All of these are due:
+Time for these:

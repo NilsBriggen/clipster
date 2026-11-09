@@ -583,6 +583,16 @@ fn timers(s: &str, raw: &str) -> Option<Reply> {
     if !has(s, TIMER_WORDS) && !s.starts_with("in ") && !s.starts_with("every ") || has(s, &["until", "till"]) || s.contains("countdown to") || s.contains("count down to") {
         return None; // "countdown to christmas" is a date question
     }
+    // "in 5 years i want to be rich" is a dream, not a reminder: months and years need a reminder word
+    if !has(s, TIMER_WORDS) && s.starts_with("in ") && s.split_whitespace().nth(2).is_some_and(|u| u.starts_with("year") || u.starts_with("month")) {
+        return None;
+    }
+    // counting days, weeks, months or years: "every 3 days", "every other week", "every year on 3 march"
+    if let Some(i) = s.find("every ") {
+        if let Some((rule, rest)) = crate::timers::parse_interval(&s[i + 6..], chrono::Local::now().date_naive()) {
+            return go(format!("everyat {rule}|{}", keep(raw, &label(&s[..i], &rest))));
+        }
+    }
     // by the calendar: "remind me every weekday at 8 to take my pills", "on the 1st of every month pay rent"
     if let Some(i) = s.find("every ").filter(|_| !s.contains("every other")) {
         if let Some((rule, rest)) = crate::timers::parse_rule(&s[i + 6..]) {
@@ -614,7 +624,7 @@ fn timers(s: &str, raw: &str) -> Option<Reply> {
         return Some(Reply::say(text).mood(Mood::Happy).effect(Effect::Timer(secs, label)));
     }
     if let Some((secs, label)) = timer_parts(s) {
-        return go(format!("timer {secs}s {}", keep(raw, &label)));
+        return go(format!("timer {secs}s for {}", keep(raw, &label)));
     }
     let checking = has(s, &["timer", "alarm", "countdown"]) && has(s, &["left", "remaining", "how long", "status", "check", "show", "list"]);
     if checking || has(s, &["timers", "alarms", "reminders", "how long left", "how much time left", "time left"]) || s == "timer" {
@@ -632,6 +642,7 @@ fn timers(s: &str, raw: &str) -> Option<Reply> {
 /// Find "10 minutes" / "1h30" / "at 5pm" anywhere in the sentence, plus what it's for.
 pub fn timer_parts(s: &str) -> Option<(u64, String)> {
     let b = s.as_bytes();
+    let clock = |t: &str| clock_for(t, has(s, &["alarm", "wake me", "wake up"]));
     for i in 0..b.len() {
         if b[i].is_ascii_digit() && (i == 0 || b[i - 1] == b' ') {
             let before = &s[..i];
@@ -664,9 +675,12 @@ pub fn timer_parts(s: &str) -> Option<(u64, String)> {
             }
         }
     }
-    let at = if s.starts_with("at ") { Some(0) } else { s.find(" at ").map(|i| i + 1) }?;
-    let (secs, used) = clock(&s[at + 3..])?;
-    Some((secs, label(&s[..at], &s[at + 3 + used..])))
+    // each "at" in turn: "look at the oven at 5"
+    let ats = s.starts_with("at ").then_some(0).into_iter().chain(s.match_indices(" at ").map(|(i, _)| i + 1));
+    ats.into_iter().find_map(|at| {
+        let (secs, used) = clock(&s[at + 3..])?;
+        Some((secs, label(&s[..at], &s[at + 3 + used..])))
+    })
 }
 
 fn label(before: &str, after: &str) -> String {
@@ -701,18 +715,34 @@ pub fn dated(s: &str) -> Option<(u64, String, String)> {
         "in" => {
             let n: u64 = words.get(i + 1)?.parse().ok()?;
             let unit = words.get(i + 2)?;
-            let days = if unit.starts_with("week") { n.checked_mul(7)? } else if unit.starts_with("day") { n } else { return None };
-            Some((i, i + 3, today.checked_add_days(chrono::Days::new(days.min(3650)))?))
+            let date = if unit.starts_with("week") || unit.starts_with("day") {
+                let days = if unit.starts_with("week") { n.checked_mul(7)? } else { n };
+                today.checked_add_days(chrono::Days::new(days.min(3650)))?
+            } else if unit.starts_with("month") || unit.starts_with("year") {
+                let months = if unit.starts_with("year") { n.checked_mul(12)? } else { n };
+                today.checked_add_months(chrono::Months::new(months.min(120) as u32))?
+            } else {
+                return None;
+            };
+            Some((i, i + 3, date))
         }
         // "on friday", "next monday", "on june 3": the longest run of up to 3 words that is a day
         // the shortest run that is a day, so "on friday to water the plants" keeps its words
-        w @ ("on" | "next") => (1..=3).filter(|n| i + 1 + n <= words.len()).find_map(|n| {
-            let (d, _) = crate::powers::parse_day(&words[i + 1..i + 1 + n].join(" "), today)?;
+        // the shortest run that means the same day as the longest: "on friday to water the plants" keeps its words,
+        // and "on new year's eve" isn't New Year
+        w @ ("on" | "next") => {
+            let runs: Vec<(usize, chrono::NaiveDate)> = (1..=3).filter(|n| i + 1 + n <= words.len()).filter_map(|n| Some((n, crate::powers::parse_day(&words[i + 1..i + 1 + n].join(" "), today)?.0))).collect();
+            let (_, longest) = *runs.last()?;
+            let (n, d) = *runs.iter().find(|(_, d)| *d == longest)?;
+            // "on 29 february 2027": that year has no such day, so no quiet jump to 2028
+            if words.get(i + 1 + n).is_some_and(|y| y.len() == 4 && y.parse::<i32>().is_ok_and(|y| y != chrono::Datelike::year(&d))) {
+                return None;
+            }
             (d > today || w == "next").then_some((i, i + 1 + n, d))
-        }),
+        }
         _ => None,
     });
-    let (start, mut end, date) = day?;
+    let (start, mut end, mut date) = day?;
     // the time: "at 3", "at 9:30am"; without am/pm, 1-7 means the afternoon (nobody books 3 a.m.)
     let mut time = match words[start] {
         "tonight" => (20, 0),
@@ -720,25 +750,46 @@ pub fn dated(s: &str) -> Option<(u64, String, String)> {
         "this" => (15, 0),
         _ => (9, 0),
     };
-    if let Some(a) = words.iter().position(|w| *w == "at") {
+    // "tomorrow morning", "on friday evening"
+    let part = words.get(end).and_then(|w| match *w {
+        "morning" => Some((8, 0)),
+        "afternoon" => Some((15, 0)),
+        "evening" | "night" => Some((19, 0)),
+        _ => None,
+    });
+    if let Some(t) = part {
+        time = t;
+        end += 1;
+    }
+    // "tonight at 9", "this evening at 8", "tomorrow evening at 7" are evening hours, whenever they're asked
+    let evening = words[start] == "tonight" || words.get(start + 1) == Some(&"evening") || part == Some((19, 0));
+    // every "at" in turn: "look at the report tomorrow at 3" has its time after the second one
+    let mut cut = None;
+    for a in (0..words.len()).filter(|i| words[*i] == "at") {
         let rest = words[a + 1..].join(" ");
-        if let Some((hours, m, used)) = hm(&rest) {
-            // "tonight at 9" and "this evening at 8" are evening hours, whenever they're asked
-            let evening = words[start] == "tonight" || words.get(start + 1) == Some(&"evening");
-            let pm = if evening { hours[0] >= 4 } else { hours[0] < 8 };
-            time = (if hours.len() == 2 && pm { hours[1] } else { hours[0] }, m);
-            if a == end {
-                end = a + 1 + rest[..used].split_whitespace().count(); // "tomorrow at 3 to call anna": the label starts after the time
-            }
+        let Some((hours, m, used)) = hm(&rest) else { continue };
+        let pm = if evening { hours[0] >= 4 } else { hours[0] < 8 };
+        time = (if hours.len() == 2 && pm { hours[1] } else { hours[0] }, m);
+        if evening && hours == [12] {
+            time = (0, m); // "tonight at 12:30" is after midnight
+            date = date.succ_opt()?;
         }
+        let past = a + 1 + rest[..used].split_whitespace().count();
+        if a == end {
+            end = past; // "tomorrow at 3 to call anna": the label starts after the time
+        } else {
+            cut = Some((a, past)); // "tomorrow to call anna at 3": the time's words aren't part of the label
+        }
+        break;
     }
     let at = date.and_hms_opt(time.0, time.1, 0)?;
     if at <= now {
         return None;
     }
-    let label = label(&words[..start].join(" "), &words[end.min(words.len())..].join(" "));
+    let keep = |range: std::ops::Range<usize>| range.filter(|i| cut.is_none_or(|(a, b)| !(a..b).contains(i))).map(|i| words[i]).collect::<Vec<_>>().join(" ");
+    let label = label(&keep(0..start), &keep(end.min(words.len())..words.len()));
     let label = label.trim_end_matches(" at").to_string();
-    let clock = at.format("%H:%M");
+    let clock = brain::clock(at);
     // always the day's name: the lines say "on {when}" ("on tomorrow at 9:00" doesn't read)
     let when = format!("{} at {clock}", at.format("%A, %B %-d"));
     // through real (zoned) times: across a daylight-saving change a local day isn't 24 hours
@@ -756,13 +807,14 @@ pub fn when_secs(s: &str) -> Option<(u64, String)> {
             return Some((secs, format!("in {}", brain::fmt_dur(secs))));
         }
     }
-    if let Some((secs, _, when)) = dated(s) {
+    // "tomorrow at 9", and "friday at 3" (the Desk's own hint) as if it said "on friday at 3"
+    if let Some((secs, _, when)) = dated(s).or_else(|| dated(&format!("on {s}"))) {
         return Some((secs, when));
     }
     let evening = |h: u32| {
         let now = Local::now().naive_local();
         let at = now.date().and_hms_opt(h, 0, 0)?;
-        (at > now).then(|| ((crate::timers::unix_of(at) - crate::timers::unix_now()).max(1) as u64, format!("at {h}:00")))
+        (at > now).then(|| ((crate::timers::unix_of(at) - crate::timers::unix_now()).max(1) as u64, format!("at {}", brain::clock(at))))
     };
     match s {
         "this evening" | "evening" | "after work" => return evening(18),
@@ -771,7 +823,7 @@ pub fn when_secs(s: &str) -> Option<(u64, String)> {
     }
     let t = s.trim_start_matches("at ");
     let (secs, used) = clock(t)?;
-    (used == t.len()).then(|| (secs, format!("at {}", (Local::now() + chrono::Duration::seconds(secs as i64)).format("%H:%M"))))
+    (used == t.len()).then(|| (secs, format!("at {}", brain::clock(Local::now() + chrono::Duration::seconds(secs as i64)))))
 }
 
 /// "5", "5pm", "17:30", "7:15 am", "9 o'clock" -> the possible hours (both for "at 5"), the minutes and how much text was used.
@@ -783,7 +835,9 @@ pub fn hm(t: &str) -> Option<(Vec<u32>, u32, usize)> {
     let h: u32 = t[..d].parse().ok()?;
     let mut i = d;
     let mut m = 0;
-    if t[i..].starts_with(':') {
+    // "17:30", and "17.30" as it's written in Switzerland and Germany (but "3.5 hours" isn't a time)
+    let two_digits = t.get(i + 1..i + 3).is_some_and(|d| d.bytes().all(|b| b.is_ascii_digit())) && !t[i..].as_bytes().get(3).is_some_and(u8::is_ascii_digit);
+    if t[i..].starts_with(':') || t[i..].starts_with('.') && two_digits {
         m = t.get(i + 1..i + 3)?.parse().ok()?;
         i += 3;
     }
@@ -812,8 +866,16 @@ pub fn hm(t: &str) -> Option<(Vec<u32>, u32, usize)> {
 
 /// "5pm", "17:30", "7:15 am", "9 o'clock" -> seconds until then, and how much text was used.
 fn clock(t: &str) -> Option<(u64, usize)> {
+    clock_for(t, false)
+}
+
+/// `clock`; for an alarm or a wake-up (`morning`) "6:30" without am/pm is the morning, even in the afternoon.
+fn clock_for(t: &str, morning: bool) -> Option<(u64, usize)> {
     use chrono::{Duration, Local};
-    let (hours, m, i) = hm(t)?;
+    let (mut hours, m, i) = hm(t)?;
+    if morning {
+        hours.truncate(1);
+    }
     let now = Local::now().naive_local();
     hours
         .iter()
@@ -2461,7 +2523,8 @@ mod tests {
         assert!(timer("remind me on june 3 to send the report").is_some());
         assert!(matches!(eff("remind me in 10 minutes to stretch"), Effect::Timer(600, _)), "plain timers still work");
         assert_eq!(eff("cancel the tea timer"), Effect::CancelTimer("tea".into()));
-        assert_eq!(eff("cancel all timers"), Effect::CancelTimers);
+        assert!(respond("cancel all timers").buttons.iter().any(|b| b.1 == Act::Run("cancel all confirmed".into())), "asks first");
+        assert_eq!(eff("cancel all confirmed"), Effect::CancelTimers);
     }
 
     #[test]
@@ -2510,7 +2573,7 @@ mod tests {
         assert_eq!(eff("start a 15 minute timer for pasta"), Effect::Timer(900, "pasta".into()));
         assert_eq!(eff("wake me up in half an hour"), Effect::Timer(1800, "Time's up!".into()));
         assert!(matches!(eff("remind me at 5pm to leave"), Effect::Timer(s, l) if s <= 86400 && l == "leave"));
-        assert_eq!(eff("cancel all my timers"), Effect::CancelTimers);
+        assert!(respond("delete my reminders").buttons.iter().any(|b| b.1 == Act::Run("cancel all confirmed".into())), "asks first");
         assert_eq!(eff("set a tiemr for 5 minuts"), Effect::Timer(300, "Time's up!".into()));
     }
 
@@ -2671,6 +2734,38 @@ mod tests {
         assert!(matches!(eff("rickroll"), Effect::Open(u) if u.contains("dQw4w9WgXcQ")));
         // shell commands stay literal
         assert_eq!(eff("run echo hi"), Effect::Shell("echo hi".into()));
+    }
+
+    #[test]
+    fn reminders_say_what_people_mean() {
+        let rule = |t: &str| match eff(t) {
+            Effect::RepeatAt(r, l) => (r.split(['/', ' ']).next().unwrap_or("").to_string() + r.rsplit(' ').next().map(|t| format!(" {t}")).as_deref().unwrap_or(""), l),
+            e => panic!("{t}: {e:?}"),
+        };
+        assert_eq!(rule("remind me every 3 days to water the plants"), ("n3 09:00".into(), "water the plants".into()), "days, not minutes");
+        assert_eq!(rule("remind me to take out the bins every wednesday evening"), ("wednesday 19:00".into(), "take out the bins".into()));
+        assert_eq!(rule("remind me every year on 3 March to renew the car insurance"), ("y03-03 09:00".into(), "renew the car insurance".into()));
+        assert_eq!(rule("remind me every other week to clean the fridge"), ("n14 09:00".into(), "clean the fridge".into()));
+        assert_eq!(rule("every 2 months change the filter"), ("M2 09:00".into(), "change the filter".into()));
+        let timer = |t: &str| match eff(t) {
+            Effect::Timer(s, l) => (s, l),
+            e => panic!("{t}: {e:?}"),
+        };
+        assert!(timer("remind me tomorrow at 9 to renew passport in 6 months").0 > 3600, "not a 6-minute timer");
+        assert_eq!(timer("remind me tomorrow at 9 to renew passport in 6 months").1, "renew passport in 6 months");
+        assert!(timer("remind me in 6 months to renew passport").0 > 150 * 86_400);
+        assert_eq!(timer("remind me to look at the oven at 5").1, "look at the oven", "the second at is the time");
+        assert_eq!(timer("remind me at 17.30 to call mum").1, "call mum", "a dot time");
+        assert_eq!(timer("remind me tomorrow to call anna at 3").1, "call anna", "the time's words aren't the label");
+        assert_eq!(timer("remind me on the 15th to pay rent").1, "pay rent");
+        assert_eq!(timer("remind me on new year's eve at 11 to call mum").1, "call mum");
+        assert_eq!(timer("timer 10 min for 3 things"), (600, "3 things".into()));
+        assert_eq!(timer("set an alarm for 6:30").1, "Time's up!");
+        assert!(timer("set an alarm for 6:30").0 <= 24 * 3600 && timer("wake me up at 7").0 <= 24 * 3600);
+        assert!(!matches!(eff("remind me on 29 february 2027 to x"), Effect::Timer(..)), "2027 has no 29 February");
+        assert!(!matches!(eff("in 5 years i want to be rich"), Effect::Timer(..) | Effect::RepeatAt(..)));
+        assert_eq!(eff("snooze tomorrow").clone(), eff("snooze tomorrow"));
+        assert!(matches!(eff("snooze tomorrow"), Effect::Snooze(s) if s > 60));
     }
 
     #[test]

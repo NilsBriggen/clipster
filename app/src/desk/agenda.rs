@@ -245,7 +245,7 @@ impl Desk {
                                 out.push(format!("focus {mins}m"));
                             } else {
                                 let secs = (*a - now).num_seconds().max(60);
-                                out.push(format!("timer {secs}s Free time starts"));
+                                out.push(format!("timer {secs}s for Free time starts"));
                             }
                         }
                         x += w + 6.0;
@@ -585,11 +585,11 @@ impl Desk {
         }
         let before = e.start - Duration::hours(1);
         if before > now && !e.all_day {
-            actions.push(("Remind me 1 h before".into(), format!("timer {}s {}", (before - now).num_seconds(), e.title)));
+            actions.push(("Remind me 1 h before".into(), format!("timer {}s for {}", (before - now).num_seconds(), e.title)));
         }
         let evening = (e.start.date() - Duration::days(1)).and_hms_opt(18, 0, 0).unwrap_or(now);
         if evening > now {
-            actions.push(("The evening before".into(), format!("timer {}s Tomorrow: {}", (evening - now).num_seconds(), e.title)));
+            actions.push(("The evening before".into(), format!("timer {}s for Tomorrow: {}", (evening - now).num_seconds(), e.title)));
         }
         actions.push(("To-do: prepare".into(), format!("todo Prepare: {} by {}", e.title, e.start.date())));
         actions.push(("Meeting notes".into(), format!("calendar notes {}", e.key())));
@@ -696,7 +696,10 @@ impl Desk {
         }
         let enter = resp.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter));
         if (look.primary(ui, Rect::from_min_size(pos2(field.max.x + 8.0, field.min.y), vec2(64.0, ctl)), Id::unique("desk-note-when-ok"), "Set", preview.is_some()).clicked() || enter) && preview.is_some() {
-            out.push(format!("remind me {} to {}", self.note_when.trim(), note.text));
+            // seconds, not a sentence: the note's own words ("… in 6 months") can't be read as the time
+            if let Some((secs, _)) = crate::understand::when_secs(&self.note_when) {
+                out.push(format!("timer {secs}s for {}", note.text));
+            }
             self.card = None;
             return;
         }

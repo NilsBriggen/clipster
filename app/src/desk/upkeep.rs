@@ -700,7 +700,7 @@ impl Desk {
         let p = ui.painter().clone();
         for (i, run) in h.iter().enumerate() {
             let cy = inner.min.y + 10.0 + i as f32 * 24.0;
-            let when = chrono::DateTime::from_timestamp(run[0] as i64, 0).map(|t| t.with_timezone(&chrono::Local).format("%a %-d %b %Y, %-H:%M").to_string()).unwrap_or_default();
+            let when = chrono::DateTime::from_timestamp(run[0] as i64, 0).map(|t| { let t = t.with_timezone(&chrono::Local); format!("{}, {}", t.format("%a %-d %b %Y"), crate::brain::clock(t)) }).unwrap_or_default();
             p.text(pos2(inner.min.x, cy), Align2::LEFT_CENTER, &when, look.font(12.0), look.text());
             let what = format!("{} copied · {}{}", run[1], crate::upkeep::size(run[2]), if run[3] > 0 { format!(" · {} failed", run[3]) } else { String::new() });
             p.text(pos2(inner.max.x, cy), Align2::RIGHT_CENTER, what, look.font(12.0), if run[3] > 0 { look.danger() } else { look.dim() });

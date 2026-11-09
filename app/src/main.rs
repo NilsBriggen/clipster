@@ -252,7 +252,7 @@ struct App {
     next_timer: u64,            // the last id handed out
     summon_checked: f64,
     from_button: bool,
-    last_rung: Option<String>,
+    last_rung: Vec<String>, // what rang last, for Snooze
     idle: Option<u64>,          // seconds since the last input, where the system tells (outside KDE the pointer can't)
     idle_checked: f64,
     installing: bool,
@@ -312,7 +312,7 @@ struct App {
     desk_sample: Option<(Vec<timers::Timer>, std::collections::BTreeMap<String, std::collections::BTreeMap<String, u64>>, Vec<FocusLog>, std::collections::BTreeMap<String, String>)>,
     checkin_days: std::collections::BTreeMap<String, String>, // day -> great/okay/meh/rough (two weeks)
     notice_health: bool,
-    quiet_until: Option<Instant>,
+    quiet_until: Option<i64>, // unix seconds, so "quiet for 3 hours" survives a restart and a suspend
     next_tip: Instant,
     last_touch: Instant,
     late_warned: bool,
@@ -695,7 +695,7 @@ impl App {
             settings_locked: false,
             summon_checked: 0.0,
             from_button: false,
-            last_rung: None,
+            last_rung: vec![],
             idle: None,
             idle_checked: 0.0,
             installing: false,
@@ -875,12 +875,13 @@ impl App {
     /// No chatter now: "be quiet for …", after your quiet hour (until 6 in the morning), at weekends, or during a
     /// calendar event. Reminders, heads-ups and answers still come.
     fn quiet(&self) -> bool {
-        if self.quiet_until.is_some_and(|q| Instant::now() < q) {
+        if self.quiet_until.is_some_and(|q| timers::unix_now() < q) {
             return true;
         }
         let now = chrono::Local::now();
         let hour = chrono::Timelike::hour(&now);
-        self.quiet_after.is_some_and(|h| hour >= h || hour < 6) || self.quiet_weekend && chrono::Datelike::weekday(&now).number_from_monday() >= 6 || self.quiet_meetings && calendar::busy_at(&self.events, now.naive_local()).is_some_and(|e| !e.all_day)
+        // quiet from that hour until 6 in the morning ("after 1" means 1–6, not all day)
+        self.quiet_after.is_some_and(|h| if h < 6 { (h..6).contains(&hour) } else { hour >= h || hour < 6 }) || self.quiet_weekend && chrono::Datelike::weekday(&now).number_from_monday() >= 6 || self.quiet_meetings && calendar::busy_at(&self.events, now.naive_local()).is_some_and(|e| !e.all_day)
     }
 
     /// A line as he says it: your name, the facts he knows and this system's shortcuts filled in.
@@ -994,7 +995,7 @@ impl App {
         events.extend(self.holidays.iter().map(|(d, name)| calendar::Event { uid: format!("holiday-{d}"), start: d.and_hms_opt(0, 0, 0).unwrap_or_default(), end: (*d + chrono::Days::new(1)).and_hms_opt(0, 0, 0).unwrap_or_default(), all_day: true, title: name.clone(), cal: calendar::HOLIDAY, ..Default::default() }));
         let t_now = self.t() as f32;
         let mini = move |p: &egui::Painter, foot: Pos2, s: f32, hat: &str, skin: &str| draw_mini(p, foot, s, hat, skin, t_now);
-        let clip_paused = self.clip_paused.filter(|t| *t > now).map(|t| (chrono::Local::now() + chrono::Duration::from_std(t - now).unwrap_or_default()).format("%-H:%M").to_string());
+        let clip_paused = self.clip_paused.filter(|t| *t > now).map(|t| brain::clock(chrono::Local::now() + chrono::Duration::from_std(t - now).unwrap_or_default()));
         let day_totals = match &self.desk_sample {
             Some((_, k, f, _)) => plan::history_merge(&desk::sample_history(), k, f, chrono::Local::now().date_naive()),
             None => plan::history_merge(&self.day_totals, &self.kind_time, &self.focus_log, chrono::Local::now().date_naive()),
@@ -1024,7 +1025,7 @@ impl App {
             work_days: self.work_days.clone(),
             clock12: brain::clock12(),
             week_sunday: brain::week_sunday(),
-            quiet_until: self.quiet_until.filter(|q| *q > now).map(|q| brain::clock(chrono::Local::now() + chrono::Duration::from_std(q - now).unwrap_or_default())),
+            quiet_until: self.quiet_until.filter(|q| *q > timers::unix_now()).map(|q| brain::clock(chrono::Local::now() + chrono::Duration::seconds(q - timers::unix_now()))),
             quiet_after: self.quiet_after,
             quiet_weekend: self.quiet_weekend,
             quiet_meetings: self.quiet_meetings,
@@ -1428,9 +1429,9 @@ impl App {
                 lines::pick("say_timer_cancelled").replace("{label}", &label)
             }
             "snooze" | "at" => {
-                // "snooze 10m" means from now; plain numbers are minutes
+                // "snooze 10m" means from now, and a plain number is minutes; "at 5" is five o'clock (as the preview says)
                 let arg = arg.trim();
-                let words = if arg.chars().all(|c| c.is_ascii_digit()) && !arg.is_empty() { format!("in {arg} minutes") } else if verb == "snooze" && brain::parse_dur(arg).is_some_and(|(_, rest)| rest.trim().is_empty()) { format!("in {arg}") } else { arg.to_string() };
+                let words = if verb == "snooze" && arg.chars().all(|c| c.is_ascii_digit()) && !arg.is_empty() { format!("in {arg} minutes") } else if verb == "snooze" && brain::parse_dur(arg).is_some_and(|(_, rest)| rest.trim().is_empty()) { format!("in {arg}") } else { arg.to_string() };
                 match understand::when_secs(&words) {
                     Some((secs, when)) => {
                         self.timers[i].at = timers::unix_now() + secs as i64;
@@ -1500,7 +1501,7 @@ impl App {
             }
             "next" => match calendar::next(&self.events, chrono::Local::now().naive_local()) {
                 Some(e) => {
-                    let r = Reply::say(format!("Next up: {} ({}).", e.title, calendar::describe_day(e.start.date()).to_lowercase() + &e.start.format(" at %-H:%M").to_string())).mood(Mood::Alarm);
+                    let r = Reply::say(format!("Next up: {} ({}).", e.title, calendar::describe_day(e.start.date()).to_lowercase() + " at " + &brain::clock(e.start))).mood(Mood::Alarm);
                     match &e.join {
                         Some(j) => r.btn("Join the call", Act::Open(j.clone())),
                         None => r,
@@ -1544,7 +1545,7 @@ impl App {
                 let day = chrono::NaiveDate::parse_from_str(arg, "%Y-%m-%d").unwrap_or(today);
                 let now = chrono::Local::now().naive_local();
                 let from = if day == today { now } else { day.and_hms_opt(0, 0, 0).unwrap_or(now) };
-                let slots: Vec<String> = plan::free_slots(&self.events, from, self.work_hours).iter().filter(|(a, b)| (*b - *a).num_minutes() >= 30).map(|(a, b)| format!("{}–{}", a.format("%-H:%M"), plan::end_text(*b))).collect();
+                let slots: Vec<String> = plan::free_slots(&self.events, from, self.work_hours).iter().filter(|(a, b)| (*b - *a).num_minutes() >= 30).map(|(a, b)| format!("{}–{}", brain::clock(*a), plan::end_text(*b))).collect();
                 let when = calendar::describe_day(day);
                 if slots.is_empty() {
                     Reply::say(lines::pick("agenda_no_free").replace("{when}", &when)).mood(Mood::Think)
@@ -1586,7 +1587,7 @@ impl App {
                     let made = if file.exists() {
                         Ok(())
                     } else {
-                        let head = format!("{}\n{}{}\n\n", e.title, if e.all_day { e.start.format("%A %-d %B %Y").to_string() } else { format!("{}–{}", e.start.format("%A %-d %B %Y, %-H:%M"), e.end.format("%-H:%M")) }, if e.place.is_empty() { String::new() } else { format!(" · {}", e.place) });
+                        let head = format!("{}\n{}{}\n\n", e.title, if e.all_day { e.start.format("%A %-d %B %Y").to_string() } else { format!("{}, {}–{}", e.start.format("%A %-d %B %Y"), brain::clock(e.start), brain::clock(e.end)) }, if e.place.is_empty() { String::new() } else { format!(" · {}", e.place) });
                         brain::write_atomic(&file, &head)
                     };
                     match made.and_then(|_| open(&file.to_string_lossy())).map_err(|e| e.to_string()) {
@@ -2416,7 +2417,7 @@ impl App {
     fn snapshot(&self) -> String {
         serde_json::json!({
             "tips_every": self.tips_every, "notice_clip": self.notice_clip, "notice_programs": self.notice_programs, "notice_windows": self.notice_windows, "checkin": self.checkin, "facts": self.facts, "kind_time": self.kind_time, "focus_log": self.focus_log, "desk_look": if self.desk_modern { "modern" } else { "classic" }, "desk_size": if self.desk_large { "large" } else { "normal" }, "checkin_days": self.checkin_days,
-            "pins": self.pins, "reading": self.reading, "calendars": self.calendars, "calendar_meta": self.calendar_meta.iter().map(|(s, m)| (s.clone(), m.to_json())).collect::<serde_json::Map<_, _>>(), "holidays": self.holiday_cc, "pin_labels": self.pin_labels, "reading_titles": self.reading_titles, "people": self.people.iter().map(|p| p.to_json()).collect::<Vec<_>>(), "habits": self.habits.iter().map(|h| h.to_json()).collect::<Vec<_>>(), "countdowns": self.countdowns.iter().map(|(l, d)| serde_json::json!([l, d.to_string()])).collect::<Vec<_>>(), "site_time": self.site_time, "kind_moves": self.kind_moves, "weather": self.weather_on, "work_hours": [self.work_hours.0, self.work_hours.1], "day_totals": plan::history_merge(&self.day_totals, &self.kind_time, &self.focus_log, chrono::Local::now().date_naive()), "workday": self.workday, "workday_ask": self.workday_ask, "welcome_seen": self.welcome_seen, "backup_sources": self.backup_sources, "backup_target": self.backup_target, "backup_last": self.backup_last, "backup_result": self.backup_result, "backup_skip": self.backup_skip, "backup_auto": self.backup_auto, "backup_history": self.backup_history, "upkeep_hide": self.upkeep_hide, "space_log": self.space_log, "tidy_targets": self.tidy_targets, "tidy_auto": self.tidy_auto, "work_days": self.work_days, "clock12": brain::clock12(), "week_sunday": brain::week_sunday(), "quiet_after": self.quiet_after, "quiet_weekend": self.quiet_weekend, "quiet_meetings": self.quiet_meetings, "headsup": self.headsup_min, "break_every": self.break_every, "alarm_sound": self.alarm_sound, "muted": self.muted, "desk_morning": self.desk_morning, "dnd_restore": self.dnd_restore, "dnd": self.dnd, "wrapup": self.wrapup, "upkeep_day": self.upkeep_day, "focus_goal": self.focus_goal, "budgets": self.budgets,
+            "pins": self.pins, "reading": self.reading, "calendars": self.calendars, "calendar_meta": self.calendar_meta.iter().map(|(s, m)| (s.clone(), m.to_json())).collect::<serde_json::Map<_, _>>(), "holidays": self.holiday_cc, "pin_labels": self.pin_labels, "reading_titles": self.reading_titles, "people": self.people.iter().map(|p| p.to_json()).collect::<Vec<_>>(), "habits": self.habits.iter().map(|h| h.to_json()).collect::<Vec<_>>(), "countdowns": self.countdowns.iter().map(|(l, d)| serde_json::json!([l, d.to_string()])).collect::<Vec<_>>(), "site_time": self.site_time, "kind_moves": self.kind_moves, "weather": self.weather_on, "work_hours": [self.work_hours.0, self.work_hours.1], "day_totals": plan::history_merge(&self.day_totals, &self.kind_time, &self.focus_log, chrono::Local::now().date_naive()), "workday": self.workday, "workday_ask": self.workday_ask, "welcome_seen": self.welcome_seen, "backup_sources": self.backup_sources, "backup_target": self.backup_target, "backup_last": self.backup_last, "backup_result": self.backup_result, "backup_skip": self.backup_skip, "backup_auto": self.backup_auto, "backup_history": self.backup_history, "upkeep_hide": self.upkeep_hide, "space_log": self.space_log, "tidy_targets": self.tidy_targets, "tidy_auto": self.tidy_auto, "work_days": self.work_days, "clock12": brain::clock12(), "week_sunday": brain::week_sunday(), "quiet_after": self.quiet_after, "quiet_until": self.quiet_until.filter(|q| *q > timers::unix_now()), "quiet_weekend": self.quiet_weekend, "quiet_meetings": self.quiet_meetings, "headsup": self.headsup_min, "break_every": self.break_every, "alarm_sound": self.alarm_sound, "muted": self.muted, "desk_morning": self.desk_morning, "dnd_restore": self.dnd_restore, "dnd": self.dnd, "wrapup": self.wrapup, "upkeep_day": self.upkeep_day, "focus_goal": self.focus_goal, "budgets": self.budgets,
             "notice_health": self.notice_health, "check_updates": self.check_updates, "update_told": self.update_told, "sounds": self.sounds, "breaks": self.breaks, "name": self.name,
             "hat": self.hat, "skin": self.skin, "friendship": self.friendship, "highscores": self.highscores, "birthday": self.birthday.map(|(m, d)| [m, d]), "stats": self.stats, "unlocked": self.unlocked, "explored": self.explored, "persona": if self.unhinged { "unhinged" } else { "boring" }, "anchor": self.anchor.or(self.saved_anchor).map(|a| [a.x, a.y]),
             "timers": self.timers.iter().map(|t| serde_json::json!([t.at, t.label, t.every, t.id, t.rule])).collect::<Vec<_>>(),
@@ -2464,6 +2465,7 @@ impl App {
         self.backup_last = v["backup_last"].as_i64();
         self.backup_result = v["backup_result"].as_str().unwrap_or_default().to_string();
         // Clipster stopped during a focus session: put the notification setting back
+        self.quiet_until = v["quiet_until"].as_i64().filter(|q| *q > timers::unix_now());
         if let Some(m) = v["dnd_restore"].as_str() {
             sys::dnd_restore(m);
         }
@@ -2846,12 +2848,15 @@ impl App {
                 self.desk_answer = None;
                 silent = true;
             }
-            Effect::Snooze(secs) => match self.last_rung.clone() {
-                Some(label) => {
-                    self.add_timer(secs, label.clone(), 0, None);
+            Effect::Snooze(secs) => match std::mem::take(&mut self.last_rung) {
+                labels if !labels.is_empty() => {
+                    for l in &labels {
+                        self.add_timer(secs, l.clone(), 0, None);
+                    }
+                    let label = if labels.len() == 1 { labels[0].clone() } else { format!("{} reminders", labels.len()) };
                     r.text = lines::pick("timer_snoozed").replace("{label}", if label.is_empty() { "your timer" } else { &label }).replace("{when}", &format!("in {}", brain::fmt_dur(secs)));
                 }
-                None => r = Reply::say("Nothing has rung yet, so there's nothing to snooze.").mood(Mood::Think),
+                _ => r = Reply::say("Nothing has rung yet, so there's nothing to snooze.").mood(Mood::Think),
             },
             Effect::FocusUntilNext(label) => {
                 // until 5 minutes before the next timed event today
@@ -2948,7 +2953,7 @@ impl App {
                     "wrapup" => self.wrapup = on,
                     "upkeepday" => self.upkeep_day = on,
                     "workdayask" => self.workday_ask = on,
-                    "quiet" => self.quiet_until = on.then(|| Instant::now() + Duration::from_secs(3600)),
+                    "quiet" => self.quiet_until = on.then(|| timers::unix_now() + 3600),
                     "autostart" if self.screenshot.is_none() => {
                         if sys::set_autostart(on).is_ok() {
                             self.autostart = on;
@@ -2981,7 +2986,7 @@ impl App {
                         } else {
                             value.parse::<u64>().unwrap_or(60).clamp(1, 24 * 60) * 60
                         };
-                        self.quiet_until = Some(Instant::now() + Duration::from_secs(secs));
+                        self.quiet_until = Some(timers::unix_now() + secs as i64);
                     }
                     "quietafter" => self.quiet_after = value.parse::<u32>().ok().filter(|h| *h <= 23),
                     "quietweekend" => self.quiet_weekend = on,
@@ -3339,7 +3344,7 @@ impl App {
                     "pause" => {
                         let secs = brain::parse_dur(target).map_or(15 * 60, |(s, _)| s).clamp(60, 24 * 3600);
                         self.clip_paused = Some(Instant::now() + Duration::from_secs(secs));
-                        self.set_status(lines::pick("clip_paused").replace("{when}", &(chrono::Local::now() + chrono::Duration::seconds(secs as i64)).format("%-H:%M").to_string()));
+                        self.set_status(lines::pick("clip_paused").replace("{when}", &brain::clock(chrono::Local::now() + chrono::Duration::seconds(secs as i64))));
                         Some("")
                     }
                     "resume" => {
@@ -3614,7 +3619,7 @@ impl App {
                 });
             }
             Effect::Net(q) => self.ask_net(ctx, q),
-            Effect::Quiet(secs) => self.quiet_until = Some(Instant::now() + Duration::from_secs(secs)),
+            Effect::Quiet(secs) => self.quiet_until = Some(timers::unix_now() + secs as i64),
             Effect::ListTimers => {
                 let now = timers::unix_now();
                 let mut list = self.timers.clone();
@@ -3794,36 +3799,44 @@ impl App {
             });
         }
         let now_unix = timers::unix_now();
-        if let Some(i) = self.timers.iter().position(|t| t.at <= now_unix) {
-            let mut fired = self.timers.remove(i);
-            let label = fired.label.clone();
-            self.last_rung = Some(label.clone());
-            // it comes back: after its interval, or on its rule's next day (same id, so the Desk keeps it)
-            let next = match (&fired.rule, fired.every) {
-                (Some(rule), _) => timers::next_fire(rule, chrono::Local::now().naive_local()).map(timers::unix_of),
-                (None, e) if e > 0 => Some(now_unix + e as i64),
-                _ => None,
-            };
-            if let Some(at) = next {
-                fired.at = at;
-                self.timers.push(fired);
+        // everything due rings together (nine to-dos due today all come at 9:00, and after a restart the missed ones
+        // at once): one balloon listing them, one sound, and Snooze takes them all
+        let (due, waiting): (Vec<timers::Timer>, Vec<timers::Timer>) = std::mem::take(&mut self.timers).into_iter().partition(|t| t.at <= now_unix);
+        self.timers = waiting;
+        if !due.is_empty() {
+            let labels: Vec<String> = due.iter().map(|t| t.label.clone()).collect();
+            self.last_rung = labels.clone();
+            for mut fired in due {
+                // it comes back: after its interval, or on its rule's next day (same id, so the Desk keeps it)
+                let next = match (&fired.rule, fired.every) {
+                    (Some(rule), _) => timers::next_fire(rule, chrono::Local::now().naive_local()).map(timers::unix_of),
+                    (None, e) if e > 0 => Some(now_unix + e as i64),
+                    _ => None,
+                };
+                if let Some(at) = next {
+                    fired.at = at;
+                    self.timers.push(fired);
+                }
             }
             // a reminder rings with its own switch, apart from "Play sounds"
             if self.alarm_sound && self.screenshot.is_none() {
                 sys::play_sound("alarm-clock-elapsed");
             }
-            sys::notify(&label);
+            for l in &labels {
+                sys::notify(l);
+            }
             ctx.send_viewport_cmd(egui::ViewportCommand::RequestUserAttention(egui::UserAttentionType::Critical));
+            let label = if labels.len() == 1 { labels[0].clone() } else { labels.iter().map(|l| format!("• {l}")).collect::<Vec<_>>().join("\n") };
             self.show(
                 Reply::say(format!("⏰ {}", {
-                    let quip = lines::pick("timer_done");
+                    let quip = lines::pick(if labels.len() == 1 { "timer_done" } else { "timers_done" });
                     if quip.contains("{label}") { quip.replace("{label}", &label) } else { format!("{quip}\n\n{label}") }
                 }))
                     .mood(Mood::Alarm)
-                    // snooze keeps the label as it was: "timer 10m 5 min call" would read the 5 as more time
+                    // snooze keeps the labels as they were: "timer 10m 5 min call" would read the 5 as more time
                     .run("Snooze 10 min", "snooze 10m")
                     .run("1 hour", "snooze 1h")
-                    .run("Tomorrow", &format!("remind me tomorrow at 9 to {}", if label.is_empty() { "look at this" } else { &label }))
+                    .run("Tomorrow", "snooze tomorrow")
                     .btn("Got it, thanks", Act::Hide),
             );
         }
@@ -3924,7 +3937,7 @@ impl App {
             self.told_events.insert(e.key());
             let mins = ((e.start - wall).num_seconds() as f64 / 60.0).ceil() as i64;
             self.sound("message");
-            sys::notify(&format!("{} at {}", e.title, e.start.format("%-H:%M")));
+            sys::notify(&format!("{} at {}", e.title, brain::clock(e.start)));
             let mut r = Reply::say(lines::pick("event_soon").replace("{x}", &e.title).replace("{n}", &mins.to_string())).mood(Mood::Alarm);
             if let Some(j) = &e.join {
                 r = r.btn("Join the call", Act::Open(j.clone()));

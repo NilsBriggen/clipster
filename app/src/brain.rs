@@ -650,6 +650,11 @@ pub fn exact(input: &str) -> Option<Reply> {
         }
         "volume" | "sound" => return Some(crate::powers::volume(rest)),
         "media" | "music" | "song" => return Some(crate::powers::media(rest)),
+        "snooze" if rest == "tomorrow" => {
+            // tomorrow at 9, counted when it's clicked
+            let nine = (chrono::Local::now().date_naive() + chrono::Days::new(1)).and_hms_opt(9, 0, 0)?;
+            return Some(Reply::say("").mood(Mood::Alarm).effect(Effect::Snooze((crate::timers::unix_of(nine) - crate::timers::unix_now()).max(60) as u64)));
+        }
         "snooze" => return Some(Reply::say("").mood(Mood::Alarm).effect(Effect::Snooze(parse_dur(rest).map_or(600, |(s, _)| s).clamp(60, 24 * 3600)))),
         "next" | "skip" if rest.is_empty() || ["song", "track", "this song", "this one"].contains(&rest) => return Some(crate::powers::media("next")),
         "brightness" => return Some(crate::powers::brightness(rest)),
@@ -729,7 +734,9 @@ pub fn exact(input: &str) -> Option<Reply> {
         "timer" | "alarm" => return Some(timer(rest, "")),
         "remind" | "reminder" => return Some(remind(rest)),
         "timers" => return Some(Reply::say("").effect(Effect::ListTimers)),
-        "cancel" | "stop" if rest.is_empty() || rest == "all" => return Some(Reply::say(lines::pick("say_cancel")).effect(Effect::CancelTimers)),
+        "cancel" if rest == "all confirmed" => return Some(Reply::say(lines::pick("say_cancel")).effect(Effect::CancelTimers)),
+        // every reminder at once, the repeating ones too: ask first, like the other things that can't be taken back
+        "cancel" | "stop" if rest.is_empty() || rest == "all" => return Some(Reply::say("Cancel every timer and reminder, the repeating ones too?").mood(Mood::Think).run("Yes, cancel them all", "cancel all confirmed").run("Show them first", "timers").btn("Keep them", Act::Hide)),
         "cancel" => return Some(Reply::say(lines::pick("say_timer_cancelled").replace("{label}", rest)).effect(Effect::CancelTimer(rest.to_string()))),
         // "note #3 edit …", "note #3 pin", "note #3 remove", "note #3 copy" (the Desk); anything else is a new note
         "note" if note_op(rest).is_some() => return Some(Reply::say("").effect(Effect::Note(note_op(rest).unwrap_or_default()))),
@@ -956,7 +963,7 @@ pub fn react_clip(text: &str) -> Option<Reply> {
         // within a few years of now: a US phone number without dashes is 10 digits too
         let now = chrono::Local::now().timestamp();
         if let Some(d) = chrono::Local.timestamp_opt(secs, 0).single().filter(|_| (978_307_200..now + 5 * 365 * 86_400).contains(&secs)) {
-            let date = d.format("%A, %B %-d %Y, %H:%M").to_string();
+            let date = format!("{}, {}", d.format("%A, %B %-d %Y"), clock(d));
             return Some(Reply::say(lines::pick("clip_timestamp").replace("{date}", &date)).mood(Mood::Think).btn("Copy the date", Act::Copy(date)));
         }
     }
@@ -1101,6 +1108,12 @@ pub fn clock12() -> bool {
 
 pub fn week_sunday() -> bool {
     WEEK_SUNDAY.load(std::sync::atomic::Ordering::Relaxed)
+}
+
+/// The first day of `d`'s week: Monday, or Sunday when the week starts on Sunday.
+pub fn week_start(d: chrono::NaiveDate) -> chrono::NaiveDate {
+    use chrono::Datelike;
+    d - chrono::Days::new(if week_sunday() { d.weekday().num_days_from_sunday() } else { d.weekday().num_days_from_monday() } as u64)
 }
 
 /// A time of day as you like it: "14:30", or "2:30 pm".
@@ -1523,6 +1536,10 @@ pub fn parse_dur(s: &str) -> Option<(u64, &str)> {
 60.0
             }
             "h" | "hr" | "hrs" | "hour" | "hours" => 3600.0,
+            "d" | "day" | "days" => 86_400.0,
+            "w" | "wk" | "wks" | "week" | "weeks" => 604_800.0,
+            // months and years aren't a fixed number of seconds: dates handle those ("in 6 months" -> `understand::dated`)
+            "mo" | "month" | "months" | "y" | "yr" | "yrs" | "year" | "years" => return None,
             _ => {
                 i = us; // bare number = minutes; the word belongs to the label
                 60.0
@@ -1540,7 +1557,9 @@ fn timer(rest: &str, label: &str) -> Reply {
     let Some((secs, tail)) = parse_dur(rest) else {
         return Reply::say("How long? Try: timer 5m tea, or timer 1h30m laundry");
     };
-    let label = if label.is_empty() { tail.trim_start_matches("for ").trim() } else { label };
+    let tail = tail.trim();
+    let tail = tail.strip_prefix("for").filter(|r| r.is_empty() || r.starts_with(' ')).map_or(tail, str::trim);
+    let label = if label.is_empty() { tail } else { label };
     let label = if label.is_empty() { "Time's up!" } else { label };
     Reply::say(lines::pick("say_timer").replace("{dur}", &fmt_dur(secs)).replace("{label}", label))
         .effect(Effect::Timer(secs, label.to_string()))
@@ -1557,17 +1576,18 @@ fn remind(rest: &str) -> Reply {
             return timer(&format!("{secs}s"), if what.is_empty() { "Reminder!" } else { what });
         }
     }
-    if let Some((what, when)) = r.rsplit_once(" in ") {
-        if parse_dur(when).is_some() {
-            return timer(when, what.trim_start_matches("to ").trim());
-        }
-    }
-    // a day and maybe a time: "tomorrow at 3 to call Anna", "on friday to water the plants", "at 5pm to leave"
+    // a day and maybe a time: "tomorrow at 3 to call Anna", "on friday to water the plants"; before "… in 10 min",
+    // so "tomorrow at 9 to renew the passport in 6 months" keeps its words
     let low = r.to_lowercase();
     if let Some((secs, label, when)) = crate::understand::dated(&low) {
         let label = crate::understand::keep(r, &label);
         let text = lines::pick("say_remind_dated").replace("{label}", if label.is_empty() { "your reminder" } else { &label }).replace("{when}", &when);
         return Reply::say(text).mood(Mood::Happy).effect(Effect::Timer(secs, label));
+    }
+    if let Some((what, when)) = r.rsplit_once(" in ") {
+        if parse_dur(when).is_some() {
+            return timer(when, what.trim_start_matches("to ").trim());
+        }
     }
     if let Some((secs, label)) = crate::understand::timer_parts(&low) {
         return timer(&format!("{secs}s"), &crate::understand::keep(r, &label));
@@ -1607,6 +1627,10 @@ pub fn or_clipboard(t: &str) -> String {
 
 pub fn fmt_dur(secs: u64) -> String {
     let (h, m, s) = (secs / 3600, secs / 60 % 60, secs % 60);
+    if secs >= 2 * 86_400 {
+        let (d, h) = (secs / 86_400, secs / 3600 % 24);
+        return if h == 0 { format!("{d} days") } else { format!("{d} days {h}h") };
+    }
     match (h, m, s) {
         (0, 0, s) => format!("{s}s"),
         (0, m, 0) => format!("{m} min"),
@@ -1762,7 +1786,7 @@ fn password(rest: &str) -> Reply {
 
 fn time_now() -> Reply {
     let now = chrono::Local::now();
-    let stamp = now.format("%H:%M on %A, %B %-d, %Y").to_string();
+    let stamp = format!("{} on {}", clock(now), now.format("%A, %B %-d, %Y"));
     Reply::say(format!("It's {stamp}. {}", pick(&[
         "Time flies when you're with a paperclip.",
         "Shouldn't you be doing something?",

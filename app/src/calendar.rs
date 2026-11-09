@@ -249,21 +249,26 @@ fn nth_weekday(year: i32, month: u32, n: i32, day: Weekday) -> Option<NaiveDate>
 /// BYMONTHDAY ("1,15", "-1" for the last day), or the first one's day number when there are neither.
 fn month_days(m: NaiveDate, byday: &[(i32, Weekday)], bymonthday: &[i32], default_day: u32) -> Vec<NaiveDate> {
     let last = m.checked_add_months(Months::new(1)).and_then(|n| n.pred_opt()).map_or(28, |l| l.day());
-    let mut v = vec![];
+    let mut by_wd = vec![];
     for (n, wd) in byday {
         if *n != 0 {
-            v.extend(nth_weekday(m.year(), m.month(), *n, *wd));
+            by_wd.extend(nth_weekday(m.year(), m.month(), *n, *wd));
         } else {
-            v.extend((1..=last).filter_map(|d| m.with_day(d)).filter(|d| d.weekday() == *wd));
+            by_wd.extend((1..=last).filter_map(|d| m.with_day(d)).filter(|d| d.weekday() == *wd));
         }
     }
+    let mut by_md = vec![];
     for md in bymonthday {
         let day = if *md > 0 { *md } else { last as i32 + 1 + md };
-        v.extend(u32::try_from(day).ok().filter(|d| *d >= 1 && *d <= last).and_then(|d| m.with_day(d)));
+        by_md.extend(u32::try_from(day).ok().filter(|d| *d >= 1 && *d <= last).and_then(|d| m.with_day(d)));
     }
-    if byday.is_empty() && bymonthday.is_empty() {
-        v.extend(m.with_day(default_day)); // months without that day are skipped, like calendars do
-    }
+    let mut v = match (byday.is_empty(), bymonthday.is_empty()) {
+        // both: a day must fit both ("Friday the 13th" is BYDAY=FR;BYMONTHDAY=13)
+        (false, false) => by_wd.into_iter().filter(|d| by_md.contains(d)).collect(),
+        (false, true) => by_wd,
+        (true, false) => by_md,
+        (true, true) => m.with_day(default_day).into_iter().collect(), // months without that day are skipped, like calendars do
+    };
     v.sort();
     v.dedup();
     v
@@ -301,6 +306,7 @@ fn starts(first: NaiveDateTime, rule: &str, from: NaiveDateTime, until: NaiveDat
         .unwrap_or_default();
     let numbers = |k: &str| -> Vec<i32> { part(k).map(|v| v.split(',').filter_map(|d| d.parse().ok()).filter(|d: &i32| *d != 0 && d.abs() <= 366).collect()).unwrap_or_default() };
     let (bymonthday, bysetpos) = (numbers("BYMONTHDAY"), numbers("BYSETPOS"));
+    let bymonth: Vec<u32> = numbers("BYMONTH").into_iter().filter_map(|m| u32::try_from(m).ok()).filter(|m| (1..=12).contains(m)).collect();
     // WKST: which day a week starts on (Google writes SU for fortnightly series)
     let wkst = part("WKST").and_then(|v| weekday(&v)).unwrap_or(Weekday::Mon).num_days_from_monday();
     let in_week = |d: Weekday| ((d.num_days_from_monday() + 7 - wkst) % 7) as u64;
@@ -350,6 +356,20 @@ fn starts(first: NaiveDateTime, rule: &str, from: NaiveDateTime, until: NaiveDat
                 }
                 match days.is_empty() {
                     true => m.and_time(time) <= end,
+                    false => days.into_iter().all(|d| push(d.and_time(time), &mut out)),
+                }
+            }
+            // in given months, on given days: "the 2nd Sunday of May" (BYMONTH=5;BYDAY=2SU)
+            "YEARLY" if !bymonth.is_empty() || !byday.is_empty() || !bymonthday.is_empty() => {
+                let Some(y) = i32::try_from(step).ok().and_then(|s| first.year().checked_add(s)) else { break };
+                let months = if bymonth.is_empty() { vec![first.month()] } else { bymonth.clone() };
+                let mut days: Vec<NaiveDate> = months.iter().filter_map(|mo| NaiveDate::from_ymd_opt(y, *mo, 1)).flat_map(|m| month_days(m, &byday, &bymonthday, first.day())).collect();
+                days.sort();
+                if !bysetpos.is_empty() {
+                    days = setpos(days, &bysetpos);
+                }
+                match days.is_empty() {
+                    true => NaiveDate::from_ymd_opt(y, 1, 1).is_some_and(|d| d.and_time(time) <= end),
                     false => days.into_iter().all(|d| push(d.and_time(time), &mut out)),
                 }
             }
@@ -722,6 +742,11 @@ BEGIN:VEVENT\r\nDTSTART;TZID=Europe/Zurich:20261110T140000\r\nDTEND;TZID=Europe/
         assert_eq!(days("FREQ=MONTHLY;BYDAY=2TU,4TU;COUNT=4", t(2026, 11, 10, 9, 0)), ["Tue 11-10", "Tue 11-24", "Tue 12-08", "Tue 12-22"]);
         assert_eq!(days("FREQ=MONTHLY;BYMONTHDAY=1,15;COUNT=3", t(2026, 11, 1, 9, 0)), ["Sun 11-01", "Sun 11-15", "Tue 12-01"]);
         assert_eq!(days("FREQ=MONTHLY;BYDAY=FR;BYSETPOS=-1;COUNT=3", t(2026, 11, 27, 9, 0)), ["Fri 11-27", "Fri 12-25", "Fri 01-29"]);
+        // Friday the 13th: both must fit; Mother's Day: the 2nd Sunday of May, every year
+        let v = starts(t(2026, 2, 13, 9, 0), "FREQ=MONTHLY;BYDAY=FR;BYMONTHDAY=13;COUNT=2", t(2026, 1, 1, 0, 0), t(2028, 1, 1, 0, 0), false);
+        assert_eq!(v, [t(2026, 2, 13, 9, 0), t(2026, 3, 13, 9, 0)]);
+        let v = starts(t(2025, 5, 11, 0, 0), "FREQ=YEARLY;BYDAY=2SU;BYMONTH=5", t(2027, 1, 1, 0, 0), t(2028, 1, 1, 0, 0), false);
+        assert!(v.contains(&t(2027, 5, 9, 0, 0)) && !v.contains(&t(2027, 5, 11, 0, 0)), "{v:?}");
         // fortnightly on Sunday and Monday with weeks starting on Sunday
         assert_eq!(days("FREQ=WEEKLY;WKST=SU;INTERVAL=2;BYDAY=SU,MO;COUNT=4", t(2026, 11, 8, 9, 0)), ["Sun 11-08", "Mon 11-09", "Sun 11-22", "Mon 11-23"]);
         // a UTC series ends at its UNTIL in UTC, wherever the computer is

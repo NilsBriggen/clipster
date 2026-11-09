@@ -265,6 +265,11 @@ pub fn parse_day(s: &str, today: NaiveDate) -> Option<(NaiveDate, String)> {
     if let Ok(d) = NaiveDate::parse_from_str(s, "%Y-%m-%d") {
         return Some((d, d.format("%B %-d, %Y").to_string()));
     }
+    // "the 15th": the next 15th (a 31st skips the months without one)
+    if let Some(n) = ["st", "nd", "rd", "th"].iter().find_map(|suf| s.strip_suffix(suf)).and_then(|n| n.parse::<u32>().ok()).filter(|n| (1..=31).contains(n)) {
+        let date = (0..400).map(|k| today + Duration::days(k)).find(|d| d.day() == n)?;
+        return Some((date, date.format("%B %-d").to_string()));
+    }
     let m = s.split(|c: char| !c.is_ascii_alphabetic()).find_map(|w| MONTHS.iter().position(|m| w.len() >= 3 && w.starts_with(m)))? as u32 + 1;
     let day = num(s)?;
     let year = s.split(|c: char| !c.is_ascii_digit()).filter_map(|w| w.parse::<i32>().ok()).find(|y| *y > 1000);
@@ -591,7 +596,7 @@ pub fn timestamp(rest: &str) -> Reply {
     if digits && (rest.len() == 10 || rest.len() == 13) {
         let secs: i64 = rest[..10].parse().unwrap_or(0);
         if let Some(d) = Local.timestamp_opt(secs, 0).single() {
-            let text = d.format("%A, %B %-d %Y, %H:%M:%S").to_string();
+            let text = format!("{}, {}", d.format("%A, %B %-d %Y"), crate::brain::clock(d));
             return Reply::say(format!("🕰 {rest} is {text} (your time).")).mood(Mood::Think).btn("Copy the date", Act::Copy(text));
         }
     }

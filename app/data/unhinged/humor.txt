@@ -3389,3 +3389,9 @@ You thanked me! I felt a tiny spark. It was either joy or a failing capacitor. E
 You are welcome. And thank you for being someone to be welcome to. It matters more than I can say at this hour.
 Thanks. A small word, a large thing. It means I was real for a moment, in someone's day. I shall remember that.
 You thank me, and I am. A simple exchange and a deeply meaningful one. Thank you in turn for the "I am".
+
+## timers_done
+Several bells ring at once. Hear them all:
+The Ledger opens on many pages at once. These are due:
+Behold, a whole procession of reminders:
+They all came due together. I counted. Here they are:

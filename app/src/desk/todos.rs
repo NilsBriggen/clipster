@@ -40,12 +40,14 @@ fn date_choices(today: NaiveDate) -> Vec<(String, String)> {
 
 /// "every Mon", "daily", "monthly".
 fn repeat_text(every: &str) -> String {
-    match todo::every_text(every) {
+    match todo::every_text(every).as_str() {
         "day" => "daily".into(),
         "week" => "weekly".into(),
         "month" => "monthly".into(),
+        "year" => "yearly".into(),
         "weekday" => "weekdays".into(),
-        d => format!("every {}", writing_cap(&d.chars().take(3).collect::<String>())),
+        d if d.parse::<chrono::Weekday>().is_ok() => format!("every {}", writing_cap(&d.chars().take(3).collect::<String>())),
+        d => format!("every {d}"),
     }
 }
 
@@ -579,10 +581,10 @@ impl Desk {
             qx += w + 6.0;
         }
         label(lx, 5, "Repeat");
-        let rules = ["", "day", "weekday", "week", "month"];
-        let now_rule = it.every.as_deref().map(|e| if e.starts_with("month") { "month" } else { e }).unwrap_or("");
+        let rules = ["", "day", "weekday", "week", "month", "year"];
+        let now_rule = it.every.as_deref().map(|e| if e.starts_with("month-") { "month" } else { e }).unwrap_or("");
         let active = rules.iter().position(|r| *r == now_rule).unwrap_or(0);
-        let (hit, seg) = look.segments(ui, pos2(lx + lab, row(5)), &["Never", "Daily", "Weekdays", "Weekly", "Monthly"], active, &format!("todo-every-{line_no}"));
+        let (hit, seg) = look.segments(ui, pos2(lx + lab, row(5)), &["Never", "Daily", "Weekdays", "Weekly", "Monthly", "Yearly"], active, &format!("todo-every-{line_no}"));
         if let Some(i) = hit {
             out.push(format!("{n} every {}", if rules[i].is_empty() { "none" } else { rules[i] }));
         }

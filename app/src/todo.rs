@@ -47,6 +47,8 @@ impl Item {
 
 /// "2026-46": the ISO week of a day.
 pub fn week_key(d: NaiveDate) -> String {
+    // a week from Sunday: the Sunday belongs with the Monday after it
+    let d = if crate::brain::week_sunday() { d + Days::new(1) } else { d };
     format!("{}-{:02}", d.iso_week().year(), d.iso_week().week())
 }
 
@@ -230,47 +232,96 @@ fn archive(gone: &[Item]) {
     let _ = crate::brain::write_atomic(&archive_path(), &format(&all));
 }
 
-/// The next date for a repeating item: after `from` (or today), never today or earlier.
-/// `every` is "day", "week", "month", "weekday" or a weekday name. None when it isn't one of those.
+/// The next date for a repeating item: after its due date `from` and after today. A late tick keeps the rhythm
+/// (due Wednesday, ticked Monday: next Wednesday); an early one doesn't bring the same date back.
+/// `every` is "day", "week", "month", "month-31", "weekday", a weekday name, "year", or "days-3", "weeks-2",
+/// "months-2" (those count from the day it's ticked, so a chore done late moves along). None for anything else.
 pub fn every_next(every: &str, from: Option<NaiveDate>, today: NaiveDate) -> Option<NaiveDate> {
-    // after the current due date if that's later (finishing early doesn't bring the same date back)
-    let base = from.unwrap_or(today).max(today);
-    let after = |ok: &dyn Fn(NaiveDate) -> bool| (1..=7).map(|n| base + Days::new(n)).find(|x| ok(*x));
-    match every {
-        "day" => Some(base + Days::new(1)),
-        "week" => Some(base + Days::new(7)),
-        "month" => base.checked_add_months(Months::new(1)),
-        // "month-31": the 31st, or the month's last day, so it doesn't drift to the 28th after February
-        m if m.starts_with("month-") => {
-            let day: u32 = m[6..].parse().ok().filter(|d| (1..=31).contains(d))?;
-            let next = base.checked_add_months(Months::new(1))?;
-            (1..=day).rev().find_map(|d| next.with_day(d))
-        }
-        "weekday" => after(&|x| x.weekday().number_from_monday() <= 5),
-        d => {
-            let d = d.parse::<Weekday>().ok()?;
-            after(&|x| x.weekday() == d)
-        }
+    let n = |prefix: &str| every.strip_prefix(prefix).and_then(|n| n.parse::<u32>().ok()).filter(|n| (1..=366).contains(n));
+    if let Some(k) = n("days-") {
+        return today.checked_add_days(Days::new(k as u64));
     }
+    if let Some(k) = n("weeks-") {
+        return today.checked_add_days(Days::new(k as u64 * 7));
+    }
+    let step = |d: NaiveDate| -> Option<NaiveDate> {
+        let after = |ok: &dyn Fn(NaiveDate) -> bool| (1..=7).map(|n| d + Days::new(n)).find(|x| ok(*x));
+        match every {
+            "day" => Some(d + Days::new(1)),
+            "week" => Some(d + Days::new(7)),
+            "month" => d.checked_add_months(Months::new(1)),
+            "year" => d.checked_add_months(Months::new(12)),
+            // "month-31": the 31st, or the month's last day, so it doesn't drift to the 28th after February
+            m if m.starts_with("month-") => {
+                let day: u32 = m[6..].parse().ok().filter(|d| (1..=31).contains(d))?;
+                let next = d.checked_add_months(Months::new(1))?;
+                (1..=day).rev().find_map(|x| next.with_day(x))
+            }
+            // shortcut: every N months keeps the due date's day, so the 31st becomes the 30th or 28th on the way
+            m if m.starts_with("months-") => d.checked_add_months(Months::new(m[7..].parse::<u32>().ok().filter(|k| (1..=24).contains(k))?)),
+            "weekday" => after(&|x| x.weekday().number_from_monday() <= 5),
+            w => {
+                let w = w.parse::<Weekday>().ok()?;
+                after(&|x| x.weekday() == w)
+            }
+        }
+    };
+    let mut next = step(from.unwrap_or(today))?;
+    for _ in 0..4000 {
+        if next > today {
+            return Some(next);
+        }
+        next = step(next)?;
+    }
+    None
 }
 
 fn valid_every(every: &str) -> bool {
-    ["day", "week", "month", "weekday"].contains(&every) || every.parse::<Weekday>().is_ok() || every.strip_prefix("month-").and_then(|d| d.parse::<u32>().ok()).is_some_and(|d| (1..=31).contains(&d))
+    let counted = |prefix: &str, max: u32| every.strip_prefix(prefix).and_then(|n| n.parse::<u32>().ok()).is_some_and(|n| (1..=max).contains(&n));
+    ["day", "week", "month", "weekday", "year"].contains(&every) || every.parse::<Weekday>().is_ok() || counted("month-", 31) || counted("days-", 366) || counted("weeks-", 52) || counted("months-", 24)
 }
 
-/// "month-31" -> "month", for people.
-pub fn every_text(every: &str) -> &str {
-    if every.starts_with("month-") { "month" } else { every }
+/// "month-31" -> "month", "days-3" -> "3 days", for people ("every …").
+pub fn every_text(every: &str) -> String {
+    for (prefix, unit) in [("days-", "days"), ("weeks-", "weeks"), ("months-", "months")] {
+        if let Some(n) = every.strip_prefix(prefix) {
+            return if n == "2" { format!("other {}", unit.trim_end_matches('s')) } else { format!("{n} {unit}") };
+        }
+    }
+    if every.starts_with("month-") { "month".into() } else { every.into() }
 }
 
-/// "daily", "weekdays", "workdays", "mondays", "weekly" -> the stored rule.
+/// "daily", "weekdays", "workdays", "mondays", "weekly", "yearly", "every 3 days", "every other week",
+/// "fortnightly", "quarterly" -> the stored rule.
 pub fn every_rule(s: &str) -> Option<String> {
     let s = s.trim().to_lowercase();
-    let s = s.trim_start_matches("every ").trim_end_matches('s');
+    let s = s.trim_start_matches("every ");
+    let counted = match s.split_whitespace().collect::<Vec<_>>().as_slice() {
+        ["other", unit] => Some((2, *unit)),
+        [n, unit] => n.parse::<u32>().ok().map(|n| (n, *unit)),
+        _ => None,
+    };
+    if let Some((n, unit)) = counted {
+        let rule = match unit.trim_end_matches('s') {
+            "day" if n == 1 => "day".to_string(),
+            "week" if n == 1 => "week".to_string(),
+            "month" if n == 1 => "month".to_string(),
+            "year" if n == 1 => "year".to_string(),
+            "day" => format!("days-{n}"),
+            "week" => format!("weeks-{n}"),
+            "month" => format!("months-{n}"),
+            _ => return None,
+        };
+        return valid_every(&rule).then_some(rule);
+    }
+    let s = s.trim_end_matches('s');
     let rule = match s {
         "daily" | "day" => "day",
         "weekly" | "week" => "week",
         "monthly" | "month" => "month",
+        "yearly" | "year" | "annually" | "annual" => "year",
+        "fortnightly" | "fortnight" => "weeks-2",
+        "quarterly" => "months-3",
         w if w.starts_with("work") || w == "weekday" => "weekday",
         w => w,
     };
@@ -280,10 +331,9 @@ pub fn every_rule(s: &str) -> Option<String> {
 /// The first date for a new repeat: today if it fits, else the next time.
 fn first_date(rule: &str, today: NaiveDate) -> Option<NaiveDate> {
     let fits_today = match rule {
-        "day" | "week" | "month" => true,
-        m if m.starts_with("month-") => true,
         "weekday" => today.weekday().number_from_monday() <= 5,
-        d => d.parse::<Weekday>().is_ok_and(|d| d == today.weekday()),
+        d if d.parse::<Weekday>().is_ok() => d.parse::<Weekday>().is_ok_and(|d| d == today.weekday()),
+        _ => true,
     };
     if fits_today { Some(today) } else { every_next(rule, None, today) }
 }
@@ -317,10 +367,33 @@ pub fn parse_when(s: &str, today: NaiveDate) -> Option<Option<NaiveDate>> {
     match s.as_str() {
         "none" | "no date" | "nothing" | "never" | "someday" | "no deadline" | "-" => Some(None),
         "today" | "tonight" | "this evening" | "end of day" | "now" => Some(Some(today)),
-        "next week" => Some(Some(today + Days::new(7 - today.weekday().num_days_from_monday() as u64))),
+        "next week" => Some(Some(crate::brain::week_start(today) + Days::new(7))),
         "in a week" => Some(Some(today + Days::new(7))),
         "in a month" | "next month" => Some(today.checked_add_months(Months::new(1))),
-        _ => crate::powers::parse_day(&s, today).map(|(d, _)| Some(d)),
+        _ => {
+            // "in 3 days", "in 2 weeks", "in 6 months" (what the date fields' hints suggest)
+            if let Some((n, unit)) = s.strip_prefix("in ").and_then(|r| r.split_once(' ')) {
+                let n: u32 = n.parse().ok()?;
+                return match unit.trim_end_matches('s') {
+                    "day" => today.checked_add_days(Days::new(n.min(3650) as u64)),
+                    "week" => today.checked_add_days(Days::new(n.min(520) as u64 * 7)),
+                    "month" => today.checked_add_months(Months::new(n.min(120))),
+                    _ => return None,
+                }
+                .map(Some);
+            }
+            // "24.12", "24.12.", "24.12.2026": the next 24 December, as people write it in Switzerland and Germany
+            let parts: Vec<&str> = s.trim_end_matches('.').split('.').collect();
+            if (2..=3).contains(&parts.len()) && parts.iter().all(|p| !p.is_empty() && p.bytes().all(|b| b.is_ascii_digit())) {
+                let (d, m) = (parts[0].parse().ok()?, parts[1].parse().ok()?);
+                let year = |y: i32| NaiveDate::from_ymd_opt(y, m, d);
+                return match parts.get(2) {
+                    Some(y) => year(y.parse::<i32>().ok().map(|y| if y < 100 { 2000 + y } else { y })?).map(Some),
+                    None => year(today.year()).filter(|x| *x >= today).or_else(|| year(today.year() + 1)).map(Some),
+                };
+            }
+            crate::powers::parse_day(&s, today).map(|(d, _)| Some(d))
+        }
     }
 }
 
@@ -949,7 +1022,7 @@ pub fn list() -> Reply {
 /// "What did I finish this week": the to-dos ticked since Monday (also the cleared-away ones).
 pub fn finished_reply(days: &str) -> Reply {
     let today = Local::now().date_naive();
-    let since = if days == "today" { today } else { today - Days::new(today.weekday().num_days_from_monday() as u64) };
+    let since = if days == "today" { today } else { crate::brain::week_start(today) };
     let done = finished_since(&load(), since);
     if done.is_empty() {
         return Reply::say(lines::pick("todo_finished_none")).mood(Mood::Think).run("Show my list", "todos");
@@ -1142,10 +1215,16 @@ mod tests {
         assert_eq!(parse_when("next week", today), Some(Some(day(11, 16))), "next Monday");
         assert_eq!(parse_when("3 dec", today), Some(Some(day(12, 3))));
         assert_eq!(parse_when("blue", today), None);
+        assert_eq!(parse_when("in 3 days", today), Some(Some(day(11, 12))));
+        assert_eq!(parse_when("in 2 weeks", today), Some(Some(day(11, 23))));
+        assert_eq!(parse_when("24.12.", today), Some(Some(day(12, 24))));
+        assert_eq!(parse_when("24.12", today), Some(Some(day(12, 24))));
+        assert_eq!(parse_when("1.3.2027", today), Some(NaiveDate::from_ymd_opt(2027, 3, 1)));
+        assert_eq!(parse_when("31.2.", today), None);
         // a repeat added later starts on the next fitting day
         assert_eq!(change(&mut items, &Op::EveryAt(1, Some("every wednesday".into())), today).0, "todo_detail");
         assert_eq!((items[0].every.as_deref(), items[0].due), (Some("wednesday"), Some(day(11, 11))));
-        assert_eq!(change(&mut items, &Op::EveryAt(1, Some("fortnightly".into())), today).0, "todo_bad_repeat");
+        assert_eq!(change(&mut items, &Op::EveryAt(1, Some("every fortnight on sunday".into())), today).0, "todo_bad_repeat");
         assert_eq!(change(&mut items, &Op::EveryAt(1, None), today).0, "todo_detail");
         assert_eq!(items[0].every, None);
         // waiting on someone: a follow-up three working days later
@@ -1240,5 +1319,23 @@ mod tests {
         // wrapping up: the unfinished top 3 move to tomorrow
         assert_eq!(change(&mut items, &Op::Tomorrow, today), ("wrapup_moved", "2".into()));
         assert!(items.iter().all(|i| !i.top_today(today)) && items[n - 3].due == Some(day(11, 10)));
+    }
+    #[test]
+    fn repeats_ticked_late_keep_their_rhythm() {
+        let today = day(11, 9); // a Monday
+        assert_eq!(every_next("month-25", Some(day(10, 25)), day(11, 2)), Some(day(11, 25)), "a monthly one ticked late doesn't skip a month");
+        assert_eq!(every_next("week", Some(day(11, 4)), today), Some(day(11, 11)), "a weekly one stays on Wednesday");
+        assert_eq!(every_next("week", Some(day(11, 12)), today), Some(day(11, 19)), "ticked early: not the same date again");
+        assert_eq!(every_next("days-3", Some(day(11, 1)), today), Some(day(11, 12)), "a chore counts from the day it's done");
+        assert_eq!(every_next("year", Some(day(11, 9)), today), NaiveDate::from_ymd_opt(2027, 11, 9));
+        assert_eq!(every_next("months-2", Some(day(11, 9)), today), NaiveDate::from_ymd_opt(2027, 1, 9));
+        for (said, rule) in [("every year", "year"), ("yearly", "year"), ("every 3 days", "days-3"), ("every other week", "weeks-2"), ("fortnightly", "weeks-2"), ("every 2 months", "months-2"), ("quarterly", "months-3"), ("every 1 week", "week")] {
+            assert_eq!(every_rule(said).as_deref(), Some(rule), "{said}");
+        }
+        assert_eq!(every_rule("every 0 days"), None);
+        assert_eq!(every_text("weeks-2"), "other week");
+        let (what, rep) = split_every("renew the passport every year", today);
+        assert_eq!((what.as_str(), rep), ("renew the passport", Some(("year".to_string(), today))));
+        assert_eq!(parse(&format(&parse("- [ ] water plants (due 2026-11-12) (every days-3)\n")))[0].every.as_deref(), Some("days-3"));
     }
 }
