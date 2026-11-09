@@ -385,6 +385,7 @@ fn intent(s: &str, raw: &str) -> Option<Reply> {
     }
     // commands with side effects first, then conversation topics, then the broad keyword groups
     timers(s, raw)
+        .or_else(|| appointment(s, raw))
         .or_else(|| notes(s, raw))
         .or_else(|| powers(s, raw))
         .or_else(|| lines::topic(s, false))
@@ -503,6 +504,64 @@ fn grief(s: &str) -> Option<Reply> {
 }
 
 /// Things that are files ("where is my CV" is a file search, "where is my phone" isn't).
+/// "dentist on Tuesday at 10", "doctor appointment Friday 14:30", "haircut tomorrow at 5": when, and what he can do
+/// about it (a reminder before, the evening before, a to-do). He always asks; nothing is set by itself.
+fn appointment(s: &str, raw: &str) -> Option<Reply> {
+    const KINDS: &[&str] = &[
+        "appointment", "dentist", "doctor", "doctors", "haircut", "hairdresser", "barber", "interview", "therapy", "therapist", "physio", "vet",
+        "checkup", "check up", "massage", "optician", "lawyer", "meeting", "call", "lunch", "dinner", "date", "party", "flight", "train", "exam",
+        "class", "lesson", "gym", "yoga", "concert", "match", "game", "visit", "mechanic", "garage", "delivery", "pickup", "parents evening", "rehearsal", "practice",
+    ];
+    let words: Vec<&str> = s.split_whitespace().collect();
+    // short, about an appointment, and not something that already happened
+    if words.len() > 9 || !has(s, KINDS) || has(s, &["was", "were", "had", "went", "did", "cancelled", "canceled", "every", "remind", "timer", "how", "what", "when", "why", "should"]) {
+        return None;
+    }
+    // "friday 14:30" says the day without "on": read it as if it did
+    const DAYS: &[&str] = &["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+    let with_on: String = words.iter().enumerate().map(|(i, w)| if DAYS.contains(w) && (i == 0 || !["on", "next"].contains(&words[i - 1])) { format!("on {w}") } else { w.to_string() }).collect::<Vec<_>>().join(" ");
+    let with_at = {
+        // "friday 14:30": a bare time after the day becomes "at 14:30"
+        let w: Vec<&str> = with_on.split_whitespace().collect();
+        w.iter().enumerate().map(|(i, x)| if i > 0 && w[i - 1] != "at" && x.contains(':') && hm(x).is_some() { format!("at {x}") } else { x.to_string() }).collect::<Vec<_>>().join(" ")
+    };
+    // a time must be said ("an interview tomorrow" is something to talk about; "the dentist on Tuesday at 10" is an
+    // appointment), and moving a to-do isn't one
+    let timed = with_at.split_whitespace().collect::<Vec<_>>().windows(2).any(|w| w[0] == "at" && hm(w[1]).is_some());
+    if !timed || ["move ", "push ", "reschedule ", "postpone ", "put off "].iter().any(|p| s.starts_with(p)) {
+        return None;
+    }
+    let (secs, _, when) = dated(&with_at)?;
+    // what it is: the words that aren't the day or the time ("i have a dentist appointment" -> "dentist appointment")
+    let skip = ["on", "at", "next", "tomorrow", "tonight", "this", "morning", "afternoon", "evening", "i", "have", "a", "an", "my", "the", "got", "is", "there", "s"];
+    let label: Vec<&str> = words.iter().copied().filter(|w| !skip.contains(w) && !DAYS.contains(w) && hm(w).is_none_or(|(_, _, used)| used < w.len()) && !["am", "pm"].contains(w)).collect();
+    if label.is_empty() || label.len() > 5 {
+        return None;
+    }
+    let label = label.join(" ");
+    let label = label.as_str();
+    let what = crate::writing::cap_first(&keep(raw, label));
+    let at = crate::timers::unix_now() + secs as i64;
+    let before = at - 3600;
+    let evening = chrono::DateTime::from_timestamp(at, 0)
+        .map(|t| t.with_timezone(&chrono::Local).date_naive())
+        .and_then(|d| (d - chrono::Days::new(1)).and_hms_opt(19, 0, 0))
+        .map(crate::timers::unix_of)
+        .filter(|e| *e > crate::timers::unix_now() + 60);
+    let day = chrono::DateTime::from_timestamp(at, 0).map(|t| t.with_timezone(&chrono::Local));
+    let mut r = Reply::say(format!("{what}, {when}. Shall I remind you?")).mood(Mood::Alarm);
+    if before > crate::timers::unix_now() + 60 {
+        r = r.run("1 hour before", &format!("timerat {before}|{what} at {}", day.map(brain::clock).unwrap_or_default()));
+    }
+    if let Some(e) = evening {
+        r = r.run("The evening before", &format!("timerat {e}|Tomorrow: {what}"));
+    }
+    if let Some(d) = day {
+        r = r.run("Just a to-do", &format!("todo {what} by {} at {}", d.format("%Y-%m-%d"), d.format("%H:%M")));
+    }
+    Some(r.btn("No, thanks", Act::Hide))
+}
+
 /// Saying and asking where a thing is. Only for things: not people or pets ("my mum is in Rome"), not feelings or
 /// idioms ("my head is in the clouds"), and never a code or password (things.rs refuses those).
 fn where_things(s: &str, raw: &str) -> Option<Reply> {
@@ -2955,6 +3014,18 @@ mod tests {
         assert!(!matches!(eff("in 5 years i want to be rich"), Effect::Timer(..) | Effect::RepeatAt(..)));
         assert_eq!(eff("snooze tomorrow").clone(), eff("snooze tomorrow"));
         assert!(matches!(eff("snooze tomorrow"), Effect::Snooze(s) if s > 60));
+    }
+
+    #[test]
+    fn appointments_ask_first() {
+        let r = respond("doctor appointment Friday 14:30");
+        assert!(r.text.starts_with("Doctor appointment, Friday") && r.effect == Effect::None, "it asks, nothing is set: {}", r.text);
+        assert!(r.buttons.iter().any(|b| matches!(&b.1, Act::Run(c) if c.starts_with("timerat "))));
+        assert!(respond("haircut tomorrow at 5").text.contains("at 17:00"));
+        for not in ["the party was on friday at 8", "remind me on friday to call the dentist", "what time is my dentist appointment"] {
+            assert!(!respond(not).text.contains("Shall I remind you"), "{not}");
+        }
+        assert!(matches!(exact(&format!("timerat {}|Dentist", crate::timers::unix_now() + 3600)).map(|r| r.effect), Some(Effect::Timer(s, l)) if (3590..=3600).contains(&s) && l == "Dentist"));
     }
 
     #[test]

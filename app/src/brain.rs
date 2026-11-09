@@ -737,6 +737,15 @@ pub fn exact(input: &str) -> Option<Reply> {
             let label = label.trim().trim_start_matches("to ").trim();
             return Some(Reply::say("").mood(Mood::Alarm).effect(Effect::RepeatAt(rule.to_string(), if label.is_empty() { "Reminder!".into() } else { label.to_string() })));
         }
+        // a reminder at a fixed moment (unix seconds), for buttons offered now but clicked later: "timerat 1789000000|Dentist"
+        "timerat" => {
+            let (at, label) = rest.split_once('|')?;
+            let secs = at.trim().parse::<i64>().ok()? - crate::timers::unix_now();
+            if secs < 30 {
+                return Some(Reply::say("That moment has passed already.").mood(Mood::Think));
+            }
+            return Some(timer(&format!("{secs}s"), label.trim()));
+        }
         "timer" | "alarm" => return Some(timer(rest, "")),
         "remind" | "reminder" => return Some(remind(rest)),
         "timers" => return Some(Reply::say("").effect(Effect::ListTimers)),
