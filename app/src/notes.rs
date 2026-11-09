@@ -65,6 +65,16 @@ pub fn change(notes: &mut Vec<Note>, cmd: &str, today: NaiveDate) -> Option<Stri
             let i = index(rest, notes.len())?;
             Some(format!("Gone: \"{}\"", notes.remove(i).text))
         }
+        // "drop milk": the one note about milk (several: say so, take none)
+        "drop" if !rest.trim().is_empty() => {
+            let words: Vec<String> = rest.split_whitespace().map(str::to_lowercase).collect();
+            let hits: Vec<usize> = (0..notes.len()).filter(|i| words.iter().all(|w| notes[*i].text.to_lowercase().contains(w.as_str()))).collect();
+            match hits.as_slice() {
+                [i] => Some(format!("Gone: \"{}\"", notes.remove(*i).text)),
+                [] => Some(format!("No note mentions \"{}\".", rest.trim())),
+                _ => Some(format!("{} notes mention \"{}\". Which one? Remove it on the Desk, or say more words.", hits.len(), rest.trim())),
+            }
+        }
         "edit" => {
             let (n, text) = rest.split_once(' ')?;
             let i = index(n, notes.len()).filter(|_| !text.trim().is_empty())?;

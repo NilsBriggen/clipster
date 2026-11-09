@@ -259,7 +259,8 @@ fn head_fits(head: &str, rest: &str) -> bool {
         "space" => rest.is_empty() || rest == "scan" || rest.starts_with("trash "),
         "power" | "pass" | "bat" => rest.is_empty(),
         "top" => rest.is_empty() || ["processes", "programs", "apps", "cpu", "memory"].contains(&rest),
-        "where" => rest.starts_with("is ") || rest.starts_with("are "),
+        // "where is Bern" is a map; "where is the spare key" or "where are my glasses" is a thing in the house
+        "where" => ["is ", "are "].iter().any(|p| rest.strip_prefix(p).is_some_and(|r| !["the ", "my ", "our ", "your ", "his ", "her ", "their ", "a ", "an "].iter().any(|a| r.starts_with(a)))),
         "sun" => rest.is_empty() || first == "in" || ["today", "tomorrow"].contains(&rest),
         "dog" | "cat" | "fox" => rest.is_empty() || ["pic", "picture", "photo", "please", "pics", "photos", "image", "pictures", "gif"].contains(&rest),
         "count" => !["me", "on", "to", "down", "your", "my"].contains(&first),
@@ -714,8 +715,10 @@ pub fn exact(input: &str) -> Option<Reply> {
             return Some(shell(rest, &format!("Ran `{rest}`:")));
         }
         "open" | "launch" | "start" => return Some(open(rest)),
-        "search" | "google" | "ddg" | "web" | "find" => return Some(web("https://duckduckgo.com/?q=", rest, "Searching the web")),
-        "define" | "meaning" | "dictionary" => return Some(net(Query::Define(rest.into()), "Opening my big dictionary...")),
+        "search" | "google" | "ddg" | "web" | "find" if !rest.is_empty() => return Some(web("https://duckduckgo.com/?q=", rest, "Searching the web")),
+        "search" | "google" | "find" => return Some(Reply::say("Search for what? Try: search cheap flights, or find my tax return").mood(Mood::Think)),
+        "define" | "meaning" | "dictionary" if !rest.is_empty() => return Some(net(Query::Define(rest.into()), "Opening my big dictionary...")),
+        "define" | "dictionary" => return Some(Reply::say("Define which word? Try: define serendipity").mood(Mood::Think)),
         "random" | "number" => return Some(random_number(rest)),
         "wiki" | "wikipedia" => return Some(net(Query::Wiki(rest.into()), "Looking it up in the encyclopedia... 📚")),
         "youtube" | "yt" | "video" => return Some(web("https://www.youtube.com/results?search_query=", rest, "To the videos!")),
@@ -740,13 +743,21 @@ pub fn exact(input: &str) -> Option<Reply> {
         "cancel" => return Some(Reply::say(lines::pick("say_timer_cancelled").replace("{label}", rest)).effect(Effect::CancelTimer(rest.to_string()))),
         // "note #3 edit …", "note #3 pin", "note #3 remove", "note #3 copy" (the Desk); anything else is a new note
         "note" if note_op(rest).is_some() => return Some(Reply::say("").effect(Effect::Note(note_op(rest).unwrap_or_default()))),
+        "note" if rest.starts_with("drop ") => return Some(Reply::say("").effect(Effect::Note(rest.to_string()))),
         "note" | "remember" if rest.is_empty() => return Some(Reply::say("Note what? Try: note call grandma")),
         // "remember me?", "remember when we…" are questions, not notes
         "remember" if ["me", "me?", "us", "us?", "this", "that"].contains(&rest) || ["when ", "how ", "what ", "who ", "the time ", "if "].iter().any(|p| rest.starts_with(p)) => return None,
         "note" | "remember" => return Some(Reply::say("").effect(Effect::Note(format!("add {rest}")))),
+        "notes" if rest.starts_with("find ") => return Some(notes_find(&rest[5..])),
         "notes" => return Some(notes_list()),
         // the Desk's commands name an item by its line: "todo #3 done", "todo #3 edit call Anna", "todo #3 due friday"
-        "todo" if rest.starts_with('#') => {
+        // only the Desk's exact shape: "todo #work email Ben" is a to-do with a tag, and "todo #2 remove the old shed"
+        // is a to-do called that (the Desk's remove has nothing after it), never "delete line 2"
+        "todo" if rest.starts_with('#') && rest[1..].split(' ').next().is_some_and(|n| n.parse::<usize>().is_ok()) && {
+            let what = rest[1..].split_once(' ').map_or("", |w| w.1);
+            let (verb, text) = what.split_once(' ').unwrap_or((what, ""));
+            !(["done", "undone", "star", "startomorrow", "prio", "remove"].contains(&verb) && !text.trim().is_empty())
+        } => {
             use crate::todo::Op;
             let (n, what) = rest[1..].split_once(' ').unwrap_or((&rest[1..], ""));
             let (verb, text) = what.split_once(' ').unwrap_or((what, ""));
@@ -795,6 +806,7 @@ pub fn exact(input: &str) -> Option<Reply> {
         }
         // a named list: "onlist shopping", "onlist shopping add eggs, milk", "onlist shopping clear", "… reset", "… rename trip",
         // "… delete" (then "… delete confirmed"), "… copy", "… mail"
+        "todoremove" if !rest.is_empty() => return Some(Reply::say("").effect(Effect::Todo(crate::todo::Op::RemoveFrom(String::new(), rest.to_string())))),
         "onlist" if !rest.is_empty() => {
             use crate::todo::Op;
             let (name, what) = rest.split_once(' ').unwrap_or((rest, ""));
@@ -1694,6 +1706,17 @@ fn notes_list() -> Reply {
         .btn("Copy all", Act::Copy(all))
         .run("Forget them all", "forget notes")
         .run("Open the Desk", "desk notes")
+}
+
+/// The notes with every one of the words in them.
+fn notes_find(words: &str) -> Reply {
+    let words: Vec<String> = words.split_whitespace().map(str::to_lowercase).collect();
+    let notes = crate::notes::load();
+    let hits: Vec<String> = notes.iter().filter(|n| words.iter().all(|w| n.text.to_lowercase().contains(w.as_str()))).map(|n| format!("• {}{}", if n.pinned { "📌 " } else { "" }, n.text)).collect();
+    if hits.is_empty() {
+        return Reply::say(format!("No note mentions \"{}\".", words.join(" "))).mood(Mood::Think).run("Show all notes", "notes");
+    }
+    Reply::say(format!("{} with \"{}\":\n{}", if hits.len() == 1 { "One note".to_string() } else { format!("{} notes", hits.len()) }, words.join(" "), hits.join("\n"))).mood(Mood::Read).run("Show all notes", "notes").run("Open the Desk", "desk notes")
 }
 
 fn notes_confirm() -> Reply {

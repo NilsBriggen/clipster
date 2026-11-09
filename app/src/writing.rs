@@ -47,6 +47,10 @@ fn wants_an(word: &str) -> Option<bool> {
     if letters.chars().count() >= 2 && letters.chars().all(|c| c.is_uppercase() || c.is_ascii_digit()) || letters.chars().any(|c| c.is_ascii_digit()) {
         return None;
     }
+    // "an X-ray", "a U-turn", "a T-shirt": a letter's name decides, not the letter
+    if letters.chars().nth(1) == Some('-') {
+        return None;
+    }
     if ["hour", "honest", "honor", "honour", "heir"].iter().any(|h| w.starts_with(h)) {
         return Some(true);
     }
@@ -72,7 +76,7 @@ pub fn proofread(text: &str, wrong: &HashMap<String, String>) -> Vec<Issue> {
             ("a", Some(true)) | ("an", Some(false)) => out.push(Issue::AAn(pair[1].trim_matches(|c: char| !c.is_alphanumeric()).to_string())),
             _ => {}
         }
-        let followers = ["a", "an", "the", "been", "not", "going", "just", "very", "so", "time", "too", "really", "gonna"];
+        let followers = ["a", "an", "the", "been", "not", "going", "just", "very", "so", "time", "too", "really", "gonna", "fine", "ok", "okay", "good", "great", "all", "over", "here", "true", "late", "hard", "easy"];
         if a == "its" && followers.contains(&b.as_str()) || a == "it's" && b == "own" {
             out.push(Issue::Its);
         }
@@ -136,16 +140,46 @@ fn syllables(w: &str) -> usize {
     count.max(1)
 }
 
+/// English, as far as a/an and doubled words go: "Ich denke an dich" and "Die Frau, die die Zeitung liest" aren't.
+fn english(text: &str) -> bool {
+    const ENGLISH: &[&str] = &["the", "and", "is", "are", "was", "were", "of", "with", "that", "this", "you", "your", "my", "have", "has", "not", "but", "they", "what", "to", "it", "for"];
+    // German, French, Italian and Spanish words that English doesn't have
+    const OTHER: &[&str] = &["ich", "du", "und", "die", "der", "das", "nicht", "ist", "ein", "eine", "sie", "wir", "mit", "auf", "für", "den", "dem", "je", "tu", "il", "elle", "est", "les", "des", "une", "et", "pas", "avec", "pour", "dans", "qui", "que", "nous", "vous", "el", "los", "las", "y", "es", "por", "con", "una", "che", "di", "non", "sono", "gli"];
+    let words: Vec<String> = text.split_whitespace().map(bare).collect();
+    let (en, other) = (words.iter().filter(|w| ENGLISH.contains(&w.as_str())).count(), words.iter().filter(|w| OTHER.contains(&w.as_str())).count());
+    other == 0 || en > other
+}
+
+/// Which of the safe fixes to make (`fix_one` makes just the one you clicked).
+#[derive(Clone, Copy)]
+struct Fixes {
+    doubled: bool,
+    a_an: bool,
+    spaces: bool,
+    capital: bool,
+}
+
 /// The safe fixes only: doubled words, listed misspellings, double spaces, a/an, capitals after a full stop.
 pub fn fix(text: &str, wrong: &HashMap<String, String>) -> String {
+    fix_these(text, wrong, Fixes { doubled: true, a_an: true, spaces: true, capital: true })
+}
+
+fn fix_these(text: &str, wrong: &HashMap<String, String>, kinds: Fixes) -> String {
+    let english = english(text);
     let mut out: Vec<String> = vec![];
     let mut cap = true;
     for line in text.split('\n') {
         let indent = &line[..line.len() - line.trim_start().len()]; // code, lists and poems keep their indentation
+        if !indent.is_empty() && wrong.is_empty() {
+            out.push(line.to_string()); // an indented line (code) keeps its spacing and its words
+            continue;
+        }
         let mut fixed: Vec<String> = vec![];
-        for w in line.split(' ').filter(|w| !w.is_empty()) {
+        let words: Vec<&str> = if kinds.spaces || !indent.is_empty() { line.split(' ').filter(|w| !w.is_empty()).collect() } else { line.trim_start().split(' ').collect() };
+        for w in words {
             let b = bare(w);
-            let doubled = !b.is_empty() && !b.chars().all(|c| c.is_ascii_digit()) && !DOUBLES.contains(&b.as_str());
+            // names stay ("Bora Bora"), and only in English ("die die" is German)
+            let doubled = kinds.doubled && english && w.starts_with(|c: char| c.is_lowercase()) && !b.chars().all(|c| c.is_ascii_digit()) && !DOUBLES.contains(&b.as_str());
             if doubled && fixed.last().is_some_and(|p| bare(p) == b && !p.ends_with(['.', ',', ';', ':', '!', '?'])) {
                 // the dropped word's full stop or comma stays: "the the." -> "the."
                 let tail = &w[w.trim_end_matches(|c: char| !c.is_alphanumeric()).len()..];
@@ -163,10 +197,10 @@ pub fn fix(text: &str, wrong: &HashMap<String, String>) -> String {
                 }
                 None => w.to_string(),
             };
-            if cap && word.starts_with(|c: char| c.is_lowercase()) && !fixed.is_empty() {
+            if kinds.capital && cap && word.starts_with(|c: char| c.is_lowercase()) && !fixed.is_empty() {
                 word = cap_first(&word);
             }
-            if let (Some(prev), Some(an)) = (fixed.last_mut(), wants_an(&word)) {
+            if let (Some(prev), Some(an), true) = (fixed.last_mut(), wants_an(&word), kinds.a_an && english) {
                 match (prev.as_str(), an) {
                     ("a", true) => *prev = "an".into(),
                     ("A", true) => *prev = "An".into(),
@@ -175,7 +209,9 @@ pub fn fix(text: &str, wrong: &HashMap<String, String>) -> String {
                     _ => {}
                 }
             }
-            cap = word.ends_with(['.', '!', '?']) && !["e.g.", "i.e.", "etc.", "vs."].contains(&word.to_lowercase().as_str());
+            // not after "e.g.", "3 p.m." (a dot inside: an abbreviation) or "Wait..."
+            let stem = word.trim_end_matches(['.', '!', '?']);
+            cap = word.ends_with(['.', '!', '?']) && !word.ends_with("..") && !stem.contains('.') && !["etc.", "vs.", "approx.", "dr.", "mr.", "mrs.", "ms.", "no."].contains(&word.to_lowercase().as_str());
             fixed.push(word);
         }
         out.push(format!("{indent}{}", fixed.join(" ")));
@@ -260,10 +296,11 @@ pub fn fix_one(text: &str, issue: &Issue) -> String {
                 }
             })
             .collect(),
-        Issue::Doubled(_) | Issue::AAn(_) | Issue::Spaces | Issue::Capital => {
-            // the safe fixer, with only the misspellings left out (each has its own button)
-            fix(text, &HashMap::new())
-        }
+        // just the kind you clicked (the misspellings have a button each)
+        Issue::Doubled(_) => fix_these(text, &HashMap::new(), Fixes { doubled: true, a_an: false, spaces: false, capital: false }),
+        Issue::AAn(_) => fix_these(text, &HashMap::new(), Fixes { doubled: false, a_an: true, spaces: false, capital: false }),
+        Issue::Spaces => fix_these(text, &HashMap::new(), Fixes { doubled: false, a_an: false, spaces: true, capital: false }),
+        Issue::Capital => fix_these(text, &HashMap::new(), Fixes { doubled: false, a_an: false, spaces: false, capital: true }),
         _ => text.to_string(),
     }
 }
@@ -369,6 +406,11 @@ mod tests {
         assert_eq!(fix("i will definately  recieve the the parcel. it is an box.", &wrong()), "i will definitely receive the parcel. It is a box.");
         assert_eq!(fix("Definately. A apple a day.", &wrong()), "Definitely. An apple a day.");
         assert_eq!(fix("Its fine.", &wrong()), "Its fine.", "its/it's needs a human");
+        // other languages, names, letter names, abbreviations, ellipses and code are left alone
+        for same in ["Ich denke an dich.", "Elle a appris.", "Die Frau, die die Zeitung liest.", "We flew to Bora Bora.", "I need an X-ray.", "We meet at 3 p.m. tomorrow.", "Wait... what?", "fn x() {\n    let a = 1;\n}"] {
+            assert_eq!(fix(same, &wrong()), same);
+        }
+        assert_eq!(fix_one("the the cat. a apple", &Issue::Doubled("the".into())), "the cat. a apple", "one kind of fix at a time");
     }
 
     #[test]

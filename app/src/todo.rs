@@ -400,15 +400,27 @@ pub fn parse_when(s: &str, today: NaiveDate) -> Option<Option<NaiveDate>> {
 /// "call Anna by friday" -> ("call Anna", Friday).
 /// The words after the date stay: "call the bank on monday about the loan" -> ("call the bank about the loan", Monday).
 pub fn split_due(text: &str, today: NaiveDate) -> (String, Option<NaiveDate>) {
-    for sep in [" by ", " due ", " before ", " on "] {
+    for sep in [" by ", " due ", " before ", " on ", " for "] {
         if let Some((what, when)) = text.rsplit_once(sep) {
             let words: Vec<&str> = when.split_whitespace().collect();
             for n in 1..=words.len().min(3) {
-                if let Some(Some(d)) = parse_when(&words[..n].join(" "), today) {
+                let phrase = words[..n].join(" ");
+                // "for" only before a day ("buy milk for tomorrow"), never "a present for Anna"
+                if sep == " for " && n < words.len() {
+                    continue;
+                }
+                // "by someday", "by none": no date, and the words go too
+                if let Some(d) = parse_when(&phrase, today).filter(|d| d.is_some() || sep == " by ") {
                     let rest = words[n..].join(" ");
-                    return (if rest.is_empty() { what.trim().to_string() } else { format!("{} {rest}", what.trim()) }, Some(d));
+                    return (if rest.is_empty() { what.trim().to_string() } else { format!("{} {rest}", what.trim()) }, d);
                 }
             }
+        }
+    }
+    // "buy milk tomorrow": a bare day word at the end
+    for day in ["today", "tomorrow", "tonight"] {
+        if let Some(what) = text.trim().strip_suffix(day).filter(|w| w.ends_with(' ') && !w.trim().is_empty()) {
+            return (what.trim().to_string(), parse_when(day, today).flatten());
         }
     }
     (text.trim().to_string(), None)
@@ -613,7 +625,8 @@ pub fn change(items: &mut Vec<Item>, op: &Op, today: NaiveDate) -> (&'static str
             None => missing(n),
         },
         Op::StarAt(n) => match at(*n, items) {
-            Some(i) if items[i].top_today(today) => {
+            // a finished one starred today comes off too (top_today counts only open ones)
+            Some(i) if items[i].top_today(today) || items[i].top == Some(today) => {
                 items[i].top = None;
                 ("todo_unstarred", items[i].text.clone())
             }
@@ -786,7 +799,8 @@ pub fn change(items: &mut Vec<Item>, op: &Op, today: NaiveDate) -> (&'static str
         },
         Op::RemoveFrom(list, q) | Op::DoneOn(list, q) => {
             let removing = matches!(op, Op::RemoveFrom(..));
-            let hit = find_in(items, q, |i| i.list.as_deref() == Some(list.as_str()) && (removing || !i.done));
+            // "" is the to-do list itself ("remove call Anna from my list")
+            let hit = find_in(items, q, |i| i.list.as_deref().unwrap_or("") == list.as_str() && (removing || !i.done));
             match hit {
                 Some(i) if removing => ("list_removed", items.remove(i).text),
                 Some(i) => {

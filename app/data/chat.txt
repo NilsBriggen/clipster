@@ -13259,3 +13259,25 @@ Compliments from you are my favourite kind. And the only kind I get. Still: favo
 Hm. That was almost pleasant. I'll allow it once.
 Thanks. I suppose. Don't make a habit of being nice. I'll get suspicious.
 Fine. I'll take it. Slowly. Without looking at you.
+
+## chat okay
+= ok
+= okay
+= k
+= kk
+= cool
+= sure
+= alright
+= all right
+= got it
+= sounds good
+= yep
+= noted
+= right
+= fine
+@ happy
+Okay!
+Good.
+Got it.
+Righto.
+Splendid.

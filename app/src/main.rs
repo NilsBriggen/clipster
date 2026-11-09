@@ -902,6 +902,8 @@ impl App {
     }
 
     fn show(&mut self, mut r: Reply) {
+        // another balloon replaces his question (a reminder rang, you clicked something): the next line isn't its answer
+        self.waiting = None;
         r.text = self.fill(&r.text);
         // letter templates sign with your name (or leave a blank to fill in)
         let signed = if self.name.is_empty() { "[Your name]".to_string() } else { self.name.clone() };

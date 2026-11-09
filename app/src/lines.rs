@@ -27,6 +27,15 @@ use std::sync::atomic::{AtomicBool, AtomicI32, AtomicUsize, Ordering};
 use std::sync::{Once, RwLock, RwLockReadGuard};
 
 const BUILT_IN: [&str; 3] = [include_str!("../data/humor.txt"), include_str!("../data/chat.txt"), include_str!("../data/reactions.txt")];
+
+/// Every word in his own (Boring) lines: if he says it, it's a real word, and the typo fixer leaves it alone
+/// ("lunch" isn't "launch", "pack" isn't "pick"). Built once, on the first guess.
+pub fn real_word(w: &str) -> bool {
+    static WORDS: std::sync::OnceLock<std::collections::HashSet<String>> = std::sync::OnceLock::new();
+    WORDS
+        .get_or_init(|| BUILT_IN.iter().flat_map(|t| t.split(|c: char| !c.is_ascii_alphabetic())).filter(|w| w.len() >= 3).map(str::to_ascii_lowercase).collect())
+        .contains(w)
+}
 const UNHINGED: [&str; 4] = [
     include_str!("../data/unhinged/humor.txt"),
     include_str!("../data/unhinged/chat.txt"),
@@ -386,7 +395,9 @@ pub fn reply(name: &str) -> Reply {
 pub fn topic(s: &str, user: bool) -> Option<Reply> {
     let padded = format!(" {s} ");
     let db = db();
-    let pool = || db.iter().filter(|t| t.user == user && (user || t.name.starts_with("chat ")) && (!t.lines.is_empty() || !t.commands.is_empty()));
+    // only conversation sections, yours too: a saved list starter or letter template in lines.txt has a raw "> shopping"
+    // trigger that would swallow "add milk to my shopping list"
+    let pool = || db.iter().filter(|t| t.user == user && t.name.starts_with("chat ") && (!t.lines.is_empty() || !t.commands.is_empty()));
     let longest = |t: &Section| t.triggers.iter().filter(|k| padded.contains(&format!(" {k} "))).map(|k| k.len()).max();
     let hit = pool()
         .find(|t| t.exact.iter().any(|e| e == s))
@@ -586,8 +597,8 @@ pub fn reflect(x: &str) -> String {
     while i < words.len() {
         let pair = (words[i], words.get(i + 1).copied().unwrap_or(""));
         let swapped = match pair {
-            ("you", "are") => Some("i am"),
-            ("you", "were") => Some("i was"),
+            ("you", "are") => Some("I am"),
+            ("you", "were") => Some("I was"),
             ("i", "am") => Some("you are"),
             ("i", "was") => Some("you were"),
             _ => None,
@@ -603,10 +614,12 @@ pub fn reflect(x: &str) -> String {
             "mine" => "yours",
             "myself" => "yourself",
             "am" => "are",
-            "you" => "me",
             "your" => "my",
             "yours" => "mine",
             "yourself" => "myself",
+            // "you should rest" -> "I should rest": the subject is "I"; "they love you" -> "they love me"
+            "you" if i == 0 || ["should", "can", "will", "would", "could", "have", "had", "do", "did", "need", "want", "know", "think", "like", "love", "hate", "must", "might", "may", "shall", "said", "look", "seem", "never", "always", "just", "really", "make", "made", "get", "got"].contains(&pair.1) => "I",
+            "you" => "me",
             w => w,
         });
         i += 1;
@@ -833,7 +846,10 @@ mod tests {
         assert_eq!((hit.name.as_str(), x.as_str()), ("pattern i-am-so", "tired of meetings"), "the most specific pattern wins");
         assert!(match_pattern(&v, &["i", "am"]).is_none(), "* needs at least one word");
         assert_eq!(reflect("my boss hates me"), "your boss hates you");
-        assert_eq!(reflect("i am sure you are right"), "you are sure i am right");
+        assert_eq!(reflect("i am sure you are right"), "you are sure I am right");
+        assert_eq!(reflect("you should rest"), "I should rest");
+        assert_eq!(reflect("they all love you"), "they all love me");
+        assert_eq!(reflect("i think you are wrong"), "you think I am wrong");
     }
 
     #[test]

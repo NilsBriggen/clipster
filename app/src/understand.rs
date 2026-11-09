@@ -255,6 +255,10 @@ fn followup(raw: &str) -> Option<Reply> {
 /// What you typed after he asked you something (`## ask <id>`): his reaction, and the fact if it was a fact question
 /// (the ids "city", "job", "pet", "fav_food", "fav_music" are also fact keys).
 pub fn answer_to(id: &str, text: &str) -> Reply {
+    // "timer 5m tea" typed while he waited for your city is a command, not your city
+    if exact(text).or_else(|| exact(&clean(text))).is_some() {
+        return respond(text);
+    }
     let t = tidy_words(text);
     let t = t.trim_end_matches(['.', ',', '!']).trim();
     let (kind, mut r) = lines::answer(id, t, &lines::reflect(t)).unwrap_or_else(|| (String::new(), lines::reply("confused")));
@@ -1087,6 +1091,11 @@ fn powers(s: &str, raw: &str) -> Option<Reply> {
     if has(s, &["shrug", "table flip", "tableflip", "flip the table", "flip a table", "flip table", "lenny", "lenny face", "unflip", "put the table back", "disapproval", "look of disapproval", "kaomoji"]) {
         return go(format!("kaomoji {s}"));
     }
+    // "what week is it": the calendar week (ISO, as calendars in Europe count it)
+    if ["what week is it", "which week is it", "what week is this", "week number", "what is the week number", "calendar week", "which calendar week is it", "what calendar week is it"].contains(&s) {
+        let w = chrono::Datelike::iso_week(&chrono::Local::now().date_naive()).week();
+        return Some(Reply::say(format!("It's week {w}.")).mood(Mood::Think).btn("Copy it", Act::Copy(w.to_string())));
+    }
     // dates: "what date is in 90 days", "what day is christmas", "days until june 3"
     if let Some(r) = after(s, &["what date is ", "what is the date ", "what day will it be ", "which date is ", "the date "]).filter(|r| r.starts_with("in ")) {
         return go(format!("until {r}"));
@@ -1422,6 +1431,15 @@ fn notes(s: &str, raw: &str) -> Option<Reply> {
     if has(s, &["reading list", "my saved links", "what did i save to read", "links i saved", "read later list"]) && !s.starts_with("add ") {
         return go("reading".into());
     }
+    // "delete the note about milk": that one note, not all of them
+    if let Some(x) = after(s, &["delete the note about ", "remove the note about ", "forget the note about ", "delete my note about ", "remove my note about ", "delete the note ", "remove the note "]).filter(|x| !x.is_empty()) {
+        return go(format!("note drop {}", keep(raw, x)));
+    }
+    // "remove call Anna from my list": that one item (clearing below only ever takes the finished ones)
+    let from_list = [" from my to do list", " from the to do list", " from my todo list", " from my list", " from the list", " off my list", " off my to do list", " off the list", " from my tasks"];
+    if let Some(x) = ["remove ", "delete ", "take ", "cross "].iter().find_map(|p| s.strip_prefix(p)).and_then(|r| from_list.iter().find_map(|l| r.strip_suffix(l))).map(|x| x.trim_start_matches("the ")).filter(|x| !["everything", "all", "it", "finished", "done", "finished items", "done items"].contains(x)) {
+        return go(format!("todoremove {}", keep(raw, x)));
+    }
     let about_todos = has(s, &["to do", "to do list", "todo", "todos", "todo list", "list", "tasks"]) && !has(s, &["notes", "note"]);
     let about_notes = has(s, &["notes", "note", "reminders"]) || about_todos;
     if about_notes && has(s, &["delete", "clear", "erase", "remove", "wipe", "forget", "empty", "reset"]) && !s.starts_with("note ") && !adding_todo(s) {
@@ -1429,7 +1447,7 @@ fn notes(s: &str, raw: &str) -> Option<Reply> {
         return go(if about_todos { "todos clear" } else { "forget notes" }.into());
     }
     // habits: "new habit stretch", "i did my stretch" (only for a habit he knows)
-    if let Some(h) = after(s, &["new habit ", "add a habit ", "add habit ", "track a habit called ", "start a habit "]).filter(|h| !h.is_empty()) {
+    if let Some(h) = after(s, &["new habit: ", "add a habit: ", "add habit: ", "new habit ", "add a habit ", "add habit ", "track a habit called ", "start a habit "]).filter(|h| !h.is_empty()) {
         return go(format!("habit add {}", keep(raw, h)));
     }
     if let Some(h) = after(s, &["i did my ", "did my ", "done my ", "i have done my ", "i just did my ", "finished my "]) {
@@ -1509,7 +1527,7 @@ fn notes(s: &str, raw: &str) -> Option<Reply> {
     if let Some(rest) = after(s, &["move ", "push ", "reschedule ", "postpone ", "put off ", "delay ", "shift "]) {
         if let Some((what, when)) = rest.rsplit_once(" to ").or_else(|| rest.rsplit_once(" until ")).or_else(|| rest.rsplit_once(" till ")) {
             let what = what.trim_start_matches("the ").trim_start_matches("my ").trim();
-            let all_overdue = ["overdue", "everything overdue", "all overdue", "overdue to dos", "overdue todos", "overdue tasks", "my overdue to dos", "all my overdue to dos"].contains(&what);
+            let all_overdue = ["overdue", "everything overdue", "all overdue", "overdue to dos", "overdue todos", "overdue tasks", "my overdue to dos", "all my overdue to dos"].contains(&what.replace("to-dos", "to dos").as_str());
             if all_overdue && when == "today" {
                 return go("todos overdue today".into());
             }
@@ -1548,6 +1566,12 @@ fn notes(s: &str, raw: &str) -> Option<Reply> {
     if !adding && has(s, &["my to do", "my to do list", "my list", "my todos", "my todo list", "my tasks", "what is on my list", "what do i need to do", "what is on my to do list", "what do i have to do", "show my list"]) {
         return go("todos".into());
     }
+    // "search my notes for dentist", "notes about the dentist", "find dentist in my notes"
+    let note_words = after(s, &["search my notes for ", "search notes for ", "search my notes ", "look in my notes for ", "find in my notes ", "notes about ", "my notes about ", "notes on ", "any notes about ", "do i have notes about "])
+        .or_else(|| s.strip_prefix("find ").and_then(|r| r.strip_suffix(" in my notes")));
+    if let Some(w) = note_words.map(|w| w.trim_start_matches("the ")).filter(|w| !w.is_empty()) {
+        return go(format!("notes find {}", keep(raw, w)));
+    }
     if s == "notes" || has(s, &["my notes", "show notes", "list notes", "read notes", "what did i ask you to remember", "what did i tell you to remember", "what should i remember", "all notes"]) {
         return go("notes".into());
     }
@@ -1573,8 +1597,14 @@ fn notes(s: &str, raw: &str) -> Option<Reply> {
     if let Some(what) = rest.strip_suffix(" to my notes").or_else(|| rest.strip_suffix(" to the notes")) {
         return go(format!("note {}", keep(raw, what)));
     }
-    let what = LISTS.iter().find_map(|l| rest.strip_suffix(l))?;
-    go(format!("todo {}", keep(raw, what)))
+    if let Some(what) = LISTS.iter().find_map(|l| rest.strip_suffix(l)) {
+        return go(format!("todo {}", keep(raw, what)));
+    }
+    // "add buy milk to my todo list by tomorrow": the date after the list goes with the to-do
+    let (what, when) = LISTS.iter().find_map(|l| rest.split_once(&format!("{l} ")))?;
+    let when = when.trim_start_matches("by ").trim_start_matches("for ").trim_start_matches("on ").trim_start_matches("due ");
+    crate::todo::parse_when(when, chrono::Local::now().date_naive())?;
+    go(format!("todo {} by {when}", keep(raw, what)))
 }
 
 const MATH_WORDS: &[(&str, &str)] = &[
@@ -1738,14 +1768,21 @@ fn verbs(s: &str, raw: &str) -> Option<Reply> {
     if has(s, &["the iss", "space station"]) {
         return go("iss".into()); // "where is the ISS"
     }
-    // "where is my phone", "where are my keys": not on a map
-    if let Some(thing) = after(s, &["where is my ", "where are my ", "where did i put my ", "where did i leave my "]) {
+    // "where is my phone", "where are my keys", "where's the spare key": not on a map
+    const HOUSEHOLD: &[&str] = &["key", "keys", "phone", "wallet", "glasses", "remote", "charger", "umbrella", "passport", "headphones", "earbuds", "bag", "backpack", "purse", "card", "cards", "scissors", "tape", "stapler", "pen", "pens", "book", "jacket", "coat", "shoes", "hat", "gloves", "drill", "hammer", "ladder", "screwdriver", "batteries", "torch", "flashlight", "ticket", "tickets", "receipt", "watch", "ring", "cable", "adapter", "manual", "papers", "documents", "toolbox", "vacuum", "iron"];
+    let household = |t: &str| t.split_whitespace().count() <= 3 && t.split_whitespace().last().is_some_and(|w| HOUSEHOLD.contains(&w));
+    let the_thing = after(s, &["where is the ", "where are the ", "where did i put the ", "where did i leave the "]).filter(|t| household(t));
+    if let Some(thing) = after(s, &["where is my ", "where are my ", "where did i put my ", "where did i leave my "]).or(the_thing) {
         if !FILE_WORDS.iter().any(|f| thing.contains(f)) {
             return Some(Reply::say(lines::pick("lost_things").replace("{x}", thing)).mood(Mood::Think));
         }
     }
     if let Some(q) = after(s, &["where is ", "where are ", "where can i find ", "directions to ", "how do i get to ", "how to get to ", "how far is ", "map of ", "a map of ", "on the map ", "locate ", "find on the map ", "navigate to ", "route to "]) {
         return go(format!("map {q}"));
+    }
+    // "start my morning routine", "run the packing checklist": a list of steps, not a program
+    if let Some(name) = after(s, &["start my ", "start the ", "start ", "run my ", "run the ", "run ", "begin my ", "begin ", "do my "]).filter(|n| n.ends_with(" routine") || n.ends_with(" checklist")) {
+        return go(format!("onlist {}", crate::todo::list_name(name.trim_start_matches("my ").trim_start_matches("the ").trim_end_matches(" checklist"))));
     }
     if let Some(t) = after(s, &["open up ", "open ", "launch ", "start up ", "start ", "fire up ", "boot up ", "load ", "bring up ", "pull up ", "go to ", "visit ", "take me to ", "browse to ", "switch to ", "run the ", "show my "]) {
         // "go to bed", "go to work", "go to sleep": not a website called bed.com
@@ -2105,7 +2142,7 @@ fn chat(s: &str) -> Option<Reply> {
 
 fn system(s: &str) -> Option<Reply> {
     let place_after = |s: &str| [" in ", " for ", " at "].iter().filter_map(|k| s.rsplit_once(k).map(|x| x.1.to_string())).next().unwrap_or_default();
-    if let Some((_, p)) = ["time in ", "time is it in ", "time is in ", "clock in ", "time over in "].iter().find_map(|k| s.split_once(k)) {
+    if let Some((_, p)) = ["time in ", "time is it in ", "time is in ", "clock in ", "time over in ", "time difference with ", "time difference to ", "time difference between here and ", "time zone of ", "time zone in "].iter().find_map(|k| s.split_once(k)) {
         return go(format!("time {p}"));
     }
     if has(s, &["sunrise", "sunset", "sun rise", "sun set", "sun go down", "sun come up", "sundown", "dawn", "dusk", "sun up", "sun down"]) {
@@ -2158,9 +2195,13 @@ fn system(s: &str) -> Option<Reply> {
     if let Some((_, cmd)) = alone.iter().find(|(ws, _)| ws.contains(&s)) {
         return go(cmd.to_string());
     }
-    if has(s, &["weather", "forecast", "rain", "raining", "sunny", "snow", "snowing", "temperature outside", "how hot is it", "how cold is it", "hot outside", "cold outside", "umbrella", "degrees outside", "jacket"]) {
+    // "I gave Ben my umbrella" is about Ben, not the sky
+    let things_only = !has(s, &["weather", "forecast", "rain", "raining", "snow", "snowing"]) && has(s, &["gave", "lent", "lend", "borrowed", "lost", "bought", "found", "left", "forgot", "broke", "need a new", "where is", "where are"]);
+    if !things_only && has(s, &["weather", "forecast", "rain", "raining", "sunny", "snow", "snowing", "temperature outside", "how hot is it", "how cold is it", "hot outside", "cold outside", "umbrella", "degrees outside", "jacket"]) {
         let place = [" in ", " for ", " at "].iter().filter_map(|k| s.rsplit_once(k).map(|x| x.1)).next().unwrap_or("");
-        let place = place.trim_end_matches(" today").trim_end_matches(" tomorrow").trim_end_matches(" this week");
+        // "in rome on friday": the place is Rome
+        let place = place.split(" on ").next().unwrap_or(place).split(" this ").next().unwrap_or(place).split(" next ").next().unwrap_or(place);
+        let place = place.trim_end_matches(" today").trim_end_matches(" tomorrow").trim_end_matches(" this week").trim_end_matches(" tonight");
         let place = if ["today", "tomorrow", "the morning", "the evening", "this week", "outside"].contains(&place) { "" } else { place };
         return go(format!("weather {place}"));
     }
@@ -2181,6 +2222,10 @@ fn questions(s: &str, raw: &str) -> Option<Reply> {
     if s.contains(" or ") && s.split_whitespace().count() <= 10 {
         let body = after(s, &["should i ", "should we ", "do i want ", "is it ", "which is better ", "would you rather "]).unwrap_or(s);
         return go(format!("pick {}", body.replace(" or ", ", ")));
+    }
+    // "did I take my pills", "have I paid the rent": about what you did, which a toy can't answer; he says he doesn't know
+    if ["did i ", "did we ", "have i ", "have we ", "do i have ", "do i need to "].iter().any(|p| s.starts_with(p)) {
+        return None;
     }
     if ["should ", "will ", "shall ", "am i ", "is it ", "are we ", "do i ", "does ", "did ", "would ", "is my ", "are you going "].iter().any(|p| s.starts_with(p)) || raw.trim_end().ends_with('?') && s.split_whitespace().count() <= 8 && ["is ", "are ", "can ", "will "].iter().any(|p| s.starts_with(p)) {
         return go("8ball".into());
@@ -2227,10 +2272,14 @@ pub fn dist(a: &str, b: &str) -> usize {
 }
 
 pub fn fix_typos(s: &str) -> String {
+    // a pasted page isn't a typo'd command (and checking every word of it against the vocabulary froze him for seconds)
+    if s.split(' ').count() > 12 {
+        return s.to_string();
+    }
     s.split(' ')
         .map(|w| {
             const REAL: &[&str] = &["better", "rolls", "rock", "rocks", "hours", "mock", "sock", "look", "book", "cook", "took", "hook", "late", "rate", "mate", "gate", "tell", "sell", "well", "fell", "bell", "vote", "word", "worm", "form", "fork", "home", "hope", "some", "same", "came", "make", "take", "lake", "cake", "bake", "fake", "wake", "more", "core", "bore", "sore", "store", "stone", "alone", "alive", "later", "water", "after", "other", "bitter", "butter", "matter", "winter", "dinner", "power", "tower", "lower", "flower", "money", "honey", "funny", "sunny", "happy", "sorry", "worry", "party", "times", "lines", "files", "miles", "smile", "while", "white", "write", "quite", "quiet", "quit", "wait", "want", "went", "west", "best", "test", "rest", "nest", "jest", "sent", "rent", "tent", "dent", "bent", "what", "that", "this", "then", "than", "them", "they", "there", "these", "those", "where", "were", "here", "hear", "near", "year", "dear", "fear", "gear", "tear", "wear", "bear", "beer", "deer", "peer", "seer", "need", "feed", "seed", "weed", "read", "lead", "dead", "head", "bread", "dread"];
-            if w.len() < 4 || VOCAB.contains(&w) || REAL.contains(&w) || !w.chars().all(|c| c.is_ascii_alphabetic()) {
+            if w.len() < 4 || VOCAB.contains(&w) || REAL.contains(&w) || !w.chars().all(|c| c.is_ascii_alphabetic()) || crate::lines::real_word(w) {
                 return w.to_string();
             }
             let max = if w.len() >= 7 { 2 } else { 1 };
@@ -2267,7 +2316,9 @@ fn fallback(raw: &str, s: &str) -> Reply {
     let personal = words.iter().any(|w| ["i", "me", "my", "you", "your", "we", "our", "us"].contains(w));
     // "work is stressful" is a statement, not a name to look up
     let sentence = words.iter().any(|w| ["is", "are", "was", "were", "am", "feel", "feels", "seems", "looks", "sucks", "rocks", "hurts", "go", "die", "be"].contains(w));
-    if knowledge(s) || (!personal && !sentence && words.len() <= 3 && scored.is_empty()) {
+    // a lookup needs something to look up: not "the", an emoji or "1/0"
+    let lookable = words.iter().any(|w| w.chars().filter(|c| c.is_alphabetic()).count() >= 2 && !["the", "a", "an", "and", "or", "of", "to", "it", "this", "that"].contains(w));
+    if knowledge(s) || (lookable && !personal && !sentence && words.len() <= 3 && scored.is_empty()) {
         return exact(&format!("ask {raw}")).unwrap_or_else(|| Reply::say("Hmm?"));
     }
     // anything else is conversation he has no rule for: answer in character, offer the web as an option
@@ -2766,6 +2817,34 @@ mod tests {
         assert!(!matches!(eff("in 5 years i want to be rich"), Effect::Timer(..) | Effect::RepeatAt(..)));
         assert_eq!(eff("snooze tomorrow").clone(), eff("snooze tomorrow"));
         assert!(matches!(eff("snooze tomorrow"), Effect::Snooze(s) if s > 60));
+    }
+
+    #[test]
+    fn understanding_round9() {
+        use crate::todo::Op;
+        assert!(!respond("did I take my pills").text.contains('🎱'), "not the 8-ball");
+        assert!(respond("should i go out").text.contains('🎱'));
+        for real in ["block 2 hours tomorrow for the report", "plan my meals for the week", "pack for my trip", "lunch"] {
+            assert!(!respond(real).text.contains("guessing") && !respond(real).text.contains("Did you mean"), "{real}: {}", respond(real).text);
+        }
+        assert!(respond("set a tiemr for 5 minutes").text.contains("guessing"), "real typos are still fixed");
+        assert!(!matches!(eff("where's the spare key"), Effect::Open(_)), "not a map");
+        assert!(matches!(eff("where is bern"), Effect::Open(_)));
+        assert!(!matches!(eff("I gave Ben my umbrella"), Effect::Net(_)));
+        assert_eq!(eff("weather in Rome on friday"), Effect::Net(crate::net::Query::Place(crate::net::Kind::Weather, "rome".into())));
+        assert_eq!(eff("what is the time difference with Tokyo"), Effect::Net(crate::net::Query::Place(crate::net::Kind::Time, "tokyo".into())));
+        assert!(!matches!(eff("start my morning routine"), Effect::Open(_)));
+        assert!(!matches!(eff("ok"), Effect::Net(_)) && !matches!(eff("the"), Effect::Net(_)) && !matches!(eff("🙂"), Effect::Net(_)));
+        assert!(!matches!(eff("find"), Effect::Open(_)) && !matches!(eff("define"), Effect::Net(_)));
+        assert!(respond("what week is it").text.starts_with("It's week "));
+        assert_eq!(eff("remove call Anna from my list"), Effect::Todo(Op::RemoveFrom(String::new(), "call Anna".into())));
+        assert_eq!(eff("add buy milk to my todo list by tomorrow"), Effect::Todo(Op::Add("buy milk by tomorrow".into())));
+        assert_eq!(eff("delete the note about milk"), Effect::Note("drop milk".into()));
+        assert_eq!(eff("add a habit: walk"), Effect::Habit("add walk".into()));
+        assert_eq!(eff("move the overdue to-dos to today"), Effect::Todo(Op::OverdueToToday));
+        assert_eq!(exact("todo #2 remove the old shed").map(|r| r.effect), Some(Effect::Todo(Op::Add("#2 remove the old shed".into()))), "never delete line 2");
+        assert_eq!(exact("todo #2 remove").map(|r| r.effect), Some(Effect::Todo(Op::RemoveAt(2))));
+        assert!(matches!(answer_to("city", "timer 5m tea").effect, Effect::Timer(300, _)), "a command, not your city");
     }
 
     #[test]

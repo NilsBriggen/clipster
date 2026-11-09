@@ -397,7 +397,7 @@ pub fn weather_words(temp: f64, code: i64, low: f64, hours: &[(u32, f64)], now: 
     let raining = matches!(code, 51..=67 | 80..=82 | 95..=99);
     let wet = hours.iter().find(|(h, p)| *h >= now && *p >= 50.0).map(|(h, _)| *h);
     if let Some(h) = wet.filter(|h| !raining && *h > now) {
-        parts.push(format!("rain from {h:02}:00"));
+        parts.push(format!("rain from {}", crate::brain::clock(chrono::NaiveTime::from_hms_opt(h.min(23), 0, 0).unwrap_or_default())));
     }
     if raining || wet.is_some() {
         parts.push(lines::pick("weather_umbrella"));
@@ -579,24 +579,34 @@ fn fetch(q: &Query) -> Result<Reply, String> {
             .btn("Show me what it looks like", Act::Open(s(&v["sprites"]["other"]["official-artwork"]["front_default"]))))
         }
         Query::Recipe(q) => {
-            let url = if q.is_empty() { "https://www.themealdb.com/api/json/v1/1/random.php".to_string() } else { format!("https://www.themealdb.com/api/json/v1/1/search.php?s={}", url_encode(q)) };
-            let v = get(&url)?;
+            const API: &str = "https://www.themealdb.com/api/json/v1/1";
+            // "with chicken", "using leeks": a meal made with that, not one named "with chicken"
+            let ingredient = ["with ", "using ", "containing ", "from "].iter().find_map(|p| q.strip_prefix(p)).map(str::trim).filter(|i| !i.is_empty());
+            let v = match ingredient {
+                Some(i) => {
+                    let list = get(&format!("{API}/filter.php?i={}", url_encode(&i.replace(' ', "_"))))?;
+                    let meals = list["meals"].as_array().filter(|m| !m.is_empty()).ok_or("nothing")?;
+                    let pick = &meals[rand::Rng::gen_range(&mut rand::thread_rng(), 0..meals.len())];
+                    get(&format!("{API}/lookup.php?i={}", url_encode(&s(&pick["idMeal"]))))?
+                }
+                None if q.is_empty() => get(&format!("{API}/random.php"))?,
+                None => get(&format!("{API}/search.php?s={}", url_encode(q)))?,
+            };
             let m = &v["meals"][0];
             if m.is_null() {
                 return Err("nothing".into());
             }
-            let ingredients: Vec<String> = (1..=20)
-                .filter_map(|i| {
-                    let ing = s(&m[format!("strIngredient{i}")]);
-                    (!ing.is_empty()).then(|| format!("{} {ing}", s(&m[format!("strMeasure{i}")])).trim().to_string())
-                })
-                .collect();
+            let parts: Vec<(String, String)> = (1..=20).map(|i| (s(&m[format!("strMeasure{i}")]), s(&m[format!("strIngredient{i}")]))).filter(|(_, ing)| !ing.trim().is_empty()).collect();
+            let ingredients: Vec<String> = parts.iter().map(|(amount, ing)| format!("{amount} {ing}").trim().to_string()).collect();
             let steps: String = s(&m["strInstructions"]).chars().take(350).collect();
             let link = [s(&m["strSource"]), s(&m["strYoutube"])].into_iter().find(|u| !u.is_empty()).unwrap_or(format!("https://www.themealdb.com/meal/{}", s(&m["idMeal"])));
+            // what to buy: the ingredient names (lowercase, commas would split them) onto the shopping list
+            let shopping: Vec<String> = parts.iter().map(|(_, ing)| ing.trim().to_lowercase().replace(',', " ")).collect();
             Ok(Reply::say(format!("🍳 {} ({} {})\nYou need: {}\n{steps}…", s(&m["strMeal"]), s(&m["strArea"]), s(&m["strCategory"]).to_lowercase(), ingredients.join(", ")))
                 .mood(Mood::Happy)
                 .btn("Open the full recipe", Act::Open(link))
-                .run("Something else!", "recipe"))
+                .run("Put it on my shopping list", &format!("onlist shopping add {}", shopping.join(", ")))
+                .run("Something else!", &if q.is_empty() { "recipe".to_string() } else { format!("recipe {q}") }))
         }
         Query::Cocktail => {
             let d = &get("https://www.thecocktaildb.com/api/json/v1/1/random.php")?["drinks"][0];

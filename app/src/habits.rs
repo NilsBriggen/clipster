@@ -69,16 +69,17 @@ pub fn set_names(habits: &[Habit]) {
 
 /// A habit by that name (or the start of one) exists.
 pub fn known(name: &str) -> bool {
-    let n = name.trim().to_lowercase();
-    let n = n.trim_start_matches("my ").trim().to_string();
-    !n.is_empty() && NAMES.with_borrow(|names| names.iter().any(|h| *h == n || h.starts_with(&n)))
+    let full = name.trim().to_lowercase();
+    let n = full.trim_start_matches("my ").trim().to_string();
+    !n.is_empty() && NAMES.with_borrow(|names| names.iter().any(|h| *h == full || *h == n || h.starts_with(&n)))
 }
 
 /// The habit a name means: the same name, or the one it starts.
 pub fn find(habits: &[Habit], name: &str) -> Option<usize> {
-    let n = name.trim().to_lowercase();
-    let n = n.trim_start_matches("my ").trim();
-    habits.iter().position(|h| h.name.to_lowercase() == n).or_else(|| habits.iter().position(|h| !n.is_empty() && h.name.to_lowercase().starts_with(n)))
+    // the whole name first, so a habit called "My meds" is found as itself
+    let full = name.trim().to_lowercase();
+    let n = full.trim_start_matches("my ").trim();
+    habits.iter().position(|h| h.name.to_lowercase() == full).or_else(|| habits.iter().position(|h| h.name.to_lowercase() == n)).or_else(|| habits.iter().position(|h| !n.is_empty() && h.name.to_lowercase().starts_with(n)))
 }
 
 /// Apply "add <name>", "done <name>", "undone <name>", "remove <name>". Returns the pool to answer with and the habit's name.
