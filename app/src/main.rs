@@ -304,6 +304,7 @@ struct App {
     desk_large: bool,                                         // the Desk's larger size
     desk_answer: Option<desk::Answer>,                        // a background answer shown on its Desk page
     desk_net: Option<(u64, String)>,                          // the web question asked for the Desk, and what kind
+    shell_desk: bool,                                         // the running shell command was confirmed on the Desk: it answers there
     undo: Option<(String, Undo, Instant)>,                    // the last removal on the Desk, to put back right after
     desk_sample: Option<(Vec<timers::Timer>, std::collections::BTreeMap<String, std::collections::BTreeMap<String, u64>>, Vec<FocusLog>, std::collections::BTreeMap<String, String>)>,
     checkin_days: std::collections::BTreeMap<String, String>, // day -> great/okay/meh/rough (two weeks)
@@ -743,6 +744,7 @@ impl App {
             desk_large: false,
             desk_answer: None,
             desk_net: None,
+            shell_desk: false,
             undo: None,
             desk_sample: None,
             checkin_days: Default::default(),
@@ -3563,6 +3565,7 @@ impl App {
                 }
             }
             Effect::Shell(c) => {
+                self.shell_desk = from_desk;
                 let (tx, ctx2) = (self.tx.clone(), ctx.clone());
                 std::thread::spawn(move || {
                     let out = sys::shell(&c).output();
@@ -3679,6 +3682,7 @@ impl App {
             if confirm {
                 let buttons = r.buttons.iter().filter_map(|(l, a)| match a {
                     Act::Run(c) => Some((l.clone(), Some(c.clone()))),
+                    Act::Open(u) => Some((l.clone(), Some(format!("open {u}")))), // "Show me the trash first"
                     Act::Hide => Some((l.clone(), None)),
                     _ => None,
                 });
@@ -3930,6 +3934,12 @@ impl App {
         }
         while let Ok(ev) = self.rx.try_recv() {
             match ev {
+                Event::ShellDone(out) if std::mem::take(&mut self.shell_desk) => {
+                    // "Yes, empty it" on the Desk: the outcome goes in its status bar, not a balloon
+                    let failed = out.starts_with("It failed") || out.starts_with("Couldn't run");
+                    let last = out.trim().lines().last().unwrap_or("Done.").chars().take(160).collect::<String>();
+                    self.status(if failed { desk::Tone::Problem } else { desk::Tone::Done }, last, None);
+                }
                 Event::ShellDone(out) => {
                     let mut r = self.balloon.take().unwrap_or_else(|| Reply::say(""));
                     // the balloon shows the start of a long output; "Copy output" has all of it

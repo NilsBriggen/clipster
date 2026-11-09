@@ -1174,11 +1174,16 @@ fn named_lists(s: &str, raw: &str) -> Option<Reply> {
     if let Some((v, op)) = verb.filter(|_| at >= 2 && ["from", "off", "on", "in"].contains(&w[at - 1])) {
         let item = w[..at - 1].join(" ");
         let item = item.trim_start_matches(v.trim()).trim().trim_end_matches(" as done").trim();
+        let item = item.strip_prefix("the ").or_else(|| item.strip_prefix("my ")).unwrap_or(item); // "take the eggs off"
         if !item.is_empty() {
             return go(format!("onlist {name} {op} {}", keep(raw, item)));
         }
     }
-    if ["clear", "empty", "wipe", "reset", "clean"].contains(&first) {
+    // "reset my packing list" unticks everything to use it again; clearing takes the ticked ones away
+    if ["reset", "untick", "reuse", "restart"].contains(&first) {
+        return go(format!("onlist {name} reset"));
+    }
+    if ["clear", "empty", "wipe", "clean"].contains(&first) {
         return go(format!("onlist {name} clear"));
     }
     let asks = ["what", "show", "read", "open", "check", "see", "view", "whats", "list"].contains(&first) || at == 0 && at + 3 == w.len();
@@ -1404,10 +1409,9 @@ fn notes(s: &str, raw: &str) -> Option<Reply> {
         if let Some(who) = who {
             let what = what.trim().trim_start_matches("to ").trim_start_matches("for ").trim();
             let what = if what.is_empty() { format!("something from {first}") } else { keep(raw, what) };
-            // the new to-do lands at the end of the list, then it's marked
-            let line = crate::todo::load().len() + 1;
+            // one step, so the to-do's words are never read again as a command ("waiting for Ben tomorrow")
             let who = who.split_whitespace().map(crate::writing::cap_first).collect::<Vec<_>>().join(" ");
-            return Some(Reply::say("").effect(Effect::Commands(vec![format!("todo {what}"), format!("todo #{line} waiting {who}")])));
+            return Some(Reply::say("").effect(Effect::Todo(crate::todo::Op::AddWaiting(what, who))));
         }
     }
     if ["my habits", "show my habits", "habits", "my streaks", "show my streaks", "how are my habits"].contains(&s) {
@@ -1681,10 +1685,15 @@ fn verbs(s: &str, raw: &str) -> Option<Reply> {
         // "go to bed", "go to work", "go to sleep": not a website called bed.com
         let place = ["go to ", "visit ", "take me to ", "browse to "].iter().any(|p| s.starts_with(p));
         const PLACES: &[&str] = &["bed", "work", "sleep", "school", "lunch", "dinner", "breakfast", "the gym", "gym", "church", "the shops", "the shop", "the store", "the doctor", "the dentist", "hell", "town", "class", "war", "the park", "the office", "the beach", "a party", "the party", "the bathroom", "the toilet", "the loo", "the movies", "the cinema", "university", "uni", "college", "kindergarten", "prison", "jail", "the pub", "a bar", "the bar", "work early", "bed early", "the hospital", "hospital", "the vet", "my room", "your room", "the kitchen", "the airport", "the station", "the moon", "space", "heaven", "the next level", "the point", "the top", "the bottom", "the end"];
-        if place && (PLACES.contains(&t) || t.contains(' ') && !t.contains('.') && !t.contains('/')) {
+        let target = resolve(t, raw);
+        // several words that are no folder, program or site ("the shops") are a place; "my downloads" isn't
+        if place && (PLACES.contains(&t) || t.contains(' ') && target.eq_ignore_ascii_case(t) && find_app(t).is_none()) {
             return None; // "go to bed", "go to the shops": not a website
         }
-        let target = resolve(t, raw);
+        // "start reboot": the power programs ask first (brain's open), never an app search that happens to match
+        if brain::is_power_program(t.split_whitespace().next().unwrap_or("")) {
+            return go(format!("open {t}"));
+        }
         if s.starts_with("show my ") && target == format!("{t}.com") {
             return None; // "show my stats" isn't stats.com
         }
@@ -2679,6 +2688,13 @@ mod tests {
         assert!(matches!(respond("pause my focus").effect, Effect::FocusPause(_)));
         assert!(matches!(respond("keep in touch with mum every 999999999 weeks").effect, Effect::People(_)), "no overflow");
         assert_eq!(hm("4 amazon order").map(|h| h.0), Some(vec![4, 16]), "am only as a whole word");
+        assert!(matches!(eff("go to my downloads"), Effect::Open(_)) && matches!(eff("take me to my documents"), Effect::Open(_)));
+        assert_eq!(eff("go to the shops"), Effect::None);
+        for t in ["start reboot", "open shutdown", "launch logout"] {
+            assert!(!matches!(eff(t), Effect::Open(_)), "{t} asks first, whatever app search finds");
+        }
+        assert_eq!(eff("reset my packing list"), Effect::Todo(crate::todo::Op::ResetList("packing".into())));
+        assert_eq!(eff("take the eggs off my shopping list"), Effect::Todo(crate::todo::Op::RemoveFrom("shopping".into(), "eggs".into())));
         assert_eq!(hm("4 am order").map(|h| (h.0, h.2)), Some((vec![4], 4)));
         for c in ["backup stop", "backup skip node_modules, *.iso", "backup skip", "backup auto plugged", "backup find slides", "backup restore 2"] {
             assert_eq!(exact(c).map(|r| r.effect), Some(Effect::Backup(c[7..].into())), "{c}");
@@ -2726,9 +2742,10 @@ mod tests {
         assert!(crate::brain::exact("fact password|x").is_none(), "only the listed kinds");
         assert!(matches!(eff("when am I free"), Effect::Calendar(c) if c.starts_with("freeday ")));
         assert!(matches!(eff("am i free friday at 3"), Effect::Calendar(c) if c.starts_with("free ")), "the one-time question still works");
-        assert!(!matches!(eff("I'm waiting for the bus"), Effect::Commands(_)), "not a person he knows");
+        assert!(!matches!(eff("I'm waiting for the bus"), Effect::Todo(_)), "not a person he knows");
         crate::people::set_names(&[crate::people::Person::new("Ben Keller")]);
-        assert!(matches!(eff("I'm waiting for Ben's numbers"), Effect::Commands(c) if c[0] == "todo numbers" && c[1].ends_with("waiting Ben Keller")));
+        assert_eq!(eff("I'm waiting for Ben's numbers"), Effect::Todo(crate::todo::Op::AddWaiting("numbers".into(), "Ben Keller".into())));
+        assert_eq!(eff("I'm waiting for Ben tomorrow"), Effect::Todo(crate::todo::Op::AddWaiting("tomorrow".into(), "Ben Keller".into())), "never \"todo tomorrow\"");
         crate::people::set_names(&[]);
         // ordinary sentences stay ordinary
         assert!(!matches!(eff("what kind of movie is that"), Effect::KindMove(..)));

@@ -55,6 +55,7 @@ pub fn week_key(d: NaiveDate) -> String {
 #[derive(Clone, Debug, PartialEq)]
 pub enum Op {
     Add(String),
+    AddWaiting(String, String), // a new to-do that waits on someone: (text, who)
     Done(String),
     Undone(String),
     ClearFinished,
@@ -475,6 +476,11 @@ pub fn change(items: &mut Vec<Item>, op: &Op, today: NaiveDate) -> (&'static str
     let at = |n: usize, items: &Vec<Item>| n.checked_sub(1).filter(|i| *i < items.len());
     let missing = |n: &usize| ("todo_not_found", format!("#{n}"));
     match op {
+        Op::AddWaiting(text, who) => {
+            let added = change(items, &Op::Add(text.clone()), today);
+            change(items, &Op::WaitingAt(items.len(), Some(who.clone())), today);
+            added
+        }
         Op::Add(text) => {
             let item = new_item(text, today);
             let text = item.text.clone();
@@ -843,7 +849,7 @@ fn reply(op: &Op, pool: &str, x: &str, items: &[Item], today: NaiveDate) -> Repl
     let mut r = Reply::say(text).mood(if ["todo_not_found", "todo_top_full", "todo_week_full", "todo_bad_repeat"].contains(&pool) { Mood::Think } else { Mood::Happy });
     // a reminder on the morning a new (or repeating, or moved) item is due, or at its time
     let fresh = match op {
-        Op::Add(_) => items.last(),
+        Op::Add(_) | Op::AddWaiting(..) => items.last(),
         Op::AddTo(..) => items.last().filter(|i| i.due.is_some()),
         Op::DueAt(..) | Op::AtTimeAt(..) | Op::DueFor(..) => item,
         // a renamed item's reminder went with its old name; a first date from a repeat needs one too

@@ -1845,7 +1845,7 @@ fn open(target: &str) -> Reply {
     let program = t.split_whitespace().next().unwrap_or("").to_lowercase();
     let program = program.trim_end_matches(".exe");
     match program {
-        "reboot" | "restart" | "shutdown" | "poweroff" | "halt" | "suspend" | "hibernate" | "logout" | "logoff" => {
+        p if is_power_program(p) && p != "sleep" => {
             return crate::powers::power(match program {
                 "reboot" | "restart" => "reboot",
                 "suspend" | "hibernate" => "suspend",
@@ -1865,6 +1865,11 @@ fn open(target: &str) -> Reply {
         t.to_string()
     };
     Reply::say(format!("Opening {t}! Wheee!")).effect(Effect::Open(target)).mood(Mood::Happy)
+}
+
+/// Programs that switch the computer off, restart it or log out: they ask first, whatever words start them.
+pub fn is_power_program(name: &str) -> bool {
+    ["reboot", "restart", "shutdown", "poweroff", "halt", "suspend", "hibernate", "logout", "logoff", "sleep"].contains(&name.to_lowercase().trim_end_matches(".exe"))
 }
 
 fn web(base: &str, q: &str, intro: &str) -> Reply {

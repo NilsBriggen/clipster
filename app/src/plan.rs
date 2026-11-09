@@ -227,7 +227,9 @@ pub fn history_merge(stored: &History, kind_time: &KindTime, log: &[crate::Focus
         *focus.entry(&s.0).or_default() += s.2;
     }
     for (day, secs) in focus {
-        h.entry(day.to_string()).or_insert([0; 4])[3] = secs;
+        // the 60-session log often holds only part of its oldest day: a day's focus never shrinks
+        let e = &mut h.entry(day.to_string()).or_insert([0; 4])[3];
+        *e = (*e).max(secs);
     }
     let (oldest, newest) = (key(today - Days::new(55)), key(today));
     h.retain(|d, _| *d >= oldest && *d <= newest);
@@ -567,6 +569,9 @@ mod tests {
         assert_eq!(h[&key(today)], [7200, 1200, 60, 4200]);
         assert_eq!(h[&key(day(11, 12))], [0, 0, 0, 900], "a day with only focus");
         assert!(!h.contains_key(&key(day(9, 1))));
+        let mut partly = History::new();
+        partly.insert(key(day(11, 12)), [0, 0, 0, 7500]);
+        assert_eq!(history_merge(&partly, &kt, &log, today)[&key(day(11, 12))][3], 7500, "a day half out of the log keeps its focus");
         let (text, verdict) = compare(&h, today, 7, 5).unwrap();
         assert_eq!(text, "vs last week: focus +1h 15m · distractions −1h 40m · to-dos 7 (5)");
         assert_eq!(verdict, Some(true));
