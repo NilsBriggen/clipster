@@ -23,6 +23,7 @@ mod pointer;
 mod powers;
 mod props;
 mod sys;
+mod renewals;
 mod things;
 mod tidy;
 mod todo;
@@ -183,6 +184,7 @@ struct App {
     habits: Vec<habits::Habit>,     // a few daily ticks with streaks
     countdowns: Vec<(String, chrono::NaiveDate)>, // pinned countdowns: "Italy", 2 December
     things: things::Things,                       // where things are: passport → top drawer
+    renewals: Vec<renewals::Renewal>,             // the passport, insurance, subscriptions: dates that matter
     gift_lead: u32,                               // days before a birthday for the present nudge (0 = off)
     habit_nudge: bool,                            // an evening word when a habit streak is about to break
     after_meeting: bool,                          // "how did it go?" after a meeting ends
@@ -627,6 +629,7 @@ impl App {
             habits: vec![],
             countdowns: vec![],
             things: Default::default(),
+            renewals: vec![],
             gift_lead: 10,
             habit_nudge: true,
             after_meeting: true,
@@ -1235,12 +1238,46 @@ impl App {
         }
         let todos = todo::load();
         lines.extend(plan::briefing(&self.events, &self.timers, &todos, &self.people, &self.countdowns, &self.habits, now, self.work_hours));
+        for (r, days) in renewals::due_soon(&self.renewals, now.date()).into_iter().filter(|(_, d)| *d <= 14).take(2) {
+            lines.push(format!("📄 {} {} {}.", r.what, r.verb(), if days <= 0 { "today".to_string() } else { format!("in {days} days") }));
+        }
         let all = lines.join("\n");
         let mut r = Reply::say(all.clone()).mood(Mood::Happy);
         if !todos.iter().any(|i| i.top_today(now.date())) {
             r = r.run("Pick my top 3", "planday");
         }
         r.run("More (weather, a quote)", "briefing web").btn("Copy my day", Act::Copy(all))
+    }
+
+    /// Renewals and expiry dates: the list, what's coming up, and the changes (see renewals.rs).
+    fn renewal_command(&mut self, cmd: &str) -> Reply {
+        let today = chrono::Local::now().date_naive();
+        let line = |r: &renewals::Renewal| {
+            let days = (r.date - today).num_days();
+            let left = match days {
+                d if d < 0 => format!("{} days ago", -d),
+                0 => "today".to_string(),
+                1 => "tomorrow".to_string(),
+                d => format!("in {d} days"),
+            };
+            format!("• {} {} {} ({left}){}{}", r.what, r.verb(), r.date.format("%-d %b %Y"), r.every.as_deref().map(|e| format!(", every {e}")).unwrap_or_default(), r.amount.as_deref().map(|a| format!(", {a}")).unwrap_or_default())
+        };
+        match cmd {
+            "list" if self.renewals.is_empty() => Reply::say("No renewals kept yet. Tell me: my passport expires on 3 March 2027, or netflix renews on the 15th every month.").mood(Mood::Think),
+            "list" => Reply::say(format!("Your renewals:\n{}", self.renewals.iter().map(line).collect::<Vec<_>>().join("\n"))).mood(Mood::Read),
+            "soon" => {
+                let soon = renewals::due_soon(&self.renewals, today);
+                if soon.is_empty() {
+                    Reply::say("Nothing runs out or renews soon.").mood(Mood::Happy).run("All my renewals", "renewals")
+                } else {
+                    Reply::say(format!("Coming up:\n{}", soon.iter().map(|(r, _)| line(r)).collect::<Vec<_>>().join("\n"))).mood(Mood::Think).run("All my renewals", "renewals")
+                }
+            }
+            _ => {
+                let text = renewals::change(&mut self.renewals, cmd, today);
+                Reply::say(text).mood(Mood::Write).run("My renewals", "renewals")
+            }
+        }
     }
 
     /// Where things are: "set passport|top drawer", "forget passport", "where passport", "in blue bag", "list".
@@ -2609,7 +2646,7 @@ impl App {
     fn snapshot(&self) -> String {
         serde_json::json!({
             "tips_every": self.tips_every, "notice_clip": self.notice_clip, "notice_programs": self.notice_programs, "notice_windows": self.notice_windows, "checkin": self.checkin, "facts": self.facts, "kind_time": self.kind_time, "focus_log": self.focus_log, "desk_look": if self.desk_modern { "modern" } else { "classic" }, "desk_size": if self.desk_large { "large" } else { "normal" }, "checkin_days": self.checkin_days,
-            "pins": self.pins, "reading": self.reading, "calendars": self.calendars, "calendar_meta": self.calendar_meta.iter().map(|(s, m)| (s.clone(), m.to_json())).collect::<serde_json::Map<_, _>>(), "holidays": self.holiday_cc, "pin_labels": self.pin_labels, "reading_titles": self.reading_titles, "people": self.people.iter().map(|p| p.to_json()).collect::<Vec<_>>(), "habits": self.habits.iter().map(|h| h.to_json()).collect::<Vec<_>>(), "countdowns": self.countdowns.iter().map(|(l, d)| serde_json::json!([l, d.to_string()])).collect::<Vec<_>>(), "things": self.things, "gift_lead": self.gift_lead, "habit_nudge": self.habit_nudge, "after_meeting": self.after_meeting, "site_time": self.site_time, "kind_moves": self.kind_moves, "weather": self.weather_on, "work_hours": [self.work_hours.0, self.work_hours.1], "day_totals": plan::history_merge(&self.day_totals, &self.kind_time, &self.focus_log, chrono::Local::now().date_naive()), "workday": self.workday, "workday_ask": self.workday_ask, "welcome_seen": self.welcome_seen, "backup_sources": self.backup_sources, "backup_target": self.backup_target, "backup_last": self.backup_last, "backup_result": self.backup_result, "backup_skip": self.backup_skip, "backup_auto": self.backup_auto, "backup_history": self.backup_history, "upkeep_hide": self.upkeep_hide, "space_log": self.space_log, "tidy_targets": self.tidy_targets, "tidy_auto": self.tidy_auto, "work_days": self.work_days, "clock12": brain::clock12(), "week_sunday": brain::week_sunday(), "quiet_after": self.quiet_after, "quiet_until": self.quiet_until.filter(|q| *q > timers::unix_now()), "quiet_weekend": self.quiet_weekend, "quiet_meetings": self.quiet_meetings, "headsup": self.headsup_min, "break_every": self.break_every, "alarm_sound": self.alarm_sound, "muted": self.muted, "desk_morning": self.desk_morning, "dnd_restore": self.dnd_restore, "dnd": self.dnd, "wrapup": self.wrapup, "upkeep_day": self.upkeep_day, "focus_goal": self.focus_goal, "budgets": self.budgets,
+            "pins": self.pins, "reading": self.reading, "calendars": self.calendars, "calendar_meta": self.calendar_meta.iter().map(|(s, m)| (s.clone(), m.to_json())).collect::<serde_json::Map<_, _>>(), "holidays": self.holiday_cc, "pin_labels": self.pin_labels, "reading_titles": self.reading_titles, "people": self.people.iter().map(|p| p.to_json()).collect::<Vec<_>>(), "habits": self.habits.iter().map(|h| h.to_json()).collect::<Vec<_>>(), "countdowns": self.countdowns.iter().map(|(l, d)| serde_json::json!([l, d.to_string()])).collect::<Vec<_>>(), "things": self.things, "renewals": self.renewals.iter().map(|r| r.to_json()).collect::<Vec<_>>(), "gift_lead": self.gift_lead, "habit_nudge": self.habit_nudge, "after_meeting": self.after_meeting, "site_time": self.site_time, "kind_moves": self.kind_moves, "weather": self.weather_on, "work_hours": [self.work_hours.0, self.work_hours.1], "day_totals": plan::history_merge(&self.day_totals, &self.kind_time, &self.focus_log, chrono::Local::now().date_naive()), "workday": self.workday, "workday_ask": self.workday_ask, "welcome_seen": self.welcome_seen, "backup_sources": self.backup_sources, "backup_target": self.backup_target, "backup_last": self.backup_last, "backup_result": self.backup_result, "backup_skip": self.backup_skip, "backup_auto": self.backup_auto, "backup_history": self.backup_history, "upkeep_hide": self.upkeep_hide, "space_log": self.space_log, "tidy_targets": self.tidy_targets, "tidy_auto": self.tidy_auto, "work_days": self.work_days, "clock12": brain::clock12(), "week_sunday": brain::week_sunday(), "quiet_after": self.quiet_after, "quiet_until": self.quiet_until.filter(|q| *q > timers::unix_now()), "quiet_weekend": self.quiet_weekend, "quiet_meetings": self.quiet_meetings, "headsup": self.headsup_min, "break_every": self.break_every, "alarm_sound": self.alarm_sound, "muted": self.muted, "desk_morning": self.desk_morning, "dnd_restore": self.dnd_restore, "dnd": self.dnd, "wrapup": self.wrapup, "upkeep_day": self.upkeep_day, "focus_goal": self.focus_goal, "budgets": self.budgets,
             "notice_health": self.notice_health, "check_updates": self.check_updates, "update_told": self.update_told, "sounds": self.sounds, "breaks": self.breaks, "name": self.name,
             "hat": self.hat, "skin": self.skin, "friendship": self.friendship, "highscores": self.highscores, "birthday": self.birthday.map(|(m, d)| [m, d]), "stats": self.stats, "unlocked": self.unlocked, "explored": self.explored, "persona": if self.unhinged { "unhinged" } else { "boring" }, "anchor": self.anchor.or(self.saved_anchor).map(|a| [a.x, a.y]),
             "timers": self.timers.iter().map(|t| serde_json::json!([t.at, t.label, t.every, t.id, t.rule])).collect::<Vec<_>>(),
@@ -2745,6 +2782,7 @@ impl App {
         self.gift_lead = v["gift_lead"].as_u64().map_or(10, |d| d.min(60) as u32);
         self.habit_nudge = v["habit_nudge"].as_bool().unwrap_or(true);
         self.after_meeting = v["after_meeting"].as_bool().unwrap_or(true);
+        self.renewals = v["renewals"].as_array().into_iter().flatten().filter_map(renewals::Renewal::from_json).collect();
         self.things = v["things"].as_object().into_iter().flatten().filter_map(|(k, e)| Some((k.clone(), (e[0].as_str()?.to_string(), e[1].as_str().unwrap_or_default().to_string())))).collect();
         self.countdowns = v["countdowns"].as_array().into_iter().flatten().filter_map(|c| Some((c[0].as_str()?.to_string(), chrono::NaiveDate::parse_from_str(c[1].as_str()?, "%Y-%m-%d").ok()?))).filter(|c| c.1 >= today).collect();
         if v["backup_sources"].is_array() {
@@ -3040,6 +3078,7 @@ impl App {
                 r = Reply::say(text).mood(if pool.ends_with("unknown") || pool.ends_with("full") || pool.ends_with("exists") { Mood::Think } else { Mood::Write });
             }
             Effect::Things(cmd) => r = self.things_command(&cmd),
+            Effect::Renewal(cmd) => r = self.renewal_command(&cmd),
             Effect::Briefing(weekend) => r = self.briefing(weekend),
             Effect::Countdown(cmd) => {
                 let today = chrono::Local::now().date_naive();
@@ -4181,6 +4220,23 @@ impl App {
                         self.pipe_up(Reply::say(lines::pick("tidy_auto_done").replace("{n}", &n.to_string())).mood(Mood::Happy).run("Undo", "tidy undo").btn("Thanks", Act::Hide));
                     }
                 }
+            }
+        }
+        // renewals: once a day after 8, on the heads-up day, a week before and on the day
+        if can_nudge && chrono::Timelike::hour(&local) >= 8 && t > 150.0 && self.stats.get("renewal_day") != Some(&day_num) {
+            let today = local.date_naive();
+            if let Some((r, days)) = renewals::due_soon(&self.renewals, today).into_iter().find(|(r, d)| *d == r.lead as i64 || *d == 7 || *d == 0).map(|(r, d)| (r.clone(), d)) {
+                self.stats.insert("renewal_day".into(), day_num);
+                let when = if days == 0 { "today".to_string() } else { format!("in {days} days") };
+                let papers = renewals::lead_for(&r.what) > 30 && days > 7;
+                let text = format!("Your {} {} {when}.{}", r.what.to_lowercase(), r.verb(), if papers { " Renewing can take weeks." } else { "" });
+                let half = today + chrono::Days::new((days / 2).max(0) as u64);
+                let mut reply = Reply::say(text).mood(Mood::Think).run("To-do: renew it", &format!("todo Renew the {} by {}", r.what.to_lowercase(), half.format("%Y-%m-%d")));
+                if r.every.is_some() {
+                    reply = reply.run("Renewed", &format!("renewal renewed {}", r.what));
+                }
+                self.pipe_up(reply.btn("Later", Act::Hide));
+                can_nudge = false;
             }
         }
         // an evening word when a habit streak of 3 days or more would break tonight

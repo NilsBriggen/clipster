@@ -526,6 +526,50 @@ fn doses(s: &str, raw: &str) -> Option<Reply> {
     None
 }
 
+/// Renewals and expiry dates: "my passport expires on 3 March 2027", "the car insurance renews on 1 March every year",
+/// "netflix renews on the 15th every month for 12.99", "my laptop warranty ends in June 2027", "what's expiring soon",
+/// "renewed the car insurance", "forget the netflix renewal". Only a verb of expiring *and* a date he can read
+/// ("my patience is running out" isn't one).
+fn renewal_talk(s: &str, raw: &str) -> Option<Reply> {
+    if ["what is expiring soon", "anything expiring soon", "what expires soon", "what is running out", "what renews soon", "anything expiring", "renewals soon", "what is due for renewal"].contains(&s) {
+        return go("renewals soon".into());
+    }
+    if ["my renewals", "show my renewals", "list my renewals", "renewals", "my subscriptions", "my contracts"].contains(&s) {
+        return go("renewals".into());
+    }
+    if let Some(w) = after(s, &["renewed the ", "renewed my ", "i renewed the ", "i renewed my ", "i paid the ", "paid my "]) {
+        return go(format!("renewal renewed {}", keep(raw, w)));
+    }
+    if let Some(w) = after(s, &["forget the ", "forget my ", "remove the ", "remove my ", "delete the "]).and_then(|w| w.strip_suffix(" renewal").or_else(|| w.strip_suffix(" subscription"))) {
+        return go(format!("renewal remove {}", keep(raw, w)));
+    }
+    const VERBS: &[&str] = &[" expires on ", " expires in ", " expires ", " runs out on ", " runs out in ", " runs out ", " renews on ", " renews in ", " renews every ", " renews ", " is due for renewal on ", " is due for service on ", " is due for inspection on ", " ends on ", " ends in "];
+    let (what, rest) = VERBS.iter().find_map(|v| s.split_once(v).map(|(w, r)| (w, (r, *v))))?;
+    let (rest, verb) = rest;
+    let what = what.trim_start_matches("my ").trim_start_matches("the ").trim_start_matches("our ").trim();
+    // "ends on" only for things that end: a warranty, a contract, a subscription, a lease, a membership
+    if verb.starts_with(" ends") && !["warranty", "contract", "subscription", "lease", "membership", "trial", "plan", "insurance"].iter().any(|w| what.contains(w)) {
+        return None;
+    }
+    if what.is_empty() || what.split_whitespace().count() > 4 || ["patience", "time", "luck", "battery", "money", "coffee"].contains(&what) {
+        return None;
+    }
+    // the repeat and the amount: "… every year", "… every month for 12.99"
+    let (rest, amount) = rest.rsplit_once(" for ").map_or((rest, None), |(r, a)| (r, Some(a.trim())));
+    let every = if verb.contains("every") || rest.contains("every year") || rest.contains("each year") || rest.contains("yearly") { Some("year") } else { None };
+    let every = if rest.contains("month") && (rest.contains("every") || verb.contains("every")) || rest.contains("monthly") { Some("month") } else { every };
+    let when = rest.replace("every year", "").replace("each year", "").replace("every month", "").replace("monthly", "").replace("yearly", "").trim().trim_start_matches("on ").to_string();
+    let today = chrono::Local::now().date_naive();
+    let date = crate::todo::parse_when(&when, today).flatten().or_else(|| crate::renewals::month_end(&when, today))?;
+    let days = (date - today).num_days();
+    let cmd = format!("renewal add {}|{}|{}|{}", keep(raw, what), date, every.unwrap_or("-"), amount.map(|a| keep(raw, a)).unwrap_or_else(|| "-".into()));
+    // "the milk expires tomorrow": soon and once is a to-do, not a renewal
+    if days < 14 && every.is_none() {
+        return Some(Reply::say(format!("{} {}{}. A to-do for it?", crate::writing::cap_first(&keep(raw, what)), verb.trim().split_whitespace().next().unwrap_or("expires"), match days { d if d <= 0 => " today".to_string(), 1 => " tomorrow".to_string(), d => format!(" in {d} days") })).mood(Mood::Think).run("Yes, a to-do", &format!("todo {} by {date}", keep(raw, what))).run("Keep it as a renewal", &cmd).btn("No", Act::Hide));
+    }
+    go(cmd)
+}
+
 /// "dentist on Tuesday at 10", "doctor appointment Friday 14:30", "haircut tomorrow at 5": when, and what he can do
 /// about it (a reminder before, the evening before, a to-do). He always asks; nothing is set by itself.
 fn appointment(s: &str, raw: &str) -> Option<Reply> {
@@ -1605,6 +1649,9 @@ fn notes(s: &str, raw: &str) -> Option<Reply> {
     }
     if let Some(what) = s.strip_prefix("add ").and_then(|r| r.strip_suffix(" to my workday").or_else(|| r.strip_suffix(" to my work day")).or_else(|| r.strip_suffix(" to the workday"))) {
         return go(format!("workday add {}", keep(raw, what)));
+    }
+    if let Some(r) = renewal_talk(s, raw) {
+        return Some(r);
     }
     if let Some(r) = people_talk(s, raw) {
         return Some(r);
@@ -3089,6 +3136,24 @@ mod tests {
         assert_eq!(eff("I took my pills"), Effect::Habit("dose pills".into()));
         assert!(!matches!(eff("I took my time"), Effect::Habit(_)), "only habits he knows");
         assert!(!matches!(eff("+1 meeting"), Effect::Habit(_)));
+    }
+
+    #[test]
+    fn renewals_in_the_chat() {
+        let today = chrono::Local::now().date_naive();
+        assert!(matches!(eff("my passport expires on 3 March 2030"), Effect::Renewal(c) if c == "add passport|2030-03-03|-|-"));
+        assert!(matches!(eff("the car insurance renews on 1 March every year"), Effect::Renewal(c) if c.starts_with("add car insurance|") && c.ends_with("|year|-")));
+        assert!(matches!(eff("netflix renews on the 15th every month for 12.99"), Effect::Renewal(c) if c.ends_with("|month|12.99")));
+        assert!(matches!(eff("my laptop warranty ends in June 2030"), Effect::Renewal(c) if c == "add laptop warranty|2030-06-30|-|-"));
+        assert_eq!(eff("what's expiring soon"), Effect::Renewal("soon".into()));
+        assert_eq!(eff("renewed the car insurance"), Effect::Renewal("renewed car insurance".into()));
+        assert_eq!(eff("forget the netflix renewal"), Effect::Renewal("remove netflix".into()));
+        let milk = respond("the milk expires tomorrow");
+        assert!(milk.effect == Effect::None && milk.text.contains("tomorrow") && milk.buttons.iter().any(|b| matches!(&b.1, Act::Run(c) if c.starts_with("todo milk by "))), "soon is a to-do offer");
+        for not in ["my patience is running out", "the meeting ends at 5", "my time runs out on friday"] {
+            assert!(!matches!(eff(not), Effect::Renewal(_)), "{not}");
+        }
+        let _ = today;
     }
 
     #[test]

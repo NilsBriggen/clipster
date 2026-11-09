@@ -62,6 +62,7 @@ pub enum Effect {
     Habit(String),                   // "add walk", "done walk", "undone walk", "remove walk"
     Countdown(String),               // "add Italy|2 december", "remove 2", "list"
     Briefing(bool),                  // the day from what's on the computer (true: the weekend instead)
+    Renewal(String),                 // "add passport|2027-03-03|-|-", "renewed netflix", "date …|…", "remove …", "list"
     Things(String),                  // where things are: "set passport|top drawer", "forget passport", "where passport", "in blue bag", "list"
     Journal(String),                 // "add <line>", "mood great", "day 2026-11-05|rough|<line>" (written to journal.txt)
     SaveTemplate(String, String),    // a letter template of your own: name, text (written to your lines file)
@@ -675,6 +676,8 @@ pub fn exact(input: &str) -> Option<Reply> {
         "countdowns" => return Some(Reply::say("").effect(Effect::Countdown("list".into()))),
         "thing" if ["set", "forget", "where", "in"].contains(&rest.split(' ').next().unwrap_or("")) && rest.contains(' ') => return Some(Reply::say("").effect(Effect::Things(rest.to_string()))),
         "things" if rest.is_empty() => return Some(Reply::say("").effect(Effect::Things("list".into()))),
+        "renewal" if ["add", "renewed", "date", "remove"].contains(&rest.split(' ').next().unwrap_or("")) && rest.contains(' ') => return Some(Reply::say("").effect(Effect::Renewal(rest.to_string()))),
+        "renewals" if rest.is_empty() || rest == "soon" => return Some(Reply::say("").effect(Effect::Renewal(if rest.is_empty() { "list".into() } else { "soon".into() }))),
         "until" | "countdown" => return Some(crate::powers::until(rest)),
         "habit" if ["add", "done", "undone", "remove", "target", "count", "times", "dose", "status"].contains(&rest.split(' ').next().unwrap_or("")) && rest.contains(' ') => return Some(Reply::say("").effect(Effect::Habit(rest.to_string()))),
         // the sub-commands only in their own shape: "journal day was long" is a line for today
