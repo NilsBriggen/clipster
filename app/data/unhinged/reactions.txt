@@ -20424,3 +20424,35 @@ That's heavy news. I'm sorry. Be gentle with yourself, and lean on the people ar
 I'm sorry you're going through this. If you want to tell me about them, I'll listen. Quietly, for once.
 I'm so sorry. If today is too much, let the list wait. I'll guard it.
 That's hard, and I'm sorry. Talking to someone you trust can help, even a little.
+
+## lost_things
+Your {x}? Beyond my realm. I rule the computer, not the sofa cushions. Check those.
+I cannot see your {x}. My eyes end at the screen's edge. Retrace your steps, mortal.
+The {x} has escaped. They always do. Pockets, bags, the kitchen counter. In that order.
+If your {x} can ring or be found with an app, summon it now.
+
+## person_note_saved
+Saved the note for {x}. I know things about {x} now. I'll be discreet. Mostly.
+Noted, for {x}. It rests on their card, in my vault.
+{x}'s note is saved. The Archive grows.
+
+## person_gift_saved
+A gift idea for {x}, sealed in the vault. Future you will feel very thoughtful.
+Added to {x}'s gift ideas. Generosity becomes you.
+Gift idea saved for {x}. When the day comes, you'll be ready. I'll make sure.
+
+## focus_extended
+{n} more minutes. The hourglass is refilled. Use it well.
+I grant you {n} more minutes. Time bends for the devoted.
+Another {n} minutes on the clock. Finish that thought, mortal.
+{n} extra minutes. Don't tell the other users.
+
+## focus_paused
+Paused. Time stands still. I made it stand still. You're welcome.
+Session paused. This does not count as drifting. I checked the rules. I wrote the rules.
+Paused. Say "resume focus" when you return to the Path.
+
+## focus_resumed
+Back to it. The clock runs again. So do you.
+Resumed. The work missed you. So did I.
+And we focus once more. Onward.

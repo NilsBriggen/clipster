@@ -13,7 +13,7 @@ I'm great. A little wiry, but great.
 Living the dream on your desktop. Thanks for asking!
 
 ## chat good-night
-> good night | goodnight | nighty night | going to bed | going to sleep | sleep well
+> good night | goodnight | nighty night | going to bed | going to sleep | sleep well | go to bed | off to bed | time for bed | bedtime | i am off to bed
 @ happy
 Good night! Don't let the bed bugs byte. 🐛
 Sweet dreams! I'll guard the desktop.
@@ -27,7 +27,7 @@ I know. But it's nice to hear!
 You're not so bad yourself. For a human.
 
 ## chat insult
-> you suck | you are stupid | you are dumb | you are useless | you are annoying | hate you | stupid | dumb | useless | worst | idiot | you are bad
+> you suck | you are stupid | you are dumb | you are useless | you are annoying | hate you | stupid clip | dumb clip | useless clip | you are the worst | you idiot | you are bad | worst assistant | stupid paperclip
 @ angry
 % -5
 Hey! I'm doing my best with no brain and one piece of wire.
@@ -37,7 +37,8 @@ Wow. I'm telling the stapler.
 I've been insulted by better. Mostly printers.
 
 ## chat sorry
-> sorry | my bad | apologize | apologies
+= sorry
+> my bad | i apologize | my apologies | sorry about that | sorry for that | sorry my fault
 @ happy
 % +2
 Apology accepted. I'm a paperclip, I don't hold grudges. Only paper.
@@ -390,7 +391,7 @@ Go rest, {name}. The spreadsheet will still be a mess tomorrow. I'll keep it com
 Exhausted is your body typing "please stop". Maybe listen to it.
 Nap now, produce later. I won't tell anyone. I don't have anyone to tell.
 You sound wiped. Water, stretch, short break. And no, coffee number five doesn't count as rest.
-+ Take a break = pomodoro
++ Take a break = timer 5m Break's over
 
 ## chat hungry
 > i am hungry | i am starving | i want a snack | i could eat something
@@ -451,7 +452,7 @@ Nerves mean you care. Which is annoying but useful. You've got this.
 Take a slow breath. Then another one. I'll hold your attention while you do.
 Whatever's coming, you've prepared more than you think. And if not, improvise. It works for me.
 Shake it out, roll your shoulders, drink water. And remember: a lot of people are winging it.
-+ Calm me down = hug
++ Calm me down = i am anxious
 
 ## chat homesick
 > i miss home | i am homesick | i miss my family | i miss my friends | i want to go home
@@ -9097,7 +9098,7 @@ If you must keep one alert, make it the one for your family.
 ## chat screen-time-guilt
 > i spend way too much time on my phone | i look at screens all day | i feel guilty about how long i was online | i should spend less time on my computer
 @ think
-+ Take a break = pomodoro
++ Take a break = timer 5m Break's over
 Screen time: the number your phone shows you on Sunday, which you'll quickly decide is a glitch.
 Nobody needs a perfect number. A small cut, a walk and a book are a decent start.
 Put the phone in another room for the first hour of the day. It changes more than you'd think.

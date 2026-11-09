@@ -55,6 +55,9 @@ pub enum Effect {
     Todo(crate::todo::Op),           // a change to the to-do list (applied by the app: it writes todo.txt)
     Focus(u64, String),              // a focus session: seconds, what it's for
     FocusStop,
+    FocusExtend(u64),                // a few more minutes on the running session
+    Snooze(u64),                     // the timer that rang last, again in this many seconds
+    FocusPause(bool),                // true = pause, false = go on
     TimeReport,                      // where today's time went, by window kind
     AppTips,                         // a tip for the app you're in (the app knows which)
     Pref(String, String),            // a setting changed on the Desk's Settings tab: key, value
@@ -222,6 +225,33 @@ pub fn respond(input: &str) -> Reply {
 }
 
 /// Strict commands ("joke", "timer 5m tea", "5 km to miles"). `None` = not a command I know.
+/// The settings the Desk's `pref <key> <value>` may change.
+pub const PREF_KEYS: &[&str] = &["persona", "tips", "clip", "programs", "windows", "checkin", "health", "updates", "sounds", "breaks", "dnd", "wrapup", "upkeepday", "workdayask", "quiet", "autostart", "goal", "budget", "classiclook"];
+
+/// Command words that are also ordinary English words only count in their command shape: "drink" alone is a
+/// cocktail, "drink water" is advice; "top" alone lists programs, "top 10 movies" is a question.
+fn head_fits(head: &str, rest: &str) -> bool {
+    let first = rest.split_whitespace().next().unwrap_or("");
+    match head {
+        "sound" => rest.is_empty() || ["up", "down", "louder", "quieter", "mute", "unmute", "off", "on", "max", "full"].contains(&first) || first.chars().all(|c| c.is_ascii_digit()),
+        "music" | "song" | "media" => rest.is_empty() || ["play", "pause", "next", "previous", "prev", "skip", "stop", "resume", "toggle", "back", "on", "off", "what", "now"].contains(&first),
+        "drink" => rest.is_empty() || ["a drink", "something", "a cocktail", "me a drink", "please"].contains(&rest),
+        "book" | "books" => !["a", "an", "the", "me", "us", "my", "your", "it", "that", "this", "him", "her", "them"].contains(&first), // "book a flight"
+        "space" | "power" | "pass" | "bat" => rest.is_empty(),
+        "top" => rest.is_empty() || ["processes", "programs", "apps", "cpu", "memory"].contains(&rest),
+        "where" => rest.starts_with("is ") || rest.starts_with("are "),
+        "sun" => rest.is_empty() || first == "in" || ["today", "tomorrow"].contains(&rest),
+        "dog" | "cat" | "fox" => rest.is_empty() || ["pic", "picture", "photo", "please", "pics", "photos", "image", "pictures", "gif"].contains(&rest),
+        "count" => !["me", "on", "to", "down", "your", "my"].contains(&first),
+        "colour" => rest.is_empty() || ["silver", "gold", "rose", "neon", "rainbow", "midnight", "ocean", "beige", "ember"].iter().any(|k| rest.contains(k)),
+        "review" => rest.is_empty() || ["copy", "my week", "the week", "week"].contains(&rest),
+        "checkin" => ["great", "okay", "meh", "rough"].contains(&rest),
+        "clip" => ["copy", "pin", "unpin", "clear", "todo", "note", "readlater", "tool", "label", "up", "pause", "resume"].contains(&first),
+        "pref" => PREF_KEYS.contains(&first),
+        _ => true,
+    }
+}
+
 pub fn exact(input: &str) -> Option<Reply> {
     let raw = input.trim();
     let low = raw.to_lowercase();
@@ -235,10 +265,15 @@ pub fn exact(input: &str) -> Option<Reply> {
     if low.starts_with("what time") {
         return Some(time_now());
     }
+    if !head_fits(&head, &rest.to_lowercase()) {
+        return None; // "drink water", "book a flight", "top 10 movies": sentences, not commands
+    }
     match head.as_str() {
         "help" if !rest.is_empty() => return help_topic(&rest.to_lowercase()).or_else(|| Some(help())),
         "" | "help" | "?" | "commands" | "menu" => return Some(help()),
-        "hi" | "hello" | "hey" | "yo" | "sup" => return Some(greeting()),
+        // "hey clipster, i am tired" is more than a hello
+        "hi" | "hello" | "hey" | "yo" | "sup" if rest.is_empty() || ["clipster", "there", "you", "buddy", "friend", "again", "clipster!", "there!"].contains(&rest.to_lowercase().trim_end_matches(['!', '.', ',']).trim()) => return Some(greeting()),
+        "hi" | "hello" | "hey" | "yo" | "sup" => return None,
         "joke" | "jokes" | "funny" => {
             // half from my own collection, half fresh from the internet
             let kind = ["dad", "dev", "chuck"].into_iter().find(|k| rest.contains(k)).unwrap_or("");
@@ -336,7 +371,7 @@ pub fn exact(input: &str) -> Option<Reply> {
         "workday" if rest.starts_with("add ") || rest.starts_with("remove ") => return Some(Reply::say("").effect(Effect::Workday(rest.to_string()))),
         "prank" if rest.is_empty() => return Some(Reply::say("").effect(Effect::Prank)),
         // people: "person birthday Anna|3 March", "people", "contacts import"
-        "person" if ["add", "birthday", "email", "every", "met", "last", "mail", "forget"].contains(&rest.split(' ').next().unwrap_or("")) && rest.contains(' ') => {
+        "person" if ["add", "birthday", "email", "every", "met", "last", "mail", "forget", "note", "phone", "gift", "ungift", "rename"].contains(&rest.split(' ').next().unwrap_or("")) && rest.contains(' ') => {
             return Some(Reply::say("").effect(Effect::People(rest.to_string())));
         }
         "people" if ["", "list", "birthdays"].contains(&rest) => return Some(Reply::say("").effect(Effect::People(if rest.is_empty() { "list".into() } else { rest.to_string() }))),
@@ -389,6 +424,12 @@ pub fn exact(input: &str) -> Option<Reply> {
         "dupes" => return Some(net(Query::Dupes(rest.to_string()), "Comparing your files byte by byte. I love this kind of work.")),
         "oldfiles" => return Some(net(Query::OldFiles(rest.to_string()), "Digging for big old files...")),
         "focus" if ["stop", "end", "cancel", "off", "done"].contains(&rest) => return Some(Reply::say("").effect(Effect::FocusStop)),
+        "focus" if ["pause", "resume", "continue", "unpause"].contains(&rest) => return Some(Reply::say("").mood(Mood::Cool).effect(Effect::FocusPause(rest == "pause"))),
+        "focus" if rest.starts_with("extend") => {
+            let r = rest.trim_start_matches("extend").trim().trim_start_matches("by ").trim();
+            let secs = if r.is_empty() { 600 } else { parse_dur(r).map_or(600, |(s, _)| s) };
+            return Some(Reply::say("").mood(Mood::Cool).effect(Effect::FocusExtend(secs.clamp(60, 2 * 3600))));
+        }
         "focus" => {
             let (secs, label) = parse_dur(rest).map(|(s, l)| (s, l.trim().trim_start_matches("on ").trim_start_matches("for ").to_string())).unwrap_or((25 * 60, rest.to_string()));
             return Some(Reply::say("").effect(Effect::Focus(secs.clamp(60, 4 * 3600), label)));
@@ -405,10 +446,11 @@ pub fn exact(input: &str) -> Option<Reply> {
         // shows the comment for a window title, e.g. "window Untitled 1 - LibreOffice Writer" (for trying it out)
         "window" => {
             let pool = lines::window_site(rest).or_else(|| lines::window_kind(rest).map(|k| format!("window {k}")));
-            return Some(pool.map(|p| react_window(&p)).map(|mut r| {
+            // no window of ours by that title: "window seat or aisle" is a sentence
+            return pool.map(|p| react_window(&p)).map(|mut r| {
                 r.text = r.text.replace("{title}", &page_title(rest));
                 r
-            }).unwrap_or_else(|| Reply::say("No comment on that window.")));
+            });
         }
         "updates" | "update" => return Some(net(Query::Update, "Checking for a newer me...")),
         "install" if ["update", "the update", "updates"].contains(&rest.to_lowercase().as_str()) => {
@@ -517,6 +559,8 @@ pub fn exact(input: &str) -> Option<Reply> {
         }
         "volume" | "sound" => return Some(crate::powers::volume(rest)),
         "media" | "music" | "song" => return Some(crate::powers::media(rest)),
+        "snooze" => return Some(Reply::say("").mood(Mood::Alarm).effect(Effect::Snooze(parse_dur(rest).map_or(600, |(s, _)| s).clamp(60, 24 * 3600)))),
+        "next" | "skip" if rest.is_empty() || ["song", "track", "this song", "this one"].contains(&rest) => return Some(crate::powers::media("next")),
         "brightness" => return Some(crate::powers::brightness(rest)),
         "screenshot" => return Some(crate::powers::screenshot(rest)),
         "shutdown" | "reboot" | "restart" | "suspend" | "logout" => return Some(crate::powers::power(&format!("{head} {rest}"))),
@@ -546,8 +590,9 @@ pub fn exact(input: &str) -> Option<Reply> {
         "roll" | "dice" | "die" => return Some(roll(rest)),
         "flip" | "coin" => return Some(Reply::say(if rand::thread_rng().gen_bool(0.5) { "Heads!" } else { "Tails!" }).mood(Mood::Spin).run("Flip again", "flip")),
         "pick" | "choose" => return Some(choose(rest)),
-        "password" | "pass" | "pw" | "passwd" => return Some(password(rest)),
+        "password" | "pw" | "passwd" => return Some(password(rest)),
         "time" if !rest.is_empty() && rest != "is" && !rest.starts_with("is ") => return Some(net(Query::Place(Kind::Time, rest.into()), &format!("Checking the clocks in {rest}..."))),
+        "today" | "now" if !rest.is_empty() => return None, // "today is a good day" is a sentence
         "time" | "date" | "clock" | "today" | "now" => return Some(time_now()),
         "battery" | "bat" | "power" => return Some(Reply::say(battery_text()).mood(Mood::Think)),
         "stats" | "cpu" | "ram" | "mem" | "memory" | "system" | "sys" | "status" => return Some(stats()),
@@ -591,6 +636,8 @@ pub fn exact(input: &str) -> Option<Reply> {
         // "note #3 edit …", "note #3 pin", "note #3 remove", "note #3 copy" (the Desk); anything else is a new note
         "note" if note_op(rest).is_some() => return Some(Reply::say("").effect(Effect::Note(note_op(rest).unwrap_or_default()))),
         "note" | "remember" if rest.is_empty() => return Some(Reply::say("Note what? Try: note call grandma")),
+        // "remember me?", "remember when we…" are questions, not notes
+        "remember" if ["me", "me?", "us", "us?", "this", "that"].contains(&rest) || ["when ", "how ", "what ", "who ", "the time ", "if "].iter().any(|p| rest.starts_with(p)) => return None,
         "note" | "remember" => return Some(Reply::say("").effect(Effect::Note(format!("add {rest}")))),
         "notes" => return Some(notes_list()),
         // the Desk's commands name an item by its line: "todo #3 done", "todo #3 edit call Anna", "todo #3 due friday"
@@ -661,7 +708,7 @@ pub fn exact(input: &str) -> Option<Reply> {
                 ("mail", _) => {
                     let text = crate::todo::list_text(&crate::todo::load(), &name);
                     let (subject, body) = text.split_once('\n').unwrap_or((&text, ""));
-                    return Some(Reply::say("Opening an email with the list.").mood(Mood::Write).effect(Effect::Open(format!("mailto:?subject={}&body={}", url_encode(subject), url_encode(body)))));
+                    return Some(Reply::say("Opening an email with the list.").mood(Mood::Write).effect(Effect::Open(format!("mailto:?subject={}&body={}", mail_encode(subject), mail_encode(body)))));
                 }
                 ("add", items) if !items.trim().is_empty() => Reply::say("").effect(Effect::Todo(Op::AddTo(name, crate::todo::split_items(items)))),
                 ("remove", item) if !item.trim().is_empty() => Reply::say("").effect(Effect::Todo(Op::RemoveFrom(name, item.trim().to_string()))),
@@ -682,7 +729,9 @@ pub fn exact(input: &str) -> Option<Reply> {
         "todo" | "to-do" | "todos" if rest.is_empty() => return Some(crate::todo::list()),
         "todos" if rest == "clear" => return Some(crate::todo::clear_confirm()),
         "todos" if rest == "clear confirmed" => return Some(Reply::say("").effect(Effect::Todo(crate::todo::Op::ClearFinished))),
-        "done" if !rest.is_empty() => return Some(Reply::say("").effect(Effect::Todo(crate::todo::Op::Done(rest.to_string())))),
+        // "done with it" is a feeling, not an item
+        "done" if ["it", "this", "that", "them", "everything", "all", "you", "life", "today", "work", "deal", "for today", "for the day", "here", "already", "now", "yet"].contains(&rest.trim_start_matches("with ").trim()) => return None,
+        "done" if !rest.is_empty() => return Some(Reply::say("").effect(Effect::Todo(crate::todo::Op::Done(rest.trim_start_matches("with ").to_string())))),
         "undone" if !rest.is_empty() => return Some(Reply::say("").effect(Effect::Todo(crate::todo::Op::Undone(rest.to_string())))),
         // notes are only wiped after a yes, and only when it's clearly about them ("forget it" is not)
         "forget" if rest == "notes confirmed" => return Some(Reply::say("Poof! All notes forgotten. What notes? I don't know what you're talking about.").mood(Mood::Sly).effect(Effect::Note("clear".into()))),
@@ -799,12 +848,17 @@ pub fn react_clip(text: &str) -> Option<Reply> {
     if one_line && (t.len() == 10 || t.len() == 13) && t.chars().all(|c| c.is_ascii_digit()) {
         use chrono::TimeZone;
         let secs: i64 = t[..10].parse().unwrap_or(0);
-        if let Some(d) = chrono::Local.timestamp_opt(secs, 0).single().filter(|_| (978_307_200..4_102_444_800).contains(&secs)) {
+        // within a few years of now: a US phone number without dashes is 10 digits too
+        let now = chrono::Local::now().timestamp();
+        if let Some(d) = chrono::Local.timestamp_opt(secs, 0).single().filter(|_| (978_307_200..now + 5 * 365 * 86_400).contains(&secs)) {
             let date = d.format("%A, %B %-d %Y, %H:%M").to_string();
             return Some(Reply::say(lines::pick("clip_timestamp").replace("{date}", &date)).mood(Mood::Think).btn("Copy the date", Act::Copy(date)));
         }
     }
-    if one_line && t.len() < 80 && (t.chars().any(|c| "+*/^%×÷".contains(c)) || t.contains(" - ")) {
+    // a date ("2026/11/09", "12/25") or a phone number ("+41 79 123 45 67") isn't a sum
+    let date_like = t.split('/').count() >= 2 && t.split('/').all(|p| !p.is_empty() && p.len() <= 4 && p.chars().all(|c| c.is_ascii_digit()));
+    let phone_like = t.starts_with('+') && t[1..].split_whitespace().count() >= 2 && t[1..].chars().all(|c| c.is_ascii_digit() || c == ' ' || c == '-');
+    if one_line && t.len() < 80 && !date_like && !phone_like && (t.chars().any(|c| "+*/^%×÷".contains(c)) || t.contains(" - ")) {
         if let Some(v) = calc(t) {
             let s = fmt_num(v);
             return Some(Reply::say(lines::pick("clip_math").replace("{expr}", t).replace("{answer}", &s)).mood(Mood::Think).btn("Copy the answer", Act::Copy(s)));
@@ -941,7 +995,7 @@ pub fn kind_name(kind: &str) -> String {
         "jobhunt" => "Job hunting".into(),
         "pdf" => "PDFs".into(),
         "other" => "Everything else".into(),
-        k => k[..1].to_uppercase() + &k[1..],
+        k => crate::writing::cap_first(k), // char by char: a kind can come from the user's own lines file
     }
 }
 
@@ -1081,7 +1135,7 @@ pub fn calc(s: &str) -> Option<f64> {
     if c.is_empty() {
         return None;
     }
-    let mut p = Parser { c, i: 0 };
+    let mut p = Parser { c, i: 0, depth: 0 };
     let v = p.expr()?;
     (p.i == p.c.len() && v.is_finite()).then_some(v)
 }
@@ -1089,6 +1143,7 @@ pub fn calc(s: &str) -> Option<f64> {
 struct Parser {
     c: Vec<char>,
     i: usize,
+    depth: usize, // how deep the brackets and signs go: a pasted 20,000 "(((" would overflow the stack
 }
 
 impl Parser {
@@ -1127,6 +1182,12 @@ impl Parser {
         }
     }
     fn unary(&mut self) -> Option<f64> {
+        self.depth += 1;
+        let v = if self.depth > 200 { None } else { self.unary_inner() };
+        self.depth -= 1;
+        v
+    }
+    fn unary_inner(&mut self) -> Option<f64> {
         if self.eat('-') {
             return Some(-self.unary()?);
         }
@@ -1358,6 +1419,16 @@ fn remind(rest: &str) -> Reply {
             return timer(when, what.trim_start_matches("to ").trim());
         }
     }
+    // a day and maybe a time: "tomorrow at 3 to call Anna", "on friday to water the plants", "at 5pm to leave"
+    let low = r.to_lowercase();
+    if let Some((secs, label, when)) = crate::understand::dated(&low) {
+        let label = crate::understand::keep(r, &label);
+        let text = lines::pick("say_remind_dated").replace("{label}", if label.is_empty() { "your reminder" } else { &label }).replace("{when}", &when);
+        return Reply::say(text).mood(Mood::Happy).effect(Effect::Timer(secs, label));
+    }
+    if let Some((secs, label)) = crate::understand::timer_parts(&low) {
+        return timer(&format!("{secs}s"), &crate::understand::keep(r, &label));
+    }
     // no time given: keep it as a note instead of failing
     let what = r.trim_start_matches("to ").trim();
     if what.is_empty() {
@@ -1370,7 +1441,8 @@ fn remind(rest: &str) -> Reply {
 }
 
 fn random_number(rest: &str) -> Reply {
-    let nums: Vec<i64> = rest.split(|c: char| !c.is_ascii_digit()).filter_map(|w| w.parse().ok()).collect();
+    // keep minus signs: "between -5 and 5"
+    let nums: Vec<i64> = rest.split(|c: char| !(c.is_ascii_digit() || c == '-')).filter_map(|w| w.trim_end_matches('-').parse::<i64>().ok()).map(|n| n.clamp(-1_000_000_000_000, 1_000_000_000_000)).collect();
     let (a, b) = match nums[..] {
         [a, b, ..] => (a.min(b), a.max(b)),
         [b] => (1, b.max(1)),
@@ -1629,6 +1701,21 @@ fn open(target: &str) -> Reply {
     if t.is_empty() {
         return Reply::say("Open what? Try: open firefox, open ~/Documents, or open example.com");
     }
+    // power programs never start straight away: "start reboot", "open shutdown" ask first, like every power command
+    let program = t.split_whitespace().next().unwrap_or("").to_lowercase();
+    let program = program.trim_end_matches(".exe");
+    match program {
+        "reboot" | "restart" | "shutdown" | "poweroff" | "halt" | "suspend" | "hibernate" | "logout" | "logoff" => {
+            return crate::powers::power(match program {
+                "reboot" | "restart" => "reboot",
+                "suspend" | "hibernate" => "suspend",
+                "logout" | "logoff" => "logout",
+                _ => "shutdown",
+            });
+        }
+        "sleep" => return Reply::say("I'll just doze off here in the corner. Say \"put the computer to sleep\" if you meant the computer.").mood(Mood::Think),
+        _ => {}
+    }
     let path = expand_home(t);
     let target = if path.exists() {
         path.to_string_lossy().into_owned()
@@ -1644,6 +1731,11 @@ fn web(base: &str, q: &str, intro: &str) -> Reply {
     Reply::say(format!("{intro}{}...", if q.is_empty() { String::new() } else { format!(" for \"{q}\"") }))
         .effect(Effect::Open(format!("{base}{}", url_encode(q))))
         .mood(Mood::Happy)
+}
+
+/// For mailto links: spaces as %20 (a "+" there is a plus sign).
+pub fn mail_encode(s: &str) -> String {
+    url_encode(s).replace('+', "%20")
 }
 
 pub fn url_encode(s: &str) -> String {

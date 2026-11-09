@@ -331,7 +331,8 @@ fn to_reply_x(s: &Section, words: &Section, x: Option<&str>) -> Reply {
     let fits = x.is_some_and(|x| (1..=6).contains(&x.split_whitespace().count()));
     let plain: Vec<&String> = words.lines.iter().filter(|l| !l.contains("{x}")).collect();
     let line = if fits || plain.is_empty() { words.lines.choose(&mut rand::thread_rng()) } else { plain.choose(&mut rand::thread_rng()).copied() };
-    let text = line.map(|l| spoken(&s.name, &l.replace("{x}", x.unwrap_or("that")))).unwrap_or_default();
+    // glitch the line first, then put their words in: what they said is never garbled
+    let text = line.map(|l| spoken(&s.name, l).replace("{x}", x.unwrap_or("that"))).unwrap_or_default();
     // a reply that starts with what they said ("{x}? Bold.") still starts with a capital
     let mut chars = text.chars();
     let text = match chars.next() {
@@ -448,13 +449,13 @@ pub fn teach(phrase: &str, reply: &str, commands: &[String]) -> std::io::Result<
     if !reply.is_empty() {
         let line = reply.replace('\n', "\\n");
         // keep it a reply line even if it happens to start like a format line
-        let line = if ["> ", "= ", "@ ", "+ ", "% ", "! ", "#"].iter().any(|p| line.starts_with(p)) { format!("\"{line}\"") } else { line };
+        let line = if ["> ", "= ", "@ ", "+ ", "% ", "! ", "~ ", "#"].iter().any(|p| line.starts_with(p)) { format!("\"{line}\"") } else { line };
         text += &format!("{line}\n");
     }
     for c in commands {
         text += &format!("! {}\n", one(c));
     }
-    std::fs::write(&path, text)?;
+    crate::brain::write_atomic(&path, &text)?;
     reload();
     Ok(())
 }
@@ -549,7 +550,7 @@ pub fn pattern(raw: &str) -> Option<Reply> {
     let tidy = crate::understand::tidy_words(raw);
     // "hey clipster, i am tired" is still "i am tired"
     let fillers = ["hey", "hi", "hello", "ok", "okay", "so", "well", "um", "uh", "oh", "clipster", "dear", "and", "but", "honestly", "actually"];
-    let words: Vec<&str> = tidy.split_whitespace().skip_while(|w| fillers.contains(w)).collect();
+    let words: Vec<&str> = tidy.split_whitespace().map(|w| w.trim_matches([',', ';', ':'])).filter(|w| !w.is_empty()).skip_while(|w| fillers.contains(w)).collect();
     let db = db();
     let (hit, x) = match_pattern(&db, &words)?;
     let x = reflect(&x);

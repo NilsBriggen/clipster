@@ -1,7 +1,7 @@
 //! Writing help: an offline proofreader for what you copied, and letter/email templates (`## template <id>`).
 //! Rules only: a list of common misspellings, a few grammar patterns, sentence length and a readability score.
 
-use crate::brain::{url_encode, Act, Effect, Mood, Reply};
+use crate::brain::{Act, Effect, Mood, Reply};
 use crate::lines;
 use std::collections::HashMap;
 
@@ -21,7 +21,7 @@ pub enum Issue {
 }
 
 /// "über" -> "Über": the first letter in capitals, whatever its size in bytes.
-fn cap_first(word: &str) -> String {
+pub fn cap_first(word: &str) -> String {
     let mut c = word.chars();
     c.next().map(|f| f.to_uppercase().collect::<String>() + c.as_str()).unwrap_or_default()
 }
@@ -42,6 +42,11 @@ fn wants_an(word: &str) -> Option<bool> {
     if !first.is_alphabetic() {
         return None;
     }
+    // "an MRI", "an FAQ", "a 4K screen": how acronyms and numbers sound isn't in their letters
+    let letters = word.trim_matches(|c: char| !c.is_alphanumeric());
+    if letters.chars().count() >= 2 && letters.chars().all(|c| c.is_uppercase() || c.is_ascii_digit()) || letters.chars().any(|c| c.is_ascii_digit()) {
+        return None;
+    }
     if ["hour", "honest", "honor", "honour", "heir"].iter().any(|h| w.starts_with(h)) {
         return Some(true);
     }
@@ -51,13 +56,16 @@ fn wants_an(word: &str) -> Option<bool> {
     Some("aeio".contains(first))
 }
 
+/// Words that are fine twice in a row ("knock knock", "so so", "very very").
+const DOUBLES: &[&str] = &["had", "that", "is", "ha", "bye", "no", "very", "so", "knock", "bla", "blah", "la", "ho", "hey", "yeah", "really", "far", "many", "more", "again", "go", "tsk", "tut", "chop", "night", "boo", "yum", "choo", "now", "well"];
+
 /// Everything that looks off in `text`, most useful first.
 pub fn proofread(text: &str, wrong: &HashMap<String, String>) -> Vec<Issue> {
     let mut out = vec![];
     let words: Vec<&str> = text.split_whitespace().collect();
     for pair in words.windows(2) {
         let (a, b) = (bare(pair[0]), bare(pair[1]));
-        if a == b && !a.is_empty() && !["had", "that", "is", "ha", "bye", "no", "very"].contains(&a.as_str()) && !pair[0].ends_with(['.', ',', ';', ':', '!', '?']) {
+        if a == b && !a.is_empty() && !a.chars().all(|c| c.is_ascii_digit()) && !DOUBLES.contains(&a.as_str()) && !pair[0].ends_with(['.', ',', ';', ':', '!', '?']) {
             out.push(Issue::Doubled(a.clone()));
         }
         match (a.as_str(), wants_an(pair[1])) {
@@ -133,10 +141,17 @@ pub fn fix(text: &str, wrong: &HashMap<String, String>) -> String {
     let mut out: Vec<String> = vec![];
     let mut cap = true;
     for line in text.split('\n') {
+        let indent = &line[..line.len() - line.trim_start().len()]; // code, lists and poems keep their indentation
         let mut fixed: Vec<String> = vec![];
         for w in line.split(' ').filter(|w| !w.is_empty()) {
             let b = bare(w);
-            if fixed.last().is_some_and(|p| bare(p) == b && !p.ends_with(['.', ',', ';', ':', '!', '?'])) && !["had", "that", "is", "ha", "bye", "no", "very"].contains(&b.as_str()) {
+            let doubled = !b.is_empty() && !b.chars().all(|c| c.is_ascii_digit()) && !DOUBLES.contains(&b.as_str());
+            if doubled && fixed.last().is_some_and(|p| bare(p) == b && !p.ends_with(['.', ',', ';', ':', '!', '?'])) {
+                // the dropped word's full stop or comma stays: "the the." -> "the."
+                let tail = &w[w.trim_end_matches(|c: char| !c.is_alphanumeric()).len()..];
+                if let Some(p) = fixed.last_mut() {
+                    p.push_str(tail);
+                }
                 continue;
             }
             let mut word = match wrong.get(&b) {
@@ -163,7 +178,7 @@ pub fn fix(text: &str, wrong: &HashMap<String, String>) -> String {
             cap = word.ends_with(['.', '!', '?']) && !["e.g.", "i.e.", "etc.", "vs."].contains(&word.to_lowercase().as_str());
             fixed.push(word);
         }
-        out.push(fixed.join(" "));
+        out.push(format!("{indent}{}", fixed.join(" ")));
     }
     out.join("\n")
 }
@@ -248,7 +263,7 @@ pub fn letter(kind: &str) -> Reply {
     Reply::say(format!("{}\n\n✉ {subject}\n{preview}\n…", lines::pick("template_intro")))
         .mood(Mood::Happy)
         .btn("Copy it", Act::Copy(full.clone()))
-        .btn("Open as email", Act::Open(format!("mailto:?subject={}&body={}", url_encode(&subject), url_encode(&body))))
+        .btn("Open as email", Act::Open(format!("mailto:?subject={}&body={}", crate::brain::mail_encode(&subject), crate::brain::mail_encode(&body))))
         .run("Another kind of letter", "letter")
 }
 

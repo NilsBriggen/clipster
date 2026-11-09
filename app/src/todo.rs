@@ -824,9 +824,9 @@ fn reply(op: &Op, pool: &str, x: &str, items: &[Item], today: NaiveDate) -> Repl
             if matches!(op, Op::Add(_)) {
                 r.text += &format!(" (due {}{})", due.format("%A, %B %-d"), it.at.map(|t| format!(" at {}", t.format("%H:%M"))).unwrap_or_default());
             }
-            let at = due.and_time(it.at.unwrap_or(NaiveTime::from_hms_opt(9, 0, 0).unwrap_or_default())) - Local::now().naive_local();
-            if at.num_seconds() > 60 {
-                r.effect = Effect::Timer(at.num_seconds() as u64, format!("To-do: {}", it.text));
+            let at = crate::timers::unix_of(due.and_time(it.at.unwrap_or(NaiveTime::from_hms_opt(9, 0, 0).unwrap_or_default()))) - crate::timers::unix_now();
+            if at > 60 {
+                r.effect = Effect::Timer(at as u64, format!("To-do: {}", it.text));
             }
         }
     }

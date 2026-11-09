@@ -45,10 +45,12 @@ pub fn guess(rest: &str) -> Reply {
     let [lo, hi, tries] = n[..] else {
         return Reply::say("Think of a number between 1 and 100. Don't tell me! I'll read your mind... with math.").mood(Mood::Sly).run("OK, I've got one!", "guess 1 100 1");
     };
+    // typed numbers: kept to a range where the maths can't overflow
+    let (lo, hi, tries) = (lo.clamp(-1_000_000_000, 1_000_000_000), hi.clamp(-1_000_000_000, 1_000_000_000), tries.clamp(0, 1000));
     if lo > hi {
         return Reply::say("Wait a minute... that's impossible! 🤨 Did you change your number? CHEATER!").mood(Mood::Shock).run("OK, let's play fair", "guess");
     }
-    let mid = (lo + hi) / 2;
+    let mid = lo + (hi - lo) / 2;
     Reply::say(format!("Guess #{tries}: is it {mid}?"))
         .mood(Mood::Think)
         .run("Higher ⬆", &format!("guess {} {hi} {}", mid + 1, tries + 1))

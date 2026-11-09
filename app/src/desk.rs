@@ -42,7 +42,7 @@ pub struct View<'a> {
     pub timers: Vec<crate::timers::Timer>, // soonest first
     pub kind_time: &'a BTreeMap<String, BTreeMap<String, u64>>, // day -> window kind -> seconds
     pub focus_log: &'a [crate::FocusLog],
-    pub focus_now: Option<(String, u64, u64, u64)>, // label, seconds left, seconds so far, seconds distracted
+    pub focus_now: Option<(String, u64, u64, u64, bool)>, // label, seconds left, seconds so far, seconds distracted, paused
     pub checkins: &'a BTreeMap<String, String>,      // day -> great/okay/meh/rough
     pub streaks: (u64, u64, u64),                    // focus, check-in, days with Clipster
     pub status: String,
@@ -458,7 +458,7 @@ impl Desk {
         look.group(&p, mid, "Focus");
         let (fx, fw, top) = (mid.min.x + 12.0, mid.width() - 24.0, mid.min.y);
         let running = view.focus_now.as_ref().map_or(0, |f| f.2.saturating_sub(f.3));
-        let mut y = if let Some((label, left_s, so_far, off)) = &view.focus_now {
+        let mut y = if let Some((label, left_s, so_far, off, _paused)) = &view.focus_now {
             let what = if label.is_empty() { "Focusing".to_string() } else { format!("Focusing on {label}") };
             let g = clipped(&p, &what, look.bold(13.0), look.text(), fw);
             p.galley(pos2(fx, top + 38.0 - g.size().y / 2.0), g, look.text());

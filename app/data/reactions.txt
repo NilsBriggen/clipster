@@ -20165,3 +20165,35 @@ That's heavy news. I'm sorry. Be gentle with yourself, and lean on the people ar
 I'm sorry you're going through this. If you want, tell me about them. If not, that's fine too.
 I'm so sorry. If today is too much, it's okay to let the to-dos wait.
 That's hard. I'm sorry. Talking to someone you trust can help, even a little.
+
+## lost_things
+I can't see your {x} from here, sadly. Last place you had it, then pockets, then the sofa cushions.
+Your {x}? Try where you were when you last used it. Things are rarely where they should be, and often right next to it.
+I only know where files are. For your {x}: check bags, coats and the kitchen counter.
+If your {x} has a ring or a "find my device" app, now's its moment.
+
+## person_note_saved
+Saved the note for {x}.
+Noted, for {x}. It's on their card.
+{x}'s note is saved. Future you will be glad.
+
+## person_gift_saved
+A gift idea for {x}, saved. You'll thank yourself in the shop.
+Added to {x}'s gift ideas.
+Gift idea saved for {x}. Birthday shopping just got easier.
+
+## focus_extended
+{n} more minutes. Keep going.
+Added {n} minutes to the session. You're on a roll.
+Another {n} minutes on the clock. Finish that thought.
+{n} extra minutes, granted.
+
+## focus_paused
+Paused. The clock waits for you.
+Session paused. Take your time; it doesn't count as drifting.
+Paused. Say "resume focus" when you're back.
+
+## focus_resumed
+Back to it. The clock is running again.
+Resumed. Where were we?
+And we're focusing again.

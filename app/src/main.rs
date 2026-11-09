@@ -205,7 +205,9 @@ struct App {
     stopwatch: Option<Instant>,
     timers: Vec<timers::Timer>, // what rings when (wall-clock, so a suspend doesn't delay it), each with an id
     next_timer: u64,            // the last id handed out
-    summon_checked: f64,        // when the "come here" note of a second Clipster was last looked for
+    summon_checked: f64,
+    from_button: bool,
+    last_rung: Option<String>,  // the label of the timer that rang last ("snooze" brings it back)          // the next command comes from a balloon button: strict first, like the Desk's        // when the "come here" note of a second Clipster was last looked for
     settings_locked: bool,      // settings.json exists but couldn't be read: don't save over it
     settings_note: Option<String>, // what went wrong with it, for the greeting
     name: String,
@@ -312,10 +314,30 @@ fn checkin_streaks(stats: &std::collections::BTreeMap<String, u64>, today: u64, 
 struct Focus {
     label: String,
     start: Instant,
-    until: Instant,
+    until: Instant,               // the planned end, not counting pauses
     distracted: u64,              // seconds spent in distraction kinds
     last_nudge: Option<Instant>,
     dnd: Option<sys::Dnd>,        // the system's notifications, silenced until the session ends (dropping it restores them)
+    paused_at: Option<Instant>,   // paused since then
+    paused: u64,                  // seconds of earlier pauses (they count as neither focus nor drift)
+}
+
+impl Focus {
+    /// Seconds of pause so far, the current one included.
+    fn pause_secs(&self, now: Instant) -> u64 {
+        self.paused + self.paused_at.map_or(0, |p| now.duration_since(p).as_secs())
+    }
+    /// Seconds of the session so far, without the pauses.
+    fn elapsed(&self, now: Instant) -> u64 {
+        now.duration_since(self.start).as_secs().saturating_sub(self.pause_secs(now))
+    }
+    /// Seconds left (it stands still while paused).
+    fn left(&self, now: Instant) -> u64 {
+        self.until.duration_since(self.start).as_secs().saturating_sub(self.elapsed(now))
+    }
+    fn over(&self, now: Instant) -> bool {
+        self.paused_at.is_none() && self.left(now) == 0
+    }
 }
 
 /// A finished focus session, kept for the Desk: (day "2026-11-09", planned minutes, focused seconds, distracted seconds, label).
@@ -504,6 +526,8 @@ impl App {
             next_timer: 0,
             settings_locked: false,
             summon_checked: 0.0,
+            from_button: false,
+            last_rung: None,
             settings_note: None,
             name: String::new(),
             hat: None,
@@ -667,7 +691,7 @@ impl App {
                 if t.contains("{name}") {
                     *t = t.replace("{name}", &signed);
                 } else if t.contains("%7Bname%7D") {
-                    *t = t.replace("%7Bname%7D", &brain::url_encode(&signed));
+                    *t = t.replace("%7Bname%7D", &brain::mail_encode(&signed));
                 }
             }
         }
@@ -683,7 +707,8 @@ impl App {
 
     /// Something Clipster says on its own: skipped while quiet or while you're typing to it.
     fn pipe_up(&mut self, r: Reply) {
-        if self.quiet() || !self.input.is_empty() {
+        // quiet, typing, or in a focus session (reminders and the session's own nudge use `show`)
+        if self.quiet() || !self.input.is_empty() || self.focus.as_ref().is_some_and(|f| f.paused_at.is_none()) {
             return;
         }
         self.show(r);
@@ -701,7 +726,7 @@ impl App {
         let streak = |last: &str, n: &str| if self.stats.get(last).is_some_and(|d| d + 1 >= today) { self.stats.get(n).copied().unwrap_or(0) } else { 0 };
         let mut timers = self.timers.clone();
         timers.sort_by_key(|t| t.at);
-        let focus_now = self.focus.as_ref().map(|f| (f.label.clone(), f.until.saturating_duration_since(now).as_secs(), now.duration_since(f.start).as_secs(), f.distracted));
+        let focus_now = self.focus.as_ref().map(|f| (f.label.clone(), f.left(now), f.elapsed(now), f.distracted, f.paused_at.is_some()));
         let look = if self.desk_modern { desk::Look::Modern } else { desk::Look::Classic };
         let status = self.desk_status.clone();
         let streaks = (streak("focus_last_day", "focus_streak"), streak("checkin_last", "checkin_streak"), self.stats.get("days").copied().unwrap_or(1));
@@ -728,7 +753,7 @@ impl App {
         };
         match &self.desk_sample {
             Some((t, k, f, c)) => {
-                let view = desk::View { timers: t.clone(), kind_time: k, focus_log: f, focus_now: Some(("the slides".into(), 18 * 60, 7 * 60, 40)), checkins: c, streaks: (4, 6, 31), status, prefs, clips: &self.sample_clips, pins: &self.sample_clips[..2], reading: &self.sample_reading, me: sample_me(), upkeep: Some((&self.sample_upkeep, 120)), upkeep_running: false, backup_check: upkeep::backup_check(true, Some(backup::now() - 9 * 86_400), backup::now(), true), backup: desk::Backup { sources: &self.backup_sources, target: "/run/media/you/BACKUP", last: Some(backup::now() - 9 * 86_400), result: "214 copied (1.3 GB), 4120 unchanged", progress: None }, events: &self.sample_events, calendars: &self.sample_calendars, calendar_note: "Checked 4 min ago".into(), people: &self.sample_people, workday: &self.sample_workday };
+                let view = desk::View { timers: t.clone(), kind_time: k, focus_log: f, focus_now: Some(("the slides".into(), 18 * 60, 7 * 60, 40, false)), checkins: c, streaks: (4, 6, 31), status, prefs, clips: &self.sample_clips, pins: &self.sample_clips[..2], reading: &self.sample_reading, me: sample_me(), upkeep: Some((&self.sample_upkeep, 120)), upkeep_running: false, backup_check: upkeep::backup_check(true, Some(backup::now() - 9 * 86_400), backup::now(), true), backup: desk::Backup { sources: &self.backup_sources, target: "/run/media/you/BACKUP", last: Some(backup::now() - 9 * 86_400), result: "214 copied (1.3 GB), 4120 unchanged", progress: None }, events: &self.sample_events, calendars: &self.sample_calendars, calendar_note: "Checked 4 min ago".into(), people: &self.sample_people, workday: &self.sample_workday };
                 self.desk.show(ctx, &view, look, near)
             }
             None => {
@@ -754,7 +779,7 @@ impl App {
         }
         let kind = self.window_kind.clone().unwrap_or_else(|| "other".into());
         *self.kind_time.entry(today_key()).or_default().entry(kind.clone()).or_insert(0) += secs;
-        if let Some(f) = &mut self.focus {
+        if let Some(f) = self.focus.as_mut().filter(|f| f.paused_at.is_none()) {
             if brain::DISTRACTIONS.contains(&kind.as_str()) {
                 f.distracted += secs;
             }
@@ -769,7 +794,7 @@ impl App {
         if f.dnd.take().is_some() {
             self.dnd_restore = None;
         }
-        let total = Instant::now().duration_since(f.start).as_secs().max(1);
+        let total = f.elapsed(Instant::now()).max(1);
         let focused = total.saturating_sub(f.distracted);
         let planned = f.until.duration_since(f.start).as_secs() / 60;
         self.focus_log.push((today_key(), planned, focused, f.distracted, f.label.clone()));
@@ -795,7 +820,7 @@ impl App {
             text = format!("{text}\n\n{cheer}");
         }
         let again = if f.label.is_empty() { "focus 25m".to_string() } else { format!("focus 25m {}", f.label) };
-        Reply::say(text).mood(if pct >= 60 { Mood::Party } else { Mood::Think }).run("Another 25 minutes", &again).run("Open the Desk", "desk")
+        Reply::say(text).mood(if pct >= 60 { Mood::Party } else { Mood::Think }).run("5-minute break", "timer 5m Break's over").run("Another 25 minutes", &again).run("Open the Desk", "desk")
     }
 
     /// Run the checkup on its own thread (it asks the package manager, which can take a while).
@@ -842,6 +867,11 @@ impl App {
                     Reply::say(say("person_added", name)).mood(Mood::Write)
                 }
             },
+            "birthday" if ["none", "-", ""].contains(&value) && at.is_some() => {
+                let p = &mut self.people[at.unwrap_or_default()];
+                p.birthday = None;
+                Reply::say(format!("I took {}'s birthday off.", p.name)).mood(Mood::Write)
+            }
             "birthday" => match people::parse_birthday(value, today) {
                 Some(b) => {
                     let i = at.unwrap_or_else(|| {
@@ -862,6 +892,11 @@ impl App {
                 Reply::say(format!("Got it: {}'s email is {value}.", self.people[i].name)).mood(Mood::Write).run(&format!("Email {}", self.people[i].name), &format!("person mail {}", self.people[i].name))
             }
             "email" => Reply::say("That doesn't look like an email address.").mood(Mood::Think),
+            "every" if ["none", "0", "off", "never"].contains(&value) && at.is_some() => {
+                let p = &mut self.people[at.unwrap_or_default()];
+                p.every = None;
+                Reply::say(format!("I'll stop reminding you about {}.", p.name)).mood(Mood::Happy)
+            }
             "every" => match value.parse::<u32>().ok().filter(|n| *n > 0) {
                 Some(days) => {
                     let i = at.unwrap_or_else(|| {
@@ -874,13 +909,46 @@ impl App {
                 }
                 None => Reply::say("How often? Try: keep in touch with mum every 2 weeks").mood(Mood::Think),
             },
-            "met" => match at {
-                Some(i) => {
-                    self.people[i].last = Some(today);
+            // "met mum", or "met mum|yesterday", "met mum|3 days ago", "met mum|2026-11-02"
+            "met" => match (at, people::past_day(value, today)) {
+                (Some(i), Some(day)) => {
+                    self.people[i].last = Some(day);
                     Reply::say(say("contact_logged", &self.people[i].name)).mood(Mood::Happy)
                 }
-                None => Reply::say(say("person_unknown", name)).mood(Mood::Think),
+                (Some(_), None) => Reply::say(format!("When was that? Try: yesterday, 3 days ago, or {}.", today.format("%Y-%m-%d"))).mood(Mood::Think),
+                (None, _) => Reply::say(say("person_unknown", name)).mood(Mood::Think),
             },
+            "note" | "phone" | "gift" | "ungift" if at.is_some() => {
+                let p = &mut self.people[at.unwrap_or_default()];
+                let clear = value.is_empty() || value.eq_ignore_ascii_case("none");
+                let text = match verb {
+                    "note" => {
+                        p.note = (!clear).then(|| value.chars().take(500).collect());
+                        lines::pick("person_note_saved").replace("{x}", &p.name)
+                    }
+                    "phone" => {
+                        p.phone = (!clear).then(|| value.to_string());
+                        format!("Saved {}'s number.", p.name)
+                    }
+                    "gift" if !clear => {
+                        p.gifts.retain(|g| !g.eq_ignore_ascii_case(value));
+                        p.gifts.push(value.chars().take(120).collect());
+                        p.gifts.truncate(20);
+                        lines::pick("person_gift_saved").replace("{x}", &p.name)
+                    }
+                    "ungift" => match value.trim_start_matches('#').parse::<usize>().ok().and_then(|n| n.checked_sub(1)).filter(|i| *i < p.gifts.len()) {
+                        Some(i) => format!("Crossed off: {}", p.gifts.remove(i)),
+                        None => "There's no gift idea with that number.".to_string(),
+                    },
+                    _ => "A gift idea needs a few words.".to_string(),
+                };
+                Reply::say(text).mood(Mood::Write)
+            }
+            "rename" if at.is_some() && !value.is_empty() => {
+                let i = at.unwrap_or_default();
+                let old = std::mem::replace(&mut self.people[i].name, value.to_string());
+                Reply::say(format!("{old} is {value} now.")).mood(Mood::Write)
+            }
             "last" => match at.map(|i| &self.people[i]) {
                 Some(p) => match p.last {
                     Some(d) => Reply::say(say("last_contact", &p.name).replace("{n}", &(today - d).num_days().to_string())).mood(Mood::Think).run("I talked to them today", &format!("person met {}", p.name)),
@@ -1200,7 +1268,7 @@ impl App {
 
     /// Seconds focused today, the running session included.
     fn focus_today(&self) -> u64 {
-        let running = self.focus.as_ref().map_or(0, |f| Instant::now().duration_since(f.start).as_secs().saturating_sub(f.distracted));
+        let running = self.focus.as_ref().map_or(0, |f| f.elapsed(Instant::now()).saturating_sub(f.distracted));
         plan::focus_today(&self.focus_log, chrono::Local::now().date_naive(), running)
     }
 
@@ -1770,7 +1838,8 @@ impl App {
         // the Desk's buttons send exact commands: they're never re-read as a sentence ("todo clear the desk"
         // is a to-do, "cancel Pomodoro" cancels that timer)
         let from_desk = std::mem::take(&mut self.literal);
-        let mut r = match from_desk {
+        let button = std::mem::take(&mut self.from_button);
+        let mut r = match from_desk || button {
             true => brain::exact(cmd).unwrap_or_else(|| brain::respond(cmd)),
             false => brain::respond(cmd),
         };
@@ -1871,7 +1940,7 @@ impl App {
                 let dnd = if self.dnd && self.screenshot.is_none() { sys::dnd_on() } else { None };
                 self.dnd_restore = dnd.as_ref().and_then(|d| d.marker());
                 let quiet = dnd.is_some();
-                self.focus = Some(Focus { label: label.clone(), start: now, until: now + Duration::from_secs(secs), distracted: 0, last_nudge: None, dnd });
+                self.focus = Some(Focus { label: label.clone(), start: now, until: now + Duration::from_secs(secs), distracted: 0, last_nudge: None, dnd, paused_at: None, paused: 0 });
                 let mut text = lines::pick("focus_start").replace("{n}", &(secs / 60).to_string()).replace("{x}", &label);
                 let today = chrono::Datelike::num_days_from_ce(&chrono::Local::now().date_naive()) as u64;
                 if quiet {
@@ -1884,6 +1953,43 @@ impl App {
                 r = Reply::say(text).mood(Mood::Cool).run("Stop the session", "focus stop");
                 if !quiet && cfg!(windows) && self.dnd {
                     r = r.btn("Open Focus settings", Act::Open("ms-settings:quiethours".into()));
+                }
+            }
+            Effect::Snooze(secs) => match self.last_rung.clone() {
+                Some(label) => {
+                    self.add_timer(secs, label.clone(), 0, None);
+                    r.text = lines::pick("timer_snoozed").replace("{label}", if label.is_empty() { "your timer" } else { &label }).replace("{when}", &format!("in {}", brain::fmt_dur(secs)));
+                }
+                None => r = Reply::say("Nothing has rung yet, so there's nothing to snooze.").mood(Mood::Think),
+            },
+            Effect::FocusExtend(_) | Effect::FocusPause(_) if self.focus.is_none() => r = Reply::say("There's no focus session running. Start one with: focus 25 minutes").run("Focus 25 minutes", "focus 25m"),
+            Effect::FocusExtend(secs) => {
+                if let Some(f) = &mut self.focus {
+                    f.until += Duration::from_secs(secs);
+                }
+                r.text = lines::pick("focus_extended").replace("{n}", &(secs / 60).to_string());
+                if from_desk {
+                    self.desk_status = r.text.clone();
+                    silent = true;
+                }
+            }
+            Effect::FocusPause(pause) => {
+                let now = Instant::now();
+                self.account_time();
+                if let Some(f) = &mut self.focus {
+                    match (pause, f.paused_at) {
+                        (true, None) => f.paused_at = Some(now),
+                        (false, Some(p)) => {
+                            f.paused += now.duration_since(p).as_secs();
+                            f.paused_at = None;
+                        }
+                        _ => {}
+                    }
+                }
+                r.text = lines::pick(if pause { "focus_paused" } else { "focus_resumed" });
+                if from_desk {
+                    self.desk_status = r.text.clone();
+                    silent = true;
                 }
             }
             Effect::FocusStop => {
@@ -1956,6 +2062,10 @@ impl App {
                     Ok(()) => Reply::say(if what == "startup" { "Opening the start-up settings." } else { "Opening the updater. Updates are good for you, like vegetables." }).mood(Mood::Happy),
                     Err(e) => Reply::say(e).mood(Mood::Think),
                 };
+            }
+            Effect::Startup(id, _) if !self.upkeep.as_ref().is_some_and(|(_, rep)| rep.startup.iter().any(|a| a.id == id)) => {
+                // only an app the checkup listed: a typed sentence never writes to the start-up settings
+                r = Reply::say("I don't know a start-up app by that name. They're listed on the Desk: Upkeep → Checkup → Start-up apps.").run("Show them", "desk startup");
             }
             Effect::Startup(id, on) => {
                 let name = self.upkeep.as_ref().and_then(|(_, rep)| rep.startup.iter().find(|a| a.id == id)).map_or(id.clone(), |a| a.name.clone());
@@ -2143,7 +2253,7 @@ impl App {
             Effect::Prank => self.prank = prank_lines(),
             Effect::People(cmd) => {
                 r = self.people_command(&cmd);
-                if from_desk && matches!(cmd.split(' ').next(), Some("add" | "birthday" | "met" | "forget" | "email" | "every")) {
+                if from_desk && matches!(cmd.split(' ').next(), Some("add" | "birthday" | "met" | "forget" | "email" | "every" | "note" | "phone" | "gift" | "ungift" | "rename")) {
                     self.desk_status = r.text.clone();
                     silent = true;
                 }
@@ -2386,7 +2496,11 @@ impl App {
     fn act(&mut self, ctx: &egui::Context, a: Act) {
         self.waiting = None; // a click instead of an answer: the question is off
         match a {
-            Act::Run(c) => self.run(ctx, &c),
+            Act::Run(c) => {
+                // a button's command is a command: strict first, so "joke dev" or "ask is the internet off" mean what they say
+                self.from_button = true;
+                self.run(ctx, &c)
+            }
             Act::Open(t) => {
                 let _ = open(&t);
                 self.balloon = None;
@@ -2410,6 +2524,7 @@ impl App {
         if let Some(i) = self.timers.iter().position(|t| t.at <= now_unix) {
             let mut fired = self.timers.remove(i);
             let label = fired.label.clone();
+            self.last_rung = Some(label.clone());
             // it comes back: after its interval, or on its rule's next day (same id, so the Desk keeps it)
             let next = match (&fired.rule, fired.every) {
                 (Some(rule), _) => timers::next_fire(rule, chrono::Local::now().naive_local()).map(timers::unix_of),
@@ -2707,17 +2822,20 @@ impl App {
                 self.pipe_up(Reply::say(lines::pick("review_offer")).mood(Mood::Happy).run("Show me my week", "review").btn("Not now", Act::Hide));
             }
         }
-        if self.focus.as_ref().is_some_and(|f| now >= f.until) {
+        if self.focus.as_ref().is_some_and(|f| f.over(now)) {
             let r = self.finish_focus(false);
             self.show(r);
             self.sound("complete");
         } else if let Some(k) = self.window_kind.clone().filter(|k| brain::DISTRACTIONS.contains(&k.as_str()) && now.duration_since(self.window_since) > Duration::from_secs(60)) {
-            let due = self.focus.as_ref().is_some_and(|f| f.last_nudge.is_none_or(|n| now.duration_since(n) > Duration::from_secs(600)));
+            let due = self.focus.as_ref().is_some_and(|f| f.paused_at.is_none() && f.last_nudge.is_none_or(|n| now.duration_since(n) > Duration::from_secs(600)));
             if due && self.balloon.is_none() {
                 if let Some(f) = &mut self.focus {
                     f.last_nudge = Some(now);
                 }
-                self.pipe_up(Reply::say(lines::pick(&format!("focus_nudge_{k}"))).mood(Mood::Sly).run("Stop the session", "focus stop"));
+                if !self.quiet() && self.input.is_empty() {
+                    self.show(Reply::say(lines::pick(&format!("focus_nudge_{k}"))).mood(Mood::Sly).run("Stop the session", "focus stop"));
+                    self.auto_hide = Some(Instant::now() + Duration::from_secs(8));
+                }
             }
         }
         // ten minutes in the same kind of app: once a day, a tip for it

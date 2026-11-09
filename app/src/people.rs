@@ -13,6 +13,9 @@ pub struct Person {
     pub email: Option<String>,
     pub every: Option<u32>,      // keep in touch every this many days
     pub last: Option<NaiveDate>, // when you last talked
+    pub phone: Option<String>,
+    pub note: Option<String>,    // a few lines: "kids Mia and Leo, allergic to nuts"
+    pub gifts: Vec<String>,      // present ideas
 }
 
 impl Person {
@@ -25,6 +28,7 @@ impl Person {
             "name": self.name,
             "birthday": self.birthday.map(|(y, m, d)| match y { Some(y) => format!("{y:04}-{m:02}-{d:02}"), None => format!("{m:02}-{d:02}") }),
             "email": self.email, "every": self.every, "last": self.last.map(|d| d.to_string()),
+            "phone": self.phone, "note": self.note, "gifts": self.gifts,
         })
     }
 
@@ -36,6 +40,9 @@ impl Person {
             email: v["email"].as_str().map(String::from),
             every: v["every"].as_u64().map(|n| n as u32),
             last: v["last"].as_str().and_then(|d| NaiveDate::parse_from_str(d, "%Y-%m-%d").ok()),
+            phone: v["phone"].as_str().map(String::from),
+            note: v["note"].as_str().map(String::from),
+            gifts: v["gifts"].as_array().into_iter().flatten().filter_map(|g| g.as_str().map(String::from)).collect(),
         })
     }
 
@@ -54,6 +61,26 @@ impl Person {
         let every = self.every? as i64;
         let since = (today - self.last?).num_days();
         (since >= every).then_some(since)
+    }
+}
+
+/// A day in the past, as people say it: "", "today", "yesterday", "3 days ago", "a week ago", "2026-11-02".
+pub fn past_day(s: &str, today: NaiveDate) -> Option<NaiveDate> {
+    let s = s.trim().to_lowercase();
+    let ago = |n: u64| today.checked_sub_days(chrono::Days::new(n));
+    match s.as_str() {
+        "" | "today" | "just now" => Some(today),
+        "yesterday" => ago(1),
+        "a week ago" | "last week" => ago(7),
+        _ => {
+            if let Some(n) = s.strip_suffix(" days ago").or_else(|| s.strip_suffix(" day ago")).and_then(|n| n.trim().parse::<u64>().ok()) {
+                return ago(n.min(3650));
+            }
+            if let Some(n) = s.strip_suffix(" weeks ago").and_then(|n| n.trim().parse::<u64>().ok()) {
+                return ago(n.min(520) * 7);
+            }
+            NaiveDate::parse_from_str(&s, "%Y-%m-%d").ok().filter(|d| *d <= today)
+        }
     }
 }
 
@@ -103,7 +130,13 @@ pub fn parse_vcf(text: &str) -> Vec<Person> {
     let mut lines: Vec<String> = vec![];
     for l in text.lines() {
         let l = l.trim_end_matches('\r');
-        if (l.starts_with(' ') || l.starts_with('\t')) && !lines.is_empty() {
+        let qp_soft = lines.last().is_some_and(|p: &String| p.to_ascii_uppercase().contains("QUOTED-PRINTABLE") && p.ends_with('='));
+        if qp_soft {
+            // vCard 2.1 (Android): a quoted-printable line ending in "=" goes on in the next one
+            let last = lines.last_mut().unwrap();
+            last.pop();
+            last.push_str(l);
+        } else if (l.starts_with(' ') || l.starts_with('\t')) && !lines.is_empty() {
             lines.last_mut().unwrap().push_str(&l[1..]);
         } else {
             lines.push(l.to_string());
@@ -115,7 +148,9 @@ pub fn parse_vcf(text: &str) -> Vec<Person> {
         let Some((head, value)) = l.split_once(':') else { continue };
         // "item1.EMAIL;type=INTERNET" -> "EMAIL"
         let name = head.split(';').next().unwrap_or("").rsplit('.').next().unwrap_or("").to_ascii_uppercase();
-        match (name.as_str(), value.trim()) {
+        let decoded = if head.to_ascii_uppercase().contains("ENCODING=QUOTED-PRINTABLE") { quoted_printable(value) } else { value.to_string() };
+        let unescape = |v: &str| v.replace("\\n", "\n").replace("\\N", "\n").replace("\\,", ",").replace("\\;", ";").trim().to_string();
+        match (name.as_str(), decoded.trim()) {
             ("BEGIN", v) if v.eq_ignore_ascii_case("VCARD") => cur = Some(Person::default()),
             ("END", v) if v.eq_ignore_ascii_case("VCARD") => {
                 if let Some(p) = cur.take().filter(|p| !p.name.is_empty()) {
@@ -124,7 +159,17 @@ pub fn parse_vcf(text: &str) -> Vec<Person> {
             }
             ("FN", v) => {
                 if let Some(p) = cur.as_mut() {
-                    p.name = v.replace("\\,", ",").replace("\\;", ";").trim().to_string();
+                    p.name = unescape(v);
+                }
+            }
+            ("TEL", v) if !v.is_empty() => {
+                if let Some(p) = cur.as_mut().filter(|p| p.phone.is_none()) {
+                    p.phone = Some(v.to_string());
+                }
+            }
+            ("NOTE", v) if !v.is_empty() => {
+                if let Some(p) = cur.as_mut() {
+                    p.note = Some(unescape(v).chars().take(500).collect());
                 }
             }
             ("EMAIL", v) if !v.is_empty() => {
@@ -141,6 +186,24 @@ pub fn parse_vcf(text: &str) -> Vec<Person> {
         }
     }
     out
+}
+
+/// "J=C3=BCrg" -> "Jürg": vCard 2.1's quoted-printable, as bytes, then UTF-8.
+fn quoted_printable(v: &str) -> String {
+    let b = v.as_bytes();
+    let mut out = Vec::with_capacity(b.len());
+    let mut i = 0;
+    while i < b.len() {
+        if b[i] == b'=' && b.get(i + 1).is_some_and(u8::is_ascii_hexdigit) && b.get(i + 2).is_some_and(u8::is_ascii_hexdigit) {
+            let hex = |c: u8| (c as char).to_digit(16).unwrap_or(0) as u8;
+            out.push(hex(b[i + 1]) * 16 + hex(b[i + 2]));
+            i += 3;
+        } else {
+            out.push(b[i]);
+            i += 1;
+        }
+    }
+    String::from_utf8_lossy(&out).into_owned()
 }
 
 /// vCard dates: "1990-02-15", "19900215", "--0215", "--02-15" (no year), maybe with a time after "T".
@@ -161,14 +224,16 @@ fn vcf_date(v: &str) -> Option<(Option<i32>, u32, u32)> {
 /// Returns how many were added or filled in. At most 500 people are kept.
 pub fn merge(people: &mut Vec<Person>, imported: Vec<Person>) -> usize {
     let mut changed = 0;
-    for p in imported.into_iter().filter(|p| p.birthday.is_some() || p.email.is_some()) {
+    for p in imported.into_iter().filter(|p| p.birthday.is_some() || p.email.is_some() || p.phone.is_some()) {
         let full = people.len() >= 500;
         match people.iter_mut().find(|q| q.name.to_lowercase() == p.name.to_lowercase()) {
             Some(q) => {
-                let before = (q.birthday, q.email.clone());
+                let before = q.clone();
                 q.birthday = q.birthday.or(p.birthday);
                 q.email = q.email.clone().or(p.email);
-                changed += usize::from(before != (q.birthday, q.email.clone()));
+                q.phone = q.phone.clone().or(p.phone);
+                q.note = q.note.clone().or(p.note);
+                changed += usize::from(before != *q);
             }
             None if !full => {
                 people.push(p);
@@ -261,5 +326,25 @@ BEGIN:VCARD\r\nVERSION:4.0\r\nFN:Cleo\r\nBDAY:--1224\r\nEND:VCARD\r\nBEGIN:VCARD
         assert_eq!(merge(&mut list, people), 3, "Anna filled in, Ben and Cleo added, Nobody skipped (nothing to keep)");
         assert_eq!(list[0].email.as_deref(), Some("anna@example.com"));
         assert_eq!(list.len(), 3);
+    }
+
+    #[test]
+    fn vcard_21_phone_and_notes() {
+        let vcf = "BEGIN:VCARD\r\nVERSION:2.1\r\nFN;CHARSET=UTF-8;ENCODING=QUOTED-PRINTABLE:J=C3=BCrg M=C3=BC=\r\nller\r\nTEL;CELL:+41 79 123 45 67\r\nNOTE:Kids Mia and Leo\\, allergic to nuts\r\nEND:VCARD\r\n";
+        let p = parse_vcf(vcf);
+        assert_eq!(p.len(), 1);
+        assert_eq!(p[0].name, "Jürg Müller", "quoted-printable, with a soft line break");
+        assert_eq!(p[0].phone.as_deref(), Some("+41 79 123 45 67"));
+        assert_eq!(p[0].note.as_deref(), Some("Kids Mia and Leo, allergic to nuts"));
+        let mut people = vec![Person::new("Jürg Müller")];
+        assert_eq!(merge(&mut people, p), 1, "a phone number alone is worth merging");
+        assert!(people[0].phone.is_some());
+        let back = Person::from_json(&Person { gifts: vec!["a book".into()], ..people[0].clone() }.to_json()).unwrap();
+        assert_eq!(back.gifts, vec!["a book"]);
+        let today = NaiveDate::from_ymd_opt(2026, 11, 9).unwrap();
+        assert_eq!(past_day("yesterday", today), NaiveDate::from_ymd_opt(2026, 11, 8));
+        assert_eq!(past_day("3 days ago", today), NaiveDate::from_ymd_opt(2026, 11, 6));
+        assert_eq!(past_day("2027-01-01", today), None, "not in the future");
+        assert_eq!(past_day("", today), Some(today));
     }
 }

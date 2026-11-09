@@ -20,6 +20,19 @@ fn media_keys(key: u8, times: u32) -> String {
 }
 
 pub fn volume(rest: &str) -> Reply {
+    // "increase the volume by 10" is a step, not 10 %
+    let up = ["up", "increase", "raise", "louder", "more"].iter().any(|w| rest.contains(w));
+    let down = ["down", "decrease", "lower", "quieter", "softer", "less", "reduce"].iter().any(|w| rest.contains(w));
+    let step = num(rest).filter(|_| (up || down) && (rest.contains("by ") || up || down)).map(|n| n.clamp(1, 100));
+    if let Some(n) = step {
+        if cfg!(windows) {
+            let cmd = media_keys(if up { 175 } else { 174 }, (n / 2).max(1));
+            return shell(&format!("{cmd}; 'Done.'"), if up { "Turning it up! 🔊" } else { "A little quieter..." }).run("Louder", "volume up").run("Quieter", "volume down").run("Mute", "volume mute");
+        }
+        const SINK: &str = "@DEFAULT_AUDIO_SINK@";
+        let cmd = format!("wpctl set-mute {SINK} 0; wpctl set-volume -l 1.0 {SINK} {n}%{}", if up { "+" } else { "-" });
+        return shell(&cmd, if up { "Turning it up! 🔊" } else { "A little quieter..." });
+    }
     if cfg!(windows) {
         let (cmd, intro) = if rest.contains("unmute") {
             (media_keys(175, 1), "Sound's back on! 🔊") // any volume key unmutes
@@ -151,7 +164,8 @@ pub fn power(rest: &str) -> Reply {
     let win = cfg!(windows);
     let (what, cmd) = match rest {
         r if r.contains("restart") || r.contains("reboot") => ("restart the computer", if win { "shutdown /r /t 0" } else { "systemctl reboot" }),
-        r if r.contains("sleep") || r.contains("suspend") => ("put the computer to sleep", if win { "rundll32.exe powrprof.dll,SetSuspendState 0,1,0" } else { "systemctl suspend" }),
+        // rundll32 can't pass SetSuspendState's arguments and hibernates instead; this sleeps
+        r if r.contains("sleep") || r.contains("suspend") => ("put the computer to sleep", if win { "Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.Application]::SetSuspendState('Suspend', $false, $false)" } else { "systemctl suspend" }),
         r if r.contains("hibernate") => ("hibernate the computer", if win { "shutdown /h" } else { "systemctl hibernate" }),
         r if r.contains("log") || r.contains("sign") => ("log you out", if win { "shutdown /l" } else { "loginctl terminate-session $XDG_SESSION_ID" }),
         _ => ("shut down the computer", if win { "shutdown /s /t 0" } else { "systemctl poweroff" }),
@@ -201,9 +215,11 @@ pub fn kaomoji(rest: &str) -> Reply {
 }
 
 pub fn uuid() -> Reply {
-    let b: [u8; 16] = rand::thread_rng().gen();
+    let mut b: [u8; 16] = rand::thread_rng().gen();
+    b[6] = b[6] & 0x0f | 0x40; // version 4
+    b[8] = b[8] & 0x3f | 0x80; // the RFC 4122 variant
     let h: String = b.iter().map(|x| format!("{x:02x}")).collect();
-    let id = format!("{}-{}-4{}-{}-{}", &h[..8], &h[8..12], &h[13..16], &h[16..20], &h[20..32]);
+    let id = format!("{}-{}-{}-{}-{}", &h[..8], &h[8..12], &h[12..16], &h[16..20], &h[20..32]);
     Reply::say(format!("Fresh unique ID:\n{id}")).btn("Copy it", Act::Copy(id))
 }
 
@@ -229,10 +245,8 @@ const DAYS: [&str; 7] = ["monday", "tuesday", "wednesday", "thursday", "friday",
 /// "christmas", "2027-03-01", "june 3rd", "3 june", "friday", "tomorrow" -> the next such date.
 pub fn parse_day(s: &str, today: NaiveDate) -> Option<(NaiveDate, String)> {
     let s = s.trim().trim_start_matches("the ").trim_start_matches("next ").trim_end_matches('?').trim();
-    let next = |m: u32, d: u32| {
-        let this = NaiveDate::from_ymd_opt(today.year(), m, d)?;
-        if this >= today { Some(this) } else { NaiveDate::from_ymd_opt(today.year() + 1, m, d) }
-    };
+    // the next time that date comes round: 29 February looks ahead to the next leap year
+    let next = |m: u32, d: u32| (0..=8).filter_map(|k| NaiveDate::from_ymd_opt(today.year() + k, m, d)).find(|x| *x >= today);
     let named = [
         ("christmas eve", (12, 24)), ("christmas", (12, 25)), ("xmas", (12, 25)), ("new years eve", (12, 31)), ("new year's eve", (12, 31)),
         ("new year", (1, 1)), ("halloween", (10, 31)), ("valentine", (2, 14)), ("pi day", (3, 14)), ("star wars day", (5, 4)),
@@ -515,7 +529,11 @@ pub fn pct_change(rest: &str) -> Reply {
 }
 
 fn a_date(s: &str) -> Option<NaiveDate> {
-    let s = s.trim().trim_start_matches("on ").trim();
+    let s = s.trim().trim_start_matches("on ").trim_start_matches("in ").trim();
+    // a bare year: "born in 1990" (1 January, so the age is right from then on)
+    if let Some(y) = s.parse::<i32>().ok().filter(|y| (1000..=9999).contains(y)) {
+        return NaiveDate::from_ymd_opt(y, 1, 1);
+    }
     ["%d.%m.%Y", "%m/%d/%Y", "%d/%m/%Y"].iter().find_map(|f| NaiveDate::parse_from_str(s, f).ok()).or_else(|| parse_day(s, Local::now().date_naive()).map(|(d, _)| d))
 }
 

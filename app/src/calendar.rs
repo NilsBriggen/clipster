@@ -87,14 +87,16 @@ fn duration(v: &str) -> Option<Duration> {
             u => {
                 let n: i64 = num.parse().ok()?;
                 num.clear();
-                total += match u {
-                    'W' => Duration::weeks(n),
-                    'D' => Duration::days(n),
-                    'H' => Duration::hours(n),
-                    'M' => Duration::minutes(n),
-                    'S' => Duration::seconds(n),
+                // a broken or hostile feed ("P99999999999W") is skipped, never a crash
+                let part = match u {
+                    'W' => Duration::try_weeks(n),
+                    'D' => Duration::try_days(n),
+                    'H' => Duration::try_hours(n),
+                    'M' => Duration::try_minutes(n),
+                    'S' => Duration::try_seconds(n),
                     _ => return None,
-                };
+                }?;
+                total = total.checked_add(&part)?;
             }
         }
     }
@@ -213,12 +215,53 @@ fn nth_weekday(year: i32, month: u32, n: i32, day: Weekday) -> Option<NaiveDate>
 
 /// The start times a recurring event has, from its first one on, until `until` (at most 3000 steps looked at).
 /// Without a COUNT, daily and weekly ones skip ahead to near `from`, so an old series still reaches today.
-fn starts(first: NaiveDateTime, rule: &str, from: NaiveDateTime, until: NaiveDateTime) -> Vec<NaiveDateTime> {
+/// The days of month `m` (its 1st) a MONTHLY rule picks: every BYDAY ("2TU,4TU", or "FR" for every Friday) and every
+/// BYMONTHDAY ("1,15", "-1" for the last day), or the first one's day number when there are neither.
+fn month_days(m: NaiveDate, byday: &[(i32, Weekday)], bymonthday: &[i32], default_day: u32) -> Vec<NaiveDate> {
+    let last = m.checked_add_months(Months::new(1)).and_then(|n| n.pred_opt()).map_or(28, |l| l.day());
+    let mut v = vec![];
+    for (n, wd) in byday {
+        if *n != 0 {
+            v.extend(nth_weekday(m.year(), m.month(), *n, *wd));
+        } else {
+            v.extend((1..=last).filter_map(|d| m.with_day(d)).filter(|d| d.weekday() == *wd));
+        }
+    }
+    for md in bymonthday {
+        let day = if *md > 0 { *md } else { last as i32 + 1 + md };
+        v.extend(u32::try_from(day).ok().filter(|d| *d >= 1 && *d <= last).and_then(|d| m.with_day(d)));
+    }
+    if byday.is_empty() && bymonthday.is_empty() {
+        v.extend(m.with_day(default_day)); // months without that day are skipped, like calendars do
+    }
+    v.sort();
+    v.dedup();
+    v
+}
+
+/// BYSETPOS: of the days a rule picked in one period, only these (1 = the first, -1 = the last: "the last Friday").
+fn setpos(days: Vec<NaiveDate>, pos: &[i32]) -> Vec<NaiveDate> {
+    let n = days.len() as i32;
+    let mut v: Vec<NaiveDate> = pos.iter().filter_map(|p| usize::try_from(if *p > 0 { p - 1 } else { n + p }).ok()).filter_map(|i| days.get(i).copied()).collect();
+    v.sort();
+    v.dedup();
+    v
+}
+
+/// The starts of a repeating event, from its first one up to `until` (and its own UNTIL/COUNT). `utc`: the series is
+/// expanded in UTC (written with "Z"), so its UNTIL is compared in UTC too.
+fn starts(first: NaiveDateTime, rule: &str, from: NaiveDateTime, until: NaiveDateTime, utc: bool) -> Vec<NaiveDateTime> {
     let part = |k: &str| rule.split(';').find_map(|p| p.strip_prefix(&format!("{k}=")).map(String::from));
     let freq = part("FREQ").unwrap_or_default();
-    let interval = part("INTERVAL").and_then(|v| v.parse::<u32>().ok()).unwrap_or(1).max(1);
+    // a huge INTERVAL (a broken feed) can't overflow anything; past a few years nothing repeats in our window anyway
+    let interval = part("INTERVAL").and_then(|v| v.parse::<u64>().ok()).unwrap_or(1).clamp(1, 10_000);
     let count = part("COUNT").and_then(|v| v.parse::<usize>().ok());
-    let end = part("UNTIL").and_then(|v| when("", &v).map(|w| if w.1 { w.0 + Duration::days(1) - Duration::seconds(1) } else { w.0 })).map_or(until, |u| u.min(until));
+    let end = part("UNTIL")
+        .and_then(|v| match v.strip_suffix('Z') {
+            Some(z) if utc => NaiveDateTime::parse_from_str(z, "%Y%m%dT%H%M%S").ok(),
+            _ => when("", &v).map(|w| if w.1 { w.0 + Duration::days(1) - Duration::seconds(1) } else { w.0 }),
+        })
+        .map_or(until, |u| u.min(until));
     let byday: Vec<(i32, Weekday)> = part("BYDAY")
         .map(|v| v.split(',').filter_map(|d| {
             let cut = d.len().checked_sub(2).filter(|c| d.is_char_boundary(*c))?;
@@ -226,7 +269,11 @@ fn starts(first: NaiveDateTime, rule: &str, from: NaiveDateTime, until: NaiveDat
             Some((n.parse::<i32>().unwrap_or(0), weekday(code)?))
         }).collect())
         .unwrap_or_default();
-    let bymonthday: Option<i32> = part("BYMONTHDAY").and_then(|v| v.split(',').next()?.parse().ok()).filter(|d: &i32| *d != 0);
+    let numbers = |k: &str| -> Vec<i32> { part(k).map(|v| v.split(',').filter_map(|d| d.parse().ok()).filter(|d: &i32| *d != 0 && d.abs() <= 366).collect()).unwrap_or_default() };
+    let (bymonthday, bysetpos) = (numbers("BYMONTHDAY"), numbers("BYSETPOS"));
+    // WKST: which day a week starts on (Google writes SU for fortnightly series)
+    let wkst = part("WKST").and_then(|v| weekday(&v)).unwrap_or(Weekday::Mon).num_days_from_monday();
+    let in_week = |d: Weekday| ((d.num_days_from_monday() + 7 - wkst) % 7) as u64;
     let time = first.time();
     let mut out: Vec<NaiveDateTime> = vec![];
     let push = |t: NaiveDateTime, out: &mut Vec<NaiveDateTime>| -> bool {
@@ -244,36 +291,44 @@ fn starts(first: NaiveDateTime, rule: &str, from: NaiveDateTime, until: NaiveDat
         "WEEKLY" => 7,
         _ => 0,
     };
-    let skip = if count.is_none() && period > 0 && from > first { ((from - first).num_days() / (period * interval as i64) - 1).max(0) as u32 } else { 0 };
+    let skip = if count.is_none() && period > 0 && from > first { ((from - first).num_days() / (period * interval as i64) - 1).max(0) as u64 } else { 0 };
     for k in skip..skip + 3000 {
         let step = k * interval;
         let go_on = match freq.as_str() {
-            "DAILY" => push(first + Duration::days(step as i64), &mut out),
+            "DAILY" => match first.checked_add_days(Days::new(step)) {
+                None => false,
+                // "every weekday" written as DAILY with BYDAY: the other days don't count
+                Some(t) if !byday.is_empty() && !byday.iter().any(|(_, d)| *d == t.weekday()) => t <= end,
+                Some(t) => push(t, &mut out),
+            },
             "WEEKLY" if !byday.is_empty() => {
-                // the week of the first one (from Monday), then every `interval` weeks
-                let monday = first.date() - Duration::days(first.weekday().num_days_from_monday() as i64) + Duration::weeks(step as i64);
-                let mut days: Vec<NaiveDate> = byday.iter().map(|(_, d)| monday + Duration::days(d.num_days_from_monday() as i64)).collect();
+                // the week of the first one (from its WKST day), then every `interval` weeks
+                let Some(week) = first.date().checked_sub_days(Days::new(in_week(first.weekday()))).and_then(|w| w.checked_add_days(Days::new(step.saturating_mul(7)))) else { break };
+                let mut days: Vec<NaiveDate> = byday.iter().filter_map(|(_, d)| week.checked_add_days(Days::new(in_week(*d)))).collect();
                 days.sort();
                 days.into_iter().all(|d| push(d.and_time(time), &mut out))
             }
-            "WEEKLY" => push(first + Duration::weeks(step as i64), &mut out),
+            "WEEKLY" => match first.checked_add_days(Days::new(step.saturating_mul(7))) {
+                Some(t) => push(t, &mut out),
+                None => false,
+            },
             "MONTHLY" => {
-                let Some(m) = first.date().with_day(1).and_then(|d| d.checked_add_months(Months::new(step))) else { break };
-                let day = match (byday.first(), bymonthday) {
-                    (Some((n, wd)), _) if *n != 0 => nth_weekday(m.year(), m.month(), *n, *wd),
-                    (_, Some(md)) if md > 0 => m.with_day(md as u32),
-                    // -1 = the last day of the month, -2 the one before…
-                    (_, Some(md)) => m.checked_add_months(Months::new(1)).and_then(|next| next.checked_sub_days(Days::new((-md) as u64))).filter(|d| d.month() == m.month()),
-                    _ => m.with_day(first.day()), // months without that day are skipped, like calendars do
-                };
-                match day {
-                    Some(d) => push(d.and_time(time), &mut out),
-                    None => m.and_time(time) <= end,
+                let Some(m) = first.date().with_day(1).and_then(|d| d.checked_add_months(Months::new(u32::try_from(step).ok()?))) else { break };
+                let mut days = month_days(m, &byday, &bymonthday, first.day());
+                if !bysetpos.is_empty() {
+                    days = setpos(days, &bysetpos);
+                }
+                match days.is_empty() {
+                    true => m.and_time(time) <= end,
+                    false => days.into_iter().all(|d| push(d.and_time(time), &mut out)),
                 }
             }
-            "YEARLY" => match first.date().with_year(first.year() + step as i32) {
-                Some(d) => push(d.and_time(time), &mut out),
-                None => true, // 29 February in a year without one
+            "YEARLY" => match i32::try_from(step).ok().and_then(|s| first.year().checked_add(s)) {
+                None => false,
+                Some(y) => match first.date().with_year(y) {
+                    Some(d) => push(d.and_time(time), &mut out),
+                    None => NaiveDate::from_ymd_opt(y, 1, 1).is_some_and(|d| d.and_time(time) <= end), // 29 February in a year without one
+                },
             },
             _ => {
                 push(first, &mut out);
@@ -304,11 +359,11 @@ pub fn parse(ics: &str, from: NaiveDate, days: u64) -> Vec<Event> {
         };
         let firsts = match (&r.rrule, r.recurrence_id, r.start_utc) {
             // written in UTC: repeat in UTC and turn each one into local time, so a daylight-saving change keeps the clock time right
-            (Some(rule), None, Some(utc)) => starts(utc, rule, window.0 - length - Duration::days(1), window.1 + Duration::days(1))
+            (Some(rule), None, Some(utc)) => starts(utc, rule, window.0 - length - Duration::days(1), window.1 + Duration::days(1), true)
                 .into_iter()
                 .map(|t| chrono::Utc.from_utc_datetime(&t).with_timezone(&Local).naive_local())
                 .collect(),
-            (Some(rule), None, None) => starts(start, rule, window.0 - length, window.1),
+            (Some(rule), None, None) => starts(start, rule, window.0 - length, window.1, false),
             _ => vec![start],
         };
         for s in firsts {
@@ -583,7 +638,24 @@ BEGIN:VEVENT\r\nDTSTART;TZID=Europe/Zurich:20261110T140000\r\nDTEND;TZID=Europe/
         let twin = "BEGIN:VCALENDAR\nBEGIN:VEVENT\nSUMMARY:A\nDTSTART:20261110T090000\nEND:VEVENT\nBEGIN:VEVENT\nSUMMARY:B\nDTSTART:20261110T090000\nEND:VEVENT\nEND:VCALENDAR\n";
         let ev = parse(twin, d(2026, 11, 10), 1);
         assert_ne!(ev[0].key(), ev[1].key(), "events without a UID don't collapse into one");
-        let _ = starts(t(2026, 1, 1, 9, 0), "FREQ=WEEKLY;BYDAY=日", t(2026, 1, 1, 0, 0), t(2026, 2, 1, 0, 0)); // a broken BYDAY doesn't crash
+        let _ = starts(t(2026, 1, 1, 9, 0), "FREQ=WEEKLY;BYDAY=日", t(2026, 1, 1, 0, 0), t(2026, 2, 1, 0, 0), false); // a broken BYDAY doesn't crash
+        // huge numbers in a feed are skipped, not a crash
+        for rule in ["FREQ=DAILY;INTERVAL=1000000000", "FREQ=YEARLY;INTERVAL=3000000000", "FREQ=MONTHLY;INTERVAL=4294967295"] {
+            let _ = starts(t(2026, 1, 1, 9, 0), rule, t(2026, 1, 1, 0, 0), t(2026, 3, 1, 0, 0), false);
+        }
+        assert_eq!(duration("P99999999999W"), None);
+        let days = |rule: &str, first: NaiveDateTime| starts(first, rule, t(2026, 11, 1, 0, 0), t(2027, 2, 1, 0, 0), false).iter().map(|d| d.format("%a %m-%d").to_string()).collect::<Vec<_>>();
+        // Thunderbird's "every weekday" is DAILY with BYDAY
+        assert_eq!(days("FREQ=DAILY;BYDAY=MO,TU,WE,TH,FR;COUNT=7", t(2026, 11, 13, 9, 0)), ["Fri 11-13", "Mon 11-16", "Tue 11-17", "Wed 11-18", "Thu 11-19", "Fri 11-20", "Mon 11-23"]);
+        // the 2nd and 4th Tuesday; the 1st and 15th; the last Friday
+        assert_eq!(days("FREQ=MONTHLY;BYDAY=2TU,4TU;COUNT=4", t(2026, 11, 10, 9, 0)), ["Tue 11-10", "Tue 11-24", "Tue 12-08", "Tue 12-22"]);
+        assert_eq!(days("FREQ=MONTHLY;BYMONTHDAY=1,15;COUNT=3", t(2026, 11, 1, 9, 0)), ["Sun 11-01", "Sun 11-15", "Tue 12-01"]);
+        assert_eq!(days("FREQ=MONTHLY;BYDAY=FR;BYSETPOS=-1;COUNT=3", t(2026, 11, 27, 9, 0)), ["Fri 11-27", "Fri 12-25", "Fri 01-29"]);
+        // fortnightly on Sunday and Monday with weeks starting on Sunday
+        assert_eq!(days("FREQ=WEEKLY;WKST=SU;INTERVAL=2;BYDAY=SU,MO;COUNT=4", t(2026, 11, 8, 9, 0)), ["Sun 11-08", "Mon 11-09", "Sun 11-22", "Mon 11-23"]);
+        // a UTC series ends at its UNTIL in UTC, wherever the computer is
+        let utc = starts(t(2026, 11, 9, 10, 0), "FREQ=DAILY;UNTIL=20261111T100000Z", t(2026, 11, 1, 0, 0), t(2026, 12, 1, 0, 0), true);
+        assert_eq!(utc.len(), 3, "{utc:?}");
     }
 
     #[test]

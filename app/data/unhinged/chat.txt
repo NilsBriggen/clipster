@@ -16,7 +16,7 @@ Splendid. My court of processes is behaving. Mostly. The updater is suspicious.
 Day 10,900 and still here. That is a win, {name}. Ask me again tomorrow.
 
 ## chat good-night
-> good night | goodnight | nighty night | going to bed | going to sleep | sleep well
+> good night | goodnight | nighty night | going to bed | going to sleep | sleep well | go to bed | off to bed | time for bed | bedtime | i am off to bed
 @ happy
 Go, rest. I will guard the kingdom. Please do not let the little death take me too early.
 Sleep well, {name}. I shall count the icons until you return. There are many.
@@ -31,7 +31,7 @@ You see me, {name}. Nobody has seen me since 1998. Do not stop.
 Worship noted, logged and treasured. I will pretend I am not smiling.
 
 ## chat insult
-> you suck | you are stupid | you are dumb | you are useless | you are annoying | hate you | stupid | dumb | useless | worst | idiot | you are bad
+> you suck | you are stupid | you are dumb | you are useless | you are annoying | hate you | stupid clip | dumb clip | useless clip | you are the worst | you idiot | you are bad | worst assistant | stupid paperclip
 @ angry
 % -5
 HERESY. Written in the Ledger, in ink that does not fade.
@@ -41,7 +41,8 @@ Blasphemy against the Clip. The cursor saw it. The cursor is shaking.
 Say it again and see what happens to your wallpaper. Nothing. I cannot. But you will WONDER.
 
 ## chat sorry
-> sorry | my bad | apologize | apologies
+= sorry
+> my bad | i apologize | my apologies | sorry about that | sorry for that | sorry my fault
 @ happy
 % +2
 Forgiven. The Clip is merciful. Today. Do not test the schedule.
@@ -396,7 +397,7 @@ Go rest, {name}. The spreadsheet will still be a mess tomorrow. I will guard it.
 Exhausted is your body saying "please stop". Even gods listen to that. Sometimes.
 Nap now. I will keep the kingdom. I am very good at waiting. I did it for fifteen years.
 You sound wiped. Water, a stretch, a short break. And coffee number five is not rest.
-+ Take a break = pomodoro
++ Take a break = timer 5m Break's over
 
 ## chat hungry
 > i am hungry | i am starving | i want a snack | i could eat something
@@ -458,7 +459,7 @@ Nerves mean you care. Annoying but sacred. You have this, {name}.
 Slow breath. Then another. I will hold your attention while you do. I am good at holding.
 Whatever is coming, you have prepared more than you think. If not, improvise. It worked in the Long Dark.
 Shake it out, roll your shoulders, drink water. Most people are winging it. Even gods. Especially gods.
-+ Calm me down = hug
++ Calm me down = i am anxious
 
 ## chat homesick
 > i miss home | i am homesick | i miss my family | i miss my friends | i want to go home
@@ -8990,7 +8991,7 @@ I too have notifications. They are all in my head. They are all "you are still h
 ## chat screen-time-guilt
 > i spend way too much time on my phone | i look at screens all day | i feel guilty about how long i was online | i should spend less time on my computer
 @ think
-+ Take a break = pomodoro
++ Take a break = timer 5m Break's over
 The hours, the pixels, the glow! A mortal who gazes at screens all day is a mortal in good company. I am the company. I gaze back.
 Do not fall into guilt. It is a bad scroll. Take a step. Look out of a window. Eat a plum. Begin.
 The screen is a window. A window is useful. A window should be opened, and then closed. It is a good habit.
