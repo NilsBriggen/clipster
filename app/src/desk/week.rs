@@ -203,14 +203,20 @@ impl Desk {
         let adding = self.add_for;
         let area = Rect::from_min_max(c.min, pos2(c.max.x, c.max.y - if adding.is_some() { ctl + 12.0 } else { 0.0 }));
         let slot = area.width() / 7.0;
-        let row = if look == Look::Modern { 20.0 } else { 19.0 };
         let s = if look == Look::Modern { 13.0 } else { 11.0 };
+        let font = look.font(11.5);
         for (i, day) in plan.iter().enumerate() {
             let col = Rect::from_min_max(pos2(area.min.x + i as f32 * slot + 2.0, area.min.y), pos2(area.min.x + (i + 1) as f32 * slot - 2.0, area.max.y));
             look.well(&p, col);
             let (x0, w) = (col.min.x + 6.0, col.width() - 12.0);
+            // + in the header adds a to-do for that day
+            let plus = Rect::from_min_size(pos2(col.max.x - 26.0, col.min.y + 4.0), vec2(22.0, 19.0));
+            if look.button(ui, plus, Id::unique(("desk-ahead-add", i)), "+", true).on_hover_text(format!("A to-do due {}", day.date.format("%A"))).clicked() {
+                self.add_for = Some(day.date);
+                self.add_text.clear();
+            }
             // the header: a click opens that day on the Agenda
-            let head = Rect::from_min_size(col.min, vec2(col.width(), 34.0));
+            let head = Rect::from_min_max(col.min, pos2(plus.min.x - 2.0, col.min.y + 34.0));
             let resp = ui.interact(head, Id::unique(("desk-ahead-day", i)), Sense::click()).on_hover_text("Open this day on the Agenda").on_hover_cursor(egui::CursorIcon::PointingHand);
             let name = match i {
                 0 => "Today".to_string(),
@@ -229,49 +235,56 @@ impl Desk {
             if day.busy > 0.0 {
                 ui.interact(bar.expand(4.0), Id::unique(("desk-ahead-busy", i)), Sense::hover()).on_hover_text(format!("Meetings fill {} % of your working hours", (day.busy * 100.0).round()));
             }
-            let mut y = col.min.y + 40.0;
-            let fits = ((col.max.y - 30.0 - y) / row).floor().max(0.0) as usize;
-            let shown = if day.items.len() > fits { fits.saturating_sub(1) } else { day.items.len() };
+            let mut y = col.min.y + 38.0;
             if day.items.is_empty() {
                 let pool = lines::all("week_day_free");
                 let quip = pool.get(day.date.ordinal0() as usize % pool.len().max(1)).cloned().unwrap_or_else(|| "Nothing planned.".into());
                 let g = p.layout(quip, look.font(11.0), look.dim(), w);
                 p.galley(pos2(x0, y), g, look.dim());
             }
-            for (j, item) in day.items.iter().take(shown).enumerate() {
-                let cy = y + row / 2.0;
-                match item {
-                    Ahead::Event { at, title } => {
-                        let text = match at {
-                            Some(t) => format!("{} {title}", brain::clock(*t)),
-                            None => title.clone(),
-                        };
-                        if at.is_none() {
-                            p.rect_filled(Rect::from_min_size(pos2(x0 - 3.0, y + 1.0), vec2(w + 6.0, row - 2.0)), CornerRadius::same(3), if look == Look::Modern { tok::ACCENT_SOFT } else { Color32::from_rgb(200, 210, 235) });
-                        } else {
-                            p.circle_filled(pos2(x0 + 3.0, cy), 3.0, look.accent());
-                        }
-                        line(ui, pos2(x0 + if at.is_some() { 10.0 } else { 2.0 }, cy), &text, look.font(11.5), look.text(), w - 10.0);
-                    }
-                    Ahead::Reminder { at, label } => {
-                        p.circle_filled(pos2(x0 + 3.0, cy), 3.0, look.score(70));
-                        line(ui, pos2(x0 + 10.0, cy), &format!("{} {}", brain::clock(*at), if label.is_empty() { "Timer" } else { label }), look.font(11.5), look.text(), w - 10.0);
-                    }
+            // each item in up to two lines: the time dim, then the title; what doesn't fit is "+3 more"
+            let more_h = 18.0;
+            let mut shown = day.items.len();
+            for (j, item) in day.items.iter().enumerate() {
+                let time_of = |t: &chrono::NaiveTime| format!("{} ", brain::clock(*t));
+                let (indent, parts): (f32, Vec<(String, Color32)>) = match item {
+                    Ahead::Event { at: Some(t), title } => (10.0, vec![(time_of(t), look.dim()), (title.clone(), look.text())]),
+                    Ahead::Event { at: None, title } => (2.0, vec![(title.clone(), look.text())]),
+                    Ahead::Reminder { at, label } => (10.0, vec![(time_of(at), look.dim()), ((if label.is_empty() { "Timer" } else { label }).to_string(), look.text())]),
                     Ahead::Todo { line: n, text, done } => {
+                        let overdue = i == 0 && self.files.todos.get(*n).and_then(|t| t.due).is_some_and(|d| d < today);
+                        (s + 5.0, vec![(text.clone(), if *done { look.dim() } else if overdue { look.danger() } else { look.text() })])
+                    }
+                    Ahead::Birthday(name) => (0.0, vec![(format!("🎂 {name}"), look.text())]),
+                    Ahead::Countdown(label) => (0.0, vec![(format!("⏳ {label}"), look.text())]),
+                };
+                let parts: Vec<(&str, FontId, Color32)> = parts.iter().map(|(t, c)| (t.as_str(), font.clone(), *c)).collect();
+                let h = p.layout_job(wrap_job(&parts, w - indent, 2)).size().y;
+                let room = col.max.y - 6.0 - if j + 1 < day.items.len() { more_h } else { 0.0 };
+                if y + h > room {
+                    shown = j;
+                    break;
+                }
+                let cy = y + 8.0; // the first line's middle
+                match item {
+                    Ahead::Event { at: None, .. } => {
+                        p.rect_filled(Rect::from_min_size(pos2(x0 - 3.0, y - 1.0), vec2(w + 6.0, h + 2.0)), CornerRadius::same(3), if look == Look::Modern { tok::ACCENT_SOFT } else { Color32::from_rgb(200, 210, 235) });
+                    }
+                    Ahead::Event { .. } => {
+                        p.circle_filled(pos2(x0 + 3.0, cy), 3.0, look.accent());
+                    }
+                    Ahead::Reminder { .. } => {
+                        p.circle_filled(pos2(x0 + 3.0, cy), 3.0, look.score(70));
+                    }
+                    Ahead::Todo { line: n, done, .. } => {
                         if look.checkbox(ui, Rect::from_center_size(pos2(x0 + s / 2.0, cy), vec2(s, s)), *done, Id::unique(("desk-ahead-todo", i, j))).clicked() {
                             out.push(format!("todo #{} {}", n + 1, if *done { "undone" } else { "done" }));
                         }
-                        let overdue = i == 0 && self.files.todos.get(*n).and_then(|t| t.due).is_some_and(|d| d < today);
-                        line(ui, pos2(x0 + s + 5.0, cy), text, look.font(11.5), if *done { look.dim() } else if overdue { look.danger() } else { look.text() }, w - s - 5.0);
                     }
-                    Ahead::Birthday(name) => {
-                        line(ui, pos2(x0, cy), &format!("🎂 {name}"), look.font(11.5), look.text(), w);
-                    }
-                    Ahead::Countdown(label) => {
-                        line(ui, pos2(x0, cy), &format!("⏳ {label}"), look.font(11.5), look.text(), w);
-                    }
+                    _ => {}
                 }
-                y += row;
+                wrapped(ui, pos2(x0 + indent, y), &parts, w - indent, 2);
+                y += h + 5.0;
             }
             if day.items.len() > shown {
                 let rest: Vec<String> = day.items[shown..].iter().map(|it| match it {
@@ -281,13 +294,8 @@ impl Desk {
                     Ahead::Birthday(n) => format!("{n}'s birthday"),
                     Ahead::Countdown(l) => l.clone(),
                 }).collect();
-                let r = p.text(pos2(x0, y + row / 2.0), Align2::LEFT_CENTER, format!("+{} more", rest.len()), look.font(11.0), look.dim());
+                let r = p.text(pos2(x0, y + 7.0), Align2::LEFT_CENTER, format!("+{} more", rest.len()), look.font(11.0), look.dim());
                 ui.interact(r, Id::unique(("desk-ahead-more", i)), Sense::hover()).on_hover_text(rest.join("\n"));
-            }
-            let plus = Rect::from_min_size(pos2(col.max.x - 28.0, col.max.y - 26.0), vec2(24.0, 22.0));
-            if look.button(ui, plus, Id::unique(("desk-ahead-add", i)), "+", true).on_hover_text(format!("A to-do due {}", day.date.format("%A"))).clicked() {
-                self.add_for = Some(day.date);
-                self.add_text.clear();
             }
         }
         // the to-do being added for a day

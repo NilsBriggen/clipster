@@ -682,6 +682,34 @@ impl Desk {
         false
     }
 
+    /// A row's actions: one visible button and "…" with the rest, right-aligned at `right`, `h` high, centred on `cy`.
+    /// `main` is the button's label and width (the width of the list's widest label, so the buttons line up; an empty
+    /// label keeps its place free). Returns what was clicked (0 = the button, 1… = the menu's items) and where the row's
+    /// text has to end.
+    #[allow(clippy::too_many_arguments)]
+    fn row_menu(&mut self, ui: &mut Ui, look: Look, right: f32, cy: f32, h: f32, key: &str, main: (&str, f32), more: &[String]) -> (Option<usize>, f32) {
+        let mut x = right;
+        let mut hit = None;
+        if !more.is_empty() {
+            let mr = Rect::from_min_size(pos2(x - 28.0, cy - h / 2.0), vec2(28.0, h));
+            if look.button(ui, mr, Id::unique(("desk-row-more", key)), "…", true).on_hover_text(more.join(" · ")).clicked() {
+                self.toggle_popup(key);
+            }
+            if let Some(k) = self.popup(ui, look, key, mr, more) {
+                hit = Some(k + 1);
+            }
+            x = mr.min.x - 6.0;
+        }
+        if main.1 > 0.0 {
+            let br = Rect::from_min_size(pos2(x - main.1, cy - h / 2.0), vec2(main.1, h));
+            if !main.0.is_empty() && look.button(ui, br, Id::unique(("desk-row-main", key)), main.0, true).clicked() {
+                hit = Some(0);
+            }
+            x = br.min.x - 6.0;
+        }
+        (hit, x)
+    }
+
     /// A drop-down menu under `anchor`, while it's the open one (`self.popup == key`): returns the item clicked. A
     /// click anywhere else, or Esc, closes it. It sits on its own layer, above the page.
     fn popup(&mut self, ui: &Ui, look: Look, key: &str, anchor: Rect, items: &[String]) -> Option<usize> {
@@ -1177,6 +1205,49 @@ fn line(ui: &mut Ui, at: Pos2, text: &str, font: FontId, color: Color32, width: 
         ui.interact(Rect::from_min_size(pos2(at.x, at.y - h / 2.0), vec2(w, h)), Id::unique(("desk-cut", text, at.x as i32, at.y as i32)), Sense::hover()).on_hover_text(text);
     }
     w
+}
+
+/// Text in parts (each its own font and colour) wrapped to `width` in at most `rows` lines, its top left at `at`, cut
+/// with "…" (the whole text on hover when cut). Returns its height.
+fn wrapped(ui: &mut Ui, at: Pos2, parts: &[(&str, FontId, Color32)], width: f32, rows: usize) -> f32 {
+    let g = ui.painter().layout_job(wrap_job(parts, width, rows));
+    let (size, cut) = (g.size(), g.elided);
+    ui.painter().galley(at, g, Color32::PLACEHOLDER);
+    if cut {
+        let all: String = parts.iter().map(|p| p.0).collect();
+        ui.interact(Rect::from_min_size(at, size), Id::unique(("desk-wrap-cut", at.x as i32, at.y as i32)), Sense::hover()).on_hover_text(all);
+    }
+    size.y
+}
+
+/// The layout `wrapped` draws (to measure it first).
+fn wrap_job(parts: &[(&str, FontId, Color32)], width: f32, rows: usize) -> egui::text::LayoutJob {
+    let mut job = egui::text::LayoutJob::default();
+    for (text, font, color) in parts {
+        job.append(text, 0.0, egui::TextFormat::simple(font.clone(), *color));
+    }
+    job.wrap = egui::text::TextWrapping { max_width: width.max(12.0), max_rows: rows, break_anywhere: false, overflow_character: Some('…') };
+    job
+}
+
+/// Text that works as a link (the accent colour, underlined under the pointer), its left middle at `at`.
+fn link(ui: &mut Ui, look: Look, at: Pos2, text: &str, font: FontId, key: &str) -> Response {
+    let g = ui.painter().layout_no_wrap(text.to_string(), font, look.accent());
+    let r = Rect::from_min_size(pos2(at.x, at.y - g.size().y / 2.0), g.size());
+    let resp = ui.interact(r.expand(2.0), Id::unique(("desk-link", key)), Sense::click()).on_hover_cursor(egui::CursorIcon::PointingHand);
+    let color = if resp.hovered() { look.text() } else { look.accent() };
+    ui.painter().galley(r.min, g, color);
+    if resp.hovered() {
+        ui.painter().hline(r.min.x..=r.max.x, r.max.y, Stroke::new(1.0, color));
+    }
+    resp
+}
+
+/// A line from a pool that stays the same all day (a random pick would change every frame), with {name} filled in.
+fn daily(pool: &str, name: &str) -> String {
+    let all = crate::lines::all(pool);
+    let day = chrono::Datelike::ordinal0(&chrono::Local::now().date_naive()) as usize;
+    all.get(day % all.len().max(1)).cloned().unwrap_or_default().replace("{name}", if name.is_empty() { "friend" } else { name })
 }
 
 /// One line of text, cut off with "…" where it would pass `width`.

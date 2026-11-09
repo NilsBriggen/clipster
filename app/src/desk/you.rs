@@ -12,17 +12,12 @@ const FACT_CHOICES: [(&str, &str); 10] = [("city", "City"), ("job", "Job"), ("pe
 
 impl Desk {
     pub(super) fn you_and_me(&mut self, ui: &mut Ui, c: Rect, view: &View, look: Look, out: &mut Vec<String>) {
-        let p = ui.painter().clone();
-        let mut x = c.min.x;
         let label = format!("People ({})", view.people.len());
-        for (i, name) in ["You", label.as_str(), "Journal"].iter().enumerate() {
-            let w = p.layout_no_wrap(name.to_string(), look.bold(12.5), look.text()).size().x + 28.0;
-            if look.tab(ui, Rect::from_min_size(pos2(x, c.min.y), vec2(w, look.tab_h())), name, self.me_page == i).clicked() {
-                self.me_page = i;
-            }
-            x += w + 6.0;
+        let (hit, seg) = look.segments(ui, c.min, &["You", label.as_str(), "Journal"], self.me_page, "me-page");
+        if let Some(i) = hit {
+            self.me_page = i;
         }
-        let page = Rect::from_min_max(pos2(c.min.x, c.min.y + look.tab_h() + 10.0), c.max);
+        let page = Rect::from_min_max(pos2(c.min.x, seg.max.y + 10.0), c.max);
         match self.me_page {
             1 => self.people_page(ui, page, view, look, out),
             2 => self.journal_page(ui, page, view, look, out),
@@ -471,7 +466,7 @@ impl Desk {
         let first_name = q.name.split_whitespace().next().unwrap_or(&q.name).to_lowercase();
         let waiting: Vec<String> = self.files.todos.iter().filter(|t| !t.done && t.waiting.as_deref().is_some_and(|w| w.to_lowercase().split_whitespace().next() == Some(first_name.as_str()))).map(|t| t.text.clone()).collect();
         if !waiting.is_empty() {
-            line(ui, pos2(rx, row(5) + ctl / 2.0), &format!("Waiting on {}: {}", q.name.split_whitespace().next().unwrap_or(""), waiting.join(", ")), look.font(12.0), look.score(70), col);
+            line(ui, pos2(rx, row(5) + ctl / 2.0), &format!("Waiting on {}: {}", q.name.split_whitespace().next().unwrap_or(""), waiting.join(", ")), look.font(12.0), look.score_text(70), col);
         }
         // the buttons
         let by = inner.max.y - ctl;

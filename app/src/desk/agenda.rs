@@ -748,7 +748,7 @@ impl Desk {
                 out.push(format!("calendar show {n} {}", if cal.show { "off" } else { "on" }));
             }
             // ✓ read fine, or ! with what went wrong
-            let (mark, color) = if cal.problem.is_some() { ("!", look.danger()) } else { ("✓", look.score(100)) };
+            let (mark, color) = if cal.problem.is_some() { ("!", look.danger()) } else { ("✓", look.score_text(100)) };
             let mr = p.text(pos2(show_x - 10.0, cy), Align2::RIGHT_CENTER, mark, look.bold(13.0), color);
             ui.interact(mr.expand(3.0), Id::unique(("desk-cal-mark", i)), Sense::hover()).on_hover_text(cal.problem.clone().unwrap_or_else(|| "Read fine".into()));
             let name_r = Rect::from_min_max(pos2(x0 + 18.0, cy - ctl / 2.0), pos2(mr.min.x - 10.0, cy + ctl / 2.0));

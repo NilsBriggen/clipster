@@ -133,9 +133,10 @@ impl Look {
             Look::Modern => tok::ACCENT,
         }
     }
+    /// Mostly text ("overdue", problems), so in Classic a red that reads on the 98 grey (4.8:1).
     pub(super) fn danger(self) -> Color32 {
         match self {
-            Look::Classic => Color32::from_rgb(200, 50, 40),
+            Look::Classic => Color32::from_rgb(150, 20, 20),
             Look::Modern => tok::DANGER,
         }
     }
@@ -169,6 +170,16 @@ impl Look {
             (Look::Modern, 85..) => tok::SUCCESS,
             (Look::Modern, 60..) => tok::WARNING,
             (Look::Modern, _) => tok::DANGER,
+        }
+    }
+    /// The same, for text: Classic's bright green and amber are for bars and dots (1.2–1.9:1 on its grey); these
+    /// darker ones read at 4.8 and 5:1. Modern's already do on its panels.
+    pub(super) fn score_text(self, pct: u32) -> Color32 {
+        match (self, pct) {
+            (Look::Classic, 85..) => Color32::from_rgb(0, 88, 24),
+            (Look::Classic, 60..) => Color32::from_rgb(110, 60, 0),
+            (Look::Classic, _) => self.danger(),
+            _ => self.score(pct),
         }
     }
     /// The week chart's three groups (in `brain::kind_group` order).

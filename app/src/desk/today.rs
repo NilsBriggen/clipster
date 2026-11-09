@@ -213,7 +213,7 @@ impl Desk {
             let done = crate::plan::focus_today(view.focus_log, today, running);
             let (text, color) = match done {
                 0 => (format!("Goal: {} a day, not started", brain::fmt_dur(goal)), look.dim()),
-                d if d >= goal => (format!("Goal met: {} of {}", brain::fmt_dur(d), brain::fmt_dur(goal)), look.score(100)),
+                d if d >= goal => (format!("Goal met: {} of {}", brain::fmt_dur(d), brain::fmt_dur(goal)), look.score_text(100)),
                 d => (format!("Goal: {} of {}", brain::fmt_dur(d), brain::fmt_dur(goal)), look.dim()),
             };
             p.text(pos2(fx, y), Align2::LEFT_CENTER, text, look.font(11.5), color);

@@ -34,17 +34,13 @@ impl Desk {
     /// Upkeep: five pages, each on its own sub-tab.
     pub(super) fn upkeep(&mut self, ui: &mut Ui, c: Rect, view: &View, look: Look, out: &mut Vec<String>) {
         let p = ui.painter().clone();
-        let mut x = c.min.x;
-        for (i, name) in ["Checkup", "Right now", "Tidy", "Space", "Backup"].iter().enumerate() {
-            let w = p.layout_no_wrap(name.to_string(), look.bold(12.5), look.text()).size().x + 26.0;
-            if look.tab(ui, Rect::from_min_size(pos2(x, c.min.y), vec2(w, look.tab_h())), name, self.upkeep_page == i).clicked() {
-                self.upkeep_page = i;
-                self.startup_list = false;
-                self.tidy_found = false;
-            }
-            x += w + 6.0;
+        let (hit, seg) = look.segments(ui, c.min, &["Checkup", "Right now", "Tidy", "Space", "Backup"], self.upkeep_page, "upkeep-page");
+        if let Some(i) = hit {
+            self.upkeep_page = i;
+            self.startup_list = false;
+            self.tidy_found = false;
         }
-        let inner = Rect::from_min_max(pos2(c.min.x, c.min.y + look.tab_h() + 10.0), c.max);
+        let inner = Rect::from_min_max(pos2(c.min.x, seg.max.y + 10.0), c.max);
         match self.upkeep_page {
             0 => self.checkup(ui, inner, view, look, out),
             1 => self.right_now(ui, inner, view, look, out),
@@ -588,7 +584,7 @@ impl Desk {
             let label = target_drive.as_ref().map_or_else(|| b.target.to_string(), |d| format!("{} · {} free", d.label, crate::upkeep::size(d.free)));
             radio(ui, look, pos2(x0, y), &fit(&p, look, &label, x1 - x0 - 140.0), true, "drive-current");
             if !present {
-                p.text(pos2(x1, y + 9.0), Align2::RIGHT_CENTER, "(not plugged in)", look.font(11.5), look.score(70));
+                p.text(pos2(x1, y + 9.0), Align2::RIGHT_CENTER, "(not plugged in)", look.font(11.5), look.score_text(70));
             } else if removable && b.progress.is_none() {
                 let w = btn_w(&p, look, "Eject");
                 if look.button(ui, Rect::from_min_size(pos2(x1 - w, y - 2.0), vec2(w, ctl - 4.0)), Id::unique("backup-eject"), "Eject", true).on_hover_text("So you can unplug it safely").clicked() {
