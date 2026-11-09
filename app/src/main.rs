@@ -222,6 +222,19 @@ struct App {
     backup_last: Option<i64>, // unix seconds
     backup_result: String,    // what the last backup did, for the Desk
     backup_progress: Option<(usize, usize, u64)>, // running: files done, files to copy, bytes
+    backup_stop: std::sync::Arc<std::sync::atomic::AtomicBool>, // set: the running backup stops after its current file
+    backup_skip: Vec<String>,                     // names left out ("node_modules", "*.iso")
+    backup_auto: String,                          // "plugged", "evening" or "off"
+    backup_history: Vec<[u64; 4]>,                // the last runs: when, copied, bytes, failed
+    backup_found: Option<Vec<std::path::PathBuf>>, // files found in the backup ("Get a file back")
+    now_reading: Option<upkeep::Now>,             // Upkeep's Right now, while that page is open
+    now_asked: Option<Instant>,
+    space: Option<(Instant, upkeep::Space)>,      // Upkeep's Space: what fills the disk
+    space_running: bool,
+    upkeep_hide: Vec<String>,                     // checks you said aren't for you
+    space_log: Vec<[u64; 2]>,                     // free space over time: (unix, bytes), about weekly, 12 kept
+    tidy_targets: Vec<(String, String)>,          // a tidy category -> your folder for it ("Documents" -> ~/Documents)
+    tidy_auto: bool,                              // tidy Downloads every Monday (files a week old)
     dnd_restore: Option<String>, // a notification setting to put back if Clipster stopped mid-session
     stopwatch: Option<Instant>,
     timers: Vec<timers::Timer>, // what rings when (wall-clock, so a suspend doesn't delay it), each with an id
@@ -603,6 +616,7 @@ impl App {
             sample_upkeep: upkeep::Report {
                 startup: ["1Password", "LocalSend", "Nextcloud"].iter().map(|n| sys::StartupApp { id: format!("{n}.desktop"), name: n.to_string(), on: *n != "Nextcloud" }).collect(),
                 checks: vec![],
+                disk: Some((175_000_000_000, 752_000_000_000)),
             },
             upkeep_running: false,
             backup_sources: [dirs::document_dir(), dirs::picture_dir(), dirs::desktop_dir()].into_iter().flatten().filter(|d| d.exists()).map(|d| d.to_string_lossy().into_owned()).collect(),
@@ -610,6 +624,19 @@ impl App {
             backup_last: None,
             backup_result: String::new(),
             backup_progress: None,
+            backup_stop: Default::default(),
+            backup_skip: vec![],
+            backup_auto: "off".into(),
+            backup_history: vec![],
+            backup_found: None,
+            now_reading: None,
+            now_asked: None,
+            space: None,
+            space_running: false,
+            upkeep_hide: vec![],
+            space_log: vec![],
+            tidy_targets: vec![],
+            tidy_auto: false,
             dnd_restore: None,
             sample_events: sample_events(),
             sample_people: sample_people(),
@@ -734,6 +761,12 @@ impl App {
                 (app.habits, app.countdowns, app.site_time, app.weather_on, app.weather) = (habits, countdowns, sites, true, Some((Instant::now(), weather)));
                 app.holidays = vec![(chrono::Local::now().date_naive() + chrono::Days::new(6), "St. Gerald's Day (sample)".into())];
                 app.pin_labels.insert("Printer code: 4711".into(), "Printer".into());
+                app.backup_sources = vec!["/home/you/Documents".into(), "/home/you/Pictures".into()];
+                app.backup_skip = vec!["node_modules".into(), "*.iso".into()];
+                let (now, space) = desk::sample_upkeep();
+                (app.now_reading, app.space) = (Some(now), Some((Instant::now(), space)));
+                app.space_log = (0..12u64).map(|w| [backup::now() as u64 - (11 - w) * 7 * 86_400, 207_000_000_000 - w * 2_900_000_000]).collect();
+                app.backup_history = vec![[backup::now() as u64 - 9 * 86_400, 214, 1_300_000_000, 0], [backup::now() as u64 - 23 * 86_400, 1820, 9_400_000_000, 2]];
                 app.reading_titles.insert("https://en.wikipedia.org/wiki/Paper_clip".into(), "Paper clip - Wikipedia".into());
                 app.budgets.insert("video".into(), 30);
             }
@@ -851,6 +884,21 @@ impl App {
     fn show_desk(&mut self, ctx: &egui::Context, near: Option<Rect>) -> Vec<String> {
         let now = Instant::now();
         self.account_time();
+        // Upkeep's Right now: read every 3 seconds while that page is open; Space: counted once when it opens
+        match self.desk.upkeep_page() {
+            Some(1) if self.screenshot.is_none() && self.now_asked.is_none_or(|t| t.elapsed() > Duration::from_secs(3)) => {
+                self.now_asked = Some(now);
+                let (tx, ctx2) = (self.tx.clone(), ctx.clone());
+                std::thread::spawn(move || {
+                    let _ = tx.send(Event::Now(Box::new(upkeep::now())));
+                    ctx2.request_repaint();
+                });
+            }
+            Some(3) if self.space.is_none() && !self.space_running => {
+                let _ = self.space_command(ctx, "scan", true, &mut false);
+            }
+            _ => {}
+        }
         // the weather line: asked while the Desk is open, once an hour (after a failure, again in 10 minutes)
         let stale = self.weather.as_ref().is_none_or(|(t, _)| t.elapsed() > Duration::from_secs(3600));
         if self.weather_on && self.screenshot.is_none() && stale && self.weather_asked.is_none_or(|t| t.elapsed() > Duration::from_secs(600)) {
@@ -922,11 +970,11 @@ impl App {
         let weather = self.weather.as_ref().filter(|_| self.weather_on).map(|(_, w)| w.clone());
         match &self.desk_sample {
             Some((t, k, f, c)) => {
-                let view = desk::View { timers: t.clone(), kind_time: k, focus_log: f, focus_now: Some(("the slides".into(), 18 * 60, 7 * 60, 40, false)), checkins: c, streaks: vec![("Focus".into(), 4, 9), ("Goal met".into(), 2, 5), ("Check-ins".into(), 6, 12), ("Days with me".into(), 31, 31)], status, quip, prefs, clips: &self.sample_clips, pins: &self.sample_clips[..2], reading: &self.sample_reading, me: sample_me(), upkeep: Some((&self.sample_upkeep, 120)), upkeep_running: false, backup_check: upkeep::backup_check(true, Some(backup::now() - 9 * 86_400), backup::now(), true), backup: desk::Backup { sources: &self.backup_sources, target: "/run/media/you/BACKUP", last: Some(backup::now() - 9 * 86_400), result: "214 copied (1.3 GB), 4120 unchanged", progress: None }, events: &events, calendars: self.sample_calendars.iter().enumerate().map(|(i, s)| desk::CalView { label: ["Work", "Family"].get(i).map_or_else(|| calendar::short(s), |n| n.to_string()), color: i as u8, show: true, alert: i == 0, ..Default::default() }).collect(), calendar_note: "Checked 4 min ago".into(), calendar_problems: 0, answer: self.desk_answer.as_ref(), name: "Sam".into(), people: &self.sample_people, workday: &self.sample_workday, habits: &self.habits, countdowns: &self.countdowns, sites, moved: &self.kind_moves, weather, day_totals, pin_labels: &self.pin_labels, clip_paused, reading_titles: &self.reading_titles };
+                let view = desk::View { timers: t.clone(), kind_time: k, focus_log: f, focus_now: Some(("the slides".into(), 18 * 60, 7 * 60, 40, false)), checkins: c, streaks: vec![("Focus".into(), 4, 9), ("Goal met".into(), 2, 5), ("Check-ins".into(), 6, 12), ("Days with me".into(), 31, 31)], status, quip, prefs, clips: &self.sample_clips, pins: &self.sample_clips[..2], reading: &self.sample_reading, me: sample_me(), upkeep: Some((&self.sample_upkeep, 120)), upkeep_running: false, backup_check: upkeep::backup_check(true, Some(backup::now() - 9 * 86_400), backup::now(), true), backup: desk::Backup { sources: &self.backup_sources, target: "/run/media/you/BACKUP", last: Some(backup::now() - 9 * 86_400), result: "214 copied (1.3 GB), 4120 unchanged", progress: None, skip: &self.backup_skip, auto: &self.backup_auto, history: &self.backup_history, found: self.backup_found.as_deref(), failed: false }, events: &events, calendars: self.sample_calendars.iter().enumerate().map(|(i, s)| desk::CalView { label: ["Work", "Family"].get(i).map_or_else(|| calendar::short(s), |n| n.to_string()), color: i as u8, show: true, alert: i == 0, ..Default::default() }).collect(), calendar_note: "Checked 4 min ago".into(), calendar_problems: 0, answer: self.desk_answer.as_ref(), name: "Sam".into(), people: &self.sample_people, workday: &self.sample_workday, habits: &self.habits, countdowns: &self.countdowns, sites, moved: &self.kind_moves, weather, day_totals, pin_labels: &self.pin_labels, clip_paused, reading_titles: &self.reading_titles, now: self.now_reading.as_ref(), space: self.space.as_ref().map(|(_, s)| s), space_running: self.space_running, upkeep_hide: &self.upkeep_hide, space_log: &self.space_log, tidy_targets: &self.tidy_targets, tidy_auto: self.tidy_auto };
                 self.desk.show(ctx, &view, look, near)
             }
             None => {
-                let view = desk::View { timers, kind_time: &self.kind_time, focus_log: &self.focus_log, focus_now, checkins: &self.checkin_days, streaks, status, quip, prefs, clips: &self.clip_history, pins: &self.pins, reading: &self.reading, me: about_me(&self.facts, self.birthday, &self.stats, &self.unlocked, &self.highscores, self.friendship), upkeep: self.upkeep.as_ref().map(|(t, r)| (r, t.elapsed().as_secs())), upkeep_running: self.upkeep_running, backup_check: self.backup_check(), backup: desk::Backup { sources: &self.backup_sources, target: &self.backup_target, last: self.backup_last, result: &self.backup_result, progress: self.backup_progress }, events: &events, calendars: cal_views, calendar_note: self.calendar_note(), calendar_problems: self.calendar_problems.len(), answer: self.desk_answer.as_ref(), name: self.name.clone(), people: &self.people, workday: &self.workday, habits: &self.habits, countdowns: &self.countdowns, sites, moved: &self.kind_moves, weather, day_totals, pin_labels: &self.pin_labels, clip_paused, reading_titles: &self.reading_titles };
+                let view = desk::View { timers, kind_time: &self.kind_time, focus_log: &self.focus_log, focus_now, checkins: &self.checkin_days, streaks, status, quip, prefs, clips: &self.clip_history, pins: &self.pins, reading: &self.reading, me: about_me(&self.facts, self.birthday, &self.stats, &self.unlocked, &self.highscores, self.friendship), upkeep: self.upkeep.as_ref().map(|(t, r)| (r, t.elapsed().as_secs())), upkeep_running: self.upkeep_running, backup_check: self.backup_check(), backup: desk::Backup { sources: &self.backup_sources, target: &self.backup_target, last: self.backup_last, result: &self.backup_result, progress: self.backup_progress, skip: &self.backup_skip, auto: &self.backup_auto, history: &self.backup_history, found: self.backup_found.as_deref(), failed: self.backup_history.first().is_some_and(|h| h[3] > 0) || !self.backup_result.is_empty() && !self.backup_result.contains("copied") }, events: &events, calendars: cal_views, calendar_note: self.calendar_note(), calendar_problems: self.calendar_problems.len(), answer: self.desk_answer.as_ref(), name: self.name.clone(), people: &self.people, workday: &self.workday, habits: &self.habits, countdowns: &self.countdowns, sites, moved: &self.kind_moves, weather, day_totals, pin_labels: &self.pin_labels, clip_paused, reading_titles: &self.reading_titles, now: self.now_reading.as_ref(), space: self.space.as_ref().map(|(_, s)| s), space_running: self.space_running, upkeep_hide: &self.upkeep_hide, space_log: &self.space_log, tidy_targets: &self.tidy_targets, tidy_auto: self.tidy_auto };
                 self.desk.show(ctx, &view, look, near)
             }
         }
@@ -1496,12 +1544,16 @@ impl App {
         let arg = arg.trim();
         match verb {
             "add" => {
-                let path = std::path::Path::new(arg);
+                // "~/Projects" and dropped folders work too
+                let full = brain::expand_home(arg);
+                let arg = full.to_string_lossy().to_string();
+                let path = full.as_path();
                 if !path.is_dir() {
-                    return Reply::say(format!("I can't find a folder at {arg}.")).mood(Mood::Think);
+                    self.set_status(format!("! I can't find a folder at {arg}."));
+                    return Reply::say("");
                 }
-                if !self.backup_sources.iter().any(|s| s == arg) {
-                    self.backup_sources.push(arg.to_string());
+                if !self.backup_sources.iter().any(|s| *s == arg) {
+                    self.backup_sources.push(arg.clone());
                 }
                 self.set_status(format!("Backing up {} too.", path.file_name().map(|n| n.to_string_lossy().to_string()).unwrap_or(arg.to_string())));
             }
@@ -1512,8 +1564,56 @@ impl App {
                 self.set_status(lines::pick("settings_saved"));
             }
             "target" => {
-                self.backup_target = arg.to_string();
-                self.set_status(format!("Backups go to {arg}."));
+                let full = brain::expand_home(arg).to_string_lossy().to_string();
+                self.backup_target = full.clone();
+                self.set_status(format!("Backups go to {full}."));
+            }
+            "stop" => {
+                self.backup_stop.store(true, std::sync::atomic::Ordering::Relaxed);
+                self.set_status("Stopping after the file it's copying…".to_string());
+            }
+            // names to leave out: "skip node_modules, *.iso, .cache"
+            "skip" => {
+                self.backup_skip = arg.split(',').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).take(30).collect();
+                self.set_status(if self.backup_skip.is_empty() { "Nothing is skipped.".to_string() } else { format!("Skipping {}.", self.backup_skip.join(", ")) });
+            }
+            // on its own: "auto plugged" (when the drive is plugged in, once a day), "auto evening" (18:00), "auto off"
+            "auto" => {
+                self.backup_auto = match arg {
+                    "plugged" | "evening" => arg.to_string(),
+                    _ => "off".to_string(),
+                };
+                self.set_status(lines::pick("settings_saved"));
+            }
+            // getting a file back: "find slides" searches the backup, "restore 2" copies one back beside its original
+            "find" => {
+                let dir = std::path::Path::new(&self.backup_target).join(backup::FOLDER);
+                if !dir.is_dir() {
+                    self.set_status(format!("! I can't reach the backup at {}. Is the drive plugged in?", self.backup_target));
+                    return Reply::say("");
+                }
+                let (tx, ctx, words) = (self.tx.clone(), ctx.clone(), arg.to_string());
+                self.backup_found = None;
+                std::thread::spawn(move || {
+                    let _ = tx.send(Event::BackupFound(find::search(&dir, &words, 12)));
+                    ctx.request_repaint();
+                });
+                self.set_status("Looking in the backup…".to_string());
+            }
+            "restore" => {
+                let file = arg.parse::<usize>().ok().and_then(|n| n.checked_sub(1)).and_then(|i| self.backup_found.as_ref()?.get(i).cloned());
+                let sources: Vec<std::path::PathBuf> = self.backup_sources.iter().map(std::path::PathBuf::from).collect();
+                match file.and_then(|f| Some((backup::original_of(&f, std::path::Path::new(&self.backup_target), &sources)?, f))) {
+                    Some((original, f)) => {
+                        let (tx, ctx) = (self.tx.clone(), ctx.clone());
+                        std::thread::spawn(move || {
+                            let _ = tx.send(Event::Restored(backup::restore(&f, &original).map_err(|e| e.to_string())));
+                            ctx.request_repaint();
+                        });
+                        self.set_status("Copying it back…".to_string());
+                    }
+                    None => self.set_status("! I don't know where that one came from.".to_string()),
+                }
             }
             "eject" => {
                 return match sys::eject(std::path::Path::new(&self.backup_target)) {
@@ -1524,6 +1624,50 @@ impl App {
             _ => return self.start_backup(ctx),
         }
         Reply::say("") // from the Desk: its status bar says it
+    }
+
+    /// Upkeep's Space page: "scan" (on a thread), "trash 2,5" (asks first), "trash 2,5 confirmed".
+    fn space_command(&mut self, ctx: &egui::Context, cmd: &str, from_desk: bool, silent: &mut bool) -> Reply {
+        let (verb, arg) = cmd.split_once(' ').unwrap_or((cmd, ""));
+        if verb == "scan" {
+            if !self.space_running && self.screenshot.is_none() {
+                self.space_running = true;
+                let (tx, ctx) = (self.tx.clone(), ctx.clone());
+                std::thread::spawn(move || {
+                    let _ = tx.send(Event::Space(Box::new(upkeep::space())));
+                    ctx.request_repaint();
+                });
+            }
+            *silent = from_desk;
+            return Reply::say(lines::pick("space_scanning")).mood(Mood::Search);
+        }
+        let confirmed = arg.ends_with(" confirmed");
+        let picks: Vec<usize> = arg.trim_end_matches(" confirmed").split(',').filter_map(|n| n.trim().parse::<usize>().ok()?.checked_sub(1)).collect();
+        let files: Vec<(std::path::PathBuf, u64)> = self.space.as_ref().map(|(_, s)| picks.iter().filter_map(|i| s.big.get(*i).map(|b| (b.0.clone(), b.1))).collect()).unwrap_or_default();
+        if files.is_empty() {
+            return Reply::say("Tick the files to move to the trash first.").mood(Mood::Think);
+        }
+        let total: u64 = files.iter().map(|f| f.1).sum();
+        if !confirmed {
+            let names: Vec<String> = files.iter().take(8).map(|(p, b)| format!("{} ({})", p.file_name().unwrap_or_default().to_string_lossy(), upkeep::size(*b))).collect();
+            return Reply::say(format!("Move {} to the trash? That's {}. You can get them back from the trash.\n{}", if files.len() == 1 { "this file".to_string() } else { format!("these {} files", files.len()) }, upkeep::size(total), names.join("\n"))).mood(Mood::Think).run("Yes, to the trash", &format!("space trash {} confirmed", arg.trim_end_matches(" confirmed"))).btn("Keep them", Act::Hide);
+        }
+        let mut moved = (0, 0u64);
+        let mut failed = vec![];
+        for (p, b) in &files {
+            match sys::trash_file(p) {
+                Ok(()) => moved = (moved.0 + 1, moved.1 + b),
+                Err(e) => failed.push(format!("{}: {e}", p.file_name().unwrap_or_default().to_string_lossy())),
+            }
+        }
+        if let Some((_, s)) = self.space.as_mut() {
+            s.big.retain(|b| b.0.exists());
+        }
+        let mut text = lines::pick("space_trashed").replace("{n}", &moved.0.to_string()).replace("{x}", &upkeep::size(moved.1));
+        if !failed.is_empty() {
+            text += &format!(" ({} couldn't: {})", failed.len(), failed[0]);
+        }
+        Reply::say(text).mood(Mood::Happy)
     }
 
     /// Copy what changed to the backup place, on its own thread, reporting progress as it goes.
@@ -1540,12 +1684,14 @@ impl App {
         }
         let limits = sys::drives().into_iter().find(|d| target.starts_with(&d.path)).map_or(backup::Limits { strict_names: cfg!(windows), fat: false }, |d| backup::Limits { strict_names: d.strict_names(), fat: d.fat() });
         let sources: Vec<std::path::PathBuf> = self.backup_sources.iter().map(std::path::PathBuf::from).collect();
-        let (tx, ctx) = (self.tx.clone(), ctx.clone());
+        let (tx, ctx, skip) = (self.tx.clone(), ctx.clone(), self.backup_skip.clone());
         self.backup_progress = Some((0, 0, 0));
+        self.backup_stop.store(false, std::sync::atomic::Ordering::Relaxed);
+        let stop = self.backup_stop.clone();
         std::thread::spawn(move || {
             // a panic deep in the copying still ends with BackupDone, or the Desk would wait for it forever
             let tx2 = tx.clone();
-            let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| backup::plan(&sources, &target, limits).map(|plan| {
+            let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| backup::plan_skipping(&sources, &target, limits, &skip).map(|plan| {
                 let total = plan.copies.len();
                 let mut last = Instant::now();
                 let _ = tx.send(Event::BackupProgress(0, total, 0));
@@ -1555,7 +1701,7 @@ impl App {
                         let _ = tx2.send(Event::BackupProgress(done, total, bytes));
                         ctx.request_repaint();
                     }
-                })
+                }, &stop)
             })))
             .unwrap_or_else(|_| Err("something went wrong while copying".into()));
             let _ = tx.send(Event::BackupDone(result));
@@ -2046,7 +2192,7 @@ impl App {
     fn snapshot(&self) -> String {
         serde_json::json!({
             "tips_every": self.tips_every, "notice_clip": self.notice_clip, "notice_programs": self.notice_programs, "notice_windows": self.notice_windows, "checkin": self.checkin, "facts": self.facts, "kind_time": self.kind_time, "focus_log": self.focus_log, "desk_look": if self.desk_modern { "modern" } else { "classic" }, "desk_size": if self.desk_large { "large" } else { "normal" }, "checkin_days": self.checkin_days,
-            "pins": self.pins, "reading": self.reading, "calendars": self.calendars, "calendar_meta": self.calendar_meta.iter().map(|(s, m)| (s.clone(), m.to_json())).collect::<serde_json::Map<_, _>>(), "holidays": self.holiday_cc, "pin_labels": self.pin_labels, "reading_titles": self.reading_titles, "people": self.people.iter().map(|p| p.to_json()).collect::<Vec<_>>(), "habits": self.habits.iter().map(|h| h.to_json()).collect::<Vec<_>>(), "countdowns": self.countdowns.iter().map(|(l, d)| serde_json::json!([l, d.to_string()])).collect::<Vec<_>>(), "site_time": self.site_time, "kind_moves": self.kind_moves, "weather": self.weather_on, "work_hours": [self.work_hours.0, self.work_hours.1], "day_totals": plan::history_merge(&self.day_totals, &self.kind_time, &self.focus_log, chrono::Local::now().date_naive()), "workday": self.workday, "workday_ask": self.workday_ask, "welcome_seen": self.welcome_seen, "backup_sources": self.backup_sources, "backup_target": self.backup_target, "backup_last": self.backup_last, "backup_result": self.backup_result, "dnd_restore": self.dnd_restore, "dnd": self.dnd, "wrapup": self.wrapup, "upkeep_day": self.upkeep_day, "focus_goal": self.focus_goal, "budgets": self.budgets,
+            "pins": self.pins, "reading": self.reading, "calendars": self.calendars, "calendar_meta": self.calendar_meta.iter().map(|(s, m)| (s.clone(), m.to_json())).collect::<serde_json::Map<_, _>>(), "holidays": self.holiday_cc, "pin_labels": self.pin_labels, "reading_titles": self.reading_titles, "people": self.people.iter().map(|p| p.to_json()).collect::<Vec<_>>(), "habits": self.habits.iter().map(|h| h.to_json()).collect::<Vec<_>>(), "countdowns": self.countdowns.iter().map(|(l, d)| serde_json::json!([l, d.to_string()])).collect::<Vec<_>>(), "site_time": self.site_time, "kind_moves": self.kind_moves, "weather": self.weather_on, "work_hours": [self.work_hours.0, self.work_hours.1], "day_totals": plan::history_merge(&self.day_totals, &self.kind_time, &self.focus_log, chrono::Local::now().date_naive()), "workday": self.workday, "workday_ask": self.workday_ask, "welcome_seen": self.welcome_seen, "backup_sources": self.backup_sources, "backup_target": self.backup_target, "backup_last": self.backup_last, "backup_result": self.backup_result, "backup_skip": self.backup_skip, "backup_auto": self.backup_auto, "backup_history": self.backup_history, "upkeep_hide": self.upkeep_hide, "space_log": self.space_log, "tidy_targets": self.tidy_targets, "tidy_auto": self.tidy_auto, "dnd_restore": self.dnd_restore, "dnd": self.dnd, "wrapup": self.wrapup, "upkeep_day": self.upkeep_day, "focus_goal": self.focus_goal, "budgets": self.budgets,
             "notice_health": self.notice_health, "check_updates": self.check_updates, "update_told": self.update_told, "sounds": self.sounds, "breaks": self.breaks, "name": self.name,
             "hat": self.hat, "skin": self.skin, "friendship": self.friendship, "highscores": self.highscores, "birthday": self.birthday.map(|(m, d)| [m, d]), "stats": self.stats, "unlocked": self.unlocked, "explored": self.explored, "persona": if self.unhinged { "unhinged" } else { "boring" }, "anchor": self.anchor.or(self.saved_anchor).map(|a| [a.x, a.y]),
             "timers": self.timers.iter().map(|t| serde_json::json!([t.at, t.label, t.every, t.id, t.rule])).collect::<Vec<_>>(),
@@ -2179,6 +2325,14 @@ impl App {
         if v["backup_sources"].is_array() {
             self.backup_sources = strings("backup_sources");
         }
+        self.backup_skip = strings("backup_skip");
+        self.upkeep_hide = strings("upkeep_hide");
+        self.space_log = v["space_log"].as_array().into_iter().flatten().filter_map(|e| Some([e[0].as_u64()?, e[1].as_u64()?])).take(12).collect();
+        self.tidy_targets = v["tidy_targets"].as_array().into_iter().flatten().filter_map(|e| Some((e[0].as_str()?.to_string(), e[1].as_str()?.to_string()))).collect();
+        tidy::set_targets(&self.tidy_targets.iter().map(|(c, p)| (c.clone(), std::path::PathBuf::from(p))).collect::<Vec<_>>());
+        self.tidy_auto = v["tidy_auto"].as_bool().unwrap_or(false);
+        self.backup_auto = v["backup_auto"].as_str().filter(|a| ["plugged", "evening"].contains(a)).unwrap_or("off").to_string();
+        self.backup_history = v["backup_history"].as_array().into_iter().flatten().filter_map(|h| Some([h[0].as_u64()?, h[1].as_u64()?, h[2].as_u64()?, h[3].as_u64()?])).take(10).collect();
         self.timers.clear();
         // [unix, label, every, id, rule]; older files have only the first three, and get fresh ids
         let now_unix = timers::unix_now();
@@ -2549,6 +2703,17 @@ impl App {
                         }
                     }
                     "desksize" => self.desk_large = value == "large",
+                    "tidyauto" => self.tidy_auto = on,
+                    // "Documents /home/you/Documents" (or "Documents default")
+                    "tidytarget" => {
+                        if let Some((cat, path)) = value.split_once(' ') {
+                            self.tidy_targets.retain(|(c, _)| c != cat);
+                            if path.trim() != "default" && std::path::Path::new(path.trim()).is_dir() {
+                                self.tidy_targets.push((cat.to_string(), path.trim().to_string()));
+                            }
+                            tidy::set_targets(&self.tidy_targets.iter().map(|(c, p)| (c.clone(), std::path::PathBuf::from(p))).collect::<Vec<_>>());
+                        }
+                    }
                     "workhours" => {
                         // "9-17": from 9:00 to 17:59
                         if let Some((a, b)) = value.split_once('-').and_then(|(a, b)| Some((a.trim().parse::<u32>().ok()?, b.trim().parse::<u32>().ok()?))).filter(|(a, b)| a <= b && *b <= 23) {
@@ -2596,8 +2761,16 @@ impl App {
                 let name = self.upkeep.as_ref().and_then(|(_, rep)| rep.startup.iter().find(|a| a.id == id)).map_or(id.clone(), |a| a.name.clone());
                 r = match sys::set_startup(&id, on) {
                     Ok(()) => {
-                        if let Some(app) = self.upkeep.as_mut().and_then(|(_, rep)| rep.startup.iter_mut().find(|a| a.id == id)) {
-                            app.on = on;
+                        if let Some((_, rep)) = self.upkeep.as_mut() {
+                            if let Some(app) = rep.startup.iter_mut().find(|a| a.id == id) {
+                                app.on = on;
+                            }
+                            // the row's count follows at once
+                            let n = rep.startup.iter().filter(|a| a.on).count();
+                            if let Some(c) = rep.checks.iter_mut().find(|c| c.id == "startup") {
+                                c.text = format!("{n} app{} start{} when you log in", if n == 1 { "" } else { "s" }, if n == 1 { "s" } else { "" });
+                                c.level = if n >= 10 { upkeep::Level::Note } else { upkeep::Level::Good };
+                            }
                         }
                         Reply::say(lines::pick(if on { "upkeep_startup_on" } else { "upkeep_startup_off" }).replace("{x}", &name)).mood(Mood::Happy)
                     }
@@ -2642,6 +2815,15 @@ impl App {
                     r = Reply::say(format!("{} {}\n\n{text}", lines::pick("review_intro"), lines::pick(verdict))).mood(Mood::Happy).btn("Copy as text", Act::Copy(text)).run("Plan next week", "desk planweek");
                 }
             }
+            Effect::UpkeepHide(id, hide) => {
+                self.upkeep_hide.retain(|h| *h != id);
+                if hide {
+                    self.upkeep_hide.push(id);
+                }
+                self.set_status(if hide { "Hidden. Settings can bring it back." } else { "It's back on the checkup." }.to_string());
+                silent = true;
+            }
+            Effect::Space(cmd) => r = self.space_command(ctx, &cmd, from_desk, &mut silent),
             Effect::ShowQr(text) => {
                 // the code is drawn in a card on the Desk
                 if !self.desk.is_open() {
@@ -2681,7 +2863,21 @@ impl App {
             }
             Effect::AppTips => r = brain::app_tip(self.window_kind.as_deref().filter(|k| *k != "other").unwrap_or("desktop")),
             Effect::Tidy(which) => {
-                r = match tidy::folder(&which).map(|d| (tidy::apply(&tidy::plan(&d), &tidy::undo_log()), d)) {
+                // "downloads skip 2,5": the files you unticked (places in the plan the Desk showed) stay where they are
+                let (which, skip) = which.split_once(" skip ").map_or((which.as_str(), vec![]), |(w, s)| (w, s.split(',').filter_map(|n| n.trim().parse::<usize>().ok()).collect::<Vec<_>>()));
+                let keep = |d: &std::path::Path| tidy::plan(d).into_iter().enumerate().filter(|(i, _)| !skip.contains(&(i + 1))).map(|(_, m)| m).collect::<Vec<_>>();
+                if self.desk.is_open() && self.upkeep.is_some() {
+                    self.start_checkup(ctx, false); // the Downloads row turns green
+                }
+                // nothing to move (all unticked): the last tidy's undo stays as it is
+                let planned = tidy::folder(which).map(|d| (keep(&d), d));
+                if let Some((moves, d)) = planned.as_ref().filter(|(m, _)| m.is_empty()) {
+                    let _ = moves;
+                    self.set_status(lines::pick("tidy_nothing").replace("{x}", &d.file_name().unwrap_or_default().to_string_lossy()));
+                    silent = true;
+                }
+                r = match planned.filter(|(m, _)| !m.is_empty()).map(|(m, d)| (tidy::apply(&m, &tidy::undo_log()), d)) {
+                    None if silent => Reply::say(""),
                     Some((Ok(n), d)) => Reply::say(lines::pick("tidy_done").replace("{n}", &n.to_string()))
                         .mood(Mood::Party)
                         .run("Undo", "tidy undo")
@@ -3310,6 +3506,30 @@ impl App {
         }
         // people: once a day after 8:00, a birthday coming up (or today), or someone you wanted to keep in touch with
         let mut can_nudge = self.balloon.is_none() && !self.quiet() && self.input.is_empty() && self.focus.is_none() && self.screenshot.is_none();
+        // backups on their own: when the drive appears (once a day), or in the evening if it's there
+        if self.backup_auto != "off" && self.screenshot.is_none() && self.backup_progress.is_none() && !self.backup_sources.is_empty() && !self.backup_target.is_empty() && self.stats.get("backup_auto_day") != Some(&day_num) && t > 60.0 && self.backup_last.is_none_or(|l| backup::days_since(Some(l), backup::now()) != Some(0)) {
+            let evening_ok = self.backup_auto != "evening" || chrono::Timelike::hour(&chrono::Local::now()) >= 18;
+            if evening_ok && std::path::Path::new(&self.backup_target).exists() {
+                self.stats.insert("backup_auto_day".into(), day_num);
+                let r = self.start_backup(ctx);
+                if !r.text.is_empty() && can_nudge {
+                    self.pipe_up(Reply::say(lines::pick("backup_auto_started")).mood(Mood::Search).btn("Thanks", Act::Hide));
+                }
+            }
+        }
+        // the weekly tidy: Mondays, files in Downloads that are a week old
+        if self.tidy_auto && self.screenshot.is_none() && chrono::Datelike::weekday(&chrono::Local::now()) == chrono::Weekday::Mon && self.stats.get("tidy_auto_day") != Some(&day_num) && t > 120.0 {
+            self.stats.insert("tidy_auto_day".into(), day_num);
+            if let Some(d) = tidy::folder("downloads") {
+                // nothing to move: the last tidy's undo stays as it is
+                let moves = tidy::plan_older(&d, 7);
+                if let Some(n) = (!moves.is_empty()).then(|| tidy::apply(&moves, &tidy::undo_log()).ok()).flatten().filter(|n| *n > 0) {
+                    if can_nudge {
+                        self.pipe_up(Reply::say(lines::pick("tidy_auto_done").replace("{n}", &n.to_string())).mood(Mood::Happy).run("Undo", "tidy undo").btn("Thanks", Act::Hide));
+                    }
+                }
+            }
+        }
         // a countdown's day: he cheers once (it's gone tomorrow)
         if can_nudge && t > 90.0 && self.stats.get("countdown_day") != Some(&day_num) {
             let today = chrono::Local::now().date_naive();
@@ -3471,7 +3691,17 @@ impl App {
                 }
                 Event::Upkeep(report, nudge) => {
                     self.upkeep_running = false;
-                    let needs = report.checks.iter().filter(|c| c.level != upkeep::Level::Good).count() + usize::from(self.backup_check().level != upkeep::Level::Good);
+                    // free space over time: one reading about a week apart
+                    if let Some((free, _)) = report.disk {
+                        let now_unix = backup::now() as u64;
+                        if self.space_log.last().is_none_or(|l| now_unix.saturating_sub(l[0]) >= 6 * 86_400) {
+                            self.space_log.push([now_unix, free]);
+                            let excess = self.space_log.len().saturating_sub(12);
+                            self.space_log.drain(..excess);
+                        }
+                    }
+                    let hidden = |id: &str| self.upkeep_hide.iter().any(|h| h == id);
+                    let needs = report.checks.iter().filter(|c| c.level != upkeep::Level::Good && !hidden(c.id)).count() + usize::from(self.backup_check().level != upkeep::Level::Good && !hidden("backup"));
                     self.upkeep = Some((Instant::now(), *report));
                     if nudge && needs > 0 {
                         self.pipe_up(Reply::say(lines::pick("upkeep_day").replace("{n}", &needs.to_string())).mood(Mood::Think).run("Open Upkeep", "desk upkeep").btn("Later", Act::Hide));
@@ -3496,9 +3726,38 @@ impl App {
                     self.calendar_names = names;
                     self.show_calendars();
                 }
+                Event::Now(reading) => self.now_reading = Some(*reading),
+                Event::Space(report) => {
+                    self.space_running = false;
+                    self.space = Some((Instant::now(), *report));
+                }
+                Event::BackupFound(found) => {
+                    self.set_status(if found.is_empty() { "Nothing in the backup by that name.".to_string() } else { format!("Found {} in the backup.", found.len()) });
+                    self.backup_found = Some(found);
+                }
+                Event::Restored(result) => match result {
+                    Ok(p) => {
+                        let name = p.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
+                        self.set_status(lines::pick("backup_restored").replace("{x}", &name));
+                        let _ = sys::reveal(&p);
+                    }
+                    Err(e) => self.set_status(format!("! I couldn't copy it back: {e}")),
+                },
                 Event::BackupDone(result) => {
                     self.backup_progress = None;
+                    if let Ok(s) = &result {
+                        self.backup_history.insert(0, [backup::now() as u64, s.copied as u64, s.bytes, s.errors.len() as u64]);
+                        self.backup_history.truncate(10);
+                    }
+                    // a fixed problem turns green on the checkup without asking
+                    if self.desk.is_open() && self.upkeep.is_some() {
+                        self.start_checkup(ctx, false);
+                    }
                     let r = match result {
+                        Ok(s) if s.stopped.is_some() => {
+                            self.backup_result = format!("Stopped: {} copied, {} left for next time", s.copied, s.stopped.unwrap_or(0));
+                            Reply::say(lines::pick("backup_stopped").replace("{n}", &s.copied.to_string())).mood(Mood::Think)
+                        }
                         Ok(s) => {
                             if s.errors.is_empty() {
                                 self.backup_last = Some(backup::now()); // a run with failures doesn't silence the reminder

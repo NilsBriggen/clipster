@@ -317,6 +317,75 @@ pub fn running_programs() -> HashSet<String> {
     }
 }
 
+/// One /proc/<pid>/stat line: the program's name and the CPU ticks it has used (user + system). The name sits
+/// between the first "(" and the last ")", and may hold spaces or brackets itself.
+pub fn parse_proc_stat(text: &str) -> Option<(String, u64)> {
+    let (open, close) = (text.find('(')?, text.rfind(')')?);
+    let name = text.get(open + 1..close)?.to_string();
+    let rest: Vec<&str> = text.get(close + 1..)?.split_whitespace().collect();
+    // after the name: state is field 3, utime and stime are fields 14 and 15
+    Some((name, rest.get(11)?.parse::<u64>().ok()? + rest.get(12)?.parse::<u64>().ok()?))
+}
+
+/// PowerShell's answer for the top programs: [{"Name":…,"Mem":bytes,"Cpu":percent}] (or one object alone).
+pub fn parse_top_json(out: &str) -> Vec<(String, u64, f32)> {
+    let v: serde_json::Value = serde_json::from_str(out.trim()).unwrap_or_default();
+    let list = if v.is_array() { v.as_array().cloned().unwrap_or_default() } else if v.is_object() { vec![v] } else { vec![] };
+    list.iter().filter_map(|p| Some((p["Name"].as_str()?.to_string(), p["Mem"].as_u64().unwrap_or(0) / 1024, p["Cpu"].as_f64().unwrap_or(0.0) as f32))).collect()
+}
+
+/// The programs using the most memory: (name, memory in KB, CPU in percent of one core), all of a program's
+/// processes together. Takes about half a second (CPU use is measured over that), so call it on a thread.
+pub fn top_programs(n: usize) -> Vec<(String, u64, f32)> {
+    if cfg!(windows) {
+        let ps = "$a=@{}; Get-Process | % { $a[$_.Id]=$_.CPU }; Start-Sleep -Milliseconds 500; Get-Process | Group-Object Name | % { $cpu=0; foreach($p in $_.Group){ if($a.ContainsKey($p.Id) -and $p.CPU){ $cpu += ($p.CPU - $a[$p.Id]) } }; [pscustomobject]@{Name=$_.Name; Mem=($_.Group | Measure-Object WorkingSet64 -Sum).Sum; Cpu=[math]::Round($cpu*200,1)} } | Sort-Object Mem -Descending | Select-Object -First 12 | ConvertTo-Json -Compress";
+        let out = shell(ps).output().map(|o| String::from_utf8_lossy(&o.stdout).into_owned()).unwrap_or_default();
+        let mut v = parse_top_json(&out);
+        v.truncate(n);
+        return v;
+    }
+    let sample = || -> std::collections::HashMap<u32, (String, u64)> {
+        std::fs::read_dir("/proc").into_iter().flatten().flatten().filter_map(|e| {
+            let pid: u32 = e.file_name().to_str()?.parse().ok()?;
+            let (name, ticks) = parse_proc_stat(&std::fs::read_to_string(e.path().join("stat")).ok()?)?;
+            Some((pid, (name, ticks)))
+        }).collect()
+    };
+    let before = sample();
+    let t0 = std::time::Instant::now();
+    std::thread::sleep(std::time::Duration::from_millis(500));
+    let after = sample();
+    let secs = t0.elapsed().as_secs_f32().max(0.1);
+    let page_kb = 4; // shortcut: assumes 4 KB pages, true on the PCs Clipster runs on
+    let mut by: std::collections::HashMap<String, (u64, f32)> = std::collections::HashMap::new();
+    for (pid, (name, ticks)) in &after {
+        let rss = std::fs::read_to_string(format!("/proc/{pid}/statm")).ok().and_then(|s| s.split_whitespace().nth(1)?.parse::<u64>().ok()).unwrap_or(0) * page_kb;
+        let cpu = before.get(pid).map_or(0.0, |(_, t)| ticks.saturating_sub(*t) as f32 / secs); // 100 ticks a second = one core
+        let e = by.entry(name.clone()).or_default();
+        e.0 += rss;
+        e.1 += cpu;
+    }
+    let mut v: Vec<(String, u64, f32)> = by.into_iter().map(|(n, (m, c))| (n, m, c)).filter(|p| p.1 > 0).collect();
+    v.sort_by(|a, b| b.1.cmp(&a.1));
+    v.truncate(n);
+    v
+}
+
+/// Move a file to the trash (it can be got back from there): `gio trash` on Linux, the Recycle Bin on Windows.
+pub fn trash_file(path: &std::path::Path) -> Result<(), String> {
+    let out = if cfg!(windows) {
+        let p = path.to_string_lossy().replace('\'', "''");
+        shell(&format!("Add-Type -AssemblyName Microsoft.VisualBasic; [Microsoft.VisualBasic.FileIO.FileSystem]::DeleteFile('{p}','OnlyErrorDialogs','SendToRecycleBin')")).output()
+    } else {
+        command("gio").arg("trash").arg(path).output()
+    };
+    match out {
+        Ok(o) if o.status.success() => Ok(()),
+        Ok(o) => Err(String::from_utf8_lossy(&o.stderr).trim().to_string()),
+        Err(e) => Err(e.to_string()),
+    }
+}
+
 /// Program names are letters, digits and `._-` only, so they're safe to hand to a shell.
 pub fn program_name(t: &str) -> String {
     t.chars().filter(|c| c.is_ascii_alphanumeric() || "._-".contains(*c)).collect()
@@ -1162,6 +1231,10 @@ mod tests {
     fn readings_and_names() {
         assert_eq!(program_name("fire$(rm)fox; ls"), "firermfoxls");
         assert_eq!(close_command("a b; rm"), if cfg!(windows) { "taskkill /IM abrm.exe" } else { "pkill -x abrm" });
+        assert_eq!(parse_proc_stat("4711 (Web Content (x)) S 1 2 3 4 5 6 7 8 9 10 250 50 0 0"), Some(("Web Content (x)".into(), 300)));
+        assert_eq!(parse_proc_stat("garbage"), None);
+        assert_eq!(parse_top_json(r#"[{"Name":"firefox","Mem":2097152,"Cpu":12.5},{"Name":"code","Mem":1048576,"Cpu":null}]"#), vec![("firefox".into(), 2048, 12.5), ("code".into(), 1024, 0.0)]);
+        assert_eq!(parse_top_json(r#"{"Name":"one","Mem":1024,"Cpu":1}"#).len(), 1, "a single process comes as an object");
         assert!(uptime() > 0);
         assert!(mem().is_some_and(|(total, avail)| total > 0.0 && avail <= total));
         assert!(!running_programs().is_empty());

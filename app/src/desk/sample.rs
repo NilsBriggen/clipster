@@ -48,7 +48,7 @@ pub(super) fn sample_files(desktop: bool) -> Files {
         .collect();
     let recent = ["Quarterly report.odt", "Offsite budget.ods", "Team photo.jpg"].iter().map(|n| (n.to_string(), PathBuf::from(format!("/home/you/Documents/{n}")))).collect();
     let downloads = ["invoice-2026-11.pdf", "printer-manual.pdf"].iter().map(|n| PathBuf::from(format!("/home/you/Downloads/{n}"))).collect();
-    Files { at: Some(Instant::now()), todos, notes, plan, plan_at: Some(Instant::now()), plan_desktop: desktop, can_undo: true, taught, done, journal, recent, downloads }
+    Files { at: Some(Instant::now()), todos, notes, plan, plan_at: Some(Instant::now()), plan_desktop: desktop, can_undo: Some((24, std::time::SystemTime::now() - std::time::Duration::from_secs(2 * 86_400))), taught, done, journal, recent, downloads }
 }
 
 /// Made-up timers, times, sessions and check-ins for screenshots: (timers, kind_time, focus_log, checkins).
@@ -95,4 +95,15 @@ pub fn sample_history() -> crate::plan::History {
             (d.format("%Y-%m-%d").to_string(), [4 * 3600 + n * 60, 3000 + (n % 3) * 900, 1800, if tuesday { 6600 } else { 2400 + (n % 4) * 300 }])
         })
         .collect()
+}
+
+/// A made-up Right now and Space for screenshots.
+pub fn sample_upkeep() -> (crate::upkeep::Now, crate::upkeep::Space) {
+    let top = [("firefox", 2_400_000, 12.5), ("code", 1_300_000, 4.0), ("Web Content", 900_000, 22.0), ("thunderbird", 640_000, 0.5), ("spotify", 410_000, 1.2), ("plasmashell", 380_000, 0.8), ("clipster", 120_000, 2.0), ("nextcloud", 95_000, 0.1)].iter().map(|(n, m, c)| (n.to_string(), *m as u64, *c as f32)).collect();
+    let now = crate::upkeep::Now { load: Some(0.42), mem: Some((16.0, 6.3)), battery: Some((81, true)), uptime: 4 * 86_400 + 3 * 3600, top };
+    let home = PathBuf::from("/home/you");
+    let folders = [("Videos", 84_000_000_000u64), ("Pictures", 41_000_000_000), ("Downloads", 23_500_000_000), ("Documents", 6_200_000_000), ("Music", 3_900_000_000)].iter().map(|(n, b)| (home.join(n), *b)).collect();
+    let ago = |d: u64| std::time::SystemTime::now() - std::time::Duration::from_secs(d * 86_400);
+    let big = [("Videos/holiday-2024.mkv", 9_800_000_000u64, 400), ("Downloads/ubuntu-24.04.iso", 6_100_000_000, 210), ("Videos/screen-recording.mp4", 3_300_000_000, 35), ("Downloads/old-backup.zip", 2_700_000_000, 600), ("Pictures/raw/IMG_0412.dng", 410_000_000, 90)].iter().map(|(n, b, d)| (home.join(n), *b, ago(*d))).collect();
+    (now, crate::upkeep::Space { free: Some((175_000_000_000, 752_000_000_000)), folders, big })
 }

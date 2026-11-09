@@ -87,6 +87,8 @@ pub enum Effect {
     ReviewCsv,                       // the last seven days as spreadsheets in Documents
     ShowQr(String),                  // a QR code of this text, drawn on the Desk (nothing leaves the computer)
     Reveal(String),                  // show this file in its folder
+    UpkeepHide(String, bool),        // a checkup row that isn't for you: its id, hide (true) or bring back
+    Space(String),                   // Upkeep's Space page: "scan", "trash 2,5" (asks first), "trash 2,5 confirmed"
     SaveStarter(String),             // keep this named list as one to start new lists from (written to your lines file)
     OpenDesk(String),                // Clipster's Desk, on this tab ("" = where it was): stats, to-dos, reminders, upkeep
     DeskLook(bool),                  // the Desk's look: true = modern, false = classic 98
@@ -239,7 +241,7 @@ pub fn respond(input: &str) -> Reply {
 
 /// Strict commands ("joke", "timer 5m tea", "5 km to miles"). `None` = not a command I know.
 /// The settings the Desk's `pref <key> <value>` may change.
-pub const PREF_KEYS: &[&str] = &["persona", "tips", "clip", "programs", "windows", "checkin", "health", "updates", "sounds", "breaks", "dnd", "wrapup", "upkeepday", "workdayask", "quiet", "autostart", "goal", "budget", "classiclook", "desksize", "weather", "workhours", "holidays"];
+pub const PREF_KEYS: &[&str] = &["persona", "tips", "clip", "programs", "windows", "checkin", "health", "updates", "sounds", "breaks", "dnd", "wrapup", "upkeepday", "workdayask", "quiet", "autostart", "goal", "budget", "classiclook", "desksize", "weather", "workhours", "holidays", "tidyauto", "tidytarget"];
 
 /// Command words that are also ordinary English words only count in their command shape: "drink" alone is a
 /// cocktail, "drink water" is advice; "top" alone lists programs, "top 10 movies" is a question.
@@ -412,6 +414,11 @@ pub fn exact(input: &str) -> Option<Reply> {
         "files" if rest.starts_with("copypath ") => return Some(Reply::say(lines::pick("clip_copied")).mood(Mood::Happy).effect(Effect::CopyNow(rest[9..].trim().to_string()))),
         // upkeep: the checkup, the system's updater and start-up apps, backups
         "upkeep" if rest == "check" => return Some(Reply::say("").effect(Effect::UpkeepCheck)),
+        "upkeep" if rest.starts_with("hide ") || rest.starts_with("unhide ") => {
+            let (verb, id) = rest.split_once(' ')?;
+            return Some(Reply::say("").effect(Effect::UpkeepHide(id.trim().to_string(), verb == "hide")));
+        }
+        "space" if rest == "scan" || rest.starts_with("trash ") => return Some(Reply::say("").effect(Effect::Space(rest.to_string()))),
         "upkeep" if rest == "cleartemp" => {
             let what = if cfg!(windows) { "the temporary files older than a week" } else { "the thumbnails" };
             return Some(Reply::say(format!("Clear {what}? Programs make new ones when they need them.")).mood(Mood::Think).run("Yes, clear them", crate::sys::temp_clear_command()).btn("No, leave them", Act::Hide));
@@ -441,6 +448,9 @@ pub fn exact(input: &str) -> Option<Reply> {
         "tidy" if rest == "undo" => return Some(Reply::say("").effect(Effect::TidyUndo)),
         "tidy" if rest.ends_with(" confirmed") => return Some(Reply::say("").effect(Effect::Tidy(rest.trim_end_matches(" confirmed").to_string()))),
         "tidy" if crate::tidy::known(rest) => return Some(tidy_plan(rest)),
+        // the Tidy page's own lists: the answer goes onto the page
+        "tidyfind" if rest.starts_with("dupes ") => return Some(Reply::say("").effect(Effect::DeskNet(Query::Dupes(rest[6..].trim().to_string()), "tidyfind".into()))),
+        "tidyfind" if rest.starts_with("old ") => return Some(Reply::say("").effect(Effect::DeskNet(Query::OldFiles(rest[4..].trim().to_string()), "tidyfind".into()))),
         "dupes" => return Some(net(Query::Dupes(rest.to_string()), "Comparing your files byte by byte. I love this kind of work.")),
         "oldfiles" => return Some(net(Query::OldFiles(rest.to_string()), "Digging for big old files...")),
         "focus" if ["stop", "end", "cancel", "off", "done"].contains(&rest) => return Some(Reply::say("").effect(Effect::FocusStop)),

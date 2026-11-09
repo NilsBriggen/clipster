@@ -20417,3 +20417,35 @@ Picked one for you. No peeking at the others.
 ## reading_old
 {n} links are more than a month old. Clear them?
 Clear the {n} links you saved over a month ago?
+
+## upkeep_now_calm
+Nothing is working hard right now.
+All calm. No program is hogging the processor.
+
+## upkeep_now_busy
+{x} is working the processor hard right now.
+{x} is the busy one at the moment.
+
+## space_scanning
+Counting what's in your home folder. A big one takes a while.
+Measuring your folders. This can take a minute.
+
+## space_trashed
+Moved {n} to the trash ({x}). You can get them back from there until you empty it.
+{n} in the trash, {x} freed once you empty it.
+
+## tidy_auto_done
+Monday tidy: {n} files from last week went into folders in Downloads.
+I tidied {n} week-old files in your Downloads. Undo is there if you need it.
+
+## backup_auto_started
+Your backup drive is here, so I've started the backup.
+The backup is running on its own. I'll say when it's done.
+
+## backup_stopped
+Stopped. {n} files were copied; the rest go next time.
+The backup stopped after {n} files. The next one picks up from there.
+
+## backup_restored
+"{x}" is back, next to the original. I've shown it in its folder.
+Copied back as "{x}". Your current file is untouched.

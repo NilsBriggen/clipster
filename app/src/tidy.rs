@@ -35,11 +35,38 @@ pub fn folder(which: &str) -> Option<PathBuf> {
     }
 }
 
+/// The categories, in order (for "Where to" on the Desk).
+pub fn categories() -> Vec<&'static str> {
+    CATEGORIES.iter().map(|(c, _)| *c).chain(std::iter::once("Other")).collect()
+}
+
+// Where a category goes instead of a subfolder ("Documents" → your real Documents folder), from the settings.
+static TARGETS: std::sync::Mutex<Vec<(String, PathBuf)>> = std::sync::Mutex::new(Vec::new());
+
+pub fn set_targets(targets: &[(String, PathBuf)]) {
+    if let Ok(mut t) = TARGETS.lock() {
+        *t = targets.to_vec();
+    }
+}
+
+fn target_of(dir: &Path, category: &str) -> PathBuf {
+    if cfg!(test) {
+        return dir.join(category);
+    }
+    TARGETS.lock().ok().and_then(|t| t.iter().find(|(c, _)| c == category).map(|(_, p)| p.clone())).unwrap_or_else(|| dir.join(category))
+}
+
 /// What would move where: the files directly in `dir` (not folders, hidden files, half-finished downloads
-/// or anything changed in the last two minutes) into `dir/<Category>/`, with " (2)" where a name is taken.
+/// or anything changed in the last two minutes) into `dir/<Category>/` (or where you said that category goes),
+/// with " (2)" where a name is taken.
 pub fn plan(dir: &Path) -> Vec<(PathBuf, PathBuf)> {
+    plan_older(dir, 0)
+}
+
+/// `plan`, for files at least `days` old only (the weekly tidy leaves this week's downloads alone).
+pub fn plan_older(dir: &Path, days: u64) -> Vec<(PathBuf, PathBuf)> {
     let Ok(entries) = std::fs::read_dir(dir) else { return vec![] };
-    let fresh = SystemTime::now() - Duration::from_secs(120);
+    let fresh = SystemTime::now() - Duration::from_secs(120.max(days * 86_400));
     let mut files: Vec<PathBuf> = entries
         .flatten()
         .filter(|e| e.file_type().is_ok_and(|t| t.is_file()))
@@ -57,7 +84,7 @@ pub fn plan(dir: &Path) -> Vec<(PathBuf, PathBuf)> {
         .into_iter()
         .map(|from| {
             let name = from.file_name().unwrap_or_default().to_string_lossy().to_string();
-            let sub = dir.join(category(&name));
+            let sub = target_of(dir, category(&name));
             let to = free_name(&sub, &name, &taken);
             taken.insert(to.clone());
             (from, to)
@@ -111,13 +138,21 @@ pub fn undo(log: &Path) -> Result<usize, String> {
             back += 1;
         }
     }
-    // tidy up the tidying: empty category folders go away again
-    let dirs: std::collections::HashSet<PathBuf> = moves.iter().filter_map(|(_, to)| Path::new(to).parent().map(Path::to_path_buf)).collect();
+    // tidy up the tidying: empty category folders go away again (only ones made inside the tidied folder, never
+    // your own Documents or Music folder)
+    let dirs: std::collections::HashSet<PathBuf> = moves.iter().filter_map(|(from, to)| Path::new(to).parent().filter(|d| d.parent() == Path::new(from).parent()).map(Path::to_path_buf)).collect();
     for d in dirs {
         let _ = std::fs::remove_dir(d); // only succeeds when it's empty
     }
     let _ = std::fs::remove_file(log);
     Ok(back)
+}
+
+/// What the last tidy would undo: how many files, and when it happened.
+pub fn undo_summary(log: &Path) -> Option<(usize, SystemTime)> {
+    let moves: Vec<(String, String)> = serde_json::from_str(&std::fs::read_to_string(log).ok()?).ok()?;
+    let when = std::fs::metadata(log).and_then(|m| m.modified()).ok()?;
+    (!moves.is_empty()).then_some((moves.len(), when))
 }
 
 /// Files with the same content (same size, then the same SHA-256), biggest first. Looks at up to 5000 files.
@@ -221,8 +256,10 @@ mod tests {
         let p = plan(&d);
         let rel: Vec<String> = p.iter().map(|(_, to)| to.strip_prefix(&d).unwrap().to_string_lossy().replace('\\', "/")).collect();
         assert_eq!(rel, ["Images/cat.JPG", "Documents/report (2).pdf", "Music/song.mp3", "Other/thing.xyz"]);
+        assert!(plan_older(&d, 7).is_empty(), "all of them are an hour old, not a week");
         let log = d.join("undo.json");
         assert_eq!(apply(&p, &log), Ok(4));
+        assert_eq!(undo_summary(&log).map(|s| s.0), Some(4));
         assert!(d.join("Music/song.mp3").exists() && !d.join("song.mp3").exists());
         assert!(d.join(".hidden").exists() && d.join("big.iso.part").exists(), "hidden and partial files stay");
         assert_eq!(undo(&log), Ok(4));

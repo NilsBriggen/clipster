@@ -136,6 +136,33 @@ pub fn newest(dir: &Path, n: usize) -> Vec<PathBuf> {
     files.into_iter().take(n).map(|f| f.1).collect()
 }
 
+/// The biggest files under `root` (not in hidden folders), biggest first: (path, bytes, last changed). Looks at
+/// up to `limit` files, so a huge home folder can't keep it busy for minutes.
+pub fn biggest(root: &Path, n: usize, limit: usize) -> Vec<(PathBuf, u64, std::time::SystemTime)> {
+    let (mut found, mut seen, mut todo) = (vec![], 0, vec![root.to_path_buf()]);
+    while let Some(dir) = todo.pop() {
+        for e in std::fs::read_dir(&dir).into_iter().flatten().flatten() {
+            if e.file_name().to_string_lossy().starts_with('.') {
+                continue;
+            }
+            let Ok(m) = std::fs::symlink_metadata(e.path()) else { continue };
+            if m.is_dir() {
+                todo.push(e.path());
+            } else if m.is_file() {
+                found.push((e.path(), m.len(), m.modified().unwrap_or(std::time::UNIX_EPOCH)));
+                seen += 1;
+                if seen >= limit {
+                    todo.clear();
+                    break;
+                }
+            }
+        }
+    }
+    found.sort_by(|a, b| b.1.cmp(&a.1));
+    found.truncate(n);
+    found
+}
+
 pub fn tilde(p: &Path) -> String {
     let home = dirs::home_dir().unwrap_or_default();
     match p.strip_prefix(&home) {

@@ -18,6 +18,10 @@ pub enum Event {
     BackupDone(Result<crate::backup::Summary, String>),
     Calendar(u64, crate::calendar::Fetched),                 // which fetch, and what it found (events, problems, names)
     Holidays(String, Vec<(chrono::NaiveDate, String)>),      // a country's public holidays (this year and next)
+    BackupFound(Vec<std::path::PathBuf>),                    // files found in the backup by name
+    Restored(Result<std::path::PathBuf, String>),            // a file copied back from the backup (where it went)
+    Now(Box<crate::upkeep::Now>),                            // Upkeep's Right now: load, memory, battery, the top programs
+    Space(Box<crate::upkeep::Space>),                        // Upkeep's Space: folders and the biggest files
     Weather(Option<String>),                                 // the Today tab's weather line (None: couldn't get it)
 }
 

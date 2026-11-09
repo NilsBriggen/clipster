@@ -37,6 +37,46 @@ pub struct Readings {
 pub struct Report {
     pub checks: Vec<Check>,
     pub startup: Vec<sys::StartupApp>,
+    pub disk: Option<(u64, u64)>, // free, total (for the free-space history)
+}
+
+/// Upkeep's Right now page: how busy the computer is, and what's using it.
+#[derive(Clone, Debug, Default)]
+pub struct Now {
+    pub load: Option<f32>,
+    pub mem: Option<(f64, f64)>, // total, available GB
+    pub battery: Option<(u8, bool)>,
+    pub uptime: u64,
+    pub top: Vec<(String, u64, f32)>, // name, KB, CPU % of one core
+}
+
+/// Read it (half a second: CPU use is measured over that); on a thread.
+pub fn now() -> Now {
+    Now { load: sys::load(), mem: sys::mem(), battery: sys::battery(), uptime: sys::uptime(), top: sys::top_programs(8) }
+}
+
+/// Upkeep's Space page: the home folder's folders by size, and its biggest files.
+#[derive(Clone, Debug, Default)]
+pub struct Space {
+    pub free: Option<(u64, u64)>,
+    pub folders: Vec<(std::path::PathBuf, u64)>,
+    pub big: Vec<(std::path::PathBuf, u64, std::time::SystemTime)>,
+}
+
+/// Count it (slow on a big home folder: at most 300,000 files are looked at); on a thread.
+pub fn space() -> Space {
+    let home = dirs::home_dir().unwrap_or_default();
+    let mut folders: Vec<(std::path::PathBuf, u64)> = std::fs::read_dir(&home)
+        .into_iter()
+        .flatten()
+        .flatten()
+        .filter(|e| e.file_type().is_ok_and(|t| t.is_dir()) && !e.file_name().to_string_lossy().starts_with('.'))
+        .map(|e| (e.path(), sys::dir_size(&e.path(), 300_000)))
+        .filter(|f| f.1 > 0)
+        .collect();
+    folders.sort_by(|a, b| b.1.cmp(&a.1));
+    folders.truncate(10);
+    Space { free: sys::disk_space(&home), folders, big: crate::find::biggest(&home, 15, 300_000) }
 }
 
 /// "4.2 GB", "340 MB", "12 KB".
@@ -63,7 +103,7 @@ pub fn run() -> Report {
         startup: sys::startup_apps(),
         loose: crate::tidy::folder("downloads").map(|d| crate::tidy::plan(&d).len()).unwrap_or(0),
     };
-    Report { checks: judge(&r), startup: r.startup }
+    Report { checks: judge(&r), startup: r.startup, disk: r.disk }
 }
 
 /// The verdicts, most important first within the fixed order the Desk shows.
@@ -73,7 +113,7 @@ pub fn judge(r: &Readings) -> Vec<Check> {
     if let Some((free, total)) = r.disk {
         let pct = free * 100 / total.max(1);
         let level = if pct < 5 || free < 2_000_000_000 { Level::Needs } else if pct < 10 || free < 10_000_000_000 { Level::Note } else { Level::Good };
-        out.push(check("disk", "Free space", level, format!("{} free of {}", size(free), size(total)), (level != Level::Good).then_some(("Big files", "bigfiles"))));
+        out.push(check("disk", "Free space", level, format!("{} free of {}", size(free), size(total)), (level != Level::Good).then_some(("What fills it", "@space"))));
     }
     if let Some((bytes, items)) = r.trash {
         let level = if bytes >= 1_000_000_000 { Level::Note } else { Level::Good };
@@ -113,7 +153,7 @@ pub fn backup_check(set_up: bool, last: Option<i64>, now: i64, present: bool) ->
     if !set_up {
         return check(Level::Note, "Not set up yet".into(), ("Set up", "@backup"));
     }
-    let now_fix = if present { ("Back up now", "backup now") } else { ("Backup", "@backup") };
+    let now_fix = if present { ("Back up now", "backup now") } else { ("Open Backup", "@backup") };
     match last.map(|t| (now - t).max(0) / 86_400) {
         None => check(Level::Needs, "Never run yet".into(), now_fix),
         Some(d) => {

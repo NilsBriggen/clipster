@@ -23,6 +23,7 @@ pub struct Plan {
 
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct Summary {
+    pub stopped: Option<usize>, // stopped by you before the end: how many files were left
     pub copied: usize,
     pub bytes: u64,
     pub plan_same: usize,
@@ -62,8 +63,59 @@ fn later(a: SystemTime, b: SystemTime) -> i64 {
     }
 }
 
+/// A name you said to skip: `node_modules` (that name), `*.iso` (ending), `cache*` (starting), any case.
+pub fn skipped(name: &str, patterns: &[String]) -> bool {
+    let n = name.to_lowercase();
+    patterns.iter().map(|p| p.trim().to_lowercase()).filter(|p| !p.is_empty()).any(|p| match (p.strip_prefix('*'), p.strip_suffix('*')) {
+        (Some(end), _) if !end.contains('*') => n.ends_with(end),
+        (_, Some(start)) if !start.contains('*') => n.starts_with(start),
+        _ => n == p,
+    })
+}
+
+/// The folder names the backup gives the sources, in order: "Documents", and "Documents (2)" for a second one.
+pub fn names(sources: &[PathBuf]) -> Vec<String> {
+    let mut names: Vec<String> = vec![];
+    for src in sources {
+        let base = src.file_name().map(|n| n.to_string_lossy().to_string()).unwrap_or_else(|| "Files".into());
+        let mut name = base.clone();
+        let mut n = 2;
+        while names.iter().any(|x| x.eq_ignore_ascii_case(&name)) {
+            name = format!("{base} ({n})");
+            n += 1;
+        }
+        names.push(name);
+    }
+    names
+}
+
+/// Where a file in the backup came from: `target/Clipster backup/<source name>/rest` → `<source>/rest`.
+pub fn original_of(file: &Path, target: &Path, sources: &[PathBuf]) -> Option<PathBuf> {
+    let rel = file.strip_prefix(target.join(FOLDER)).ok()?;
+    let mut parts = rel.components();
+    let top = parts.next()?.as_os_str().to_string_lossy().to_string();
+    let i = names(sources).iter().position(|n| *n == top || fat_safe_name(n) == top)?;
+    Some(sources[i].join(parts.as_path()))
+}
+
+/// Copy a file back from the backup next to where it came from, as "name (from backup).ext" (never over a file).
+pub fn restore(file: &Path, original: &Path) -> std::io::Result<PathBuf> {
+    let dir = original.parent().ok_or_else(|| std::io::Error::other("no folder"))?;
+    std::fs::create_dir_all(dir)?;
+    let stem = original.file_stem().unwrap_or_default().to_string_lossy().to_string();
+    let ext = original.extension().map(|e| format!(".{}", e.to_string_lossy())).unwrap_or_default();
+    let dest = (1..).map(|i| dir.join(if i == 1 { format!("{stem} (from backup){ext}") } else { format!("{stem} (from backup {i}){ext}") })).find(|p| !p.exists()).unwrap_or_else(|| dir.join(format!("{stem} (from backup){ext}")));
+    std::fs::copy(file, &dest)?;
+    Ok(dest)
+}
+
 /// What to copy from `sources` into `target/Clipster backup/<folder name>/`.
 pub fn plan(sources: &[PathBuf], target: &Path, limits: Limits) -> Result<Plan, String> {
+    plan_skipping(sources, target, limits, &[])
+}
+
+/// `plan`, leaving out files and folders whose names match `skip` (see `skipped`).
+pub fn plan_skipping(sources: &[PathBuf], target: &Path, limits: Limits, skip: &[String]) -> Result<Plan, String> {
     let target = target.canonicalize().map_err(|_| format!("I can't reach {}. Is the drive plugged in?", target.display()))?;
     let mut plan = Plan::default();
     let mut names: Vec<String> = vec![];
@@ -92,6 +144,9 @@ pub fn plan(sources: &[PathBuf], target: &Path, limits: Limits) -> Result<Plan, 
             for e in entries {
                 let Ok(m) = std::fs::symlink_metadata(e.path()) else { continue };
                 let raw = e.file_name().to_string_lossy().to_string();
+                if skipped(&raw, skip) {
+                    continue;
+                }
                 let mut name = if limits.strict_names { fat_safe_name(&raw) } else { raw };
                 if limits.strict_names {
                     let (stem, ext) = match name.rsplit_once('.') {
@@ -145,10 +200,15 @@ pub fn plan(sources: &[PathBuf], target: &Path, limits: Limits) -> Result<Plan, 
     Ok(plan)
 }
 
-/// Copy what the plan says. `progress(files done, bytes done)` is called as it goes.
-pub fn run(plan: &Plan, progress: &mut dyn FnMut(usize, u64)) -> Summary {
+/// Copy what the plan says. `progress(files done, bytes done)` is called as it goes; `stop` ends it between two files
+/// (the file being copied is finished first).
+pub fn run(plan: &Plan, progress: &mut dyn FnMut(usize, u64), stop: &std::sync::atomic::AtomicBool) -> Summary {
     let mut s = Summary { plan_same: plan.same, conflicts: plan.conflicts, skipped: plan.too_big + plan.online_only, ..Default::default() };
     for (i, (from, to, len)) in plan.copies.iter().enumerate() {
+        if stop.load(std::sync::atomic::Ordering::Relaxed) {
+            s.stopped = Some(plan.copies.len() - i);
+            break;
+        }
         match copy_one(from, to) {
             Ok(()) => {
                 s.copied += 1;
@@ -221,6 +281,32 @@ mod tests {
     }
 
     #[test]
+    fn skips_stops_and_restores() {
+        let skip = ["node_modules".to_string(), "*.ISO".to_string(), "cache*".to_string()];
+        assert!(skipped("node_modules", &skip) && skipped("ubuntu.iso", &skip) && skipped("Cache2", &skip));
+        assert!(!skipped("my_node_modules_notes.txt", &skip) && !skipped("isotope.txt", &skip));
+        let (src, dst) = (temp("skip-src").join("Projects"), temp("skip-dst"));
+        write(&src.join("app").join("main.rs"), "fn main() {}", 3600);
+        write(&src.join("app").join("node_modules").join("x.js"), "junk", 3600);
+        write(&src.join("ubuntu.iso"), "big", 3600);
+        let p = plan_skipping(std::slice::from_ref(&src), &dst, Limits::default(), &skip).unwrap();
+        assert_eq!(p.copies.len(), 1, "only main.rs: {:?}", p.copies);
+        // stopped before it starts: nothing copied, one left
+        let s = run(&p, &mut |_, _| {}, &std::sync::atomic::AtomicBool::new(true));
+        assert_eq!((s.copied, s.stopped), (0, Some(1)));
+        run(&p, &mut |_, _| {}, &std::sync::atomic::AtomicBool::new(false));
+        // the backup copy maps back to where it came from, and comes back beside it, never over it
+        let copy = dst.join(FOLDER).join("Projects").join("app").join("main.rs");
+        let original = original_of(&copy, &dst, std::slice::from_ref(&src)).unwrap();
+        assert_eq!(original, src.join("app").join("main.rs"));
+        let back = restore(&copy, &original).unwrap();
+        assert_eq!(back, src.join("app").join("main (from backup).rs"));
+        assert_eq!(restore(&copy, &original).unwrap(), src.join("app").join("main (from backup 2).rs"));
+        assert_eq!(std::fs::read_to_string(&original).unwrap(), "fn main() {}", "the original is untouched");
+        assert_eq!(names(&[PathBuf::from("/a/Documents"), PathBuf::from("/b/documents")]), ["Documents", "documents (2)"]);
+    }
+
+    #[test]
     fn copies_new_and_changed_files_and_never_deletes() {
         let (src, dst) = (temp("src").join("Documents"), temp("dst"));
         write(&src.join("a.txt"), "first", 3600);
@@ -232,7 +318,7 @@ mod tests {
         std::os::unix::fs::symlink("/etc", src.join("link")).unwrap();
         let p = plan(std::slice::from_ref(&src), &dst, Limits::default()).unwrap();
         assert_eq!(p.copies.len(), 2, "links are skipped");
-        let s = run(&p, &mut |_, _| {});
+        let s = run(&p, &mut |_, _| {}, &std::sync::atomic::AtomicBool::new(false));
         assert_eq!((s.copied, s.errors.len()), (2, 0));
         let a = dst.join(FOLDER).join("Documents").join("a.txt");
         assert_eq!(std::fs::read_to_string(&a).unwrap(), "first");
@@ -243,7 +329,7 @@ mod tests {
         write(&dst.join(FOLDER).join("Documents").join("mine.txt"), "only here", 10);
         let p = plan(std::slice::from_ref(&src), &dst, Limits::default()).unwrap();
         assert_eq!(p.copies.len(), 1);
-        run(&p, &mut |_, _| {});
+        run(&p, &mut |_, _| {}, &std::sync::atomic::AtomicBool::new(false));
         assert_eq!(std::fs::read_to_string(&a).unwrap(), "first, edited");
         assert!(dst.join(FOLDER).join("Documents").join("mine.txt").exists(), "nothing is deleted");
         assert!(!a.with_file_name("a.txt.clipster-part").exists(), "no half files left");

@@ -20656,3 +20656,35 @@ Picked one for you. The gods of the reading list have spoken.
 ## reading_old
 {n} links are more than a month old. Shall I let them go to the basement?
 {n} links have gathered dust for a month. Clear them? They won't feel a thing.
+
+## upkeep_now_calm
+Nothing is working hard right now. The machine dozes. I keep watch.
+All calm. No program dares to hog the processor while I'm looking.
+
+## upkeep_now_busy
+{x} is working the processor hard right now. I've noted its name in the ledger.
+{x} is the busy one. Sweating, even. I respect the effort.
+
+## space_scanning
+Counting everything in your home folder. Every byte. I'm thorough. It takes a while.
+Measuring your folders. The scrolls are long. Patience.
+
+## space_trashed
+Moved {n} to the trash ({x}). They wait in the basement. You can still get them back. I did.
+{n} sent to the trash, {x} freed once you empty it. They go gently.
+
+## tidy_auto_done
+Monday tidy: {n} files from last week sorted into folders. Order restored. By me.
+I tidied {n} week-old downloads while you weren't looking. Undo is there, but why would you.
+
+## backup_auto_started
+Your backup drive has arrived. I've begun the copying. The sacred duplication.
+The backup runs on its own. I carry your files to safety. I'll report.
+
+## backup_stopped
+Stopped. {n} files made it across. The rest wait for next time. I wait with them.
+The backup halted after {n} files. Next time it picks up the thread.
+
+## backup_restored
+"{x}" is back from the backup, beside the original. Resurrected. I know how that feels.
+Copied back as "{x}". The current file is untouched. Two versions now. Both blessed.

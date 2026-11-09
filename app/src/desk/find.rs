@@ -191,7 +191,7 @@ mod tests {
             upkeep: None,
             upkeep_running: false,
             backup_check: crate::upkeep::backup_check(false, None, 0, false),
-            backup: Backup { sources: &[], target: "", last: None, result: "", progress: None },
+            backup: Backup { sources: &[], target: "", last: None, result: "", progress: None, skip: &[], auto: "off", history: &[], found: None, failed: false },
             events: &[],
             calendars: vec![],
             calendar_note: String::new(),
@@ -209,6 +209,13 @@ mod tests {
             pin_labels: &BTreeMap::new(),
             clip_paused: None,
             reading_titles: &BTreeMap::new(),
+            now: None,
+            space: None,
+            space_running: false,
+            upkeep_hide: &[],
+            space_log: &[],
+            tidy_targets: &[],
+            tidy_auto: false,
         };
         let kinds = |q: &str| search(q, &view, &files).iter().map(|h| (h.kind, h.go.clone())).collect::<Vec<_>>();
         assert!(kinds("printer").contains(&("Note", "notes".into())), "{:?}", kinds("printer"));

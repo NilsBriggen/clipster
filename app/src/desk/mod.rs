@@ -27,7 +27,7 @@ mod write;
 mod you;
 
 use look::{tok, Kind};
-pub use sample::{sample, sample_extras, sample_history};
+pub use sample::{sample, sample_extras, sample_history, sample_upkeep};
 use sample::sample_files;
 
 pub const TABS: [&str; 9] = ["Today", "Week", "To-do", "Agenda", "Clipboard", "Write", "Upkeep", "You & me", "Settings"];
@@ -133,6 +133,13 @@ pub struct View<'a> {
     pub pin_labels: &'a BTreeMap<String, String>, // a pin's text -> your label for it
     pub clip_paused: Option<String>,         // the history looks away until this time ("14:20")
     pub reading_titles: &'a BTreeMap<String, String>, // a saved link -> its page's title
+    pub now: Option<&'a crate::upkeep::Now>,      // Upkeep's Right now
+    pub space: Option<&'a crate::upkeep::Space>,  // Upkeep's Space
+    pub space_running: bool,
+    pub upkeep_hide: &'a [String],                // checks you hid
+    pub space_log: &'a [[u64; 2]],                // free space over time
+    pub tidy_targets: &'a [(String, String)],     // a tidy category -> your folder for it
+    pub tidy_auto: bool,
 }
 
 /// A linked calendar on the Calendars page: what to call it, its colour and switches, and what went wrong.
@@ -153,6 +160,11 @@ pub struct Backup<'a> {
     pub last: Option<i64>,
     pub result: &'a str,
     pub progress: Option<(usize, usize, u64)>,
+    pub skip: &'a [String],
+    pub auto: &'a str,               // "plugged", "evening", "off"
+    pub history: &'a [[u64; 4]],     // the last runs: when, copied, bytes, failed
+    pub found: Option<&'a [PathBuf]>, // files found in the backup
+    pub failed: bool,                // the last run went wrong
 }
 
 /// What the You & me tab shows.
@@ -213,7 +225,7 @@ struct Files {
     plan: Vec<(PathBuf, PathBuf)>,
     plan_at: Option<Instant>, // when the tidy plan was made
     plan_desktop: bool,
-    can_undo: bool,
+    can_undo: Option<(usize, std::time::SystemTime)>, // what the last tidy would undo
     taught: Vec<(String, String)>, // your phrases: (when you say, what I do)
     done: Vec<todo::Item>,         // finished to-dos cleared from the list (done.txt), the last eight weeks
     recent: Vec<(String, PathBuf)>, // files opened lately (only while the Files page is open)
@@ -312,6 +324,12 @@ pub struct Desk {
     link_text: String,                 // Saved links: a link pasted in
     file_query: String,                // Files: what to find
     asked_files: bool,                 // Files: a search was sent
+    tidy_found: bool,                  // Tidy shows what Find duplicates / Big old files found
+    tidy_skip: std::collections::BTreeSet<usize>, // Tidy: files unticked (places in the plan, 1-based)
+    tidy_open: std::collections::BTreeSet<String>, // Tidy: folders opened to show their files
+    space_pick: std::collections::BTreeSet<usize>, // Space: biggest files ticked (1-based)
+    backup_skip_text: String,
+    restore_text: String,
 }
 
 /// A card over the page with its own controls.
@@ -329,6 +347,8 @@ pub(super) enum Card {
     Older, // to-dos finished over the last month
     Timer(u64),        // a reminder, by id
     NoteRemind(usize), // a reminder about a note, by line
+    BackupHistory,
+    Restore, // get a file back from the backup
 }
 
 impl Desk {
@@ -373,7 +393,7 @@ impl Desk {
             self.files.at = None; // the Files page reads its lists now
         }
         self.wrapping = name == "wrapup";
-        if let Some(page) = ["checkup", "tidy", "backup"].iter().position(|p| *p == name) {
+        if let Some(page) = ["checkup", "rightnow", "tidy", "space", "backup"].iter().position(|p| *p == name) {
             self.upkeep_page = page;
         }
         self.startup_list = name == "startup";
@@ -386,6 +406,11 @@ impl Desk {
         if self.startup_list {
             self.upkeep_page = 0;
         }
+    }
+
+    /// The Upkeep page that's open (Checkup 0, Right now 1, Tidy 2, Space 3, Backup 4), when the Upkeep tab is.
+    pub fn upkeep_page(&self) -> Option<usize> {
+        (self.open && TABS[self.tab] == "Upkeep" && !self.startup_list).then_some(self.upkeep_page)
     }
 
     /// Show a QR code of this text in a card, over whatever tab is open.
@@ -477,7 +502,7 @@ impl Desk {
             plan,
             plan_at,
             plan_desktop: self.desktop,
-            can_undo: crate::tidy::undo_log().exists(),
+            can_undo: crate::tidy::undo_summary(&crate::tidy::undo_log()),
             taught: crate::lines::taught(),
             done: todo::load_done(chrono::Local::now().date_naive() - chrono::Days::new(56)),
             recent: if files_open { crate::sys::recent_files().into_iter().take(8).collect() } else { vec![] },
