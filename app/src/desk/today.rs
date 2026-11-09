@@ -417,7 +417,7 @@ impl Desk {
                     (text, b)
                 }
                 Upcoming::Chase { line, who, text } => {
-                    let mut b = vec![("Got it".to_string(), format!("todo #{} waiting none", line + 1)), ("Later".to_string(), format!("todo #{} due in 3 days", line + 1))];
+                    let mut b = vec![("Got it".to_string(), format!("todo #{} waiting none", line + 1)), ("Later".to_string(), format!("todo #{} due {}", line + 1, chrono::Local::now().date_naive() + chrono::Days::new(3)))];
                     if view.people.iter().any(|p| p.name.eq_ignore_ascii_case(&who) && p.email.is_some()) {
                         b.insert(0, ("Write".to_string(), format!("person mail {who}")));
                     }

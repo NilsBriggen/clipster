@@ -2662,6 +2662,17 @@ mod tests {
             assert!(t.contains("between 1 and 6"), "{t}");
         }
         assert!(respond("random number between -5 and 5").text.contains("between -5 and 5"));
+        for c in ["backup stop", "backup skip node_modules, *.iso", "backup skip", "backup auto plugged", "backup find slides", "backup restore 2"] {
+            assert_eq!(exact(c).map(|r| r.effect), Some(Effect::Backup(c[7..].into())), "{c}");
+        }
+        let in3 = chrono::Local::now().date_naive() + chrono::Days::new(3);
+        assert!(matches!(exact(&format!("todo #1 due {in3}")).map(|r| r.effect), Some(Effect::Todo(_))), "the chase row's Later");
+        for b in ["June 3", "3 March", "march 3"] {
+            assert!(matches!(exact(&format!("birthday {b}")).map(|r| r.effect), Some(Effect::SetBirthday(..))), "{b}");
+        }
+        assert_eq!(exact("journal day was long, but good").map(|r| r.effect), Some(Effect::Journal("add day was long, but good".into())));
+        assert_eq!(exact("journal mood great").map(|r| r.effect), Some(Effect::Journal("mood great".into())));
+        assert_eq!(exact("journal set 2026-11-08|meh|ok").map(|r| r.effect), Some(Effect::Journal("set 2026-11-08|meh|ok".into())));
     }
 
     #[test]

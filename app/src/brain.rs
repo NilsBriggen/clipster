@@ -447,7 +447,7 @@ pub fn exact(input: &str) -> Option<Reply> {
             let (on, id) = rest.split_once(' ')?;
             return Some(Reply::say("").effect(Effect::Startup(id.to_string(), match on { "on" => true, "off" => false, _ => return None })));
         }
-        "backup" if rest == "now" || rest == "eject" || ["add ", "remove ", "target "].iter().any(|v| rest.starts_with(v)) => return Some(Reply::say("").effect(Effect::Backup(rest.to_string()))),
+        "backup" if ["now", "eject", "stop", "skip"].contains(&rest) || ["add ", "remove ", "target ", "skip ", "auto ", "find ", "restore "].iter().any(|v| rest.starts_with(v)) => return Some(Reply::say("").effect(Effect::Backup(rest.to_string()))),
         // the Desk's You & me tab forgets one fact (or all of them, after its own "are you sure")
         "forgetfact" if !rest.is_empty() => {
             let key = rest.trim();
@@ -661,7 +661,8 @@ pub fn exact(input: &str) -> Option<Reply> {
         "countdowns" => return Some(Reply::say("").effect(Effect::Countdown("list".into()))),
         "until" | "countdown" => return Some(crate::powers::until(rest)),
         "habit" if ["add", "done", "undone", "remove"].contains(&rest.split(' ').next().unwrap_or("")) && rest.contains(' ') => return Some(Reply::say("").effect(Effect::Habit(rest.to_string()))),
-        "journal" if rest.starts_with("day ") || rest.starts_with("set ") || rest.starts_with("mood ") => return Some(Reply::say("").effect(Effect::Journal(rest.to_string()))),
+        // the sub-commands only in their own shape: "journal day was long" is a line for today
+        "journal" if rest.split_once(' ').is_some_and(|(v, a)| ["day", "set"].contains(&v) && chrono::NaiveDate::parse_from_str(a.split('|').next().unwrap_or("").trim(), "%Y-%m-%d").is_ok() || v == "mood" && crate::journal::MOODS.contains(&a.trim())) => return Some(Reply::say("").effect(Effect::Journal(rest.to_string()))),
         "journal" if !rest.is_empty() => return Some(Reply::say("").effect(Effect::Journal(format!("add {}", rest.trim_start_matches(':').trim())))),
         "journal" => return Some(Reply::say("").effect(Effect::OpenDesk("journal".into()))),
         "findfile" | "locate" if !rest.is_empty() => return Some(net(Query::Files(rest.into()), &lines::pick("find_searching").replace("{x}", rest))),
@@ -845,7 +846,7 @@ pub fn exact(input: &str) -> Option<Reply> {
         "bye" | "quit" | "exit" | "goodbye" => return Some(Reply::say(lines::pick("goodbye")).effect(Effect::Exit).mood(Mood::Spin)),
         "birthday" | "bday" => {
             use chrono::Datelike;
-            let Some((date, _)) = crate::powers::parse_day(rest, chrono::Local::now().date_naive()) else {
+            let Some((date, _)) = crate::powers::parse_day(&rest.to_lowercase(), chrono::Local::now().date_naive()) else {
                 return Some(Reply::say("When? Try: my birthday is june 3").mood(Mood::Think));
             };
             return Some(Reply::say(format!("🎂 {}! Noted. Forever. I'll throw you a party. A small one. I'm a paperclip.", date.format("%B %-d"))).mood(Mood::Party).effect(Effect::SetBirthday(date.month(), date.day())));
