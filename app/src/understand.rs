@@ -353,7 +353,9 @@ fn intent(s: &str, raw: &str) -> Option<Reply> {
     if let Some(r) = crisis(s).or_else(|| crisis(&tidy_words(raw))) {
         return Some(r);
     }
-    if let Some(r) = grief(&tidy_words(raw)) {
+    // a reminder, to-do or note that mentions a funeral is still made
+    let command = has(s, TIMER_WORDS) || adding_todo(s) || ["note ", "note: ", "journal", "calendar ", "add ", "put "].iter().any(|p| s.starts_with(p));
+    if let Some(r) = grief(&tidy_words(raw)).filter(|_| !command) {
         return Some(r); // before the topics, so "my dog died" never gets a dog joke or a dog photo
     }
     if let Some(r) = teach(raw) {
@@ -448,12 +450,15 @@ fn crisis(s: &str) -> Option<Reply> {
     let words = [
         "kill myself", "killing myself", "suicide", "suicidal", "end my life", "ending my life", "want to die", "wanna die", "self harm", "self-harm",
         "hurt myself", "hurting myself", "cut myself", "cutting myself", "no reason to live", "better off dead", "do not want to live", "take my own life",
-        "do not want to be alive", "not want to be here anymore", "like to die", "need to die", "going to die", "want to be dead", "wish i was dead",
+        "do not want to be alive", "not want to be here anymore", "like to die", "need to die", "want to be dead", "wish i was dead",
         "wish i were dead", "wish i was not alive", "wish i were not alive", "end it all", "want it all to end", "not worth living", "let me die",
-        "do not want to wake up", "want to disappear forever", "kill me", "no point in living", "rather be dead", "want to stop living",
+        "do not want to wake up", "want to disappear forever", "no point in living", "rather be dead", "want to stop living",
     ];
     let t = s.trim().trim_end_matches(['.', '!']).trim();
-    (has(s, &words) || ["die", "i die", "please die", "die please", "dying", "i am dying inside"].contains(&t)).then(|| {
+    // everyday hyperbole stays out: "my phone is going to die", "I'm going to die of boredom", "my boss will kill me"
+    let dying = ["i am going to die", "im going to die"].iter().any(|p| has(s, &[p]) && !["of", "laughing", "if", "from", "when", "before"].iter().any(|n| has(s, &[&format!("{p} {n}")])));
+    let kill_me = has(s, &["kill me"]) && !has(s, &["will kill me", "going to kill me", "gonna kill me", "would kill me", "might kill me", "could kill me"]);
+    (has(s, &words) || dying || kill_me || ["die", "i die", "please die", "die please", "dying", "i am dying inside"].contains(&t)).then(|| {
         Reply::say(
             "I'm really sorry you're feeling this way. I'm only a paperclip, but you deserve to talk to a real person about this, right now.\n\n\
              If you might act on these thoughts, please call your local emergency number. You can also reach a free, confidential helpline in your country, any time:",
@@ -554,7 +559,7 @@ fn timers(s: &str, raw: &str) -> Option<Reply> {
         return go(format!("focus untilnext {}", keep(raw, label)));
     }
     // pause, go on, a few more minutes (before "focus …" starts a new session)
-    if has(s, &["focus", "focus session", "session"]) && has(s, &["pause", "hold"]) {
+    if has(s, &["focus", "focus session", "session"]) && has(s, &["pause", "hold"]) && !has(s, TIMER_WORDS) {
         return go("focus pause".into());
     }
     if has(s, &["focus", "focus session"]) && has(s, &["resume", "continue", "unpause", "go on with"]) {
@@ -1267,7 +1272,7 @@ fn people_talk(s: &str, raw: &str) -> Option<Reply> {
         let n: u32 = match when.split_whitespace().next().unwrap_or("") {
             "other" | "couple" | "2" => 2,
             "few" => 3,
-            w => w.parse().unwrap_or(1),
+            w => w.parse::<u32>().unwrap_or(1).min(365),
         };
         let days = if when.contains("week") { n * 7 } else if when.contains("month") { n * 30 } else { n };
         return go(format!("person every {}|{days}", keep(raw, who)));
@@ -2662,6 +2667,13 @@ mod tests {
             assert!(t.contains("between 1 and 6"), "{t}");
         }
         assert!(respond("random number between -5 and 5").text.contains("between -5 and 5"));
+        assert!(matches!(respond("remind me tomorrow at 9 to buy flowers for the funeral").effect, Effect::Timer(..)));
+        assert!(matches!(respond("todo visit grandma in hospital").effect, Effect::Todo(_)));
+        assert!(matches!(respond("note the funeral is on friday at 2").effect, Effect::Note(_)));
+        assert!(lines::all("grief").contains(&respond("my grandma's funeral is tomorrow").text), "still kind outside commands");
+        assert!(!matches!(respond("remind me to hold the session at 3").effect, Effect::FocusPause(_)));
+        assert!(matches!(respond("pause my focus").effect, Effect::FocusPause(_)));
+        assert!(matches!(respond("keep in touch with mum every 999999999 weeks").effect, Effect::People(_)), "no overflow");
         for c in ["backup stop", "backup skip node_modules, *.iso", "backup skip", "backup auto plugged", "backup find slides", "backup restore 2"] {
             assert_eq!(exact(c).map(|r| r.effect), Some(Effect::Backup(c[7..].into())), "{c}");
         }
@@ -2752,7 +2764,13 @@ mod tests {
         ] {
             assert!(helpline(t), "{t}: {}", respond(t).text);
         }
-        for t in ["roll a die", "roll a d20", "this meeting is killing me", "my phone died", "kill firefox"] {
+        for t in ["i am going to die", "I'm going to die", "please kill me", "someone kill me", "i want someone to kill me"] {
+            assert!(helpline(t), "{t}: {}", respond(t).text);
+        }
+        for t in [
+            "roll a die", "roll a d20", "this meeting is killing me", "my phone died", "kill firefox", "my phone is going to die", "my battery is going to die",
+            "my boss will kill me", "this traffic is going to kill me", "i am going to die of boredom", "i'm going to die laughing",
+        ] {
             assert!(!helpline(t), "{t} isn't a crisis");
         }
     }
