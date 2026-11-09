@@ -105,14 +105,18 @@ pub fn undo_log() -> PathBuf {
 /// Move the files as planned and write the undo log. Returns how many moved.
 pub fn apply(moves: &[(PathBuf, PathBuf)], log: &Path) -> Result<usize, String> {
     let mut done: Vec<(String, String)> = vec![];
+    let mut failed = None;
     for (from, to) in moves {
         if to.exists() {
             continue; // never overwrite
         }
-        if let Some(parent) = to.parent() {
-            std::fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+        // a folder that can't be made (a file in its way, an unplugged drive) skips its files; the rest still move
+        // and still get their undo
+        if let Some(Err(e)) = to.parent().map(std::fs::create_dir_all) {
+            failed.get_or_insert(e.to_string());
+            continue;
         }
-        if std::fs::rename(from, to).is_ok() {
+        if move_file(from, to) {
             done.push((from.to_string_lossy().into(), to.to_string_lossy().into()));
         }
     }
@@ -123,7 +127,28 @@ pub fn apply(moves: &[(PathBuf, PathBuf)], log: &Path) -> Result<usize, String> 
     let mut all: Vec<(String, String)> = std::fs::read_to_string(log).ok().and_then(|t| serde_json::from_str(&t).ok()).unwrap_or_default();
     all.extend(done.iter().cloned());
     std::fs::write(log, serde_json::to_string(&all).map_err(|e| e.to_string())?).map_err(|e| e.to_string())?;
-    Ok(done.len())
+    match failed {
+        Some(e) if done.is_empty() => Err(e),
+        _ => Ok(done.len()),
+    }
+}
+
+/// A rename, or for a folder on another drive (where rename can't go) a copy that's checked before the original goes.
+fn move_file(from: &Path, to: &Path) -> bool {
+    if std::fs::rename(from, to).is_ok() {
+        return true;
+    }
+    let Ok(m) = std::fs::metadata(from) else { return false };
+    let part = to.with_file_name(format!("{}.clipster-part", to.file_name().unwrap_or_default().to_string_lossy()));
+    let copied = m.is_file() && std::fs::copy(from, &part).is_ok_and(|n| n == m.len()) && std::fs::rename(&part, to).is_ok();
+    if copied && std::fs::remove_file(from).is_ok() {
+        return true;
+    }
+    let _ = std::fs::remove_file(&part);
+    if copied {
+        let _ = std::fs::remove_file(to); // the original couldn't go, so don't leave two
+    }
+    false
 }
 
 /// Put everything from the last tidy back where it was (unless something new took its place). Returns how many.
@@ -132,7 +157,7 @@ pub fn undo(log: &Path) -> Result<usize, String> {
     let moves: Vec<(String, String)> = serde_json::from_str(&text).map_err(|e| e.to_string())?;
     let mut back = 0;
     for (from, to) in moves.iter().rev() {
-        if !Path::new(from).exists() && std::fs::rename(to, from).is_ok() {
+        if !Path::new(from).exists() && move_file(Path::new(to), Path::new(from)) {
             back += 1;
         }
     }
@@ -269,6 +294,21 @@ mod tests {
         assert_eq!(apply(&p[2..], &log), Ok(2));
         assert_eq!(undo(&log), Ok(4));
         assert!(d.join("cat.JPG").exists() && d.join("song.mp3").exists());
+        let _ = std::fs::remove_dir_all(&d);
+    }
+
+    #[test]
+    fn a_folder_that_cant_be_made_keeps_the_undo() {
+        let d = temp("blocked");
+        touch(&d.join("a.pdf"), "a");
+        touch(&d.join("b.mp3"), "b");
+        std::fs::write(d.join("Music"), "a file where the Music folder would go").unwrap(); // fresh, so not planned
+        let log = d.join("undo.json");
+        assert_eq!(apply(&plan(&d), &log), Ok(1), "a.pdf moves, b.mp3 can't");
+        assert!(d.join("Documents/a.pdf").exists() && d.join("b.mp3").exists());
+        assert_eq!(undo_summary(&log).map(|s| s.0), Some(1), "and the move can be undone");
+        assert_eq!(undo(&log), Ok(1));
+        assert!(d.join("a.pdf").exists());
         let _ = std::fs::remove_dir_all(&d);
     }
 

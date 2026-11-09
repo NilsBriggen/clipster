@@ -51,6 +51,11 @@ pub fn fat_safe_name(name: &str) -> String {
     if s.is_empty() { "_".into() } else { s }
 }
 
+/// FNV-1a: a tiny hash that stays the same across Rust versions (the std one doesn't promise that).
+fn fnv(s: &str) -> u32 {
+    s.bytes().fold(0x811c_9dc5, |h, b| (h ^ b as u32).wrapping_mul(0x0100_0193))
+}
+
 fn mtime(m: &std::fs::Metadata) -> SystemTime {
     m.modified().unwrap_or(SystemTime::UNIX_EPOCH)
 }
@@ -148,12 +153,21 @@ pub fn plan_skipping(sources: &[PathBuf], target: &Path, limits: Limits, skip: &
                 if skipped(&raw, skip) {
                     continue;
                 }
-                let mut name = if limits.strict_names { fat_safe_name(&raw) } else { raw };
+                let mut name = raw.clone();
                 if limits.strict_names {
-                    let (stem, ext) = match name.rsplit_once('.') {
+                    let split = |n: &str| match n.rsplit_once('.') {
                         Some((a, b)) if !a.is_empty() && !m.is_dir() => (a.to_string(), format!(".{b}")),
-                        _ => (name.clone(), String::new()),
+                        _ => (n.to_string(), String::new()),
                     };
+                    // a name the drive can't hold gets a tag made from the original name, never from its neighbours,
+                    // so deleting "a:b.txt" can't hand its backup copy's name to "a_b.txt"
+                    let safe = fat_safe_name(&raw);
+                    if safe != raw {
+                        let (stem, ext) = split(&safe);
+                        name = format!("{stem} ~{:06x}{ext}", fnv(&raw) & 0xff_ffff);
+                    }
+                    // shortcut: twins that differ only in case still number by name order; rare enough to leave
+                    let (stem, ext) = split(&name);
                     let mut k = 2;
                     while !taken.insert(name.to_lowercase()) {
                         name = format!("{stem} ({k}){ext}");
@@ -372,5 +386,12 @@ mod tests {
         names.sort();
         names.dedup();
         assert_eq!(names.len(), 4, "every file has a name of its own: {names:?}");
+        // the colon file's backup name doesn't depend on the file next to it
+        let colon = |p: &Plan| p.copies.iter().find(|c| c.0.ends_with("a:b.txt")).map(|c| c.1.clone());
+        let before = colon(&p);
+        write(&src.join("a_b.txt"), "underscore", 3600);
+        let p = plan(std::slice::from_ref(&src), &dst, Limits { strict_names: true, fat: false }).unwrap();
+        assert_eq!(colon(&p), before);
+        assert!(p.copies.iter().any(|c| c.1.file_name().unwrap() == "a_b.txt"), "the real a_b.txt keeps its name");
     }
 }

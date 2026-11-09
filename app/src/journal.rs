@@ -18,18 +18,37 @@ pub fn path() -> std::path::PathBuf {
 }
 
 pub fn parse(text: &str) -> Vec<Entry> {
-    let mut out: Vec<Entry> = text
-        .lines()
-        .filter_map(|l| {
-            let mut parts = l.splitn(3, " | ");
-            let day = NaiveDate::parse_from_str(parts.next()?.trim(), "%Y-%m-%d").ok()?;
-            let mood = parts.next().map(str::trim).filter(|m| MOODS.contains(m)).map(String::from);
-            let text = parts.next().unwrap_or("").trim().to_string();
-            Some(Entry { day, mood, text })
-        })
-        .collect();
+    // read loosely, because people edit it by hand: "2026-11-07 | walked", "2026-11-06|great|party", a BOM from Notepad,
+    // and lines without a date (they belong to the day above). Rewriting the file must never lose what they wrote.
+    let mut out: Vec<Entry> = vec![];
+    let mut loose: Vec<String> = vec![];
+    for l in text.trim_start_matches('\u{feff}').lines().map(str::trim).filter(|l| !l.is_empty()) {
+        let mut parts = l.splitn(3, '|').map(str::trim);
+        let Some(day) = parts.next().and_then(|d| NaiveDate::parse_from_str(d, "%Y-%m-%d").ok()) else {
+            match out.last_mut() {
+                Some(e) => e.text = join(&e.text, l),
+                None => loose.push(l.to_string()),
+            }
+            continue;
+        };
+        let (second, third) = (parts.next().unwrap_or(""), parts.next().unwrap_or(""));
+        let mood = MOODS.contains(&second).then(|| second.to_string());
+        let text = if mood.is_some() || second == "-" { third.to_string() } else { join(second, third) };
+        out.push(Entry { day, mood, text });
+    }
+    if let Some(first) = out.first_mut() {
+        first.text = join(&loose.join(" · "), &first.text);
+    }
     out.sort_by_key(|e| e.day);
     out
+}
+
+fn join(a: &str, b: &str) -> String {
+    match (a.is_empty(), b.is_empty()) {
+        (true, _) => b.to_string(),
+        (_, true) => a.to_string(),
+        _ => format!("{a} · {b}"),
+    }
 }
 
 pub fn format(entries: &[Entry]) -> String {
@@ -56,9 +75,6 @@ pub fn set(entries: &mut Vec<Entry>, day: NaiveDate, mood: Option<&str>, text: O
     if let Some(t) = text.map(|t| t.split_whitespace().collect::<Vec<_>>().join(" ")).filter(|t| !t.is_empty()) {
         entries[i].text = if entries[i].text.is_empty() { t } else { format!("{} · {t}", entries[i].text) };
     }
-    // a year is plenty
-    let keep = entries.len().saturating_sub(366);
-    entries.drain(..keep);
 }
 
 /// "add <text>" (today), "mood <mood>" (today), "day <date>|<mood>|<text>". The status text, or None when it makes no sense.
@@ -142,5 +158,17 @@ mod tests {
         assert_eq!(month_grid_from(2026, 11, false).len(), 6, "November 2026 starts on a Sunday");
         assert_eq!(month_grid_from(2026, 11, false)[0][6], Some(d(11, 1)));
         assert_eq!(month_grid_from(2026, 11, true)[0][0], Some(d(11, 1)), "a week from Sunday starts with the 1st");
+    }
+
+    #[test]
+    fn hand_written_lines_survive_a_rewrite() {
+        let mut e = parse("\u{feff}2026-11-08 | meh | long day\n2026-11-07 | walked by the lake\nGerald brought cake\n2026-11-06|great|party\n2026-11-05 | tired | slept badly\n");
+        assert_eq!(e[3].mood.as_deref(), Some("meh"), "a BOM doesn't hide the first day");
+        change(&mut e, "mood okay", d(11, 9));
+        let out = format(&e);
+        for kept in ["long day", "walked by the lake · Gerald brought cake", "great | party", "tired · slept badly"] {
+            assert!(out.contains(kept), "{kept} in {out}");
+        }
+        assert_eq!(parse(&out), e, "and it reads back the same");
     }
 }

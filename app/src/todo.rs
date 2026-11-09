@@ -123,7 +123,8 @@ fn unesc(s: &str) -> String {
 }
 
 pub fn parse(text: &str) -> Vec<Item> {
-    text.lines()
+    text.trim_start_matches('\u{feff}') // a BOM from Notepad
+        .lines()
         .filter_map(|l| {
             let l = l.trim();
             let (done, mut rest) = match (l.strip_prefix("- [x] ").or_else(|| l.strip_prefix("- [X] ")), l.strip_prefix("- [ ] ")) {

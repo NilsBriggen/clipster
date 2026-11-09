@@ -136,7 +136,7 @@ fn duration(v: &str) -> Option<Duration> {
 fn raws(ics: &str) -> Vec<Raw> {
     // unfold: a line starting with a space or tab continues the one before
     let mut lines: Vec<String> = vec![];
-    for l in ics.lines() {
+    for l in ics.trim_start_matches('\u{feff}').lines() {
         let l = l.trim_end_matches('\r');
         if (l.starts_with(' ') || l.starts_with('\t')) && !lines.is_empty() {
             lines.last_mut().unwrap().push_str(&l[1..]);
@@ -386,7 +386,8 @@ pub fn parse(ics: &str, from: NaiveDate, days: u64) -> Vec<Event> {
             (_, Some(d)) => d,
             _ if all_day => Duration::days(1),
             _ => Duration::hours(1),
-        };
+        }
+        .min(Duration::days(3660)); // a broken feed's thousand-year event would overflow the dates below
         let firsts = match (&r.rrule, r.recurrence_id, r.start_utc) {
             // written in UTC: repeat in UTC and turn each one into local time, so a daylight-saving change keeps the clock time right
             (Some(rule), None, Some(utc)) => starts(utc, rule, window.0 - length - Duration::days(1), window.1 + Duration::days(1), true)
@@ -711,6 +712,9 @@ BEGIN:VEVENT\r\nDTSTART;TZID=Europe/Zurich:20261110T140000\r\nDTEND;TZID=Europe/
             let _ = starts(t(2026, 1, 1, 9, 0), rule, t(2026, 1, 1, 0, 0), t(2026, 3, 1, 0, 0), false);
         }
         assert_eq!(duration("P99999999999W"), None);
+        // a duration chrono can hold but a date can't add: the other events still show
+        let ics = "BEGIN:VCALENDAR\nBEGIN:VEVENT\nUID:x\nDTSTART:20261110T100000\nDURATION:P99999999D\nSUMMARY:Broken\nEND:VEVENT\nBEGIN:VEVENT\nUID:y\nDTSTART:20261110T120000\nSUMMARY:Fine\nEND:VEVENT\nEND:VCALENDAR\n";
+        assert!(parse(ics, t(2026, 11, 10, 0, 0).date(), 5).iter().any(|e| e.title == "Fine"));
         let days = |rule: &str, first: NaiveDateTime| starts(first, rule, t(2026, 11, 1, 0, 0), t(2027, 2, 1, 0, 0), false).iter().map(|d| d.format("%a %m-%d").to_string()).collect::<Vec<_>>();
         // Thunderbird's "every weekday" is DAILY with BYDAY
         assert_eq!(days("FREQ=DAILY;BYDAY=MO,TU,WE,TH,FR;COUNT=7", t(2026, 11, 13, 9, 0)), ["Fri 11-13", "Mon 11-16", "Tue 11-17", "Wed 11-18", "Thu 11-19", "Fri 11-20", "Mon 11-23"]);

@@ -441,7 +441,9 @@ pub fn ps_quote(s: &str) -> String {
 pub fn trash_file(path: &std::path::Path) -> Result<(), String> {
     let out = if cfg!(windows) {
         let p = ps_quote(&path.to_string_lossy());
-        shell(&format!("Add-Type -AssemblyName Microsoft.VisualBasic; [Microsoft.VisualBasic.FileIO.FileSystem]::DeleteFile('{p}','OnlyErrorDialogs','SendToRecycleBin')")).output()
+        // 'AllDialogs', not 'OnlyErrorDialogs': with no dialogs Windows quietly deletes for good what the Recycle Bin
+        // can't take (too big, a drive without a bin); this way it asks first, and No fails the move
+        shell(&format!("Add-Type -AssemblyName Microsoft.VisualBasic; [Microsoft.VisualBasic.FileIO.FileSystem]::DeleteFile('{p}','AllDialogs','SendToRecycleBin')")).output()
     } else {
         command("gio").arg("trash").arg(path).output()
     };

@@ -16,7 +16,8 @@ pub fn path() -> std::path::PathBuf {
 }
 
 pub fn parse(text: &str) -> Vec<Note> {
-    text.lines()
+    text.trim_start_matches('\u{feff}') // a BOM from Notepad
+        .lines()
         .filter(|l| !l.trim().is_empty())
         .map(|l| {
             let head = l.get(..10).and_then(|d| NaiveDate::parse_from_str(d, "%Y-%m-%d").ok());

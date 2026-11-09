@@ -134,7 +134,7 @@ pub fn birthday_text(b: (Option<i32>, u32, u32)) -> String {
 pub fn parse_vcf(text: &str) -> Vec<Person> {
     // unfold: a line starting with a space or tab continues the one before
     let mut lines: Vec<String> = vec![];
-    for l in text.lines() {
+    for l in text.trim_start_matches('\u{feff}').lines() {
         let l = l.trim_end_matches('\r');
         let qp_soft = lines.last().is_some_and(|p: &String| p.to_ascii_uppercase().contains("QUOTED-PRINTABLE") && p.ends_with('='));
         if qp_soft {

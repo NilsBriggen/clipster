@@ -1787,7 +1787,13 @@ impl App {
             "import" => {
                 let confirmed = arg.ends_with(" confirmed");
                 let folder = brain::expand_home(arg.trim_end_matches(" confirmed").trim());
-                let found: Vec<(&str, std::path::PathBuf)> = Self::data_files().into_iter().filter(|(n, _)| folder.join(n).is_file()).collect();
+                let all: Vec<(&str, std::path::PathBuf)> = Self::data_files().into_iter().filter(|(n, _)| folder.join(n).is_file()).collect();
+                // a file copied onto itself comes out empty: skip the ones that already are your files
+                let same = |a: &std::path::Path, b: &std::path::Path| std::fs::canonicalize(a).ok().is_some_and(|a| std::fs::canonicalize(b).ok() == Some(a));
+                let found: Vec<(&str, std::path::PathBuf)> = all.iter().filter(|(n, to)| !same(&folder.join(n), to)).cloned().collect();
+                if found.is_empty() && !all.is_empty() {
+                    return Reply::say(format!("{} is my own folder: those files are the ones I'm using already. Pick the folder of an export instead.", find::tilde(&folder))).mood(Mood::Think);
+                }
                 if found.is_empty() {
                     return Reply::say(format!("There's no Clipster export in {}. It holds files like settings.json and todo.txt.", find::tilde(&folder))).mood(Mood::Think);
                 }
@@ -2451,7 +2457,7 @@ impl App {
         for (key, field) in [("dnd", &mut self.dnd), ("wrapup", &mut self.wrapup), ("upkeep_day", &mut self.upkeep_day)] {
             *field = v[key].as_bool().unwrap_or(true);
         }
-        self.focus_goal = v["focus_goal"].as_u64().unwrap_or(0);
+        self.focus_goal = v["focus_goal"].as_u64().unwrap_or(0).min(16 * 60);
         self.workday_ask = v["workday_ask"].as_bool().unwrap_or(true);
         self.welcome_seen = v["welcome_seen"].as_str().unwrap_or_default().to_string();
         self.backup_target = v["backup_target"].as_str().unwrap_or_default().to_string();
@@ -2482,7 +2488,8 @@ impl App {
         self.reading_titles = v["reading_titles"].as_object().into_iter().flatten().filter_map(|(k, l)| Some((k.clone(), l.as_str()?.to_string()))).collect();
         self.holiday_cc = v["holidays"].as_str().filter(|c| c.len() == 2 && c.chars().all(|ch| ch.is_ascii_alphabetic())).map(|c| c.to_uppercase()).unwrap_or_default();
         if let (Some(a), Some(b)) = (v["work_hours"][0].as_u64(), v["work_hours"][1].as_u64()) {
-            self.work_hours = ((a as u32).min(23), (b as u32).clamp(a as u32, 23));
+            let a = a.min(23) as u32;
+            self.work_hours = (a, (b.min(23) as u32).max(a));
         }
         self.day_totals = v["day_totals"].as_object().into_iter().flatten().filter_map(|(d, e)| {
             let e = e.as_array()?;

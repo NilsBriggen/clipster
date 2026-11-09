@@ -233,7 +233,7 @@ pub fn mood_named(s: &str) -> Option<Mood> {
 pub fn parse(text: &str, user: bool, out: &mut Vec<Section>) -> Vec<String> {
     let mut problems = vec![];
     let mut cur = None;
-    for (n, line) in text.lines().map(str::trim).enumerate() {
+    for (n, line) in text.trim_start_matches('\u{feff}').lines().map(str::trim).enumerate() {
         let mut bad = |why: &str| problems.push(format!("line {}: {why}: {line}", n + 1));
         if line.is_empty() {
             continue;
