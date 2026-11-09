@@ -340,7 +340,7 @@ impl Desk {
         let copy = Rect::from_min_size(pos2(list.max.x - 132.0, list.min.y + 22.0), vec2(120.0, ctl));
         if look.button(ui, copy, Id::unique("desk-focus-copy"), "Copy as text", !sessions.is_empty()).clicked() {
             let text: Vec<String> = sessions.iter().map(|s| format!("{} · {} · {} of {} min focused", s.0, if s.4.is_empty() { "focus" } else { &s.4 }, s.2 / 60, s.1)).collect();
-            out.push(format!("copy {}", text.join("\n")));
+            out.push(format!("deskcopy {}", text.join("\n")));
         }
         let rows_area = Rect::from_min_max(pos2(list.min.x + 4.0, copy.max.y + 8.0), pos2(list.max.x - 4.0, list.max.y - 6.0));
         let row = look.row_h().max(ctl + 4.0);
@@ -387,7 +387,7 @@ impl Desk {
         }
         let by = inner.max.y - ctl;
         if look.button(ui, Rect::from_min_size(pos2(inner.max.x - 80.0 - 8.0 - 120.0, by), vec2(120.0, ctl)), Id::unique("desk-day-copy"), "Copy as text", true).clicked() {
-            out.push(format!("copy {title}\n{}", story.join("\n")));
+            out.push(format!("deskcopy {title}\n{}", story.join("\n")));
         }
         if look.button(ui, Rect::from_min_size(pos2(inner.max.x - 80.0, by), vec2(80.0, ctl)), Id::unique("desk-day-close"), "Close", true).clicked() || ui.input(|i| i.key_pressed(egui::Key::Escape)) {
             self.card = None;

@@ -597,7 +597,7 @@ impl Desk {
             actions.push((format!("Focus until then ({n} min)"), format!("focus {n}m")));
         }
         let details = format!("{}\n{when}{}{}", e.title, if e.place.is_empty() { String::new() } else { format!("\n{}", e.place) }, e.join.as_ref().map(|j| format!("\n{j}")).unwrap_or_default());
-        actions.push(("Copy details".into(), format!("copy {details}")));
+        actions.push(("Copy details".into(), format!("deskcopy {details}")));
         let mut bx = x0;
         let mut by = y + 4.0;
         for (i, (label, cmd)) in actions.iter().enumerate() {

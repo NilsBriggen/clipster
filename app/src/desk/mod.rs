@@ -522,7 +522,7 @@ impl Desk {
     /// Read the to-do list and the notes again every few seconds (or right after a change). The tidy plan looks at
     /// every file in Downloads, so only while its page is open, and at most every ten seconds.
     fn refresh(&mut self) {
-        let tidy_open = TABS[self.tab] == "Upkeep" && self.upkeep_page == 1;
+        let tidy_open = TABS[self.tab] == "Upkeep" && self.upkeep_page == 2;
         let files_open = TABS[self.tab] == "Clipboard" && self.clip_page == 2;
         let plan_stale = tidy_open && (self.files.plan_at.is_none_or(|t| t.elapsed() > Duration::from_secs(10)) || self.files.plan_desktop != self.desktop);
         if self.files.at.is_some_and(|t| t.elapsed() < Duration::from_secs(3)) && !plan_stale {
@@ -534,7 +534,11 @@ impl Desk {
         }
         let (plan, plan_at) = if plan_stale || (tidy_open && self.files.at.is_none()) {
             let dir = crate::tidy::folder(if self.desktop { "desktop" } else { "downloads" });
-            (dir.map(|d| crate::tidy::plan(&d)).unwrap_or_default(), Some(Instant::now()))
+            let plan = dir.map(|d| crate::tidy::plan(&d)).unwrap_or_default();
+            if plan != self.files.plan {
+                self.tidy_skip.clear(); // the ticks are places in the plan: a new plan starts with all ticked
+            }
+            (plan, Some(Instant::now()))
         } else {
             (std::mem::take(&mut self.files.plan), self.files.plan_at)
         };
@@ -719,7 +723,7 @@ impl Desk {
         }
         let by = inner.max.y - ctl;
         if look.button(ui, Rect::from_min_size(pos2(inner.max.x - 80.0 - 8.0 - 110.0, by), vec2(110.0, ctl)), Id::unique("desk-qr-copy"), "Copy the text", true).clicked() {
-            out.push(format!("copy {text}"));
+            out.push(format!("deskcopy {text}"));
         }
         if look.button(ui, Rect::from_min_size(pos2(inner.max.x - 80.0, by), vec2(80.0, ctl)), Id::unique("desk-qr-close"), "Close", true).clicked() || ui.input(|i| i.key_pressed(egui::Key::Escape)) {
             self.card = None;

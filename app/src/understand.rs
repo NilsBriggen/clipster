@@ -1419,7 +1419,7 @@ fn notes(s: &str, raw: &str) -> Option<Reply> {
         return go("countdowns".into());
     }
     // the journal: "journal: finished the slides", "for my journal: …"
-    if let Some(line) = after(s, &["journal ", "for my journal ", "write in my journal ", "add to my journal ", "dear journal "]).filter(|l| !l.is_empty()) {
+    if let Some(line) = after(s, &["journal: ", "journal ", "for my journal: ", "for my journal ", "write in my journal ", "add to my journal ", "dear journal: ", "dear journal "]).filter(|l| !l.is_empty()) {
         return go(format!("journal {}", keep(raw, line)));
     }
     if ["my journal", "show my journal", "open my journal", "journal"].contains(&s) {
@@ -2652,11 +2652,27 @@ mod tests {
     }
 
     #[test]
+    fn review_round_fixes() {
+        assert_eq!(exact("space scan").map(|r| r.effect), Some(Effect::Space("scan".into())), "the Space page's Count again");
+        assert_eq!(exact("space trash 2,5 confirmed").map(|r| r.effect), Some(Effect::Space("trash 2,5 confirmed".into())));
+        assert!(!matches!(respond("copy that").effect, Effect::CopyNow(_)), "a sentence never overwrites the clipboard");
+        assert_eq!(exact("deskcopy hello").map(|r| r.effect), Some(Effect::CopyNow("hello".into())));
+        for _ in 0..30 {
+            let t = respond("random number 1-6").text;
+            assert!(t.contains("between 1 and 6"), "{t}");
+        }
+        assert!(respond("random number between -5 and 5").text.contains("between -5 and 5"));
+    }
+
+    #[test]
     fn today_tab_commands() {
         let eff = |t: &str| respond(t).effect;
         assert_eq!(eff("focus until my next meeting"), Effect::FocusUntilNext(String::new()));
         assert_eq!(eff("focus until the meeting on the report"), Effect::FocusUntilNext("the report".into()));
         assert_eq!(eff("close my work apps"), Effect::Workday("close".into()));
+        for t in ["journal: finished the slides", "for my journal: finished the slides", "dear journal: finished the slides", "journal finished the slides"] {
+            assert_eq!(eff(t), Effect::Journal("add finished the slides".into()), "{t}");
+        }
         assert!(matches!(eff("show my habits"), Effect::OpenDesk(t) if t == "habits"));
         assert_eq!(eff("kind move youtube work"), Effect::None, "only the kinds on the Count as list");
         assert_eq!(eff("kind move youtube code"), Effect::KindMove("youtube".into(), "code".into()));

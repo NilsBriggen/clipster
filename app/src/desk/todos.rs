@@ -752,7 +752,7 @@ impl Desk {
         }
         let by = inner.max.y - ctl;
         if look.button(ui, Rect::from_min_size(pos2(inner.max.x - 80.0 - 8.0 - 120.0, by), vec2(120.0, ctl)), Id::unique("desk-older-copy"), "Copy as text", !text.is_empty()).clicked() {
-            out.push(format!("copy {}", text.join("\n")));
+            out.push(format!("deskcopy {}", text.join("\n")));
         }
         if look.button(ui, Rect::from_min_size(pos2(inner.max.x - 80.0, by), vec2(80.0, ctl)), Id::unique("desk-older-close"), "Close", true).clicked() || ui.input(|i| i.key_pressed(egui::Key::Escape)) {
             self.card = None;

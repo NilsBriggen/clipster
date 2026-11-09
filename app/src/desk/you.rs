@@ -576,7 +576,7 @@ impl Desk {
         let month_text: Vec<String> = entries.iter().filter(|e| e.day.year() == year && e.day.month() == month).map(|e| format!("{} · {}{}", e.day.format("%a %-d %b"), e.mood.clone().unwrap_or_else(|| "-".into()), if e.text.is_empty() { String::new() } else { format!(" · {}", e.text) })).collect();
         let cw = btn_w(&p, look, "Copy month as text");
         if look.button(ui, Rect::from_min_size(pos2(right.min.x + 12.0, by), vec2(cw, ctl)), Id::unique("journal-copy"), "Copy month as text", !month_text.is_empty()).clicked() {
-            out.push(format!("copy {}\n{}", first.format("%B %Y"), month_text.join("\n")));
+            out.push(format!("deskcopy {}\n{}", first.format("%B %Y"), month_text.join("\n")));
         }
         let pw = btn_w(&p, look, "Print…");
         if look.button(ui, Rect::from_min_size(pos2(right.min.x + 12.0 + cw + 6.0, by), vec2(pw, ctl)), Id::unique("journal-print"), "Print…", !month_text.is_empty()).clicked() {

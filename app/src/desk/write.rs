@@ -48,7 +48,7 @@ impl Desk {
                         self.write_text = fixed.clone();
                         out.push("deskstatus Fixed what was safe to fix.".into());
                     }
-                    "Copy" => out.push(format!("copy {}", self.write_text)),
+                    "Copy" => out.push(format!("deskcopy {}", self.write_text)),
                     _ => self.write_text.clear(),
                 }
             }
@@ -225,7 +225,7 @@ impl Desk {
         let y = y + ctl + 8.0;
         let (subject, body) = filled.split_once("\n\n").map(|(s, b)| (s.trim_start_matches("Subject: ").to_string(), b.to_string())).unwrap_or((String::new(), filled.clone()));
         if look.primary(ui, Rect::from_min_size(pos2(right.min.x, y), vec2(70.0, ctl)), Id::unique("letter-copy"), "Copy", true).clicked() {
-            out.push(format!("copy {filled}"));
+            out.push(format!("deskcopy {filled}"));
         }
         if look.button(ui, Rect::from_min_size(pos2(right.min.x + 78.0, y), vec2(120.0, ctl)), Id::unique("letter-mail"), "Open as email", true).clicked() {
             out.push(format!("open mailto:{}?subject={}&body={}", self.letter_to.trim(), crate::brain::mail_encode(&subject), crate::brain::mail_encode(&body)));

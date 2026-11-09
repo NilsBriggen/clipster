@@ -304,7 +304,7 @@ struct App {
     desk_large: bool,                                         // the Desk's larger size
     desk_answer: Option<desk::Answer>,                        // a background answer shown on its Desk page
     desk_net: Option<(u64, String)>,                          // the web question asked for the Desk, and what kind
-    undo: Option<(String, Undo)>,                             // the last removal on the Desk, to put back
+    undo: Option<(String, Undo, Instant)>,                    // the last removal on the Desk, to put back right after
     desk_sample: Option<(Vec<timers::Timer>, std::collections::BTreeMap<String, std::collections::BTreeMap<String, u64>>, Vec<FocusLog>, std::collections::BTreeMap<String, String>)>,
     checkin_days: std::collections::BTreeMap<String, String>, // day -> great/okay/meh/rough (two weeks)
     notice_health: bool,
@@ -2570,7 +2570,8 @@ impl App {
 
     /// "undo": put back what the last removal took.
     fn undo_restore(&mut self) -> Reply {
-        let Some((what, u)) = self.undo.take() else {
+        // only right after the removal: the snapshot is the whole state, so anything done since would be lost
+        let Some((what, u, _)) = self.undo.take().filter(|(_, _, at)| at.elapsed() < Duration::from_secs(120)) else {
             return Reply::say(lines::pick("undo_nothing")).mood(Mood::Think);
         };
         for (path, text) in &u.files {
@@ -2581,7 +2582,11 @@ impl App {
             }
         }
         lines::reload();
+        let timers = std::mem::take(&mut self.timers);
         self.load_lists(&u.lists);
+        if what != "the reminder" {
+            self.timers = timers; // a reminder that rang meanwhile doesn't come back
+        }
         self.clip_history = u.clips;
         Reply::say(lines::pick("undo_done").replace("{x}", &what)).mood(Mood::Happy)
     }
@@ -2608,6 +2613,9 @@ impl App {
             from_desk = false;
         }
         // a removal on the Desk can be undone: remember how things were
+        if cmd.trim() != "undo" {
+            self.undo = None; // undo is for the latest thing only
+        }
         let removing = removal(cmd).filter(|_| from_desk || button);
         let before = removing.map(|_| self.undo_capture());
         let mut r = match from_desk || button {
@@ -3657,7 +3665,7 @@ impl App {
         r.text += &news;
         let mut undo_action = None;
         if let (Some(what), Some(u)) = (removing, before) {
-            self.undo = Some((what.to_string(), u));
+            self.undo = Some((what.to_string(), u, Instant::now()));
             undo_action = Some(("Undo".to_string(), "undo".to_string()));
         }
         // from the Desk: an "are you sure?" becomes a Desk card, everything else a word in its status bar

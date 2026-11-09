@@ -256,7 +256,8 @@ fn head_fits(head: &str, rest: &str) -> bool {
         "music" | "song" | "media" => rest.is_empty() || ["play", "pause", "next", "previous", "prev", "skip", "stop", "resume", "toggle", "back", "on", "off", "what", "now"].contains(&first),
         "drink" => rest.is_empty() || ["a drink", "something", "a cocktail", "me a drink", "please"].contains(&rest),
         "book" | "books" => !["a", "an", "the", "me", "us", "my", "your", "it", "that", "this", "him", "her", "them"].contains(&first), // "book a flight"
-        "space" | "power" | "pass" | "bat" => rest.is_empty(),
+        "space" => rest.is_empty() || rest == "scan" || rest.starts_with("trash "),
+        "power" | "pass" | "bat" => rest.is_empty(),
         "top" => rest.is_empty() || ["processes", "programs", "apps", "cpu", "memory"].contains(&rest),
         "where" => rest.starts_with("is ") || rest.starts_with("are "),
         "sun" => rest.is_empty() || first == "in" || ["today", "tomorrow"].contains(&rest),
@@ -498,7 +499,7 @@ pub fn exact(input: &str) -> Option<Reply> {
         "letter" | "template" => return Some(crate::writing::letter(rest)),
         // the Desk's own small commands
         "undo" if rest.is_empty() => return Some(Reply::say("").effect(Effect::Undo)),
-        "copy" if !rest.is_empty() => return Some(Reply::say(lines::pick("clip_copied")).mood(Mood::Happy).effect(Effect::CopyNow(rest.to_string()))),
+        "deskcopy" if !rest.is_empty() => return Some(Reply::say(lines::pick("clip_copied")).mood(Mood::Happy).effect(Effect::CopyNow(rest.to_string()))),
         "deskstatus" => return Some(Reply::say(rest).mood(Mood::Happy)),
         "deskwords" => {
             let (kind, w) = rest.split_once(' ')?;
@@ -1578,7 +1579,8 @@ fn remind(rest: &str) -> Reply {
 }
 
 fn random_number(rest: &str) -> Reply {
-    // keep minus signs: "between -5 and 5"
+    // keep minus signs: "between -5 and 5"; a dash right after a digit is a range: "1-6"
+    let rest: String = rest.char_indices().map(|(i, c)| if c == '-' && rest[..i].ends_with(|p: char| p.is_ascii_digit()) { ' ' } else { c }).collect();
     let nums: Vec<i64> = rest.split(|c: char| !(c.is_ascii_digit() || c == '-')).filter_map(|w| w.trim_end_matches('-').parse::<i64>().ok()).map(|n| n.clamp(-1_000_000_000_000, 1_000_000_000_000)).collect();
     let (a, b) = match nums[..] {
         [a, b, ..] => (a.min(b), a.max(b)),

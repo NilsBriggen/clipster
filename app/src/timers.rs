@@ -113,8 +113,9 @@ pub fn parse_rule(s: &str) -> Option<(String, String)> {
     let (time, rest) = match rest.strip_prefix("at ") {
         Some(r) => {
             let (hours, m, used) = crate::understand::hm(r)?;
-            // 1–7 without am/pm is the afternoon, except in the morning words
-            let h = if hours.len() == 2 && hours[0] < 7 && default.0 != 8 { hours[1] } else { hours[0] };
+            // 1–6 without am/pm is the afternoon, except in the morning words; in the evening words 4–11 are too
+            let pm = if default.0 == 19 { hours[0] >= 4 } else { hours[0] < 7 && default.0 != 8 };
+            let h = if hours.len() == 2 && pm { hours[1] } else { hours[0] };
             ((h, m), r[used..].trim())
         }
         None => (default, rest),
@@ -179,6 +180,9 @@ mod tests {
         assert_eq!(parse_rule("mondays at 3pm stand-up"), Some(("monday 15:00".into(), "stand-up".into())));
         assert_eq!(parse_rule("day at 22:00 lock the door"), Some(("day 22:00".into(), "lock the door".into())));
         assert_eq!(parse_rule("morning stretch"), Some(("day 08:00".into(), "stretch".into())));
+        assert_eq!(parse_rule("evening at 7 call mum"), Some(("day 19:00".into(), "call mum".into())));
+        assert_eq!(parse_rule("night at 10 lock up"), Some(("day 22:00".into(), "lock up".into())));
+        assert_eq!(parse_rule("night at 1 backup"), Some(("day 01:00".into(), "backup".into())), "1 at night is 1 am");
         assert_eq!(parse_rule("30 minutes"), None, "an interval isn't a rule");
         assert_eq!(parse_monthly("on the 1st of every month pay rent"), Some(("m1 09:00".into(), "pay rent".into())));
         assert_eq!(parse_monthly("on the 15th of each month at 7pm water the cactus"), Some(("m15 19:00".into(), "water the cactus".into())));

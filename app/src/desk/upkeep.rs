@@ -376,6 +376,7 @@ impl Desk {
         }
         // the buttons
         let y = c.max.y - ctl;
+        // shortcut: skips are places in the plan, so a file landing in the 10 s before the click shifts them; send names if that bites
         let tidy_cmd = if self.tidy_skip.is_empty() { format!("tidy {which} confirmed") } else { format!("tidy {which} skip {} confirmed", self.tidy_skip.iter().map(|i| i.to_string()).collect::<Vec<_>>().join(",")) };
         let undo = self.files.can_undo.map(|(n, when)| format!("Undo last tidy ({n} files, {})", chrono::DateTime::<chrono::Local>::from(when).format("%a")));
         let buttons = [("Tidy now".to_string(), tidy_cmd, moving > 0), (undo.clone().unwrap_or_else(|| "Undo last tidy".into()), "tidy undo".to_string(), undo.is_some()), ("Find duplicates".to_string(), format!("tidyfind dupes {which}"), true), ("Big old files".to_string(), format!("tidyfind old {which}"), true)];
