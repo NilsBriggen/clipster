@@ -820,6 +820,34 @@ impl App {
                 app.backup_history = vec![[backup::now() as u64 - 9 * 86_400, 214, 1_300_000_000, 0], [backup::now() as u64 - 23 * 86_400, 1820, 9_400_000_000, 2]];
                 app.reading_titles.insert("https://en.wikipedia.org/wiki/Paper_clip".into(), "Paper clip - Wikipedia".into());
                 app.budgets.insert("video".into(), 30);
+                // CLIPSTER_SAMPLE=empty: a new install; crowded: long names and many rows
+                match desk::sample_variant().as_str() {
+                    "empty" => {
+                        app.sample_events.clear();
+                        app.sample_people.clear();
+                        app.sample_clips.clear();
+                        app.sample_reading.clear();
+                        app.sample_calendars.clear();
+                        app.sample_workday.clear();
+                        app.backup_sources.clear();
+                        app.backup_history.clear();
+                        app.holidays.clear();
+                        app.weather_on = false;
+                        app.focus_goal = 0;
+                        app.budgets.clear();
+                    }
+                    "crowded" => {
+                        let today = chrono::Local::now().date_naive();
+                        for n in 0..14u32 {
+                            let start = (today + chrono::Days::new(u64::from(n % 5))).and_hms_opt(8 + n % 9, 15 * (n % 4), 0).unwrap_or_default();
+                            app.sample_events.push(calendar::Event { uid: format!("crowd-{n}"), start, end: start + chrono::Duration::minutes(45), title: format!("Weekly sync about the sync meetings, part {n} (please read the agenda first)"), place: "Building C, 4th floor, the room with the broken projector".into(), cal: (n % 2) as usize, ..Default::default() });
+                        }
+                        app.sample_people.extend(["Anna-Katharina Brönnimann-Oberholzer", "Dr. Bartholomew Featherstonehaugh", "Gerald", "Lin", "Mo", "Priya Ramanathan-Venkataraman", "Zoë", "Uncle Bob from the allotment"].map(|n| people::Person { every: Some(21), last: Some(today - chrono::Days::new(30)), ..people::Person::new(n) }));
+                        app.sample_clips.extend((0..20).map(|n| format!("Copied thing number {n}: a rather long sentence someone pasted from an email thread that went on for far too long")));
+                        app.sample_reading.extend((0..10).map(|n| (format!("https://www.example.com/articles/2026/11/a-very-long-article-slug-that-goes-on-and-on-{n}?utm_source=newsletter"), "2026-11-01".to_string())));
+                    }
+                    _ => {}
+                }
             }
         } else if let Some(game) = play.clone().filter(|g| g != "welcome") {
             app.arcade.open(&game);
@@ -1057,7 +1085,8 @@ impl App {
         let weather = self.weather.as_ref().filter(|_| self.weather_on).map(|(_, w)| w.clone());
         match &self.desk_sample {
             Some((t, k, f, c)) => {
-                let view = desk::View { timers: t.clone(), kind_time: k, focus_log: f, focus_now: Some(("the slides".into(), 18 * 60, 7 * 60, 40, false)), checkins: c, streaks: vec![("Focus".into(), 4, 9), ("Goal met".into(), 2, 5), ("Check-ins".into(), 6, 12), ("Days with me".into(), 31, 31)], status, quip, prefs, clips: &self.sample_clips, pins: &self.sample_clips[..2], reading: &self.sample_reading, me: sample_me(), upkeep: Some((&self.sample_upkeep, 120)), upkeep_running: false, backup_check: upkeep::backup_check(true, Some(backup::now() - 9 * 86_400), backup::now(), true), backup: desk::Backup { sources: &self.backup_sources, target: "/run/media/you/BACKUP", last: Some(backup::now() - 9 * 86_400), result: "214 copied (1.3 GB), 4120 unchanged", progress: None, skip: &self.backup_skip, auto: &self.backup_auto, history: &self.backup_history, found: self.backup_found.as_deref(), failed: false, here: true }, events: &events, calendars: self.sample_calendars.iter().enumerate().map(|(i, s)| desk::CalView { label: ["Work", "Family"].get(i).map_or_else(|| calendar::short(s), |n| n.to_string()), color: i as u8, show: true, alert: i == 0, ..Default::default() }).collect(), calendar_note: "Checked 4 min ago".into(), calendar_problems: 0, answer: self.desk_answer.as_ref(), name: "Sam".into(), people: &self.sample_people, workday: &self.sample_workday, habits: &self.habits, countdowns: &self.countdowns, sites, moved: &self.kind_moves, weather, day_totals, pin_labels: &self.pin_labels, clip_paused, reading_titles: &self.reading_titles, now: self.now_reading.as_ref(), space: self.space.as_ref().map(|(_, s)| s), space_running: self.space_running, upkeep_hide: &self.upkeep_hide, space_log: &self.space_log, tidy_auto: self.tidy_auto, mini: &mini };
+                let empty = desk::sample_variant() == "empty";
+                let view = desk::View { timers: t.clone(), kind_time: k, focus_log: f, focus_now: (!empty).then(|| ("the slides".into(), 18 * 60, 7 * 60, 40, false)), checkins: c, streaks: if empty { vec![] } else { vec![("Focus".into(), 4, 9), ("Goal met".into(), 2, 5), ("Check-ins".into(), 6, 12), ("Days with me".into(), 31, 31)] }, status, quip, prefs, clips: &self.sample_clips, pins: &self.sample_clips[..self.sample_clips.len().min(2)], reading: &self.sample_reading, me: if empty { about_me(&Default::default(), None, &Default::default(), &[], &Default::default(), 0, &Default::default(), true) } else { sample_me() }, upkeep: (!empty).then_some((&self.sample_upkeep, 120)), upkeep_running: false, backup_check: upkeep::backup_check(true, Some(backup::now() - 9 * 86_400), backup::now(), true), backup: desk::Backup { sources: &self.backup_sources, target: "/run/media/you/BACKUP", last: Some(backup::now() - 9 * 86_400), result: "214 copied (1.3 GB), 4120 unchanged", progress: None, skip: &self.backup_skip, auto: &self.backup_auto, history: &self.backup_history, found: self.backup_found.as_deref(), failed: false, here: true }, events: &events, calendars: self.sample_calendars.iter().enumerate().map(|(i, s)| desk::CalView { label: ["Work", "Family"].get(i).map_or_else(|| calendar::short(s), |n| n.to_string()), color: i as u8, show: true, alert: i == 0, ..Default::default() }).collect(), calendar_note: "Checked 4 min ago".into(), calendar_problems: 0, answer: self.desk_answer.as_ref(), name: "Sam".into(), people: &self.sample_people, workday: &self.sample_workday, habits: &self.habits, countdowns: &self.countdowns, sites, moved: &self.kind_moves, weather, day_totals, pin_labels: &self.pin_labels, clip_paused, reading_titles: &self.reading_titles, now: self.now_reading.as_ref(), space: self.space.as_ref().map(|(_, s)| s), space_running: self.space_running, upkeep_hide: &self.upkeep_hide, space_log: &self.space_log, tidy_auto: self.tidy_auto, mini: &mini };
                 self.desk.show(ctx, &view, look, near)
             }
             None => {

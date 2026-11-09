@@ -27,7 +27,7 @@ mod write;
 mod you;
 
 use look::{tok, Kind};
-pub use sample::{sample, sample_extras, sample_history, sample_upkeep};
+pub use sample::{sample, sample_extras, sample_history, sample_upkeep, variant as sample_variant};
 use sample::sample_files;
 
 pub const TABS: [&str; 9] = ["Today", "Week", "To-do", "Agenda", "Clipboard", "Write", "Upkeep", "You & me", "Settings"];
