@@ -20196,3 +20196,17 @@ Paused. Say "resume focus" when you're back.
 Back to it. The clock is running again.
 Resumed. Where were we?
 And we're focusing again.
+
+## undo_done
+Put back: {x}.
+Undone. {x} is back where it was.
+{x}: back again, as if nothing happened.
+
+## undo_nothing
+There's nothing to undo right now.
+Nothing to put back. Everything is where you left it.
+
+## template_saved
+Saved "{x}" as a template of yours. It's at the top of Letters.
+"{x}" is one of your templates now.
+Template "{x}" saved. Fill it in any time on the Write tab.

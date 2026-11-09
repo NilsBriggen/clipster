@@ -57,6 +57,10 @@ pub enum Effect {
     FocusStop,
     FocusExtend(u64),                // a few more minutes on the running session
     Snooze(u64),                     // the timer that rang last, again in this many seconds
+    Undo,                            // put back what the last removal on the Desk took
+    SaveTemplate(String, String),    // a letter template of your own: name, text (written to your lines file)
+    ForgetTemplate(String),
+    DeskNet(crate::net::Query, String), // a web question from the Desk: its answer goes onto its page (kind: "words", "files"…)
     FocusPause(bool),                // true = pause, false = go on
     TimeReport,                      // where today's time went, by window kind
     AppTips,                         // a tip for the app you're in (the app knows which)
@@ -226,7 +230,7 @@ pub fn respond(input: &str) -> Reply {
 
 /// Strict commands ("joke", "timer 5m tea", "5 km to miles"). `None` = not a command I know.
 /// The settings the Desk's `pref <key> <value>` may change.
-pub const PREF_KEYS: &[&str] = &["persona", "tips", "clip", "programs", "windows", "checkin", "health", "updates", "sounds", "breaks", "dnd", "wrapup", "upkeepday", "workdayask", "quiet", "autostart", "goal", "budget", "classiclook"];
+pub const PREF_KEYS: &[&str] = &["persona", "tips", "clip", "programs", "windows", "checkin", "health", "updates", "sounds", "breaks", "dnd", "wrapup", "upkeepday", "workdayask", "quiet", "autostart", "goal", "budget", "classiclook", "desksize"];
 
 /// Command words that are also ordinary English words only count in their command shape: "drink" alone is a
 /// cocktail, "drink water" is advice; "top" alone lists programs, "top 10 movies" is a question.
@@ -437,7 +441,26 @@ pub fn exact(input: &str) -> Option<Reply> {
         "timereport" => return Some(Reply::say("").effect(Effect::TimeReport)),
         "proofread" if rest == "fix" => return Some(crate::writing::fix_clipboard()),
         "proofread" => return Some(crate::writing::check(rest)),
+        "template" if rest.starts_with("save ") && rest.contains('|') => {
+            let (name, text) = rest[5..].split_once('|')?;
+            return Some(Reply::say("").effect(Effect::SaveTemplate(name.trim().to_string(), text.to_string())));
+        }
+        "template" if rest.starts_with("forget ") => return Some(Reply::say("").effect(Effect::ForgetTemplate(rest[7..].trim().to_string()))),
         "letter" | "template" => return Some(crate::writing::letter(rest)),
+        // the Desk's own small commands
+        "undo" if rest.is_empty() => return Some(Reply::say("").effect(Effect::Undo)),
+        "copy" if !rest.is_empty() => return Some(Reply::say(lines::pick("clip_copied")).mood(Mood::Happy).effect(Effect::CopyNow(rest.to_string()))),
+        "deskstatus" => return Some(Reply::say(rest).mood(Mood::Happy)),
+        "deskwords" => {
+            let (kind, w) = rest.split_once(' ')?;
+            let q = match kind {
+                "syn" => Query::Words("rel_syn", w.trim().into()),
+                "define" => Query::Define(w.trim().into()),
+                "spell" => Query::Spell(w.trim().into()),
+                _ => return None,
+            };
+            return Some(Reply::say("").effect(Effect::DeskNet(q, "words".into())));
+        }
         "checkin" => return Some(Reply::say("").effect(Effect::Checkin(rest.to_lowercase()))),
         "answer-to" => {
             let (id, text) = rest.split_once(' ').unwrap_or((rest, ""));

@@ -254,7 +254,12 @@ struct App {
     tipped: std::collections::HashMap<String, String>,        // window kind -> the day he last offered a tip for it
     desk: desk::Desk,
     desk_modern: bool,                                        // the Desk in the modern look instead of Classic 98
-    desk_status: String,                                      // its status-bar quip, picked when it opens
+    desk_status: desk::Status,                                // the Desk's last answer to a click
+    desk_quip: String,                                        // its status-bar quip, picked when it opens
+    desk_large: bool,                                         // the Desk's larger size
+    desk_answer: Option<desk::Answer>,                        // a background answer shown on its Desk page
+    desk_net: Option<(u64, String)>,                          // the web question asked for the Desk, and what kind
+    undo: Option<(String, Undo)>,                             // the last removal on the Desk, to put back
     desk_sample: Option<(Vec<timers::Timer>, std::collections::BTreeMap<String, std::collections::BTreeMap<String, u64>>, Vec<FocusLog>, std::collections::BTreeMap<String, String>)>,
     checkin_days: std::collections::BTreeMap<String, String>, // day -> great/okay/meh/rough (two weeks)
     notice_health: bool,
@@ -312,6 +317,40 @@ fn checkin_streaks(stats: &std::collections::BTreeMap<String, u64>, today: u64, 
         (true, _) => 1,
     };
     (streak, run)
+}
+
+/// What a removal on the Desk took away, to put back with "undo": the files it may have touched, and the lists
+/// kept in the settings, as they were just before.
+struct Undo {
+    files: Vec<(std::path::PathBuf, Option<String>)>,
+    lists: serde_json::Value,
+    clips: Vec<String>,
+}
+
+/// A Desk command that removes something: what to call it in "Removed … · Undo".
+fn removal(cmd: &str) -> Option<&'static str> {
+    let c = cmd.trim();
+    let starts = |p: &str| c.starts_with(p);
+    Some(match () {
+        _ if starts("todo #") && c.ends_with(" remove") => "the to-do",
+        _ if c == "todos clear confirmed" => "the finished to-dos",
+        _ if starts("onlist ") && (c.ends_with(" clear") || c.ends_with(" delete confirmed") || c.contains(" remove ") || c.ends_with(" reset")) => "the list",
+        _ if starts("note #") && c.ends_with(" remove") || starts("unnote") || c == "forget notes confirmed" => "the note",
+        _ if starts("person forget ") => "the person",
+        _ if starts("person ungift ") => "the gift idea",
+        _ if starts("calendar remove ") => "the calendar",
+        _ if starts("clip unpin ") || c == "clip clear" || starts("clip forget ") => "the copies",
+        _ if starts("reading done ") => "the link",
+        _ if starts("workday remove ") => "the workday item",
+        _ if starts("forgetfact ") => "what I knew",
+        _ if starts("backup remove ") => "the folder",
+        _ if starts("timer #") && c.ends_with(" cancel") => "the reminder",
+        _ if starts("unlearn ") => "the phrase",
+        _ if starts("template forget ") => "the template",
+        _ if starts("habit remove ") => "the habit",
+        _ if starts("countdown remove ") => "the countdown",
+        _ => return None,
+    })
 }
 
 /// A running focus session.
@@ -585,7 +624,12 @@ impl App {
             tipped: Default::default(),
             desk: Default::default(),
             desk_modern: false,
-            desk_status: String::new(),
+            desk_status: desk::Status::default(),
+            desk_quip: String::new(),
+            desk_large: false,
+            desk_answer: None,
+            desk_net: None,
+            undo: None,
             desk_sample: None,
             checkin_days: Default::default(),
             notice_health: true,
@@ -629,7 +673,7 @@ impl App {
         };
         if play.as_deref() == Some("desk") {
             // --play desk: Clipster's Desk; with --screenshot it shows made-up data (CLIPSTER_DESK_TAB=0-4, CLIPSTER_DESK_LOOK=modern)
-            app.desk_status = lines::pick("desk_status");
+            app.desk_quip = lines::pick("desk_status");
             app.desk.open();
             if app.screenshot.is_some() {
                 cc.egui_ctx.set_embed_viewports(true);
@@ -637,6 +681,7 @@ impl App {
                 app.desk_sample = Some(desk::sample());
                 app.desk.set_tab(&std::env::var("CLIPSTER_DESK_TAB").unwrap_or_default());
                 app.desk_modern = std::env::var("CLIPSTER_DESK_LOOK").as_deref() == Ok("modern");
+                app.desk_large = std::env::var("CLIPSTER_DESK_SIZE").as_deref() == Ok("large");
                 let startup = app.sample_upkeep.startup.clone();
                 app.sample_upkeep.checks = upkeep::judge(&upkeep::Readings { disk: Some((175_000_000_000, 752_000_000_000)), trash: Some((2_400_000_000, 31)), temp: 43_000_000, uptime: 9 * 86_400, updates: Some(5), battery: Some(82), startup, loose: 24 });
                 app.focus_goal = 120; // so the pictures show a goal and a limit
@@ -699,8 +744,25 @@ impl App {
         self.quiet_until.is_some_and(|q| Instant::now() < q)
     }
 
+    /// A line as he says it: your name, the facts he knows and this system's shortcuts filled in.
+    fn fill(&self, text: &str) -> String {
+        lines::fill_facts(&text.replace("{name}", if self.name.is_empty() { "friend" } else { &self.name }).replace("Meta+Shift+C", sys::DESK_HOTKEY).replace("Meta+C", sys::HOTKEY))
+    }
+
+    /// The Desk's status bar: a word after a click. Problems ("I couldn't…") show as problems.
+    fn set_status(&mut self, text: impl Into<String>) {
+        let text: String = text.into();
+        let low = text.to_lowercase();
+        let problem = ["i couldn't", "couldn't", "i can't", "can't ", "oops", "there's no ", "that doesn't", "i don't know", "error", "failed", "not found", "isn't a time"].iter().any(|w| low.starts_with(w) || low.contains(&format!(" {w}")));
+        self.status(if problem { desk::Tone::Problem } else { desk::Tone::Done }, text, None);
+    }
+
+    fn status(&mut self, tone: desk::Tone, text: String, action: Option<(String, String)>) {
+        self.desk_status = desk::Status { text: text.trim().to_string(), tone, at: Some(Instant::now()), action };
+    }
+
     fn show(&mut self, mut r: Reply) {
-        r.text = lines::fill_facts(&r.text.replace("{name}", if self.name.is_empty() { "friend" } else { &self.name }).replace("Meta+Shift+C", sys::DESK_HOTKEY).replace("Meta+C", sys::HOTKEY));
+        r.text = self.fill(&r.text);
         // letter templates sign with your name (or leave a blank to fill in)
         let signed = if self.name.is_empty() { "[Your name]".to_string() } else { self.name.clone() };
         for (_, act) in &mut r.buttons {
@@ -745,7 +807,8 @@ impl App {
         timers.sort_by_key(|t| t.at);
         let focus_now = self.focus.as_ref().map(|f| (f.label.clone(), f.left(now), f.elapsed(now), f.distracted, f.paused_at.is_some()));
         let look = if self.desk_modern { desk::Look::Modern } else { desk::Look::Classic };
-        let status = self.desk_status.clone();
+        let status = desk::Status { text: self.fill(&self.desk_status.text), ..self.desk_status.clone() };
+        let quip = self.fill(&self.desk_quip);
         let streaks = (streak("focus_last_day", "focus_streak"), streak("checkin_last", "checkin_streak"), self.stats.get("days").copied().unwrap_or(1));
         let prefs = desk::Prefs {
             unhinged: self.unhinged,
@@ -767,14 +830,15 @@ impl App {
             modern: self.desk_modern,
             focus_goal: self.focus_goal,
             budgets: self.budgets.clone(),
+            large: self.desk_large,
         };
         match &self.desk_sample {
             Some((t, k, f, c)) => {
-                let view = desk::View { timers: t.clone(), kind_time: k, focus_log: f, focus_now: Some(("the slides".into(), 18 * 60, 7 * 60, 40, false)), checkins: c, streaks: (4, 6, 31), status, prefs, clips: &self.sample_clips, pins: &self.sample_clips[..2], reading: &self.sample_reading, me: sample_me(), upkeep: Some((&self.sample_upkeep, 120)), upkeep_running: false, backup_check: upkeep::backup_check(true, Some(backup::now() - 9 * 86_400), backup::now(), true), backup: desk::Backup { sources: &self.backup_sources, target: "/run/media/you/BACKUP", last: Some(backup::now() - 9 * 86_400), result: "214 copied (1.3 GB), 4120 unchanged", progress: None }, events: &self.sample_events, calendars: &self.sample_calendars, calendar_note: "Checked 4 min ago".into(), people: &self.sample_people, workday: &self.sample_workday };
+                let view = desk::View { timers: t.clone(), kind_time: k, focus_log: f, focus_now: Some(("the slides".into(), 18 * 60, 7 * 60, 40, false)), checkins: c, streaks: (4, 6, 31), status, quip, prefs, clips: &self.sample_clips, pins: &self.sample_clips[..2], reading: &self.sample_reading, me: sample_me(), upkeep: Some((&self.sample_upkeep, 120)), upkeep_running: false, backup_check: upkeep::backup_check(true, Some(backup::now() - 9 * 86_400), backup::now(), true), backup: desk::Backup { sources: &self.backup_sources, target: "/run/media/you/BACKUP", last: Some(backup::now() - 9 * 86_400), result: "214 copied (1.3 GB), 4120 unchanged", progress: None }, events: &self.sample_events, calendars: &self.sample_calendars, calendar_note: "Checked 4 min ago".into(), calendar_problems: 0, answer: self.desk_answer.as_ref(), name: "Sam".into(), people: &self.sample_people, workday: &self.sample_workday };
                 self.desk.show(ctx, &view, look, near)
             }
             None => {
-                let view = desk::View { timers, kind_time: &self.kind_time, focus_log: &self.focus_log, focus_now, checkins: &self.checkin_days, streaks, status, prefs, clips: &self.clip_history, pins: &self.pins, reading: &self.reading, me: about_me(&self.facts, self.birthday, &self.stats, &self.unlocked, &self.highscores, self.friendship), upkeep: self.upkeep.as_ref().map(|(t, r)| (r, t.elapsed().as_secs())), upkeep_running: self.upkeep_running, backup_check: self.backup_check(), backup: desk::Backup { sources: &self.backup_sources, target: &self.backup_target, last: self.backup_last, result: &self.backup_result, progress: self.backup_progress }, events: &self.events, calendars: &self.calendars, calendar_note: self.calendar_note(), people: &self.people, workday: &self.workday };
+                let view = desk::View { timers, kind_time: &self.kind_time, focus_log: &self.focus_log, focus_now, checkins: &self.checkin_days, streaks, status, quip, prefs, clips: &self.clip_history, pins: &self.pins, reading: &self.reading, me: about_me(&self.facts, self.birthday, &self.stats, &self.unlocked, &self.highscores, self.friendship), upkeep: self.upkeep.as_ref().map(|(t, r)| (r, t.elapsed().as_secs())), upkeep_running: self.upkeep_running, backup_check: self.backup_check(), backup: desk::Backup { sources: &self.backup_sources, target: &self.backup_target, last: self.backup_last, result: &self.backup_result, progress: self.backup_progress }, events: &self.events, calendars: &self.calendars, calendar_note: self.calendar_note(), calendar_problems: self.calendar_problems.len(), answer: self.desk_answer.as_ref(), name: self.name.clone(), people: &self.people, workday: &self.workday };
                 self.desk.show(ctx, &view, look, near)
             }
         }
@@ -1136,7 +1200,7 @@ impl App {
             _ => return Reply::say("I can cancel, snooze, move or rename a timer."),
         };
         if from_desk {
-            self.desk_status = text;
+            self.set_status(text);
             *silent = true;
             return Reply::say("");
         }
@@ -1232,17 +1296,17 @@ impl App {
                 if !self.backup_sources.iter().any(|s| s == arg) {
                     self.backup_sources.push(arg.to_string());
                 }
-                self.desk_status = format!("Backing up {} too.", path.file_name().map(|n| n.to_string_lossy().to_string()).unwrap_or(arg.to_string()));
+                self.set_status(format!("Backing up {} too.", path.file_name().map(|n| n.to_string_lossy().to_string()).unwrap_or(arg.to_string())));
             }
             "remove" => {
                 if let Some(i) = arg.parse::<usize>().ok().and_then(|n| n.checked_sub(1)).filter(|i| *i < self.backup_sources.len()) {
                     self.backup_sources.remove(i);
                 }
-                self.desk_status = lines::pick("settings_saved");
+                self.set_status(lines::pick("settings_saved"));
             }
             "target" => {
                 self.backup_target = arg.to_string();
-                self.desk_status = format!("Backups go to {arg}.");
+                self.set_status(format!("Backups go to {arg}."));
             }
             "eject" => {
                 return match sys::eject(std::path::Path::new(&self.backup_target)) {
@@ -1623,7 +1687,7 @@ impl App {
             self.autostart = sys::set_autostart(s.autostart).is_ok() == s.autostart;
         }
         if s.open_desk {
-            self.desk_status = lines::pick("desk_status");
+            self.desk_quip = lines::pick("desk_status");
             self.desk.open();
             self.desk.set_tab("today");
         }
@@ -1741,7 +1805,7 @@ impl App {
 
     fn snapshot(&self) -> String {
         serde_json::json!({
-            "tips_every": self.tips_every, "notice_clip": self.notice_clip, "notice_programs": self.notice_programs, "notice_windows": self.notice_windows, "checkin": self.checkin, "facts": self.facts, "kind_time": self.kind_time, "focus_log": self.focus_log, "desk_look": if self.desk_modern { "modern" } else { "classic" }, "checkin_days": self.checkin_days,
+            "tips_every": self.tips_every, "notice_clip": self.notice_clip, "notice_programs": self.notice_programs, "notice_windows": self.notice_windows, "checkin": self.checkin, "facts": self.facts, "kind_time": self.kind_time, "focus_log": self.focus_log, "desk_look": if self.desk_modern { "modern" } else { "classic" }, "desk_size": if self.desk_large { "large" } else { "normal" }, "checkin_days": self.checkin_days,
             "pins": self.pins, "reading": self.reading, "calendars": self.calendars, "people": self.people.iter().map(|p| p.to_json()).collect::<Vec<_>>(), "workday": self.workday, "workday_ask": self.workday_ask, "welcome_seen": self.welcome_seen, "backup_sources": self.backup_sources, "backup_target": self.backup_target, "backup_last": self.backup_last, "backup_result": self.backup_result, "dnd_restore": self.dnd_restore, "dnd": self.dnd, "wrapup": self.wrapup, "upkeep_day": self.upkeep_day, "focus_goal": self.focus_goal, "budgets": self.budgets,
             "notice_health": self.notice_health, "check_updates": self.check_updates, "update_told": self.update_told, "sounds": self.sounds, "breaks": self.breaks, "name": self.name,
             "hat": self.hat, "skin": self.skin, "friendship": self.friendship, "highscores": self.highscores, "birthday": self.birthday.map(|(m, d)| [m, d]), "stats": self.stats, "unlocked": self.unlocked, "explored": self.explored, "persona": if self.unhinged { "unhinged" } else { "boring" }, "anchor": self.anchor.or(self.saved_anchor).map(|a| [a.x, a.y]),
@@ -1772,32 +1836,19 @@ impl App {
                 return;
             }
         };
-        // one odd entry drops only itself, not the whole list
-        let strings = |k: &str| -> Vec<String> { v[k].as_array().into_iter().flatten().filter_map(|x| x.as_str().map(String::from)).collect() };
         let b = |k: &str, d: bool| v[k].as_bool().unwrap_or(d);
         self.tips_every = v["tips_every"].as_u64().unwrap_or(self.tips_every).min(24 * 60);
         (self.notice_clip, self.notice_programs, self.notice_health) = (b("notice_clip", true), b("notice_programs", true), b("notice_health", true));
         (self.notice_windows, self.checkin) = (b("notice_windows", true), b("checkin", true));
-        for (k, v) in v["facts"].as_object().into_iter().flatten() {
-            self.facts.insert(k.clone(), v.as_str().unwrap_or("").to_string());
-        }
-        lines::set_facts(&self.facts);
+        self.load_lists(&v);
         self.desk_modern = v["desk_look"].as_str() == Some("modern");
+        self.desk_large = v["desk_size"].as_str() == Some("large");
         for (key, field) in [("dnd", &mut self.dnd), ("wrapup", &mut self.wrapup), ("upkeep_day", &mut self.upkeep_day)] {
             *field = v[key].as_bool().unwrap_or(true);
         }
         self.focus_goal = v["focus_goal"].as_u64().unwrap_or(0);
-        self.pins = strings("pins");
-        self.reading = v["reading"].as_array().into_iter().flatten().filter_map(|r| Some((r[0].as_str()?.to_string(), r[1].as_str().unwrap_or("").to_string()))).collect();
-        self.calendars = strings("calendars");
-        self.people = v["people"].as_array().into_iter().flatten().filter_map(people::Person::from_json).collect();
-        people::set_names(&self.people);
-        self.workday = strings("workday");
         self.workday_ask = v["workday_ask"].as_bool().unwrap_or(true);
         self.welcome_seen = v["welcome_seen"].as_str().unwrap_or_default().to_string();
-        if v["backup_sources"].is_array() {
-            self.backup_sources = strings("backup_sources");
-        }
         self.backup_target = v["backup_target"].as_str().unwrap_or_default().to_string();
         self.backup_last = v["backup_last"].as_i64();
         self.backup_result = v["backup_result"].as_str().unwrap_or_default().to_string();
@@ -1830,7 +1881,6 @@ impl App {
         self.unhinged = v["persona"].as_str() != Some("boring");
         lines::set_persona(self.unhinged);
         lines::set_level(self.friendship);
-        self.birthday = v["birthday"].as_array().and_then(|a| Some((a.first()?.as_u64()? as u32, a.get(1)?.as_u64()? as u32)));
         for (k, n) in v["stats"].as_object().into_iter().flatten() {
             self.stats.insert(k.clone(), n.as_u64().unwrap_or(0));
         }
@@ -1840,6 +1890,34 @@ impl App {
             self.highscores.insert(game.clone(), best.as_u64().unwrap_or(0) as u32);
         }
         self.saved_anchor = v["anchor"].as_array().and_then(|a| Some(pos2(a.first()?.as_f64()? as f32, a.get(1)?.as_f64()? as f32)));
+        self.saved = self.snapshot();
+    }
+
+    /// The lists you keep in the settings (facts, pins, saved links, calendars, people, the workday, backup folders,
+    /// timers). Used at start-up and by "undo", which puts back the lists from before a removal.
+    fn load_lists(&mut self, v: &serde_json::Value) {
+        // one odd entry drops only itself, not the whole list
+        let strings = |k: &str| -> Vec<String> { v[k].as_array().into_iter().flatten().filter_map(|x| x.as_str().map(String::from)).collect() };
+        self.facts.clear();
+        for (k, v) in v["facts"].as_object().into_iter().flatten() {
+            self.facts.insert(k.clone(), v.as_str().unwrap_or("").to_string());
+        }
+        lines::set_facts(&self.facts);
+        self.birthday = v["birthday"].as_array().and_then(|a| Some((a.first()?.as_u64()? as u32, a.get(1)?.as_u64()? as u32)));
+        self.pins = strings("pins");
+        self.reading = v["reading"].as_array().into_iter().flatten().filter_map(|r| Some((r[0].as_str()?.to_string(), r[1].as_str().unwrap_or("").to_string()))).collect();
+        if strings("calendars") != self.calendars {
+            self.calendars = strings("calendars");
+            self.calendar_gen += 1;
+            self.calendar_at = None; // read them again
+        }
+        self.people = v["people"].as_array().into_iter().flatten().filter_map(people::Person::from_json).collect();
+        people::set_names(&self.people);
+        self.workday = strings("workday");
+        if v["backup_sources"].is_array() {
+            self.backup_sources = strings("backup_sources");
+        }
+        self.timers.clear();
         // [unix, label, every, id, rule]; older files have only the first three, and get fresh ids
         let now_unix = timers::unix_now();
         for t in v["timers"].as_array().into_iter().flatten() {
@@ -1850,7 +1928,33 @@ impl App {
                 self.timers.push(timers::Timer { id, at: at.min(now_unix + timers::MAX_SECS as i64), label: label.to_string(), every: every.min(timers::MAX_SECS), rule });
             }
         }
-        self.saved = self.snapshot();
+    }
+
+    /// Remember how things are, before a removal.
+    fn undo_capture(&self) -> Undo {
+        let files = [todo::path(), todo::archive_path(), notes::path(), lines::user_path(), brain::data_dir().join("journal.txt")].into_iter().map(|p| {
+            let text = std::fs::read_to_string(&p).ok();
+            (p, text)
+        });
+        Undo { files: files.collect(), lists: serde_json::from_str(&self.snapshot()).unwrap_or_default(), clips: self.clip_history.clone() }
+    }
+
+    /// "undo": put back what the last removal took.
+    fn undo_restore(&mut self) -> Reply {
+        let Some((what, u)) = self.undo.take() else {
+            return Reply::say(lines::pick("undo_nothing")).mood(Mood::Think);
+        };
+        for (path, text) in &u.files {
+            if let Some(t) = text {
+                if std::fs::read_to_string(path).ok().as_deref() != Some(t.as_str()) {
+                    let _ = brain::write_atomic(path, t);
+                }
+            }
+        }
+        lines::reload();
+        self.load_lists(&u.lists);
+        self.clip_history = u.clips;
+        Reply::say(lines::pick("undo_done").replace("{x}", &what)).mood(Mood::Happy)
     }
 
     fn save_if_changed(&mut self) {
@@ -1866,8 +1970,17 @@ impl App {
     fn run(&mut self, ctx: &egui::Context, cmd: &str) {
         // the Desk's buttons send exact commands: they're never re-read as a sentence ("todo clear the desk"
         // is a to-do, "cancel Pomodoro" cancels that timer)
-        let from_desk = std::mem::take(&mut self.literal);
+        let mut from_desk = std::mem::take(&mut self.literal);
         let button = std::mem::take(&mut self.from_button);
+        // the Desk's find box: words for Clipster, understood like the balloon; a short answer stays in the status bar
+        let asked = cmd.strip_prefix("ask-desk ").map(str::to_string);
+        let cmd = asked.as_deref().unwrap_or(cmd);
+        if asked.is_some() {
+            from_desk = false;
+        }
+        // a removal on the Desk can be undone: remember how things were
+        let removing = removal(cmd).filter(|_| from_desk || button);
+        let before = removing.map(|_| self.undo_capture());
         let mut r = match from_desk || button {
             true => brain::exact(cmd).unwrap_or_else(|| brain::respond(cmd)),
             false => brain::respond(cmd),
@@ -1945,7 +2058,7 @@ impl App {
             Effect::Timer(secs, label) => {
                 self.add_timer(secs, label, 0, None);
                 if from_desk {
-                    self.desk_status = r.text.clone();
+                    self.set_status(r.text.clone());
                     silent = true;
                 }
             }
@@ -1985,6 +2098,27 @@ impl App {
                     r = r.btn("Open Focus settings", Act::Open("ms-settings:quiethours".into()));
                 }
             }
+            Effect::Undo => r = self.undo_restore(),
+            Effect::SaveTemplate(name, text) => {
+                r = match lines::save_template(&name, &text.replace("\\n", "\n")) {
+                    Ok(()) => Reply::say(lines::pick("template_saved").replace("{x}", &name)).mood(Mood::Write),
+                    Err(e) => Reply::say(format!("I couldn't save it: {e}")).mood(Mood::Sad),
+                };
+            }
+            Effect::ForgetTemplate(id) => {
+                r = match lines::forget_template(&id) {
+                    Ok(true) => Reply::say("That template of yours is gone.").mood(Mood::Happy),
+                    Ok(false) => Reply::say("I only forget templates you saved yourself.").mood(Mood::Think),
+                    Err(e) => Reply::say(format!("I couldn't change your lines file: {e}")).mood(Mood::Sad),
+                };
+            }
+            Effect::DeskNet(q, kind) => {
+                // asked from the Desk: the answer goes onto its page, not into a balloon
+                self.ask_net(ctx, q);
+                self.desk_net = Some((self.net_id, kind));
+                self.desk_answer = None;
+                silent = true;
+            }
             Effect::Snooze(secs) => match self.last_rung.clone() {
                 Some(label) => {
                     self.add_timer(secs, label.clone(), 0, None);
@@ -1999,7 +2133,7 @@ impl App {
                 }
                 r.text = lines::pick("focus_extended").replace("{n}", &(secs / 60).to_string());
                 if from_desk {
-                    self.desk_status = r.text.clone();
+                    self.set_status(r.text.clone());
                     silent = true;
                 }
             }
@@ -2018,7 +2152,7 @@ impl App {
                 }
                 r.text = lines::pick(if pause { "focus_paused" } else { "focus_resumed" });
                 if from_desk {
-                    self.desk_status = r.text.clone();
+                    self.set_status(r.text.clone());
                     silent = true;
                 }
             }
@@ -2030,7 +2164,7 @@ impl App {
             }
             Effect::TimeReport => r = self.time_report(),
             Effect::OpenDesk(tab) => {
-                self.desk_status = lines::pick("desk_status");
+                self.desk_quip = lines::pick("desk_status");
                 self.desk.open();
                 self.desk.set_tab(&tab);
                 // now and then, mention the shortcut
@@ -2071,6 +2205,7 @@ impl App {
                             };
                         }
                     }
+                    "desksize" => self.desk_large = value == "large",
                     "classiclook" => {
                         self.hat = Some("none".into());
                         self.skin = "silver".into();
@@ -2079,7 +2214,7 @@ impl App {
                 }
                 // from the Desk: a word in its status bar; typed ("set my focus goal to 2 hours"): his answer
                 if r.text.is_empty() {
-                    self.desk_status = lines::pick("settings_saved");
+                    self.set_status(lines::pick("settings_saved"));
                     silent = true;
                 }
             }
@@ -2115,7 +2250,7 @@ impl App {
             Effect::Wrapup => {
                 let today = chrono::Local::now().date_naive();
                 let n = todo::load().iter().filter(|i| i.done && i.done_on == Some(today) && i.list.is_none()).count();
-                self.desk_status = lines::pick("desk_status");
+                self.desk_quip = lines::pick("desk_status");
                 self.desk.open();
                 self.desk.set_tab("wrapup");
                 r = Reply::say(lines::pick("wrapup_intro").replace("{n}", &n.to_string())).mood(Mood::Happy);
@@ -2127,10 +2262,10 @@ impl App {
                 if copy {
                     ctx.copy_text(text.clone());
                     self.ignore_clip = text;
-                    self.desk_status = lines::pick("review_copied");
+                    self.set_status(lines::pick("review_copied"));
                     silent = true;
                 } else {
-                    self.desk_status = lines::pick("desk_status");
+                    self.desk_quip = lines::pick("desk_status");
                     self.desk.open();
                     self.desk.set_tab("week");
                     r = Reply::say(format!("{} {}\n\n{text}", lines::pick("review_intro"), lines::pick(plan::week_verdict(&w)))).mood(Mood::Happy).btn("Copy as text", Act::Copy(text));
@@ -2168,7 +2303,7 @@ impl App {
                     self.add_timer(*secs, label.clone(), 0, None);
                 }
                 if quiet {
-                    self.desk_status = news.text.clone();
+                    self.set_status(news.text.clone());
                     silent = true;
                 }
                 r = Reply { effect: Effect::None, ..news };
@@ -2204,7 +2339,7 @@ impl App {
                 }
                 lines::set_facts(&self.facts);
                 if r.text.is_empty() {
-                    self.desk_status = "Forgotten.".into(); // from the Desk
+                    self.set_status("Forgotten."); // from the Desk
                     silent = true;
                 }
             }
@@ -2239,7 +2374,7 @@ impl App {
                     }
                     _ => None,
                 };
-                self.desk_status = pool.map(lines::pick).unwrap_or_default();
+                self.set_status(pool.map(lines::pick).unwrap_or_default());
                 silent = true;
             }
             Effect::Workday(cmd) => {
@@ -2280,7 +2415,7 @@ impl App {
                     }
                 };
                 if from_desk && matches!(verb, "add" | "remove") {
-                    self.desk_status = r.text.clone();
+                    self.set_status(r.text.clone());
                     silent = true;
                 }
             }
@@ -2288,14 +2423,14 @@ impl App {
             Effect::People(cmd) => {
                 r = self.people_command(&cmd);
                 if from_desk && matches!(cmd.split(' ').next(), Some("add" | "birthday" | "met" | "forget" | "email" | "every" | "note" | "phone" | "gift" | "ungift" | "rename")) {
-                    self.desk_status = r.text.clone();
+                    self.set_status(r.text.clone());
                     silent = true;
                 }
             }
             Effect::Calendar(cmd) => {
                 r = self.calendar_command(ctx, &cmd);
                 if from_desk && matches!(cmd.split(' ').next(), Some("add" | "remove" | "refresh")) {
-                    self.desk_status = r.text.clone();
+                    self.set_status(r.text.clone());
                     silent = true;
                 }
             }
@@ -2314,7 +2449,7 @@ impl App {
                         None => "There's no note with that number.".to_string(),
                     };
                     if from_desk {
-                        self.desk_status = line;
+                        self.set_status(line);
                         silent = true;
                     } else {
                         r = Reply::say(line);
@@ -2330,7 +2465,7 @@ impl App {
                             } else if verb == "clear" {
                                 // the reply already says so
                             } else if from_desk {
-                                self.desk_status = line;
+                                self.set_status(line);
                                 silent = true;
                             } else if verb == "add" && r.text.is_empty() {
                                 let text = list.last().map(|n| n.text.clone()).unwrap_or_default();
@@ -2362,7 +2497,7 @@ impl App {
                     ("open", Some(i)) => {
                         let link = self.reading[i].0.clone();
                         if let Err(e) = open(&link) {
-                            self.desk_status = format!("I couldn't open that: {e}");
+                            self.set_status(format!("I couldn't open that: {e}"));
                         }
                         silent = from_desk;
                     }
@@ -2370,7 +2505,7 @@ impl App {
                         self.reading.remove(i);
                         let line = lines::pick("reading_done");
                         if from_desk {
-                            self.desk_status = line;
+                            self.set_status(line);
                             silent = true;
                         } else {
                             r = Reply::say(line).mood(Mood::Happy);
@@ -2511,6 +2646,42 @@ impl App {
             }
         }
         r.text += &news;
+        let mut undo_action = None;
+        if let (Some(what), Some(u)) = (removing, before) {
+            self.undo = Some((what.to_string(), u));
+            undo_action = Some(("Undo".to_string(), "undo".to_string()));
+        }
+        // from the Desk: an "are you sure?" becomes a Desk card, everything else a word in its status bar
+        if (from_desk || asked.is_some() && r.buttons.is_empty() && r.text.chars().count() < 160 && !asks_net) && !silent && news.is_empty() {
+            let confirm = r.buttons.iter().any(|(_, a)| matches!(a, Act::Run(c) if c.starts_with("run ") || c.ends_with(" confirmed") || c == "forgetfact all"));
+            if confirm {
+                let buttons = r.buttons.iter().filter_map(|(l, a)| match a {
+                    Act::Run(c) => Some((l.clone(), Some(c.clone()))),
+                    Act::Hide => Some((l.clone(), None)),
+                    _ => None,
+                });
+                let text = self.fill(&r.text);
+                self.desk.confirm("Are you sure?", vec![text], buttons.collect());
+                return;
+            }
+            if !r.text.trim().is_empty() {
+                let tone = match r.mood {
+                    Mood::Sad | Mood::Shock | Mood::Angry => desk::Tone::Problem,
+                    Mood::Think => desk::Tone::Info,
+                    _ => desk::Tone::Done,
+                };
+                let action = undo_action.clone().or_else(|| r.buttons.iter().find_map(|(l, a)| match a {
+                    Act::Run(c) if !c.starts_with("run ") => Some((l.clone(), c.clone())),
+                    _ => None,
+                }));
+                let text = self.fill(&r.text);
+                self.status(tone, text, action);
+            }
+            return;
+        }
+        if let Some(a) = undo_action {
+            self.desk_status.action = Some(a); // a silent removal: its status gets Undo
+        }
         if !silent || !news.is_empty() {
             if !asks_net {
                 self.net_id += 1; // a web answer still on its way mustn't replace this newer reply
@@ -2644,7 +2815,7 @@ impl App {
             self.show(r.run("Open the Agenda", "desk agenda").btn("Thanks", Act::Hide));
         }
         if self.tracker.as_ref().is_some_and(|tr| tr.take_desk()) {
-            self.desk_status = lines::pick("desk_status");
+            self.desk_quip = lines::pick("desk_status");
             self.desk.open();
         }
         // Meta+C, or a second Clipster that was started (it leaves a note and quits)
@@ -2699,6 +2870,17 @@ impl App {
                     r.buttons.retain(|b| b.0 != "Copy output");
                     r.buttons.insert(0, ("Copy output".into(), Act::Copy(out)));
                     self.balloon = Some(r);
+                }
+                Event::Answer(id, r) if self.desk_net.as_ref().is_some_and(|(n, _)| *n == id) => {
+                    let kind = self.desk_net.take().map(|(_, k)| k).unwrap_or_default();
+                    // the parts to act on: the words of a "Copy them" list, or the paths of Open buttons
+                    let mut items: Vec<String> = r.buttons.iter().filter_map(|(_, a)| match a {
+                        Act::Copy(t) if kind == "words" => Some(t.split(", ").map(String::from).collect::<Vec<_>>()),
+                        Act::Open(t) if kind != "words" => Some(vec![t.clone()]),
+                        _ => None,
+                    }).flatten().collect();
+                    items.dedup();
+                    self.desk_answer = Some(desk::Answer { kind, text: r.text.clone(), items });
                 }
                 Event::Answer(id, mut r) if id == self.net_id && self.balloon.is_some() => {
                     if let Effect::Open(u) = std::mem::replace(&mut r.effect, Effect::None) {
@@ -4110,7 +4292,8 @@ fn main() -> eframe::Result {
             .with_title("Clipster")
             .with_app_id("clipster")
             .with_inner_size(match (play.as_deref(), screenshot.is_some()) {
-                (Some("desk"), true) => [740.0, 540.0],
+                (Some("desk"), true) if std::env::var("CLIPSTER_DESK_SIZE").as_deref() == Ok("large") => [920.0, 680.0],
+                (Some("desk"), true) => [740.0, 580.0],
                 (Some("welcome"), true) => [620.0, 480.0],
                 (Some(_), true) => [560.0, 640.0],
                 _ => [FULL_W, 330.0],

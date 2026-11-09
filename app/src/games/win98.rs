@@ -33,7 +33,7 @@ pub fn glyphs(size: f32) -> FontId {
 }
 
 /// A 1-pixel-wide frame: top/left in `tl`, bottom/right in `br`.
-fn edge(p: &Painter, r: Rect, tl: Color32, br: Color32) {
+pub fn edge(p: &Painter, r: Rect, tl: Color32, br: Color32) {
     p.rect_filled(Rect::from_min_max(r.min, pos2(r.max.x, r.min.y + 1.0)), 0.0, tl);
     p.rect_filled(Rect::from_min_max(r.min, pos2(r.min.x + 1.0, r.max.y)), 0.0, tl);
     p.rect_filled(Rect::from_min_max(pos2(r.min.x, r.max.y - 1.0), r.max), 0.0, br);

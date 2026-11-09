@@ -4,6 +4,21 @@
 use super::*;
 
 /// The Modern look's colours.
+/// What a button does: the main thing on a card, an ordinary thing, or something that can't be taken back.
+#[derive(Clone, Copy, PartialEq)]
+pub(super) enum Kind {
+    Primary,
+    Secondary,
+    Danger,
+}
+
+/// The 98 focus rectangle: a dotted outline.
+fn dotted(p: &Painter, r: Rect, color: Color32) {
+    for (a, b) in [(r.left_top(), r.right_top()), (r.right_top(), r.right_bottom()), (r.right_bottom(), r.left_bottom()), (r.left_bottom(), r.left_top())] {
+        p.add(Shape::dashed_line(&[a, b], Stroke::new(1.0, color), 1.0, 1.0));
+    }
+}
+
 pub(super) mod tok {
     use eframe::egui::Color32;
     const fn hex(v: u32) -> Color32 {
@@ -66,9 +81,10 @@ impl Look {
             Look::Modern => tok::TEXT,
         }
     }
+    /// Secondary text: hints, labels, times. In Classic a dark grey (the 98 grey means "disabled").
     pub(super) fn dim(self) -> Color32 {
         match self {
-            Look::Classic => win98::GRAY_TEXT,
+            Look::Classic => Color32::from_rgb(72, 72, 72),
             Look::Modern => tok::DIM,
         }
     }
@@ -286,10 +302,38 @@ impl Look {
     }
 
     /// A button. "Add", "Start focus" and "Tidy now" are the primary ones; "✕" is an icon-only delete.
+    /// A plain button ("✕" is an icon-only delete).
     pub(super) fn button(self, ui: &mut Ui, r: Rect, id: Id, label: &str, enabled: bool) -> Response {
+        self.btn(ui, r, id, label, Kind::Secondary, enabled)
+    }
+    /// The main button of a card (at most one): the 98 default button, or Modern's accent.
+    pub(super) fn primary(self, ui: &mut Ui, r: Rect, id: Id, label: &str, enabled: bool) -> Response {
+        self.btn(ui, r, id, label, Kind::Primary, enabled)
+    }
+    /// A button that removes or forgets something for good.
+    pub(super) fn danger_btn(self, ui: &mut Ui, r: Rect, id: Id, label: &str, enabled: bool) -> Response {
+        self.btn(ui, r, id, label, Kind::Danger, enabled)
+    }
+
+    pub(super) fn btn(self, ui: &mut Ui, r: Rect, id: Id, label: &str, kind: Kind, enabled: bool) -> Response {
         if self == Look::Classic {
-            return win98::button(ui, r, id, label, enabled);
+            let resp = win98::button(ui, r, id, label, enabled);
+            if kind == Kind::Primary && enabled {
+                win98::edge(ui.painter(), r.expand(1.0), win98::DARK, win98::DARK); // the 98 default button
+            }
+            if resp.has_focus() {
+                dotted(ui.painter(), r.shrink(4.0), win98::DARK);
+            }
+            return resp;
         }
+        let resp = self.btn_modern(ui, r, id, label, kind, enabled);
+        if resp.has_focus() {
+            ui.painter().rect_stroke(r.expand(2.0), CornerRadius::same(8), Stroke::new(2.0, tok::ACCENT), StrokeKind::Outside);
+        }
+        resp
+    }
+
+    fn btn_modern(self, ui: &mut Ui, r: Rect, id: Id, label: &str, kind: Kind, enabled: bool) -> Response {
         let resp = ui.interact(r, id, if enabled { Sense::click() } else { Sense::hover() });
         let (hover, down) = (enabled && resp.hovered(), enabled && resp.is_pointer_button_down_on());
         let p = ui.painter();
@@ -302,9 +346,12 @@ impl Look {
         }
         let pick = |normal, h, d| if down { d } else if hover { h } else { normal };
         let (fill, border, text) = if !enabled {
-            (tok::DISABLED, Some(tok::CONTROL_BORDER), tok::DISABLED_TEXT)
-        } else if matches!(label, "Add" | "Start focus" | "Tidy now" | "Move to tomorrow" | "Back up now" | "Done picking" | "Copy as text") {
+            // disabled looks it: no fill of its own, a faint outline
+            (tok::PAGE, Some(tok::BORDER), tok::DISABLED_TEXT)
+        } else if kind == Kind::Primary {
             (pick(tok::ACCENT, tok::ACCENT_HOVER, tok::ACCENT_PRESSED), None, Color32::WHITE)
+        } else if kind == Kind::Danger {
+            (pick(tok::CARD, tok::SECONDARY_HOVER, tok::SECONDARY_PRESSED), Some(tok::DANGER), tok::DANGER)
         } else {
             (pick(tok::SECONDARY, tok::SECONDARY_HOVER, tok::SECONDARY_PRESSED), Some(tok::CONTROL_BORDER), tok::TEXT)
         };
@@ -374,6 +421,96 @@ impl Look {
             }
             Look::Modern => {
                 p.rect_filled(r, CornerRadius::same(2), color);
+            }
+        }
+    }
+
+    /// Text rows of a list, and rows that carry buttons.
+    pub(super) fn row_h(self) -> f32 {
+        match self {
+            Look::Classic => 24.0,
+            Look::Modern => 28.0,
+        }
+    }
+    pub(super) fn button_row_h(self) -> f32 {
+        self.ctl() + 8.0
+    }
+
+    /// A row of choices inside a tab (Copies | Saved links): flat 98 toolbar toggles, or Modern's segmented control.
+    /// Returns the clicked one.
+    pub(super) fn segments(self, ui: &mut Ui, at: Pos2, labels: &[&str], active: usize, key: &str) -> (Option<usize>, Rect) {
+        let p = ui.painter().clone();
+        let h = if self == Look::Modern { 28.0 } else { 24.0 };
+        let widths: Vec<f32> = labels.iter().map(|l| p.layout_no_wrap(l.to_string(), self.bold(12.0), self.text()).size().x + 22.0).collect();
+        let all = Rect::from_min_size(at, vec2(widths.iter().sum::<f32>() + if self == Look::Modern { 4.0 } else { 0.0 }, h));
+        if self == Look::Modern {
+            p.rect(all, CornerRadius::same(6), tok::CARD, Stroke::new(1.0, tok::CONTROL_BORDER), StrokeKind::Inside);
+        }
+        let mut x = at.x + if self == Look::Modern { 2.0 } else { 0.0 };
+        let mut hit = None;
+        for (i, (label, w)) in labels.iter().zip(&widths).enumerate() {
+            let r = Rect::from_min_size(pos2(x, at.y), vec2(*w, h));
+            let resp = ui.interact(r, Id::unique(("desk-seg", key, i)), Sense::click());
+            let on = i == active;
+            match self {
+                Look::Classic => {
+                    // a 98 toolbar toggle: flat, raised on hover, sunken when chosen
+                    if on {
+                        p.rect_filled(r, 0.0, Color32::from_rgb(222, 222, 222));
+                        win98::edge(&p, r, win98::SHADOW, win98::LIGHT);
+                    } else if resp.hovered() {
+                        win98::edge(&p, r, win98::LIGHT, win98::SHADOW);
+                    }
+                    p.text(r.center() + if on { vec2(1.0, 1.0) } else { vec2(0.0, 0.0) }, Align2::CENTER_CENTER, *label, if on { self.bold(12.5) } else { self.font(12.5) }, self.text());
+                }
+                Look::Modern => {
+                    let inner = r.shrink2(vec2(0.0, 2.0));
+                    if on {
+                        p.rect_filled(inner, CornerRadius::same(4), if resp.hovered() { tok::ACCENT_SOFT_HOVER } else { tok::ACCENT_SOFT });
+                    } else if resp.hovered() {
+                        p.rect_filled(inner, CornerRadius::same(4), tok::SECONDARY_HOVER);
+                    }
+                    p.text(r.center(), Align2::CENTER_CENTER, *label, if on { self.bold(12.0) } else { self.font(12.0) }, if on { tok::ACCENT_PRESSED } else { tok::TEXT });
+                }
+            }
+            if resp.clicked() && !on {
+                hit = Some(i);
+            }
+            x += w;
+        }
+        (hit, all)
+    }
+
+    /// A field for longer text (several lines), in a well.
+    pub(super) fn text_area(self, ui: &mut Ui, r: Rect, id: Id, text: &mut String, hint: &str) -> Response {
+        self.well(ui.painter(), r);
+        let edit = egui::TextEdit::multiline(text)
+            .id(id)
+            .frame(egui::Frame::NONE.inner_margin(egui::Margin::symmetric(8, 6)))
+            .font(self.font(if self == Look::Modern { 12.5 } else { 13.0 }))
+            .text_color(self.text())
+            .desired_width(r.width() - 16.0)
+            .hint_text(egui::RichText::new(hint).color(self.dim()).font(self.font(12.5)));
+        let mut child = ui.new_child(egui::UiBuilder::new().max_rect(r.shrink(2.0)));
+        egui::ScrollArea::vertical().id_salt(id).max_height(r.height() - 4.0).auto_shrink([false, false]).show(&mut child, |ui| ui.add_sized(vec2(r.width() - 6.0, r.height() - 8.0), edit)).inner
+    }
+
+    /// A status mark that doesn't rely on colour: ✓ in a circle (good), ! in a triangle (worth a look), ! in a square (needs you).
+    pub(super) fn light(self, p: &Painter, c: Pos2, level: crate::upkeep::Level) {
+        use crate::upkeep::Level;
+        let r = 6.5;
+        match level {
+            Level::Good => {
+                p.circle_filled(c, r, self.score(100));
+                p.add(Shape::line(vec![c + vec2(-3.0, 0.0), c + vec2(-0.8, 2.4), c + vec2(3.2, -2.6)], Stroke::new(1.6, Color32::WHITE)));
+            }
+            Level::Note => {
+                p.add(Shape::convex_polygon(vec![c + vec2(0.0, -r - 0.5), c + vec2(r + 0.8, r - 0.5), c + vec2(-r - 0.8, r - 0.5)], self.score(70), Stroke::NONE));
+                p.text(c + vec2(0.0, 1.0), Align2::CENTER_CENTER, "!", self.bold(10.0), Color32::WHITE);
+            }
+            Level::Needs => {
+                p.rect_filled(Rect::from_center_size(c, vec2(r * 2.0, r * 2.0)), CornerRadius::same(2), self.danger());
+                p.text(c, Align2::CENTER_CENTER, "!", self.bold(11.0), Color32::WHITE);
             }
         }
     }

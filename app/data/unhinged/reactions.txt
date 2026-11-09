@@ -20453,3 +20453,17 @@ Paused. Say "resume focus" when you return to the Path.
 Back to it. The clock runs again. So do you.
 Resumed. The work missed you. So did I.
 And we focus once more. Onward.
+
+## undo_done
+Put back: {x}. Time flows backwards for me. Only a little.
+Undone. {x} returns, as if the Recycle Bin had never heard of it.
+{x}: restored. I am merciful today.
+
+## undo_nothing
+There is nothing to undo. Even I cannot unmake what never happened.
+Nothing to put back. All is as you left it. Suspiciously so.
+
+## template_saved
+Saved "{x}" as a template of yours. It sits at the top of Letters, glowing slightly.
+"{x}" is one of your templates now. The scribes approve.
+Template "{x}" is sealed. Summon it any time on the Write tab.

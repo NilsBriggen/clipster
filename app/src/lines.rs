@@ -442,6 +442,47 @@ pub fn ensure_user_file() -> PathBuf {
     path
 }
 
+/// A letter template of your own in the user's file: `## template my_<name>` (one line, the whole text).
+pub fn save_template(name: &str, text: &str) -> std::io::Result<()> {
+    let id: String = name.trim().to_lowercase().chars().map(|c| if c.is_alphanumeric() { c } else { '_' }).collect();
+    forget_template(&format!("my_{id}"))?;
+    let path = ensure_user_file();
+    let mut all = std::fs::read_to_string(&path)?;
+    let words = name.trim().replace(" | ", " ");
+    all += &format!("\n## template my_{id}\n> {words}\n{}\n", text.trim().replace('\n', "\\n"));
+    crate::brain::write_atomic(&path, &all)?;
+    reload();
+    Ok(())
+}
+
+/// Remove a template of yours (only `my_` ones); false when there was none.
+pub fn forget_template(id: &str) -> std::io::Result<bool> {
+    if !id.starts_with("my_") {
+        return Ok(false);
+    }
+    let path = user_path();
+    let Ok(text) = std::fs::read_to_string(&path) else { return Ok(false) };
+    let head = format!("## template {id}");
+    let mut out = String::new();
+    let mut skipping = false;
+    let mut found = false;
+    for l in text.lines() {
+        if l.starts_with("## ") {
+            skipping = l.trim() == head;
+            found |= skipping;
+        }
+        if !skipping {
+            out += l;
+            out.push('\n');
+        }
+    }
+    if found {
+        crate::brain::write_atomic(&path, &out)?;
+        reload();
+    }
+    Ok(found)
+}
+
 /// Remember "when I say `phrase`, say `reply` / run `commands`" in the user's file.
 pub fn teach(phrase: &str, reply: &str, commands: &[String]) -> std::io::Result<()> {
     unlearn(phrase)?;

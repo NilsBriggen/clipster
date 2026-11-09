@@ -220,6 +220,81 @@ pub fn check(text: &str) -> Reply {
     r.run("Check again", "proofread")
 }
 
+/// One issue in plain words, for the Desk's Write tab.
+pub fn issue_text(i: &Issue) -> String {
+    let say = |pool: &str, x: &str, y: &str| lines::pick(pool).replace("{x}", x).replace("{y}", y).replace("{n}", x);
+    match i {
+        Issue::Doubled(w) => say("proof_doubled", w, ""),
+        Issue::Misspelled(w, r) => say("proof_misspelled", w, r),
+        Issue::AAn(w) => say("proof_a_an", w, ""),
+        Issue::Its => say("proof_its", "", ""),
+        Issue::Your => say("proof_your", "", ""),
+        Issue::Then => say("proof_then", "", ""),
+        Issue::Spaces => say("proof_spaces", "", ""),
+        Issue::Capital => say("proof_capital", "", ""),
+        Issue::Shouting => say("proof_shouting", "", ""),
+        Issue::Long(n) => say("proof_long", &n.to_string(), ""),
+        Issue::Hard => say("proof_hard", "", ""),
+    }
+}
+
+/// Whether "Fix" can do it safely (the rest are hints for you to judge).
+pub fn fixable(i: &Issue) -> bool {
+    matches!(i, Issue::Doubled(_) | Issue::Misspelled(..) | Issue::AAn(_) | Issue::Spaces | Issue::Capital)
+}
+
+/// Apply one safe fix to the text (the Write tab's "Fix" next to an issue).
+pub fn fix_one(text: &str, issue: &Issue) -> String {
+    match issue {
+        Issue::Misspelled(w, right) => text
+            .split_inclusive(|c: char| c.is_whitespace())
+            .map(|tok| {
+                let core = tok.trim_end();
+                if bare(core) == *w {
+                    let start = core.find(|c: char| c.is_alphanumeric()).unwrap_or(0);
+                    let end = core.rfind(|c: char| c.is_alphanumeric() || c == '\'').map_or(core.len(), |i| i + core[i..].chars().next().map_or(1, char::len_utf8));
+                    let r = if core[start..].starts_with(|c: char| c.is_uppercase()) { cap_first(right) } else { right.clone() };
+                    format!("{}{r}{}{}", &core[..start], &core[end..], &tok[core.len()..])
+                } else {
+                    tok.to_string()
+                }
+            })
+            .collect(),
+        Issue::Doubled(_) | Issue::AAn(_) | Issue::Spaces | Issue::Capital => {
+            // the safe fixer, with only the misspellings left out (each has its own button)
+            fix(text, &HashMap::new())
+        }
+        _ => text.to_string(),
+    }
+}
+
+/// The `[blanks]` of a template, each once, in order: "[Recipient]", "[the product]".
+pub fn fields(template: &str) -> Vec<String> {
+    let mut out: Vec<String> = vec![];
+    let mut rest = template;
+    while let Some(a) = rest.find('[') {
+        let Some(b) = rest[a..].find(']') else { break };
+        let f = rest[a + 1..a + b].to_string();
+        if !f.is_empty() && f.len() < 60 && !out.contains(&f) {
+            out.push(f);
+        }
+        rest = &rest[a + b + 1..];
+    }
+    out
+}
+
+/// A template with the blanks you filled in (the empty ones stay as they are).
+pub fn fill_fields(template: &str, values: &std::collections::BTreeMap<String, String>) -> String {
+    values.iter().filter(|(_, v)| !v.trim().is_empty()).fold(template.to_string(), |t, (k, v)| t.replace(&format!("[{k}]"), v.trim()))
+}
+
+/// Every letter template: (id, name), yours first.
+pub fn templates() -> Vec<(String, String)> {
+    let mut all: Vec<(String, String)> = lines::sections_with_prefix("template ").into_iter().map(|(id, _)| (id.clone(), id.replace('_', " "))).collect();
+    all.sort_by_key(|(id, _)| !id.starts_with("my_"));
+    all
+}
+
 /// "Fix the easy ones": the fixed text goes onto the clipboard.
 pub fn fix_clipboard() -> Reply {
     let text = crate::brain::or_clipboard("");
@@ -328,5 +403,23 @@ mod tests {
     #[test]
     fn templates_get_the_date() {
         assert_eq!(fill("Dear [Name],\n{date}\n{name}", "May 3, 2026"), "Dear [Name],\nMay 3, 2026\n{name}");
+    }
+
+    #[test]
+    fn one_fix_at_a_time_and_template_blanks() {
+        let w = wrong();
+        let t = "I will Definately recieve it.";
+        let issues = proofread(t, &w);
+        let fixed = fix_one(t, &Issue::Misspelled("definately".into(), "definitely".into()));
+        assert_eq!(fixed, "I will Definitely recieve it.", "only that word, keeping its capital");
+        assert!(issues.iter().any(|i| fixable(i)));
+        assert_eq!(fix_one("the the cat", &Issue::Doubled("the".into())), "the cat");
+        assert!(!fixable(&Issue::Its), "its/it's is only ever a hint");
+        let tpl = "Dear [Recipient],\n\nAbout [the product] ([order number]), [Recipient]…";
+        assert_eq!(fields(tpl), vec!["Recipient", "the product", "order number"]);
+        let mut v = std::collections::BTreeMap::new();
+        v.insert("Recipient".to_string(), "Ms Keller".to_string());
+        v.insert("order number".to_string(), " ".to_string());
+        assert_eq!(fill_fields(tpl, &v), "Dear Ms Keller,\n\nAbout [the product] ([order number]), Ms Keller…");
     }
 }

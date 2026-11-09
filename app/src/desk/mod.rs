@@ -15,6 +15,7 @@ use std::time::{Duration, Instant};
 
 mod agenda;
 mod clipboard;
+mod find;
 mod look;
 mod sample;
 mod settings;
@@ -22,27 +23,27 @@ mod today;
 mod todos;
 mod upkeep;
 mod week;
+mod write;
 mod you;
 
-use look::tok;
+use look::{tok, Kind};
 pub use sample::sample;
 use sample::sample_files;
 
-const W: f32 = 720.0;
-const H: f32 = 520.0;
-pub const TABS: [&str; 8] = ["Today", "Week", "To-do", "Agenda", "Clipboard", "Upkeep", "You & me", "Settings"];
+pub const TABS: [&str; 9] = ["Today", "Week", "To-do", "Agenda", "Clipboard", "Write", "Upkeep", "You & me", "Settings"];
 
 /// A tab's index from its number or (the start of) its name: "2", "settings", "todo".
 pub fn tab(name: &str) -> Option<usize> {
     let t = match name.trim().to_lowercase().replace('-', "").as_str() {
-        "plan" => "todo".to_string(), // plan my day
-        "wrapup" => "today".to_string(),
-        "checkup" | "tidy" | "backup" | "startup" => "upkeep".to_string(),
+        "plan" | "planweek" => "todo".to_string(), // plan my day, plan next week
+        "wrapup" | "workday" => "today".to_string(),
+        "checkup" | "tidy" | "backup" | "startup" | "rightnow" | "space" => "upkeep".to_string(),
         t if t.starts_with("list ") => "todo".to_string(), // "list shopping": a named list on the To-do tab
-        "links" => "clipboard".to_string(),                  // the saved links page
-        "reminders" | "notes" | "calendar" | "calendars" => "agenda".to_string(),
-        "people" => "you".to_string(),
-        "workday" => "today".to_string(),
+        "links" | "files" => "clipboard".to_string(),      // the saved links and files pages
+        "reminders" | "notes" | "calendar" | "calendars" | "month" => "agenda".to_string(),
+        "people" | "journal" => "you".to_string(),
+        "next7" | "nextweek" | "focuslog" => "week".to_string(),
+        "proofread" | "letters" | "letter" => "write".to_string(),
         t => t.to_string(),
     };
     match t.parse::<usize>() {
@@ -50,6 +51,48 @@ pub fn tab(name: &str) -> Option<usize> {
         Err(_) if t.len() >= 3 => TABS.iter().position(|n| n.to_lowercase().replace('-', "").starts_with(&t)),
         Err(_) => None,
     }
+}
+
+/// How a status message reads: plain, done (✓, the accent colour, fades after a few seconds) or a problem
+/// (!, the danger colour, stays until the next one).
+#[derive(Clone, Copy, PartialEq, Default, Debug)]
+pub enum Tone {
+    #[default]
+    Info,
+    Done,
+    Problem,
+}
+
+/// The Desk's status bar: the last answer to a click, with an optional button (Undo, Show), or the quip.
+#[derive(Clone, Default)]
+pub struct Status {
+    pub text: String,
+    pub tone: Tone,
+    pub at: Option<Instant>,
+    pub action: Option<(String, String)>, // label, command
+}
+
+impl Status {
+    /// Still worth showing: problems until replaced, the rest for eight seconds.
+    pub fn fresh(&self) -> bool {
+        !self.text.is_empty() && self.at.is_some_and(|t| self.tone == Tone::Problem || t.elapsed() < Duration::from_secs(8))
+    }
+}
+
+/// An answer from a background job, shown on its Desk page instead of a balloon: other words for a word,
+/// the files found, duplicates… `items` are the parts to act on (words, or paths).
+#[derive(Clone, Debug, Default)]
+pub struct Answer {
+    pub kind: String,
+    pub text: String,
+    pub items: Vec<String>,
+}
+
+/// An "are you sure?" over the Desk: lines, and buttons with the command each one runs (None = just close).
+pub struct Confirm {
+    pub title: String,
+    pub lines: Vec<String>,
+    pub buttons: Vec<(String, Option<String>)>,
 }
 
 /// What the app knows that the Desk shows (borrowed for one frame).
@@ -60,7 +103,8 @@ pub struct View<'a> {
     pub focus_now: Option<(String, u64, u64, u64, bool)>, // label, seconds left, seconds so far, seconds distracted, paused
     pub checkins: &'a BTreeMap<String, String>,      // day -> great/okay/meh/rough
     pub streaks: (u64, u64, u64),                    // focus, check-in, days with Clipster
-    pub status: String,
+    pub status: Status,
+    pub quip: String, // what the status bar says when nothing just happened
     pub prefs: Prefs,
     pub clips: &'a [String], // the clipboard history, oldest first
     pub pins: &'a [String],
@@ -73,6 +117,9 @@ pub struct View<'a> {
     pub events: &'a [crate::calendar::Event], // the calendars' next weeks
     pub calendars: &'a [String],              // their links or files
     pub calendar_note: String,                // "Checked 3 min ago", or what went wrong
+    pub calendar_problems: usize,             // calendars that couldn't be read
+    pub answer: Option<&'a Answer>,           // a web or file answer meant for the Desk (words, files found…)
+    pub name: String,                         // what he calls you (letters are signed with it)
     pub people: &'a [crate::people::Person],
     pub workday: &'a [String], // what "start my workday" opens
 }
@@ -125,6 +172,7 @@ pub struct Prefs {
     pub focus_goal: u64,
     pub budgets: BTreeMap<String, u64>,
     pub workday_ask: bool,
+    pub large: bool, // the Desk's larger size
 }
 
 #[derive(Clone, Copy, PartialEq)]
@@ -186,6 +234,37 @@ pub struct Desk {
     teach_reply: String,
     wrapping: bool,                    // "wrap up my day": the end-of-day card over the Today tab
     scroll: BTreeMap<&'static str, f32>, // how far each list is scrolled, in rows
+    confirming: Option<Confirm>,       // an "are you sure?" over everything
+    removed_at: Option<Instant>,       // the last ✕: the next ✕ waits a moment, so a double-click removes one row
+    large: bool,                       // the larger size (from the settings)
+    query: String,                     // the box for finding anything or telling him something
+    found_at: Option<(String, Instant)>, // a row to light up for a moment (just added, or found)
+    status_rect: Option<Rect>,         // where the status line is (its button goes at the right end)
+    found: Vec<find::Hit>,             // what the find box found this frame
+    pick: Option<usize>,               // the result picked with the arrow keys
+    find_enter: bool,                  // Enter was pressed in the find box
+    find_rect: Option<Rect>,
+    find_focus: bool,
+    card: Option<Card>,                // a card open over the page (a person, an event, a to-do's details…)
+    write_page: usize,                 // Write: Proofread, Letters
+    write_text: String,                // the text being proofread
+    letter: Option<String>,            // the template open on Letters
+    letter_values: BTreeMap<String, String>, // its blanks, filled in so far
+    letter_to: String,                 // who it goes to (an email address)
+    letter_name: String,               // a name for "Save as my template"
+    word: String,                      // the word in the Words panel
+}
+
+/// A card over the page with its own controls.
+#[derive(Clone, Debug, PartialEq)]
+pub(super) enum Card {
+    Person(String),         // by name
+    Event(String),          // by key
+    Todo(usize),            // by line
+    Day(chrono::NaiveDate), // the Week chart's day story
+    Qr(String),             // a QR code of this text
+    NewList,
+    Habits,
 }
 
 impl Desk {
@@ -226,14 +305,26 @@ impl Desk {
         }
     }
 
+    /// The window's size: 720×560, or 900×660 (still fits a 1366×768 laptop) when the larger Desk is chosen.
+    pub fn size(&self) -> egui::Vec2 {
+        if self.large { vec2(900.0, 660.0) } else { vec2(720.0, 560.0) }
+    }
+
+    /// An "are you sure?" over the Desk (the app hands over a confirmation that came from a Desk click).
+    pub fn confirm(&mut self, title: &str, lines: Vec<String>, buttons: Vec<(String, Option<String>)>) {
+        self.confirming = Some(Confirm { title: title.to_string(), lines, buttons });
+    }
+
     /// Call every frame: draws the window next to `near` (Clipster) and returns the commands its buttons ran.
     pub fn show(&mut self, ctx: &egui::Context, view: &View, look: Look, near: Option<Rect>) -> Vec<String> {
         let mut out = vec![];
         if !self.open {
             return out;
         }
+        let resized = self.large != view.prefs.large;
+        self.large = view.prefs.large;
         self.refresh();
-        let size = vec2(W, H);
+        let size = self.size();
         if self.place.is_none() {
             let monitor = ctx.input(|i| i.viewport().monitor_size).unwrap_or(vec2(1920.0, 1080.0));
             self.place = Some(match near {
@@ -255,6 +346,9 @@ impl Desk {
             ctx.show_viewport_immediate(egui::ViewportId::from_hash_of("clipster-desk"), builder, |ui, _| {
                 if fresh {
                     ui.ctx().send_viewport_cmd(egui::ViewportCommand::Focus);
+                }
+                if resized {
+                    ui.ctx().send_viewport_cmd(egui::ViewportCommand::InnerSize(size));
                 }
                 close = self.window(ui, view, look, true, &mut out) || ui.input(|i| i.viewport().close_requested());
                 ui.ctx().request_repaint_after(Duration::from_secs(1)); // timers count down
@@ -299,13 +393,137 @@ impl Desk {
         };
     }
 
+    /// A card is open over the page (an "are you sure?", the wrap-up, an editor): the tabs and menu wait.
+    fn modal(&self) -> bool {
+        self.confirming.is_some() || self.wrapping || self.forget_all || self.workday_open || self.card.is_some()
+    }
+
+    /// Leave a sub-page (Calendars, start-up apps, Plan my day, a named list): true when there was one.
+    fn back(&mut self) -> bool {
+        let was = self.calendars_open || self.startup_list || self.planning || self.list_tab.is_some();
+        self.calendars_open = false;
+        self.startup_list = false;
+        self.planning = false;
+        self.list_tab = None;
+        was
+    }
+
+    /// A list drawn row by row: wheel, PageUp/PageDown/Home/End over it, and a scrollbar you can drag or click.
+    /// Returns the first row to show; keeps the position per list.
+    fn rows(&mut self, ui: &mut Ui, look: Look, key: &'static str, area: Rect, total: usize, fits: usize) -> usize {
+        let max = total.saturating_sub(fits) as f32;
+        let mut at = self.scroll.get(key).copied().unwrap_or(0.0);
+        if ui.rect_contains_pointer(area) {
+            at -= ui.input(|i| i.smooth_scroll_delta.y) / 24.0;
+            let typing = ui.memory(|m| m.focused().is_some());
+            if !typing {
+                ui.input(|i| {
+                    if i.key_pressed(egui::Key::PageDown) {
+                        at += fits as f32;
+                    }
+                    if i.key_pressed(egui::Key::PageUp) {
+                        at -= fits as f32;
+                    }
+                    if i.key_pressed(egui::Key::Home) {
+                        at = 0.0;
+                    }
+                    if i.key_pressed(egui::Key::End) {
+                        at = max;
+                    }
+                });
+            }
+        }
+        if total > fits && total > 0 {
+            // the scrollbar: a trough along the right edge with a thumb to drag; a click on the trough pages
+            let w = if look == Look::Modern { 8.0 } else { 12.0 };
+            let track = Rect::from_min_max(pos2(area.max.x - w - 2.0, area.min.y + 4.0), pos2(area.max.x - 2.0, area.max.y - 4.0));
+            let h = (track.height() * fits as f32 / total as f32).max(18.0);
+            let resp = ui.interact(track, Id::unique(("desk-scroll", key)), Sense::click_and_drag()).on_hover_text("Drag, or use the wheel, PageUp and PageDown");
+            if let Some(pos) = resp.interact_pointer_pos() {
+                let frac = ((pos.y - track.min.y - h / 2.0) / (track.height() - h)).clamp(0.0, 1.0);
+                if resp.dragged() || resp.clicked() {
+                    at = frac * max;
+                }
+            }
+            at = at.clamp(0.0, max);
+            let y = track.min.y + (track.height() - h) * if max > 0.0 { at / max } else { 0.0 };
+            let thumb = Rect::from_min_size(pos2(track.min.x, y), vec2(w, h));
+            let p = ui.painter();
+            match look {
+                Look::Classic => {
+                    p.rect_filled(track, 0.0, Color32::from_rgb(223, 223, 223));
+                    p.rect_filled(thumb, 0.0, win98::FACE);
+                    win98::bevel(p, thumb, true);
+                }
+                Look::Modern => {
+                    let wide = resp.hovered() || resp.dragged();
+                    let t = if wide { thumb } else { thumb.shrink2(vec2(2.0, 0.0)) };
+                    p.rect_filled(t, CornerRadius::same(4), if wide { tok::DIM } else { tok::CONTROL_BORDER });
+                }
+            }
+        }
+        at = at.clamp(0.0, max);
+        self.scroll.insert(key, at);
+        at.round() as usize
+    }
+
+    /// A ✕ that removes something. After a removal the next row slides up under the pointer, so for half a second
+    /// the next ✕ waits: a habitual double-click removes one row, not two.
+    fn remove_btn(&mut self, ui: &mut Ui, look: Look, r: Rect, id: Id, what: &str) -> bool {
+        let resp = look.button(ui, r, id, "✕", true).on_hover_text(what);
+        if resp.clicked() && self.removed_at.is_none_or(|t| t.elapsed() > Duration::from_millis(500)) {
+            self.removed_at = Some(Instant::now());
+            return true;
+        }
+        false
+    }
+
+    /// The light-up a row gets for a moment after it was added or found (true while it lasts).
+    fn lit(&self, text: &str) -> bool {
+        self.found_at.as_ref().is_some_and(|(t, at)| at.elapsed() < Duration::from_millis(1800) && (t == text || text.contains(t.as_str()) && t.len() > 3))
+    }
+
     /// The whole window. Returns true when it should close.
     fn window(&mut self, ui: &mut Ui, view: &View, look: Look, drag: bool, out: &mut Vec<String>) -> bool {
-        let (win, _) = ui.allocate_exact_size(vec2(W, H), Sense::hover());
+        let size = self.size();
+        let (win, _) = ui.allocate_exact_size(size, Sense::hover());
+        // keys: Esc leaves a sub-page or closes, Ctrl+Tab / Ctrl+PageDown change tabs, Ctrl+1…9 jump, Ctrl+W closes,
+        // Ctrl+Z undoes the last removal, Ctrl+K finds anything
+        let typing = ui.memory(|m| m.focused().is_some());
+        let (esc, ctrl, shift) = ui.input(|i| (i.key_pressed(egui::Key::Escape), i.modifiers.command, i.modifiers.shift));
+        let key = |k: egui::Key| ui.input(|i| i.key_pressed(k));
+        let modal = self.modal();
+        if !modal {
+            let n = TABS.len();
+            if ctrl && (key(egui::Key::Tab) && !shift || key(egui::Key::PageDown)) {
+                self.tab = (self.tab + 1) % n;
+                self.back();
+            } else if ctrl && (key(egui::Key::Tab) && shift || key(egui::Key::PageUp)) {
+                self.tab = (self.tab + n - 1) % n;
+                self.back();
+            }
+            let digits = [egui::Key::Num1, egui::Key::Num2, egui::Key::Num3, egui::Key::Num4, egui::Key::Num5, egui::Key::Num6, egui::Key::Num7, egui::Key::Num8, egui::Key::Num9];
+            if let Some(i) = digits.iter().position(|d| ctrl && key(*d)) {
+                self.tab = i;
+                self.back();
+            }
+            if ctrl && key(egui::Key::Z) && !typing {
+                out.push("undo".into());
+            }
+            if ctrl && (key(egui::Key::K) || key(egui::Key::F)) {
+                ui.memory_mut(|m| m.request_focus(Id::unique("desk-find")));
+            }
+        }
+        if ctrl && key(egui::Key::W) {
+            return true;
+        }
+        if esc && !modal && !typing && !self.menu && !self.back() {
+            return true;
+        }
         let (c, close, view_menu) = match look {
-            Look::Classic => self.classic_chrome(ui, win, view, drag),
+            Look::Classic => self.classic_chrome(ui, win, view, drag, modal),
             Look::Modern => {
-                let (c, close) = self.modern_chrome(ui, win, view, drag, out);
+                let (c, close) = self.modern_chrome(ui, win, view, drag, modal, out);
                 (c, close, None)
             }
         };
@@ -314,28 +532,54 @@ impl Desk {
             "Week" => self.week(ui, c, view, look, out),
             "To-do" => self.todos(ui, c, view, look, out),
             "Agenda" => self.reminders(ui, c, view, look, out),
+            "Write" => self.write(ui, c, view, look, out),
             "Settings" => self.settings(ui, c, &view.prefs, look, out),
             "Clipboard" => self.clipboard(ui, c, view, look, out),
             "You & me" => self.you_and_me(ui, c, view, look, out),
             _ => self.upkeep(ui, c, view, look, out),
         }
+        // the status line's button and the find box's results sit on top of the page
+        self.status_action(ui, view, look, out);
+        self.find_results(ui, view, look, out);
+        // an "are you sure?" from a click: over everything
+        if let Some(conf) = &self.confirming {
+            let labels: Vec<&str> = conf.buttons.iter().map(|(l, _)| l.as_str()).collect();
+            let area = self.page_area(win, look);
+            if let Some(i) = look.dialog(ui, area, &conf.title.clone(), &conf.lines.clone(), &labels) {
+                if let Some(cmd) = conf.buttons.get(i).and_then(|b| b.1.clone()) {
+                    out.push(cmd);
+                }
+                self.confirming = None;
+            }
+        }
         // Classic's View menu, last so it lies on top of the page
         if let Some(label) = view_menu.filter(|_| self.menu) {
-            let drop = Rect::from_min_size(pos2(label.rect.min.x, label.rect.max.y), vec2(170.0, 3.0 * 22.0 + 14.0));
+            let rows: Vec<(String, String, bool)> = [("Classic 98".to_string(), String::new(), true), ("Modern".to_string(), String::new(), false)]
+                .into_iter()
+                .chain(TABS.iter().enumerate().map(|(i, t)| (t.to_string(), format!("Ctrl+{}", i + 1), self.tab == i)))
+                .chain([(if self.large { "Normal size" } else { "Larger size" }.to_string(), String::new(), false), ("Close".to_string(), "Ctrl+W".to_string(), false)])
+                .collect();
+            let gap = |i: usize| if i >= 2 { 8.0 } else { 0.0 } + if i >= 2 + TABS.len() { 8.0 } else { 0.0 };
+            let drop = Rect::from_min_size(pos2(label.rect.min.x, label.rect.max.y), vec2(200.0, rows.len() as f32 * 20.0 + 22.0));
             win98::panel(ui.painter(), drop, win98::FACE, true);
-            let item = |ui: &mut Ui, i: usize, label: &str, on: bool| win98::menu_item(ui, Rect::from_min_size(pos2(drop.min.x + 3.0, drop.min.y + 3.0 + i as f32 * 22.0 + if i == 2 { 8.0 } else { 0.0 }), vec2(drop.width() - 6.0, 22.0)), label, "", on);
-            if item(ui, 0, "Classic 98", true) {
-                out.push("desklook classic".into());
-                self.menu = false;
+            for (i, (name, keys, on)) in rows.iter().enumerate() {
+                let r = Rect::from_min_size(pos2(drop.min.x + 3.0, drop.min.y + 3.0 + i as f32 * 20.0 + gap(i)), vec2(drop.width() - 6.0, 20.0));
+                if win98::menu_item(ui, r, name, keys, *on) {
+                    self.menu = false;
+                    match i {
+                        0 => out.push("desklook classic".into()),
+                        1 => out.push("desklook modern".into()),
+                        i if i < 2 + TABS.len() => {
+                            self.tab = i - 2;
+                            self.back();
+                        }
+                        i if i == 2 + TABS.len() => out.push(format!("pref desksize {}", if self.large { "normal" } else { "large" })),
+                        _ => return true,
+                    }
+                }
             }
-            if item(ui, 1, "Modern", false) {
-                out.push("desklook modern".into());
-                self.menu = false;
-            }
-            let y = drop.min.y + 3.0 + 2.0 * 22.0 + 4.0;
-            ui.painter().hline(drop.min.x + 6.0..=drop.max.x - 6.0, y, Stroke::new(1.0, win98::GRAY_TEXT));
-            if item(ui, 2, "Close", false) {
-                return true;
+            for y in [drop.min.y + 3.0 + 2.0 * 20.0 + 4.0, drop.min.y + 3.0 + (2 + TABS.len()) as f32 * 20.0 + 12.0] {
+                ui.painter().hline(drop.min.x + 6.0..=drop.max.x - 6.0, y, Stroke::new(1.0, win98::GRAY_TEXT));
             }
             if ui.input(|i| i.pointer.any_click()) && !ui.rect_contains_pointer(drop) && !label.clicked() {
                 self.menu = false;
@@ -344,9 +588,34 @@ impl Desk {
         close
     }
 
-    /// The 98 window: title bar, a View menu, property-sheet tabs, the page and two status panes.
+    /// The area the cards dim and block: everything below the title bar.
+    fn page_area(&self, win: Rect, look: Look) -> Rect {
+        match look {
+            Look::Classic => Rect::from_min_max(pos2(win.min.x + 4.0, win.min.y + 27.0), pos2(win.max.x - 4.0, win.max.y - 4.0)),
+            Look::Modern => Rect::from_min_max(pos2(win.min.x + 9.0, win.min.y + 49.0), pos2(win.max.x - 9.0, win.max.y - 9.0)),
+        }
+    }
+
+    /// A small number or ! after a tab's name when something there wants you.
+    fn badge(&self, name: &str, view: &View) -> Option<String> {
+        let today = chrono::Local::now().date_naive();
+        match name {
+            "To-do" => {
+                let n = self.files.todos.iter().filter(|i| !i.done && i.list.is_none() && i.due.is_some_and(|d| d < today)).count();
+                (n > 0).then(|| n.to_string())
+            }
+            "Agenda" => (view.calendar_problems > 0).then(|| "!".to_string()),
+            "Upkeep" => {
+                let n = view.upkeep.map_or(0, |(r, _)| r.checks.iter().filter(|c| c.level == crate::upkeep::Level::Needs).count()) + usize::from(view.backup_check.level == crate::upkeep::Level::Needs);
+                (n > 0).then(|| n.to_string())
+            }
+            _ => None,
+        }
+    }
+
+    /// The 98 window: title bar, a View menu and the find box, property-sheet tabs, the page and two status panes.
     /// Returns the content area, whether to close, and the View menu's label (its menu is drawn last).
-    fn classic_chrome(&mut self, ui: &mut Ui, win: Rect, view: &View, drag: bool) -> (Rect, bool, Option<Response>) {
+    fn classic_chrome(&mut self, ui: &mut Ui, win: Rect, view: &View, drag: bool, modal: bool) -> (Rect, bool, Option<Response>) {
         let p = ui.painter().clone();
         let look = Look::Classic;
         win98::panel(&p, win, win98::FACE, true);
@@ -355,16 +624,22 @@ impl Desk {
         let close = win98::title_bar(ui, bar, "Clipster's Desk", drag);
         let row = Rect::from_min_size(pos2(inner.min.x, bar.max.y + 1.0), vec2(inner.width(), 20.0));
         let label = win98::menu_label(ui, row.min + vec2(2.0, 0.0), "View", self.menu);
-        if label.clicked() {
+        if label.clicked() && !modal {
             self.menu = !self.menu;
         }
+        self.find_box(ui, Rect::from_min_max(pos2(row.max.x - 260.0, row.min.y + 1.0), pos2(row.max.x - 2.0, row.max.y)), look);
         let tabs_y = row.max.y + 6.0;
         let mut x = inner.min.x + 6.0;
         for (i, name) in TABS.iter().enumerate() {
-            let w = p.layout_no_wrap(name.to_string(), look.font(13.0), look.text()).size().x + 22.0;
-            if look.tab(ui, Rect::from_min_size(pos2(x, tabs_y), vec2(w, 24.0)), name, self.tab == i).clicked() {
+            let shown = match self.badge(name, view) {
+                Some(b) => format!("{name} ({b})"),
+                None => name.to_string(),
+            };
+            let w = p.layout_no_wrap(shown.clone(), look.font(13.0), look.text()).size().x + 18.0;
+            if look.tab(ui, Rect::from_min_size(pos2(x, tabs_y), vec2(w, 24.0)), &shown, self.tab == i).clicked() && !modal {
                 self.tab = i;
                 self.menu = false;
+                self.back();
             }
             x += w;
         }
@@ -372,32 +647,37 @@ impl Desk {
         let page = Rect::from_min_max(pos2(inner.min.x + 6.0, tabs_y + 24.0), pos2(inner.max.x - 6.0, status.min.y - 6.0));
         p.rect_filled(page, 0.0, win98::FACE);
         win98::bevel(&p, page, true);
-        win98::status_bar(&p, Rect::from_min_max(status.min, pos2(status.max.x - 92.0, status.max.y)), &view.status);
-        win98::status_bar(&p, Rect::from_min_max(pos2(status.max.x - 88.0, status.min.y), status.max), "Classic 98");
+        let field = Rect::from_min_max(status.min, pos2(status.max.x - 92.0, status.max.y));
+        win98::status_bar(&p, field, "");
+        self.status_text(&p, field.shrink2(vec2(7.0, 2.0)), view, look);
+        win98::status_bar(&p, Rect::from_min_max(pos2(status.max.x - 88.0, status.min.y), status.max), if self.large { "Classic 98 · large" } else { "Classic 98" });
+        self.status_rect = Some(field.shrink2(vec2(3.0, 3.0)));
         (page.shrink(12.0), close, Some(label))
     }
 
     /// The modern window: a rounded card inside the transparent canvas (with room for its shadow), a title
-    /// bar with the paperclip, the Classic 98 | Modern switch and close, flat tabs, the page and a quip.
-    fn modern_chrome(&mut self, ui: &mut Ui, win: Rect, view: &View, drag: bool, out: &mut Vec<String>) -> (Rect, bool) {
+    /// bar with the paperclip, the find box, the Classic 98 | Modern switch and close, flat tabs, the page and the status.
+    fn modern_chrome(&mut self, ui: &mut Ui, win: Rect, view: &View, drag: bool, modal: bool, out: &mut Vec<String>) -> (Rect, bool) {
         let p = ui.painter().clone();
         let look = Look::Modern;
+        let (w, h) = (win.width(), win.height());
         let o = win.min.to_vec2();
         let at = |x: f32, y: f32, w: f32, h: f32| Rect::from_min_size(pos2(x, y) + o, vec2(w, h));
-        let card = at(8.0, 6.0, W - 16.0, H - 14.0);
+        let card = at(8.0, 6.0, w - 16.0, h - 14.0);
         p.add(egui::epaint::Shadow { offset: [0, 2], blur: 8, spread: 0, color: Color32::from_rgba_unmultiplied(0x17, 0x20, 0x33, 0x26) }.as_shape(card, CornerRadius::same(12)));
         p.rect(card, CornerRadius::same(12), tok::FRAME, Stroke::new(1.0, tok::BORDER), StrokeKind::Inside);
         p.hline(card.x_range(), o.y + 48.0, Stroke::new(1.0, tok::DIVIDER));
         p.add(Shape::line(PAPERCLIP.iter().map(|(x, y)| pos2(*x, *y) + o).collect(), Stroke::new(1.4, tok::PAPERCLIP)));
         p.text(pos2(50.0, 26.0) + o, Align2::LEFT_CENTER, "Clipster's Desk", look.bold(15.0), tok::TEXT);
-        let mover = ui.interact(at(8.0, 6.0, W - 208.0, 42.0), Id::unique("desk-modern-title"), Sense::click_and_drag());
+        let mover = ui.interact(at(8.0, 6.0, 170.0, 42.0), Id::unique("desk-modern-title"), Sense::click_and_drag());
         if drag && mover.drag_started() {
             ui.ctx().send_viewport_cmd(egui::ViewportCommand::StartDrag);
         }
+        self.find_box(ui, at(w - 470.0, 14.0, 264.0, 28.0), look);
         // the look switch: both segments are always there, so Classic is one click away
-        p.rect(at(W - 196.0, 14.0, 142.0, 28.0), CornerRadius::same(6), tok::CARD, Stroke::new(1.0, tok::CONTROL_BORDER), StrokeKind::Inside);
-        for (seg, label, active) in [(at(W - 196.0, 14.0, 70.0, 28.0), "Classic 98", false), (at(W - 126.0, 14.0, 72.0, 28.0), "Modern", true)] {
-            let resp = ui.interact(seg, Id::unique(("desk-look", label)), Sense::click());
+        p.rect(at(w - 196.0, 14.0, 142.0, 28.0), CornerRadius::same(6), tok::CARD, Stroke::new(1.0, tok::CONTROL_BORDER), StrokeKind::Inside);
+        for (seg, label, active) in [(at(w - 196.0, 14.0, 70.0, 28.0), "Classic 98", false), (at(w - 126.0, 14.0, 72.0, 28.0), "Modern", true)] {
+            let resp = ui.interact(seg, Id::unique(("desk-look", label)), Sense::click()).on_hover_text(if active { "The look you have" } else { "Switch to the 98 look" });
             let fill = match (active, resp.is_pointer_button_down_on(), resp.hovered()) {
                 (true, true, _) => Some(tok::ACCENT_SOFT_PRESSED),
                 (true, _, true) => Some(tok::ACCENT_SOFT_HOVER),
@@ -410,30 +690,62 @@ impl Desk {
                 p.rect_filled(seg.shrink(2.0), CornerRadius::same(4), f);
             }
             p.text(seg.center(), Align2::CENTER_CENTER, label, if active { look.bold(11.5) } else { look.font(11.5) }, if active { tok::ACCENT_PRESSED } else { tok::DIM });
-            if resp.clicked() && !active {
+            if resp.clicked() && !active && !modal {
                 out.push("desklook classic".into());
             }
         }
-        let x = at(W - 46.0, 14.0, 28.0, 28.0);
-        let close = ui.interact(x, Id::unique("desk-modern-close"), Sense::click());
+        let x = at(w - 46.0, 14.0, 28.0, 28.0);
+        let close = ui.interact(x, Id::unique("desk-modern-close"), Sense::click()).on_hover_text("Close (Esc)");
         if close.hovered() {
             p.rect_filled(x, CornerRadius::same(6), if close.is_pointer_button_down_on() { tok::DANGER.gamma_multiply(0.85) } else { tok::DANGER });
         }
         cross(&p, x.center(), 5.0, 1.4, if close.hovered() { Color32::WHITE } else { tok::DIM });
         // tabs: each as wide as its label in Medium, so nothing shifts when one becomes active
-        let mut tx = 20.0;
+        let mut tx = 16.0;
         for (i, name) in TABS.iter().enumerate() {
-            let w = p.layout_no_wrap(name.to_string(), look.bold(12.5), tok::TEXT).size().x + 24.0;
-            if look.tab(ui, at(tx, 56.0, w, 30.0), name, self.tab == i).clicked() {
+            let shown = match self.badge(name, view) {
+                Some(b) => format!("{name} · {b}"),
+                None => name.to_string(),
+            };
+            let tw = p.layout_no_wrap(shown.clone(), look.bold(12.5), tok::TEXT).size().x + 18.0;
+            if look.tab(ui, at(tx, 54.0, tw, 30.0), &shown, self.tab == i).clicked() && !modal {
                 self.tab = i;
+                self.back();
             }
-            tx += w + 4.0;
+            tx += tw + 2.0;
         }
-        p.rect(at(16.0, 94.0, W - 32.0, H - 142.0), CornerRadius::same(10), tok::PAGE, Stroke::new(1.0, tok::BORDER), StrokeKind::Inside);
-        p.hline(o.x + 16.0..=o.x + W - 16.0, o.y + H - 44.0, Stroke::new(1.0, tok::DIVIDER));
-        let quip = clipped(&p, &view.status, look.font(11.0), tok::DIM, W - 44.0);
-        p.galley(pos2(20.0, H - 29.0 - quip.size().y / 2.0) + o, quip, tok::DIM);
-        (at(28.0, 106.0, W - 56.0, H - 172.0), close.clicked())
+        p.hline(o.x + 16.0..=o.x + w - 16.0, o.y + h - 40.0, Stroke::new(1.0, tok::DIVIDER));
+        let line = at(20.0, h - 38.0, w - 40.0, 28.0);
+        self.status_text(&p, line, view, look);
+        self.status_rect = Some(line);
+        (at(20.0, 92.0, w - 40.0, h - 140.0), close.clicked())
+    }
+
+    /// The status line: the last answer to a click (✓ done, ! a problem) for a few seconds, else the quip.
+    fn status_text(&self, p: &Painter, r: Rect, view: &View, look: Look) {
+        let (text, color) = match view.status.fresh() {
+            true => match view.status.tone {
+                Tone::Done => (format!("✓ {}", view.status.text), look.accent()),
+                Tone::Problem => (format!("! {}", view.status.text), look.danger()),
+                Tone::Info => (view.status.text.clone(), look.text()),
+            },
+            false => (view.quip.clone(), if look == Look::Modern { tok::DIM } else { look.text() }),
+        };
+        let room = r.width() - if view.status.fresh() && view.status.action.is_some() { 96.0 } else { 0.0 };
+        let font = if look == Look::Modern { if view.status.fresh() { look.bold(11.5) } else { look.font(11.5) } } else { look.font(12.5) };
+        let g = clipped(p, &text.replace('\n', " "), font, color, room);
+        p.galley(pos2(r.min.x, r.center().y - g.size().y / 2.0), g, color);
+    }
+
+    /// The status line's button (Undo, Show…), at its right end.
+    fn status_action(&mut self, ui: &mut Ui, view: &View, look: Look, out: &mut Vec<String>) {
+        let Some((label, cmd)) = view.status.action.as_ref().filter(|_| view.status.fresh()) else { return };
+        let Some(sr) = self.status_rect else { return };
+        let h = if look == Look::Modern { 24.0 } else { sr.height() };
+        let r = Rect::from_min_size(pos2(sr.max.x - 90.0, sr.center().y - h / 2.0), vec2(90.0, h));
+        if look.button(ui, r, Id::unique("desk-status-action"), label, true).clicked() {
+            out.push(cmd.clone());
+        }
     }
 
     // ---------- the tabs (one layout for both looks) ----------
@@ -533,6 +845,20 @@ fn scrollbar(p: &Painter, look: Look, area: Rect, first: usize, fits: usize, tot
     let h = (track.height() * fits as f32 / total as f32).max(16.0);
     let y = track.min.y + (track.height() - h) * first as f32 / (total - fits) as f32;
     p.rect_filled(Rect::from_min_size(pos2(track.min.x, y), vec2(track.width(), h)), CornerRadius::same(2), if look == Look::Modern { tok::CONTROL_BORDER } else { win98::SHADOW });
+}
+
+/// One line of text at `at` (its left middle), cut with "…" where it would pass `width`; the whole text on hover when cut.
+/// Returns how wide it came out.
+fn line(ui: &mut Ui, at: Pos2, text: &str, font: FontId, color: Color32, width: f32) -> f32 {
+    let p = ui.painter().clone();
+    let g = clipped(&p, text, font, color, width);
+    let (w, h) = (g.size().x, g.size().y);
+    let cut = g.elided;
+    p.galley(pos2(at.x, at.y - h / 2.0), g, color);
+    if cut {
+        ui.interact(Rect::from_min_size(pos2(at.x, at.y - h / 2.0), vec2(w, h)), Id::unique(("desk-cut", text, at.x as i32, at.y as i32)), Sense::hover()).on_hover_text(text);
+    }
+    w
 }
 
 /// One line of text, cut off with "…" where it would pass `width`.
