@@ -402,6 +402,8 @@ fn new_item(text: &str, today: NaiveDate) -> Item {
     let (text, at) = split_at(&text);
     let (text, due) = split_due(&text, today);
     let (text, repeat) = split_every(&text, today);
+    // "call Anna at 3 every monday": the time shows up at the end once the date and the repeat are gone
+    let (text, at) = if at.is_none() { split_at(&text) } else { (text, at) };
     let (every, due) = match repeat {
         Some((every, first)) => (Some(every), due.or(Some(first))),
         None => (None, due),
@@ -588,6 +590,9 @@ pub fn change(items: &mut Vec<Item>, op: &Op, today: NaiveDate) -> (&'static str
                     None => (text.trim(), false),
                 };
                 let new = new_item(text, today);
+                // a bare time ("call Anna at 14:00") keeps the item's date: new_item only guesses today for it
+                let (rest, _) = split_at(text);
+                let dated = split_due(&rest, today).1.is_some() || split_every(&rest, today).1.is_some();
                 if !new.text.is_empty() {
                     items[i].text = new.text;
                 }
@@ -595,9 +600,12 @@ pub fn change(items: &mut Vec<Item>, op: &Op, today: NaiveDate) -> (&'static str
                 if undated {
                     items[i].due = None;
                     items[i].at = None;
-                } else if new.due.is_some() {
+                } else if new.due.is_some() && (dated || items[i].due.is_none()) {
+                    let old_due = items[i].due;
                     items[i].due = new.due;
-                    items[i].at = new.at.or(items[i].at.filter(|_| new.due == items[i].due));
+                    items[i].at = new.at.or(items[i].at.filter(|_| new.due == old_due));
+                } else if new.at.is_some() {
+                    items[i].at = new.at;
                 }
                 if new.every.is_some() {
                     items[i].every = new.every;
@@ -838,6 +846,8 @@ fn reply(op: &Op, pool: &str, x: &str, items: &[Item], today: NaiveDate) -> Repl
         Op::Add(_) => items.last(),
         Op::AddTo(..) => items.last().filter(|i| i.due.is_some()),
         Op::DueAt(..) | Op::AtTimeAt(..) | Op::DueFor(..) => item,
+        // a renamed item's reminder went with its old name; a first date from a repeat needs one too
+        Op::EditAt(n, _) | Op::EveryAt(n, _) => n.checked_sub(1).and_then(|i| items.get(i)),
         _ if pool == "todo_repeat" => items.last(),
         _ => None,
     };
@@ -1213,6 +1223,13 @@ mod tests {
         assert_eq!((items[n - 1].text.as_str(), items[n - 1].every.as_deref()), ("d", Some("monday")));
         change(&mut items, &Op::EditAt(n, "d, but better by none".into()), today);
         assert_eq!((items[n - 1].text.as_str(), items[n - 1].due), ("d, but better", None));
+        // a bare time keeps the date; a time before the repeat or date is still found
+        change(&mut items, &Op::EditAt(n, "call Anna by friday".into()), today);
+        change(&mut items, &Op::EditAt(n, "call Anna at 14:00".into()), today);
+        assert_eq!((items[n - 1].text.as_str(), items[n - 1].due, items[n - 1].at), ("call Anna", Some(day(11, 13)), NaiveTime::from_hms_opt(14, 0, 0)));
+        let it = new_item("call Anna at 3 every monday", today);
+        assert_eq!((it.text.as_str(), it.at, it.every.as_deref()), ("call Anna", NaiveTime::from_hms_opt(15, 0, 0), Some("monday")));
+        assert_eq!(new_item("pay rent at 3 by friday", today).at, NaiveTime::from_hms_opt(15, 0, 0));
         // wrapping up: the unfinished top 3 move to tomorrow
         assert_eq!(change(&mut items, &Op::Tomorrow, today), ("wrapup_moved", "2".into()));
         assert!(items.iter().all(|i| !i.top_today(today)) && items[n - 3].due == Some(day(11, 10)));

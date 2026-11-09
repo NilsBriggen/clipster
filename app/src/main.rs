@@ -3186,6 +3186,7 @@ impl App {
                     self.timers.retain(|t| t.label != label); // finished, renamed or moved: no reminder for it
                 }
                 if let Effect::Timer(secs, label) = &news.effect {
+                    self.timers.retain(|t| t.label != *label); // one reminder per to-do
                     self.add_timer(*secs, label.clone(), 0, None);
                 }
                 if quiet {

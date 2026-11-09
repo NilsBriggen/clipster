@@ -720,7 +720,10 @@ pub fn dated(s: &str) -> Option<(u64, String, String)> {
     if let Some(a) = words.iter().position(|w| *w == "at") {
         let rest = words[a + 1..].join(" ");
         if let Some((hours, m, used)) = hm(&rest) {
-            time = (if hours.len() == 2 && hours[0] < 8 { hours[1] } else { hours[0] }, m);
+            // "tonight at 9" and "this evening at 8" are evening hours, whenever they're asked
+            let evening = words[start] == "tonight" || words.get(start + 1) == Some(&"evening");
+            let pm = if evening { hours[0] >= 4 } else { hours[0] < 8 };
+            time = (if hours.len() == 2 && pm { hours[1] } else { hours[0] }, m);
             if a == end {
                 end = a + 1 + rest[..used].split_whitespace().count(); // "tomorrow at 3 to call anna": the label starts after the time
             }
@@ -785,7 +788,8 @@ pub fn hm(t: &str) -> Option<(Vec<u32>, u32, usize)> {
     let gap = t.len() - i - rest.len();
     let mut pm = None;
     for (w, is_pm) in [("pm", Some(true)), ("p.m.", Some(true)), ("am", Some(false)), ("a.m.", Some(false)), ("o'clock", None), ("oclock", None)] {
-        if rest.starts_with(w) {
+        // a whole word only: "at 4 amazon order" is 4 o'clock and an Amazon order
+        if rest.starts_with(w) && !rest[w.len()..].starts_with(|c: char| c.is_alphanumeric()) {
             pm = is_pm;
             i += gap + w.len();
             break;
@@ -2674,6 +2678,8 @@ mod tests {
         assert!(!matches!(respond("remind me to hold the session at 3").effect, Effect::FocusPause(_)));
         assert!(matches!(respond("pause my focus").effect, Effect::FocusPause(_)));
         assert!(matches!(respond("keep in touch with mum every 999999999 weeks").effect, Effect::People(_)), "no overflow");
+        assert_eq!(hm("4 amazon order").map(|h| h.0), Some(vec![4, 16]), "am only as a whole word");
+        assert_eq!(hm("4 am order").map(|h| (h.0, h.2)), Some((vec![4], 4)));
         for c in ["backup stop", "backup skip node_modules, *.iso", "backup skip", "backup auto plugged", "backup find slides", "backup restore 2"] {
             assert_eq!(exact(c).map(|r| r.effect), Some(Effect::Backup(c[7..].into())), "{c}");
         }
@@ -2802,7 +2808,9 @@ mod tests {
         for t in ["is the internet off", "my internet keeps cutting off", "what is a lock", "did i lock the door", "what is a screenshot", "rock and roll", "close the meeting notes"] {
             assert!(!shell(t), "{t}: {:?}", eff(t));
         }
-        assert!(shell("turn the wifi off") && shell("lock") && shell("lock my computer"));
+        assert!(shell("lock") && shell("lock my computer"));
+        // Windows has no Wi-Fi switch for apps: it opens the Settings page instead
+        assert!(if cfg!(windows) { matches!(eff("turn the wifi off"), Effect::Open(_)) } else { shell("turn the wifi off") });
         assert!(!matches!(eff("find recipes on the internet"), Effect::Shell(_)));
         for t in ["what is a password", "my password is not working", "what is a coin", "i want to flip my mattress", "who invented dice", "i have no time", "today is a good day"] {
             let r = respond(t);
