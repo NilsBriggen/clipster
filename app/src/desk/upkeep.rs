@@ -584,7 +584,7 @@ impl Desk {
         let target_drive = self.drives.iter().find(|d| d.path.to_string_lossy() == b.target).cloned();
         let removable = target_drive.is_some() || ["/run/media/", "/media/"].iter().any(|m| b.target.starts_with(m));
         if !b.target.is_empty() {
-            let present = self.sample || Path::new(b.target).exists();
+            let present = self.sample || b.here;
             let label = target_drive.as_ref().map_or_else(|| b.target.to_string(), |d| format!("{} · {} free", d.label, crate::upkeep::size(d.free)));
             radio(ui, look, pos2(x0, y), &fit(&p, look, &label, x1 - x0 - 140.0), true, "drive-current");
             if !present {

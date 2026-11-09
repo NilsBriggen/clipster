@@ -167,6 +167,7 @@ pub struct Backup<'a> {
     pub history: &'a [[u64; 4]],     // the last runs: when, copied, bytes, failed
     pub found: Option<&'a [PathBuf]>, // files found in the backup
     pub failed: bool,                // the last run went wrong
+    pub here: bool,                  // the target was reachable at the last look (asked on a thread, never per frame)
 }
 
 /// What the You & me tab shows.
@@ -272,6 +273,7 @@ pub struct Desk {
     files: Files,
     typing_last: bool, // a text field had the keyboard at the end of the last frame (see the Esc key)
     popup_missed: u8,  // frames the open drop-down wasn't drawn
+    write_cache: Option<(String, String, Vec<crate::writing::Issue>, f32)>, // Write: the text, fixed, issues, readability
     numbers: BTreeMap<String, String>, // the Settings tab's minute fields while you type in them
     editing: Option<(usize, String)>,  // a to-do being renamed: its line, the new text so far
     planning: bool,                    // "plan my day": the To-do tab asks for today's top 3
@@ -470,6 +472,11 @@ impl Desk {
     /// The Upkeep page that's open (Checkup 0, Right now 1, Tidy 2, Space 3, Backup 4), when the Upkeep tab is.
     pub fn upkeep_page(&self) -> Option<usize> {
         (self.open && TABS[self.tab] == "Upkeep" && !self.startup_list).then_some(self.upkeep_page)
+    }
+
+    /// You & me's data (achievements, facts, memories) is only built when something shows it: that tab, or a search.
+    pub fn needs_me(&self) -> bool {
+        TABS[self.tab] == "You & me" || !self.query.trim().is_empty()
     }
 
     /// Space counted again: its ticks were places in the old list, so they go.

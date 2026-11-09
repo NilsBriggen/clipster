@@ -99,8 +99,14 @@ pub fn user_path() -> PathBuf {
     dirs::config_dir().unwrap_or_else(std::env::temp_dir).join("clipster").join("lines.txt")
 }
 
-/// The built-in database for one personality, and the lines it couldn't use.
+/// The built-in database for one personality, parsed once and kept: a reload (teaching a phrase, switching the
+/// personality, an import) copies it instead of parsing 5 MB of text again on the UI thread.
 pub fn database(unhinged: bool) -> (Vec<Section>, Vec<String>) {
+    static CACHE: [std::sync::OnceLock<(Vec<Section>, Vec<String>)>; 2] = [std::sync::OnceLock::new(), std::sync::OnceLock::new()];
+    CACHE[unhinged as usize].get_or_init(|| parse_database(unhinged)).clone()
+}
+
+fn parse_database(unhinged: bool) -> (Vec<Section>, Vec<String>) {
     let (mut all, mut problems) = (vec![], vec![]);
     for text in BUILT_IN {
         problems.extend(parse(text, false, &mut all));
@@ -992,15 +998,23 @@ mod tests {
     #[test]
     fn every_trigger_reaches_its_topic() {
         let all = built_in();
-        let mut lost = vec![];
-        for t in all.iter().filter(|s| s.name.starts_with("chat ") && !s.lines.is_empty()) {
-            for phrase in t.triggers.iter().chain(&t.exact) {
-                let got = crate::understand::respond(phrase).text;
-                if !t.lines.contains(&got) {
-                    lost.push(format!("{}: \"{phrase}\" -> {}", t.name, got.lines().next().unwrap_or("")));
-                }
-            }
-        }
+        let pairs: Vec<(&Section, &String)> = all.iter().filter(|s| s.name.starts_with("chat ") && !s.lines.is_empty()).flat_map(|t| t.triggers.iter().chain(&t.exact).map(move |p| (t, p))).collect();
+        // thousands of sentences: spread over the cores (respond only reads the database)
+        let threads = std::thread::available_parallelism().map_or(4, |n| n.get()).clamp(1, 16);
+        let lost: Vec<String> = std::thread::scope(|sc| {
+            let jobs: Vec<_> = pairs
+                .chunks(pairs.len().div_ceil(threads).max(1))
+                .map(|chunk| {
+                    sc.spawn(move || {
+                        chunk.iter().filter_map(|(t, phrase)| {
+                            let got = crate::understand::respond(phrase).text;
+                            (!t.lines.contains(&got)).then(|| format!("{}: \"{phrase}\" -> {}", t.name, got.lines().next().unwrap_or("")))
+                        }).collect::<Vec<_>>()
+                    })
+                })
+                .collect();
+            jobs.into_iter().flat_map(|j| j.join().unwrap_or_default()).collect()
+        });
         assert!(lost.is_empty(), "{} triggers go elsewhere: {lost:#?}", lost.len());
     }
 

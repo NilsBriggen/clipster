@@ -52,7 +52,7 @@ pub(super) fn search(query: &str, view: &View, files: &Files) -> Vec<Hit> {
         add("Saved link", &format!("{title} {link}").chars().take(160).collect::<String>(), "links".into(), &mut out);
     }
     for p in view.pins {
-        add("Pin", &p.split_whitespace().collect::<Vec<_>>().join(" "), "clipboard".into(), &mut out);
+        add("Pin", &p.chars().take(400).collect::<String>().split_whitespace().collect::<Vec<_>>().join(" "), "clipboard".into(), &mut out);
     }
     for p in view.people {
         let about = format!("{} {} {}", p.name, p.note.clone().unwrap_or_default(), p.gifts.join(" "));
@@ -193,7 +193,7 @@ mod tests {
             upkeep: None,
             upkeep_running: false,
             backup_check: crate::upkeep::backup_check(false, None, 0, false),
-            backup: Backup { sources: &[], target: "", last: None, result: "", progress: None, skip: &[], auto: "off", history: &[], found: None, failed: false },
+            backup: Backup { sources: &[], target: "", last: None, result: "", progress: None, skip: &[], auto: "off", history: &[], found: None, failed: false, here: false },
             events: &[],
             calendars: vec![],
             calendar_note: String::new(),

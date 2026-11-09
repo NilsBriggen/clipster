@@ -45,7 +45,7 @@ impl Desk {
         tools.push("Count words".into());
         // recent copies
         look.group(&p, left, "Recent copies");
-        let history: Vec<(usize, String)> = view.clips.iter().enumerate().rev().map(|(i, t)| (i, t.clone())).collect();
+        let history: Vec<(usize, &String)> = view.clips.iter().enumerate().rev().collect(); // not copies: a copy can be megabytes
         if let Some(until) = &view.clip_paused {
             p.text(pos2(left.center().x, left.min.y + 50.0), Align2::CENTER_CENTER, format!("Paused until {until}: copies aren't kept."), look.font(12.5), look.dim());
         } else if history.is_empty() {
@@ -102,7 +102,7 @@ impl Desk {
                 out.push(format!("clip pin {h}"));
             }
             bx -= pw + 6.0;
-            line(ui, pos2(area.min.x, cy), &text.split_whitespace().collect::<Vec<_>>().join(" "), look.font(12.5), look.text(), bx - area.min.x - 6.0);
+            line(ui, pos2(area.min.x, cy), &one_line(text), look.font(12.5), look.text(), bx - area.min.x - 6.0);
             if n + 1 < fits && first + n + 1 < history.len() {
                 look.divider(&p, area.min.x, area.max.x, y + pitch - 3.0);
             }
@@ -163,7 +163,7 @@ impl Desk {
                 }
                 continue;
             }
-            let one = text.split_whitespace().collect::<Vec<_>>().join(" ");
+            let one = one_line(text);
             let (w, hit_w) = match view.pin_labels.get(text) {
                 Some(label) => {
                     let lw = line(ui, pos2(area.min.x, cy), label, look.bold(12.5), look.text(), room);
@@ -392,4 +392,11 @@ impl Desk {
     fn desk_waiting(&self, view: &View, kind: &str) -> bool {
         view.answer.is_none_or(|a| a.kind != kind) && self.asked_files
     }
+}
+
+/// A copy as one line for its row: only its start (a row shows a few dozen letters, and joining a 1 MB copy every
+/// frame made the tab crawl).
+fn one_line(text: &str) -> String {
+    let start: String = text.chars().take(400).collect();
+    start.split_whitespace().collect::<Vec<_>>().join(" ")
 }

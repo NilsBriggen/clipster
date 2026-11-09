@@ -26,6 +26,7 @@ jobs:
       - name: Linux build dependencies
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y libxkbcommon-dev libwayland-dev libx11-dev libxcursor-dev libxrandr-dev libxi-dev libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev
-      - run: cargo build --locked
+      # checks the program itself (the test run below compiles it again as the test harness, so no second full build)
+      - run: cargo check --locked
       - run: cargo test --locked
         timeout-minutes: 10 # the suite takes under a minute: a hung test fails here with its log, instead of running for hours

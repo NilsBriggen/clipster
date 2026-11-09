@@ -27,9 +27,14 @@ impl Desk {
         let left = Rect::from_min_max(c.min, pos2(c.max.x - right_w - 12.0, c.max.y - ctl - 12.0));
         look.text_area(ui, left, Id::unique("write-text"), &mut self.write_text, "Paste or type your text here, or press \"Use what I copied\".");
         // the buttons under the text
-        let wrong = crate::writing::misspellings();
         let text = self.write_text.clone();
-        let fixed = crate::writing::fix(&text, &wrong);
+        // the checks run when the text changes, not every frame (they read the whole text and the word list)
+        if self.write_cache.as_ref().is_none_or(|c| c.0 != text) {
+            let wrong = crate::writing::misspellings();
+            let issues = if text.trim().is_empty() { vec![] } else { crate::writing::proofread(&text, &wrong) };
+            self.write_cache = Some((text.clone(), crate::writing::fix(&text, &wrong), issues, crate::writing::readability(&text)));
+        }
+        let (_, fixed, issues, score) = self.write_cache.clone().unwrap_or_default();
         let y = c.max.y - ctl;
         let mut x = c.min.x;
         let newest = view.clips.last().cloned();
@@ -58,13 +63,11 @@ impl Desk {
         let right = Rect::from_min_max(pos2(left.max.x + 12.0, c.min.y), c.max);
         let issues_card = Rect::from_min_max(right.min, pos2(right.max.x, right.min.y + (right.height() * 0.56).round()));
         look.group(&p, issues_card, "What I'd change");
-        let issues = if text.trim().is_empty() { vec![] } else { crate::writing::proofread(&text, &wrong) };
         let (x0, x1) = (issues_card.min.x + 12.0, issues_card.max.x - 12.0);
         let words = text.split_whitespace().count();
         let stats = if words == 0 {
             String::new()
         } else {
-            let score = crate::writing::readability(&text);
             let ease = if words < 30 { "" } else if score >= 70.0 { " · easy to read" } else if score >= 50.0 { " · plain" } else { " · hard going" };
             format!("{} words · {} characters · about {} min to read{ease}", words, text.chars().count(), words.div_ceil(230))
         };

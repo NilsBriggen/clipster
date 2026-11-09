@@ -19,8 +19,21 @@ chrono = { version = "0.4", default-features = false, features = ["clock"] }
 qrcode = { version = "0.14", default-features = false } # QR codes drawn here (lists for your phone), not by a website
 ring = "0.17" # SHA-256 for checking downloaded updates (already built in through ureq's TLS)
 
+# Line numbers in panics are all a debug build needs: the test binary goes from 443 MB to 78 MB and links in half the
+# time (CI's caches and a full /tmp thank it); the dependencies need no debug info at all.
+[profile.dev]
+debug = "line-tables-only"
+
+[profile.dev.package."*"]
+debug = false
+
+# 21 % smaller AppImage and installer; panic messages stay
+[profile.release]
+strip = true
+
 [target.'cfg(target_os = "linux")'.dependencies]
 zbus = "5"
+x11rb = "0.13" # the active window's title straight from X (already built for winit), not two xprop processes every 2 s
 
 [package.metadata.packager]
 product-name = "Clipster"

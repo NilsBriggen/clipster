@@ -162,6 +162,10 @@ pub mod win {
         pub fn GetDriveTypeW(root: *const u16) -> u32; // 2 removable, 3 fixed
         pub fn GetVolumeInformationW(root: *const u16, name: *mut u16, name_len: u32, serial: *mut u32, max_part: *mut u32, flags: *mut u32, fs: *mut u16, fs_len: u32) -> i32;
         pub fn SetThreadErrorMode(new: u32, old: *mut u32) -> i32; // 1 = no "insert a disk" box for empty card readers
+        pub fn CreateToolhelp32Snapshot(flags: u32, pid: u32) -> isize; // -1 = failed
+        pub fn Process32FirstW(snap: isize, entry: *mut ProcessEntry) -> i32;
+        pub fn Process32NextW(snap: isize, entry: *mut ProcessEntry) -> i32;
+        pub fn CloseHandle(h: isize) -> i32;
         pub fn GetUserDefaultLocaleName(name: *mut u16, len: i32) -> i32; // "de-CH"
     }
     #[link(name = "shell32")]
@@ -173,6 +177,25 @@ pub mod win {
     pub struct LastInput {
         pub size: u32,
         pub time: u32, // GetTickCount of the last key or mouse input
+    }
+    /// PROCESSENTRY32W: one program in a process snapshot.
+    #[repr(C)]
+    pub struct ProcessEntry {
+        pub size: u32,
+        pub usage: u32,
+        pub pid: u32,
+        pub heap: usize,
+        pub module: u32,
+        pub threads: u32,
+        pub parent: u32,
+        pub priority: i32,
+        pub flags: u32,
+        pub exe: [u16; 260],
+    }
+    impl Default for ProcessEntry {
+        fn default() -> Self {
+            ProcessEntry { size: 0, usage: 0, pid: 0, heap: 0, module: 0, threads: 0, parent: 0, priority: 0, flags: 0, exe: [0; 260] }
+        }
     }
     /// A window message (for the hot keys).
     #[repr(C)]
@@ -272,13 +295,43 @@ pub fn active_title() -> Option<String> {
         let n = unsafe { win::GetWindowTextW(win::GetForegroundWindow(), buf.as_mut_ptr(), buf.len() as i32) };
         (n > 0).then(|| String::from_utf16_lossy(&buf[..n as usize]))
     }
-    #[cfg(not(windows))]
+    #[cfg(target_os = "linux")]
     {
-        let out = |args: &[&str]| command("xprop").args(args).output().ok().map(|o| String::from_utf8_lossy(&o.stdout).into_owned());
-        let id = out(&["-root", "_NET_ACTIVE_WINDOW"])?.split_whitespace().last()?.to_string(); // "… window id # 0x3a00007"
-        let title = out(&["-id", &id, "_NET_WM_NAME"])?.split_once(" = ")?.1.trim().trim_matches('"').to_string();
-        (!title.is_empty()).then_some(title)
+        x11_title()
     }
+    #[cfg(not(any(windows, target_os = "linux")))]
+    {
+        None
+    }
+}
+
+/// `_NET_WM_NAME` of `_NET_ACTIVE_WINDOW`, over one X connection kept open (no X server: None).
+#[cfg(target_os = "linux")]
+fn x11_title() -> Option<String> {
+    use x11rb::connection::Connection;
+    use x11rb::protocol::xproto::{AtomEnum, ConnectionExt};
+    struct X {
+        conn: x11rb::rust_connection::RustConnection,
+        root: u32,
+        active: u32,
+        name: u32,
+        utf8: u32,
+    }
+    static X11: std::sync::OnceLock<Option<std::sync::Mutex<X>>> = std::sync::OnceLock::new();
+    let x = X11
+        .get_or_init(|| {
+            let (conn, screen) = x11rb::connect(None).ok()?;
+            let root = conn.setup().roots.get(screen)?.root;
+            let atom = |n: &str| conn.intern_atom(false, n.as_bytes()).ok()?.reply().ok().map(|r| r.atom);
+            let (active, name, utf8) = (atom("_NET_ACTIVE_WINDOW")?, atom("_NET_WM_NAME")?, atom("UTF8_STRING")?);
+            Some(std::sync::Mutex::new(X { conn, root, active, name, utf8 }))
+        })
+        .as_ref()?;
+    let x = x.lock().ok()?;
+    let win = x.conn.get_property(false, x.root, x.active, AtomEnum::WINDOW, 0, 1).ok()?.reply().ok()?.value32()?.next().filter(|w| *w != 0)?;
+    let reply = x.conn.get_property(false, win, x.name, x.utf8, 0, 1024).ok()?.reply().ok()?;
+    let title = String::from_utf8_lossy(&reply.value).into_owned();
+    (!title.is_empty()).then_some(title)
 }
 
 // ---------- battery, CPU, memory, uptime ----------
@@ -377,10 +430,32 @@ pub fn uptime() -> u64 {
 
 /// Names of the running programs, lowercase ("firefox", "spotify"; `.exe` dropped on Windows).
 pub fn running_programs() -> HashSet<String> {
-    if cfg!(windows) {
-        let out = command("tasklist").args(["/fo", "csv", "/nh"]).output().map(|o| String::from_utf8_lossy(&o.stdout).into_owned()).unwrap_or_default();
-        out.lines().filter_map(|l| l.split(',').next()).map(|n| n.trim_matches('"').trim_end_matches(".exe").trim_end_matches(".EXE").to_lowercase()).filter(|n| !n.is_empty()).collect()
-    } else {
+    #[cfg(windows)]
+    {
+        // a snapshot of the process list (no tasklist started every 4 seconds)
+        let mut names = HashSet::new();
+        unsafe {
+            let snap = win::CreateToolhelp32Snapshot(2, 0); // TH32CS_SNAPPROCESS
+            if snap == -1 {
+                return names;
+            }
+            let mut e = win::ProcessEntry { size: std::mem::size_of::<win::ProcessEntry>() as u32, ..Default::default() };
+            let mut ok = win::Process32FirstW(snap, &mut e) != 0;
+            while ok {
+                let len = e.exe.iter().position(|c| *c == 0).unwrap_or(e.exe.len());
+                let n = String::from_utf16_lossy(&e.exe[..len]).to_lowercase();
+                let n = n.trim_end_matches(".exe");
+                if !n.is_empty() {
+                    names.insert(n.to_string());
+                }
+                ok = win::Process32NextW(snap, &mut e) != 0;
+            }
+            win::CloseHandle(snap);
+        }
+        names
+    }
+    #[cfg(not(windows))]
+    {
         std::fs::read_dir("/proc")
             .into_iter()
             .flatten()
@@ -1286,6 +1361,31 @@ pub fn dnd_on() -> Option<Dnd> {
 
 #[cfg(test)]
 mod tests {
+    /// Reads (never changes) the real desktop's active window title: `cargo test active_title -- --ignored --nocapture`.
+    #[test]
+    #[ignore]
+    fn active_title_live() {
+        println!("active title: {:?}; {} programs running", active_title(), running_programs().len());
+    }
+
+    /// On a throwaway X server only (it sets properties on the root window):
+    /// `xvfb-run -a cargo test x11_title_reads -- --ignored`.
+    #[test]
+    #[ignore]
+    #[cfg(target_os = "linux")]
+    fn x11_title_reads_the_active_window() {
+        use x11rb::connection::Connection;
+        use x11rb::protocol::xproto::{AtomEnum, ConnectionExt, PropMode};
+        use x11rb::wrapper::ConnectionExt as _;
+        let (conn, screen) = x11rb::connect(None).expect("an X server (run it under xvfb-run)");
+        let root = conn.setup().roots[screen].root;
+        let atom = |n: &str| conn.intern_atom(false, n.as_bytes()).unwrap().reply().unwrap().atom;
+        conn.change_property8(PropMode::REPLACE, root, atom("_NET_WM_NAME"), atom("UTF8_STRING"), "Report – draft.docx – Writer".as_bytes()).unwrap();
+        conn.change_property32(PropMode::REPLACE, root, atom("_NET_ACTIVE_WINDOW"), AtomEnum::WINDOW, &[root]).unwrap();
+        conn.sync().unwrap();
+        assert_eq!(active_title().as_deref(), Some("Report – draft.docx – Writer"));
+    }
+
     #[test]
     fn arcade_sounds_are_real_wavs() {
         let w = super::blip_wav("win").expect("a known sound");
