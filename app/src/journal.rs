@@ -73,11 +73,17 @@ pub fn change(entries: &mut Vec<Entry>, cmd: &str, today: NaiveDate) -> Option<&
             set(entries, today, Some(rest.trim()), None);
             Some("journal_saved")
         }
-        "day" => {
+        // "day" adds to that day's line; "set" (the Desk's day card) replaces it
+        "day" | "set" => {
             let mut p = rest.splitn(3, '|');
             let day = NaiveDate::parse_from_str(p.next()?.trim(), "%Y-%m-%d").ok().filter(|d| *d <= today)?;
             let mood = p.next().map(str::trim).filter(|m| !m.is_empty());
             let text = p.next();
+            if verb == "set" {
+                if let Some(e) = entries.iter_mut().find(|e| e.day == day) {
+                    e.text.clear();
+                }
+            }
             set(entries, day, mood, text);
             Some("journal_saved")
         }
@@ -128,6 +134,8 @@ mod tests {
         assert_eq!(e[2], Entry { day: d(11, 9), mood: Some("great".into()), text: "finished the slides · Gerald was sick".into() });
         assert_eq!(change(&mut e, "day 2026-11-05|rough|flu at the office", d(11, 9)), Some("journal_saved"));
         assert_eq!(change(&mut e, "day 2027-01-01|okay|", d(11, 9)), None, "not in the future");
+        change(&mut e, "set 2026-11-09|okay|just one line", d(11, 9));
+        assert_eq!((e[3].mood.as_deref(), e[3].text.as_str()), (Some("okay"), "just one line"), "set replaces the day's line");
         assert_eq!(parse(&format(&e)), e);
         assert_eq!(month_grid(2026, 11).len(), 6, "November 2026 starts on a Sunday");
         assert_eq!(month_grid(2026, 11)[0][6], Some(d(11, 1)));

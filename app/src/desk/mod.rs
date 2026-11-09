@@ -43,7 +43,8 @@ pub fn tab(name: &str) -> Option<usize> {
         t if t.starts_with("list ") => "todo".to_string(), // "list shopping": a named list on the To-do tab
         "links" | "files" => "clipboard".to_string(),      // the saved links and files pages
         "reminders" | "notes" | "calendar" | "calendars" | "month" | "event" => "agenda".to_string(),
-        "people" | "journal" => "you".to_string(),
+        "people" | "journal" | "jot" => "you".to_string(),
+        t if t.starts_with("person ") => "you".to_string(),
         "next7" | "nextweek" | "focuslog" => "week".to_string(),
         "proofread" | "letters" | "letter" => "write".to_string(),
         t => t.to_string(),
@@ -175,6 +176,9 @@ pub struct Me {
     pub scores: Vec<(String, String)>, // game (with its difficulty), best score or time
     pub friendship: i32,
     pub days: u64,
+    pub games: Vec<(String, String, Option<String>)>, // every arcade game: id, name, your best
+    pub untried: Vec<(String, String)>,             // things you haven't tried: label, a harmless command to show them
+    pub memories: Option<(u64, u64, bool)>,         // Unhinged: memories seen, how many, one ready today
 }
 
 pub struct Achievement {
@@ -330,6 +334,14 @@ pub struct Desk {
     space_pick: std::collections::BTreeSet<usize>, // Space: biggest files ticked (1-based)
     backup_skip_text: String,
     restore_text: String,
+    fact_edit: Option<(String, String)>, // a fact being changed: its key, the text so far
+    fact_kind: String,                 // "+ Add": the kind picked
+    fact_value: String,
+    phrase_edit: Option<(String, String, String)>, // a phrase being changed: the old phrase, the new one, what it does
+    person_edit: Option<[String; 8]>,  // a person's card: name, birthday, email, phone, every, last talked, note, a new gift
+    journal_month: Option<(i32, u32)>, // the journal's month (None = this one)
+    journal_query: String,
+    journal_edit: Option<(chrono::NaiveDate, String, String)>, // a journal day being written: day, mood, line
 }
 
 /// A card over the page with its own controls.
@@ -349,6 +361,7 @@ pub(super) enum Card {
     NoteRemind(usize), // a reminder about a note, by line
     BackupHistory,
     Restore, // get a file back from the backup
+    JournalDay(chrono::NaiveDate),
 }
 
 impl Desk {
@@ -375,7 +388,8 @@ impl Desk {
             "newlist" => Some(Card::NewList),
             "older" => Some(Card::Older),
             "event" => Some(Card::Event(String::new())),
-            _ => name.strip_prefix("kind ").map(|k| Card::Kind(k.trim().to_string())).or_else(|| name.strip_prefix("todo #").and_then(|n| n.trim().parse().ok()).map(Card::Todo)),
+            "jot" => Some(Card::JournalDay(chrono::Local::now().date_naive())),
+            _ => name.strip_prefix("kind ").map(|k| Card::Kind(k.trim().to_string())).or_else(|| name.strip_prefix("todo #").and_then(|n| n.trim().parse().ok()).map(Card::Todo)).or_else(|| name.strip_prefix("person ").map(|n| Card::Person(n.trim().to_string()))),
         };
         self.planning = name == "plan";
         self.planning_week = name == "planweek";
@@ -385,8 +399,8 @@ impl Desk {
             self.agenda_month = true;
         }
         self.workday_open = name == "workday";
-        if name == "people" || name == "you" {
-            self.me_page = usize::from(name == "people");
+        if let Some(page) = ["you", "people", "journal", "jot"].iter().position(|p| *p == name).map(|p| p.min(2)) {
+            self.me_page = page;
         }
         if let Some(page) = ["clipboard", "links", "files"].iter().position(|p| *p == name) {
             self.clip_page = page;

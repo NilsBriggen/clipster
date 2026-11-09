@@ -45,6 +45,7 @@ pub enum Effect {
     Tour,                    // the welcome window: the tour (or the whole setup, the first time)
     Memory(bool),            // true = list everything remembered so far
     Teach(String, String, Vec<String>), // phrase, what to say, what to run
+    Relearn(String, String, String, Vec<String>), // old phrase, new phrase, what to say, what to run
     Unlearn(String),
     ListAchievements,
     Play(String),            // open an arcade game
@@ -579,6 +580,26 @@ pub fn exact(input: &str) -> Option<Reply> {
         "upsidedown" | "morse" | "binary" | "leet" | "rot13" => return Some(crate::fun::trick(&head, &or_clipboard(rest))),
         "randomwiki" | "surprise" => return Some(net(Query::RandomWiki, "Opening the encyclopedia at a random page... 🎲")),
         "briefing" => return Some(net(Query::Briefing, "Good morning! ☀ Let me get your day ready...")),
+        // the Desk's You page: "fact city|Bern", "fact fav_food|pizza" (the keys are a fixed list)
+        "fact" if rest.contains('|') => {
+            let (key, value) = rest.split_once('|')?;
+            let value: String = value.trim().chars().take(60).collect();
+            return (FACT_KEYS.contains(&key.trim()) && !value.is_empty()).then(|| Reply::say(lines::pick("settings_saved")).mood(Mood::Write).effect(Effect::Remember(vec![(key.trim().to_string(), value)])));
+        }
+        // a taught phrase changed on the Desk: "relearn gm|good morning|Morning, sunshine!" or "…|open firefox → open code"
+        "relearn" if rest.matches('|').count() >= 2 => {
+            let mut parts = rest.splitn(3, '|');
+            let (old, new, does) = (parts.next()?.trim(), parts.next()?.trim(), parts.next()?.trim());
+            if new.is_empty() || does.is_empty() {
+                return None;
+            }
+            let (reply, cmds) = match does.strip_prefix('"').and_then(|d| d.strip_suffix('"')) {
+                Some(said) => (said.to_string(), vec![]),
+                None if does.contains(" → ") || does.starts_with("open ") || does.starts_with("run ") => (String::new(), does.split(" → ").map(|c| c.trim().to_string()).filter(|c| !c.is_empty()).collect()),
+                None => (does.to_string(), vec![]),
+            };
+            return Some(Reply::say(lines::pick("settings_saved")).mood(Mood::Write).effect(Effect::Relearn(old.to_string(), new.to_string(), reply, cmds)));
+        }
         "setname" => {
             let name: String = rest.trim().trim_end_matches(['.', '!']).chars().take(30).collect();
             if name.is_empty() {
@@ -630,7 +651,7 @@ pub fn exact(input: &str) -> Option<Reply> {
         "countdowns" => return Some(Reply::say("").effect(Effect::Countdown("list".into()))),
         "until" | "countdown" => return Some(crate::powers::until(rest)),
         "habit" if ["add", "done", "undone", "remove"].contains(&rest.split(' ').next().unwrap_or("")) && rest.contains(' ') => return Some(Reply::say("").effect(Effect::Habit(rest.to_string()))),
-        "journal" if rest.starts_with("day ") || rest.starts_with("mood ") => return Some(Reply::say("").effect(Effect::Journal(rest.to_string()))),
+        "journal" if rest.starts_with("day ") || rest.starts_with("set ") || rest.starts_with("mood ") => return Some(Reply::say("").effect(Effect::Journal(rest.to_string()))),
         "journal" if !rest.is_empty() => return Some(Reply::say("").effect(Effect::Journal(format!("add {}", rest.trim_start_matches(':').trim())))),
         "journal" => return Some(Reply::say("").effect(Effect::OpenDesk("journal".into()))),
         "findfile" | "locate" if !rest.is_empty() => return Some(net(Query::Files(rest.into()), &lines::pick("find_searching").replace("{x}", rest))),
@@ -1049,6 +1070,9 @@ const WORK_KINDS: &[&str] = &["code", "writing", "letter", "spreadsheet", "slide
 pub fn site_name(id: &str) -> String {
     crate::writing::cap_first(&id.replace(['_', '-'], " "))
 }
+
+/// The facts the Desk can add by hand ("+ Add" on the You page).
+pub const FACT_KEYS: &[&str] = &["pet", "pet_kind", "partner", "partner_word", "city", "job", "fav_food", "fav_music", "fav_color", "fav_movie", "fav_book", "fav_drink", "fav_game", "fav_sport", "fav_band", "fav_show"];
 
 /// The kinds a site can be moved to on the Desk ("Count as …"), work first.
 pub const COUNT_AS: &[&str] = &["code", "writing", "email", "meeting", "docs", "learning", "design", "projects", "chat", "news", "music", "video", "social", "shopping", "game", "other"];

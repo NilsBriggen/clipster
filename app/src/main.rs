@@ -464,7 +464,30 @@ fn repeat_command(typed: &str, balloon: Option<&Reply>, last: Option<&str>) -> O
 
 /// What the Desk's You & me tab shows: the facts (with the key that forgets each), every achievement with
 /// its progress (secret ones stay secret until unlocked), the best scores and the friendship.
-fn about_me(facts: &std::collections::BTreeMap<String, String>, birthday: Option<(u32, u32)>, stats: &std::collections::BTreeMap<String, u64>, unlocked: &[String], scores: &std::collections::BTreeMap<String, u32>, friendship: i32) -> desk::Me {
+/// What "Show me" tries for something you haven't used yet: (label, first words that count as tried, a harmless command).
+const TRY_THESE: &[(&str, &[&str], &str)] = &[
+    ("Reminders", &["remind", "timer", "alarm"], "desk agenda"),
+    ("Focus", &["focus", "pomodoro"], "desk today"),
+    ("To-do lists", &["todo", "todos", "onlist"], "desk todo"),
+    ("Your calendar", &["calendar", "agenda"], "desk calendars"),
+    ("People", &["person", "people", "contacts"], "desk people"),
+    ("Habits", &["habit"], "desk habits"),
+    ("Journal", &["journal"], "desk journal"),
+    ("Writing help", &["proofread", "letter", "template"], "desk write"),
+    ("Tidying", &["tidy", "dupes", "oldfiles"], "desk tidy"),
+    ("Backups", &["backup"], "desk backup"),
+    ("The checkup", &["upkeep"], "desk checkup"),
+    ("Games", &["play", "games"], "games"),
+    ("Weather", &["weather"], "weather"),
+];
+
+/// How a game's best reads: points, or a time for the ones you race.
+fn score_text(id: &str, s: u32) -> String {
+    if id == "bughunt" { format!("{}:{:02}", s / 60, s % 60) } else { s.to_string() }
+}
+
+#[allow(clippy::too_many_arguments)]
+fn about_me(facts: &std::collections::BTreeMap<String, String>, birthday: Option<(u32, u32)>, stats: &std::collections::BTreeMap<String, u64>, unlocked: &[String], scores: &std::collections::BTreeMap<String, u32>, friendship: i32, explored: &std::collections::BTreeSet<String>, unhinged: bool) -> desk::Me {
     let mut rows = vec![];
     for (key, value) in facts {
         let label = match key.as_str() {
@@ -510,6 +533,8 @@ fn about_me(facts: &std::collections::BTreeMap<String, String>, birthday: Option
             desk::Achievement { title, quip, unlocked: unlocked.iter().any(|u| u == id), progress: what(counter).map(|w| (stats.get(*counter).copied().unwrap_or(0), *need, w)) }
         })
         .collect();
+    // every arcade game with its best (any difficulty), for Play
+    let games: Vec<(String, String, Option<String>)> = games::NAMES.iter().map(|(id, name)| (id.to_string(), name.to_string(), scores.iter().filter(|(k, s)| k.starts_with(id) && **s > 0 && **s != u32::MAX).map(|(_, s)| score_text(id, *s)).next())).collect();
     let scores = scores
         .iter()
         .filter(|(_, s)| **s > 0 && **s != u32::MAX)
@@ -521,7 +546,13 @@ fn about_me(facts: &std::collections::BTreeMap<String, String>, birthday: Option
             Some((format!("{name}{level}"), value))
         })
         .collect();
-    desk::Me { facts: rows, achievements, scores, friendship, days: stats.get("days").copied().unwrap_or(1) }
+    let untried = TRY_THESE.iter().filter(|(_, words, _)| !words.iter().any(|w| explored.contains(*w))).map(|(l, _, c)| (l.to_string(), c.to_string())).collect();
+    let memories = unhinged.then(|| {
+        let total = lines::all("memories").len() as u64;
+        let seen = stats.get("memories").copied().unwrap_or(0).min(total);
+        (seen, total, memory_unlocked(seen as usize, stats.get("days").copied().unwrap_or(1), total as usize))
+    });
+    desk::Me { facts: rows, achievements, scores, friendship, days: stats.get("days").copied().unwrap_or(1), games, untried, memories }
 }
 
 /// Made-up facts, progress and scores for screenshots of the Desk.
@@ -530,7 +561,8 @@ fn sample_me() -> desk::Me {
     let stats = [("commands", 412), ("jokes", 37), ("games", 9), ("copies", 64), ("days", 31), ("notes", 4), ("timers", 18), ("explored", 19)].map(|(k, v)| (k.to_string(), v)).into_iter().collect();
     let unlocked = ["first_words", "chatterbox_100", "joke_10", "gamer_1", "night_owl", "streak_7", "teacher"].map(String::from);
     let scores = [("paperjam", 1240), ("clipglide", 37), ("deskmerge", 2048)].map(|(k, v)| (k.to_string(), v)).into_iter().collect();
-    about_me(&facts, Some((6, 3)), &stats, &unlocked, &scores, 46)
+    let explored = ["joke", "timer", "focus", "todo", "weather", "play"].map(String::from).into_iter().collect();
+    about_me(&facts, Some((6, 3)), &stats, &unlocked, &scores, 46, &explored, true)
 }
 
 /// (id, counter, how many). Titles and quips live in the "achievements" section.
@@ -974,7 +1006,7 @@ impl App {
                 self.desk.show(ctx, &view, look, near)
             }
             None => {
-                let view = desk::View { timers, kind_time: &self.kind_time, focus_log: &self.focus_log, focus_now, checkins: &self.checkin_days, streaks, status, quip, prefs, clips: &self.clip_history, pins: &self.pins, reading: &self.reading, me: about_me(&self.facts, self.birthday, &self.stats, &self.unlocked, &self.highscores, self.friendship), upkeep: self.upkeep.as_ref().map(|(t, r)| (r, t.elapsed().as_secs())), upkeep_running: self.upkeep_running, backup_check: self.backup_check(), backup: desk::Backup { sources: &self.backup_sources, target: &self.backup_target, last: self.backup_last, result: &self.backup_result, progress: self.backup_progress, skip: &self.backup_skip, auto: &self.backup_auto, history: &self.backup_history, found: self.backup_found.as_deref(), failed: self.backup_history.first().is_some_and(|h| h[3] > 0) || !self.backup_result.is_empty() && !self.backup_result.contains("copied") }, events: &events, calendars: cal_views, calendar_note: self.calendar_note(), calendar_problems: self.calendar_problems.len(), answer: self.desk_answer.as_ref(), name: self.name.clone(), people: &self.people, workday: &self.workday, habits: &self.habits, countdowns: &self.countdowns, sites, moved: &self.kind_moves, weather, day_totals, pin_labels: &self.pin_labels, clip_paused, reading_titles: &self.reading_titles, now: self.now_reading.as_ref(), space: self.space.as_ref().map(|(_, s)| s), space_running: self.space_running, upkeep_hide: &self.upkeep_hide, space_log: &self.space_log, tidy_targets: &self.tidy_targets, tidy_auto: self.tidy_auto };
+                let view = desk::View { timers, kind_time: &self.kind_time, focus_log: &self.focus_log, focus_now, checkins: &self.checkin_days, streaks, status, quip, prefs, clips: &self.clip_history, pins: &self.pins, reading: &self.reading, me: about_me(&self.facts, self.birthday, &self.stats, &self.unlocked, &self.highscores, self.friendship, &self.explored, self.unhinged), upkeep: self.upkeep.as_ref().map(|(t, r)| (r, t.elapsed().as_secs())), upkeep_running: self.upkeep_running, backup_check: self.backup_check(), backup: desk::Backup { sources: &self.backup_sources, target: &self.backup_target, last: self.backup_last, result: &self.backup_result, progress: self.backup_progress, skip: &self.backup_skip, auto: &self.backup_auto, history: &self.backup_history, found: self.backup_found.as_deref(), failed: self.backup_history.first().is_some_and(|h| h[3] > 0) || !self.backup_result.is_empty() && !self.backup_result.contains("copied") }, events: &events, calendars: cal_views, calendar_note: self.calendar_note(), calendar_problems: self.calendar_problems.len(), answer: self.desk_answer.as_ref(), name: self.name.clone(), people: &self.people, workday: &self.workday, habits: &self.habits, countdowns: &self.countdowns, sites, moved: &self.kind_moves, weather, day_totals, pin_labels: &self.pin_labels, clip_paused, reading_titles: &self.reading_titles, now: self.now_reading.as_ref(), space: self.space.as_ref().map(|(_, s)| s), space_running: self.space_running, upkeep_hide: &self.upkeep_hide, space_log: &self.space_log, tidy_targets: &self.tidy_targets, tidy_auto: self.tidy_auto };
                 self.desk.show(ctx, &view, look, near)
             }
         }
@@ -1792,7 +1824,7 @@ impl App {
         if answer != "rough" && [3, 7, 14, 30, 50, 100].contains(&streak) {
             text = format!("{text} {}", lines::pick("checkin_streak").replace("{n}", &streak.to_string()));
         }
-        let r = Reply::say(text);
+        let r = Reply::say(text).run("Add a line to my journal", "desk jot");
         let r = match answer {
             "rough" => r.mood(Mood::Love).run("Tell me a joke", "joke").run("A hug, please", "hug").run("Remind me to take a break in 20 minutes", "timer 20m Take a break"),
             "meh" => r.mood(Mood::Think).run("Cheer me up", "joke").run("Today's trivia question", "quiz"),
@@ -2450,6 +2482,12 @@ impl App {
                 }
                 Err(e) => r = Reply::say(format!("I tried to write that down, but my pen broke: {e}")).mood(Mood::Shock),
             },
+            Effect::Relearn(old, new, reply, cmds) => {
+                let done = lines::unlearn(&old).and_then(|_| lines::teach(&new, &reply, &cmds));
+                if let Err(e) = done {
+                    r = Reply::say(format!("I couldn't change that phrase: {e}")).mood(Mood::Shock);
+                }
+            }
             Effect::Unlearn(phrase) => match lines::unlearn(&phrase) {
                 Ok(true) => {}
                 Ok(false) => r = Reply::say(format!("I never learned \"{phrase}\". My memory is clean. Suspiciously clean.")).mood(Mood::Think),
