@@ -46,6 +46,28 @@ pub fn open_with_desktop(target: &str) -> std::io::Result<()> {
     }
 }
 
+/// Show a file in its folder, selected: Explorer on Windows; on Linux the file manager's own "show this item"
+/// (the freedesktop FileManager1 call), else just its folder.
+pub fn reveal(path: &std::path::Path) -> std::io::Result<()> {
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        let mut c = command("explorer");
+        c.raw_arg(format!("/select,\"{}\"", path.display()));
+        return detach(&mut c);
+    }
+    #[cfg(target_os = "linux")]
+    {
+        let uri = format!("file://{}", path.to_string_lossy().split('/').map(|s| crate::brain::url_encode(s).replace('+', "%20")).collect::<Vec<_>>().join("/"));
+        let shown = zbus::blocking::Connection::session().and_then(|bus| bus.call_method(Some("org.freedesktop.FileManager1"), "/org/freedesktop/FileManager1", Some("org.freedesktop.FileManager1"), "ShowItems", &(vec![uri.as_str()], "")).map(|_| ()));
+        if shown.is_ok() {
+            return Ok(());
+        }
+    }
+    #[allow(unreachable_code)]
+    open_with_desktop(&path.parent().unwrap_or(path).to_string_lossy())
+}
+
 /// Start a program and let it run on its own: a thread waits for it, so it never lingers as a zombie process.
 pub fn detach(c: &mut std::process::Command) -> std::io::Result<()> {
     let mut child = c.spawn()?;

@@ -391,6 +391,34 @@ fn sha256(t: &str) -> Option<String> {
     String::from_utf8(out.stdout).ok()?.split_whitespace().next().map(String::from)
 }
 
+/// The Desk's text tools on a copy or a pin: the changed text, or None for a tool it doesn't know (or base64 that
+/// isn't). Pure, so the Clipboard tab and the tests agree.
+pub const CLIP_TOOLS: [(&str, &str); 11] = [("fix", "Fix the easy mistakes"), ("upper", "UPPER CASE"), ("lower", "lower case"), ("title", "Title Case"), ("oneline", "One line"), ("sortlines", "Sort the lines"), ("dedupe", "Remove repeated lines"), ("slug", "As a slug"), ("urldecode", "Decode a web address"), ("base64", "To base64"), ("unbase64", "From base64")];
+
+pub fn clip_tool(tool: &str, t: &str) -> Option<String> {
+    Some(match tool {
+        "fix" => crate::writing::fix(t, &crate::writing::misspellings()),
+        "upper" => t.to_uppercase(),
+        "lower" => t.to_lowercase(),
+        "title" => t.split(' ').map(|w| crate::writing::cap_first(&w.to_lowercase())).collect::<Vec<_>>().join(" "),
+        "oneline" => t.split_whitespace().collect::<Vec<_>>().join(" "),
+        "sortlines" => {
+            let mut l: Vec<&str> = t.lines().collect();
+            l.sort_by_key(|x| x.to_lowercase());
+            l.join("\n")
+        }
+        "dedupe" => {
+            let mut seen = std::collections::HashSet::new();
+            t.lines().filter(|l| seen.insert(*l)).collect::<Vec<_>>().join("\n")
+        }
+        "slug" => slug(t),
+        "urldecode" => crate::net::pct_decode(t),
+        "base64" => b64_encode(t.as_bytes()),
+        "unbase64" => b64_text(t)?,
+        _ => return None,
+    })
+}
+
 /// base64, unbase64, urlencode, urldecode, slug, sortlines, dedupe, sha256 (on the text, or the clipboard).
 pub fn text_tool(kind: &str, rest: &str) -> Reply {
     let t = crate::brain::or_clipboard(rest);
@@ -638,6 +666,17 @@ pub fn sysinfo() -> Reply {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn text_tools_on_a_copy() {
+        assert_eq!(clip_tool("oneline", "MUSTER AG\n  Bahnhofstrasse 1\n8000 ZÜRICH").as_deref(), Some("MUSTER AG Bahnhofstrasse 1 8000 ZÜRICH"));
+        assert_eq!(clip_tool("title", "MUSTER AG bahnhofstrasse").as_deref(), Some("Muster Ag Bahnhofstrasse"));
+        assert_eq!(clip_tool("dedupe", "a\nb\na").as_deref(), Some("a\nb"));
+        assert_eq!(clip_tool("unbase64", "aGVsbG8=").as_deref(), Some("hello"));
+        assert_eq!(clip_tool("unbase64", "not base64!"), None);
+        assert_eq!(clip_tool("explode", "x"), None);
+        assert!(CLIP_TOOLS.iter().all(|(t, _)| clip_tool(t, "aGVsbG8=").is_some()), "every listed tool works");
+    }
 
     #[test]
     fn text_and_number_tools() {

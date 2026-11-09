@@ -86,6 +86,7 @@ pub enum Effect {
     Review(bool),                    // the week in review (true = copy it as text)
     ReviewCsv,                       // the last seven days as spreadsheets in Documents
     ShowQr(String),                  // a QR code of this text, drawn on the Desk (nothing leaves the computer)
+    Reveal(String),                  // show this file in its folder
     SaveStarter(String),             // keep this named list as one to start new lists from (written to your lines file)
     OpenDesk(String),                // Clipster's Desk, on this tab ("" = where it was): stats, to-dos, reminders, upkeep
     DeskLook(bool),                  // the Desk's look: true = modern, false = classic 98
@@ -258,7 +259,8 @@ fn head_fits(head: &str, rest: &str) -> bool {
         "colour" => rest.is_empty() || ["silver", "gold", "rose", "neon", "rainbow", "midnight", "ocean", "beige", "ember"].iter().any(|k| rest.contains(k)),
         "review" => rest.is_empty() || ["copy", "csv", "my week", "the week", "week"].contains(&rest),
         "checkin" => ["great", "okay", "meh", "rough"].contains(&rest),
-        "clip" => ["copy", "pin", "unpin", "clear", "todo", "note", "readlater", "tool", "label", "up", "pause", "resume"].contains(&first),
+        "clip" => ["copy", "pin", "unpin", "clear", "todo", "note", "readlater", "tool", "label", "up", "pause", "resume", "forget"].contains(&first),
+        "files" => ["find", "recent", "reveal", "copypath"].contains(&first),
         "pref" => PREF_KEYS.contains(&first),
         _ => true,
     }
@@ -402,7 +404,12 @@ pub fn exact(input: &str) -> Option<Reply> {
         // the reading list: "readlater https://…" (or bare: the newest copied link), "reading", "reading done 2"
         "readlater" => return Some(Reply::say("").effect(Effect::Reading(format!("save {rest}").trim().to_string()))),
         "reading" if rest.is_empty() || rest == "list" => return Some(Reply::say("").effect(Effect::Reading("list".into()))),
-        "reading" if rest.starts_with("done ") || rest.starts_with("open ") => return Some(Reply::say("").effect(Effect::Reading(rest.to_string()))),
+        "reading" if ["done", "open", "todo", "copy", "random", "clearold"].contains(&rest.split(' ').next().unwrap_or("")) => return Some(Reply::say("").effect(Effect::Reading(rest.to_string()))),
+        // the Desk's Files page: find by name, what you opened lately, show one in its folder, copy its path
+        "files" if rest.starts_with("find ") => return Some(Reply::say("").effect(Effect::DeskNet(Query::Files(rest[5..].trim().to_string()), "files".into()))),
+        "files" if rest == "recent" => return Some(Reply::say("").effect(Effect::DeskNet(Query::Recent, "recent".into()))),
+        "files" if rest.starts_with("reveal ") => return Some(Reply::say("").effect(Effect::Reveal(rest[7..].trim().to_string()))),
+        "files" if rest.starts_with("copypath ") => return Some(Reply::say(lines::pick("clip_copied")).mood(Mood::Happy).effect(Effect::CopyNow(rest[9..].trim().to_string()))),
         // upkeep: the checkup, the system's updater and start-up apps, backups
         "upkeep" if rest == "check" => return Some(Reply::say("").effect(Effect::UpkeepCheck)),
         "upkeep" if rest == "cleartemp" => {

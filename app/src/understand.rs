@@ -1362,6 +1362,14 @@ fn notes(s: &str, raw: &str) -> Option<Reply> {
     if let Some(h) = after(s, &["stop tracking ", "remove the habit ", "remove habit ", "delete the habit "]).filter(|h| crate::habits::known(h)) {
         return go(format!("habit remove {h}"));
     }
+    // "stop watching my clipboard for a bit": the history looks away for a while
+    if has(s, &["stop watching my clipboard", "stop recording my clipboard", "pause the clipboard", "pause my clipboard", "pause clipboard history", "dont watch my clipboard", "do not watch my clipboard", "look away from my clipboard"]) {
+        let dur = after(s, &["stop watching my clipboard for ", "pause the clipboard for ", "pause my clipboard for "]).filter(|d| brain::parse_dur(d).is_some()).unwrap_or("15m");
+        return go(format!("clip pause {dur}"));
+    }
+    if has(s, &["watch my clipboard again", "resume the clipboard", "resume my clipboard", "start watching my clipboard"]) {
+        return go("clip resume".into());
+    }
     // "plan next week", "plan my week": the week's three
     if ["plan next week", "plan my week", "plan the week", "plan the next week", "my weekly goals", "set my weekly goals", "weekly goals", "this weeks three"].contains(&s) {
         return go("desk planweek".into());
@@ -2650,6 +2658,9 @@ mod tests {
         // waiting on someone he knows: a to-do, then marked
         assert!(matches!(eff("plan next week"), Effect::OpenDesk(t) if t == "planweek"));
         assert!(matches!(eff("when am i free tomorrow"), Effect::Calendar(c) if c.starts_with("freeday ")));
+        assert_eq!(eff("stop watching my clipboard for a bit"), Effect::Clip("pause 15m".into()));
+        assert_eq!(eff("pause the clipboard for 30 minutes"), Effect::Clip("pause 30 minutes".into()));
+        assert_eq!(eff("watch my clipboard again"), Effect::Clip("resume".into()));
         assert!(matches!(eff("when am I free"), Effect::Calendar(c) if c.starts_with("freeday ")));
         assert!(matches!(eff("am i free friday at 3"), Effect::Calendar(c) if c.starts_with("free ")), "the one-time question still works");
         assert!(!matches!(eff("I'm waiting for the bus"), Effect::Commands(_)), "not a person he knows");

@@ -206,6 +206,9 @@ mod tests {
             moved: &BTreeMap::new(),
             weather: None,
             day_totals: Default::default(),
+            pin_labels: &BTreeMap::new(),
+            clip_paused: None,
+            reading_titles: &BTreeMap::new(),
         };
         let kinds = |q: &str| search(q, &view, &files).iter().map(|h| (h.kind, h.go.clone())).collect::<Vec<_>>();
         assert!(kinds("printer").contains(&("Note", "notes".into())), "{:?}", kinds("printer"));

@@ -20373,3 +20373,47 @@ I handed "{x}" to your calendar app. It should offer to add it.
 ## meeting_notes_made
 Notes for "{x}" are open, with the time and place already written at the top.
 A notes file for "{x}" is ready in Documents, in Clipster notes.
+
+## clip_pins_full
+That's 30 pins. Unpin one first.
+Thirty pins is the limit. Unpin one to make room.
+
+## clip_forgotten
+Forgotten.
+That copy is gone from the history.
+
+## clip_tool_done
+Done. The result is on the clipboard.
+Changed and copied. Paste it anywhere.
+
+## clip_tool_failed
+That didn't work on this text.
+I couldn't do that with this one.
+
+## clip_labelled
+Named.
+The pin has its name.
+
+## clip_paused
+Paused until {when}. Copies aren't kept or commented on until then.
+I'm looking away until {when}.
+
+## clip_resumed
+Watching the clipboard again.
+The clipboard history is back on.
+
+## reading_full
+That's 200 saved links. Mark some as read first.
+Your reading list is full (200). Read a few, then save more.
+
+## reading_opened
+Opened. Mark it as read when you're done.
+It's open. Enjoy the read.
+
+## reading_random
+Here's one from your list. Happy reading.
+Picked one for you. No peeking at the others.
+
+## reading_old
+{n} links are more than a month old. Clear them?
+Clear the {n} links you saved over a month ago?

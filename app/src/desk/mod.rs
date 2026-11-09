@@ -130,6 +130,9 @@ pub struct View<'a> {
     pub moved: &'a BTreeMap<String, String>, // sites you moved to another kind: id -> kind
     pub weather: Option<String>,             // the weather line, when it's on and came
     pub day_totals: crate::plan::History,    // eight weeks of daily totals
+    pub pin_labels: &'a BTreeMap<String, String>, // a pin's text -> your label for it
+    pub clip_paused: Option<String>,         // the history looks away until this time ("14:20")
+    pub reading_titles: &'a BTreeMap<String, String>, // a saved link -> its page's title
 }
 
 /// A linked calendar on the Calendars page: what to call it, its colour and switches, and what went wrong.
@@ -213,6 +216,8 @@ struct Files {
     can_undo: bool,
     taught: Vec<(String, String)>, // your phrases: (when you say, what I do)
     done: Vec<todo::Item>,         // finished to-dos cleared from the list (done.txt), the last eight weeks
+    recent: Vec<(String, PathBuf)>, // files opened lately (only while the Files page is open)
+    downloads: Vec<PathBuf>,       // the newest downloads (likewise)
     journal: Vec<crate::journal::Entry>,
 }
 
@@ -303,6 +308,10 @@ pub struct Desk {
     timer_label: String,
     note_when: String,                 // "remind me about this note": when
     cal_rename: Option<(usize, String)>, // a calendar being named
+    pin_rename: Option<(usize, String)>, // a pin being labelled
+    link_text: String,                 // Saved links: a link pasted in
+    file_query: String,                // Files: what to find
+    asked_files: bool,                 // Files: a search was sent
 }
 
 /// A card over the page with its own controls.
@@ -359,8 +368,9 @@ impl Desk {
         if name == "people" || name == "you" {
             self.me_page = usize::from(name == "people");
         }
-        if name == "links" || name == "clipboard" {
-            self.clip_page = usize::from(name == "links");
+        if let Some(page) = ["clipboard", "links", "files"].iter().position(|p| *p == name) {
+            self.clip_page = page;
+            self.files.at = None; // the Files page reads its lists now
         }
         self.wrapping = name == "wrapup";
         if let Some(page) = ["checkup", "tidy", "backup"].iter().position(|p| *p == name) {
@@ -445,6 +455,7 @@ impl Desk {
     /// every file in Downloads, so only while its page is open, and at most every ten seconds.
     fn refresh(&mut self) {
         let tidy_open = TABS[self.tab] == "Upkeep" && self.upkeep_page == 1;
+        let files_open = TABS[self.tab] == "Clipboard" && self.clip_page == 2;
         let plan_stale = tidy_open && (self.files.plan_at.is_none_or(|t| t.elapsed() > Duration::from_secs(10)) || self.files.plan_desktop != self.desktop);
         if self.files.at.is_some_and(|t| t.elapsed() < Duration::from_secs(3)) && !plan_stale {
             return;
@@ -469,6 +480,8 @@ impl Desk {
             can_undo: crate::tidy::undo_log().exists(),
             taught: crate::lines::taught(),
             done: todo::load_done(chrono::Local::now().date_naive() - chrono::Days::new(56)),
+            recent: if files_open { crate::sys::recent_files().into_iter().take(8).collect() } else { vec![] },
+            downloads: if files_open { dirs::download_dir().map(|d| crate::find::newest(&d, 5)).unwrap_or_default() } else { vec![] },
             journal: crate::journal::load(),
         };
     }

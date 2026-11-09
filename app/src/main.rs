@@ -203,6 +203,10 @@ struct App {
     holiday_cc: String,                                     // public holidays for this country ("" = off)
     holidays: Vec<(chrono::NaiveDate, String)>,
     holidays_asked: bool,
+    pin_labels: std::collections::BTreeMap<String, String>, // a pinned snippet's text -> your label for it ("IBAN")
+    clip_paused: Option<Instant>,                           // the clipboard history looks away until then
+    reading_titles: std::collections::BTreeMap<String, String>, // a saved link -> the page's title (from the browser window)
+    reading_opened: Option<(String, Instant)>,              // a saved link just opened: the next browser title is its title
     told_events: std::collections::HashSet<String>, // events that already got their heads-up
     sample_clips: Vec<String>, // made-up copies for screenshots of the Desk
     sample_reading: Vec<(String, String)>,
@@ -590,6 +594,10 @@ impl App {
             holiday_cc: String::new(),
             holidays: vec![],
             holidays_asked: false,
+            pin_labels: Default::default(),
+            clip_paused: None,
+            reading_titles: Default::default(),
+            reading_opened: None,
             told_events: Default::default(),
             upkeep: None,
             sample_upkeep: upkeep::Report {
@@ -725,6 +733,8 @@ impl App {
                 let (habits, countdowns, sites, weather) = desk::sample_extras();
                 (app.habits, app.countdowns, app.site_time, app.weather_on, app.weather) = (habits, countdowns, sites, true, Some((Instant::now(), weather)));
                 app.holidays = vec![(chrono::Local::now().date_naive() + chrono::Days::new(6), "St. Gerald's Day (sample)".into())];
+                app.pin_labels.insert("Printer code: 4711".into(), "Printer".into());
+                app.reading_titles.insert("https://en.wikipedia.org/wiki/Paper_clip".into(), "Paper clip - Wikipedia".into());
                 app.budgets.insert("video".into(), 30);
             }
         } else if let Some(game) = play.clone().filter(|g| g != "welcome") {
@@ -877,6 +887,7 @@ impl App {
         }).collect();
         let mut events = if self.desk_sample.is_some() { self.sample_events.clone() } else { self.events.clone() };
         events.extend(self.holidays.iter().map(|(d, name)| calendar::Event { uid: format!("holiday-{d}"), start: d.and_hms_opt(0, 0, 0).unwrap_or_default(), end: (*d + chrono::Days::new(1)).and_hms_opt(0, 0, 0).unwrap_or_default(), all_day: true, title: name.clone(), cal: calendar::HOLIDAY, ..Default::default() }));
+        let clip_paused = self.clip_paused.filter(|t| *t > now).map(|t| (chrono::Local::now() + chrono::Duration::from_std(t - now).unwrap_or_default()).format("%-H:%M").to_string());
         let day_totals = match &self.desk_sample {
             Some((_, k, f, _)) => plan::history_merge(&desk::sample_history(), k, f, chrono::Local::now().date_naive()),
             None => plan::history_merge(&self.day_totals, &self.kind_time, &self.focus_log, chrono::Local::now().date_naive()),
@@ -911,11 +922,11 @@ impl App {
         let weather = self.weather.as_ref().filter(|_| self.weather_on).map(|(_, w)| w.clone());
         match &self.desk_sample {
             Some((t, k, f, c)) => {
-                let view = desk::View { timers: t.clone(), kind_time: k, focus_log: f, focus_now: Some(("the slides".into(), 18 * 60, 7 * 60, 40, false)), checkins: c, streaks: vec![("Focus".into(), 4, 9), ("Goal met".into(), 2, 5), ("Check-ins".into(), 6, 12), ("Days with me".into(), 31, 31)], status, quip, prefs, clips: &self.sample_clips, pins: &self.sample_clips[..2], reading: &self.sample_reading, me: sample_me(), upkeep: Some((&self.sample_upkeep, 120)), upkeep_running: false, backup_check: upkeep::backup_check(true, Some(backup::now() - 9 * 86_400), backup::now(), true), backup: desk::Backup { sources: &self.backup_sources, target: "/run/media/you/BACKUP", last: Some(backup::now() - 9 * 86_400), result: "214 copied (1.3 GB), 4120 unchanged", progress: None }, events: &events, calendars: self.sample_calendars.iter().enumerate().map(|(i, s)| desk::CalView { label: ["Work", "Family"].get(i).map_or_else(|| calendar::short(s), |n| n.to_string()), color: i as u8, show: true, alert: i == 0, ..Default::default() }).collect(), calendar_note: "Checked 4 min ago".into(), calendar_problems: 0, answer: self.desk_answer.as_ref(), name: "Sam".into(), people: &self.sample_people, workday: &self.sample_workday, habits: &self.habits, countdowns: &self.countdowns, sites, moved: &self.kind_moves, weather, day_totals };
+                let view = desk::View { timers: t.clone(), kind_time: k, focus_log: f, focus_now: Some(("the slides".into(), 18 * 60, 7 * 60, 40, false)), checkins: c, streaks: vec![("Focus".into(), 4, 9), ("Goal met".into(), 2, 5), ("Check-ins".into(), 6, 12), ("Days with me".into(), 31, 31)], status, quip, prefs, clips: &self.sample_clips, pins: &self.sample_clips[..2], reading: &self.sample_reading, me: sample_me(), upkeep: Some((&self.sample_upkeep, 120)), upkeep_running: false, backup_check: upkeep::backup_check(true, Some(backup::now() - 9 * 86_400), backup::now(), true), backup: desk::Backup { sources: &self.backup_sources, target: "/run/media/you/BACKUP", last: Some(backup::now() - 9 * 86_400), result: "214 copied (1.3 GB), 4120 unchanged", progress: None }, events: &events, calendars: self.sample_calendars.iter().enumerate().map(|(i, s)| desk::CalView { label: ["Work", "Family"].get(i).map_or_else(|| calendar::short(s), |n| n.to_string()), color: i as u8, show: true, alert: i == 0, ..Default::default() }).collect(), calendar_note: "Checked 4 min ago".into(), calendar_problems: 0, answer: self.desk_answer.as_ref(), name: "Sam".into(), people: &self.sample_people, workday: &self.sample_workday, habits: &self.habits, countdowns: &self.countdowns, sites, moved: &self.kind_moves, weather, day_totals, pin_labels: &self.pin_labels, clip_paused, reading_titles: &self.reading_titles };
                 self.desk.show(ctx, &view, look, near)
             }
             None => {
-                let view = desk::View { timers, kind_time: &self.kind_time, focus_log: &self.focus_log, focus_now, checkins: &self.checkin_days, streaks, status, quip, prefs, clips: &self.clip_history, pins: &self.pins, reading: &self.reading, me: about_me(&self.facts, self.birthday, &self.stats, &self.unlocked, &self.highscores, self.friendship), upkeep: self.upkeep.as_ref().map(|(t, r)| (r, t.elapsed().as_secs())), upkeep_running: self.upkeep_running, backup_check: self.backup_check(), backup: desk::Backup { sources: &self.backup_sources, target: &self.backup_target, last: self.backup_last, result: &self.backup_result, progress: self.backup_progress }, events: &events, calendars: cal_views, calendar_note: self.calendar_note(), calendar_problems: self.calendar_problems.len(), answer: self.desk_answer.as_ref(), name: self.name.clone(), people: &self.people, workday: &self.workday, habits: &self.habits, countdowns: &self.countdowns, sites, moved: &self.kind_moves, weather, day_totals };
+                let view = desk::View { timers, kind_time: &self.kind_time, focus_log: &self.focus_log, focus_now, checkins: &self.checkin_days, streaks, status, quip, prefs, clips: &self.clip_history, pins: &self.pins, reading: &self.reading, me: about_me(&self.facts, self.birthday, &self.stats, &self.unlocked, &self.highscores, self.friendship), upkeep: self.upkeep.as_ref().map(|(t, r)| (r, t.elapsed().as_secs())), upkeep_running: self.upkeep_running, backup_check: self.backup_check(), backup: desk::Backup { sources: &self.backup_sources, target: &self.backup_target, last: self.backup_last, result: &self.backup_result, progress: self.backup_progress }, events: &events, calendars: cal_views, calendar_note: self.calendar_note(), calendar_problems: self.calendar_problems.len(), answer: self.desk_answer.as_ref(), name: self.name.clone(), people: &self.people, workday: &self.workday, habits: &self.habits, countdowns: &self.countdowns, sites, moved: &self.kind_moves, weather, day_totals, pin_labels: &self.pin_labels, clip_paused, reading_titles: &self.reading_titles };
                 self.desk.show(ctx, &view, look, near)
             }
         }
@@ -1684,6 +1695,18 @@ impl App {
         if title.to_lowercase().contains("clipster") || games::NAMES.iter().any(|(_, t)| *t == title) || prank {
             return;
         }
+        // a saved link was just opened: this browser title is the page's, kept as the link's title
+        if let Some((link, at)) = self.reading_opened.clone() {
+            let browser = ["Firefox", "Chrome", "Chromium", "Brave", "Edge", "Vivaldi", "Opera", "LibreWolf", "Safari", "Epiphany", "Falkon"].iter().any(|b| title.contains(b));
+            if at.elapsed() < Duration::from_secs(15) && browser {
+                self.reading_titles.insert(link, brain::page_title(title));
+                self.reading_opened = None;
+                let saved: Vec<&String> = self.reading.iter().map(|(l, _)| l).collect();
+                self.reading_titles.retain(|l, _| saved.contains(&l));
+            } else if at.elapsed() >= Duration::from_secs(15) {
+                self.reading_opened = None;
+            }
+        }
         // a site you moved on the Desk ("Count as work") counts as that kind
         let site = lines::window_site(title);
         let moved = site.as_deref().and_then(site_id).and_then(|id| self.kind_moves.get(id)).cloned();
@@ -2023,7 +2046,7 @@ impl App {
     fn snapshot(&self) -> String {
         serde_json::json!({
             "tips_every": self.tips_every, "notice_clip": self.notice_clip, "notice_programs": self.notice_programs, "notice_windows": self.notice_windows, "checkin": self.checkin, "facts": self.facts, "kind_time": self.kind_time, "focus_log": self.focus_log, "desk_look": if self.desk_modern { "modern" } else { "classic" }, "desk_size": if self.desk_large { "large" } else { "normal" }, "checkin_days": self.checkin_days,
-            "pins": self.pins, "reading": self.reading, "calendars": self.calendars, "calendar_meta": self.calendar_meta.iter().map(|(s, m)| (s.clone(), m.to_json())).collect::<serde_json::Map<_, _>>(), "holidays": self.holiday_cc, "people": self.people.iter().map(|p| p.to_json()).collect::<Vec<_>>(), "habits": self.habits.iter().map(|h| h.to_json()).collect::<Vec<_>>(), "countdowns": self.countdowns.iter().map(|(l, d)| serde_json::json!([l, d.to_string()])).collect::<Vec<_>>(), "site_time": self.site_time, "kind_moves": self.kind_moves, "weather": self.weather_on, "work_hours": [self.work_hours.0, self.work_hours.1], "day_totals": plan::history_merge(&self.day_totals, &self.kind_time, &self.focus_log, chrono::Local::now().date_naive()), "workday": self.workday, "workday_ask": self.workday_ask, "welcome_seen": self.welcome_seen, "backup_sources": self.backup_sources, "backup_target": self.backup_target, "backup_last": self.backup_last, "backup_result": self.backup_result, "dnd_restore": self.dnd_restore, "dnd": self.dnd, "wrapup": self.wrapup, "upkeep_day": self.upkeep_day, "focus_goal": self.focus_goal, "budgets": self.budgets,
+            "pins": self.pins, "reading": self.reading, "calendars": self.calendars, "calendar_meta": self.calendar_meta.iter().map(|(s, m)| (s.clone(), m.to_json())).collect::<serde_json::Map<_, _>>(), "holidays": self.holiday_cc, "pin_labels": self.pin_labels, "reading_titles": self.reading_titles, "people": self.people.iter().map(|p| p.to_json()).collect::<Vec<_>>(), "habits": self.habits.iter().map(|h| h.to_json()).collect::<Vec<_>>(), "countdowns": self.countdowns.iter().map(|(l, d)| serde_json::json!([l, d.to_string()])).collect::<Vec<_>>(), "site_time": self.site_time, "kind_moves": self.kind_moves, "weather": self.weather_on, "work_hours": [self.work_hours.0, self.work_hours.1], "day_totals": plan::history_merge(&self.day_totals, &self.kind_time, &self.focus_log, chrono::Local::now().date_naive()), "workday": self.workday, "workday_ask": self.workday_ask, "welcome_seen": self.welcome_seen, "backup_sources": self.backup_sources, "backup_target": self.backup_target, "backup_last": self.backup_last, "backup_result": self.backup_result, "dnd_restore": self.dnd_restore, "dnd": self.dnd, "wrapup": self.wrapup, "upkeep_day": self.upkeep_day, "focus_goal": self.focus_goal, "budgets": self.budgets,
             "notice_health": self.notice_health, "check_updates": self.check_updates, "update_told": self.update_told, "sounds": self.sounds, "breaks": self.breaks, "name": self.name,
             "hat": self.hat, "skin": self.skin, "friendship": self.friendship, "highscores": self.highscores, "birthday": self.birthday.map(|(m, d)| [m, d]), "stats": self.stats, "unlocked": self.unlocked, "explored": self.explored, "persona": if self.unhinged { "unhinged" } else { "boring" }, "anchor": self.anchor.or(self.saved_anchor).map(|a| [a.x, a.y]),
             "timers": self.timers.iter().map(|t| serde_json::json!([t.at, t.label, t.every, t.id, t.rule])).collect::<Vec<_>>(),
@@ -2090,6 +2113,8 @@ impl App {
         }
         self.kind_moves = v["kind_moves"].as_object().into_iter().flatten().filter_map(|(k, m)| Some((k.clone(), m.as_str().filter(|m| brain::COUNT_AS.contains(m))?.to_string()))).collect();
         self.weather_on = v["weather"].as_bool().unwrap_or(false);
+        self.pin_labels = v["pin_labels"].as_object().into_iter().flatten().filter_map(|(k, l)| Some((k.clone(), l.as_str()?.to_string()))).collect();
+        self.reading_titles = v["reading_titles"].as_object().into_iter().flatten().filter_map(|(k, l)| Some((k.clone(), l.as_str()?.to_string()))).collect();
         self.holiday_cc = v["holidays"].as_str().filter(|c| c.len() == 2 && c.chars().all(|ch| ch.is_ascii_alphabetic())).map(|c| c.to_uppercase()).unwrap_or_default();
         if let (Some(a), Some(b)) = (v["work_hours"][0].as_u64(), v["work_hours"][1].as_u64()) {
             self.work_hours = ((a as u32).min(23), (b as u32).clamp(a as u32, 23));
@@ -2737,12 +2762,76 @@ impl App {
                         self.ignore_clip = t;
                         "clip_copied"
                     }),
+                    // at 30 pins nothing old is dropped: you unpin one first
+                    "pin" if self.pins.len() >= 30 && get(self, target).is_some_and(|t| !self.pins.contains(&t)) => Some("clip_pins_full"),
                     "pin" => get(self, target).map(|t| {
                         self.pins.retain(|p| p != &t);
                         self.pins.insert(0, t);
-                        self.pins.truncate(30);
                         "clip_pinned"
                     }),
+                    "forget" => at(target).filter(|(l, i)| *l == 'h' && *i < self.clip_history.len()).map(|(_, i)| {
+                        self.clip_history.remove(i);
+                        "clip_forgotten"
+                    }),
+                    // a copy becomes a to-do, a note or a saved link (the text goes in as it is, never read as a sentence)
+                    "todo" | "note" | "readlater" => get(self, target).map(|t| {
+                        let one = t.split_whitespace().collect::<Vec<_>>().join(" ");
+                        let cmd = match verb {
+                            "todo" => format!("todo {}", one.chars().take(200).collect::<String>()),
+                            "note" => format!("note {one}"),
+                            _ => format!("readlater {one}"),
+                        };
+                        self.macro_depth += 1;
+                        self.run(ctx, &cmd);
+                        self.macro_depth -= 1;
+                        ""
+                    }),
+                    // a text tool: the result goes onto the clipboard ("tool h3 upper")
+                    "tool" => {
+                        let (which, tool) = target.split_once(' ').unwrap_or((target, ""));
+                        match (get(self, which), tool.trim()) {
+                            (Some(t), "count") => {
+                                self.set_status(format!("{} words, {} characters, {} lines.", t.split_whitespace().count(), t.chars().count(), t.lines().count().max(1)));
+                                Some("")
+                            }
+                            (Some(t), tool) => match crate::powers::clip_tool(tool, &t) {
+                                Some(done) => {
+                                    ctx.copy_text(done.clone());
+                                    self.ignore_clip = done;
+                                    Some("clip_tool_done")
+                                }
+                                None => Some("clip_tool_failed"),
+                            },
+                            _ => None,
+                        }
+                    }
+                    "label" => {
+                        let (which, label) = target.split_once(' ').unwrap_or((target, ""));
+                        get(self, which).filter(|_| which.starts_with('p')).map(|t| {
+                            let label: String = label.trim().chars().take(30).collect();
+                            if label.is_empty() {
+                                self.pin_labels.remove(&t);
+                            } else {
+                                self.pin_labels.insert(t, label);
+                            }
+                            "clip_labelled"
+                        })
+                    }
+                    "up" => at(target).filter(|(l, i)| *l == 'p' && *i > 0 && *i < self.pins.len()).map(|(_, i)| {
+                        self.pins.swap(i, i - 1);
+                        ""
+                    }),
+                    // no history and no comments for a while (memory only: a restart ends it)
+                    "pause" => {
+                        let secs = brain::parse_dur(target).map_or(15 * 60, |(s, _)| s).clamp(60, 24 * 3600);
+                        self.clip_paused = Some(Instant::now() + Duration::from_secs(secs));
+                        self.set_status(lines::pick("clip_paused").replace("{when}", &(chrono::Local::now() + chrono::Duration::seconds(secs as i64)).format("%-H:%M").to_string()));
+                        Some("")
+                    }
+                    "resume" => {
+                        self.clip_paused = None;
+                        Some("clip_resumed")
+                    }
                     "unpin" => at(target).filter(|(l, i)| *l == 'p' && *i < self.pins.len()).map(|(_, i)| {
                         self.pins.remove(i);
                         "clip_unpinned"
@@ -2753,8 +2842,17 @@ impl App {
                     }
                     _ => None,
                 };
-                self.set_status(pool.map(lines::pick).unwrap_or_default());
+                if let Some(pool) = pool.filter(|p| !p.is_empty()) {
+                    self.set_status(lines::pick(pool));
+                }
                 silent = true;
+            }
+            Effect::Reveal(path) => {
+                let p = std::path::PathBuf::from(&path);
+                if let Err(e) = sys::reveal(&p) {
+                    self.set_status(format!("I couldn't show it: {e}"));
+                }
+                silent = from_desk;
             }
             Effect::Workday(cmd) => {
                 let (verb, arg) = cmd.split_once(' ').unwrap_or((cmd.as_str(), ""));
@@ -2876,9 +2974,9 @@ impl App {
                         r = match link {
                             None => Reply::say(lines::pick("reading_no_link")).mood(Mood::Think),
                             Some(l) if self.reading.iter().any(|(x, _)| *x == l) => Reply::say(lines::pick("reading_dupe")).mood(Mood::Wink).run("My reading list", "reading"),
+                            Some(_) if self.reading.len() >= 200 => Reply::say(lines::pick("reading_full")).mood(Mood::Think).run("My reading list", "desk links"),
                             Some(l) => {
                                 self.reading.insert(0, (l, chrono::Local::now().format("%Y-%m-%d").to_string()));
-                                self.reading.truncate(200);
                                 Reply::say(lines::pick("reading_saved")).mood(Mood::Read).run("My reading list", "reading")
                             }
                         };
@@ -2887,8 +2985,57 @@ impl App {
                         let link = self.reading[i].0.clone();
                         if let Err(e) = open(&link) {
                             self.set_status(format!("I couldn't open that: {e}"));
+                        } else {
+                            // the browser's next title is the page's: kept as the link's title (nothing else is asked)
+                            self.reading_opened = Some((link, Instant::now()));
+                            if from_desk {
+                                self.desk_status = desk::Status { text: lines::pick("reading_opened"), tone: desk::Tone::Info, at: Some(Instant::now()), action: Some(("Mark as read".into(), format!("reading done {}", i + 1))) };
+                            }
                         }
                         silent = from_desk;
+                    }
+                    ("copy", Some(i)) => {
+                        let link = self.reading[i].0.clone();
+                        ctx.copy_text(link.clone());
+                        self.ignore_clip = link;
+                        self.set_status(lines::pick("clip_copied"));
+                        silent = true;
+                    }
+                    // a to-do to read it, with the link: "todo 3 friday"
+                    ("todo", _) => {
+                        let (n, when) = arg.split_once(' ').unwrap_or((arg, ""));
+                        if let Some(i) = n.parse::<usize>().ok().and_then(|n| n.checked_sub(1)).filter(|i| *i < self.reading.len()) {
+                            let link = self.reading[i].0.clone();
+                            let title = self.reading_titles.get(&link).cloned().unwrap_or_else(|| brain::short_link(&link));
+                            let line = todo::load().len() + 1;
+                            let due = if when.trim().is_empty() { String::new() } else { format!(" by {}", when.trim()) };
+                            self.run(ctx, &format!("todo Read: {title}{due}"));
+                            self.run(ctx, &format!("todo #{line} link {link}"));
+                            return;
+                        }
+                    }
+                    ("random", _) => {
+                        use rand::seq::SliceRandom;
+                        if let Some((link, _)) = self.reading.choose(&mut rand::thread_rng()).cloned() {
+                            let _ = open(&link);
+                            self.reading_opened = Some((link, Instant::now()));
+                            r = Reply::say(lines::pick("reading_random")).mood(Mood::Read);
+                        } else {
+                            r = Reply::say(lines::pick("reading_empty")).mood(Mood::Think);
+                        }
+                    }
+                    // links older than 30 days: asked first, then gone
+                    ("clearold", _) => {
+                        let cut = (chrono::Local::now().date_naive() - chrono::Days::new(30)).format("%Y-%m-%d").to_string();
+                        let old = self.reading.iter().filter(|(_, d)| *d < cut).count();
+                        if arg == "confirmed" {
+                            self.reading.retain(|(_, d)| *d >= cut);
+                            r = Reply::say(format!("Cleared {old} old links.")).mood(Mood::Happy);
+                        } else if old == 0 {
+                            r = Reply::say("No links older than a month.").mood(Mood::Happy);
+                        } else {
+                            r = Reply::say(lines::pick("reading_old").replace("{n}", &old.to_string())).mood(Mood::Think).run("Yes, clear them", "reading clearold confirmed").btn("Keep them", Act::Hide);
+                        }
                     }
                     ("done", Some(i)) => {
                         self.reading.remove(i);
@@ -3296,6 +3443,7 @@ impl App {
                         self.auto_hide = Some(Instant::now() + reading_time(&self.balloon.as_ref().map(|b| b.text.clone()).unwrap_or_default()));
                     }
                 }
+                Event::Clip(_) if self.clip_paused.is_some_and(|t| Instant::now() < t) => {} // paused: nothing kept, nothing said
                 Event::Clip(text) => {
                     // shortcut: history lives in memory only (so copied passwords never touch the disk)
                     self.clip_history.retain(|c| c != &text);

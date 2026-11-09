@@ -46,7 +46,9 @@ pub(super) fn sample_files(desktop: bool) -> Files {
         .iter()
         .map(|(n, m, l)| crate::journal::Entry { day: ago(*n), mood: Some(m.to_string()), text: l.to_string() })
         .collect();
-    Files { at: Some(Instant::now()), todos, notes, plan, plan_at: Some(Instant::now()), plan_desktop: desktop, can_undo: true, taught, done, journal }
+    let recent = ["Quarterly report.odt", "Offsite budget.ods", "Team photo.jpg"].iter().map(|n| (n.to_string(), PathBuf::from(format!("/home/you/Documents/{n}")))).collect();
+    let downloads = ["invoice-2026-11.pdf", "printer-manual.pdf"].iter().map(|n| PathBuf::from(format!("/home/you/Downloads/{n}"))).collect();
+    Files { at: Some(Instant::now()), todos, notes, plan, plan_at: Some(Instant::now()), plan_desktop: desktop, can_undo: true, taught, done, journal, recent, downloads }
 }
 
 /// Made-up timers, times, sessions and check-ins for screenshots: (timers, kind_time, focus_log, checkins).

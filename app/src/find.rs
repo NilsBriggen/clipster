@@ -119,6 +119,23 @@ fn percent_decode(s: &str) -> String {
 }
 
 /// A path as people read it: the home folder as "~".
+/// The newest files in a folder (not hidden ones, not half-downloaded ones), newest first.
+pub fn newest(dir: &Path, n: usize) -> Vec<PathBuf> {
+    let mut files: Vec<(std::time::SystemTime, PathBuf)> = std::fs::read_dir(dir)
+        .into_iter()
+        .flatten()
+        .flatten()
+        .filter(|e| e.file_type().is_ok_and(|t| t.is_file()))
+        .filter(|e| {
+            let name = e.file_name().to_string_lossy().to_lowercase();
+            !name.starts_with('.') && ![".part", ".crdownload", ".download", ".tmp"].iter().any(|x| name.ends_with(x))
+        })
+        .map(|e| (e.metadata().and_then(|m| m.modified()).unwrap_or(std::time::UNIX_EPOCH), e.path()))
+        .collect();
+    files.sort_by(|a, b| b.0.cmp(&a.0));
+    files.into_iter().take(n).map(|f| f.1).collect()
+}
+
 pub fn tilde(p: &Path) -> String {
     let home = dirs::home_dir().unwrap_or_default();
     match p.strip_prefix(&home) {
