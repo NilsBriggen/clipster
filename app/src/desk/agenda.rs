@@ -85,7 +85,14 @@ impl Desk {
             }
             self.remind_form(ui, Rect::from_min_max(pos2(x0, form), pos2(x1, left.max.y - 10.0)), look, out);
         }
-        self.notes_card(ui, right, look, out);
+        // the notes as tall as they are (eight rows, then they scroll); the running reminders get the rest
+        let words = self.notes_query.to_lowercase();
+        let shown = self.files.notes.iter().filter(|n| words.split_whitespace().all(|w| n.text.to_lowercase().contains(w))).count();
+        let note_pitch = if look == Look::Modern { 30.0 } else { 26.0 };
+        let most = if view.timers.len() > 2 { right.height() * 0.55 } else { right.height() - 120.0 };
+        let notes_h = (34.0 + shown.clamp(1, 8) as f32 * note_pitch + 26.0 + ctl + 12.0).min(most);
+        self.notes_card(ui, Rect::from_min_size(right.min, vec2(right.width(), notes_h)), look, out);
+        self.reminder_list(ui, Rect::from_min_max(pos2(right.min.x, right.min.y + notes_h + 12.0), right.max), view, look, out);
         match self.card.clone() {
             Some(Card::Event(key)) => self.event_card(ui, c, view, look, out, &key),
             Some(Card::Timer(id)) => self.timer_card(ui, c, view, look, out, id),
@@ -190,14 +197,28 @@ impl Desk {
             }
             rows.extend(items.into_iter().map(|(t, w)| Row::Item(t, w)));
         }
+        let pitch = if look == Look::Modern { 27.0 } else { 23.0 };
         if rows.len() <= 2 && view.calendars.is_empty() && view.timers.is_empty() {
+            // nothing on at all: the way out right under it, and reminders to click that fill the field below
+            let mut y = area.min.y + rows.len() as f32 * pitch + 14.0;
+            let g = p.layout("Link your calendar and your meetings show up here, with free time between them. I only read it.".to_string(), look.font(12.0), look.dim(), x1 - x0 - 8.0);
+            let gh = g.size().y;
+            p.galley(pos2(x0 + 8.0, y), g, look.dim());
+            y += gh + 8.0;
             let label = "Link my calendar…";
-            let w = btn_w(&p, look, label);
-            if look.button(ui, Rect::from_min_size(pos2(x0, area.max.y - ctl - 4.0), vec2(w, ctl)), Id::unique("agenda-link-cal"), label, true).on_hover_text("Your meetings show here; I only read the calendar").clicked() {
+            if look.button(ui, Rect::from_min_size(pos2(x0 + 8.0, y), vec2(btn_w(&p, look, label), ctl)), Id::unique("agenda-link-cal"), label, true).clicked() {
                 self.calendars_open = true;
             }
+            y += ctl + 18.0;
+            p.text(pos2(x0 + 8.0, y), Align2::LEFT_CENTER, "Or a reminder, to try:", look.font(12.0), look.dim());
+            for (i, ex) in ["in 10 minutes to stretch", "tomorrow at 9 to call Anna", "every monday at 9 to water the plants"].iter().enumerate() {
+                y += 21.0;
+                if link(ui, look, pos2(x0 + 16.0, y), ex, look.font(12.5), &format!("agenda-example-{i}")).clicked() {
+                    self.remind_text = ex.to_string();
+                    ui.memory_mut(|m| m.request_focus(Id::unique("desk-remind")));
+                }
+            }
         }
-        let pitch = if look == Look::Modern { 27.0 } else { 23.0 };
         let fits = (area.height() / pitch).floor().max(1.0) as usize;
         let first = self.rows(ui, look, "agenda", area, rows.len(), fits);
         let s = if look == Look::Modern { 15.0 } else { 13.0 };
@@ -288,34 +309,19 @@ impl Desk {
                             }
                         }
                         What::Timer(tm) => {
-                            // ✕ cancels exactly this one; Snooze ▾ and Edit
-                            let xr = Rect::from_min_size(pos2(right - 24.0, cy - small / 2.0), vec2(24.0, small));
-                            if self.remove_btn(ui, look, xr, Id::unique(("agenda-cancel", tm.id)), "Cancel this reminder (Undo brings it back)") {
-                                out.push(format!("timer #{} cancel", tm.id));
-                            }
-                            let er = Rect::from_min_size(pos2(xr.min.x - 6.0 - 40.0, cy - small / 2.0), vec2(40.0, small));
-                            if look.button(ui, er, Id::unique(("agenda-edit", tm.id)), "Edit", true).clicked() {
-                                self.card = Some(Card::Timer(tm.id));
-                                self.timer_when.clear();
-                                self.timer_label = tm.label.clone();
-                            }
-                            let sr = Rect::from_min_size(pos2(er.min.x - 6.0 - 76.0, cy - small / 2.0), vec2(76.0, small));
-                            let key = format!("snooze-{}", tm.id);
-                            if look.button(ui, sr, Id::unique(("agenda-snooze", tm.id)), "Snooze ▾", true).clicked() {
-                                self.toggle_popup(&key);
-                            }
-                            let choices: Vec<String> = ["In 10 minutes", "In 1 hour", "This evening, 18:00", "Tomorrow, 9:00"].map(String::from).to_vec();
-                            if let Some(k) = self.popup(ui, look, &key, sr, &choices) {
-                                let when = ["snooze 10m", "snooze 1h", "at 18:00", "at tomorrow at 9"][k];
-                                out.push(format!("timer #{} {when}", tm.id));
-                            }
-                            right = sr.min.x - 6.0;
+                            // just what and when here (its buttons are in Reminders): a click opens its card
+                            p.circle_filled(pos2(x0 + 2.0, cy), 3.0, look.score(70));
                             let again = match (&tm.rule, tm.every) {
                                 (Some(rule), _) => format!(" · {}", crate::timers::rule_text(rule)),
                                 (None, e) if e > 0 => format!(" · every {}", brain::fmt_dur(e)),
                                 _ => String::new(),
                             };
-                            line(ui, pos2(tx, cy), &format!("{}{again}", if tm.label.is_empty() { "Timer" } else { &tm.label }), look.font(12.5), look.text(), right - tx);
+                            let wt = line(ui, pos2(tx, cy), &format!("{}{again}", if tm.label.is_empty() { "Timer" } else { &tm.label }), look.font(12.5), look.text(), right - tx);
+                            if ui.interact(Rect::from_min_size(pos2(x0, y), vec2(tx - x0 + wt, pitch)), Id::unique(("agenda-timer", tm.id, first + n)), Sense::click()).on_hover_text("Move, rename or cancel it").on_hover_cursor(egui::CursorIcon::PointingHand).clicked() {
+                                self.card = Some(Card::Timer(tm.id));
+                                self.timer_when.clear();
+                                self.timer_label = tm.label.clone();
+                            }
                         }
                         What::Todo(line_no, due) => {
                             let it = self.files.todos.get(*line_no).cloned().unwrap_or_default();
@@ -345,18 +351,14 @@ impl Desk {
                         What::Birthday(name, age, email, day) => {
                             // the present is due the day before the birthday (not today, unless that's tomorrow)
                             let by = (*day - Duration::days(1)).max(today);
-                            let mut b: Vec<(&str, String)> = vec![("Present", format!("todo present for {name} by {by}"))];
-                            if *email {
-                                b.push(("Write", format!("person mail {name}")));
+                            let more: Vec<String> = if *email { vec![format!("Write to {name}")] } else { vec![] };
+                            let (hit, end) = self.row_menu(ui, look, right, cy, small, &format!("agenda-bday-{name}"), ("Present", btn_w(&p, look, "Present")), &more);
+                            match hit {
+                                Some(0) => out.push(format!("todo present for {name} by {by}")),
+                                Some(_) => out.push(format!("person mail {name}")),
+                                None => {}
                             }
-                            for (i, (label, cmd)) in b.iter().enumerate().rev() {
-                                let w = btn_w(&p, look, label);
-                                let br = Rect::from_min_size(pos2(right - w, cy - small / 2.0), vec2(w, small));
-                                if look.button(ui, br, Id::unique(("agenda-bday", name.as_str(), i)), label, true).clicked() {
-                                    out.push(cmd.clone());
-                                }
-                                right = br.min.x - 6.0;
-                            }
+                            right = end;
                             line(ui, pos2(tx, cy), &format!("🎂 {name}{}", age.map(|a| format!(" (turns {a})")).unwrap_or_default()), look.font(12.5), look.text(), right - tx);
                         }
                         What::Countdown(label) => {
@@ -407,19 +409,23 @@ impl Desk {
                 }
                 let past = *d < today;
                 p.text(pos2(cell.min.x + 5.0, cell.min.y + 9.0), Align2::LEFT_CENTER, d.day().to_string(), if *d == today { look.bold(12.0) } else { look.font(12.0) }, if past { look.dim() } else { look.text() });
-                // dots: meetings (their calendar's colour), reminders, to-dos due, birthdays and countdowns
-                let mut dots: Vec<Color32> = view.events.iter().filter(|e| e.start.date() == *d || e.all_day && e.start.date() <= *d && e.end.date() > *d).take(3).map(|e| if e.cal == crate::calendar::HOLIDAY { look.danger() } else { cal_color(look, view.calendars.get(e.cal).map_or(0, |c| c.color)) }).collect();
-                if view.timers.iter().any(|t| t.when().date() == *d) {
-                    dots.push(look.score(70));
+                // what's on: the first thing's title (with its colour) under the day, and "+2" for the rest: meetings
+                // (their calendar's colour), reminders, to-dos due, birthdays and countdowns
+                let mut on: Vec<(String, Color32)> = view.events.iter().filter(|e| e.start.date() == *d || e.all_day && e.start.date() <= *d && e.end.date() > *d).map(|e| (e.title.clone(), if e.cal == crate::calendar::HOLIDAY { look.danger() } else { cal_color(look, view.calendars.get(e.cal).map_or(0, |c| c.color)) })).collect();
+                on.extend(view.timers.iter().filter(|t| t.when().date() == *d).map(|t| (if t.label.is_empty() { "Timer".to_string() } else { t.label.clone() }, look.score(70))));
+                on.extend(self.files.todos.iter().filter(|t| !t.done && t.list.is_none() && t.due == Some(*d)).map(|t| (t.text.clone(), look.dim())));
+                if birthdays.contains(d) {
+                    on.push(("🎂 Birthday".to_string(), look.score(100)));
                 }
-                if self.files.todos.iter().any(|t| !t.done && t.list.is_none() && t.due == Some(*d)) {
-                    dots.push(look.dim());
-                }
-                if birthdays.contains(d) || view.countdowns.iter().any(|(_, c)| c == d) {
-                    dots.push(look.score(100));
-                }
-                for (k, c) in dots.iter().take(5).enumerate() {
-                    p.circle_filled(pos2(cell.min.x + 7.0 + k as f32 * 8.0, cell.max.y - 7.0), 2.6, *c);
+                on.extend(view.countdowns.iter().filter(|(_, c)| c == d).map(|(l, _)| (format!("⏳ {l}"), look.score(100))));
+                if let Some((title, color)) = on.first() {
+                    let ty = (cell.min.y + 24.0).min(cell.max.y - 8.0);
+                    p.circle_filled(pos2(cell.min.x + 6.0, ty), 2.6, *color);
+                    let g = clipped(&p, title, look.font(10.5), look.text(), cell.width() - 14.0);
+                    p.galley(pos2(cell.min.x + 11.0, ty - g.size().y / 2.0), g, look.text());
+                    if on.len() > 1 {
+                        p.text(pos2(cell.max.x - 4.0, cell.min.y + 9.0), Align2::RIGHT_CENTER, format!("+{}", on.len() - 1), look.font(10.5), look.dim());
+                    }
                 }
                 if resp.clicked() {
                     self.agenda_day = Some(*d);
@@ -537,6 +543,57 @@ impl Desk {
             self.note_text.clear();
             self.notes_query.clear();
             ui.memory_mut(|m| m.request_focus(Id::unique("desk-note-text")));
+        }
+    }
+
+    /// The running reminders, soonest first: when and what, Snooze ▾, and … for Edit and Cancel.
+    fn reminder_list(&mut self, ui: &mut Ui, r: Rect, view: &View, look: Look, out: &mut Vec<String>) {
+        let p = ui.painter().clone();
+        let ctl = look.ctl();
+        look.group(&p, r, &format!("Reminders ({})", view.timers.len()));
+        let (x0, x1) = (r.min.x + 12.0, r.max.x - 16.0);
+        let area = Rect::from_min_max(pos2(r.min.x, r.min.y + 28.0), pos2(r.max.x, r.max.y - 6.0));
+        if view.timers.is_empty() {
+            let g = p.layout(daily("desk_empty_reminders", &view.name), look.font(12.0), look.dim(), x1 - x0);
+            p.galley(pos2(x0, area.min.y + 4.0), g, look.dim());
+            return;
+        }
+        let pitch = ctl + 4.0;
+        let small = ctl - 6.0;
+        let fits = (area.height() / pitch).floor().max(1.0) as usize;
+        let first = self.rows(ui, look, "reminders", area, view.timers.len(), fits);
+        let now = chrono::Local::now().naive_local();
+        let snooze_w = btn_w(&p, look, "Snooze ▾");
+        for (n, tm) in view.timers.iter().skip(first).take(fits).enumerate() {
+            let cy = area.min.y + n as f32 * pitch + pitch / 2.0;
+            let key = format!("reminder-more-{}", tm.id);
+            let (hit, end) = self.row_menu(ui, look, x1, cy, small, &key, ("Snooze ▾", snooze_w), &["Edit…".to_string(), "Cancel it".to_string()]);
+            let snooze_key = format!("snooze-{}", tm.id);
+            match hit {
+                Some(0) => self.toggle_popup(&snooze_key),
+                Some(1) => {
+                    self.card = Some(Card::Timer(tm.id));
+                    self.timer_when.clear();
+                    self.timer_label = tm.label.clone();
+                }
+                Some(_) => out.push(format!("timer #{} cancel", tm.id)),
+                None => {}
+            }
+            let anchor = Rect::from_min_size(pos2(end + 6.0, cy - small / 2.0), vec2(snooze_w, small));
+            let choices: Vec<String> = ["In 10 minutes", "In 1 hour", "This evening, 18:00", "Tomorrow, 9:00"].map(String::from).to_vec();
+            if let Some(k) = self.popup(ui, look, &snooze_key, anchor, &choices) {
+                let when = ["snooze 10m", "snooze 1h", "at 18:00", "at tomorrow at 9"][k];
+                out.push(format!("timer #{} {when}", tm.id));
+            }
+            let at = tm.when();
+            let when = if at.date() == now.date() { brain::clock(at) } else { format!("{} {}", at.format("%a"), brain::clock(at)) };
+            let tw = p.text(pos2(x0, cy), Align2::LEFT_CENTER, &when, look.font(11.5), look.dim()).width().max(64.0);
+            let again = match (&tm.rule, tm.every) {
+                (Some(rule), _) => format!(" · {}", crate::timers::rule_text(rule)),
+                (None, e) if e > 0 => format!(" · every {}", brain::fmt_dur(e)),
+                _ => String::new(),
+            };
+            line(ui, pos2(x0 + tw + 8.0, cy), &format!("{}{again}", if tm.label.is_empty() { "Timer" } else { &tm.label }), look.font(12.5), look.text(), end - x0 - tw - 10.0);
         }
     }
 

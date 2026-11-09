@@ -37,8 +37,11 @@ impl Desk {
         let first_line = |pool: &str| lines::all(pool).first().cloned().unwrap_or_default();
         let me = &view.me;
         let small = ctl - 6.0;
+        // your phrases at the bottom, as tall as they are (five rows, then they scroll); what he knows gets the rest
+        let taught_n = self.files.taught.len();
+        let phrases_h = if taught_n == 0 { 90.0 + 2.0 * ctl } else { 28.0 + taught_n.min(5) as f32 * 22.0 + 10.0 + ctl + 10.0 };
         // what he knows: name and birthday first, then the facts
-        let fr = Rect::from_min_size(c.min, vec2(half, ((c.height() - 12.0) * 0.55).round()));
+        let fr = Rect::from_min_size(c.min, vec2(half, (c.height() - 12.0 - phrases_h).max(150.0)));
         look.group(&p, fr, "What I know about you");
         let (x0, x1) = (fr.min.x + 12.0, fr.max.x - 12.0);
         let birthday = me.facts.iter().find(|(k, _)| k == "birthday").map(|(_, l)| l.trim_start_matches("Birthday: ").to_string()).unwrap_or_default();
@@ -88,6 +91,11 @@ impl Desk {
             if key != "name" && !value.is_empty() && self.remove_btn(ui, look, Rect::from_center_size(pos2(x1 - 11.0, cy), vec2(22.0, small)), Id::unique(("me-fact", n)), "Forget this") {
                 out.push(format!("forgetfact {key}"));
             }
+        }
+        // nothing told yet: how to tell him, under the name and birthday
+        if me.facts.iter().all(|(k, _)| k == "birthday") && rows.len() <= fits {
+            let g = p.layout(daily("youme_no_facts", &view.name), look.font(12.0), look.dim(), x1 - x0);
+            p.galley(pos2(x0, area.min.y + rows.len() as f32 * pitch + 8.0), g, look.dim());
         }
         // + Add: a kind, a value
         let kind_r = Rect::from_min_size(pos2(x0, add_y), vec2(132.0, ctl));
@@ -189,25 +197,24 @@ impl Desk {
             let (ra, rb) = (rank(a), rank(b));
             ra.0.cmp(&rb.0).then(ra.1.total_cmp(&rb.1))
         });
-        let (apitch, colw) = (19.0, (ar.width() - 24.0) / 2.0);
-        let pairs: Vec<&[&Achievement]> = order.chunks(2).collect();
+        // one column, so the titles fit: the title, and on the right ✓ or how far along
+        let apitch = 20.0;
         let area = Rect::from_min_max(pos2(ar.min.x, ar.min.y + 28.0), pos2(ar.max.x, ar.max.y - 6.0));
         let fits = (area.height() / apitch).floor().max(1.0) as usize;
-        let first = self.rows(ui, look, "achievements", area, pairs.len(), fits);
-        for (n, pair) in pairs.iter().skip(first).take(fits).enumerate() {
-            for (k, a) in pair.iter().enumerate() {
-                let at = pos2(ar.min.x + 12.0 + k as f32 * colw, area.min.y + n as f32 * apitch);
-                let (text, color, tip) = match (a.unlocked, a.progress) {
-                    (true, Some((_, need, what))) => (format!("✓ {}", a.title), look.text(), format!("{}\n{need} {what}\n{}", a.title, a.quip)),
-                    (true, None) => (format!("✓ {}", a.title), look.text(), format!("{}\n{}", a.title, a.quip)),
-                    (false, Some((have, need, what))) => (format!("{} · {}/{}", a.title, have.min(need), need), look.dim(), format!("{}\n{} of {need} {what}", a.title, have.min(need))),
-                    (false, None) => ("??? (a secret)".to_string(), look.dim(), "A secret. You'll know it when it happens.".to_string()),
-                };
-                let r = Rect::from_min_size(at, vec2(colw - 8.0, apitch));
-                let g = clipped(&p, &text, look.font(11.5), color, colw - 8.0);
-                p.galley(pos2(at.x, r.center().y - g.size().y / 2.0), g, color);
-                ui.interact(r, Id::unique(("me-ach", first + n, k)), Sense::hover()).on_hover_text(tip);
-            }
+        let first = self.rows(ui, look, "achievements", area, order.len(), fits);
+        let (ax0, ax1) = (ar.min.x + 12.0, ar.max.x - 22.0);
+        for (n, a) in order.iter().skip(first).take(fits).enumerate() {
+            let cy = area.min.y + n as f32 * apitch + apitch / 2.0;
+            let (text, side, color, tip) = match (a.unlocked, a.progress) {
+                (true, Some((_, need, what))) => (a.title.clone(), "✓".to_string(), look.text(), format!("{}\n{need} {what}\n{}", a.title, a.quip)),
+                (true, None) => (a.title.clone(), "✓".to_string(), look.text(), format!("{}\n{}", a.title, a.quip)),
+                (false, Some((have, need, what))) => (a.title.clone(), format!("{}/{need}", have.min(need)), look.dim(), format!("{}\n{} of {need} {what}", a.title, have.min(need))),
+                (false, None) => ("??? (a secret)".to_string(), String::new(), look.dim(), "A secret. You'll know it when it happens.".to_string()),
+            };
+            let sw = p.text(pos2(ax1, cy), Align2::RIGHT_CENTER, &side, if a.unlocked { look.bold(11.5) } else { look.font(11.0) }, if a.unlocked { look.accent() } else { look.dim() }).width();
+            let g = clipped(&p, &text, look.font(11.5), color, ax1 - ax0 - sw - 8.0);
+            p.galley(pos2(ax0, cy - g.size().y / 2.0), g, color);
+            ui.interact(Rect::from_min_max(pos2(ax0, cy - apitch / 2.0), pos2(ax1, cy + apitch / 2.0)), Id::unique(("me-ach", first + n)), Sense::hover()).on_hover_text(tip);
         }
         // us: friendship, what you haven't tried, games, his memories
         let sr = Rect::from_min_max(pos2(ar.min.x, ar.max.y + 12.0), c.max);
@@ -228,39 +235,40 @@ impl Desk {
         look.bar(&p, bar, (me.friendship + 100) as f32 / 200.0, if me.friendship < 0 { look.danger() } else { look.accent() });
         ui.interact(bar.expand(4.0), Id::unique("me-friend-bar"), Sense::hover()).on_hover_text("Kind words raise it, insults lower it");
         y += 18.0;
-        // games: Play, with your best on hover
-        let mut gx = x0;
-        let gp = p.text(pos2(gx, y + small / 2.0), Align2::LEFT_CENTER, "Play:", look.font(12.0), look.dim());
-        gx = gp.max.x + 6.0;
-        for (id, name, best) in &me.games {
-            let w = btn_w(&p, look, name) - 8.0;
-            if gx + w > x1 {
-                break;
-            }
-            let tip = best.as_ref().map_or("Not played yet".to_string(), |b| format!("Your best: {b}"));
-            if look.button(ui, Rect::from_min_size(pos2(gx, y), vec2(w, small)), Id::unique(("me-play", id.as_str())), name, true).on_hover_text(tip).clicked() {
-                out.push(format!("play {id}"));
-            }
-            gx += w + 4.0;
-        }
-        y += small + 8.0;
-        if !me.untried.is_empty() && y + small < sr.max.y - 4.0 {
-            let mut tx = p.text(pos2(x0, y + small / 2.0), Align2::LEFT_CENTER, "Not tried yet:", look.font(12.0), look.dim()).max.x + 6.0;
-            for (label, cmd) in &me.untried {
-                let w = btn_w(&p, look, label) - 8.0;
-                if tx + w > x1 {
+        // games and what you haven't tried: links that wrap onto a second line, your best on hover
+        let gap = p.layout_no_wrap(" · ".to_string(), look.font(12.0), look.dim()).size().x;
+        let mut links_row = |ui: &mut Ui, y: &mut f32, title: &str, items: Vec<(String, String, String)>| {
+            let start = p.text(pos2(x0, *y + small / 2.0), Align2::LEFT_CENTER, title, look.font(12.0), look.dim()).max.x + 6.0;
+            let mut lx = start;
+            for (k, (label, cmd, tip)) in items.iter().enumerate() {
+                let w = p.layout_no_wrap(label.clone(), look.font(12.0), look.accent()).size().x;
+                if lx + gap + w > x1 && lx > start {
+                    lx = start;
+                    *y += 18.0;
+                } else if k > 0 {
+                    p.text(pos2(lx, *y + small / 2.0), Align2::LEFT_CENTER, " · ", look.font(12.0), look.dim());
+                    lx += gap;
+                }
+                if *y + small > sr.max.y - 4.0 {
                     break;
                 }
-                if look.button(ui, Rect::from_min_size(pos2(tx, y), vec2(w, small)), Id::unique(("me-try", label.as_str())), label, true).on_hover_text("Show me").clicked() {
+                if link(ui, look, pos2(lx, *y + small / 2.0), label, look.font(12.0), &format!("me-link-{title}-{k}")).on_hover_text(tip).clicked() {
                     out.push(cmd.clone());
                 }
-                tx += w + 4.0;
+                lx += w;
             }
-            y += small + 8.0;
+            *y += small + 6.0;
+        };
+        let games = me.games.iter().map(|(id, name, best)| (name.clone(), format!("play {id}"), best.as_ref().map_or("Not played yet".to_string(), |b| format!("Your best: {b}")))).collect();
+        links_row(ui, &mut y, "Play:", games);
+        if !me.untried.is_empty() && y + small < sr.max.y - 4.0 {
+            let untried = me.untried.iter().map(|(label, cmd)| (label.clone(), cmd.clone(), "Show me".to_string())).collect();
+            links_row(ui, &mut y, "Not tried yet:", untried);
         }
         if let Some((seen, total, ready)) = me.memories.filter(|_| y + small < sr.max.y - 4.0) {
             let text = format!("My memories: {seen} of {total}{}", if ready { " · one is ready" } else if seen < total { " · the next one tomorrow" } else { "" });
-            let tw = line(ui, pos2(x0, y + small / 2.0), &text, look.font(12.0), look.text(), x1 - x0 - 180.0);
+            let buttons = if seen > 0 { btn_w(&p, look, "Read them") } else { 0.0 } + if ready { btn_w(&p, look, "Remember") } else { 0.0 };
+            let tw = line(ui, pos2(x0, y + small / 2.0), &text, look.font(12.0), look.text(), x1 - x0 - buttons - 14.0);
             let mut bx = x0 + tw + 10.0;
             if seen > 0 {
                 let w = btn_w(&p, look, "Read them") - 8.0;
@@ -269,7 +277,7 @@ impl Desk {
                 }
                 bx += w + 4.0;
             }
-            if ready && look.primary(ui, Rect::from_min_size(pos2(bx, y), vec2(btn_w(&p, look, "Remember") - 8.0, small)), Id::unique("me-remember"), "Remember", true).clicked() {
+            if ready && look.button(ui, Rect::from_min_size(pos2(bx, y), vec2(btn_w(&p, look, "Remember") - 8.0, small)), Id::unique("me-remember"), "Remember", true).clicked() {
                 out.push("backstory".into());
             }
         }
@@ -290,12 +298,13 @@ impl Desk {
         let ctl = look.ctl();
         let small = ctl - 4.0;
         let today = chrono::Local::now().date_naive();
-        let card = Rect::from_min_max(c.min, pos2(c.max.x, c.max.y - 2.0 * ctl - 22.0));
+        // nobody yet: the card is as tall as its message, and the add row comes right under it
+        let empty = view.people.is_empty().then(|| p.layout(lines::all("people_empty").first().cloned().unwrap_or_default(), look.font(12.5), look.dim(), c.width() - 60.0));
+        let bottom = empty.as_ref().map_or(c.max.y - 2.0 * ctl - 22.0, |g| c.min.y + 30.0 + g.size().y + 24.0);
+        let card = Rect::from_min_max(c.min, pos2(c.max.x, bottom));
         look.group(&p, card, "People");
-        if view.people.is_empty() {
-            let empty = lines::all("people_empty").first().cloned().unwrap_or_default();
-            let g = p.layout(empty, look.font(12.5), look.dim(), card.width() - 60.0);
-            p.galley(pos2(card.center().x - g.size().x / 2.0, card.min.y + 70.0), g, look.dim());
+        if let Some(g) = empty {
+            p.galley(pos2(card.center().x - g.size().x / 2.0, card.min.y + 32.0), g, look.dim());
         }
         // a .vcf dropped on the page is imported
         let dropped: Vec<PathBuf> = ui.input(|i| i.raw.dropped_files.iter().map(|f| f.path().to_path_buf()).filter(|p| p.extension().is_some_and(|x| x.eq_ignore_ascii_case("vcf"))).collect());
@@ -306,29 +315,30 @@ impl Desk {
         let area = Rect::from_min_max(pos2(card.min.x + 12.0, card.min.y + 28.0), pos2(card.max.x - 16.0, card.max.y - 6.0));
         let fits = (area.height() / pitch).floor().max(1.0) as usize;
         let first = self.rows(ui, look, "people", card, order.len(), fits);
-        // the button columns, right to left: ✕, Email, Talked today, Present
-        let (w_mail, w_met, w_present) = (btn_w(&p, look, "Email"), btn_w(&p, look, "Talked today"), btn_w(&p, look, "Present"));
+        // one button in a fixed column (Talked today, for people you keep in touch with), and … for the rest
+        let w_met = btn_w(&p, look, "Talked today");
         for (n, (i, q)) in order.iter().skip(first).take(fits).enumerate() {
             let y = area.min.y + n as f32 * pitch;
             let cy = y + pitch / 2.0;
-            let mut bx = area.max.x - 24.0;
-            if self.remove_btn(ui, look, Rect::from_min_size(pos2(bx, cy - small / 2.0), vec2(24.0, small)), Id::unique(("person-x", *i)), &format!("Forget {}", q.name)) {
-                out.push(format!("person forget {}", q.name));
-            }
-            bx -= 6.0 + w_mail;
-            if q.email.is_some() && look.button(ui, Rect::from_min_size(pos2(bx, cy - small / 2.0), vec2(w_mail, small)), Id::unique(("person-mail", *i)), "Email", true).clicked() {
-                out.push(format!("person mail {}", q.name));
-            }
-            bx -= 6.0 + w_met;
-            if q.every.is_some() && look.button(ui, Rect::from_min_size(pos2(bx, cy - small / 2.0), vec2(w_met, small)), Id::unique(("person-met", *i)), "Talked today", true).clicked() {
-                out.push(format!("person met {}", q.name));
-            }
-            bx -= 6.0 + w_present;
             let soon = q.next_birthday(today).filter(|b| b.0 > 0 && b.0 <= 14);
+            let mut more: Vec<(String, String)> = vec![("Open their card".into(), String::new())];
             if let Some((d, _)) = soon {
-                if look.button(ui, Rect::from_min_size(pos2(bx, cy - small / 2.0), vec2(w_present, small)), Id::unique(("person-present", *i)), "Present", true).on_hover_text("A to-do to find a present").clicked() {
-                    out.push(format!("todo present for {} by {}", q.name, today + chrono::Days::new(d as u64 - 1)));
+                more.push(("To-do: find a present".into(), format!("todo present for {} by {}", q.name, today + chrono::Days::new(d as u64 - 1))));
+            }
+            if q.email.is_some() {
+                more.push(("Email".into(), format!("person mail {}", q.name)));
+            }
+            more.push((format!("Forget {}", q.name), format!("person forget {}", q.name)));
+            let labels: Vec<String> = more.iter().map(|m| m.0.clone()).collect();
+            let (hit, bx) = self.row_menu(ui, look, area.max.x, cy, small, &format!("person-more-{i}"), (if q.every.is_some() { "Talked today" } else { "" }, w_met), &labels);
+            match hit {
+                Some(0) => out.push(format!("person met {}", q.name)),
+                Some(1) => {
+                    self.card = Some(Card::Person(q.name.clone()));
+                    self.person_edit = None;
                 }
+                Some(k) => out.push(more[k - 1].1.clone()),
+                None => {}
             }
             // what's coming: the birthday; keeping in touch, overdue in the warning colour
             let mut bits: Vec<(String, Color32)> = vec![];
@@ -345,7 +355,7 @@ impl Desk {
             if let Some(every) = q.every {
                 let since = q.last.map(|l| (today - l).num_days());
                 let (text, color) = match since {
-                    Some(s) if s > every as i64 => (format!("{} overdue · every {every} days", plural((s - every as i64) as u64, "day")), look.score(70)),
+                    Some(s) if s > every as i64 => (format!("{} overdue · every {every} days", plural((s - every as i64) as u64, "day")), look.score_text(70)),
                     Some(s) if s + 3 >= every as i64 => (format!("due in {} · every {every} days", plural((every as i64 - s).max(0) as u64, "day")), look.accent()),
                     Some(s) => (format!("talked {} · every {every} days", match s { 0 => "today".to_string(), 1 => "yesterday".to_string(), d => format!("{d} days ago") }), look.dim()),
                     None => (format!("every {every} days"), look.dim()),
@@ -468,9 +478,14 @@ impl Desk {
         if !waiting.is_empty() {
             line(ui, pos2(rx, row(5) + ctl / 2.0), &format!("Waiting on {}: {}", q.name.split_whitespace().next().unwrap_or(""), waiting.join(", ")), look.font(12.0), look.score_text(70), col);
         }
-        // the buttons
+        // the buttons: Forget alone at the left, the everyday ones after a gap, Close on the right
         let by = inner.max.y - ctl;
-        let mut bx = inner.min.x;
+        if look.danger_btn(ui, Rect::from_min_size(pos2(inner.min.x, by), vec2(80.0, ctl)), Id::unique("person-forget"), "Forget", true).on_hover_text("Undo in the status bar brings them back").clicked() {
+            out.push(format!("person forget {}", q.name));
+            self.card = None;
+            return;
+        }
+        let mut bx = inner.min.x + 80.0 + 24.0;
         let mut buttons: Vec<(&str, String)> = vec![];
         if q.email.is_some() {
             buttons.push(("Email", format!("person mail {}", q.name)));
@@ -485,11 +500,6 @@ impl Desk {
                 out.push(cmd.clone());
             }
             bx += w + 8.0;
-        }
-        if look.danger_btn(ui, Rect::from_min_size(pos2(bx, by), vec2(80.0, ctl)), Id::unique("person-forget"), "Forget", true).on_hover_text("Undo in the status bar brings them back").clicked() {
-            out.push(format!("person forget {}", q.name));
-            self.card = None;
-            return;
         }
         if look.primary(ui, Rect::from_min_size(pos2(inner.max.x - 80.0, by), vec2(80.0, ctl)), Id::unique("person-close"), "Close", true).clicked() || ui.input(|i| i.key_pressed(egui::Key::Escape)) {
             self.card = None;
@@ -532,14 +542,25 @@ impl Desk {
         let grid = crate::journal::month_grid_from(year, month, brain::week_sunday());
         let (gx, gw) = (left.min.x + 10.0, left.width() - 20.0);
         let colw = gw / 7.0;
-        for (i, d) in (if brain::week_sunday() { ["S", "M", "T", "W", "T", "F", "S"] } else { ["M", "T", "W", "T", "F", "S", "S"] }).iter().enumerate() {
-            p.text(pos2(gx + colw * (i as f32 + 0.5), left.min.y + 34.0), Align2::CENTER_CENTER, *d, look.font(11.0), look.dim());
+        // the month's moods, counted (the faces below are each day's)
+        let mut moods: BTreeMap<String, usize> = BTreeMap::new();
+        for d in grid.iter().flatten().flatten().filter(|d| **d <= today) {
+            let mood = entries.iter().find(|e| e.day == *d).and_then(|e| e.mood.clone()).or_else(|| view.checkins.get(&d.format("%Y-%m-%d").to_string()).cloned());
+            if let Some(m) = mood {
+                *moods.entry(m).or_default() += 1;
+            }
         }
-        let rowh = ((left.height() - 60.0) / grid.len().max(1) as f32).min(44.0);
+        let counted: Vec<String> = crate::journal::MOODS.iter().filter_map(|m| moods.get(*m).map(|n| format!("{n} {m}"))).collect();
+        let summary = if counted.is_empty() { "No moods this month yet.".to_string() } else { counted.join(" · ") };
+        line(ui, pos2(gx, left.min.y + 32.0), &summary, look.font(11.5), look.dim(), gw);
+        for (i, d) in (if brain::week_sunday() { ["S", "M", "T", "W", "T", "F", "S"] } else { ["M", "T", "W", "T", "F", "S", "S"] }).iter().enumerate() {
+            p.text(pos2(gx + colw * (i as f32 + 0.5), left.min.y + 52.0), Align2::CENTER_CENTER, *d, look.font(11.0), look.dim());
+        }
+        let rowh = ((left.height() - 76.0) / grid.len().max(1) as f32).min(44.0);
         for (w, week) in grid.iter().enumerate() {
             for (i, day) in week.iter().enumerate() {
                 let Some(d) = day else { continue };
-                let cell = Rect::from_min_size(pos2(gx + colw * i as f32, left.min.y + 46.0 + w as f32 * rowh), vec2(colw, rowh));
+                let cell = Rect::from_min_size(pos2(gx + colw * i as f32, left.min.y + 62.0 + w as f32 * rowh), vec2(colw, rowh));
                 let entry = entries.iter().find(|e| e.day == *d);
                 // the journal's mood first: it's what you chose (or changed) for the day; the check-in fills the gaps
                 let mood = entry.and_then(|e| e.mood.clone()).or_else(|| view.checkins.get(&d.format("%Y-%m-%d").to_string()).cloned());
