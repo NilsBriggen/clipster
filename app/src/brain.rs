@@ -61,6 +61,7 @@ pub enum Effect {
     Undo,                            // put back what the last removal on the Desk took
     Habit(String),                   // "add walk", "done walk", "undone walk", "remove walk"
     Countdown(String),               // "add Italy|2 december", "remove 2", "list"
+    Briefing(bool),                  // the day from what's on the computer (true: the weekend instead)
     Things(String),                  // where things are: "set passport|top drawer", "forget passport", "where passport", "in blue bag", "list"
     Journal(String),                 // "add <line>", "mood great", "day 2026-11-05|rough|<line>" (written to journal.txt)
     SaveTemplate(String, String),    // a letter template of your own: name, text (written to your lines file)
@@ -597,7 +598,9 @@ pub fn exact(input: &str) -> Option<Reply> {
         "guess" => return Some(crate::fun::guess(rest)),
         "upsidedown" | "morse" | "binary" | "leet" | "rot13" => return Some(crate::fun::trick(&head, &or_clipboard(rest))),
         "randomwiki" | "surprise" => return Some(net(Query::RandomWiki, "Opening the encyclopedia at a random page... 🎲")),
-        "briefing" => return Some(net(Query::Briefing, "Good morning! ☀ Let me get your day ready...")),
+        // the day from what's here, at once; "briefing web" adds the weather, a quote and "on this day" from the internet
+        "briefing" if rest == "web" => return Some(net(Query::Briefing, "Asking the internet for the rest of the day...")),
+        "briefing" => return Some(Reply::say("").effect(Effect::Briefing(rest == "weekend"))),
         // a taught phrase changed on the Desk: "relearn gm|good morning|Morning, sunshine!" or "…|open firefox → open code"
         "relearn" if rest.matches('|').count() >= 2 => {
             let mut parts = rest.splitn(3, '|');

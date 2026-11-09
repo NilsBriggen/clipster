@@ -146,6 +146,68 @@ pub enum Upcoming {
     Countdown { label: String, days: i64 },
 }
 
+/// The day in a few lines, from what's on the computer (no internet needed): meetings and the first one, reminders
+/// still to come, your top 3, what's due or overdue, who to chase, birthdays this week, countdowns, habits left.
+#[allow(clippy::too_many_arguments)]
+pub fn briefing(events: &[crate::calendar::Event], timers: &[crate::timers::Timer], todos: &[Item], people: &[crate::people::Person], countdowns: &[(String, NaiveDate)], habits: &[crate::habits::Habit], now: chrono::NaiveDateTime, work_hours: (u32, u32)) -> Vec<String> {
+    let today = now.date();
+    let clock = crate::brain::clock;
+    let mut out = vec![];
+    let meetings: Vec<&crate::calendar::Event> = events.iter().filter(|e| !e.all_day && e.start.date() == today && e.end > now).collect();
+    match meetings.as_slice() {
+        [] => out.push("📅 No meetings left today.".to_string()),
+        [m] => out.push(format!("📅 {} at {}.", m.title, clock(m.start))),
+        [m, rest @ ..] => out.push(format!("📅 {} meetings, the first: {} at {}.", rest.len() + 1, m.title, clock(m.start))),
+    }
+    for e in events.iter().filter(|e| e.all_day && e.start.date() <= today && e.end.date() > today).take(2) {
+        out.push(format!("🗓 All day: {}.", e.title));
+    }
+    if !meetings.is_empty() {
+        let free: Vec<String> = free_slots(events, now, work_hours).iter().filter(|(a, b)| (*b - *a).num_minutes() >= 60).take(2).map(|(a, b)| format!("{}–{}", clock(*a), end_text(*b))).collect();
+        if !free.is_empty() {
+            out.push(format!("🟩 Free for focus: {}.", free.join(", ")));
+        }
+    }
+    let rings: Vec<&crate::timers::Timer> = timers.iter().filter(|t| t.when() > now && t.when().date() == today).collect();
+    if !rings.is_empty() {
+        out.push(format!("⏰ {}", rings.iter().take(3).map(|t| format!("{} {}", clock(t.when()), t.label)).collect::<Vec<_>>().join(" · ")));
+    }
+    let top: Vec<&str> = todos.iter().filter(|i| i.top_today(today)).map(|i| i.text.as_str()).collect();
+    if !top.is_empty() {
+        out.push(format!("⭐ Your top {}: {}.", top.len(), top.join(", ")));
+    }
+    let due = todos.iter().filter(|i| !i.done && i.list.is_none() && !i.is_step() && i.waiting.is_none() && i.due == Some(today)).count();
+    let overdue = todos.iter().filter(|i| i.overdue(today)).count();
+    match (due, overdue) {
+        (0, 0) => {}
+        (d, 0) => out.push(format!("✅ {d} to-do{} due today.", if d == 1 { "" } else { "s" })),
+        (0, o) => out.push(format!("⚠ {o} overdue.")),
+        (d, o) => out.push(format!("✅ {d} due today, ⚠ {o} overdue.")),
+    }
+    for i in todos.iter().filter(|i| !i.done && i.waiting.is_some() && i.due.is_some_and(|d| d <= today)).take(2) {
+        out.push(format!("📨 Chase {} about {}.", i.waiting.as_deref().unwrap_or("someone"), i.text));
+    }
+    let mut soon: Vec<(i64, &crate::people::Person, Option<i32>)> = people.iter().filter_map(|p| p.next_birthday(today).map(|(d, a)| (d, p, a))).filter(|(d, _, _)| *d <= 7).collect();
+    soon.sort_by_key(|s| s.0);
+    for (d, p, age) in soon.into_iter().take(2) {
+        let when = match d {
+            0 => "today".to_string(),
+            1 => "tomorrow".to_string(),
+            d => format!("in {d} days"),
+        };
+        out.push(format!("🎂 {}'s birthday {when}{}.", p.name, age.map(|a| format!(" (turning {a})")).unwrap_or_default()));
+    }
+    for (label, d) in countdowns.iter().filter(|(_, d)| *d >= today).take(2) {
+        let n = (*d - today).num_days();
+        out.push(if n == 0 { format!("🎉 {label} is today!") } else { format!("⏳ {label} in {n} day{}.", if n == 1 { "" } else { "s" }) });
+    }
+    let left: Vec<&str> = habits.iter().filter(|h| !h.done_on(today)).map(|h| h.name.as_str()).collect();
+    if !left.is_empty() {
+        out.push(format!("🔁 Still to do: {}.", left.join(", ")));
+    }
+    out
+}
+
 /// What's next: the next meeting today or tomorrow, the next reminder within a day, birthdays within a week, what's
 /// due or overdue, and the countdowns you pinned. In that order, so the strip reads from "now" outwards.
 pub fn coming_up(events: &[crate::calendar::Event], timers: &[crate::timers::Timer], todos: &[Item], people: &[crate::people::Person], countdowns: &[(String, NaiveDate)], now: chrono::NaiveDateTime) -> Vec<Upcoming> {
@@ -644,5 +706,21 @@ mod tests {
         assert_eq!(p[1].0, "pattern_mood_focus");
         h.retain(|d, _| *d > key(today - Days::new(10)));
         assert!(patterns(&h, &moods).is_empty(), "not before three weeks");
+    }
+
+    #[test]
+    fn a_briefing_from_what_is_here() {
+        let now = NaiveDate::from_ymd_opt(2026, 11, 9).unwrap().and_hms_opt(8, 0, 0).unwrap();
+        let today = now.date();
+        let ev = |t: &str, h: u32| crate::calendar::Event { title: t.into(), start: today.and_hms_opt(h, 0, 0).unwrap(), end: today.and_hms_opt(h + 1, 0, 0).unwrap(), ..Default::default() };
+        let todos = crate::todo::parse("- [ ] call the bank (due 2026-11-09) (top 2026-11-09)\n- [ ] taxes (due 2026-11-02)\n- [ ] numbers (due 2026-11-09) (waiting Ben)\n");
+        let mut anna = crate::people::Person::new("Anna");
+        anna.birthday = Some((None, 11, 11));
+        let habits = vec![crate::habits::Habit { name: "Walk".into(), days: vec![] }];
+        let b = briefing(&[ev("Standup", 9), ev("Review", 14)], &[], &todos, &[anna], &[], &habits, now, (8, 17)).join("\n");
+        for want in ["2 meetings, the first: Standup at 9:00", "10:00–14:00", "Your top 1: call the bank", "1 due today, ⚠ 1 overdue", "Chase Ben about numbers", "Anna's birthday in 2 days", "Still to do: Walk"] {
+            assert!(b.contains(want), "{want} in:\n{b}");
+        }
+        assert!(briefing(&[], &[], &[], &[], &[], &[], now, (8, 17)).join(" ").contains("No meetings left today"));
     }
 }

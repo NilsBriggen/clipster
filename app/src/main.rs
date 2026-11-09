@@ -1194,6 +1194,47 @@ impl App {
         });
     }
 
+    /// The day (or the weekend) from what's on this computer: instant and offline; the weather line when it's on.
+    fn briefing(&self, weekend: bool) -> Reply {
+        let now = chrono::Local::now().naive_local();
+        if weekend {
+            // Saturday and Sunday: their meetings, reminders and what's due
+            let today = now.date();
+            let sat = (0..7).map(|n| today + chrono::Days::new(n)).find(|d| chrono::Datelike::weekday(d) == chrono::Weekday::Sat).unwrap_or(today);
+            let mut text = String::from("This weekend:");
+            for d in [sat, sat + chrono::Days::new(1)] {
+                let mut parts: Vec<String> = self.events.iter().filter(|e| e.start.date() == d).map(|e| if e.all_day { e.title.clone() } else { format!("{} {}", brain::clock(e.start), e.title) }).collect();
+                parts.extend(self.timers.iter().filter(|t| t.when().date() == d).map(|t| format!("⏰ {} {}", brain::clock(t.when()), t.label)));
+                parts.extend(todo::load().iter().filter(|i| !i.done && i.list.is_none() && i.due == Some(d)).map(|i| format!("✅ {}", i.text)));
+                parts.extend(self.people.iter().filter(|p| p.next_birthday(today).is_some_and(|(n, _)| today + chrono::Days::new(n as u64) == d)).map(|p| format!("🎂 {}", p.name)));
+                text += &format!("\n{}: {}", d.format("%A"), if parts.is_empty() { "nothing planned".to_string() } else { parts.join(" · ") });
+            }
+            return Reply::say(text).mood(Mood::Happy).run("Open the Agenda", "desk agenda");
+        }
+        let hello = match chrono::Timelike::hour(&now) {
+            5..=11 => "Good morning",
+            12..=17 => "Good afternoon",
+            18..=23 => "Good evening",
+            _ => "Up late",
+        };
+        let name = if self.name.is_empty() { String::new() } else { format!(", {}", self.name) };
+        let mut lines = vec![format!("{hello}{name}! It's {}.", now.format("%A, %B %-d"))];
+        if let Some((_, w)) = self.weather.as_ref().filter(|(at, _)| self.weather_on && at.elapsed() < Duration::from_secs(3 * 3600)) {
+            lines.push(w.clone());
+        }
+        if let Some((_, h)) = self.holidays.iter().find(|(d, _)| *d == now.date()) {
+            lines.push(format!("🎈 A public holiday: {h}."));
+        }
+        let todos = todo::load();
+        lines.extend(plan::briefing(&self.events, &self.timers, &todos, &self.people, &self.countdowns, &self.habits, now, self.work_hours));
+        let all = lines.join("\n");
+        let mut r = Reply::say(all.clone()).mood(Mood::Happy);
+        if !todos.iter().any(|i| i.top_today(now.date())) {
+            r = r.run("Pick my top 3", "planday");
+        }
+        r.run("More (weather, a quote)", "briefing web").btn("Copy my day", Act::Copy(all))
+    }
+
     /// Where things are: "set passport|top drawer", "forget passport", "where passport", "in blue bag", "list".
     fn things_command(&mut self, cmd: &str) -> Reply {
         let (verb, rest) = cmd.split_once(' ').unwrap_or((cmd, ""));
@@ -2936,6 +2977,7 @@ impl App {
                 r = Reply::say(text).mood(if pool.ends_with("unknown") || pool.ends_with("full") || pool.ends_with("exists") { Mood::Think } else { Mood::Write });
             }
             Effect::Things(cmd) => r = self.things_command(&cmd),
+            Effect::Briefing(weekend) => r = self.briefing(weekend),
             Effect::Countdown(cmd) => {
                 let today = chrono::Local::now().date_naive();
                 let (verb, arg) = cmd.split_once(' ').unwrap_or((cmd.as_str(), ""));
@@ -4014,9 +4056,17 @@ impl App {
             self.desk.open();
         }
         let start = self.work_hours.0;
-        if weekday && (start.saturating_sub(3)..start + 3).contains(&chrono::Timelike::hour(&local)) && self.workday_ask && !self.workday.is_empty() && self.stats.get("workday_day") != Some(&day_num) && t > 90.0 && can_nudge {
+        // the morning: the day's briefing, with "Start my workday" when there's a workday to start (not on a public
+        // holiday; alone only when the Desk doesn't already open with the day)
+        let holiday = self.holidays.iter().any(|(d, _)| *d == local.date_naive());
+        if weekday && !holiday && (start.saturating_sub(3)..start + 3).contains(&chrono::Timelike::hour(&local)) && self.workday_ask && (!self.workday.is_empty() || !self.desk_morning) && self.stats.get("workday_day") != Some(&day_num) && t > 90.0 && can_nudge {
             self.stats.insert("workday_day".into(), day_num);
-            self.pipe_up(Reply::say(lines::pick("workday_offer")).mood(Mood::Coffee).run("Start my workday", "workday").btn("Not today", Act::Hide));
+            let mut r = self.briefing(false).mood(Mood::Coffee);
+            if !self.workday.is_empty() {
+                r.text = format!("{}\n\n{}", r.text, lines::pick("workday_offer"));
+                r.buttons.insert(0, ("Start my workday".into(), Act::Run("workday".into())));
+            }
+            self.pipe_up(r.btn("Not today", Act::Hide));
         }
         // 1 April: an obviously silly 98 window, once a year, after he's been around for a while
         let year = chrono::Datelike::year(&local) as u64;

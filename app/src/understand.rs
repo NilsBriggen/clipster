@@ -1094,8 +1094,11 @@ fn powers(s: &str, raw: &str) -> Option<Reply> {
     if has(s, &["what is my name", "who am i", "do you know my name", "what do you call me", "say my name", "do you remember me"]) {
         return go("myname".into());
     }
-    if ["good morning", "morning", "briefing", "daily briefing", "my briefing", "morning briefing", "what is today", "what is up today", "what is happening today", "my day", "plan for today", "start my day", "what is on today"].contains(&s) {
+    if ["good morning", "morning", "briefing", "daily briefing", "my briefing", "morning briefing", "what is today", "what is up today", "what is happening today", "my day", "plan for today", "start my day", "what is on today", "brief me", "what is my day like", "how does my day look", "how does today look", "what is on for today", "what is my day looking like"].contains(&s) {
         return go("briefing".into());
+    }
+    if ["what is on this weekend", "what is on the weekend", "what is happening this weekend", "my weekend", "what is my weekend like", "plans for the weekend", "what are my plans this weekend"].contains(&s) {
+        return go("briefing weekend".into());
     }
     if has(s, &["surprise me", "random article", "random wikipedia", "random wiki", "teach me something", "learn something", "something random", "random knowledge", "random fact from wikipedia"]) {
         return go("randomwiki".into());
@@ -2956,7 +2959,8 @@ mod tests {
         assert_eq!(eff("make yourself pink"), Effect::Skin("rose".into()));
         assert_eq!(eff("start with my computer"), Effect::Autostart(true));
         assert_eq!(eff("don't start automatically"), Effect::Autostart(false));
-        assert_eq!(eff("good morning"), Effect::Net(Query::Briefing));
+        assert_eq!(eff("good morning"), Effect::Briefing(false));
+        assert_eq!(eff("what's on this weekend"), Effect::Briefing(true));
         assert_eq!(eff("surprise me"), Effect::Net(Query::RandomWiki));
         assert!(text("SOS in morse code").starts_with("... --- ..."));
         assert!(text("let's play a game").contains("Pick a game"));
