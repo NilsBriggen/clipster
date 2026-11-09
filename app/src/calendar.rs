@@ -21,7 +21,7 @@ pub struct Event {
 impl Event {
     /// What the heads-up and "already told" remember it by.
     pub fn key(&self) -> String {
-        format!("{}@{}", self.uid, self.start)
+        format!("{}@{}", if self.uid.is_empty() { &self.title } else { &self.uid }, self.start)
     }
 }
 
@@ -30,6 +30,7 @@ impl Event {
 struct Raw {
     uid: String,
     start: Option<(NaiveDateTime, bool)>,
+    start_utc: Option<NaiveDateTime>, // the start as written, when it was in UTC (recurring ones expand from it)
     end: Option<NaiveDateTime>,
     duration: Option<Duration>,
     title: String,
@@ -145,7 +146,10 @@ fn raws(ics: &str) -> Vec<Raw> {
         let (name, params) = head.split_once(';').unwrap_or((head, ""));
         match name.to_ascii_uppercase().as_str() {
             "UID" => r.uid = value.to_string(),
-            "DTSTART" => r.start = when(params, value),
+            "DTSTART" => {
+                r.start = when(params, value);
+                r.start_utc = value.trim().strip_suffix('Z').and_then(|v| NaiveDateTime::parse_from_str(v, "%Y%m%dT%H%M%S").ok());
+            }
             "DTEND" => r.end = when(params, value).map(|w| w.0),
             "DURATION" => r.duration = duration(value),
             "SUMMARY" => r.title = unescape(value),
@@ -217,11 +221,12 @@ fn starts(first: NaiveDateTime, rule: &str, from: NaiveDateTime, until: NaiveDat
     let end = part("UNTIL").and_then(|v| when("", &v).map(|w| if w.1 { w.0 + Duration::days(1) - Duration::seconds(1) } else { w.0 })).map_or(until, |u| u.min(until));
     let byday: Vec<(i32, Weekday)> = part("BYDAY")
         .map(|v| v.split(',').filter_map(|d| {
-            let (n, code) = d.split_at(d.len().saturating_sub(2));
+            let cut = d.len().checked_sub(2).filter(|c| d.is_char_boundary(*c))?;
+            let (n, code) = d.split_at(cut);
             Some((n.parse::<i32>().unwrap_or(0), weekday(code)?))
         }).collect())
         .unwrap_or_default();
-    let bymonthday: Option<u32> = part("BYMONTHDAY").and_then(|v| v.parse().ok());
+    let bymonthday: Option<i32> = part("BYMONTHDAY").and_then(|v| v.split(',').next()?.parse().ok()).filter(|d: &i32| *d != 0);
     let time = first.time();
     let mut out: Vec<NaiveDateTime> = vec![];
     let push = |t: NaiveDateTime, out: &mut Vec<NaiveDateTime>| -> bool {
@@ -256,7 +261,9 @@ fn starts(first: NaiveDateTime, rule: &str, from: NaiveDateTime, until: NaiveDat
                 let Some(m) = first.date().with_day(1).and_then(|d| d.checked_add_months(Months::new(step))) else { break };
                 let day = match (byday.first(), bymonthday) {
                     (Some((n, wd)), _) if *n != 0 => nth_weekday(m.year(), m.month(), *n, *wd),
-                    (_, Some(md)) => m.with_day(md),
+                    (_, Some(md)) if md > 0 => m.with_day(md as u32),
+                    // -1 = the last day of the month, -2 the one before…
+                    (_, Some(md)) => m.checked_add_months(Months::new(1)).and_then(|next| next.checked_sub_days(Days::new((-md) as u64))).filter(|d| d.month() == m.month()),
                     _ => m.with_day(first.day()), // months without that day are skipped, like calendars do
                 };
                 match day {
@@ -295,8 +302,13 @@ pub fn parse(ics: &str, from: NaiveDate, days: u64) -> Vec<Event> {
             _ if all_day => Duration::days(1),
             _ => Duration::hours(1),
         };
-        let firsts = match (&r.rrule, r.recurrence_id) {
-            (Some(rule), None) => starts(start, rule, window.0 - length, window.1),
+        let firsts = match (&r.rrule, r.recurrence_id, r.start_utc) {
+            // written in UTC: repeat in UTC and turn each one into local time, so a daylight-saving change keeps the clock time right
+            (Some(rule), None, Some(utc)) => starts(utc, rule, window.0 - length - Duration::days(1), window.1 + Duration::days(1))
+                .into_iter()
+                .map(|t| chrono::Utc.from_utc_datetime(&t).with_timezone(&Local).naive_local())
+                .collect(),
+            (Some(rule), None, None) => starts(start, rule, window.0 - length, window.1),
             _ => vec![start],
         };
         for s in firsts {
@@ -324,8 +336,8 @@ pub fn source(s: &str) -> Option<String> {
     if s.starts_with("https://") || s.starts_with("http://") {
         return Some(s.to_string());
     }
-    let path = std::path::Path::new(s);
-    (path.extension().is_some_and(|x| x.eq_ignore_ascii_case("ics")) && path.is_file()).then(|| s.to_string())
+    let path = crate::brain::expand_home(s);
+    (path.extension().is_some_and(|x| x.eq_ignore_ascii_case("ics")) && path.is_file()).then(|| path.to_string_lossy().into_owned())
 }
 
 /// Where a source's last good copy is kept.
@@ -342,7 +354,7 @@ pub fn fetch(sources: &[String]) -> (Vec<Event>, Vec<String>) {
     let today = Local::now().date_naive();
     let (mut events, mut problems) = (vec![], vec![]);
     for src in sources {
-        let text = if src.starts_with("http") { crate::net::get_text(src) } else { std::fs::read_to_string(src).map_err(|e| e.to_string()) };
+        let text = if src.starts_with("http") { crate::net::get_calendar(src) } else { std::fs::read_to_string(src).map_err(|e| e.to_string()) };
         let cache = cache_file(src);
         let text = match text {
             Ok(t) if t.contains("BEGIN:VCALENDAR") => {
@@ -353,7 +365,10 @@ pub fn fetch(sources: &[String]) -> (Vec<Event>, Vec<String>) {
                 t
             }
             other => match cache.and_then(|c| std::fs::read_to_string(c).ok()) {
-                Some(t) => t,
+                Some(t) => {
+                    problems.push(format!("{} (showing the last saved copy)", short(src)));
+                    t
+                }
                 None => {
                     problems.push(match other {
                         Ok(_) => format!("{} isn't a calendar", short(src)),
@@ -401,9 +416,10 @@ pub fn label(e: &Event) -> String {
     if e.all_day { format!("{} (all day)", e.title) } else { format!("{} {}", e.start.format("%-H:%M"), e.title) }
 }
 
-/// The events on `day` (all-day ones that span it too).
+/// The events on `day` (all-day ones that span it too, and timed ones still going on from the night before).
 pub fn on(events: &[Event], day: NaiveDate) -> Vec<&Event> {
-    events.iter().filter(|e| e.start.date() == day || e.all_day && e.start.date() <= day && e.end.date() > day).collect()
+    let midnight = day.and_time(NaiveTime::MIN);
+    events.iter().filter(|e| e.start.date() == day || e.start.date() < day && if e.all_day { e.end.date() > day } else { e.end > midnight }).collect()
 }
 
 /// The timed event going on at `at`, if any (all-day ones don't make you busy).
@@ -533,7 +549,8 @@ BEGIN:VEVENT\r\nDTSTART;TZID=Europe/Zurich:20261110T140000\r\nDTEND;TZID=Europe/
         assert!(problems.is_empty() && ev.iter().any(|e| e.title == "Planning"), "{ev:?} {problems:?}");
         std::fs::remove_file(&file).unwrap();
         let (ev, problems) = fetch(std::slice::from_ref(&src));
-        assert!(problems.is_empty() && ev.iter().any(|e| e.title == "Planning"), "the cached copy stands in: {problems:?}");
+        assert!(ev.iter().any(|e| e.title == "Planning"), "the cached copy stands in");
+        assert!(problems.iter().any(|p| p.contains("last saved copy")), "and says so: {problems:?}");
         let (ev, problems) = fetch(&["/nowhere/at/all.ics".to_string()]);
         assert!(ev.is_empty() && problems.len() == 1);
         let _ = std::fs::remove_dir_all(&dir);
@@ -551,6 +568,23 @@ BEGIN:VEVENT\r\nDTSTART;TZID=Europe/Zurich:20261110T140000\r\nDTEND;TZID=Europe/
             println!("{} {} {:?}", e.start, e.title, e.join);
         }
         assert!(!ev.is_empty());
+    }
+
+    #[test]
+    fn utc_series_keep_their_clock_time_and_last_days_work() {
+        // 08:00 UTC every week across a daylight-saving change: the local time follows UTC, so it moves by an hour
+        let ics = "BEGIN:VCALENDAR\nBEGIN:VEVENT\nUID:u\nSUMMARY:Sync\nDTSTART:20261012T080000Z\nRRULE:FREQ=WEEKLY\nEND:VEVENT\nEND:VCALENDAR\n";
+        for e in parse(ics, d(2026, 10, 12), 30) {
+            let want = chrono::Utc.from_utc_datetime(&e.start.date().and_hms_opt(8, 0, 0).unwrap()).with_timezone(&Local).naive_local();
+            assert_eq!(e.start, want, "each week converted on its own date");
+        }
+        let last = "BEGIN:VCALENDAR\nBEGIN:VEVENT\nUID:l\nSUMMARY:Invoices\nDTSTART:20260930T090000\nRRULE:FREQ=MONTHLY;BYMONTHDAY=-1\nEND:VEVENT\nEND:VCALENDAR\n";
+        let days: Vec<u32> = parse(last, d(2026, 10, 1), 61).iter().map(|e| e.start.day()).collect();
+        assert_eq!(days, vec![31, 30], "the last day of October and November");
+        let twin = "BEGIN:VCALENDAR\nBEGIN:VEVENT\nSUMMARY:A\nDTSTART:20261110T090000\nEND:VEVENT\nBEGIN:VEVENT\nSUMMARY:B\nDTSTART:20261110T090000\nEND:VEVENT\nEND:VCALENDAR\n";
+        let ev = parse(twin, d(2026, 11, 10), 1);
+        assert_ne!(ev[0].key(), ev[1].key(), "events without a UID don't collapse into one");
+        let _ = starts(t(2026, 1, 1, 9, 0), "FREQ=WEEKLY;BYDAY=日", t(2026, 1, 1, 0, 0), t(2026, 2, 1, 0, 0)); // a broken BYDAY doesn't crash
     }
 
     #[test]

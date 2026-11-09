@@ -318,7 +318,7 @@ pub fn exact(input: &str) -> Option<Reply> {
             return Some(Reply::say(lines::pick("plan_day_done").replace("{n}", &n.to_string())).mood(Mood::Happy));
         }
         "planday" => {
-            if crate::todo::load().iter().all(|i| i.done) {
+            if crate::todo::load().iter().all(|i| i.done || i.list.is_some()) {
                 return Some(Reply::say(lines::pick("plan_day_empty")).mood(Mood::Think).run("Open the Desk", "desk todo"));
             }
             return Some(Reply::say(lines::pick("plan_day_intro")).mood(Mood::Happy).effect(Effect::OpenDesk("plan".into())));
@@ -329,13 +329,25 @@ pub fn exact(input: &str) -> Option<Reply> {
         "clip" if !rest.is_empty() => return Some(Reply::say("").effect(Effect::Clip(rest.to_string()))),
         // the calendar: "calendar" (today), "calendar add <link>", "calendar day 2026-11-13", "calendar free <unix time>"
         // start my workday: "workday", "workday add firefox", "workday remove 2"
-        "workday" => return Some(Reply::say("").effect(Effect::Workday(if rest.is_empty() { "start".into() } else { rest.to_string() }))),
+        "workday" if rest.is_empty() || rest == "start" => return Some(Reply::say("").effect(Effect::Workday("start".into()))),
+        "workday" if rest.starts_with("add ") || rest.starts_with("remove ") => return Some(Reply::say("").effect(Effect::Workday(rest.to_string()))),
         "prank" if rest.is_empty() => return Some(Reply::say("").effect(Effect::Prank)),
         // people: "person birthday Anna|3 March", "people", "contacts import"
-        "person" if !rest.is_empty() => return Some(Reply::say("").effect(Effect::People(rest.to_string()))),
-        "people" => return Some(Reply::say("").effect(Effect::People(if rest.is_empty() { "list".into() } else { rest.to_string() }))),
+        "person" if ["add", "birthday", "email", "every", "met", "last", "mail", "forget"].contains(&rest.split(' ').next().unwrap_or("")) && rest.contains(' ') => {
+            return Some(Reply::say("").effect(Effect::People(rest.to_string())));
+        }
+        "people" if ["", "list", "birthdays"].contains(&rest) => return Some(Reply::say("").effect(Effect::People(if rest.is_empty() { "list".into() } else { rest.to_string() }))),
         "contacts" if rest.starts_with("import") => return Some(Reply::say("").effect(Effect::People(rest.to_string()))),
-        "calendar" | "agenda" => return Some(Reply::say("").effect(Effect::Calendar(if rest.is_empty() { "today".into() } else { rest.to_string() }))),
+        "calendar" | "agenda" => {
+            let verb = rest.split(' ').next().unwrap_or("");
+            let cmd = match verb {
+                "" => "today".to_string(),
+                "add" | "remove" | "refresh" | "today" | "tomorrow" | "day" | "next" | "free" => rest.to_string(),
+                _ if crate::calendar::source(rest).is_some() => format!("add {rest}"), // a bare link
+                _ => return None,
+            };
+            return Some(Reply::say("").effect(Effect::Calendar(cmd)));
+        }
         // the reading list: "readlater https://…" (or bare: the newest copied link), "reading", "reading done 2"
         "readlater" => return Some(Reply::say("").effect(Effect::Reading(format!("save {rest}").trim().to_string()))),
         "reading" if rest.is_empty() || rest == "list" => return Some(Reply::say("").effect(Effect::Reading("list".into()))),
@@ -1510,7 +1522,7 @@ pub fn shell(cmd: &str, intro: &str) -> Reply {
     Reply::say(format!("{intro}\n(working on it...)")).effect(Effect::Shell(cmd.to_string())).mood(Mood::Think)
 }
 
-fn expand_home(p: &str) -> PathBuf {
+pub fn expand_home(p: &str) -> PathBuf {
     match p.strip_prefix("~") {
         Some(r) => dirs::home_dir().unwrap_or_default().join(r.trim_start_matches('/')),
         None => PathBuf::from(p),

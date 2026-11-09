@@ -3,6 +3,7 @@
 
 use chrono::{Datelike, NaiveDate};
 use serde_json::{json, Value};
+#[cfg(not(test))]
 use std::sync::Mutex;
 
 #[derive(Clone, Debug, PartialEq, Default)]
@@ -77,7 +78,9 @@ pub fn parse_birthday(s: &str, today: NaiveDate) -> Option<(Option<i32>, u32, u3
         let y = dots.get(2).and_then(|y| y.parse::<i32>().ok()).filter(|y| *y > 1000);
         return NaiveDate::from_ymd_opt(y.unwrap_or(2000), m, d).map(|_| (y, m, d));
     }
-    let (date, _) = crate::powers::parse_day(&s, today)?;
+    // read against a leap year, so "29 February" works in any year (an explicit year still wins)
+    let _ = today;
+    let (date, _) = crate::powers::parse_day(&s, NaiveDate::from_ymd_opt(2000, 1, 1)?)?;
     let year = s.split(|c: char| !c.is_ascii_digit()).filter_map(|w| w.parse::<i32>().ok()).find(|y| *y > 1000);
     // weekdays and "tomorrow" aren't birthdays
     let named_day = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday", "tomorrow", "weekend"].iter().any(|w| s.contains(w));
@@ -160,7 +163,7 @@ pub fn merge(people: &mut Vec<Person>, imported: Vec<Person>) -> usize {
     let mut changed = 0;
     for p in imported.into_iter().filter(|p| p.birthday.is_some() || p.email.is_some()) {
         let full = people.len() >= 500;
-        match people.iter_mut().find(|q| q.name.eq_ignore_ascii_case(&p.name)) {
+        match people.iter_mut().find(|q| q.name.to_lowercase() == p.name.to_lowercase()) {
             Some(q) => {
                 let before = (q.birthday, q.email.clone());
                 q.birthday = q.birthday.or(p.birthday);
@@ -178,16 +181,30 @@ pub fn merge(people: &mut Vec<Person>, imported: Vec<Person>) -> usize {
 }
 
 // The names he knows, for the chat ("I called mum" only counts for someone on the list).
+// Tests keep their own list per thread, so they can't see each other's names.
+#[cfg(not(test))]
 static NAMES: Mutex<Vec<String>> = Mutex::new(Vec::new());
+#[cfg(test)]
+thread_local! {
+    static NAMES: std::cell::RefCell<Vec<String>> = const { std::cell::RefCell::new(Vec::new()) };
+}
 
 pub fn set_names(people: &[Person]) {
+    let names: Vec<String> = people.iter().map(|p| p.name.to_lowercase()).collect();
+    #[cfg(not(test))]
     if let Ok(mut n) = NAMES.lock() {
-        *n = people.iter().map(|p| p.name.to_lowercase()).collect();
+        *n = names;
     }
+    #[cfg(test)]
+    NAMES.with(|n| *n.borrow_mut() = names);
 }
 
 pub fn known(name: &str) -> bool {
-    NAMES.lock().is_ok_and(|n| n.contains(&name.trim().to_lowercase()))
+    let name = name.trim().to_lowercase();
+    #[cfg(not(test))]
+    return NAMES.lock().is_ok_and(|n| n.contains(&name));
+    #[cfg(test)]
+    NAMES.with(|n| n.borrow().contains(&name))
 }
 
 #[cfg(test)]
@@ -214,6 +231,7 @@ mod tests {
         assert_eq!(parse_birthday("1990-02-15", today), Some((Some(1990), 2, 15)));
         assert_eq!(parse_birthday("15.2.1990", today), Some((Some(1990), 2, 15)));
         assert_eq!(parse_birthday("friday", today), None, "a weekday isn't a birthday");
+        assert_eq!(parse_birthday("29 February", today), Some((None, 2, 29)), "in a year without one too");
         assert_eq!(birthday_text((Some(1990), 2, 15)), "15 February 1990");
     }
 

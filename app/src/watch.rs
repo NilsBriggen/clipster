@@ -16,7 +16,7 @@ pub enum Event {
     Upkeep(Box<crate::upkeep::Report>, bool),          // the checkup's readings (true = the weekly nudge asked)
     BackupProgress(usize, usize, u64),                // files done, files to copy, bytes copied
     BackupDone(Result<crate::backup::Summary, String>),
-    Calendar(Vec<crate::calendar::Event>, Vec<String>), // the next weeks' events, and the sources that failed
+    Calendar(u64, Vec<crate::calendar::Event>, Vec<String>), // which fetch, the next weeks' events, the sources that failed
 }
 
 /// `titles`: also watch the active window's title (where the KWin script doesn't report it).

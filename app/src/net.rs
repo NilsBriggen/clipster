@@ -207,6 +207,12 @@ fn get(url: &str) -> Result<Value, String> {
     res.body_mut().read_json::<Value>().map_err(|e| e.to_string())
 }
 
+/// A calendar feed: iCal accepted, and up to 50 MB (years of events add up).
+pub(crate) fn get_calendar(url: &str) -> Result<String, String> {
+    let mut res = agent().get(url).header("Accept", "text/calendar, text/plain;q=0.9, */*;q=0.5").call().map_err(|e| e.to_string())?;
+    res.body_mut().with_config().limit(50 * 1024 * 1024).read_to_string().map_err(|e| e.to_string())
+}
+
 pub(crate) fn get_text(url: &str) -> Result<String, String> {
     let mut res = agent().get(url).header("Accept", "text/plain").call().map_err(|e| e.to_string())?;
     res.body_mut().read_to_string().map_err(|e| e.to_string())

@@ -821,7 +821,8 @@ fn powers(s: &str, raw: &str) -> Option<Reply> {
     if let Some(n) = after(s, &["find my ", "where is my ", "where are my "]).filter(|n| !n.is_empty()) {
         const THINGS: &[&str] = &["phone", "keys", "key", "glasses", "wallet", "car", "way", "ip", "ip address", "iphone", "location", "mouse", "cursor", "motivation", "mind", "passion", "purpose"];
         let filey = n.split_whitespace().any(|w| FILE_WORDS.contains(&w));
-        if !THINGS.contains(&n) && (filey || s.starts_with("find my ")) {
+        let thing = THINGS.contains(&n) || n.split_whitespace().any(|w| ["keys", "phone", "wallet", "glasses", "car", "cat", "dog", "bike", "umbrella", "headphones", "charger", "remote"].contains(&w));
+        if !thing && (filey || s.starts_with("find my ")) || filey && !THINGS.contains(&n) && s.starts_with("find my ") {
             return go(format!("findfile {}", keep(raw, n)));
         }
     }
@@ -964,7 +965,10 @@ fn adding_todo(s: &str) -> bool {
 fn named_list(s: &str) -> Option<(String, usize)> {
     let w: Vec<&str> = s.split_whitespace().collect();
     (0..w.len().saturating_sub(2))
-        .find(|&i| ["my", "the", "our"].contains(&w[i]) && w[i + 2] == "list" && !["todo", "to-do", "reading", "task", "tasks", "do"].contains(&w[i + 1]))
+        .find(|&i| {
+            const NOT_NAMES: &[&str] = &["todo", "to-do", "reading", "task", "tasks", "do", "whole", "entire", "main", "full", "old", "current", "big", "long", "short", "new", "same", "other", "next", "last", "first", "complete", "master", "own", "usual", "normal", "regular", "this", "that", "my"];
+            ["my", "the", "our"].contains(&w[i]) && w[i + 2] == "list" && !NOT_NAMES.contains(&w[i + 1]) && w[i + 1].chars().all(|c| c.is_alphabetic() || c == '-')
+        })
         .map(|i| (w[i + 1].to_string(), i))
 }
 
@@ -1020,6 +1024,8 @@ fn agenda(s: &str, raw: &str) -> Option<Reply> {
     let today = chrono::Local::now().date_naive();
     if let Some(day) = after(t, &["what is on ", "what do i have on ", "my agenda for ", "my schedule for ", "what is on my calendar on ", "agenda for "]) {
         if let Some((d, _)) = crate::powers::parse_day(day, today).filter(|_| day.split_whitespace().count() <= 3) {
+            // "what's on friday" on a Friday means today, not next week
+            let d = if (d - today).num_days() == 7 && day.starts_with(&today.format("%A").to_string().to_lowercase()) { today } else { d };
             return go(format!("calendar day {d}"));
         }
     }
@@ -1032,8 +1038,10 @@ fn agenda(s: &str, raw: &str) -> Option<Reply> {
         Some((now.timestamp() + secs as i64 + 30) / 60 * 60) // to the minute: "now" had a fraction of a second
     } else {
         // today: "at 3" is the next 3 o'clock still to come
-        let clock = rest.trim_start_matches("today ").strip_prefix("at ")?;
+        let evening = rest.starts_with("tonight");
+        let clock = rest.trim_start_matches("today ").trim_start_matches("tonight ").strip_prefix("at ")?;
         let (hours, m, _) = hm(clock)?;
+        let hours = if evening { hours.into_iter().filter(|h| *h >= 12).collect() } else { hours };
         hours.iter().filter_map(|h| today.and_hms_opt(*h, m, 0)).map(|t| t.and_local_timezone(chrono::Local).single().map(|t| t.timestamp())).flatten().find(|t| *t > now.timestamp())
     }?;
     go(format!("calendar free {at}"))
@@ -1045,7 +1053,9 @@ fn people_talk(s: &str, raw: &str) -> Option<Reply> {
     let lower = r.to_lowercase();
     // "<name>'s birthday is (on) <date>", "my mum's email is …" (but "my birthday is" stays your own)
     for (what, cmd) in [("'s birthday is ", "birthday"), ("'s birthday's ", "birthday"), ("'s email is ", "email"), ("'s email address is ", "email"), ("'s e-mail is ", "email")] {
-        if let Some(i) = lower.find(what) {
+        // the position in the lowercased text only holds in the typed one when lowercasing kept the length
+        let found = if lower.len() == r.len() { lower.find(what) } else { r.find(what) };
+        if let Some(i) = found {
             let name = r[..i].trim();
             let name = name.strip_prefix("my ").or_else(|| name.strip_prefix("My ")).unwrap_or(name).trim();
             let value = r[i + what.len()..].trim();
@@ -1057,20 +1067,31 @@ fn people_talk(s: &str, raw: &str) -> Option<Reply> {
     // "keep in touch with mum every 2 weeks"
     if let Some(rest) = after(s, &["keep in touch with ", "stay in touch with "]) {
         let (who, when) = rest.split_once(" every ")?;
-        let n: u32 = when.split_whitespace().next().and_then(|w| w.parse().ok()).unwrap_or(1);
+        let n: u32 = if when.starts_with("other ") { 2 } else { when.split_whitespace().next().and_then(|w| w.parse().ok()).unwrap_or(1) };
         let days = if when.contains("week") { n * 7 } else if when.contains("month") { n * 30 } else { n };
         return go(format!("person every {}|{days}", keep(raw, who)));
     }
     // "i called mum", "i talked to anna": only for someone he knows
+    // "my mum" is "mum", and "today" or "yesterday" at the end isn't part of the name
+    let who_of = |w: &str| -> String {
+        let w = w.strip_prefix("my ").unwrap_or(w);
+        let w = ["today", "yesterday", "this morning", "this afternoon", "this evening", "earlier", "just now", "last night", "again"].iter().find_map(|t| w.strip_suffix(t)).unwrap_or(w);
+        w.trim().to_string()
+    };
     if let Some(who) = after(s, &["i just called ", "i called ", "i talked to ", "i spoke to ", "i spoke with ", "i talked with ", "i met ", "i saw ", "i texted ", "i messaged ", "i emailed ", "i visited ", "i caught up with ", "just called ", "just talked to "]) {
+        let who = who_of(who);
+        let who = who.as_str();
         if crate::people::known(who) {
             return go(format!("person met {}", keep(raw, who)));
         }
     }
     if let Some(who) = after(s, &["when did i last talk to ", "when did i last speak to ", "when did i last call ", "when did i last see ", "when did i last text ", "when did i last meet ", "when did i last hear from "]) {
-        return go(format!("person last {}", keep(raw, who)));
+        let who = who_of(who);
+        return go(format!("person last {}", keep(raw, &who)));
     }
     if let Some(who) = after(s, &["email ", "write to ", "send an email to ", "write an email to ", "mail "]) {
+        let who = who_of(who);
+        let who = who.as_str();
         if crate::people::known(who) {
             return go(format!("person mail {}", keep(raw, who)));
         }
@@ -1953,6 +1974,9 @@ mod tests {
         assert_eq!(eff("I called mum"), Effect::People("met mum".into()));
         assert!(!matches!(eff("I talked to my boss"), Effect::People(_)), "only people he knows");
         assert_eq!(eff("when did I last talk to Mum"), Effect::People("last Mum".into()));
+        assert_eq!(eff("I called my mum today"), Effect::People("met mum".into()));
+        assert_eq!(eff("keep in touch with Mum every other week"), Effect::People("every Mum|14".into()));
+        assert!(matches!(eff("İpek's birthday is on 3 March"), Effect::People(c) if c == "birthday İpek|on 3 March"), "{:?}", eff("İpek's birthday is on 3 March"));
     }
 
     #[test]
@@ -1977,6 +2001,10 @@ mod tests {
         assert!(matches!(eff("am i free friday at 3"), Effect::Calendar(c) if c.starts_with("free ")));
         assert!(matches!(eff("am i busy at 11:30pm"), Effect::Calendar(c) if c.starts_with("free ")) || chrono::Timelike::hour(&chrono::Local::now()) == 23);
         assert!(!matches!(eff("add lunch with Anna to my calendar"), Effect::Calendar(_)), "no link, not a calendar to link");
+        assert!(!matches!(respond("calendar app").effect, Effect::Calendar(_)), "a literal head with an unknown verb isn't a command");
+        assert!(!matches!(respond("workday was long").effect, Effect::Workday(_)));
+        assert!(!matches!(respond("people are strange").effect, Effect::People(_)));
+        assert_eq!(respond("calendar https://example.com/cal/basic.ics").effect, Effect::Calendar("add https://example.com/cal/basic.ics".into()));
     }
 
     #[test]
@@ -2004,6 +2032,8 @@ mod tests {
         assert!(!matches!(eff("clear my to do list"), Effect::Todo(Op::ClearList(_))));
         assert!(!matches!(eff("add lunch with Anna to my calendar"), Effect::Todo(Op::AddTo(..))));
         assert!(!matches!(eff("show my reading list"), Effect::Todo(_)), "the reading list is something else");
+        assert!(!matches!(eff("add milk to the whole list"), Effect::Todo(Op::AddTo(..))), "'whole' isn't a list name");
+        assert!(!matches!(eff("clear the whole list"), Effect::Todo(Op::ClearList(_))));
     }
 
     #[test]
@@ -2184,6 +2214,7 @@ mod tests {
         assert!(!matches!(eff("where is my phone"), Effect::Net(Query::Files(_))), "a phone isn't a file");
         assert!(!matches!(eff("find me a recipe for lasagne"), Effect::Net(Query::Files(_))));
         assert!(!matches!(eff("where is my motivation"), Effect::Net(Query::Files(_))));
+        assert!(!matches!(eff("find my car keys"), Effect::Net(Query::Files(_))), "keys aren't files");
         // the same requests, each OS's way: PipeWire and KDE on Linux, media keys, WMI and the snipping overlay on Windows
         let shell_has = |s: &str, linux: &str, windows: &str| matches!(eff(s), Effect::Shell(c) if c.contains(if cfg!(windows) { windows } else { linux }));
         assert!(shell_has("it's too loud", "10%-", "[char]174"));

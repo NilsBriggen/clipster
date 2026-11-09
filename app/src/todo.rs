@@ -79,7 +79,8 @@ pub fn parse(text: &str) -> Vec<Item> {
                     "top" if date(value).is_some() => item.top = date(value),
                     "done" if date(value).is_some() => item.done_on = date(value),
                     "every" if valid_every(value) => item.every = Some(value.to_string()),
-                    "list" if !value.trim().is_empty() => item.list = Some(value.trim().to_lowercase()),
+                    // one word, so "write email (list of attendees)" stays a to-do
+                    "list" if !value.is_empty() && !value.contains(char::is_whitespace) => item.list = Some(value.to_lowercase()),
                     _ => break, // brackets that are part of the text
                 }
                 rest = head;
@@ -461,7 +462,7 @@ pub fn show_list(name: &str) -> Reply {
 
 /// "Remove the finished ones?" (nothing goes without a yes).
 pub fn clear_confirm() -> Reply {
-    let n = load().iter().filter(|i| i.done).count();
+    let n = load().iter().filter(|i| i.done && i.list.is_none()).count();
     if n == 0 {
         return Reply::say("Nothing finished to clear yet. Go finish something!");
     }
@@ -510,6 +511,7 @@ mod tests {
         assert_eq!(pool, "todo_cleared");
         assert!(items.iter().any(|i| i.text == "sunscreen"), "clearing the to-do list leaves named lists alone");
         assert_eq!(change(&mut items, &Op::RemoveAt(1), today), ("todo_removed", "call Anna".to_string()));
+        assert_eq!(parse("- [ ] write email (list of attendees)\n")[0].list, None, "brackets in the text stay text");
     }
 
     #[test]

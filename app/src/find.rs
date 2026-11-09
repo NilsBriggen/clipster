@@ -50,9 +50,10 @@ pub fn search(root: &Path, query: &str, max: usize) -> Vec<PathBuf> {
     }
     let start = Instant::now();
     let mut hits: Vec<(u8, SystemTime, PathBuf)> = vec![];
-    let mut stack: Vec<(PathBuf, usize)> = vec![(root.to_path_buf(), 0)];
+    // breadth first, so one huge folder can't use up the budget before Documents and Downloads are seen
+    let mut queue: std::collections::VecDeque<(PathBuf, usize)> = [(root.to_path_buf(), 0)].into();
     let mut seen = 0usize;
-    'walk: while let Some((dir, depth)) = stack.pop() {
+    'walk: while let Some((dir, depth)) = queue.pop_front() {
         for e in std::fs::read_dir(&dir).into_iter().flatten().flatten() {
             seen += 1;
             if seen > 150_000 || (seen % 2000 == 0 && start.elapsed() > Duration::from_secs(4)) {
@@ -63,7 +64,7 @@ pub fn search(root: &Path, query: &str, max: usize) -> Vec<PathBuf> {
                 continue;
             }
             match e.file_type() {
-                Ok(t) if t.is_dir() && depth < 6 => stack.push((e.path(), depth + 1)),
+                Ok(t) if t.is_dir() && depth < 6 => queue.push_back((e.path(), depth + 1)),
                 Ok(t) if t.is_file() => {
                     let p = e.path();
                     let s = score(&p, &words, root);
@@ -105,7 +106,7 @@ fn percent_decode(s: &str) -> String {
     let mut i = 0;
     while i < b.len() {
         if b[i] == b'%' && i + 2 < b.len() {
-            if let Ok(v) = u8::from_str_radix(&s[i + 1..i + 3], 16) {
+            if let Some(v) = std::str::from_utf8(&b[i + 1..i + 3]).ok().and_then(|h| u8::from_str_radix(h, 16).ok()) {
                 out.push(v);
                 i += 3;
                 continue;

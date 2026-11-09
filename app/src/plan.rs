@@ -46,7 +46,7 @@ pub struct DayEnd {
 
 pub fn day_end(kind_time: &KindTime, log: &[crate::FocusLog], todos: &[Item], today: NaiveDate) -> DayEnd {
     DayEnd {
-        done: todos.iter().filter(|i| i.done && i.done_on == Some(today)).map(|i| i.text.clone()).collect(),
+        done: todos.iter().filter(|i| i.done && i.done_on == Some(today) && i.list.is_none()).map(|i| i.text.clone()).collect(),
         focus: focus_today(log, today, 0),
         apps: top_apps(kind_time, &[today], 3),
         open_top: todos.iter().filter(|i| i.top_today(today)).map(|i| i.text.clone()).collect(),
@@ -105,7 +105,7 @@ pub fn week(kind_time: &KindTime, log: &[crate::FocusLog], todos: &[Item], check
         focus: sessions.iter().map(|s| s.2).sum(),
         sessions: sessions.len(),
         best,
-        finished: todos.iter().filter(|i| i.done && i.done_on.is_some_and(|d| d >= days[0] && d <= today)).count(),
+        finished: todos.iter().filter(|i| i.done && i.list.is_none() && i.done_on.is_some_and(|d| d >= days[0] && d <= today)).count(),
         apps: top_apps(kind_time, &days, 3),
         tracked: keys.iter().filter_map(|k| kind_time.get(k)).flat_map(|m| m.values()).sum(),
         moods,

@@ -182,6 +182,7 @@ struct App {
     events: Vec<calendar::Event>,   // their next weeks, read in the background
     calendar_at: Option<Instant>,   // when they were last read
     calendar_running: bool,
+    calendar_gen: u64, // bumped when the calendar list changes: answers from older fetches are dropped
     calendar_problems: Vec<String>,
     told_events: std::collections::HashSet<String>, // events that already got their heads-up
     sample_clips: Vec<String>, // made-up copies for screenshots of the Desk
@@ -471,6 +472,7 @@ impl App {
             events: vec![],
             calendar_at: None,
             calendar_running: false,
+            calendar_gen: 0,
             calendar_problems: vec![],
             told_events: Default::default(),
             upkeep: None,
@@ -801,10 +803,10 @@ impl App {
         }
         self.calendar_running = true;
         self.calendar_at = Some(Instant::now());
-        let (tx, ctx, sources) = (self.tx.clone(), ctx.clone(), self.calendars.clone());
+        let (tx, ctx, sources, generation) = (self.tx.clone(), ctx.clone(), self.calendars.clone(), self.calendar_gen);
         std::thread::spawn(move || {
             let (events, problems) = calendar::fetch(&sources);
-            let _ = tx.send(Event::Calendar(events, problems));
+            let _ = tx.send(Event::Calendar(generation, events, problems));
             ctx.request_repaint();
         });
     }
@@ -816,7 +818,7 @@ impl App {
         let (name, value) = arg.split_once('|').map(|(a, b)| (a.trim(), b.trim())).unwrap_or((arg.trim(), ""));
         let today = chrono::Local::now().date_naive();
         let say = |pool: &str, who: &str| lines::pick(pool).replace("{x}", who);
-        let at = self.people.iter().position(|p| p.name.eq_ignore_ascii_case(name));
+        let at = self.people.iter().position(|p| p.name.to_lowercase() == name.to_lowercase());
         let r = match verb {
             "add" if !name.is_empty() => match at {
                 Some(_) => Reply::say(format!("{name} is on your list already.")).mood(Mood::Wink),
@@ -905,7 +907,8 @@ impl App {
                         }
                     }
                 }
-                match std::fs::read_to_string(path) {
+                // lossy: older exports aren't always UTF-8
+                match std::fs::read(path).map(|b| String::from_utf8_lossy(&b).into_owned()) {
                     Ok(text) => {
                         let n = people::merge(&mut self.people, people::parse_vcf(&text));
                         Reply::say(lines::pick("contacts_imported").replace("{n}", &n.to_string())).mood(Mood::Write).run("Upcoming birthdays", "people birthdays").run("Open You & me", "desk people")
@@ -1007,6 +1010,7 @@ impl App {
                 Some(src) => {
                     self.calendars.push(src);
                     self.calendar_running = false;
+                    self.calendar_gen += 1;
                     self.fetch_calendars(ctx);
                     Reply::say(lines::pick("calendar_added")).mood(Mood::Write).run("Show my agenda", "calendar")
                 }
@@ -1016,6 +1020,7 @@ impl App {
                 Some(i) => {
                     self.calendars.remove(i);
                     self.calendar_running = false;
+                    self.calendar_gen += 1;
                     if self.calendars.is_empty() {
                         self.events.clear();
                         calendar::set_cache(&[]);
@@ -1866,7 +1871,7 @@ impl App {
             Effect::Backup(cmd) => r = self.backup_command(ctx, &cmd),
             Effect::Wrapup => {
                 let today = chrono::Local::now().date_naive();
-                let n = todo::load().iter().filter(|i| i.done && i.done_on == Some(today)).count();
+                let n = todo::load().iter().filter(|i| i.done && i.done_on == Some(today) && i.list.is_none()).count();
                 self.desk_status = lines::pick("desk_status");
                 self.desk.open();
                 self.desk.set_tab("wrapup");
@@ -2013,10 +2018,9 @@ impl App {
                         // each item through "open", so app names, menu entries, Start-menu names and links all work
                         let mut failed = vec![];
                         for item in self.workday.clone() {
-                            if let Some(Effect::Open(target)) = brain::exact(&format!("open {item}")).map(|r| r.effect) {
-                                if open(&target).is_err() {
-                                    failed.push(item);
-                                }
+                            match brain::respond(&format!("open {item}")).effect {
+                                Effect::Open(target) if open(&target).is_ok() => {}
+                                _ => failed.push(item),
                             }
                         }
                         let day = chrono::Datelike::num_days_from_ce(&chrono::Local::now().date_naive()) as u64;
@@ -2056,7 +2060,7 @@ impl App {
                 match (verb, at) {
                     ("save", _) => {
                         // no link given: the newest one you copied
-                        let link = if arg.is_empty() { self.clip_history.iter().rev().find(|c| brain::is_link(c)).cloned() } else { Some(arg.to_string()) };
+                        let link = if arg.is_empty() { self.clip_history.iter().rev().find(|c| brain::is_link(c)).cloned() } else { Some(arg.to_string()).filter(|a| brain::is_link(a)) };
                         r = match link {
                             None => Reply::say(lines::pick("reading_no_link")).mood(Mood::Think),
                             Some(l) if self.reading.iter().any(|(x, _)| *x == l) => Reply::say(lines::pick("reading_dupe")).mood(Mood::Wink).run("My reading list", "reading"),
@@ -2271,7 +2275,8 @@ impl App {
         let local = chrono::Local::now();
         let day_num = chrono::Datelike::num_days_from_ce(&local.date_naive()) as u64;
         let weekday = chrono::Datelike::weekday(&local).number_from_monday() <= 5;
-        if weekday && (6..12).contains(&chrono::Timelike::hour(&local)) && self.workday_ask && !self.workday.is_empty() && self.stats.get("workday_day") != Some(&day_num) && t > 90.0 && self.screenshot.is_none() {
+        let can_nudge = self.balloon.is_none() && !self.quiet() && self.input.is_empty() && self.focus.is_none() && self.screenshot.is_none();
+        if weekday && (6..12).contains(&chrono::Timelike::hour(&local)) && self.workday_ask && !self.workday.is_empty() && self.stats.get("workday_day") != Some(&day_num) && t > 90.0 && can_nudge {
             self.stats.insert("workday_day".into(), day_num);
             self.pipe_up(Reply::say(lines::pick("workday_offer")).mood(Mood::Coffee).run("Start my workday", "workday").btn("Not today", Act::Hide));
         }
@@ -2282,7 +2287,8 @@ impl App {
             self.prank = prank_lines();
         }
         // people: once a day after 8:00, a birthday coming up (or today), or someone you wanted to keep in touch with
-        if chrono::Timelike::hour(&chrono::Local::now()) >= 8 && self.stats.get("people_day") != Some(&day_num) && t > 120.0 && !self.people.is_empty() && self.screenshot.is_none() {
+        let can_nudge = self.balloon.is_none() && !self.quiet() && self.input.is_empty() && self.focus.is_none() && self.screenshot.is_none();
+        if chrono::Timelike::hour(&chrono::Local::now()) >= 8 && self.stats.get("people_day") != Some(&day_num) && t > 120.0 && !self.people.is_empty() && can_nudge {
             self.stats.insert("people_day".into(), day_num);
             let today = chrono::Local::now().date_naive();
             let birthday = self.people.iter().filter_map(|p| p.next_birthday(today).map(|(d, _)| (d, p))).filter(|(d, _)| *d == 0 || *d == 3).min_by_key(|(d, _)| *d).map(|(d, p)| (d, p.clone()));
@@ -2407,7 +2413,8 @@ impl App {
                     }
                 }
                 Event::BackupProgress(done, total, bytes) => self.backup_progress = Some((done, total, bytes)),
-                Event::Calendar(events, problems) => {
+                Event::Calendar(generation, _, _) if generation != self.calendar_gen => {} // the list changed since
+                Event::Calendar(_, events, problems) => {
                     self.calendar_running = false;
                     calendar::set_cache(&events);
                     self.events = events;
@@ -3454,6 +3461,14 @@ fn open(target: &str) -> std::io::Result<()> {
     if let Some(exec) = target.strip_prefix("app:") {
         // an installed app: its menu entry's launch line (Linux) or its Start-menu shortcut (Windows)
         return if cfg!(windows) { sys::open_with_desktop(exec) } else { sys::shell(exec).spawn().map(|_| ()) };
+    }
+    // "code ~/projects/report": a program on the PATH, with its arguments (a leading ~ becomes the home folder)
+    let mut words = target.split_whitespace();
+    if let (Some(prog), true) = (words.next(), target.contains(' ') && !std::path::Path::new(target).exists() && !target.contains("://")) {
+        if sys::in_path(prog) {
+            let args: Vec<String> = words.map(|w| brain::expand_home(w).to_string_lossy().into_owned()).collect();
+            return sys::command(prog).args(args).spawn().map(|_| ());
+        }
     }
     let is_program = !target.contains(['/', '\\', ':', '.']) && !target.is_empty();
     if is_program {

@@ -592,7 +592,7 @@ impl Desk {
             let mut x = c.min.x;
             let chips = std::iter::once(None).chain(names.iter().map(Some));
             for name in chips {
-                let label = name.map_or("My to-dos".to_string(), |n| n[..1].to_uppercase() + &n[1..]);
+                let label = name.map_or("My to-dos".to_string(), |n| n.chars().take(1).flat_map(char::to_uppercase).chain(n.chars().skip(1)).collect());
                 let w = p.layout_no_wrap(label.clone(), look.bold(12.5), look.text()).size().x + 28.0;
                 if x + w > c.max.x {
                     break; // shortcut: lists that don't fit on the row are only reachable by chat
