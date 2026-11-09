@@ -1802,8 +1802,10 @@ pub fn shell(cmd: &str, intro: &str) -> Reply {
 }
 
 pub fn expand_home(p: &str) -> PathBuf {
-    match p.strip_prefix("~") {
-        Some(r) => dirs::home_dir().unwrap_or_default().join(r.trim_start_matches('/')),
+    // "~/Projects", "~\Projects", and Windows' own "%USERPROFILE%\Projects" (what the Desk's hints show there)
+    let rest = p.strip_prefix('~').or_else(|| p.get(..13).filter(|h| h.eq_ignore_ascii_case("%userprofile%")).map(|_| &p[13..]));
+    match rest {
+        Some(r) => dirs::home_dir().unwrap_or_default().join(r.trim_start_matches(['/', '\\'])),
         None => PathBuf::from(p),
     }
 }
@@ -1965,6 +1967,15 @@ mod tests {
         assert!(convert("212 f to c").unwrap().text.contains("= 100 c"));
         assert!(convert("1 gib in mib").unwrap().text.contains("1024"));
         assert!(convert("hello to you").is_none());
+    }
+
+    #[test]
+    fn home_in_paths() {
+        let home = dirs::home_dir().unwrap_or_default();
+        for p in ["~/Projects", "~\\Projects", "%USERPROFILE%\\Projects", "%userprofile%/Projects"] {
+            assert_eq!(expand_home(p), home.join("Projects"), "{p}");
+        }
+        assert_eq!(expand_home("/mnt/nas"), PathBuf::from("/mnt/nas"));
     }
 
     #[test]

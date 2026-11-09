@@ -686,11 +686,13 @@ impl Desk {
             }
             x += w + 8.0;
         }
-        if ui.input(|i| i.key_pressed(egui::Key::Escape)) {
+        let escaped = ui.input(|i| i.key_pressed(egui::Key::Escape));
+        if escaped {
             picked = Some("");
         }
         if let Some(cmd) = picked {
-            if !self.journal_text.trim().is_empty() {
+            // Esc is "never mind": the line you typed stays in the box for next time, unsaved
+            if !escaped && !self.journal_text.trim().is_empty() {
                 out.push(format!("journal {}", self.journal_text.trim()));
                 self.journal_text.clear();
             }

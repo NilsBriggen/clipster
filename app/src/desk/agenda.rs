@@ -144,7 +144,7 @@ impl Desk {
         let (x0, x1) = (area.min.x + 12.0, area.max.x - 18.0);
         let now = chrono::Local::now().naive_local();
         let today = now.date();
-        let from = self.agenda_day.filter(|d| *d >= today).unwrap_or(today);
+        let from = self.agenda_day.unwrap_or(today); // a past day picked in the month shows that day
         let days: Vec<NaiveDate> = (0..7).map(|n| from + Duration::days(n)).collect();
         let birthdays: Vec<(i64, &crate::people::Person, Option<i32>)> = view.people.iter().filter_map(|p| p.next_birthday(today).map(|(d, a)| (d, p, a))).collect();
         enum Row<'e> {
@@ -181,7 +181,7 @@ impl Desk {
             }
             rows.push(Row::Day(*d));
             let from_t = if *d == today { now } else { d.and_time(NaiveTime::MIN) };
-            let free: Vec<(NaiveDateTime, NaiveDateTime)> = if d.weekday().num_days_from_monday() < 5 && !view.calendars.is_empty() { crate::plan::free_slots(view.events, from_t, view.prefs.work_hours).into_iter().filter(|(a, b)| (*b - *a).num_minutes() >= 30).collect() } else { vec![] };
+            let free: Vec<(NaiveDateTime, NaiveDateTime)> = if *d >= today && view.prefs.work_days.contains(&d.weekday().number_from_monday()) && !view.calendars.is_empty() { crate::plan::free_slots(view.events, from_t, view.prefs.work_hours).into_iter().filter(|(a, b)| (*b - *a).num_minutes() >= 30).collect() } else { vec![] };
             if !free.is_empty() {
                 rows.push(Row::Free(*d, free));
             }
@@ -270,7 +270,7 @@ impl Desk {
                             }
                             if let Some(j) = &e.join {
                                 let b = Rect::from_min_size(pos2(right - 46.0, cy - small / 2.0), vec2(46.0, small));
-                                if look.button(ui, b, Id::unique(("agenda-join", e.key())), "Join", true).clicked() {
+                                if look.button(ui, b, Id::unique(("agenda-join", e.key(), first + n)), "Join", true).clicked() {
                                     out.push(format!("open {j}"));
                                 }
                                 right = b.min.x - 6.0;
@@ -281,7 +281,7 @@ impl Desk {
                                 line(ui, pos2(tx + wt + 8.0, cy), &format!("· {}", e.place), look.font(11.5), look.dim(), right - tx - wt - 8.0);
                             }
                             if e.cal != crate::calendar::HOLIDAY {
-                                let resp = ui.interact(Rect::from_min_max(hit.min, pos2(right, hit.max.y)), Id::unique(("agenda-event", e.key())), Sense::click()).on_hover_cursor(egui::CursorIcon::PointingHand);
+                                let resp = ui.interact(Rect::from_min_max(hit.min, pos2(right, hit.max.y)), Id::unique(("agenda-event", e.key(), first + n)), Sense::click()).on_hover_cursor(egui::CursorIcon::PointingHand);
                                 if resp.clicked() {
                                     self.card = Some(Card::Event(e.key()));
                                 }

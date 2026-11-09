@@ -304,7 +304,10 @@ struct App {
     desk_large: bool,                                         // the Desk's larger size
     desk_answer: Option<desk::Answer>,                        // a background answer shown on its Desk page
     desk_net: Option<(u64, String)>,                          // the web question asked for the Desk, and what kind
-    shell_desk: bool,                                         // the running shell command was confirmed on the Desk: it answers there
+    shell_desk: bool,
+    backup_here: bool,                                        // the backup target was reachable at the last look (off the UI thread)
+    backup_here_at: Option<Instant>,
+    space_asked: Vec<(std::path::PathBuf, u64)>,              // the files Space's "move to the trash?" named                                         // the running shell command was confirmed on the Desk: it answers there
     undo: Option<(String, Undo, Instant)>,                    // the last removal on the Desk, to put back right after
     desk_sample: Option<(Vec<timers::Timer>, std::collections::BTreeMap<String, std::collections::BTreeMap<String, u64>>, Vec<FocusLog>, std::collections::BTreeMap<String, String>)>,
     checkin_days: std::collections::BTreeMap<String, String>, // day -> great/okay/meh/rough (two weeks)
@@ -744,6 +747,9 @@ impl App {
             desk_answer: None,
             desk_net: None,
             shell_desk: false,
+            backup_here: false,
+            backup_here_at: None,
+            space_asked: vec![],
             undo: None,
             desk_sample: None,
             checkin_days: Default::default(),
@@ -1608,7 +1614,7 @@ impl App {
     /// The Upkeep tab's backup row.
     fn backup_check(&self) -> upkeep::Check {
         let set_up = !self.backup_sources.is_empty() && !self.backup_target.is_empty();
-        upkeep::backup_check(set_up, self.backup_last, backup::now(), std::path::Path::new(&self.backup_target).exists())
+        upkeep::backup_check(set_up, self.backup_last, backup::now(), self.backup_here)
     }
 
     /// "backup add <folder>", "remove <n>", "target <place>", "now", "eject".
@@ -1639,6 +1645,7 @@ impl App {
             "target" => {
                 let full = brain::expand_home(arg).to_string_lossy().to_string();
                 self.backup_target = full.clone();
+                self.backup_here_at = None; // look at the new place right away
                 self.set_status(format!("Backups go to {full}."));
             }
             "stop" => {
@@ -1843,12 +1850,18 @@ impl App {
         }
         let confirmed = arg.ends_with(" confirmed");
         let picks: Vec<usize> = arg.trim_end_matches(" confirmed").split(',').filter_map(|n| n.trim().parse::<usize>().ok()?.checked_sub(1)).collect();
-        let files: Vec<(std::path::PathBuf, u64)> = self.space.as_ref().map(|(_, s)| picks.iter().filter_map(|i| s.big.get(*i).map(|b| (b.0.clone(), b.1))).collect()).unwrap_or_default();
+        // "Yes" trashes the files the question named, even if a new count reordered the list meanwhile
+        let files: Vec<(std::path::PathBuf, u64)> = if confirmed {
+            std::mem::take(&mut self.space_asked)
+        } else {
+            self.space.as_ref().map(|(_, s)| picks.iter().filter_map(|i| s.big.get(*i).map(|b| (b.0.clone(), b.1))).collect()).unwrap_or_default()
+        };
         if files.is_empty() {
             return Reply::say("Tick the files to move to the trash first.").mood(Mood::Think);
         }
         let total: u64 = files.iter().map(|f| f.1).sum();
         if !confirmed {
+            self.space_asked = files.clone();
             let names: Vec<String> = files.iter().take(8).map(|(p, b)| format!("{} ({})", p.file_name().unwrap_or_default().to_string_lossy(), upkeep::size(*b))).collect();
             return Reply::say(format!("Move {} to the trash? That's {}. You can get them back from the trash.\n{}", if files.len() == 1 { "this file".to_string() } else { format!("these {} files", files.len()) }, upkeep::size(total), names.join("\n"))).mood(Mood::Think).run("Yes, to the trash", &format!("space trash {} confirmed", arg.trim_end_matches(" confirmed"))).btn("Keep them", Act::Hide);
         }
@@ -2427,6 +2440,7 @@ impl App {
                 return;
             }
         };
+        self.settings_locked = false; // read fine (also after an import that replaced an unreadable file)
         let b = |k: &str, d: bool| v[k].as_bool().unwrap_or(d);
         self.tips_every = v["tips_every"].as_u64().unwrap_or(self.tips_every).min(24 * 60);
         (self.notice_clip, self.notice_programs, self.notice_health) = (b("notice_clip", true), b("notice_programs", true), b("notice_health", true));
@@ -3713,7 +3727,9 @@ impl App {
             return;
         }
         if let Some(a) = undo_action {
-            self.desk_status.action = Some(a); // a silent removal: its status gets Undo
+            // its own word in the Desk's status bar, never an Undo stuck on an older message
+            let what = self.undo.as_ref().map(|u| u.0.clone()).unwrap_or_default();
+            self.status(desk::Tone::Done, format!("Removed {what}."), Some(a));
         }
         if !silent || !news.is_empty() {
             if !asks_net {
@@ -3760,6 +3776,16 @@ impl App {
     fn tick(&mut self, ctx: &egui::Context) {
         let now = Instant::now();
         let t = self.t();
+        // is the backup drive there? Asked on a thread every 30 s: an unreachable network share can take seconds or
+        // hang, and that must never freeze the window. A check that hangs holds the next one back for an hour.
+        if !self.backup_target.is_empty() && self.backup_here_at.is_none_or(|a| a.elapsed() > Duration::from_secs(30)) {
+            self.backup_here_at = Some(now + Duration::from_secs(3600));
+            let (tx, ctx2, target) = (self.tx.clone(), ctx.clone(), self.backup_target.clone());
+            std::thread::spawn(move || {
+                let _ = tx.send(Event::BackupHere(std::path::Path::new(&target).exists()));
+                ctx2.request_repaint();
+            });
+        }
         let now_unix = timers::unix_now();
         if let Some(i) = self.timers.iter().position(|t| t.at <= now_unix) {
             let mut fired = self.timers.remove(i);
@@ -3822,7 +3848,7 @@ impl App {
         // backups on their own: when the drive appears (once a day), or in the evening if it's there
         if self.backup_auto != "off" && self.screenshot.is_none() && self.backup_progress.is_none() && !self.backup_sources.is_empty() && !self.backup_target.is_empty() && self.stats.get("backup_auto_day") != Some(&day_num) && t > 60.0 && self.backup_last.is_none_or(|l| backup::days_since(Some(l), backup::now()) != Some(0)) {
             let evening_ok = self.backup_auto != "evening" || chrono::Timelike::hour(&chrono::Local::now()) >= 18;
-            if evening_ok && std::path::Path::new(&self.backup_target).exists() {
+            if evening_ok && self.backup_here {
                 self.stats.insert("backup_auto_day".into(), day_num);
                 let r = self.start_backup(ctx);
                 if !r.text.is_empty() && can_nudge {
@@ -4068,6 +4094,10 @@ impl App {
                     self.space_running = false;
                     self.space = Some((Instant::now(), *report));
                 }
+                Event::BackupHere(here) => {
+                    self.backup_here = here;
+                    self.backup_here_at = Some(Instant::now());
+                }
                 Event::BackupFound(found) => {
                     self.set_status(if found.is_empty() { "Nothing in the backup by that name.".to_string() } else { format!("Found {} in the backup.", found.len()) });
                     self.backup_found = Some(found);
@@ -4200,7 +4230,7 @@ impl App {
                 self.start_checkup(ctx, true);
             } else if backup_due && self.t() > 900.0 && self.stats.get("backup_nag_day") != Some(&today) && hour >= 10 {
                 self.stats.insert("backup_nag_day".into(), today);
-                let present = std::path::Path::new(&self.backup_target).exists();
+                let present = self.backup_here;
                 let text = if present { lines::pick("backup_reminder").replace("{n}", &backup_days.unwrap_or(7).to_string()) } else { lines::pick("backup_drive_missing").replace("{x}", &self.backup_target) };
                 let r = Reply::say(text).mood(Mood::Think);
                 self.pipe_up(if present { r.run("Back up now", "backup now").btn("Later", Act::Hide) } else { r.btn("Later", Act::Hide) });
