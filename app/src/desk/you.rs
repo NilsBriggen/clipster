@@ -406,7 +406,8 @@ impl Desk {
         let ctl = look.ctl();
         let today = chrono::Local::now().date_naive();
         let bday = |b: Option<(Option<i32>, u32, u32)>| b.map(crate::people::birthday_text).unwrap_or_default();
-        if self.person_edit.as_ref().is_none_or(|e| e[0] != q.name) {
+        if self.person_edit.is_none() || self.person_for != q.name {
+            self.person_for = q.name.clone();
             self.person_edit = Some([q.name.clone(), bday(q.birthday), q.email.clone().unwrap_or_default(), q.phone.clone().unwrap_or_default(), q.every.map(|e| e.to_string()).unwrap_or_default(), q.last.map(|d| d.format("%-d %b %Y").to_string()).unwrap_or_default(), q.note.clone().unwrap_or_default(), String::new()]);
         }
         let mut e = self.person_edit.clone().unwrap_or_default();
@@ -494,6 +495,7 @@ impl Desk {
         // a rename moves the card to the new name
         if e[0].trim() != q.name && !e[0].trim().is_empty() && !ui.memory(|m| m.has_focus(Id::unique(("person-field", 0usize)))) {
             self.card = Some(Card::Person(e[0].trim().to_string()));
+            self.person_for = e[0].trim().to_string(); // the other fields keep what's typed in them
         }
         self.person_edit = Some(e);
     }

@@ -414,7 +414,7 @@ fn teach(raw: &str) -> Option<Reply> {
     }
     let (start, iffy) = ["when i say ", "whenever i say ", "if i say "].iter().find_map(|p| low.find(p).filter(|i| *i <= 12).map(|i| (i + p.len(), *p == "if i say ")))?;
     // "if i say yes, will you tell me a joke" is a question, and "yes" or "please" mustn't get taken over
-    let common = |p: &str| ["yes", "no", "please", "ok", "okay", "thanks", "thank you", "sure", "yep", "nope", "hi", "hello", "y", "n"].contains(&p.to_lowercase().as_str());
+    let common = |p: &str| COMMON_WORDS.contains(&p.to_lowercase().as_str());
     let (rest, lrest) = (&raw[start..], &low[start..]);
     let first = |keys: &[&str]| keys.iter().filter_map(|k| lrest.find(k).map(|i| (i, k.len()))).min();
     let unquote = |t: &str| t.trim().trim_matches(['"', '\'', '“', '”']).trim().to_string();
@@ -446,6 +446,9 @@ fn teach(raw: &str) -> Option<Reply> {
 }
 
 /// Someone who might be in danger gets a straight answer: no jokes, no gags, a real place to turn to.
+/// Words a taught phrase may never take over: answers to his own questions.
+pub const COMMON_WORDS: [&str; 14] = ["yes", "no", "please", "ok", "okay", "thanks", "thank you", "sure", "yep", "nope", "hi", "hello", "y", "n"];
+
 fn crisis(s: &str) -> Option<Reply> {
     let words = [
         "kill myself", "killing myself", "suicide", "suicidal", "end my life", "ending my life", "want to die", "wanna die", "self harm", "self-harm",
@@ -1364,7 +1367,7 @@ fn notes(s: &str, raw: &str) -> Option<Reply> {
         return go(if about_todos { "todos clear" } else { "forget notes" }.into());
     }
     // habits: "new habit stretch", "i did my stretch" (only for a habit he knows)
-    if let Some(h) = after(s, &["new habit ", "add a habit ", "add habit ", "track a habit called ", "start a habit ", "start tracking "]).filter(|h| !h.is_empty()) {
+    if let Some(h) = after(s, &["new habit ", "add a habit ", "add habit ", "track a habit called ", "start a habit "]).filter(|h| !h.is_empty()) {
         return go(format!("habit add {}", keep(raw, h)));
     }
     if let Some(h) = after(s, &["i did my ", "did my ", "done my ", "i have done my ", "i just did my ", "finished my "]) {
@@ -1382,7 +1385,8 @@ fn notes(s: &str, raw: &str) -> Option<Reply> {
     }
     if let Some(what) = after(s, &["stop commenting on ", "dont comment on ", "do not comment on ", "never comment on ", "no more comments about ", "stop talking about "]) {
         let id: String = what.trim_end_matches(".com").split_whitespace().next().unwrap_or("").chars().filter(|c| c.is_ascii_alphanumeric() || *c == '-').collect();
-        if id.len() >= 3 {
+        // a site he knows or a web address: "stop talking about that" isn't a site called "that"
+        if id.len() >= 3 && (what.contains('.') || lines::site_kind(&id).is_some()) {
             return go(format!("pref mute {id}"));
         }
     }
@@ -2690,6 +2694,12 @@ mod tests {
         assert_eq!(hm("4 amazon order").map(|h| h.0), Some(vec![4, 16]), "am only as a whole word");
         assert!(matches!(eff("go to my downloads"), Effect::Open(_)) && matches!(eff("take me to my documents"), Effect::Open(_)));
         assert_eq!(eff("go to the shops"), Effect::None);
+        for t in ["stop talking about that", "stop talking about yourself", "start tracking my time"] {
+            assert!(!matches!(eff(t), Effect::Pref(..) | Effect::Habit(_)), "{t}: {:?}", eff(t));
+        }
+        assert_eq!(exact("relearn tea|tea time|timer 5m tea").map(|r| r.effect), Some(Effect::Relearn("tea".into(), "tea time".into(), String::new(), vec!["timer 5m tea".into()])), "one command stays a command");
+        assert_eq!(exact("relearn gm|good morning|\"Morning, sunshine!\"").map(|r| r.effect), Some(Effect::Relearn("gm".into(), "good morning".into(), "Morning, sunshine!".into(), vec![])));
+        assert_eq!(exact("relearn gm|ok|joke").map(|r| r.effect), Some(Effect::None), "never takes over ok");
         for t in ["start reboot", "open shutdown", "launch logout"] {
             assert!(!matches!(eff(t), Effect::Open(_)), "{t} asks first, whatever app search finds");
         }

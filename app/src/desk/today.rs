@@ -181,7 +181,7 @@ impl Desk {
             let mut y = top + 32.0 + ctl + 8.0;
             let go = look.primary(ui, Rect::from_min_size(pos2(fx, y), vec2(110.0, ctl)), Id::unique("desk-focus-go"), "Start focus", !bad).clicked();
             if (go || enter) && !bad {
-                out.push(format!("focus {mins}m {}", self.focus_label.trim()));
+                out.push(crate::brain::focus_command(mins as u64, &self.focus_label));
                 self.focus_label.clear();
             }
             y += ctl + 8.0;
@@ -191,7 +191,7 @@ impl Desk {
             for (i, t) in tops.iter().enumerate() {
                 let label = fit(&p, look, &format!("★ {t}"), fw);
                 if look.button(ui, Rect::from_min_size(pos2(fx, y), vec2(btn_w(&p, look, &label).min(fw), ctl - 2.0)), Id::unique(("desk-focus-top", i)), &label, true).on_hover_text(format!("Focus {mins} min on \u{201c}{t}\u{201d}")).clicked() {
-                    out.push(format!("focus {mins}m {t}"));
+                    out.push(crate::brain::focus_command(mins as u64, &t));
                 }
                 y += ctl + 2.0;
             }
@@ -200,7 +200,7 @@ impl Desk {
                 if n >= 10 {
                     let label = fit(&p, look, &format!("Until {} · {n} min", e.title), fw);
                     if look.button(ui, Rect::from_min_size(pos2(fx, y), vec2(btn_w(&p, look, &label).min(fw), ctl - 2.0)), Id::unique("desk-focus-until"), &label, true).on_hover_text("Ends 5 minutes before it starts").clicked() {
-                        out.push(format!("focus {n}m {}", self.focus_label.trim()));
+                        out.push(crate::brain::focus_command(n as u64, &self.focus_label));
                         self.focus_label.clear();
                     }
                     y += ctl + 2.0;

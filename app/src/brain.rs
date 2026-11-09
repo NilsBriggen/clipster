@@ -603,9 +603,13 @@ pub fn exact(input: &str) -> Option<Reply> {
             if new.is_empty() || does.is_empty() {
                 return None;
             }
+            if crate::understand::COMMON_WORDS.contains(&new.to_lowercase().as_str()) {
+                return Some(Reply::say(format!("I'd better not: \"{new}\" is how you answer my questions.")).mood(Mood::Think));
+            }
+            // the Desk shows a reply in quotes and commands bare ("timer 5m tea", "joke → weather")
             let (reply, cmds) = match does.strip_prefix('"').and_then(|d| d.strip_suffix('"')) {
                 Some(said) => (said.to_string(), vec![]),
-                None if does.contains(" → ") || does.starts_with("open ") || does.starts_with("run ") => (String::new(), does.split(" → ").map(|c| c.trim().to_string()).filter(|c| !c.is_empty()).collect()),
+                None if does.contains(" → ") || does.starts_with("open ") || does.starts_with("run ") || exact(does).is_some() => (String::new(), does.split(" → ").map(|c| c.trim().to_string()).filter(|c| !c.is_empty()).collect()),
                 None => (does.to_string(), vec![]),
             };
             return Some(Reply::say(lines::pick("settings_saved")).mood(Mood::Write).effect(Effect::Relearn(old.to_string(), new.to_string(), reply, cmds)));
@@ -1619,6 +1623,9 @@ pub fn fmt_dur(secs: u64) -> String {
 /// Write a file so a crash or a full disk never leaves half of it: a `.tmp` next to it, flushed, then renamed over it.
 pub fn write_atomic(path: &std::path::Path, text: &str) -> std::io::Result<()> {
     use std::io::Write;
+    // a symlinked file (lines.txt kept in a dotfiles folder) is written where it really is, the link stays
+    let real = std::fs::canonicalize(path).unwrap_or_else(|_| path.to_path_buf());
+    let path = real.as_path();
     if let Some(dir) = path.parent() {
         std::fs::create_dir_all(dir)?;
     }
@@ -1867,6 +1874,14 @@ fn open(target: &str) -> Reply {
     Reply::say(format!("Opening {t}! Wheee!")).effect(Effect::Open(target)).mood(Mood::Happy)
 }
 
+/// "focus 25m on 10 emails": with "on", a label that starts with a number stays the label, not more minutes.
+pub fn focus_command(mins: u64, label: &str) -> String {
+    match label.trim() {
+        "" => format!("focus {mins}m"),
+        l => format!("focus {mins}m on {l}"),
+    }
+}
+
 /// Programs that switch the computer off, restart it or log out: they ask first, whatever words start them.
 pub fn is_power_program(name: &str) -> bool {
     ["reboot", "restart", "shutdown", "poweroff", "halt", "suspend", "hibernate", "logout", "logoff", "sleep"].contains(&name.to_lowercase().trim_end_matches(".exe"))
@@ -1950,6 +1965,20 @@ mod tests {
         assert!(convert("212 f to c").unwrap().text.contains("= 100 c"));
         assert!(convert("1 gib in mib").unwrap().text.contains("1024"));
         assert!(convert("hello to you").is_none());
+    }
+
+    #[test]
+    #[cfg(unix)]
+    fn writes_through_a_symlink() {
+        let d = std::env::temp_dir().join(format!("clipster-link-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&d);
+        std::fs::create_dir_all(d.join("dotfiles")).unwrap();
+        std::fs::write(d.join("dotfiles/lines.txt"), "old").unwrap();
+        std::os::unix::fs::symlink(d.join("dotfiles/lines.txt"), d.join("lines.txt")).unwrap();
+        write_atomic(&d.join("lines.txt"), "new").unwrap();
+        assert!(std::fs::symlink_metadata(d.join("lines.txt")).unwrap().file_type().is_symlink(), "the link stays");
+        assert_eq!(std::fs::read_to_string(d.join("dotfiles/lines.txt")).unwrap(), "new");
+        let _ = std::fs::remove_dir_all(&d);
     }
 
     #[test]

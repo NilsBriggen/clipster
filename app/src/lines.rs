@@ -299,6 +299,8 @@ pub fn parse(text: &str, user: bool, out: &mut Vec<Section>) -> Vec<String> {
                 Ok(d) => s.friend = d,
                 Err(_) => bad("friendship change must be a number"),
             },
+            // a text line that would read as a format line is written with a "\" in front (as_text_line)
+            _ if line.strip_prefix('\\').is_some_and(|t| t.starts_with('\\') || FORMAT_MARKS.iter().any(|p| t.starts_with(p))) => s.lines.push(line[1..].replace("\\n", "\n")),
             _ if line.starts_with('#') => bad("headers are \"## name\""),
             _ => s.lines.push(line.replace("\\n", "\n")),
         }
@@ -448,13 +450,22 @@ pub fn save_template(name: &str, text: &str) -> std::io::Result<()> {
 }
 
 /// A section of yours (`## <kind> my_<name>`, one line of text) in the user's file, replacing one of that name.
+/// How a line starts when it's a format line, not text.
+const FORMAT_MARKS: [&str; 8] = ["> ", "= ", "@ ", "+ ", "% ", "! ", "~ ", "#"];
+
+/// One line of your text as the file keeps it: "> On Monday you wrote…" stays text, not a trigger.
+fn as_text_line(t: &str) -> String {
+    let line = t.replace('\n', "\\n");
+    if line.starts_with('\\') || FORMAT_MARKS.iter().any(|p| line.starts_with(p)) { format!("\\{line}") } else { line }
+}
+
 fn save_own(kind: &str, name: &str, text: &str) -> std::io::Result<()> {
     let id: String = name.trim().to_lowercase().chars().map(|c| if c.is_alphanumeric() { c } else { '_' }).collect();
     forget_own(kind, &format!("my_{id}"))?;
     let path = ensure_user_file();
     let mut all = std::fs::read_to_string(&path)?;
     let words = name.trim().replace(" | ", " ");
-    all += &format!("\n## {kind} my_{id}\n> {words}\n{}\n", text.trim().replace('\n', "\\n"));
+    all += &format!("\n## {kind} my_{id}\n> {words}\n{}\n", as_text_line(text.trim()));
     crate::brain::write_atomic(&path, &all)?;
     reload();
     Ok(())
@@ -523,10 +534,7 @@ pub fn teach(phrase: &str, reply: &str, commands: &[String]) -> std::io::Result<
     let phrase = one(phrase);
     text += &format!("\n## chat taught {phrase}\n= {phrase}\n");
     if !reply.is_empty() {
-        let line = reply.replace('\n', "\\n");
-        // keep it a reply line even if it happens to start like a format line
-        let line = if ["> ", "= ", "@ ", "+ ", "% ", "! ", "~ ", "#"].iter().any(|p| line.starts_with(p)) { format!("\"{line}\"") } else { line };
-        text += &format!("{line}\n");
+        text += &format!("{}\n", as_text_line(reply));
     }
     for c in commands {
         text += &format!("! {}\n", one(c));
@@ -870,6 +878,15 @@ mod tests {
         assert_eq!(s.triggers, ["what is up", "hello there"]);
         assert_eq!(s.exact, ["cake"]);
         assert_eq!((s.mood, s.friend, s.lines.clone()), (Some(Mood::Sly), -3, vec!["A\nB".to_string(), "C".to_string()]));
+        // your own text that starts like a format line comes back as it was written
+        for t in ["> On Monday you wrote:\nthanks", "# Weekly report", "+ point one", "\\\\server\\share", "\\label and \\ref"] {
+            let mut v = vec![];
+            assert!(parse(&format!("## template my_x\n> my x\n{}\n", as_text_line(t)), true, &mut v).is_empty(), "{t}");
+            assert_eq!(v[0].lines, [t.to_string()], "{t}");
+        }
+        let mut v = vec![];
+        parse("## x\n\\label and \\ref!\n", false, &mut v);
+        assert_eq!(v[0].lines, ["\\label and \\ref!"], "an old line starting with a backslash stays as it is");
         assert_eq!(parse("@ grumpy\n## x\n@ grumpy\n+ nope", false, &mut v).len(), 3);
     }
 

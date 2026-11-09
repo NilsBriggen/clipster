@@ -147,7 +147,7 @@ pub fn screenshot(rest: &str) -> Reply {
         if area {
             return Reply::say("Draw a box around what you want. It goes on your clipboard: paste it anywhere with Ctrl+V. 📸").effect(Effect::Open("ms-screenclip:".into()));
         }
-        let win_path = path.to_string_lossy().replace('\'', "''");
+        let win_path = crate::sys::ps_quote(&path.to_string_lossy());
         let cmd = format!("Add-Type -AssemblyName System.Windows.Forms,System.Drawing; Start-Sleep -Milliseconds 500; $b = [Windows.Forms.SystemInformation]::VirtualScreen; $i = New-Object Drawing.Bitmap $b.Width,$b.Height; $g = [Drawing.Graphics]::FromImage($i); $g.CopyFromScreen($b.Left, $b.Top, 0, 0, $i.Size); $i.Save('{win_path}'); 'Saved to {win_path}'");
         return shell(&cmd, "Say cheese! 📸")
             .btn("Open my pictures", Act::Open(dir.to_string_lossy().into_owned()))

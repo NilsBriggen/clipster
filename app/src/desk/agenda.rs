@@ -124,14 +124,15 @@ impl Desk {
             let (hint, color) = match &preview {
                 Some(p) => (p.clone(), look.dim()),
                 None if ok => ("→ repeats".to_string(), look.dim()),
-                None => ("? try: in 20 minutes, at 5, friday at 9 to …".to_string(), look.danger()),
+                None => ("? try: in 20 minutes, at 5, on friday at 9 to …".to_string(), look.danger()),
             };
             let g = clipped(&p, &hint, look.font(10.5), color, field.width());
             p.galley(pos2(field.min.x + 2.0, field.max.y + 2.0), g, color);
         }
         let enter = resp.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter));
         if (look.primary(ui, Rect::from_min_size(pos2(x1 - 54.0, y), vec2(54.0, ctl)), Id::unique("desk-remind-add"), "Add", ok).clicked() || enter) && ok {
-            out.push(if text.to_lowercase().starts_with("remind") || text.to_lowercase().starts_with("timer") { text } else { format!("remind me {text}") });
+            // understood like the balloon: "every monday at 9 to …" repeats, "at 3 to call Anna" keeps its words
+            out.push(format!("desk-typed {}", if text.to_lowercase().starts_with("remind") || text.to_lowercase().starts_with("timer") { text } else { format!("remind me {text}") }));
             self.remind_text.clear();
         }
     }

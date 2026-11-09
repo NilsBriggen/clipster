@@ -355,6 +355,7 @@ pub struct Desk {
     fact_kind: String,                 // "+ Add": the kind picked
     fact_value: String,
     phrase_edit: Option<(String, String, String)>, // a phrase being changed: the old phrase, the new one, what it does
+    person_for: String,                // whose card person_edit holds (the Name field may already say something else)
     person_edit: Option<[String; 8]>,  // a person's card: name, birthday, email, phone, every, last talked, note, a new gift
     journal_month: Option<(i32, u32)>, // the journal's month (None = this one)
     journal_query: String,
@@ -391,6 +392,8 @@ impl Desk {
         self.open = true;
         self.fresh = true;
         self.place = None;
+        self.forget_all = false;
+        self.renaming_list = None;
         self.files.at = None;
     }
 
@@ -420,6 +423,9 @@ impl Desk {
             self.agenda_month = true;
         }
         self.workday_open = name == "workday";
+        // boxes drawn only on their own page would block every tab once that page is gone
+        self.forget_all = false;
+        self.renaming_list = None;
         if let Some(page) = ["you", "people", "journal", "jot"].iter().position(|p| *p == name).map(|p| p.min(2)) {
             self.me_page = page;
         }

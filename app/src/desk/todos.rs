@@ -646,7 +646,7 @@ impl Desk {
         let focus_label = format!("Focus on this ({} min)", 25);
         let fw = btn_w(&p, look, &focus_label);
         if look.button(ui, Rect::from_min_size(pos2(bx, by), vec2(fw, ctl)), Id::unique("desk-todo-card-focus"), &focus_label, view.focus_now.is_none() && !it.done).clicked() {
-            out.push(format!("focus 25m {}", it.text));
+            out.push(crate::brain::focus_command(25, &it.text));
             self.card = None;
         }
         bx += fw + 8.0;

@@ -361,7 +361,7 @@ impl Desk {
             let again = Rect::from_min_size(pos2(right - 64.0, cy - (ctl - 2.0) / 2.0), vec2(64.0, ctl - 2.0));
             look.bar(&p, Rect::from_min_size(pos2(again.min.x - 72.0, cy - 5.0), vec2(60.0, 10.0)), pct as f32 / 100.0, look.score(pct));
             if look.button(ui, again, Id::unique(("desk-focus-again", first + i)), "Again", view.focus_now.is_none()).on_hover_text(format!("Focus {} min on this again", s.1)).clicked() {
-                out.push(format!("focus {}m {}", s.1, s.4));
+                out.push(crate::brain::focus_command(s.1 as u64, &s.4));
             }
         }
     }

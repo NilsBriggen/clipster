@@ -431,10 +431,16 @@ pub fn top_programs(n: usize) -> Vec<(String, u64, f32)> {
     v
 }
 
+/// Text for inside PowerShell's single quotes: every quote PowerShell ends a string on is doubled, the curly
+/// ones too ("Nils’ holiday.mp4", "C:\Users\O’Brien").
+pub fn ps_quote(s: &str) -> String {
+    s.chars().flat_map(|c| if ['\'', '\u{2018}', '\u{2019}', '\u{201A}', '\u{201B}'].contains(&c) { vec![c, c] } else { vec![c] }).collect()
+}
+
 /// Move a file to the trash (it can be got back from there): `gio trash` on Linux, the Recycle Bin on Windows.
 pub fn trash_file(path: &std::path::Path) -> Result<(), String> {
     let out = if cfg!(windows) {
-        let p = path.to_string_lossy().replace('\'', "''");
+        let p = ps_quote(&path.to_string_lossy());
         shell(&format!("Add-Type -AssemblyName Microsoft.VisualBasic; [Microsoft.VisualBasic.FileIO.FileSystem]::DeleteFile('{p}','OnlyErrorDialogs','SendToRecycleBin')")).output()
     } else {
         command("gio").arg("trash").arg(path).output()
@@ -1300,6 +1306,7 @@ mod tests {
         assert!(mem().is_some_and(|(total, avail)| total > 0.0 && avail <= total));
         assert!(!running_programs().is_empty());
         assert!(!os_name().is_empty());
+        assert_eq!(ps_quote("C:\\Users\\O'Brien\\Nils\u{2019} trip.mp4"), "C:\\Users\\O''Brien\\Nils\u{2019}\u{2019} trip.mp4");
     }
 }
 

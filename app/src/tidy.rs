@@ -119,7 +119,10 @@ pub fn apply(moves: &[(PathBuf, PathBuf)], log: &Path) -> Result<usize, String> 
     if let Some(parent) = log.parent() {
         let _ = std::fs::create_dir_all(parent);
     }
-    std::fs::write(log, serde_json::to_string(&done).map_err(|e| e.to_string())?).map_err(|e| e.to_string())?;
+    // added to what's there since the last undo: Monday's automatic tidy doesn't take away undoing yours
+    let mut all: Vec<(String, String)> = std::fs::read_to_string(log).ok().and_then(|t| serde_json::from_str(&t).ok()).unwrap_or_default();
+    all.extend(done.iter().cloned());
+    std::fs::write(log, serde_json::to_string(&all).map_err(|e| e.to_string())?).map_err(|e| e.to_string())?;
     Ok(done.len())
 }
 
@@ -261,6 +264,11 @@ mod tests {
         assert!(d.join("song.mp3").exists() && d.join("report.pdf").exists() && d.join("Documents/report.pdf").exists());
         assert!(!d.join("Music").exists(), "empty folders go away again");
         assert!(undo(&log).is_err(), "nothing left to undo");
+        // two tidies in a row: one undo puts back both
+        assert_eq!(apply(&p[..2], &log), Ok(2));
+        assert_eq!(apply(&p[2..], &log), Ok(2));
+        assert_eq!(undo(&log), Ok(4));
+        assert!(d.join("cat.JPG").exists() && d.join("song.mp3").exists());
         let _ = std::fs::remove_dir_all(&d);
     }
 

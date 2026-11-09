@@ -79,7 +79,13 @@ pub fn past_day(s: &str, today: NaiveDate) -> Option<NaiveDate> {
             if let Some(n) = s.strip_suffix(" weeks ago").and_then(|n| n.trim().parse::<u64>().ok()) {
                 return ago(n.min(520) * 7);
             }
-            NaiveDate::parse_from_str(&s, "%Y-%m-%d").ok().filter(|d| *d <= today)
+            // the Desk card's own "3 Nov 2026", and "friday" / "last friday": the latest one before today
+            if let Ok(w) = s.strip_prefix("last ").unwrap_or(&s).parse::<chrono::Weekday>() {
+                use chrono::Datelike;
+                let back = (today.weekday().num_days_from_monday() + 7 - w.num_days_from_monday()) % 7;
+                return ago(if back == 0 { 7 } else { back } as u64);
+            }
+            ["%Y-%m-%d", "%d %b %Y", "%d %B %Y"].iter().find_map(|f| NaiveDate::parse_from_str(&s, f).ok()).filter(|d| *d <= today)
         }
     }
 }
@@ -355,6 +361,9 @@ BEGIN:VCARD\r\nVERSION:4.0\r\nFN:Cleo\r\nBDAY:--1224\r\nEND:VCARD\r\nBEGIN:VCARD
         assert_eq!(past_day("yesterday", today), NaiveDate::from_ymd_opt(2026, 11, 8));
         assert_eq!(past_day("3 days ago", today), NaiveDate::from_ymd_opt(2026, 11, 6));
         assert_eq!(past_day("2027-01-01", today), None, "not in the future");
+        assert_eq!(past_day("3 Nov 2026", today), NaiveDate::from_ymd_opt(2026, 11, 3), "the Desk card's own format");
+        assert_eq!(past_day("last friday", today), NaiveDate::from_ymd_opt(2026, 11, 6));
+        assert_eq!(past_day("monday", today), NaiveDate::from_ymd_opt(2026, 11, 2), "today's weekday means a week ago");
         assert_eq!(past_day("", today), Some(today));
     }
 }

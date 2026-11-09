@@ -450,8 +450,7 @@ fn relaunch() {
     if cfg!(windows) {
         // the installer replaces this program, so it runs after we exit; then Clipster starts again
         let exe = std::env::current_exe().unwrap_or_default();
-        // in PowerShell's single quotes a ' is written twice (C:\Users\O'Brien)
-        let q = |p: &std::path::Path| p.display().to_string().replace('\'', "''");
+        let q = |p: &std::path::Path| sys::ps_quote(&p.display().to_string());
         let script = format!("Start-Process msiexec -ArgumentList '/i','\"{}\"','/passive' -Wait; Start-Process '{}'", q(&path), q(&exe));
         let _ = sys::shell(&script).spawn();
     } else {
@@ -1267,6 +1266,9 @@ impl App {
                     _ => "A gift idea needs a few words.".to_string(),
                 };
                 Reply::say(text).mood(Mood::Write)
+            }
+            "rename" if self.people.iter().any(|p| p.name.eq_ignore_ascii_case(value) && !p.name.eq_ignore_ascii_case(name)) => {
+                Reply::say(format!("There's already someone called {value}. Pick another name, or forget one of them first.")).mood(Mood::Think)
             }
             "rename" if at.is_some() && !value.is_empty() => {
                 let i = at.unwrap_or_default();
@@ -2517,6 +2519,7 @@ impl App {
             self.calendar_meta = v["calendar_meta"].as_object().into_iter().flatten().map(|(s, m)| (s.clone(), calendar::CalMeta::from_json(m))).collect();
             self.calendar_gen += 1;
             self.calendar_at = None; // read them again
+            self.calendar_running = false; // the read under way answers for the old list and is dropped
         }
         self.people = v["people"].as_array().into_iter().flatten().filter_map(people::Person::from_json).collect();
         people::set_names(&self.people);
@@ -2615,13 +2618,17 @@ impl App {
         if asked.is_some() {
             from_desk = false;
         }
+        // words typed into a Desk form ("every monday at 9 to water the plants"): understood like the balloon,
+        // answered on the Desk
+        let typed = cmd.strip_prefix("desk-typed ").map(str::to_string);
+        let cmd = typed.as_deref().unwrap_or(cmd);
         // a removal on the Desk can be undone: remember how things were
         if cmd.trim() != "undo" {
             self.undo = None; // undo is for the latest thing only
         }
         let removing = removal(cmd).filter(|_| from_desk || button);
         let before = removing.map(|_| self.undo_capture());
-        let mut r = match from_desk || button {
+        let mut r = match (from_desk || button) && typed.is_none() {
             true => brain::exact(cmd).unwrap_or_else(|| brain::respond(cmd)),
             false => brain::respond(cmd),
         };
@@ -2835,7 +2842,7 @@ impl App {
                         if mins < 10 {
                             r = Reply::say(lines::pick("focus_until_short").replace("{x}", &e.title).replace("{n}", &(mins + 5).to_string())).mood(Mood::Think);
                         } else {
-                            self.run(ctx, &format!("focus {}m {label}", mins.min(240)));
+                            self.run(ctx, &brain::focus_command(mins.min(240) as u64, &label));
                             return;
                         }
                     }
@@ -3780,8 +3787,9 @@ impl App {
                     if quip.contains("{label}") { quip.replace("{label}", &label) } else { format!("{quip}\n\n{label}") }
                 }))
                     .mood(Mood::Alarm)
-                    .run("Snooze 10 min", &format!("timer 10m {label}"))
-                    .run("1 hour", &format!("timer 1h {label}"))
+                    // snooze keeps the label as it was: "timer 10m 5 min call" would read the 5 as more time
+                    .run("Snooze 10 min", "snooze 10m")
+                    .run("1 hour", "snooze 1h")
                     .run("Tomorrow", &format!("remind me tomorrow at 9 to {}", if label.is_empty() { "look at this" } else { &label }))
                     .btn("Got it, thanks", Act::Hide),
             );
@@ -3991,7 +3999,7 @@ impl App {
                     }
                 }
                 Event::Program(p) if self.notice_programs && !self.muted.iter().any(|m| m.eq_ignore_ascii_case(&p)) => {
-                    let r = brain::react_program(&p).run("Not about this", &format!("pref mute {}", sys::program_name(&p)));
+                    let r = brain::react_program(&p).run("Not about this", &format!("pref mute {}", p.to_lowercase())); // the name as it's matched: "adobe premiere pro"
                     self.pipe_up(r);
                 }
                 Event::Title(t) => self.window_title(&t),
