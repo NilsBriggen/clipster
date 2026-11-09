@@ -20512,3 +20512,45 @@ Counting down to {x}: {n} days. The hourglass is turned.
 Saved in your journal. I won't read it. Much.
 Into the journal it goes. The chronicle grows.
 Written down. Your story continues.
+
+## focus_no_meeting
+No more meetings today. The calendar is a white plain. Focus as long as you dare.
+Your calendar is empty until nightfall. No summons. Name your length, mortal.
+Nothing on the calendar today. The hours are yours. I am merely watching them.
+
+## focus_until_short
+{x} starts in {n} minutes. Too short for a session. Even I need longer to warm up my halo.
+Only {n} minutes until {x}. Not worth it. Drink some water. Stare at a plant. I'll keep watch.
+
+## kind_moved
+Done. {x} counts as {label} from now on. I have rewritten the ledger. Quietly.
+{x} is now filed under {label}. The great index bends to your will. This once.
+From now on {x} counts as {label}. My records have been amended. In ink. Silver ink.
+
+## workday_close_ask
+Close {x}? Save your work first: not every app asks before it closes. Some apps simply vanish. I know the feeling.
+Shall I close {x}? Anything unsaved may be lost to the void. Save first. The void does not give things back.
+
+## workday_close_none
+Your workday list only has links. Links cannot be closed by me. Your browser holds them. I hold grudges.
+There are no apps on your workday list to close, only links. Links are your browser's flock, not mine.
+
+## weather_umbrella
+take an umbrella
+bring an umbrella. The sky has opinions
+an umbrella. Trust the paperclip
+
+## weather_coat
+wear a coat
+coat weather. Even my wire shivers
+bring a warm jacket. I'd lend you mine, but I'm wire
+
+## today_nothing_coming
+Nothing coming up today. No meetings, no reminders. Suspicious. Enjoy it anyway.
+The day is empty of obligations. A clean desktop of a day. I approve.
+All clear. No summons, no deadlines. I'll guard the silence.
+
+## countdown_today
+Today is the day: {x}! The hourglass has run dry. Rejoice.
+{x} is today! I counted every single day. Every one. You're welcome.
+The wait is over. It's {x}. I shall hum the startup sound in celebration.

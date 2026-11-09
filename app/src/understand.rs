@@ -548,6 +548,11 @@ fn timers(s: &str, raw: &str) -> Option<Reply> {
     if has(s, &["stop focusing", "end focus", "end the focus", "stop the focus", "cancel focus", "cancel the focus", "focus off", "end my focus session"]) {
         return go("focus stop".into());
     }
+    // "focus until my next meeting [on the report]": the app knows when that is
+    if has(s, &["focus", "concentrate", "deep work"]) && has(s, &["until my next meeting", "until the next meeting", "until next meeting", "until my meeting", "until the meeting", "till my next meeting", "till the meeting", "until my next call", "until the next call", "before my next meeting", "before the next meeting"]) {
+        let label = ["meeting on ", "call on ", "meeting for ", "call for "].iter().find_map(|p| s.split_once(p).map(|(_, l)| l)).unwrap_or("");
+        return go(format!("focus untilnext {}", keep(raw, label)));
+    }
     // pause, go on, a few more minutes (before "focus …" starts a new session)
     if has(s, &["focus", "focus session", "session"]) && has(s, &["pause", "hold"]) {
         return go("focus pause".into());
@@ -1348,6 +1353,13 @@ fn notes(s: &str, raw: &str) -> Option<Reply> {
     }
     if let Some(h) = after(s, &["stop tracking ", "remove the habit ", "remove habit ", "delete the habit "]).filter(|h| crate::habits::known(h)) {
         return go(format!("habit remove {h}"));
+    }
+    if ["my habits", "show my habits", "habits", "my streaks", "show my streaks", "how are my habits"].contains(&s) {
+        return go("desk habits".into());
+    }
+    // the wrap-up's "close my work apps" (it asks first)
+    if has(s, &["close my work apps", "close my work programs", "close the work apps", "close my workday", "close all my work apps", "close my work stuff"]) {
+        return go("workday close".into());
     }
     // countdowns: "count down to my holiday on 2 december", "countdown to the wedding on june 3"
     if let Some(rest) = after(s, &["count down to ", "countdown to ", "start a countdown to ", "pin a countdown to "]) {
@@ -2590,6 +2602,28 @@ mod tests {
         assert!(matches!(eff("rickroll"), Effect::Open(u) if u.contains("dQw4w9WgXcQ")));
         // shell commands stay literal
         assert_eq!(eff("run echo hi"), Effect::Shell("echo hi".into()));
+    }
+
+    #[test]
+    fn today_tab_commands() {
+        let eff = |t: &str| respond(t).effect;
+        assert_eq!(eff("focus until my next meeting"), Effect::FocusUntilNext(String::new()));
+        assert_eq!(eff("focus until the meeting on the report"), Effect::FocusUntilNext("the report".into()));
+        assert_eq!(eff("close my work apps"), Effect::Workday("close".into()));
+        assert!(matches!(eff("show my habits"), Effect::OpenDesk(t) if t == "habits"));
+        assert_eq!(eff("kind move youtube work"), Effect::None, "only the kinds on the Count as list");
+        assert_eq!(eff("kind move youtube code"), Effect::KindMove("youtube".into(), "code".into()));
+        assert_eq!(eff("kind move youtube default"), Effect::KindMove("youtube".into(), "default".into()));
+        assert_eq!(eff("kind move ../x code"), Effect::None, "site ids are plain words");
+        assert_eq!(eff("pref weather on"), Effect::Pref("weather".into(), "on".into()));
+        // "I did my walk" only counts for a habit he knows
+        assert!(!matches!(eff("i did my homework"), Effect::Habit(_)));
+        crate::habits::set_names(&[crate::habits::Habit { name: "Walk".into(), days: vec![] }]);
+        assert_eq!(eff("i did my walk"), Effect::Habit("done walk".into()));
+        crate::habits::set_names(&[]);
+        // ordinary sentences stay ordinary
+        assert!(!matches!(eff("what kind of movie is that"), Effect::KindMove(..)));
+        assert!(!matches!(eff("the meeting went well"), Effect::FocusUntilNext(_)));
     }
 
     #[test]

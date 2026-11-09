@@ -643,6 +643,11 @@ fn best_piece<'a>(db: &'a [Section], title: &str, sites_only: bool) -> Option<(&
         .map(|(_, s, k)| (s, k))
 }
 
+/// The kind a `## site <kind> <id>` section belongs to ("youtube" → "video").
+pub fn site_kind(id: &str) -> Option<String> {
+    db().iter().find_map(|s| s.name.strip_prefix("site ")?.split_once(' ').filter(|(_, i)| *i == id).map(|(k, _)| k.to_string()))
+}
+
 fn kind_in(db: &[Section], title: &str) -> Option<String> {
     best_piece(db, title, false).map(|(_, k)| k.to_string())
 }

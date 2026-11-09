@@ -65,12 +65,14 @@ pub enum Effect {
     ForgetTemplate(String),
     DeskNet(crate::net::Query, String), // a web question from the Desk: its answer goes onto its page (kind: "words", "files"…)
     FocusPause(bool),                // true = pause, false = go on
+    FocusUntilNext(String),          // focus until 5 minutes before the next meeting (the app knows the calendar), on this label
+    KindMove(String, String),        // a site counts as another kind of app from now on: site id, kind ("default" = its own again)
     TimeReport,                      // where today's time went, by window kind
     AppTips,                         // a tip for the app you're in (the app knows which)
     Pref(String, String),            // a setting changed on the Desk's Settings tab: key, value
     Goals,                           // how today is going against the focus goal and the daily limits
     Clip(String),                    // the Desk's Clipboard tab: "copy h3", "pin h3", "unpin p1", "clear"
-    Workday(String),                 // "start", "add <app or link>", "remove 2"
+    Workday(String),                 // "start", "add <app or link>", "remove 2", "close" (asks first)
     Prank,                           // the April Fools window (also "prank", to see it)
     People(String),                  // "add Anna", "birthday Anna|3 March", "email Anna|a@b.ch", "every mum|14", "met mum", "last mum", "mail Anna", "forget Anna", "list", "birthdays", "import [file]"
     Calendar(String),                // "add <link>", "remove 2", "refresh", "day 2026-11-13", "next", "free <unix time>"
@@ -233,7 +235,7 @@ pub fn respond(input: &str) -> Reply {
 
 /// Strict commands ("joke", "timer 5m tea", "5 km to miles"). `None` = not a command I know.
 /// The settings the Desk's `pref <key> <value>` may change.
-pub const PREF_KEYS: &[&str] = &["persona", "tips", "clip", "programs", "windows", "checkin", "health", "updates", "sounds", "breaks", "dnd", "wrapup", "upkeepday", "workdayask", "quiet", "autostart", "goal", "budget", "classiclook", "desksize"];
+pub const PREF_KEYS: &[&str] = &["persona", "tips", "clip", "programs", "windows", "checkin", "health", "updates", "sounds", "breaks", "dnd", "wrapup", "upkeepday", "workdayask", "quiet", "autostart", "goal", "budget", "classiclook", "desksize", "weather"];
 
 /// Command words that are also ordinary English words only count in their command shape: "drink" alone is a
 /// cocktail, "drink water" is advice; "top" alone lists programs, "top 10 movies" is a question.
@@ -375,7 +377,7 @@ pub fn exact(input: &str) -> Option<Reply> {
         // the calendar: "calendar" (today), "calendar add <link>", "calendar day 2026-11-13", "calendar free <unix time>"
         // start my workday: "workday", "workday add firefox", "workday remove 2"
         "workday" if rest.is_empty() || rest == "start" => return Some(Reply::say("").effect(Effect::Workday("start".into()))),
-        "workday" if rest.starts_with("add ") || rest.starts_with("remove ") => return Some(Reply::say("").effect(Effect::Workday(rest.to_string()))),
+        "workday" if rest.starts_with("add ") || rest.starts_with("remove ") || rest == "close" => return Some(Reply::say("").effect(Effect::Workday(rest.to_string()))),
         "prank" if rest.is_empty() => return Some(Reply::say("").effect(Effect::Prank)),
         // people: "person birthday Anna|3 March", "people", "contacts import"
         "person" if ["add", "birthday", "email", "every", "met", "last", "mail", "forget", "note", "phone", "gift", "ungift", "rename"].contains(&rest.split(' ').next().unwrap_or("")) && rest.contains(' ') => {
@@ -432,6 +434,13 @@ pub fn exact(input: &str) -> Option<Reply> {
         "oldfiles" => return Some(net(Query::OldFiles(rest.to_string()), "Digging for big old files...")),
         "focus" if ["stop", "end", "cancel", "off", "done"].contains(&rest) => return Some(Reply::say("").effect(Effect::FocusStop)),
         "focus" if ["pause", "resume", "continue", "unpause"].contains(&rest) => return Some(Reply::say("").mood(Mood::Cool).effect(Effect::FocusPause(rest == "pause"))),
+        "focus" if rest == "untilnext" || rest.starts_with("untilnext ") => return Some(Reply::say("").effect(Effect::FocusUntilNext(rest[9..].trim().to_string()))),
+        // "kind move youtube work": that site counts as work from now on ("default": as it came)
+        "kind" if rest.starts_with("move ") => {
+            let (site, kind) = rest[5..].trim().split_once(' ')?;
+            let ok = |w: &str| !w.is_empty() && w.chars().all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || "_-".contains(c));
+            return (ok(site) && (COUNT_AS.contains(&kind) || kind == "default")).then(|| Reply::say("").effect(Effect::KindMove(site.to_string(), kind.to_string())));
+        }
         "focus" if rest.starts_with("extend") => {
             let r = rest.trim_start_matches("extend").trim().trim_start_matches("by ").trim();
             let secs = if r.is_empty() { 600 } else { parse_dur(r).map_or(600, |(s, _)| s) };
@@ -1007,6 +1016,14 @@ pub fn kind_group(kind: &str) -> usize {
 }
 
 const WORK_KINDS: &[&str] = &["code", "writing", "letter", "spreadsheet", "slides", "email", "inbox", "terminal", "pdf", "calendar", "meeting", "git", "qa", "jobhunt", "taxes", "learning", "files", "print", "notes", "design", "editing", "database", "diagrams", "remote", "projects", "translate", "docs", "cloud"];
+
+/// A site's id as a name: "youtube" → "Youtube", "google_docs" → "Google docs".
+pub fn site_name(id: &str) -> String {
+    crate::writing::cap_first(&id.replace(['_', '-'], " "))
+}
+
+/// The kinds a site can be moved to on the Desk ("Count as …"), work first.
+pub const COUNT_AS: &[&str] = &["code", "writing", "email", "meeting", "docs", "learning", "design", "projects", "chat", "news", "music", "video", "social", "shopping", "game", "other"];
 
 /// A window kind as people would say it.
 pub fn kind_name(kind: &str) -> String {

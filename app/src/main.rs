@@ -180,6 +180,11 @@ struct App {
     people: Vec<people::Person>,    // birthdays, keeping in touch, email addresses
     habits: Vec<habits::Habit>,     // a few daily ticks with streaks
     countdowns: Vec<(String, chrono::NaiveDate)>, // pinned countdowns: "Italy", 2 December
+    site_time: std::collections::BTreeMap<String, std::collections::BTreeMap<String, u64>>, // day -> site id ("youtube") -> seconds
+    kind_moves: std::collections::BTreeMap<String, String>, // site id -> the kind it counts as instead ("Count as" on the Desk)
+    weather_on: bool,                                       // the weather line on the Desk's Today tab
+    weather: Option<(Instant, String)>,                     // that line, and when it came
+    weather_asked: Option<Instant>,                         // a fetch is under way (or failed) since then
     workday: Vec<String>,           // what "start my workday" opens: apps and links
     workday_ask: bool,              // offer it on weekday mornings
     window_text: String,            // the active window's title, for comments that quote it ({title})
@@ -394,6 +399,11 @@ fn today_key() -> String {
     chrono::Local::now().format("%Y-%m-%d").to_string()
 }
 
+/// The id of a `## site <kind> <id>` section ("site video youtube" → "youtube"): what time per site is kept under.
+fn site_id(section: &str) -> Option<&str> {
+    section.strip_prefix("site ")?.split_once(' ').map(|(_, id)| id)
+}
+
 /// After an update: what to start once this window has closed (the new AppImage, or the Windows installer).
 static RELAUNCH: std::sync::Mutex<Option<std::path::PathBuf>> = std::sync::Mutex::new(None);
 
@@ -549,6 +559,11 @@ impl App {
             people: vec![],
             habits: vec![],
             countdowns: vec![],
+            site_time: Default::default(),
+            kind_moves: Default::default(),
+            weather_on: false,
+            weather: None,
+            weather_asked: None,
             workday: vec![],
             workday_ask: true,
             window_text: String::new(),
@@ -691,6 +706,8 @@ impl App {
                 let startup = app.sample_upkeep.startup.clone();
                 app.sample_upkeep.checks = upkeep::judge(&upkeep::Readings { disk: Some((175_000_000_000, 752_000_000_000)), trash: Some((2_400_000_000, 31)), temp: 43_000_000, uptime: 9 * 86_400, updates: Some(5), battery: Some(82), startup, loose: 24 });
                 app.focus_goal = 120; // so the pictures show a goal and a limit
+                let (habits, countdowns, sites, weather) = desk::sample_extras();
+                (app.habits, app.countdowns, app.site_time, app.weather_on, app.weather) = (habits, countdowns, sites, true, Some((Instant::now(), weather)));
                 app.budgets.insert("video".into(), 30);
             }
         } else if let Some(game) = play.clone().filter(|g| g != "welcome") {
@@ -807,6 +824,16 @@ impl App {
     fn show_desk(&mut self, ctx: &egui::Context, near: Option<Rect>) -> Vec<String> {
         let now = Instant::now();
         self.account_time();
+        // the weather line: asked while the Desk is open, once an hour (after a failure, again in 10 minutes)
+        let stale = self.weather.as_ref().is_none_or(|(t, _)| t.elapsed() > Duration::from_secs(3600));
+        if self.weather_on && self.screenshot.is_none() && stale && self.weather_asked.is_none_or(|t| t.elapsed() > Duration::from_secs(600)) {
+            self.weather_asked = Some(now);
+            let (tx, ctx2) = (self.tx.clone(), ctx.clone());
+            std::thread::spawn(move || {
+                let _ = tx.send(Event::Weather(net::weather_line().ok()));
+                ctx2.request_repaint();
+            });
+        }
         let today = chrono::Datelike::num_days_from_ce(&chrono::Local::now().date_naive()) as u64;
         let streak = |last: &str, n: &str| if self.stats.get(last).is_some_and(|d| d + 1 >= today) { self.stats.get(n).copied().unwrap_or(0) } else { 0 };
         let mut timers = self.timers.clone();
@@ -837,14 +864,19 @@ impl App {
             focus_goal: self.focus_goal,
             budgets: self.budgets.clone(),
             large: self.desk_large,
+            weather: self.weather_on,
         };
+        // today's time per site, with the kind each counts as now; the weather line while it's on
+        let mut sites: Vec<(String, String, u64)> = self.site_time.get(&today_key()).into_iter().flatten().filter_map(|(id, s)| Some((id.clone(), self.kind_moves.get(id).cloned().or_else(|| lines::site_kind(id))?, *s))).collect();
+        sites.sort_by_key(|s| std::cmp::Reverse(s.2));
+        let weather = self.weather.as_ref().filter(|_| self.weather_on).map(|(_, w)| w.clone());
         match &self.desk_sample {
             Some((t, k, f, c)) => {
-                let view = desk::View { timers: t.clone(), kind_time: k, focus_log: f, focus_now: Some(("the slides".into(), 18 * 60, 7 * 60, 40, false)), checkins: c, streaks: (4, 6, 31), status, quip, prefs, clips: &self.sample_clips, pins: &self.sample_clips[..2], reading: &self.sample_reading, me: sample_me(), upkeep: Some((&self.sample_upkeep, 120)), upkeep_running: false, backup_check: upkeep::backup_check(true, Some(backup::now() - 9 * 86_400), backup::now(), true), backup: desk::Backup { sources: &self.backup_sources, target: "/run/media/you/BACKUP", last: Some(backup::now() - 9 * 86_400), result: "214 copied (1.3 GB), 4120 unchanged", progress: None }, events: &self.sample_events, calendars: &self.sample_calendars, calendar_note: "Checked 4 min ago".into(), calendar_problems: 0, answer: self.desk_answer.as_ref(), name: "Sam".into(), people: &self.sample_people, workday: &self.sample_workday };
+                let view = desk::View { timers: t.clone(), kind_time: k, focus_log: f, focus_now: Some(("the slides".into(), 18 * 60, 7 * 60, 40, false)), checkins: c, streaks: (4, 6, 31), status, quip, prefs, clips: &self.sample_clips, pins: &self.sample_clips[..2], reading: &self.sample_reading, me: sample_me(), upkeep: Some((&self.sample_upkeep, 120)), upkeep_running: false, backup_check: upkeep::backup_check(true, Some(backup::now() - 9 * 86_400), backup::now(), true), backup: desk::Backup { sources: &self.backup_sources, target: "/run/media/you/BACKUP", last: Some(backup::now() - 9 * 86_400), result: "214 copied (1.3 GB), 4120 unchanged", progress: None }, events: &self.sample_events, calendars: &self.sample_calendars, calendar_note: "Checked 4 min ago".into(), calendar_problems: 0, answer: self.desk_answer.as_ref(), name: "Sam".into(), people: &self.sample_people, workday: &self.sample_workday, habits: &self.habits, countdowns: &self.countdowns, sites, moved: &self.kind_moves, weather };
                 self.desk.show(ctx, &view, look, near)
             }
             None => {
-                let view = desk::View { timers, kind_time: &self.kind_time, focus_log: &self.focus_log, focus_now, checkins: &self.checkin_days, streaks, status, quip, prefs, clips: &self.clip_history, pins: &self.pins, reading: &self.reading, me: about_me(&self.facts, self.birthday, &self.stats, &self.unlocked, &self.highscores, self.friendship), upkeep: self.upkeep.as_ref().map(|(t, r)| (r, t.elapsed().as_secs())), upkeep_running: self.upkeep_running, backup_check: self.backup_check(), backup: desk::Backup { sources: &self.backup_sources, target: &self.backup_target, last: self.backup_last, result: &self.backup_result, progress: self.backup_progress }, events: &self.events, calendars: &self.calendars, calendar_note: self.calendar_note(), calendar_problems: self.calendar_problems.len(), answer: self.desk_answer.as_ref(), name: self.name.clone(), people: &self.people, workday: &self.workday };
+                let view = desk::View { timers, kind_time: &self.kind_time, focus_log: &self.focus_log, focus_now, checkins: &self.checkin_days, streaks, status, quip, prefs, clips: &self.clip_history, pins: &self.pins, reading: &self.reading, me: about_me(&self.facts, self.birthday, &self.stats, &self.unlocked, &self.highscores, self.friendship), upkeep: self.upkeep.as_ref().map(|(t, r)| (r, t.elapsed().as_secs())), upkeep_running: self.upkeep_running, backup_check: self.backup_check(), backup: desk::Backup { sources: &self.backup_sources, target: &self.backup_target, last: self.backup_last, result: &self.backup_result, progress: self.backup_progress }, events: &self.events, calendars: &self.calendars, calendar_note: self.calendar_note(), calendar_problems: self.calendar_problems.len(), answer: self.desk_answer.as_ref(), name: self.name.clone(), people: &self.people, workday: &self.workday, habits: &self.habits, countdowns: &self.countdowns, sites, moved: &self.kind_moves, weather };
                 self.desk.show(ctx, &view, look, near)
             }
         }
@@ -870,6 +902,9 @@ impl App {
         }
         let kind = self.window_kind.clone().unwrap_or_else(|| "other".into());
         *self.kind_time.entry(today_key()).or_default().entry(kind.clone()).or_insert(0) += secs;
+        if let Some(site) = self.window_site.as_deref().and_then(site_id) {
+            *self.site_time.entry(today_key()).or_default().entry(site.to_string()).or_insert(0) += secs;
+        }
         if let Some(f) = self.focus.as_mut().filter(|f| f.paused_at.is_none()) {
             if brain::DISTRACTIONS.contains(&kind.as_str()) {
                 f.distracted += secs;
@@ -1492,13 +1527,18 @@ impl App {
         if title.to_lowercase().contains("clipster") || games::NAMES.iter().any(|(_, t)| *t == title) || prank {
             return;
         }
-        let kind = lines::window_kind(title).or_else(|| Some("other".into()));
+        // a site you moved on the Desk ("Count as work") counts as that kind
+        let site = lines::window_site(title);
+        let moved = site.as_deref().and_then(site_id).and_then(|id| self.kind_moves.get(id)).cloned();
+        let kind = moved.or_else(|| lines::window_kind(title)).or_else(|| Some("other".into()));
         self.window_text = title.to_string();
-        self.window_site = lines::window_site(title);
-        if kind != self.window_kind {
+        if kind != self.window_kind || site != self.window_site {
             self.account_time(); // the time so far belongs to the window you just left
-            (self.window_kind, self.window_since) = (kind.clone(), Instant::now());
+            if kind != self.window_kind {
+                (self.window_kind, self.window_since) = (kind.clone(), Instant::now());
+            }
         }
+        self.window_site = site;
         if let Some(k) = kind.filter(|k| !brain::TIME_SINKS.contains(&k.as_str()) && k != "other") {
             self.window_comment(&k);
         }
@@ -1818,7 +1858,7 @@ impl App {
     fn snapshot(&self) -> String {
         serde_json::json!({
             "tips_every": self.tips_every, "notice_clip": self.notice_clip, "notice_programs": self.notice_programs, "notice_windows": self.notice_windows, "checkin": self.checkin, "facts": self.facts, "kind_time": self.kind_time, "focus_log": self.focus_log, "desk_look": if self.desk_modern { "modern" } else { "classic" }, "desk_size": if self.desk_large { "large" } else { "normal" }, "checkin_days": self.checkin_days,
-            "pins": self.pins, "reading": self.reading, "calendars": self.calendars, "people": self.people.iter().map(|p| p.to_json()).collect::<Vec<_>>(), "habits": self.habits.iter().map(|h| h.to_json()).collect::<Vec<_>>(), "countdowns": self.countdowns.iter().map(|(l, d)| serde_json::json!([l, d.to_string()])).collect::<Vec<_>>(), "workday": self.workday, "workday_ask": self.workday_ask, "welcome_seen": self.welcome_seen, "backup_sources": self.backup_sources, "backup_target": self.backup_target, "backup_last": self.backup_last, "backup_result": self.backup_result, "dnd_restore": self.dnd_restore, "dnd": self.dnd, "wrapup": self.wrapup, "upkeep_day": self.upkeep_day, "focus_goal": self.focus_goal, "budgets": self.budgets,
+            "pins": self.pins, "reading": self.reading, "calendars": self.calendars, "people": self.people.iter().map(|p| p.to_json()).collect::<Vec<_>>(), "habits": self.habits.iter().map(|h| h.to_json()).collect::<Vec<_>>(), "countdowns": self.countdowns.iter().map(|(l, d)| serde_json::json!([l, d.to_string()])).collect::<Vec<_>>(), "site_time": self.site_time, "kind_moves": self.kind_moves, "weather": self.weather_on, "workday": self.workday, "workday_ask": self.workday_ask, "welcome_seen": self.welcome_seen, "backup_sources": self.backup_sources, "backup_target": self.backup_target, "backup_last": self.backup_last, "backup_result": self.backup_result, "dnd_restore": self.dnd_restore, "dnd": self.dnd, "wrapup": self.wrapup, "upkeep_day": self.upkeep_day, "focus_goal": self.focus_goal, "budgets": self.budgets,
             "notice_health": self.notice_health, "check_updates": self.check_updates, "update_told": self.update_told, "sounds": self.sounds, "breaks": self.breaks, "name": self.name,
             "hat": self.hat, "skin": self.skin, "friendship": self.friendship, "highscores": self.highscores, "birthday": self.birthday.map(|(m, d)| [m, d]), "stats": self.stats, "unlocked": self.unlocked, "explored": self.explored, "persona": if self.unhinged { "unhinged" } else { "boring" }, "anchor": self.anchor.or(self.saved_anchor).map(|a| [a.x, a.y]),
             "timers": self.timers.iter().map(|t| serde_json::json!([t.at, t.label, t.every, t.id, t.rule])).collect::<Vec<_>>(),
@@ -1879,6 +1919,12 @@ impl App {
             let kinds = kinds.as_object().into_iter().flatten().map(|(k, s)| (k.clone(), s.as_u64().unwrap_or(0))).collect();
             self.kind_time.insert(day.clone(), kinds);
         }
+        for (day, sites) in v["site_time"].as_object().into_iter().flatten().filter(|(d, _)| **d > week_ago) {
+            let sites = sites.as_object().into_iter().flatten().map(|(k, s)| (k.clone(), s.as_u64().unwrap_or(0))).collect();
+            self.site_time.insert(day.clone(), sites);
+        }
+        self.kind_moves = v["kind_moves"].as_object().into_iter().flatten().filter_map(|(k, m)| Some((k.clone(), m.as_str().filter(|m| brain::COUNT_AS.contains(m))?.to_string()))).collect();
+        self.weather_on = v["weather"].as_bool().unwrap_or(false);
         for f in v["focus_log"].as_array().into_iter().flatten() {
             if let (Some(d), Some(m), Some(fo), Some(di), Some(l)) = (f[0].as_str(), f[1].as_u64(), f[2].as_u64(), f[3].as_u64(), f[4].as_str()) {
                 self.focus_log.push((d.into(), m, fo, di, l.into()));
@@ -1928,7 +1974,9 @@ impl App {
         self.workday = strings("workday");
         self.habits = v["habits"].as_array().into_iter().flatten().filter_map(habits::Habit::from_json).collect();
         habits::set_names(&self.habits);
-        self.countdowns = v["countdowns"].as_array().into_iter().flatten().filter_map(|c| Some((c[0].as_str()?.to_string(), chrono::NaiveDate::parse_from_str(c[1].as_str()?, "%Y-%m-%d").ok()?))).collect();
+        // a countdown cheers on its day and is gone the next
+        let today = chrono::Local::now().date_naive();
+        self.countdowns = v["countdowns"].as_array().into_iter().flatten().filter_map(|c| Some((c[0].as_str()?.to_string(), chrono::NaiveDate::parse_from_str(c[1].as_str()?, "%Y-%m-%d").ok()?))).filter(|c| c.1 >= today).collect();
         if v["backup_sources"].is_array() {
             self.backup_sources = strings("backup_sources");
         }
@@ -2191,6 +2239,37 @@ impl App {
                 }
                 None => r = Reply::say("Nothing has rung yet, so there's nothing to snooze.").mood(Mood::Think),
             },
+            Effect::FocusUntilNext(label) => {
+                // until 5 minutes before the next timed event today
+                let now = chrono::Local::now().naive_local();
+                match self.events.iter().filter(|e| !e.all_day && e.start > now && e.start.date() == now.date()).min_by_key(|e| e.start) {
+                    None => r = Reply::say(lines::pick("focus_no_meeting")).mood(Mood::Cool).run("Focus 25 minutes", "focus 25m").run("Focus 50 minutes", "focus 50m"),
+                    Some(e) => {
+                        let mins = (e.start - now).num_minutes() - 5;
+                        if mins < 10 {
+                            r = Reply::say(lines::pick("focus_until_short").replace("{x}", &e.title).replace("{n}", &(mins + 5).to_string())).mood(Mood::Think);
+                        } else {
+                            self.run(ctx, &format!("focus {}m {label}", mins.min(240)));
+                            return;
+                        }
+                    }
+                }
+            }
+            Effect::KindMove(site, kind) => {
+                if kind == "default" {
+                    self.kind_moves.remove(&site);
+                } else {
+                    self.kind_moves.insert(site.clone(), kind.clone());
+                }
+                // the window you're in now counts the new way at once (the time so far still the old way)
+                self.account_time();
+                self.window_kind = None;
+                let title = self.window_text.clone();
+                if !title.is_empty() {
+                    self.window_title(&title);
+                }
+                r.text = lines::pick("kind_moved").replace("{x}", &brain::site_name(&site)).replace("{label}", &if kind == "default" { "what it was".to_string() } else { brain::kind_name(&kind) });
+            }
             Effect::FocusExtend(_) | Effect::FocusPause(_) if self.focus.is_none() => r = Reply::say("There's no focus session running. Start one with: focus 25 minutes").run("Focus 25 minutes", "focus 25m"),
             Effect::FocusExtend(secs) => {
                 if let Some(f) = &mut self.focus {
@@ -2271,6 +2350,10 @@ impl App {
                         }
                     }
                     "desksize" => self.desk_large = value == "large",
+                    "weather" => {
+                        self.weather_on = on;
+                        self.weather_asked = None;
+                    }
                     "classiclook" => {
                         self.hat = Some("none".into());
                         self.skin = "silver".into();
@@ -2458,6 +2541,16 @@ impl App {
                         }
                         None => Reply::say("There's nothing with that number on your workday.").mood(Mood::Think),
                     },
+                    "close" => {
+                        // the apps on the workday list (links can't be closed); it asks first, since not every app asks to save
+                        let apps: Vec<String> = self.workday.iter().filter(|w| !w.contains("://") && !w.starts_with("www.")).filter_map(|w| w.split_whitespace().next()).map(|w| sys::program_name(std::path::Path::new(w).file_stem().and_then(|s| s.to_str()).unwrap_or(w))).filter(|w| !w.is_empty()).collect();
+                        if apps.is_empty() {
+                            Reply::say(lines::pick("workday_close_none")).mood(Mood::Think)
+                        } else {
+                            let cmd = apps.iter().map(|a| sys::close_command(a)).collect::<Vec<_>>().join("; ");
+                            Reply::say(lines::pick("workday_close_ask").replace("{x}", &apps.join(", "))).mood(Mood::Think).run("Yes, close them", &format!("run {cmd}")).btn("Not now", Act::Hide)
+                        }
+                    }
                     _ if self.workday.is_empty() => Reply::say(lines::pick("workday_empty")).mood(Mood::Think).run("Set it up", "desk workday"),
                     _ => {
                         // each item through "open", so app names, menu entries, Start-menu names and links all work
@@ -2838,7 +2931,17 @@ impl App {
             self.prank = prank_lines();
         }
         // people: once a day after 8:00, a birthday coming up (or today), or someone you wanted to keep in touch with
-        let can_nudge = self.balloon.is_none() && !self.quiet() && self.input.is_empty() && self.focus.is_none() && self.screenshot.is_none();
+        let mut can_nudge = self.balloon.is_none() && !self.quiet() && self.input.is_empty() && self.focus.is_none() && self.screenshot.is_none();
+        // a countdown's day: he cheers once (it's gone tomorrow)
+        if can_nudge && t > 90.0 && self.stats.get("countdown_day") != Some(&day_num) {
+            let today = chrono::Local::now().date_naive();
+            if let Some((label, _)) = self.countdowns.iter().find(|(_, d)| *d == today) {
+                self.stats.insert("countdown_day".into(), day_num);
+                let text = lines::pick("countdown_today").replace("{x}", label);
+                self.pipe_up(Reply::say(text).mood(Mood::Party).btn("Yay!", Act::Hide));
+                can_nudge = false;
+            }
+        }
         if chrono::Timelike::hour(&chrono::Local::now()) >= 8 && self.stats.get("people_day") != Some(&day_num) && t > 120.0 && !self.people.is_empty() && can_nudge {
             self.stats.insert("people_day".into(), day_num);
             let today = chrono::Local::now().date_naive();
@@ -2992,6 +3095,11 @@ impl App {
                 }
                 Event::BackupProgress(done, total, bytes) => self.backup_progress = Some((done, total, bytes)),
                 Event::Calendar(generation, _, _) if generation != self.calendar_gen => {} // the list changed since
+                Event::Weather(line) => {
+                    if let Some(l) = line {
+                        self.weather = Some((Instant::now(), l));
+                    }
+                }
                 Event::Calendar(_, events, problems) => {
                     self.calendar_running = false;
                     calendar::set_cache(&events);

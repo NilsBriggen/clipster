@@ -360,6 +360,34 @@ fn sky(code: i64) -> (&'static str, &'static str) {
     }
 }
 
+/// One line for the Desk's Today tab, for your `city` (else wherever this computer is): "⛅ 12° · Partly cloudy · rain
+/// from 15:00 · take an umbrella". Asked only while the Desk is open and the weather line is switched on.
+pub fn weather_line() -> Result<String, String> {
+    let (_, lat, lon) = locate("")?;
+    let v = get(&format!("https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current=temperature_2m,weather_code&hourly=precipitation_probability&daily=temperature_2m_min&timezone=auto&forecast_days=1"))?;
+    let hour = |t: &Value| s(t).get(11..13).and_then(|h| h.parse::<u32>().ok());
+    let hours: Vec<(u32, f64)> = v["hourly"]["time"].as_array().into_iter().flatten().zip(v["hourly"]["precipitation_probability"].as_array().into_iter().flatten()).filter_map(|(t, p)| Some((hour(t)?, p.as_f64()?))).collect();
+    let code = v["current"]["weather_code"].as_i64().ok_or("no weather")?;
+    Ok(weather_words(f(&v["current"]["temperature_2m"]), code, f(&v["daily"]["temperature_2m_min"][0]), &hours, hour(&v["current"]["time"]).unwrap_or(0)))
+}
+
+/// The weather line from its readings: the sky now, when rain is likely later (50 % or more), and an umbrella or a coat.
+pub fn weather_words(temp: f64, code: i64, low: f64, hours: &[(u32, f64)], now: u32) -> String {
+    let (icon, desc) = sky(code);
+    let mut parts = vec![format!("{icon} {temp:.0}° · {desc}")];
+    let raining = matches!(code, 51..=67 | 80..=82 | 95..=99);
+    let wet = hours.iter().find(|(h, p)| *h >= now && *p >= 50.0).map(|(h, _)| *h);
+    if let Some(h) = wet.filter(|h| !raining && *h > now) {
+        parts.push(format!("rain from {h:02}:00"));
+    }
+    if raining || wet.is_some() {
+        parts.push(lines::pick("weather_umbrella"));
+    } else if low < 8.0 {
+        parts.push(lines::pick("weather_coat"));
+    }
+    parts.join(" · ")
+}
+
 fn place(kind: Kind, where_: &str) -> Result<Reply, String> {
     let (name, lat, lon) = locate(where_)?;
     let v = get(&format!(
@@ -860,6 +888,16 @@ mod tests {
         assert_eq!(home_or("Rome", Some("Bern")), "Rome");
         assert_eq!(home_or("", None), "", "unknown home: by internet address");
         assert_eq!(home_or("here", Some("Bern")), "here");
+    }
+
+    #[test]
+    fn the_weather_line() {
+        let later = weather_words(12.4, 2, 6.0, &[(13, 10.0), (14, 30.0), (15, 60.0), (16, 80.0)], 13);
+        assert!(later.starts_with("⛅ 12° · Partly cloudy · rain from 15:00 · "), "{later}");
+        let now = weather_words(9.0, 61, 7.0, &[(13, 90.0)], 13);
+        assert!(!now.contains("rain from"), "it's raining already: {now}");
+        assert_eq!(weather_words(20.0, 0, 14.0, &[(9, 5.0)], 9), "☀ 20° · Clear sky", "nothing to bring");
+        assert_eq!(weather_words(3.0, 0, -2.0, &[], 9).matches(" · ").count(), 2, "a cold dry day gets the coat line");
     }
 
     #[test]

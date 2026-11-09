@@ -27,7 +27,7 @@ mod write;
 mod you;
 
 use look::{tok, Kind};
-pub use sample::sample;
+pub use sample::{sample, sample_extras};
 use sample::sample_files;
 
 pub const TABS: [&str; 9] = ["Today", "Week", "To-do", "Agenda", "Clipboard", "Write", "Upkeep", "You & me", "Settings"];
@@ -36,7 +36,8 @@ pub const TABS: [&str; 9] = ["Today", "Week", "To-do", "Agenda", "Clipboard", "W
 pub fn tab(name: &str) -> Option<usize> {
     let t = match name.trim().to_lowercase().replace('-', "").as_str() {
         "plan" | "planweek" => "todo".to_string(), // plan my day, plan next week
-        "wrapup" | "workday" => "today".to_string(),
+        "wrapup" | "workday" | "habits" | "countdowns" => "today".to_string(),
+        t if t.starts_with("kind ") => "today".to_string(), // what made up one kind of time today
         "checkup" | "tidy" | "backup" | "startup" | "rightnow" | "space" => "upkeep".to_string(),
         t if t.starts_with("list ") => "todo".to_string(), // "list shopping": a named list on the To-do tab
         "links" | "files" => "clipboard".to_string(),      // the saved links and files pages
@@ -122,6 +123,11 @@ pub struct View<'a> {
     pub name: String,                         // what he calls you (letters are signed with it)
     pub people: &'a [crate::people::Person],
     pub workday: &'a [String], // what "start my workday" opens
+    pub habits: &'a [crate::habits::Habit],
+    pub countdowns: &'a [(String, chrono::NaiveDate)],
+    pub sites: Vec<(String, String, u64)>, // today's time per site: id, the kind it counts as, seconds (most first)
+    pub moved: &'a BTreeMap<String, String>, // sites you moved to another kind: id -> kind
+    pub weather: Option<String>,             // the weather line, when it's on and came
 }
 
 /// What the Backup page shows.
@@ -173,6 +179,7 @@ pub struct Prefs {
     pub budgets: BTreeMap<String, u64>,
     pub workday_ask: bool,
     pub large: bool, // the Desk's larger size
+    pub weather: bool, // the weather line on Today
 }
 
 #[derive(Clone, Copy, PartialEq)]
@@ -253,6 +260,11 @@ pub struct Desk {
     letter_to: String,                 // who it goes to (an email address)
     letter_name: String,               // a name for "Save as my template"
     word: String,                      // the word in the Words panel
+    count_as: Option<String>,          // the site being filed under another kind (Today's "Count as…")
+    journal_text: String,              // the wrap-up's line for the journal
+    habit_text: String,
+    countdown_label: String,
+    countdown_date: String,
 }
 
 /// A card over the page with its own controls.
@@ -265,6 +277,8 @@ pub(super) enum Card {
     Qr(String),             // a QR code of this text
     NewList,
     Habits,
+    Kind(String), // what made up one kind of time today
+    Countdown,
 }
 
 impl Desk {
@@ -284,6 +298,14 @@ impl Desk {
     pub fn set_tab(&mut self, name: &str) {
         if let Some(i) = tab(name) {
             self.tab = i;
+        }
+        self.card = match name {
+            "habits" => Some(Card::Habits),
+            "countdowns" => Some(Card::Countdown),
+            _ => name.strip_prefix("kind ").map(|k| Card::Kind(k.trim().to_string())),
+        };
+        if self.card.is_some() {
+            self.tab = 0;
         }
         self.planning = name == "plan";
         self.list_tab = name.strip_prefix("list ").map(|l| l.trim().to_lowercase());

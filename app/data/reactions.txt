@@ -20255,3 +20255,45 @@ Counting down to {x}: {n} days.
 Saved in your journal.
 In your journal it goes.
 Written down. Your journal is a little longer.
+
+## focus_no_meeting
+No more meetings today. Focus as long as you like.
+Your calendar is clear for the rest of the day. Pick a length.
+Nothing on the calendar today. How long do you want to focus?
+
+## focus_until_short
+{x} starts in {n} minutes. That's too short for a focus session. Maybe a quick tidy-up instead?
+Only {n} minutes until {x}. Not worth starting a session. Get a glass of water instead.
+
+## kind_moved
+Done. {x} counts as {label} from now on.
+{x} is now filed under {label}.
+From now on {x} counts as {label}.
+
+## workday_close_ask
+Close {x}? Save your work first: not every app asks before it closes.
+Shall I close {x}? Anything unsaved might be lost, so save first.
+
+## workday_close_none
+Your workday list only has links. I can't close those, but your browser can.
+There are no apps on your workday list to close, only links.
+
+## weather_umbrella
+take an umbrella
+bring an umbrella
+an umbrella would be wise
+
+## weather_coat
+wear a coat
+it's coat weather
+bring a warm jacket
+
+## today_nothing_coming
+Nothing coming up today. A rare, quiet day.
+Nothing on the calendar, no reminders, nothing due. Enjoy it.
+All clear: no meetings, no reminders, nothing due.
+
+## countdown_today
+Today's the day: {x}!
+{x} is today! The countdown is over.
+The wait is over. It's {x} today.

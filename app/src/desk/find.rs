@@ -200,6 +200,11 @@ mod tests {
             name: String::new(),
             people: &people,
             workday: &[],
+            habits: &[],
+            countdowns: &[],
+            sites: vec![],
+            moved: &BTreeMap::new(),
+            weather: None,
         };
         let kinds = |q: &str| search(q, &view, &files).iter().map(|h| (h.kind, h.go.clone())).collect::<Vec<_>>();
         assert!(kinds("printer").contains(&("Note", "notes".into())), "{:?}", kinds("printer"));

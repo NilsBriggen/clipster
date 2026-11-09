@@ -17,6 +17,7 @@ pub enum Event {
     BackupProgress(usize, usize, u64),                // files done, files to copy, bytes copied
     BackupDone(Result<crate::backup::Summary, String>),
     Calendar(u64, Vec<crate::calendar::Event>, Vec<String>), // which fetch, the next weeks' events, the sources that failed
+    Weather(Option<String>),                                 // the Today tab's weather line (None: couldn't get it)
 }
 
 /// `titles`: also watch the active window's title (where the KWin script doesn't report it).

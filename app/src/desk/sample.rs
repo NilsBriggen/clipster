@@ -49,3 +49,18 @@ pub fn sample() -> (Vec<crate::timers::Timer>, BTreeMap<String, BTreeMap<String,
     (timers, kind_time, focus_log, checkins)
 }
 
+
+/// Made-up habits, countdowns, time per site and a weather line for screenshots.
+#[allow(clippy::type_complexity)]
+pub fn sample_extras() -> (Vec<crate::habits::Habit>, Vec<(String, chrono::NaiveDate)>, BTreeMap<String, BTreeMap<String, u64>>, String) {
+    let today = chrono::Local::now().date_naive();
+    let ago = |n: u64| today - chrono::Days::new(n);
+    let habits = vec![
+        crate::habits::Habit { name: "Walk".into(), days: (1..7).map(ago).rev().collect() },
+        crate::habits::Habit { name: "2 l water".into(), days: vec![ago(4), ago(2), ago(1), today] },
+        crate::habits::Habit { name: "Read 10 pages".into(), days: vec![ago(5), ago(3)] },
+    ];
+    let countdowns = vec![("Italy".to_string(), today + chrono::Days::new(23))];
+    let sites = BTreeMap::from([(today.format("%Y-%m-%d").to_string(), BTreeMap::from([("youtube".to_string(), 21 * 60), ("netflix".to_string(), 6 * 60), ("github".to_string(), 48 * 60)]))]);
+    (habits, countdowns, sites, "⛅ 12° · Partly cloudy · rain from 15:00 · take an umbrella".into())
+}
