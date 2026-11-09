@@ -234,7 +234,9 @@ impl Desk {
         look.input(ui, name_r, Id::unique("letter-name"), &mut self.letter_name, "my template's name");
         let save = Rect::from_min_size(pos2(name_r.max.x + 6.0, y), vec2(144.0, ctl));
         if look.button(ui, save, Id::unique("letter-save"), "Save as my template", !self.letter_name.trim().is_empty()).on_disabled_hover_text("Give it a name first").clicked() {
-            out.push(format!("template save {}|{}", self.letter_name.trim(), filled.replace('\n', "\\n")));
+            // the blanks you filled, but {date} and {name} stay placeholders: the template is filled again each time
+            let kept = crate::writing::fill_fields(&template, &self.letter_values);
+            out.push(format!("template save {}|{}", self.letter_name.trim(), kept.replace('\n', "\\n")));
             self.letter_name.clear();
         }
         if id.starts_with("my_") && look.danger_btn(ui, Rect::from_min_size(pos2(right.min.x + 206.0, y), vec2(80.0, ctl)), Id::unique("letter-forget"), "Forget it", true).on_hover_text("Remove this template of yours").clicked() {

@@ -174,8 +174,22 @@ pub mod win {
         pub size: u32,
         pub time: u32, // GetTickCount of the last key or mouse input
     }
+    /// A window message (for the hot keys).
+    #[repr(C)]
+    #[derive(Default)]
+    pub struct Msg {
+        pub hwnd: isize,
+        pub message: u32,
+        pub wparam: usize,
+        pub lparam: isize,
+        pub time: u32,
+        pub pt: Point,
+        pub private: u32,
+    }
     #[link(name = "user32")]
     extern "system" {
+        pub fn RegisterHotKey(hwnd: isize, id: i32, modifiers: u32, key: u32) -> i32; // 0 = taken by another program
+        pub fn PeekMessageW(msg: *mut Msg, hwnd: isize, min: u32, max: u32, remove: u32) -> i32;
         pub fn GetCursorPos(p: *mut Point) -> i32;
         pub fn GetAsyncKeyState(key: i32) -> i16;
         pub fn GetForegroundWindow() -> isize;
@@ -243,8 +257,8 @@ pub fn locale_region() -> Option<String> {
 /// "de_CH.UTF-8" → "CH", "en-US" → "US".
 pub fn region_of(tag: &str) -> Option<String> {
     let base = tag.split(['.', '@']).next().unwrap_or("");
-    let region = base.split(['_', '-']).nth(1)?;
-    (region.len() == 2 && region.chars().all(|c| c.is_ascii_alphabetic())).then(|| region.to_uppercase())
+    // the first two-letter part after the language: "de-CH", and "zh-Hant-TW" or "sr-Latn-RS" with a script between
+    base.split(['_', '-']).skip(1).find(|p| p.len() == 2 && p.chars().all(|c| c.is_ascii_alphabetic())).map(|r| r.to_uppercase())
 }
 
 // ---------- what you're working in ----------
@@ -399,8 +413,10 @@ pub fn parse_top_json(out: &str) -> Vec<(String, u64, f32)> {
 pub fn top_programs(n: usize) -> Vec<(String, u64, f32)> {
     if cfg!(windows) {
         let ps = "$a=@{}; Get-Process | % { $a[$_.Id]=$_.CPU }; Start-Sleep -Milliseconds 500; Get-Process | Group-Object Name | % { $cpu=0; foreach($p in $_.Group){ if($a.ContainsKey($p.Id) -and $p.CPU){ $cpu += ($p.CPU - $a[$p.Id]) } }; [pscustomobject]@{Name=$_.Name; Mem=($_.Group | Measure-Object WorkingSet64 -Sum).Sum; Cpu=[math]::Round($cpu*200,1)} } | Sort-Object Mem -Descending | Select-Object -First 12 | ConvertTo-Json -Compress";
-        let out = shell(ps).output().map(|o| String::from_utf8_lossy(&o.stdout).into_owned()).unwrap_or_default();
+        // with a time limit (it runs every 3 s while the page is open), and without the PowerShell that measures
+        let out = run_for(shell(ps), 10).map(|(_, out)| out).unwrap_or_default();
         let mut v = parse_top_json(&out);
+        v.retain(|p| !p.0.eq_ignore_ascii_case("powershell") && !p.0.eq_ignore_ascii_case("pwsh"));
         v.truncate(n);
         return v;
     }
@@ -487,20 +503,29 @@ pub fn program_memory_kb(name: &str) -> Vec<u64> {
 
 /// One of Clipster's sounds ("message", "alarm-clock-elapsed", "complete"), if the system has it.
 pub fn play_sound(name: &str) {
-    if cfg!(windows) {
+    #[cfg(windows)]
+    {
         let file = match name {
             "alarm-clock-elapsed" => "Alarm01.wav",
             "complete" => "tada.wav",
             _ => "Windows Notify System Generic.wav",
         };
-        let path = format!("C:\\Windows\\Media\\{file}");
-        if std::path::Path::new(&path).exists() {
-            let _ = detach(&mut shell(&format!("(New-Object Media.SoundPlayer '{path}').PlaySync()")));
-        }
-    } else {
+        // straight through PlaySoundW (no PowerShell started for each sound): from the file, don't wait, no beep
+        let path = win::wide(&format!("C:\\Windows\\Media\\{file}"));
+        unsafe { win::PlaySoundW(path.as_ptr(), 0, 0x0002_0000 | 0x0001 | 0x0002) };
+    }
+    #[cfg(not(windows))]
+    {
         let file = format!("/usr/share/sounds/freedesktop/stereo/{name}.oga");
-        if std::path::Path::new(&file).exists() {
-            let _ = detach(command("paplay").arg(file));
+        if !std::path::Path::new(&file).exists() {
+            return;
+        }
+        // PulseAudio's player, or PipeWire's where there's no paplay
+        for player in ["paplay", "pw-play"] {
+            if let Ok(mut child) = command(player).arg(&file).stderr(std::process::Stdio::null()).spawn() {
+                std::thread::spawn(move || child.wait()); // no zombies left behind
+                break;
+            }
         }
     }
 }
@@ -609,10 +634,21 @@ pub fn autostart_path() -> PathBuf {
 /// Windows starts Clipster from the per-user Run key (no console window, and any characters in the path work).
 const RUN_KEY: &str = "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run";
 
+/// Where Task Manager keeps start-up apps switched on and off.
+const APPROVED_KEY: &str = "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\StartupApproved\\Run";
+
+/// `reg query` of a StartupApproved value: switched off when the first byte is odd (03 = off, 02 = on).
+pub fn approved_off(reg_out: &str) -> bool {
+    reg_out.split_whitespace().skip_while(|t| *t != "REG_BINARY").nth(1).and_then(|hex| u8::from_str_radix(hex.get(..2)?, 16).ok()).is_some_and(|b| b & 1 == 1)
+}
+
 /// Clipster starts with the computer.
 pub fn autostart_on() -> bool {
     if cfg!(windows) {
-        command("reg").args(["query", RUN_KEY, "/v", "Clipster"]).output().is_ok_and(|o| o.status.success()) || autostart_path().exists()
+        // the Run entry, and not switched off in Task Manager (which keeps the entry and marks it in StartupApproved)
+        let run = command("reg").args(["query", RUN_KEY, "/v", "Clipster"]).output().is_ok_and(|o| o.status.success());
+        let approved = command("reg").args(["query", APPROVED_KEY, "/v", "Clipster"]).output().map(|o| String::from_utf8_lossy(&o.stdout).into_owned()).unwrap_or_default();
+        run && !approved_off(&approved) || autostart_path().exists()
     } else {
         autostart_path().exists()
     }
@@ -637,6 +673,8 @@ pub fn set_autostart(on: bool) -> std::io::Result<()> {
     };
     if cfg!(windows) {
         let out = command("reg").args(["add", RUN_KEY, "/v", "Clipster", "/t", "REG_SZ", "/d", &format!("\"{}\"", exe.display()), "/f"]).output()?;
+        // switched off in Task Manager before: on again there too
+        let _ = command("reg").args(["add", APPROVED_KEY, "/v", "Clipster", "/t", "REG_BINARY", "/d", "020000000000000000000000", "/f"]).output();
         return if out.status.success() { Ok(()) } else { Err(std::io::Error::other(String::from_utf8_lossy(&out.stderr).trim().to_string())) };
     }
     std::fs::create_dir_all(p.parent().unwrap_or(&p))?;
@@ -691,6 +729,7 @@ pub fn run_for(mut cmd: Command, secs: u64) -> Option<(Option<i32>, String)> {
             Ok(None) if std::time::Instant::now() < until => std::thread::sleep(std::time::Duration::from_millis(100)),
             _ => {
                 let _ = child.kill();
+                let _ = child.wait(); // reaped, so no zombie is left behind
                 return None;
             }
         }
@@ -740,7 +779,8 @@ pub fn dir_size(dir: &std::path::Path, limit: usize) -> u64 {
             let Ok(m) = std::fs::symlink_metadata(e.path()) else { continue };
             if m.is_dir() {
                 todo.push(e.path());
-            } else if m.is_file() {
+            } else if m.is_file() && !online_only(&m) {
+                // a OneDrive file that's only in the cloud takes no room here
                 total += m.len();
                 seen += 1;
                 if seen >= limit {
@@ -784,6 +824,9 @@ pub fn trash_size() -> Option<(u64, u64)> {
 #[cfg(windows)]
 pub fn trash_size() -> Option<(u64, u64)> {
     let (mut bytes, mut items, mut any) = (0u64, 0u64, false);
+    // an empty card reader would otherwise pop up "There is no disk in the drive" (as in `drives`)
+    let mut old = 0;
+    unsafe { win::SetThreadErrorMode(1, &mut old) };
     for root in drive_roots() {
         let mut info = win::RecycleInfo { size: std::mem::size_of::<win::RecycleInfo>() as u32, ..Default::default() };
         let w = win::wide(&root);
@@ -793,6 +836,7 @@ pub fn trash_size() -> Option<(u64, u64)> {
             items += info.items.max(0) as u64;
         }
     }
+    unsafe { win::SetThreadErrorMode(old, &mut old) };
     any.then_some((bytes, items))
 }
 
@@ -875,7 +919,8 @@ pub fn pending_updates() -> Option<u32> {
     let flatpak = run("flatpak", "flatpak", &["remote-ls", "--updates", "--columns=application"]).flatten();
     match (system, flatpak) {
         (Some(None), _) => None, // the package manager is there but couldn't tell (offline, locked): not "up to date"
-        (None, None) => None,
+        // only Flatpak could be asked (no checkupdates, apt or dnf here): its updates count, but none isn't "up to date"
+        (None, None) | (None, Some(0)) => None,
         (a, b) => Some(a.flatten().unwrap_or(0) + b.unwrap_or(0)),
     }
 }
@@ -1048,7 +1093,8 @@ pub fn parse_startup_json(out: &str) -> Vec<StartupApp> {
         o @ serde_json::Value::Object(_) => vec![o],
         _ => vec![],
     };
-    let mut apps: Vec<StartupApp> = list.iter().filter_map(|e| Some(StartupApp { id: e["name"].as_str()?.to_string(), name: e["name"].as_str()?.to_string(), on: !e["off"].as_bool().unwrap_or(false) })).collect();
+    // not himself: "Start with my computer" is his own switch (as on Linux)
+    let mut apps: Vec<StartupApp> = list.iter().filter_map(|e| Some(StartupApp { id: e["name"].as_str()?.to_string(), name: e["name"].as_str()?.to_string(), on: !e["off"].as_bool().unwrap_or(false) })).filter(|a| a.id != "Clipster").collect();
     apps.sort_by_key(|a| a.name.to_lowercase());
     apps
 }
@@ -1293,6 +1339,9 @@ mod tests {
         let many = r#"[{"name":"Spotify","off":true},{"name":"OneDrive","off":false}]"#;
         assert_eq!(parse_startup_json(many), vec![StartupApp { id: "OneDrive".into(), name: "OneDrive".into(), on: true }, StartupApp { id: "Spotify".into(), name: "Spotify".into(), on: false }]);
         assert_eq!(parse_startup_json(r#"{"name":"Teams","off":false}"#).len(), 1);
+        assert!(parse_startup_json(r#"[{"name":"Clipster","off":false}]"#).is_empty(), "not himself");
+        assert!(approved_off("\r\nHKEY_CURRENT_USER\\...\\Run\r\n    Clipster    REG_BINARY    030000000000000000000000\r\n"));
+        assert!(!approved_off("    Clipster    REG_BINARY    020000000000000000000000") && !approved_off(""));
         assert!(parse_startup_json("").is_empty());
     }
 
@@ -1303,6 +1352,7 @@ mod tests {
         assert_eq!(parse_proc_stat("4711 (Web Content (x)) S 1 2 3 4 5 6 7 8 9 10 250 50 0 0"), Some(("Web Content (x)".into(), 300)));
         assert_eq!(parse_proc_stat("garbage"), None);
         assert_eq!((region_of("de_CH.UTF-8"), region_of("en-US"), region_of("C"), region_of("sr_RS@latin")), (Some("CH".into()), Some("US".into()), None, Some("RS".into())));
+        assert_eq!((region_of("zh-Hant-TW"), region_of("sr-Latn-RS")), (Some("TW".into()), Some("RS".into())), "a script part between");
         assert_eq!(parse_top_json(r#"[{"Name":"firefox","Mem":2097152,"Cpu":12.5},{"Name":"code","Mem":1048576,"Cpu":null}]"#), vec![("firefox".into(), 2048, 12.5), ("code".into(), 1024, 0.0)]);
         assert_eq!(parse_top_json(r#"{"Name":"one","Mem":1024,"Cpu":1}"#).len(), 1, "a single process comes as an object");
         assert!(uptime() > 0);
@@ -1350,14 +1400,20 @@ pub fn idle_secs() -> Option<u64> {
 
 #[cfg(target_os = "linux")]
 pub fn idle_secs() -> Option<u64> {
-    let conn = zbus::blocking::Connection::session().ok()?;
-    let ms = |dest: &str, path: &str, iface: &str, method: &str| -> Option<u64> {
+    // one session-bus connection, kept (opening one each time took a few milliseconds of the frame)
+    static CONN: std::sync::OnceLock<Option<zbus::blocking::Connection>> = std::sync::OnceLock::new();
+    let conn = CONN.get_or_init(|| zbus::blocking::Connection::session().ok()).as_ref()?;
+    let ask = |dest: &str, path: &str, iface: &str, method: &str| -> Option<u64> {
         let reply = conn.call_method(Some(dest), path, Some(iface), method, &()).ok()?;
         reply.body().deserialize::<u32>().map(u64::from).or_else(|_| reply.body().deserialize::<u64>()).ok()
     };
-    ms("org.freedesktop.ScreenSaver", "/org/freedesktop/ScreenSaver", "org.freedesktop.ScreenSaver", "GetSessionIdleTime")
-        .or_else(|| ms("org.gnome.Mutter.IdleMonitor", "/org/gnome/Mutter/IdleMonitor/Core", "org.gnome.Mutter.IdleMonitor", "GetIdletime"))
+    // the Mutter and Muffin (Cinnamon) monitors answer in milliseconds; the ScreenSaver interface in seconds, as its
+    // spec says, except on KDE, where it's milliseconds too
+    let kde = std::env::var("XDG_CURRENT_DESKTOP").is_ok_and(|d| d.to_uppercase().contains("KDE"));
+    ask("org.gnome.Mutter.IdleMonitor", "/org/gnome/Mutter/IdleMonitor/Core", "org.gnome.Mutter.IdleMonitor", "GetIdletime")
+        .or_else(|| ask("org.cinnamon.Muffin.IdleMonitor", "/org/cinnamon/Muffin/IdleMonitor/Core", "org.cinnamon.Muffin.IdleMonitor", "GetIdletime"))
         .map(|ms| ms / 1000)
+        .or_else(|| ask("org.freedesktop.ScreenSaver", "/org/freedesktop/ScreenSaver", "org.freedesktop.ScreenSaver", "GetSessionIdleTime").map(|t| if kde { t / 1000 } else { t }))
 }
 
 #[cfg(not(any(windows, target_os = "linux")))]

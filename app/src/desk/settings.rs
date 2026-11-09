@@ -389,8 +389,12 @@ impl Desk {
             let g = p.layout("Nothing muted. \u{201c}Not about this\u{201d} on one of my comments adds it here.".to_string(), look.font(12.0), look.dim(), w - 24.0);
             p.galley(pos2(rx + 12.0, g3.min.y + 30.0), g, look.dim());
         }
-        for (i, m) in s.muted.iter().enumerate().take(((g3.height() - 36.0) / 24.0) as usize) {
-            let cy = g3.min.y + 30.0 + i as f32 * 24.0 + 10.0;
+        // both lists scroll by whole rows when they're longer than their box
+        let area3 = Rect::from_min_max(pos2(rx, g3.min.y + 28.0), pos2(g3.max.x, g3.max.y - 4.0));
+        let fits3 = (area3.height() / 24.0).floor().max(1.0) as usize;
+        let first3 = self.rows(ui, look, "muted", area3, s.muted.len(), fits3);
+        for (i, m) in s.muted.iter().enumerate().skip(first3).take(fits3) {
+            let cy = area3.min.y + 12.0 + (i - first3) as f32 * 24.0;
             if self.remove_btn(ui, look, Rect::from_center_size(pos2(g3.max.x - 23.0, cy), vec2(22.0, ctl - 6.0)), Id::unique(("set-unmute", i)), "Comment on it again") {
                 cmds.push(format!("pref unmute {m}"));
             }
@@ -401,8 +405,11 @@ impl Desk {
         if view.upkeep_hide.is_empty() {
             line(ui, pos2(rx + 12.0, g4.min.y + 36.0), "None. \u{201c}Not for me\u{201d} on a checkup row hides it.", look.font(12.0), look.dim(), w - 24.0);
         }
-        for (i, id) in view.upkeep_hide.iter().enumerate().take(((g4.height() - 36.0) / 24.0).max(0.0) as usize) {
-            let cy = g4.min.y + 30.0 + i as f32 * 24.0 + 10.0;
+        let area4 = Rect::from_min_max(pos2(rx, g4.min.y + 28.0), pos2(g4.max.x, g4.max.y - 4.0));
+        let fits4 = (area4.height() / 24.0).floor().max(1.0) as usize;
+        let first4 = self.rows(ui, look, "hidden-checks", area4, view.upkeep_hide.len(), fits4);
+        for (i, id) in view.upkeep_hide.iter().enumerate().skip(first4).take(fits4) {
+            let cy = area4.min.y + 12.0 + (i - first4) as f32 * 24.0;
             let bw = btn_w(&p, look, "Bring back");
             if look.button(ui, Rect::from_min_size(pos2(g4.max.x - 12.0 - bw, cy - (ctl - 6.0) / 2.0), vec2(bw, ctl - 6.0)), Id::unique(("set-unhide", i)), "Bring back", true).clicked() {
                 cmds.push(format!("upkeep unhide {id}"));

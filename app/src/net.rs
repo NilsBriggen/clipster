@@ -176,11 +176,26 @@ pub fn download_update() -> Result<(std::path::PathBuf, String), String> {
     let version = s(&release["tag_name"]).trim_start_matches('v').to_string();
     let a = pick_asset(&release, if cfg!(windows) { ".msi" } else { ".AppImage" }).ok_or("the release has no file for this computer")?;
     if cfg!(windows) {
+        // older installers from earlier updates go first
+        for e in std::fs::read_dir(std::env::temp_dir()).into_iter().flatten().flatten() {
+            let n = e.file_name().to_string_lossy().to_lowercase();
+            if n.starts_with("clipster_") && n.ends_with(".msi") {
+                let _ = std::fs::remove_file(e.path());
+            }
+        }
         let dest = std::env::temp_dir().join(&a.name);
         download_to(&a, &dest)?;
         return Ok((dest, version));
     }
     let image = std::path::PathBuf::from(std::env::var_os("APPIMAGE").ok_or("not running as an AppImage")?);
+    // a download cut off by a crash leaves "<name>.new-<pid>" next to it: those go first
+    if let (Some(dir), Some(name)) = (image.parent(), image.file_name().map(|n| n.to_string_lossy().into_owned())) {
+        for e in std::fs::read_dir(dir).into_iter().flatten().flatten() {
+            if e.file_name().to_string_lossy().starts_with(&format!("{name}.new-")) {
+                let _ = std::fs::remove_file(e.path());
+            }
+        }
+    }
     let mut part = image.clone().into_os_string();
     part.push(format!(".new-{}", std::process::id())); // our own name: nothing else writes into it
     let part = std::path::PathBuf::from(part);
@@ -456,7 +471,7 @@ fn fetch(q: &Query) -> Result<Reply, String> {
                     let src = [s(&v["AbstractURL"]), s(&v["DefinitionURL"])].into_iter().find(|u| !u.is_empty());
                     let r = Reply::say(t).mood(Mood::Think);
                     return Ok(match src {
-                        Some(u) => r.btn("Read more", Act::Open(u)),
+                        Some(u) => r.btn("Read more", Act::Open(web_url(&u))),
                         None => r,
                     });
                 }
@@ -568,7 +583,7 @@ fn fetch(q: &Query) -> Result<Reply, String> {
                 if rating >= 8.0 { "Paperclip verdict: binge it." } else { "Paperclip verdict: watch with snacks." }
             ))
             .mood(Mood::Happy)
-            .btn("More about the show", Act::Open(s(&v["url"]))))
+            .btn("More about the show", Act::Open(web_url(&s(&v["url"])))))
         }
         Query::Pokemon(name) => {
             let v = get(&format!("https://pokeapi.co/api/v2/pokemon/{}", url_encode(&name.to_lowercase().replace(' ', "-"))))?;
@@ -579,7 +594,7 @@ fn fetch(q: &Query) -> Result<Reply, String> {
                 v["id"], s(&v["name"]).to_uppercase(), types.join("/"), f(&v["height"]) / 10.0, f(&v["weight"]) / 10.0, abilities.join(", ")
             ))
             .mood(Mood::Spin)
-            .btn("Show me what it looks like", Act::Open(s(&v["sprites"]["other"]["official-artwork"]["front_default"]))))
+            .btn("Show me what it looks like", Act::Open(web_url(&s(&v["sprites"]["other"]["official-artwork"]["front_default"])))))
         }
         Query::Recipe(q) => {
             const API: &str = "https://www.themealdb.com/api/json/v1/1";
@@ -607,7 +622,7 @@ fn fetch(q: &Query) -> Result<Reply, String> {
             let shopping: Vec<String> = parts.iter().map(|(_, ing)| ing.trim().to_lowercase().replace(',', " ")).collect();
             Ok(Reply::say(format!("🍳 {} ({} {})\nYou need: {}\n{steps}…", s(&m["strMeal"]), s(&m["strArea"]), s(&m["strCategory"]).to_lowercase(), ingredients.join(", ")))
                 .mood(Mood::Happy)
-                .btn("Open the full recipe", Act::Open(link))
+                .btn("Open the full recipe", Act::Open(web_url(&link)))
                 .run("Put it on my shopping list", &format!("onlist shopping add {}", shopping.join(", ")))
                 .run("Something else!", &if q.is_empty() { "recipe".to_string() } else { format!("recipe {q}") }))
         }
@@ -665,7 +680,7 @@ fn fetch(q: &Query) -> Result<Reply, String> {
                 let mut r = Reply::say("📰 Top tech stories right now (click one to read):").mood(Mood::Think);
                 for h in v["hits"].as_array().into_iter().flatten().take(5) {
                     let url = Some(s(&h["url"])).filter(|u| !u.is_empty()).unwrap_or(format!("https://news.ycombinator.com/item?id={}", s(&h["objectID"])));
-                    r = r.btn(&s(&h["title"]), Act::Open(url));
+                    r = r.btn(&s(&h["title"]), Act::Open(web_url(&url)));
                 }
                 r
             } else {
@@ -894,8 +909,19 @@ fn fetch(q: &Query) -> Result<Reply, String> {
                 "fox" => s(&get("https://randomfox.ca/floof/")?["image"]),
                 _ => format!("https://cataas.com/cat?{}", rand::random::<u32>()),
             };
-            Ok(Reply::say(format!("Here's a random {kind} for you! Adorable. Almost as cute as me.")).effect(Effect::Open(url)).mood(Mood::Happy).run("Another one!", kind))
+            Ok(Reply::say(format!("Here's a random {kind} for you! Adorable. Almost as cute as me.")).effect(Effect::Open(web_url(&url))).mood(Mood::Happy).run("Another one!", kind))
         }
+    }
+}
+
+/// A link from someone else's web service, made safe to open: only an http(s) address without spaces goes through
+/// (anything else could be read as a program to run); otherwise it becomes a web search for that text.
+pub fn web_url(u: &str) -> String {
+    let u = u.trim();
+    if (u.starts_with("https://") || u.starts_with("http://")) && !u.contains(char::is_whitespace) {
+        u.to_string()
+    } else {
+        format!("https://duckduckgo.com/?q={}", url_encode(u))
     }
 }
 
@@ -985,6 +1011,9 @@ mod tests {
 
     #[test]
     fn helpers() {
+        assert_eq!(web_url("https://example.com/a?b=c"), "https://example.com/a?b=c");
+        assert!(web_url("bash -c 'rm -rf ~'").starts_with("https://duckduckgo.com/?q="), "never a program");
+        assert!(web_url("https://x.com/a b").starts_with("https://duckduckgo.com/"));
         assert_eq!(money_fmt(68123.456), "68,123.46");
         assert_eq!(money_fmt(12.0), "12.00");
         assert_eq!(pct_decode("What%20is%20%22H2O%22%3F"), "What is \"H2O\"?");

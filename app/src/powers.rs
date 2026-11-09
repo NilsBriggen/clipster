@@ -566,7 +566,10 @@ fn a_date(s: &str) -> Option<NaiveDate> {
     if let Some(y) = s.parse::<i32>().ok().filter(|y| (1000..=9999).contains(y)) {
         return NaiveDate::from_ymd_opt(y, 1, 1);
     }
-    ["%d.%m.%Y", "%m/%d/%Y", "%d/%m/%Y"].iter().find_map(|f| NaiveDate::parse_from_str(s, f).ok()).or_else(|| parse_day(s, Local::now().date_naive()).map(|(d, _)| d))
+    // 05/03/1990: the 5th of March, except where the month comes first (the US and a few others)
+    let month_first = matches!(crate::sys::locale_region().as_deref(), Some("US" | "PH" | "FM" | "MH" | "PW"));
+    let slash = if month_first { ["%m/%d/%Y", "%d/%m/%Y"] } else { ["%d/%m/%Y", "%m/%d/%Y"] };
+    ["%d.%m.%Y"].iter().chain(slash.iter()).find_map(|f| NaiveDate::parse_from_str(s, f).ok()).or_else(|| parse_day(s, Local::now().date_naive()).map(|(d, _)| d))
 }
 
 /// "age 1990-05-03": how old someone born then is today.

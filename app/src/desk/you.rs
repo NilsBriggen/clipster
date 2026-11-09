@@ -68,7 +68,8 @@ impl Desk {
                     resp.request_focus();
                 }
                 if resp.lost_focus() {
-                    if !ui.input(|i| i.key_pressed(egui::Key::Escape)) && !text.trim().is_empty() && text.trim() != value {
+                    let shown_raw = if key == "pet" { value.rsplit_once(" (").map_or(value.as_str(), |x| x.0) } else { value.as_str() };
+                    if !ui.input(|i| i.key_pressed(egui::Key::Escape)) && !text.trim().is_empty() && text.trim() != shown_raw {
                         out.push(match key.as_str() {
                             "name" => format!("setname {}", text.trim()),
                             "birthday" => format!("birthday {}", text.trim()),
@@ -85,7 +86,9 @@ impl Desk {
             let w = line(ui, pos2(vx, cy), &shown, look.font(12.5), if value.is_empty() { look.dim() } else { look.text() }, x1 - vx - 30.0);
             let editable = key == "name" || key == "birthday" || crate::brain::FACT_KEYS.contains(&key.as_str());
             if editable && ui.interact(Rect::from_min_size(pos2(vx, cy - 9.0), vec2(w.max(40.0), 18.0)), Id::unique(("fact-text", key.as_str())), Sense::click()).on_hover_text("Double-click to change it").double_clicked() {
-                self.fact_edit = Some((key.clone(), value.clone()));
+                // the pet shows as "Mo (cat)": edit the name, or saving would make it "Mo (cat) (cat)"
+                let raw = if key == "pet" { value.rsplit_once(" (").map_or(value.as_str(), |x| x.0) } else { value.as_str() };
+                self.fact_edit = Some((key.clone(), raw.to_string()));
             }
             if key != "name" && !value.is_empty() && self.remove_btn(ui, look, Rect::from_center_size(pos2(x1 - 11.0, cy), vec2(22.0, small)), Id::unique(("me-fact", n)), "Forget this") {
                 out.push(format!("forgetfact {key}"));
@@ -381,7 +384,11 @@ impl Desk {
         let name = self.person_name.trim().to_string();
         if (look.primary(ui, add, Id::unique("person-add"), "Add", !name.is_empty()).clicked() || enter) && !name.is_empty() {
             let bd = self.person_birthday.trim();
-            out.push(if bd.is_empty() { format!("person add {name}") } else { format!("person birthday {name}|{bd}") });
+            // added first, so a birthday he can't read still leaves the person there (and says so)
+            out.push(format!("person add {name}"));
+            if !bd.is_empty() {
+                out.push(format!("person birthday {name}|{bd}"));
+            }
             self.found_at = Some((name, Instant::now()));
             self.person_name.clear();
             self.person_birthday.clear();
@@ -420,11 +427,13 @@ impl Desk {
         let row = |n: usize| inner.min.y + n as f32 * (ctl + 10.0);
         let n_ = q.name.clone();
         // a field that sends its command when you leave it (only when it changed)
+        // Esc leaves a field without saving what was typed (it closes the card below)
+        let esc = ui.input(|i| i.key_pressed(egui::Key::Escape));
         let mut field = |ui: &mut Ui, x: f32, n: usize, label: &str, i: usize, hint: &str, cmd: &str, out: &mut Vec<String>| {
             p.text(pos2(x, row(n) + ctl / 2.0), Align2::LEFT_CENTER, label, look.font(12.0), look.dim());
             let was = e[i].clone();
             let resp = look.input(ui, Rect::from_min_size(pos2(x + lab, row(n)), vec2(col - lab, ctl)), Id::unique(("person-field", i)), &mut e[i], hint);
-            if resp.lost_focus() && e[i].trim() != was.trim() && !(cmd == "rename" && e[i].trim().is_empty()) {
+            if resp.lost_focus() && !esc && e[i].trim() != was.trim() && !(cmd == "rename" && e[i].trim().is_empty()) {
                 out.push(format!("person {cmd} {n_}|{}", if e[i].trim().is_empty() { "none" } else { e[i].trim() }));
             }
         };
@@ -439,7 +448,7 @@ impl Desk {
         let note_r = Rect::from_min_size(pos2(rx + 60.0, row(0)), vec2(col - 60.0, 2.0 * ctl + 10.0));
         let was = q.note.clone().unwrap_or_default();
         let resp = look.text_area(ui, note_r, Id::unique("person-note"), &mut e[6], "kids Mia and Leo · allergic to nuts");
-        if resp.lost_focus() && e[6].trim() != was.trim() {
+        if resp.lost_focus() && !esc && e[6].trim() != was.trim() {
             out.push(format!("person note {}|{}", q.name, if e[6].trim().is_empty() { "none".to_string() } else { e[6].trim().replace('\n', " ") }));
         }
         p.text(pos2(rx, row(2) + ctl / 2.0), Align2::LEFT_CENTER, "Present ideas", look.font(12.0), look.dim());
@@ -492,10 +501,14 @@ impl Desk {
             self.person_edit = None;
             return;
         }
-        // a rename moves the card to the new name
+        // a rename moves the card to the new name; a name someone else has is refused, so the card stays
         if e[0].trim() != q.name && !e[0].trim().is_empty() && !ui.memory(|m| m.has_focus(Id::unique(("person-field", 0usize)))) {
-            self.card = Some(Card::Person(e[0].trim().to_string()));
-            self.person_for = e[0].trim().to_string(); // the other fields keep what's typed in them
+            if view.people.iter().any(|p| p.name.eq_ignore_ascii_case(e[0].trim())) {
+                e[0] = q.name.clone();
+            } else {
+                self.card = Some(Card::Person(e[0].trim().to_string()));
+                self.person_for = e[0].trim().to_string(); // the other fields keep what's typed in them
+            }
         }
         self.person_edit = Some(e);
     }
@@ -533,7 +546,8 @@ impl Desk {
                 let Some(d) = day else { continue };
                 let cell = Rect::from_min_size(pos2(gx + colw * i as f32, left.min.y + 46.0 + w as f32 * rowh), vec2(colw, rowh));
                 let entry = entries.iter().find(|e| e.day == *d);
-                let mood = view.checkins.get(&d.format("%Y-%m-%d").to_string()).cloned().or_else(|| entry.and_then(|e| e.mood.clone()));
+                // the journal's mood first: it's what you chose (or changed) for the day; the check-in fills the gaps
+                let mood = entry.and_then(|e| e.mood.clone()).or_else(|| view.checkins.get(&d.format("%Y-%m-%d").to_string()).cloned());
                 let resp = ui.interact(cell, Id::unique(("journal-day", *d)), Sense::click()).on_hover_text(entry.map_or_else(|| format!("{}: nothing written", d.format("%a %-d %b")), |e| format!("{}: {}", d.format("%a %-d %b"), if e.text.is_empty() { e.mood.clone().unwrap_or_default() } else { e.text.clone() }))).on_hover_cursor(egui::CursorIcon::PointingHand);
                 if *d == today {
                     p.rect_filled(cell.shrink(2.0), CornerRadius::same(4), if look == Look::Modern { tok::ACCENT_SOFT } else { Color32::from_rgb(200, 210, 235) });

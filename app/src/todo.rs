@@ -39,6 +39,12 @@ impl Item {
     pub fn week_goal(&self, today: NaiveDate) -> bool {
         self.week.as_deref() == Some(week_key(today).as_str())
     }
+    /// Open, on the to-do list itself, past its date, and not waiting on someone (a follow-up day isn't a deadline):
+    /// one rule for the tab's badge, Today's strip, the filter and "move the overdue ones to today".
+    pub fn overdue(&self, today: NaiveDate) -> bool {
+        !self.done && self.list.is_none() && self.waiting.is_none() && self.due.is_some_and(|d| d < today)
+    }
+
     /// A step of another item (on a hidden `steps-` list).
     pub fn is_step(&self) -> bool {
         self.list.as_deref().is_some_and(|l| l.starts_with("steps-"))
@@ -717,7 +723,7 @@ pub fn change(items: &mut Vec<Item>, op: &Op, today: NaiveDate) -> (&'static str
         },
         Op::OverdueToToday => {
             let mut moved = 0;
-            for i in items.iter_mut().filter(|i| !i.done && i.list.is_none() && i.due.is_some_and(|d| d < today)) {
+            for i in items.iter_mut().filter(|i| i.overdue(today)) {
                 i.due = Some(today);
                 moved += 1;
             }

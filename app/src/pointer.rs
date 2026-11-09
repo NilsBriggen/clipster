@@ -99,7 +99,13 @@ mod kwin {
     }
 
     const NAME: &str = "clipster-pointer";
+    // Plasma 6 names, with Plasma 5's (clientList, clientAdded, clientActivated, activeClient) where they're missing
     const SCRIPT: &str = r#"let last = 0;
+    const windows = function () { return workspace.windowList ? workspace.windowList() : workspace.clientList(); };
+    const added = workspace.windowAdded || workspace.clientAdded;
+    const activated = workspace.windowActivated || workspace.clientActivated;
+    function active() { return workspace.activeWindow !== undefined ? workspace.activeWindow : workspace.activeClient; }
+    function activate(w) { if (workspace.activeWindow !== undefined) workspace.activeWindow = w; else workspace.activeClient = w; }
     function report() {
         const p = workspace.cursorPos;
         callDBus("org.clipster.Pointer", "/Pointer", "org.clipster.Pointer", "Pos", p.x + "," + p.y);
@@ -112,11 +118,11 @@ mod kwin {
         w.onAllDesktops = true;
         w.keepAboveChanged.connect(function () { if (!w.keepAbove) w.keepAbove = true; });
     }
-    workspace.windowList().forEach(pin);
-    workspace.windowAdded.connect(pin);
+    windows().forEach(pin);
+    added.connect(pin);
     // Meta+C calls Clipster from anywhere (changeable in System Settings > Shortcuts)
     registerShortcut("Summon Clipster", "Summon Clipster", "Meta+C", function () {
-        workspace.windowList().forEach(function (w) { if (w.resourceClass == "clipster") workspace.activeWindow = w; });
+        windows().forEach(function (w) { if (w.resourceClass == "clipster") activate(w); });
         callDBus("org.clipster.Pointer", "/Pointer", "org.clipster.Pointer", "Summon");
     });
     // Meta+Shift+C opens Clipster's Desk
@@ -129,12 +135,12 @@ mod kwin {
         callDBus("org.clipster.Pointer", "/Pointer", "org.clipster.Pointer", "Title", w.caption || "");
     }
     function follow(w) {
-        if (w) w.captionChanged.connect(function () { if (workspace.activeWindow == w) title(w); });
+        if (w) w.captionChanged.connect(function () { if (active() == w) title(w); });
     }
-    workspace.windowList().forEach(follow);
-    workspace.windowAdded.connect(follow);
-    workspace.windowActivated.connect(title);
-    title(workspace.activeWindow);
+    windows().forEach(follow);
+    added.connect(follow);
+    activated.connect(title);
+    title(active());
     workspace.cursorPosChanged.connect(function () {
         const now = Date.now();
         if (now - last < 30) return;
@@ -177,7 +183,7 @@ mod kwin {
 #[cfg(windows)]
 mod windows {
     use super::{Shared, Tracker};
-    use crate::sys::win::{GetAsyncKeyState, GetCursorPos, Point};
+    use crate::sys::win::{GetAsyncKeyState, GetCursorPos, Msg, PeekMessageW, Point, RegisterHotKey};
     use std::sync::atomic::{AtomicBool, Ordering};
     use std::sync::Arc;
 
@@ -185,20 +191,36 @@ mod windows {
         let (pos, summoned, desk, stop) = (Shared::default(), Arc::new(AtomicBool::new(false)), Arc::new(AtomicBool::new(false)), Arc::new(AtomicBool::new(false)));
         let (p, s, d, st, ctx) = (pos.clone(), summoned.clone(), desk.clone(), stop.clone(), ctx.clone());
         std::thread::spawn(move || {
+            // real hot keys, so the keystroke doesn't also reach the app in front (Word would type ©); on this thread,
+            // whose messages we read below. 1 = Ctrl+Alt+C, 2 = with Shift. If another program has them, we watch the keys.
+            const ALT: u32 = 1;
+            const CTRL: u32 = 2;
+            const SHIFT: u32 = 4;
+            const NOREPEAT: u32 = 0x4000;
+            const WM_HOTKEY: u32 = 0x0312;
+            let hotkeys = unsafe { RegisterHotKey(0, 1, CTRL | ALT | NOREPEAT, 0x43) != 0 && RegisterHotKey(0, 2, CTRL | ALT | SHIFT | NOREPEAT, 0x43) != 0 };
             let mut held = false;
             while !st.load(Ordering::Relaxed) {
                 let mut pt = Point::default();
                 if unsafe { GetCursorPos(&mut pt) } != 0 {
                     super::moved_to(&p, pt.x as f32, pt.y as f32, &ctx);
                 }
-                let down = |key: i32| unsafe { GetAsyncKeyState(key) } as u16 & 0x8000 != 0;
-                let combo = down(0x11) && down(0xA4) && down(0x43); // Ctrl + left Alt + C (right Alt is AltGr: "ć" on a Polish keyboard)
-                if combo && !held {
-                    // with Shift it opens the Desk, without it calls Clipster
-                    (if down(0x10) { &d } else { &s }).store(true, Ordering::Relaxed);
-                    ctx.request_repaint();
+                if hotkeys {
+                    let mut msg = Msg::default();
+                    while unsafe { PeekMessageW(&mut msg, 0, WM_HOTKEY, WM_HOTKEY, 1) } != 0 {
+                        (if msg.wparam == 2 { &d } else { &s }).store(true, Ordering::Relaxed);
+                        ctx.request_repaint();
+                    }
+                } else {
+                    let down = |key: i32| unsafe { GetAsyncKeyState(key) } as u16 & 0x8000 != 0;
+                    let combo = down(0x11) && down(0xA4) && down(0x43); // Ctrl + left Alt + C (right Alt is AltGr: "ć" on a Polish keyboard)
+                    if combo && !held {
+                        // with Shift it opens the Desk, without it calls Clipster
+                        (if down(0x10) { &d } else { &s }).store(true, Ordering::Relaxed);
+                        ctx.request_repaint();
+                    }
+                    held = combo;
                 }
-                held = combo;
                 std::thread::sleep(std::time::Duration::from_millis(40));
             }
         });

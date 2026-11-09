@@ -258,7 +258,12 @@ impl Pos {
         if !self.white {
             h ^= z[768];
         }
-        if let Some(e) = self.ep {
+        // en passant only counts when a pawn can actually take: otherwise the position repeats (threefold)
+        if let Some(e) = self.ep.filter(|&e| {
+            let (f, r) = ((e % 8) as i32, (e / 8) as i32);
+            let (row, mine) = if self.white { (r - 1, PAWN) } else { (r + 1, -PAWN) };
+            [f - 1, f + 1].into_iter().any(|x| sq(x, row).is_some_and(|i| self.b[i] == mine))
+        }) {
             h ^= z[785 + (e % 8) as usize];
         }
         h

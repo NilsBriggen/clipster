@@ -238,7 +238,11 @@ fn walk(dir: &Path, limit: usize) -> Vec<(PathBuf, u64)> {
             let hidden = e.file_name().to_string_lossy().starts_with('.');
             match e.file_type() {
                 Ok(t) if t.is_dir() && !hidden => todo.push(e.path()),
-                Ok(t) if t.is_file() => out.push((e.path(), e.metadata().map(|m| m.len()).unwrap_or(0))),
+                // a OneDrive file that's only in the cloud isn't read (hashing it would download it)
+                Ok(t) if t.is_file() => match e.metadata() {
+                    Ok(m) if crate::sys::online_only(&m) => {}
+                    m => out.push((e.path(), m.map(|m| m.len()).unwrap_or(0))),
+                },
                 _ => {}
             }
             if out.len() >= limit {

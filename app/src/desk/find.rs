@@ -83,9 +83,10 @@ impl Desk {
             if ui.input(|i| i.key_pressed(egui::Key::ArrowUp)) && hits > 0 {
                 self.pick = Some(self.pick.map_or(hits - 1, |p| (p + hits - 1) % hits));
             }
-            if ui.input(|i| i.key_pressed(egui::Key::Escape)) {
-                self.query.clear();
-            }
+        }
+        // Esc takes the focus away before we see it, so it shows as the box losing focus with Esc pressed
+        if (resp.has_focus() || resp.lost_focus()) && ui.input(|i| i.key_pressed(egui::Key::Escape)) {
+            self.query.clear();
         }
         self.find_enter = resp.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter));
         self.find_rect = Some(r);
@@ -95,7 +96,7 @@ impl Desk {
     /// The results under the box: click one to go there; Enter opens the picked one, or sends the words to Clipster.
     pub(super) fn find_results(&mut self, ui: &mut Ui, view: &View, look: Look, out: &mut Vec<String>) {
         let q = self.query.trim().to_string();
-        self.found = search(&q, view, &self.files);
+        self.found = if q.is_empty() { vec![] } else { search(&q, view, &self.files) };
         if self.pick.is_some_and(|p| p >= self.found.len()) {
             self.pick = None;
         }
@@ -109,13 +110,14 @@ impl Desk {
             return;
         }
         let Some(fr) = self.find_rect else { return };
-        if q.is_empty() || !self.find_focus && !ui.rect_contains_pointer(fr.expand2(vec2(0.0, 300.0))) {
-            return;
-        }
         let row = 22.0;
         let rows = self.found.len() + 1;
         let w = fr.width().max(320.0);
         let drop = Rect::from_min_size(pos2(fr.max.x - w, fr.max.y + 2.0), vec2(w, rows as f32 * row + 8.0));
+        // while you type, or while the pointer is on the box or its list (not anywhere in a band below it)
+        if q.is_empty() || !self.find_focus && !ui.rect_contains_pointer(fr) && !ui.rect_contains_pointer(drop) {
+            return;
+        }
         let p = ui.painter().clone();
         match look {
             Look::Classic => win98::panel(&p, drop, win98::FACE, true),

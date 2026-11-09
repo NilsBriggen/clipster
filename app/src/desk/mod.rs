@@ -270,6 +270,8 @@ pub struct Desk {
     focus_label: String,
     desktop: bool, // the Files tab looks at the desktop instead of downloads
     files: Files,
+    typing_last: bool, // a text field had the keyboard at the end of the last frame (see the Esc key)
+    popup_missed: u8,  // frames the open drop-down wasn't drawn
     numbers: BTreeMap<String, String>, // the Settings tab's minute fields while you type in them
     editing: Option<(usize, String)>,  // a to-do being renamed: its line, the new text so far
     planning: bool,                    // "plan my day": the To-do tab asks for today's top 3
@@ -395,10 +397,23 @@ impl Desk {
         self.forget_all = false;
         self.renaming_list = None;
         self.files.at = None;
+        // a fresh start: no day picked earlier, no question or card left open from last time with a live Yes
+        self.agenda_day = None;
+        self.confirming = None;
+        self.wrapping = false;
+        self.workday_open = false;
+        self.card = None;
+        self.popup = None;
     }
 
     pub fn is_open(&self) -> bool {
         self.open
+    }
+
+    /// The tidy plan the Tidy page shows for "downloads" or "desktop": its ticks are places in this list, so a tidy
+    /// with skips applies this one, not a plan made again a moment later (a finished download would shift them).
+    pub fn shown_tidy_plan(&self, which: &str) -> Option<Vec<(std::path::PathBuf, std::path::PathBuf)>> {
+        (self.files.plan_at.is_some() && self.files.plan_desktop == (which == "desktop")).then(|| self.files.plan.clone())
     }
 
     /// Switch to a tab by number or name ("settings", "week", "to-do"); anything else leaves it as it is.
@@ -455,6 +470,11 @@ impl Desk {
     /// The Upkeep page that's open (Checkup 0, Right now 1, Tidy 2, Space 3, Backup 4), when the Upkeep tab is.
     pub fn upkeep_page(&self) -> Option<usize> {
         (self.open && TABS[self.tab] == "Upkeep" && !self.startup_list).then_some(self.upkeep_page)
+    }
+
+    /// Space counted again: its ticks were places in the old list, so they go.
+    pub fn space_counted(&mut self) {
+        self.space_pick.clear();
     }
 
     /// Read the to-dos, notes and the rest again (after an import).
@@ -656,6 +676,7 @@ impl Desk {
         if self.popup.as_deref() != Some(key) {
             return None;
         }
+        self.popup_missed = 0;
         let ctx = ui.ctx().clone();
         let row = if look == Look::Modern { 28.0 } else { 22.0 };
         let font = look.font(12.5);
@@ -771,7 +792,9 @@ impl Desk {
         let (win, _) = ui.allocate_exact_size(size, Sense::hover());
         // keys: Esc leaves a sub-page or closes, Ctrl+Tab / Ctrl+PageDown change tabs, Ctrl+1…9 jump, Ctrl+W closes,
         // Ctrl+Z undoes the last removal, Ctrl+K finds anything
-        let typing = ui.memory(|m| m.focused().is_some());
+        // egui forgets the focused field on Esc before this frame's UI runs, so ask the frame before as well:
+        // Esc in a text box leaves the box, it doesn't close the Desk
+        let typing = ui.memory(|m| m.focused().is_some()) || self.typing_last;
         let (esc, ctrl, shift) = ui.input(|i| (i.key_pressed(egui::Key::Escape), i.modifiers.command, i.modifiers.shift));
         let key = |k: egui::Key| ui.input(|i| i.key_pressed(k));
         let modal = self.modal();
@@ -871,6 +894,14 @@ impl Desk {
                 self.menu = false;
             }
         }
+        self.typing_last = ui.memory(|m| m.focused().is_some());
+        // a drop-down whose row isn't drawn any more (another tab, scrolled away) is closed, so Esc works again
+        if self.popup.is_some() {
+            self.popup_missed += 1;
+            if self.popup_missed > 2 {
+                self.popup = None;
+            }
+        }
         close
     }
 
@@ -887,7 +918,7 @@ impl Desk {
         let today = chrono::Local::now().date_naive();
         match name {
             "To-do" => {
-                let n = self.files.todos.iter().filter(|i| !i.done && i.list.is_none() && i.due.is_some_and(|d| d < today)).count();
+                let n = self.files.todos.iter().filter(|i| i.overdue(today)).count();
                 (n > 0).then(|| n.to_string())
             }
             "Agenda" => (view.calendar_problems > 0).then(|| "!".to_string()),

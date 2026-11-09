@@ -286,7 +286,9 @@ fn window(ui: &mut Ui, title: &str, size: Vec2, game: &mut dyn Game, st: &mut St
     *st.time += dt as f64;
     let mut f = Frame { input: !*st.menu && !*st.paused, dt, time: *st.time, best, out };
     game.ui(ui, area, &mut f);
+    // a new round (F2, New game, New, another level) keeps the score of the one you leave, like closing does
     if !*st.menu && !*st.paused && ui.input(|i| i.key_pressed(egui::Key::F2)) {
+        f.out.extend(game.abandon());
         game.new_round();
     }
     // a decided round restarts on any key or a click in the game, after a short pause so the losing press doesn't count
@@ -308,6 +310,7 @@ fn window(ui: &mut Ui, title: &str, size: Vec2, game: &mut dyn Game, st: &mut St
         match win98::dialog(ui, area, "Paused", win98::Icon::Pause, &lines, &["Resume", "New game", "Close"]) {
             Some(0) => *st.paused = false,
             Some(1) => {
+                f.out.extend(game.abandon());
                 game.new_round();
                 *st.paused = false;
             }
@@ -332,6 +335,7 @@ fn window(ui: &mut Ui, title: &str, size: Vec2, game: &mut dyn Game, st: &mut St
         };
         let mut picked = false;
         if item(ui, "New", "F2", false, &mut y) {
+            f.out.extend(game.abandon());
             game.new_round();
             picked = true;
         }
@@ -341,6 +345,7 @@ fn window(ui: &mut Ui, title: &str, size: Vec2, game: &mut dyn Game, st: &mut St
             let now = game.level();
             for (i, l) in levels.iter().enumerate() {
                 if item(ui, l, "", i == now, &mut y) {
+                    f.out.extend(game.abandon());
                     game.set_level(i);
                     picked = true;
                 }

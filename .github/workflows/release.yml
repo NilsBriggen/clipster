@@ -29,6 +29,17 @@ jobs:
         working-directory: app
     steps:
       - uses: actions/checkout@v5
+      # a tag pushed before the version bump would ship old binaries as the new version (installed copies would then
+      # offer the "update" every day)
+      - name: The tag matches the version in Cargo.toml
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        run: |
+          version="$(grep -m1 '^version' Cargo.toml | cut -d'"' -f2)"
+          if [ "$version" != "${GITHUB_REF_NAME#v}" ]; then
+            echo "::error::The tag is $GITHUB_REF_NAME but app/Cargo.toml says $version. Bump the version first."
+            exit 1
+          fi
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
         with:

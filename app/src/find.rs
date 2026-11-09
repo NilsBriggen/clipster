@@ -142,13 +142,16 @@ pub fn biggest(root: &Path, n: usize, limit: usize) -> Vec<(PathBuf, u64, std::t
     let (mut found, mut seen, mut todo) = (vec![], 0, vec![root.to_path_buf()]);
     while let Some(dir) = todo.pop() {
         for e in std::fs::read_dir(&dir).into_iter().flatten().flatten() {
-            if e.file_name().to_string_lossy().starts_with('.') {
+            let name = e.file_name().to_string_lossy().to_lowercase();
+            if name.starts_with('.') {
                 continue;
             }
             let Ok(m) = std::fs::symlink_metadata(e.path()) else { continue };
-            if m.is_dir() {
+            // not program data (Windows' AppData holds WSL disks and mail stores), build folders, or files that are
+            // only in the cloud: one file from in there in the trash breaks something
+            if m.is_dir() && !SKIP.contains(&name.as_str()) {
                 todo.push(e.path());
-            } else if m.is_file() {
+            } else if m.is_file() && !crate::sys::online_only(&m) {
                 found.push((e.path(), m.len(), m.modified().unwrap_or(std::time::UNIX_EPOCH)));
                 seen += 1;
                 if seen >= limit {

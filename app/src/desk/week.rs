@@ -219,8 +219,9 @@ impl Desk {
             };
             p.text(pos2(x0, col.min.y + 13.0), Align2::LEFT_CENTER, name, look.bold(12.0), if resp.hovered() || i == 0 { look.accent() } else { look.text() });
             if resp.clicked() {
-                self.agenda_day = Some(day.date);
                 self.set_tab("agenda");
+                self.agenda_day = Some(day.date);
+                self.agenda_month = false; // that day, not the month it's in
                 return;
             }
             let bar = Rect::from_min_size(pos2(x0, col.min.y + 25.0), vec2(w, 4.0));
@@ -297,7 +298,7 @@ impl Desk {
             let field = Rect::from_min_max(pos2(c.min.x + lw + 8.0, y), pos2(c.max.x - 150.0, y + ctl));
             let id = Id::unique("desk-ahead-text");
             let resp = look.input(ui, field, id, &mut self.add_text, "what?");
-            if !resp.has_focus() && self.add_text.is_empty() && !resp.lost_focus() {
+            if !resp.has_focus() && self.add_text.is_empty() && !resp.lost_focus() && ui.memory(|m| m.focused().is_none()) {
                 resp.request_focus();
             }
             let enter = resp.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter));

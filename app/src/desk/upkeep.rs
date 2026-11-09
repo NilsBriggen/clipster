@@ -721,7 +721,7 @@ impl Desk {
         let y = inner.min.y + gh + 8.0;
         let go = Rect::from_min_size(pos2(inner.max.x - 70.0, y), vec2(70.0, ctl));
         let resp = look.input(ui, Rect::from_min_max(pos2(inner.min.x, y), pos2(go.min.x - 8.0, y + ctl)), Id::unique("restore-q"), &mut self.restore_text, "slides, invoice 2026");
-        if !resp.has_focus() && !resp.lost_focus() && self.restore_text.is_empty() {
+        if !resp.has_focus() && !resp.lost_focus() && self.restore_text.is_empty() && ui.memory(|m| m.focused().is_none()) {
             resp.request_focus();
         }
         let enter = resp.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter));

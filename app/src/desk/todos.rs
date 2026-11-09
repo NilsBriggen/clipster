@@ -146,7 +146,7 @@ impl Desk {
                 out.push(format!("todo #{line_no} link {}", d.display()));
             }
             let resp = look.input(ui, field, Id::unique("desk-todo-search"), &mut self.todo_query, "Search, or #tag");
-            if resp.has_focus() && ui.input(|i| i.key_pressed(egui::Key::Escape)) {
+            if (resp.has_focus() || resp.lost_focus()) && ui.input(|i| i.key_pressed(egui::Key::Escape)) {
                 self.todo_query.clear();
             }
             top = seg.max.y + 8.0;
@@ -245,7 +245,7 @@ impl Desk {
         }
         groups[4].1.sort_by_key(|i| std::cmp::Reverse((items[*i].done_on, *i)));
         let done_count = groups[4].1.len();
-        let overdue = items.iter().filter(|i| !i.done && i.list.is_none() && i.waiting.is_none() && i.due.is_some_and(|d| d < today)).count();
+        let overdue = items.iter().filter(|i| i.overdue(today)).count();
         enum Row {
             Head(&'static str, usize),
             Item(usize, bool), // the line, and whether it's a step under its to-do
@@ -540,6 +540,8 @@ impl Desk {
             });
         }
         let mut e = self.todo_edit.clone().unwrap_or_default();
+        // Esc closes the card only when no drop-down was open as the frame began (the List menu closes itself on Esc)
+        let esc = ui.input(|i| i.key_pressed(egui::Key::Escape)) && self.popup.is_none();
         let inner = look.sheet(ui, c.expand(12.0), "To-do details", vec2(660.0, 7.0 * (ctl + 10.0) + ctl + 14.0));
         let p = ui.painter().clone();
         let gap = 20.0;
@@ -667,7 +669,7 @@ impl Desk {
         if let Some(s) = &steps_line {
             line(ui, pos2(bx + 4.0, by + ctl / 2.0), s, look.font(11.5), look.dim(), inner.max.x - 100.0 - bx - 4.0);
         }
-        if look.primary(ui, Rect::from_min_size(pos2(inner.max.x - 80.0, by), vec2(80.0, ctl)), Id::unique("desk-todo-card-close"), "Close", true).clicked() || ui.input(|i| i.key_pressed(egui::Key::Escape)) && self.popup.is_none() {
+        if look.primary(ui, Rect::from_min_size(pos2(inner.max.x - 80.0, by), vec2(80.0, ctl)), Id::unique("desk-todo-card-close"), "Close", true).clicked() || esc {
             // what's typed but not yet sent goes in with Close
             for (now, was, cmd) in [(&e.text, it.text.clone(), "edit"), (&e.link, it.link.clone().unwrap_or_default(), "link"), (&e.waiting, it.waiting.clone().unwrap_or_default(), "waiting"), (&e.note, it.note.clone().unwrap_or_default(), "note")] {
                 if now.trim() != was && !(cmd == "edit" && now.trim().is_empty()) {
@@ -678,7 +680,8 @@ impl Desk {
             self.todo_edit = None;
             return;
         }
-        if self.card.is_some() {
+        // a quick date button cleared the edits this frame (they reload from the file): don't put the old ones back
+        if self.card.is_some() && self.todo_edit.is_some() {
             self.todo_edit = Some(e);
         }
     }
@@ -886,7 +889,7 @@ impl Desk {
         if let Some(mut new) = self.renaming_list.clone() {
             let inner = look.sheet(ui, c.expand(60.0), "Rename the list", vec2(380.0, 2.0 * ctl + 20.0));
             let resp = look.input(ui, Rect::from_min_size(inner.min, vec2(inner.width(), ctl)), Id::unique("desk-list-rename"), &mut new, "");
-            if !resp.has_focus() && !resp.lost_focus() {
+            if !resp.has_focus() && !resp.lost_focus() && ui.memory(|m| m.focused().is_none()) {
                 resp.request_focus();
             }
             let enter = resp.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter));

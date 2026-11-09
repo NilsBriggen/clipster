@@ -203,7 +203,7 @@ struct App {
     events_all: Vec<calendar::Event>,                       // every event read; `events` leaves out the hidden calendars
     holiday_cc: String,                                     // public holidays for this country ("" = off)
     holidays: Vec<(chrono::NaiveDate, String)>,
-    holidays_asked: bool,
+    holidays_at: Option<Instant>, // when the holidays were last asked for (again after 10 minutes while there are none)
     pin_labels: std::collections::BTreeMap<String, String>, // a pinned snippet's text -> your label for it ("IBAN")
     clip_paused: Option<Instant>,                           // the clipboard history looks away until then
     reading_titles: std::collections::BTreeMap<String, String>, // a saved link -> the page's title (from the browser window)
@@ -641,7 +641,7 @@ impl App {
             events_all: vec![],
             holiday_cc: String::new(),
             holidays: vec![],
-            holidays_asked: false,
+            holidays_at: None,
             pin_labels: Default::default(),
             clip_paused: None,
             reading_titles: Default::default(),
@@ -829,6 +829,11 @@ impl App {
         let first_run = !Self::settings_path().exists();
         if app.screenshot.is_none() {
             app.load();
+            // Clipster stopped during a focus session: put the notification setting back (at start only: an
+            // imported settings.json holds another computer's)
+            if let Some(m) = std::fs::read_to_string(Self::settings_path()).ok().and_then(|t| serde_json::from_str::<serde_json::Value>(&t).ok()).and_then(|v| v["dnd_restore"].as_str().map(String::from)) {
+                sys::dnd_restore(&m);
+            }
             app.daily();
             app.refresh_mood(); // before the greeting, so "welcome back" can be in today's mood
             if !app.name.is_empty() {
@@ -1223,6 +1228,17 @@ impl App {
                 });
                 self.people[i].email = Some(value.to_string());
                 Reply::say(format!("Got it: {}'s email is {value}.", self.people[i].name)).mood(Mood::Write).run(&format!("Email {}", self.people[i].name), &format!("person mail {}", self.people[i].name))
+            }
+            // the person card sends "none" for an emptied field
+            "email" if ["none", ""].contains(&value) && at.is_some() => {
+                let p = &mut self.people[at.unwrap_or_default()];
+                p.email = None;
+                Reply::say(format!("{}'s email is gone.", p.name)).mood(Mood::Happy)
+            }
+            "met" if ["none", ""].contains(&value) && at.is_some() => {
+                let p = &mut self.people[at.unwrap_or_default()];
+                p.last = None;
+                Reply::say(format!("I've forgotten when you last talked to {}.", p.name)).mood(Mood::Happy)
             }
             "email" => Reply::say("That doesn't look like an email address.").mood(Mood::Think),
             "every" if ["none", "0", "off", "never"].contains(&value) && at.is_some() => {
@@ -1817,10 +1833,12 @@ impl App {
                         done += 1;
                     }
                 }
-                // read it all in again
+                // read it all in again (the holidays too: the country may be another one)
                 self.load();
                 lines::reload();
                 self.desk_files_stale();
+                self.holidays.clear();
+                self.holidays_at = None;
                 Reply::say(lines::pick("data_imported").replace("{n}", &done.to_string())).mood(Mood::Party)
             }
             "forget" if arg.starts_with("time") => {
@@ -2487,11 +2505,7 @@ impl App {
         self.backup_target = v["backup_target"].as_str().unwrap_or_default().to_string();
         self.backup_last = v["backup_last"].as_i64();
         self.backup_result = v["backup_result"].as_str().unwrap_or_default().to_string();
-        // Clipster stopped during a focus session: put the notification setting back
         self.quiet_until = v["quiet_until"].as_i64().filter(|q| *q > timers::unix_now());
-        if let Some(m) = v["dnd_restore"].as_str() {
-            sys::dnd_restore(m);
-        }
         self.budgets = v["budgets"].as_object().into_iter().flatten().filter_map(|(k, m)| Some((k.clone(), m.as_u64()?.min(16 * 60)))).collect();
         let fortnight = (chrono::Local::now().date_naive() - chrono::Days::new(14)).format("%Y-%m-%d").to_string();
         for (day, a) in v["checkin_days"].as_object().into_iter().flatten().filter(|(d, _)| **d > fortnight) {
@@ -2953,8 +2967,11 @@ impl App {
             }
             Effect::TimeReport => r = self.time_report(),
             Effect::OpenDesk(tab) => {
-                self.desk_quip = lines::pick("desk_status");
-                self.desk.open();
+                // already open (a button on the Desk itself): just go there, keeping its place and status line
+                if !self.desk.is_open() {
+                    self.desk_quip = lines::pick("desk_status");
+                    self.desk.open();
+                }
                 self.desk.set_tab(&tab);
                 // now and then, mention the shortcut
                 self.stat("desk_opens", 1);
@@ -3212,7 +3229,8 @@ impl App {
             Effect::Tidy(which) => {
                 // "downloads skip 2,5": the files you unticked (places in the plan the Desk showed) stay where they are
                 let (which, skip) = which.split_once(" skip ").map_or((which.as_str(), vec![]), |(w, s)| (w, s.split(',').filter_map(|n| n.trim().parse::<usize>().ok()).collect::<Vec<_>>()));
-                let keep = |d: &std::path::Path| tidy::plan(d).into_iter().enumerate().filter(|(i, _)| !skip.contains(&(i + 1))).map(|(_, m)| m).collect::<Vec<_>>();
+                let shown = (!skip.is_empty()).then(|| self.desk.shown_tidy_plan(which)).flatten();
+                let keep = |d: &std::path::Path| shown.clone().unwrap_or_else(|| tidy::plan(d)).into_iter().enumerate().filter(|(i, _)| !skip.contains(&(i + 1))).map(|(_, m)| m).collect::<Vec<_>>();
                 if self.desk.is_open() && self.upkeep.is_some() {
                     self.start_checkup(ctx, false); // the Downloads row turns green
                 }
@@ -3513,7 +3531,8 @@ impl App {
             }
             Effect::Reading(cmd) => {
                 let (verb, arg) = cmd.split_once(' ').unwrap_or((cmd.as_str(), ""));
-                let at = arg.trim_start_matches('#').parse::<usize>().ok().and_then(|n| n.checked_sub(1)).filter(|i| *i < self.reading.len());
+                // by number, or by the link itself (a status-bar button made earlier can't point at the wrong line)
+                let at = arg.trim_start_matches('#').parse::<usize>().ok().and_then(|n| n.checked_sub(1)).filter(|i| *i < self.reading.len()).or_else(|| self.reading.iter().position(|(l, _)| l == arg.trim()));
                 match (verb, at) {
                     ("save", _) => {
                         // no link given: the newest one you copied
@@ -3534,9 +3553,9 @@ impl App {
                             self.set_status(format!("I couldn't open that: {e}"));
                         } else {
                             // the browser's next title is the page's: kept as the link's title (nothing else is asked)
-                            self.reading_opened = Some((link, Instant::now()));
+                            self.reading_opened = Some((link.clone(), Instant::now()));
                             if from_desk {
-                                self.desk_status = desk::Status { text: lines::pick("reading_opened"), tone: desk::Tone::Info, at: Some(Instant::now()), action: Some(("Mark as read".into(), format!("reading done {}", i + 1))) };
+                                self.desk_status = desk::Status { text: lines::pick("reading_opened"), tone: desk::Tone::Info, at: Some(Instant::now()), action: Some(("Mark as read".into(), format!("reading done {link}"))) };
                             }
                         }
                         silent = from_desk;
@@ -3824,7 +3843,10 @@ impl App {
         }
         // is the backup drive there? Asked on a thread every 30 s: an unreachable network share can take seconds or
         // hang, and that must never freeze the window. A check that hangs holds the next one back for an hour.
-        if !self.backup_target.is_empty() && self.backup_here_at.is_none_or(|a| a.elapsed() > Duration::from_secs(30)) {
+        // Every 30 s only when it matters right away (backing up when the drive appears, or the Upkeep tab open); else
+        // every 10 minutes, so a sleeping automounted drive isn't woken up all day.
+        let every = if self.backup_auto != "off" || self.desk.upkeep_page().is_some() { 30 } else { 600 };
+        if !self.backup_target.is_empty() && self.backup_here_at.is_none_or(|a| a.elapsed() > Duration::from_secs(every)) {
             self.backup_here_at = Some(now + Duration::from_secs(3600));
             let (tx, ctx2, target) = (self.tx.clone(), ctx.clone(), self.backup_target.clone());
             std::thread::spawn(move || {
@@ -3958,9 +3980,10 @@ impl App {
         }
         // calendars: read again every 15 minutes; a heads-up 10 minutes before each timed event (like a reminder, it
         // comes through quiet mode and focus)
-        // public holidays: asked once per start (and when the country changes); the net module keeps a yearly copy
-        if !self.holiday_cc.is_empty() && self.holidays.is_empty() && !self.holidays_asked {
-            self.holidays_asked = true;
+        // public holidays: asked at start (and when the country changes), again every 10 minutes while there are none
+        // (offline at login); the net module keeps a yearly copy
+        if !self.holiday_cc.is_empty() && self.holidays.is_empty() && self.holidays_at.is_none_or(|t| now.duration_since(t) > Duration::from_secs(600)) {
+            self.holidays_at = Some(now);
             self.fetch_holidays(ctx);
         }
         if self.calendar_at.is_none_or(|at| now.duration_since(at) > Duration::from_secs(15 * 60)) {
@@ -4147,6 +4170,7 @@ impl App {
                 Event::Space(report) => {
                     self.space_running = false;
                     self.space = Some((Instant::now(), *report));
+                    self.desk.space_counted(); // the ticks were places in the old list
                 }
                 Event::BackupHere(here) => {
                     self.backup_here = here;

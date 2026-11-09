@@ -35,7 +35,7 @@ enum What<'e> {
     Timer(&'e crate::timers::Timer),
     Todo(usize, NaiveDate), // its line in the list, its due date
     Todos(usize),           // more than two due that day, as one row
-    Birthday(String, Option<i32>, bool), // name, turning, has an email
+    Birthday(String, Option<i32>, bool, NaiveDate), // name, turning, has an email, the day
     Countdown(String),
 }
 
@@ -170,7 +170,7 @@ impl Desk {
             }
             for (days_away, person, age) in &birthdays {
                 if today + Duration::days(*days_away) == *d {
-                    items.push((None, What::Birthday(person.name.clone(), *age, person.email.is_some())));
+                    items.push((None, What::Birthday(person.name.clone(), *age, person.email.is_some(), *d)));
                 }
             }
             items.extend(view.countdowns.iter().filter(|(_, day)| day == d).map(|(l, _)| (None, What::Countdown(l.clone()))));
@@ -342,8 +342,10 @@ impl Desk {
                                 return;
                             }
                         }
-                        What::Birthday(name, age, email) => {
-                            let mut b: Vec<(&str, String)> = vec![("Present", format!("todo present for {name} by {}", t.map(|t| t.date()).unwrap_or(today)))];
+                        What::Birthday(name, age, email, day) => {
+                            // the present is due the day before the birthday (not today, unless that's tomorrow)
+                            let by = (*day - Duration::days(1)).max(today);
+                            let mut b: Vec<(&str, String)> = vec![("Present", format!("todo present for {name} by {by}"))];
                             if *email {
                                 b.push(("Write", format!("person mail {name}")));
                             }
@@ -436,7 +438,7 @@ impl Desk {
         let (x0, x1) = (r.min.x + 12.0, r.max.x - 12.0);
         let search = Rect::from_min_size(pos2(x1 - 150.0, r.min.y + 6.0), vec2(150.0, ctl - 4.0));
         let resp = look.input(ui, search, Id::unique("desk-notes-search"), &mut self.notes_query, "Search notes");
-        if resp.has_focus() && ui.input(|i| i.key_pressed(egui::Key::Escape)) {
+        if (resp.has_focus() || resp.lost_focus()) && ui.input(|i| i.key_pressed(egui::Key::Escape)) {
             self.notes_query.clear();
         }
         let form = r.max.y - ctl - 12.0;
@@ -687,7 +689,7 @@ impl Desk {
         line(ui, pos2(inner.min.x, inner.min.y + 8.0), &format!("\u{201c}{}\u{201d}", note.text), look.font(12.5), look.text(), inner.width());
         let field = Rect::from_min_size(pos2(inner.min.x, inner.min.y + 24.0), vec2(inner.width() - 72.0, ctl));
         let resp = look.input(ui, field, Id::unique("desk-note-when"), &mut self.note_when, "tomorrow at 9, in 2 hours");
-        if !resp.has_focus() && !resp.lost_focus() && self.note_when.is_empty() {
+        if !resp.has_focus() && !resp.lost_focus() && self.note_when.is_empty() && ui.memory(|m| m.focused().is_none()) {
             resp.request_focus();
         }
         let preview = (!self.note_when.trim().is_empty()).then(|| remind_preview(&self.note_when, now)).flatten();
