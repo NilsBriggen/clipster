@@ -2,6 +2,59 @@
 
 Each version's section is also its GitHub release description: the release workflow publishes it and refuses to release a version without one.
 
+## 0.4.0 (2026-11-09)
+
+The assistant release. Clipster learned what a personal assistant needs to know: your appointments, the people in your life, your shopping list, where you saved that file and what you meant to read later. He also got a snake game, new animations, comments on 400 more programs and 400 websites, and more than twice as many lines as before (about 50,000 now), written to new limits you can read in `LORE.md`.
+
+### Highlights
+
+- **Your calendar:**
+  - Paste your calendar's private iCal link (Google, Outlook, Nextcloud, Proton all have one) on the Desk's new **Agenda** tab, or say "add my calendar" and the link.
+  - Ask "my agenda", "what's on Friday", "my next meeting" or "am I free on Friday at 3".
+  - He gives you a heads-up 10 minutes before each appointment, with a **Join** button for Zoom, Meet, Teams, Jitsi and Webex calls.
+  - The morning briefing lists your day, and the Agenda shows events, reminders and due to-dos together.
+- **People:**
+  - "Anna's birthday is on 3 March", "keep in touch with mum every 2 weeks", "I called mum", "when did I last talk to mum", "email Anna", "upcoming birthdays".
+  - Import your contacts from a .vcf file.
+  - He reminds you three days before a birthday, on the day, and when it's been too long.
+  - You & me has a new People page.
+- **Start my workday:** one click (or "start my workday") opens your work apps and links, shows your day and offers a focus session. On weekday mornings he offers it once.
+- **Lists:**
+  - "add eggs, milk and bread to my shopping list", "what's on my packing list", "clear my shopping list".
+  - Each list gets its own chip on the To-do tab.
+- **Find my files:** "find my CV", "where did I save the invoice", "recent files".
+- **Read later:** copied links get a Read later button, and "save this link" keeps the last one. They're on the Clipboard tab's new Saved links page.
+- **Clip Chain:** a snake game. Mini Clipster pulls a chain of coloured paperclips across the desk blotter. Easy, Normal and Hard.
+- **New animations:**
+  - He rings a desk bell before meetings, carries a box during backups, puts on reading glasses, scribbles on a clipboard, turns a wrench during upkeep, sips coffee in the morning and blows a party horn for birthdays.
+  - When nobody's looking, he knits a paperclip chain, folds a paper plane, waters a desk plant, plays with a yo-yo, doodles, and spies through binoculars.
+- **He comments on much more:**
+  - 401 more programs (625 in all, many of them Windows apps), with Windows process names added for existing ones
+  - 404 websites by name (YouTube, Reddit, GitHub, SBB, Digitec Galaxus, 20 Minuten…)
+  - 23 new kinds of app and site (notes, design, projects, banking, news…), with shortcut tips
+  - Comments may now mention the page or file you're on. Titles still never leave your computer.
+- **About 28,000 new lines in both voices:**
+  - everyday chatter
+  - 260 new conversation topics and 82 sentence patterns, plus new ways to phrase 150 existing ones
+  - more jokes, puns, true facts, riddles and would-you-rathers
+  - more arcade commentary
+  - more of his Unhinged lore: diary, prophecies, memories
+  - About 300 older lines were rewritten, and an editor reviewed everything for facts, repeats and the limits.
+- **New limits:** what he may and may not joke about was decided topic by topic and is written down in `app/data/LORE.md`: a bit sharper, still kind, never about illness, faith, real people or anything that could hurt.
+- **April Fools:** on 1 April he has a little surprise. It's harmless.
+
+### Install
+
+- **Linux:** download `clipster_0.4.0_x86_64.AppImage`, make it executable (`chmod +x`) and replace your old AppImage with it. Or click **Install now** when he tells you about the update. Your settings, notes, to-dos and taught phrases are kept.
+- **Windows:** run `clipster_0.4.0_x64_en-US.msi`, or click **Install now** in Clipster. It replaces the old version and keeps your settings. The installer still isn't code-signed, so SmartScreen may say "Windows protected your PC". Choose **More info → Run anyway**.
+
+### Known limitations
+
+- **Calendar time zones:** events are shown in your computer's time zone. Events created in another time zone (TZID) are read as local time, so they can be off by the difference. UTC times are converted correctly.
+- **Windows, untested by hand:** recent files (from the Recent folder) and opening apps by name for Start my workday compile and pass their tests on Windows, but haven't been tried on a real Windows PC yet. Please [report anything odd](https://github.com/NilsBriggen/clipster/issues).
+- **Website comments** depend on the words a site puts in its tab title. A few sites name themselves in a way he doesn't recognise; those just get the general comments.
+- As before, outside KDE Plasma there are no global shortcuts on Linux and no mouse-following.
+
 ## 0.3.0 (2026-11-08)
 
 The Desk release. Clipster grew from a chat balloon into an office helper with a window of his own: Clipster's Desk keeps your day, your to-dos, your clipboard and the upkeep of your computer in one place. He also learned to proofread, write letters, run focus sessions, tidy your downloads and back up your files, and he welcomes new users with a proper Windows 98-style setup.
