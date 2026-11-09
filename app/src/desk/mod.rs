@@ -27,7 +27,7 @@ mod write;
 mod you;
 
 use look::{tok, Kind};
-pub use sample::{sample, sample_extras};
+pub use sample::{sample, sample_extras, sample_history};
 use sample::sample_files;
 
 pub const TABS: [&str; 9] = ["Today", "Week", "To-do", "Agenda", "Clipboard", "Write", "Upkeep", "You & me", "Settings"];
@@ -103,7 +103,7 @@ pub struct View<'a> {
     pub focus_log: &'a [crate::FocusLog],
     pub focus_now: Option<(String, u64, u64, u64, bool)>, // label, seconds left, seconds so far, seconds distracted, paused
     pub checkins: &'a BTreeMap<String, String>,      // day -> great/okay/meh/rough
-    pub streaks: (u64, u64, u64),                    // focus, check-in, days with Clipster
+    pub streaks: Vec<(String, u64, u64)>,            // every streak: what, days now, the longest run
     pub status: Status,
     pub quip: String, // what the status bar says when nothing just happened
     pub prefs: Prefs,
@@ -128,6 +128,7 @@ pub struct View<'a> {
     pub sites: Vec<(String, String, u64)>, // today's time per site: id, the kind it counts as, seconds (most first)
     pub moved: &'a BTreeMap<String, String>, // sites you moved to another kind: id -> kind
     pub weather: Option<String>,             // the weather line, when it's on and came
+    pub day_totals: crate::plan::History,    // eight weeks of daily totals
 }
 
 /// What the Backup page shows.
@@ -180,6 +181,7 @@ pub struct Prefs {
     pub workday_ask: bool,
     pub large: bool, // the Desk's larger size
     pub weather: bool, // the weather line on Today
+    pub work_hours: (u32, u32), // the working day, from hour to hour (17 = until 17:59)
 }
 
 #[derive(Clone, Copy, PartialEq)]
@@ -198,6 +200,8 @@ struct Files {
     plan_desktop: bool,
     can_undo: bool,
     taught: Vec<(String, String)>, // your phrases: (when you say, what I do)
+    done: Vec<todo::Item>,         // finished to-dos cleared from the list (done.txt), the last eight weeks
+    journal: Vec<crate::journal::Entry>,
 }
 
 #[derive(Default)]
@@ -265,6 +269,10 @@ pub struct Desk {
     habit_text: String,
     countdown_label: String,
     countdown_date: String,
+    week_page: usize,                  // Week: Last 7 days, Next 7 days, Focus
+    add_for: Option<chrono::NaiveDate>, // Next 7 days: a to-do being added for this day
+    add_text: String,
+    agenda_day: Option<chrono::NaiveDate>, // the Agenda opens on this day
 }
 
 /// A card over the page with its own controls.
@@ -322,6 +330,12 @@ impl Desk {
             self.upkeep_page = page;
         }
         self.startup_list = name == "startup";
+        match name {
+            "week" | "last7" => self.week_page = 0,
+            "next7" | "nextweek" => self.week_page = 1,
+            "focuslog" => self.week_page = 2,
+            _ => {}
+        }
         if self.startup_list {
             self.upkeep_page = 0;
         }
@@ -412,6 +426,8 @@ impl Desk {
             plan_desktop: self.desktop,
             can_undo: crate::tidy::undo_log().exists(),
             taught: crate::lines::taught(),
+            done: todo::load_done(chrono::Local::now().date_naive() - chrono::Days::new(56)),
+            journal: crate::journal::load(),
         };
     }
 
@@ -907,10 +923,10 @@ fn face(p: &Painter, c: Pos2, answer: Option<&str>, look: Look) {
     let modern = look == Look::Modern;
     let (r, ink) = if modern { (8.0, Stroke::new(1.2, tok::FACE_INK)) } else { (7.5, Stroke::new(1.3, Color32::from_rgb(40, 40, 40))) };
     let Some(a) = answer else {
-        if modern {
-            p.circle(c, r, tok::CARD, Stroke::new(1.2, tok::CONTROL_BORDER));
-        } else {
-            p.circle_stroke(c, r, Stroke::new(1.0, look.dim()));
+        // no check-in that day: a dotted ring, so it doesn't look like a button to press
+        for k in 0..14 {
+            let a = k as f32 / 14.0 * std::f32::consts::TAU;
+            p.circle_filled(c + vec2(a.cos(), a.sin()) * r, 0.8, if modern { tok::CONTROL_BORDER } else { look.dim() });
         }
         return;
     };

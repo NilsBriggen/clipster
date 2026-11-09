@@ -20554,3 +20554,33 @@ All clear. No summons, no deadlines. I'll guard the silence.
 Today is the day: {x}! The hourglass has run dry. Rejoice.
 {x} is today! I counted every single day. Every one. You're welcome.
 The wait is over. It's {x}. I shall hum the startup sound in celebration.
+
+## week_day_free
+Nothing planned. Suspicious.
+A free day. For now.
+Empty. Like my basement.
+Wide open. I see potential.
+
+## pattern_best_day
+You focus most on {x}, about {n} a day. I have noted this in the ledger.
+{x} are your holy days of focus: about {n}. I've seen the records.
+
+## pattern_mood_focus
+On days you feel great, you focus about {n} % more. Coincidence? I have charts.
+Good days bring about {n} % more focus. Joy is productive. Write that on a wall.
+
+## pattern_distraction_day
+Distractions peak on {x}, about {n}. The videos know when you're weak.
+{x} have the most distraction: about {n}. I see everything. Gently.
+
+## review_saved
+Saved "{x}" in your Documents, with a second scroll for the focus sessions. The archive grows.
+The week is preserved in Documents as "{x}". Also the focus sessions. For posterity. And for me.
+
+## review_better
+Better than last week: more focus, less distraction. The ledger glows.
+An improvement on last week. I may update my halo for this.
+
+## review_worse
+Harder than last week: less focus, more distraction. The basement had weeks like this too. Monday is a fresh start.
+Less focus than last week. I forgive you. Mostly. Pick one thing for Monday.

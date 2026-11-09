@@ -29,7 +29,18 @@ pub(super) fn sample_files(desktop: bool) -> Files {
         .map(|(f, c)| (base.join(f), base.join(c).join(f)))
         .collect();
     let taught = vec![("gm".to_string(), "\"Good morning, sunshine!\"".to_string()), ("work".to_string(), "open firefox → open code".to_string())];
-    Files { at: Some(Instant::now()), todos, notes, plan, plan_at: Some(Instant::now()), plan_desktop: desktop, can_undo: true, taught }
+    let today = chrono::Local::now().date_naive();
+    let ago = |n: u64| today - chrono::Days::new(n);
+    let done = ["Book the dentist", "Pay the electricity bill", "Send the invoice", "Fix the printer", "Water the office plant", "Reply to Gerald"]
+        .iter()
+        .enumerate()
+        .map(|(n, t)| todo::Item { text: t.to_string(), done: true, done_on: Some(ago(n as u64 % 5 + 1)), ..Default::default() })
+        .collect();
+    let journal = [(1, "okay", "Long meeting, short lunch."), (2, "great", "Shipped the slides. Cake in the kitchen."), (3, "meh", "Printer jam, twice."), (5, "okay", "")]
+        .iter()
+        .map(|(n, m, l)| crate::journal::Entry { day: ago(*n), mood: Some(m.to_string()), text: l.to_string() })
+        .collect();
+    Files { at: Some(Instant::now()), todos, notes, plan, plan_at: Some(Instant::now()), plan_desktop: desktop, can_undo: true, taught, done, journal }
 }
 
 /// Made-up timers, times, sessions and check-ins for screenshots: (timers, kind_time, focus_log, checkins).
@@ -63,4 +74,17 @@ pub fn sample_extras() -> (Vec<crate::habits::Habit>, Vec<(String, chrono::Naive
     let countdowns = vec![("Italy".to_string(), today + chrono::Days::new(23))];
     let sites = BTreeMap::from([(today.format("%Y-%m-%d").to_string(), BTreeMap::from([("youtube".to_string(), 21 * 60), ("netflix".to_string(), 6 * 60), ("github".to_string(), 48 * 60)]))]);
     (habits, countdowns, sites, "⛅ 12° · Partly cloudy · rain from 15:00 · take an umbrella".into())
+}
+
+/// Four made-up weeks of daily totals (before the sample week), so "vs last week" and the patterns show.
+pub fn sample_history() -> crate::plan::History {
+    use chrono::Datelike;
+    let today = chrono::Local::now().date_naive();
+    (7..35u64)
+        .map(|n| {
+            let d = today - chrono::Days::new(n);
+            let tuesday = d.weekday() == chrono::Weekday::Tue;
+            (d.format("%Y-%m-%d").to_string(), [4 * 3600 + n * 60, 3000 + (n % 3) * 900, 1800, if tuesday { 6600 } else { 2400 + (n % 4) * 300 }])
+        })
+        .collect()
 }

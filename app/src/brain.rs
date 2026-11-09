@@ -84,6 +84,7 @@ pub enum Effect {
     Backup(String),                  // "add <folder>", "remove 2", "target <place>", "now", "eject"
     Wrapup,                          // the end-of-day card on the Desk
     Review(bool),                    // the week in review (true = copy it as text)
+    ReviewCsv,                       // the last seven days as spreadsheets in Documents
     OpenDesk(String),                // Clipster's Desk, on this tab ("" = where it was): stats, to-dos, reminders, upkeep
     DeskLook(bool),                  // the Desk's look: true = modern, false = classic 98
     Tidy(String),                    // move a folder's files into subfolders by type (after a yes)
@@ -235,7 +236,7 @@ pub fn respond(input: &str) -> Reply {
 
 /// Strict commands ("joke", "timer 5m tea", "5 km to miles"). `None` = not a command I know.
 /// The settings the Desk's `pref <key> <value>` may change.
-pub const PREF_KEYS: &[&str] = &["persona", "tips", "clip", "programs", "windows", "checkin", "health", "updates", "sounds", "breaks", "dnd", "wrapup", "upkeepday", "workdayask", "quiet", "autostart", "goal", "budget", "classiclook", "desksize", "weather"];
+pub const PREF_KEYS: &[&str] = &["persona", "tips", "clip", "programs", "windows", "checkin", "health", "updates", "sounds", "breaks", "dnd", "wrapup", "upkeepday", "workdayask", "quiet", "autostart", "goal", "budget", "classiclook", "desksize", "weather", "workhours"];
 
 /// Command words that are also ordinary English words only count in their command shape: "drink" alone is a
 /// cocktail, "drink water" is advice; "top" alone lists programs, "top 10 movies" is a question.
@@ -253,7 +254,7 @@ fn head_fits(head: &str, rest: &str) -> bool {
         "dog" | "cat" | "fox" => rest.is_empty() || ["pic", "picture", "photo", "please", "pics", "photos", "image", "pictures", "gif"].contains(&rest),
         "count" => !["me", "on", "to", "down", "your", "my"].contains(&first),
         "colour" => rest.is_empty() || ["silver", "gold", "rose", "neon", "rainbow", "midnight", "ocean", "beige", "ember"].iter().any(|k| rest.contains(k)),
-        "review" => rest.is_empty() || ["copy", "my week", "the week", "week"].contains(&rest),
+        "review" => rest.is_empty() || ["copy", "csv", "my week", "the week", "week"].contains(&rest),
         "checkin" => ["great", "okay", "meh", "rough"].contains(&rest),
         "clip" => ["copy", "pin", "unpin", "clear", "todo", "note", "readlater", "tool", "label", "up", "pause", "resume"].contains(&first),
         "pref" => PREF_KEYS.contains(&first),
@@ -372,6 +373,7 @@ pub fn exact(input: &str) -> Option<Reply> {
         }
         "wrapup" if rest == "bye" => return Some(Reply::say(lines::pick("wrapup_goodnight")).mood(Mood::Love)),
         "wrapup" => return Some(Reply::say("").effect(Effect::Wrapup)),
+        "review" if rest == "csv" => return Some(Reply::say("").effect(Effect::ReviewCsv)),
         "review" => return Some(Reply::say("").effect(Effect::Review(rest == "copy"))),
         "clip" if !rest.is_empty() => return Some(Reply::say("").effect(Effect::Clip(rest.to_string()))),
         // the calendar: "calendar" (today), "calendar add <link>", "calendar day 2026-11-13", "calendar free <unix time>"

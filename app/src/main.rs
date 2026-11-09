@@ -185,6 +185,8 @@ struct App {
     weather_on: bool,                                       // the weather line on the Desk's Today tab
     weather: Option<(Instant, String)>,                     // that line, and when it came
     weather_asked: Option<Instant>,                         // a fetch is under way (or failed) since then
+    work_hours: (u32, u32),                                 // the working day: 9 to 17 means 9:00 to 17:59
+    day_totals: plan::History,                              // eight weeks of daily totals (work, distractions, other, focus)
     workday: Vec<String>,           // what "start my workday" opens: apps and links
     workday_ask: bool,              // offer it on weekday mornings
     window_text: String,            // the active window's title, for comments that quote it ({title})
@@ -564,6 +566,8 @@ impl App {
             weather_on: false,
             weather: None,
             weather_asked: None,
+            day_totals: Default::default(),
+            work_hours: (9, 17),
             workday: vec![],
             workday_ask: true,
             window_text: String::new(),
@@ -842,7 +846,20 @@ impl App {
         let look = if self.desk_modern { desk::Look::Modern } else { desk::Look::Classic };
         let status = desk::Status { text: self.fill(&self.desk_status.text), ..self.desk_status.clone() };
         let quip = self.fill(&self.desk_quip);
-        let streaks = (streak("focus_last_day", "focus_streak"), streak("checkin_last", "checkin_streak"), self.stats.get("days").copied().unwrap_or(1));
+        // every streak he keeps: (what, now, the longest run)
+        let best = |n: &str, now: u64| self.stats.get(&format!("{n}_best")).copied().unwrap_or(0).max(now);
+        let mut streaks: Vec<(String, u64, u64)> = vec![];
+        for (label, last, n) in [("Focus", "focus_last_day", "focus_streak"), ("Goal met", "goal_last_day", "goal_streak"), ("Check-ins", "checkin_last", "checkin_streak"), ("Days with me", "last_day", "streak")] {
+            if n == "goal_streak" && self.focus_goal == 0 {
+                continue;
+            }
+            let now = streak(last, n);
+            streaks.push((label.to_string(), now, best(n, now)));
+        }
+        let day_totals = match &self.desk_sample {
+            Some((_, k, f, _)) => plan::history_merge(&desk::sample_history(), k, f, chrono::Local::now().date_naive()),
+            None => plan::history_merge(&self.day_totals, &self.kind_time, &self.focus_log, chrono::Local::now().date_naive()),
+        };
         let prefs = desk::Prefs {
             unhinged: self.unhinged,
             tips_every: self.tips_every,
@@ -865,6 +882,7 @@ impl App {
             budgets: self.budgets.clone(),
             large: self.desk_large,
             weather: self.weather_on,
+            work_hours: self.work_hours,
         };
         // today's time per site, with the kind each counts as now; the weather line while it's on
         let mut sites: Vec<(String, String, u64)> = self.site_time.get(&today_key()).into_iter().flatten().filter_map(|(id, s)| Some((id.clone(), self.kind_moves.get(id).cloned().or_else(|| lines::site_kind(id))?, *s))).collect();
@@ -872,11 +890,11 @@ impl App {
         let weather = self.weather.as_ref().filter(|_| self.weather_on).map(|(_, w)| w.clone());
         match &self.desk_sample {
             Some((t, k, f, c)) => {
-                let view = desk::View { timers: t.clone(), kind_time: k, focus_log: f, focus_now: Some(("the slides".into(), 18 * 60, 7 * 60, 40, false)), checkins: c, streaks: (4, 6, 31), status, quip, prefs, clips: &self.sample_clips, pins: &self.sample_clips[..2], reading: &self.sample_reading, me: sample_me(), upkeep: Some((&self.sample_upkeep, 120)), upkeep_running: false, backup_check: upkeep::backup_check(true, Some(backup::now() - 9 * 86_400), backup::now(), true), backup: desk::Backup { sources: &self.backup_sources, target: "/run/media/you/BACKUP", last: Some(backup::now() - 9 * 86_400), result: "214 copied (1.3 GB), 4120 unchanged", progress: None }, events: &self.sample_events, calendars: &self.sample_calendars, calendar_note: "Checked 4 min ago".into(), calendar_problems: 0, answer: self.desk_answer.as_ref(), name: "Sam".into(), people: &self.sample_people, workday: &self.sample_workday, habits: &self.habits, countdowns: &self.countdowns, sites, moved: &self.kind_moves, weather };
+                let view = desk::View { timers: t.clone(), kind_time: k, focus_log: f, focus_now: Some(("the slides".into(), 18 * 60, 7 * 60, 40, false)), checkins: c, streaks: vec![("Focus".into(), 4, 9), ("Goal met".into(), 2, 5), ("Check-ins".into(), 6, 12), ("Days with me".into(), 31, 31)], status, quip, prefs, clips: &self.sample_clips, pins: &self.sample_clips[..2], reading: &self.sample_reading, me: sample_me(), upkeep: Some((&self.sample_upkeep, 120)), upkeep_running: false, backup_check: upkeep::backup_check(true, Some(backup::now() - 9 * 86_400), backup::now(), true), backup: desk::Backup { sources: &self.backup_sources, target: "/run/media/you/BACKUP", last: Some(backup::now() - 9 * 86_400), result: "214 copied (1.3 GB), 4120 unchanged", progress: None }, events: &self.sample_events, calendars: &self.sample_calendars, calendar_note: "Checked 4 min ago".into(), calendar_problems: 0, answer: self.desk_answer.as_ref(), name: "Sam".into(), people: &self.sample_people, workday: &self.sample_workday, habits: &self.habits, countdowns: &self.countdowns, sites, moved: &self.kind_moves, weather, day_totals };
                 self.desk.show(ctx, &view, look, near)
             }
             None => {
-                let view = desk::View { timers, kind_time: &self.kind_time, focus_log: &self.focus_log, focus_now, checkins: &self.checkin_days, streaks, status, quip, prefs, clips: &self.clip_history, pins: &self.pins, reading: &self.reading, me: about_me(&self.facts, self.birthday, &self.stats, &self.unlocked, &self.highscores, self.friendship), upkeep: self.upkeep.as_ref().map(|(t, r)| (r, t.elapsed().as_secs())), upkeep_running: self.upkeep_running, backup_check: self.backup_check(), backup: desk::Backup { sources: &self.backup_sources, target: &self.backup_target, last: self.backup_last, result: &self.backup_result, progress: self.backup_progress }, events: &self.events, calendars: &self.calendars, calendar_note: self.calendar_note(), calendar_problems: self.calendar_problems.len(), answer: self.desk_answer.as_ref(), name: self.name.clone(), people: &self.people, workday: &self.workday, habits: &self.habits, countdowns: &self.countdowns, sites, moved: &self.kind_moves, weather };
+                let view = desk::View { timers, kind_time: &self.kind_time, focus_log: &self.focus_log, focus_now, checkins: &self.checkin_days, streaks, status, quip, prefs, clips: &self.clip_history, pins: &self.pins, reading: &self.reading, me: about_me(&self.facts, self.birthday, &self.stats, &self.unlocked, &self.highscores, self.friendship), upkeep: self.upkeep.as_ref().map(|(t, r)| (r, t.elapsed().as_secs())), upkeep_running: self.upkeep_running, backup_check: self.backup_check(), backup: desk::Backup { sources: &self.backup_sources, target: &self.backup_target, last: self.backup_last, result: &self.backup_result, progress: self.backup_progress }, events: &self.events, calendars: &self.calendars, calendar_note: self.calendar_note(), calendar_problems: self.calendar_problems.len(), answer: self.desk_answer.as_ref(), name: self.name.clone(), people: &self.people, workday: &self.workday, habits: &self.habits, countdowns: &self.countdowns, sites, moved: &self.kind_moves, weather, day_totals };
                 self.desk.show(ctx, &view, look, near)
             }
         }
@@ -936,6 +954,7 @@ impl App {
             _ => 1,
         };
         self.stats.extend([("focus_last_day".into(), today), ("focus_streak".into(), streak)]);
+        self.keep_best("focus_streak");
         self.stat("focus_sessions", 1);
         let (pool, pct) = brain::focus_score(focused, total);
         let mut text = lines::pick(pool).replace("{n}", &(focused / 60).to_string()).replace("{pct}", &pct.to_string());
@@ -1434,6 +1453,7 @@ impl App {
             _ => 1,
         };
         self.stats.extend([("goal_last_day".into(), today), ("goal_streak".into(), streak)]);
+        self.keep_best("goal_streak");
         let mut text = lines::pick("goal_met").replace("{x}", &brain::fmt_dur(self.focus_goal * 60));
         if streak >= 2 {
             text = format!("{text} {}", lines::pick("goal_streak").replace("{n}", &streak.to_string()));
@@ -1470,6 +1490,7 @@ impl App {
         }
         let (streak, rough) = checkin_streaks(&self.stats, today, answer == "rough");
         self.stats.extend([("checkin_last".into(), today), ("checkin_streak".into(), streak), ("rough_run".into(), rough)]);
+        self.keep_best("checkin_streak");
         if answer == "rough" {
             self.stats.insert("rough_last".into(), today);
         }
@@ -1647,6 +1668,13 @@ impl App {
         *self.stats.entry(key.into()).or_insert(0) += by;
     }
 
+    /// A streak's longest run, kept next to it as `<name>_best`.
+    fn keep_best(&mut self, name: &str) {
+        let now = self.stats.get(name).copied().unwrap_or(0);
+        let best = self.stats.entry(format!("{name}_best")).or_insert(0);
+        *best = (*best).max(now);
+    }
+
     /// Once a day: keep the streak, and a little friendship for showing up.
     fn daily(&mut self) {
         use chrono::Datelike;
@@ -1656,6 +1684,7 @@ impl App {
         if last != today {
             let streak = if last + 1 == today { self.stats.get("streak").copied().unwrap_or(0) + 1 } else { 1 };
             self.stats.insert("streak".into(), streak);
+            self.keep_best("streak");
             self.stats.insert("last_day".into(), today);
             self.stat("days", 1);
             self.refresh_mood();
@@ -1858,7 +1887,7 @@ impl App {
     fn snapshot(&self) -> String {
         serde_json::json!({
             "tips_every": self.tips_every, "notice_clip": self.notice_clip, "notice_programs": self.notice_programs, "notice_windows": self.notice_windows, "checkin": self.checkin, "facts": self.facts, "kind_time": self.kind_time, "focus_log": self.focus_log, "desk_look": if self.desk_modern { "modern" } else { "classic" }, "desk_size": if self.desk_large { "large" } else { "normal" }, "checkin_days": self.checkin_days,
-            "pins": self.pins, "reading": self.reading, "calendars": self.calendars, "people": self.people.iter().map(|p| p.to_json()).collect::<Vec<_>>(), "habits": self.habits.iter().map(|h| h.to_json()).collect::<Vec<_>>(), "countdowns": self.countdowns.iter().map(|(l, d)| serde_json::json!([l, d.to_string()])).collect::<Vec<_>>(), "site_time": self.site_time, "kind_moves": self.kind_moves, "weather": self.weather_on, "workday": self.workday, "workday_ask": self.workday_ask, "welcome_seen": self.welcome_seen, "backup_sources": self.backup_sources, "backup_target": self.backup_target, "backup_last": self.backup_last, "backup_result": self.backup_result, "dnd_restore": self.dnd_restore, "dnd": self.dnd, "wrapup": self.wrapup, "upkeep_day": self.upkeep_day, "focus_goal": self.focus_goal, "budgets": self.budgets,
+            "pins": self.pins, "reading": self.reading, "calendars": self.calendars, "people": self.people.iter().map(|p| p.to_json()).collect::<Vec<_>>(), "habits": self.habits.iter().map(|h| h.to_json()).collect::<Vec<_>>(), "countdowns": self.countdowns.iter().map(|(l, d)| serde_json::json!([l, d.to_string()])).collect::<Vec<_>>(), "site_time": self.site_time, "kind_moves": self.kind_moves, "weather": self.weather_on, "work_hours": [self.work_hours.0, self.work_hours.1], "day_totals": plan::history_merge(&self.day_totals, &self.kind_time, &self.focus_log, chrono::Local::now().date_naive()), "workday": self.workday, "workday_ask": self.workday_ask, "welcome_seen": self.welcome_seen, "backup_sources": self.backup_sources, "backup_target": self.backup_target, "backup_last": self.backup_last, "backup_result": self.backup_result, "dnd_restore": self.dnd_restore, "dnd": self.dnd, "wrapup": self.wrapup, "upkeep_day": self.upkeep_day, "focus_goal": self.focus_goal, "budgets": self.budgets,
             "notice_health": self.notice_health, "check_updates": self.check_updates, "update_told": self.update_told, "sounds": self.sounds, "breaks": self.breaks, "name": self.name,
             "hat": self.hat, "skin": self.skin, "friendship": self.friendship, "highscores": self.highscores, "birthday": self.birthday.map(|(m, d)| [m, d]), "stats": self.stats, "unlocked": self.unlocked, "explored": self.explored, "persona": if self.unhinged { "unhinged" } else { "boring" }, "anchor": self.anchor.or(self.saved_anchor).map(|a| [a.x, a.y]),
             "timers": self.timers.iter().map(|t| serde_json::json!([t.at, t.label, t.every, t.id, t.rule])).collect::<Vec<_>>(),
@@ -1925,6 +1954,13 @@ impl App {
         }
         self.kind_moves = v["kind_moves"].as_object().into_iter().flatten().filter_map(|(k, m)| Some((k.clone(), m.as_str().filter(|m| brain::COUNT_AS.contains(m))?.to_string()))).collect();
         self.weather_on = v["weather"].as_bool().unwrap_or(false);
+        if let (Some(a), Some(b)) = (v["work_hours"][0].as_u64(), v["work_hours"][1].as_u64()) {
+            self.work_hours = ((a as u32).min(23), (b as u32).clamp(a as u32, 23));
+        }
+        self.day_totals = v["day_totals"].as_object().into_iter().flatten().filter_map(|(d, e)| {
+            let e = e.as_array()?;
+            (e.len() == 4).then(|| (d.clone(), [0, 1, 2, 3].map(|i| e[i].as_u64().unwrap_or(0))))
+        }).collect();
         for f in v["focus_log"].as_array().into_iter().flatten() {
             if let (Some(d), Some(m), Some(fo), Some(di), Some(l)) = (f[0].as_str(), f[1].as_u64(), f[2].as_u64(), f[3].as_u64(), f[4].as_str()) {
                 self.focus_log.push((d.into(), m, fo, di, l.into()));
@@ -2350,6 +2386,12 @@ impl App {
                         }
                     }
                     "desksize" => self.desk_large = value == "large",
+                    "workhours" => {
+                        // "9-17": from 9:00 to 17:59
+                        if let Some((a, b)) = value.split_once('-').and_then(|(a, b)| Some((a.trim().parse::<u32>().ok()?, b.trim().parse::<u32>().ok()?))).filter(|(a, b)| a <= b && *b <= 23) {
+                            self.work_hours = (a, b);
+                        }
+                    }
                     "weather" => {
                         self.weather_on = on;
                         self.weather_asked = None;
@@ -2405,8 +2447,21 @@ impl App {
             }
             Effect::Review(copy) => {
                 self.account_time();
-                let w = plan::week(&self.kind_time, &self.focus_log, &todo::load(), &self.checkin_days, chrono::Local::now().date_naive());
-                let text = plan::week_lines(&w).join("\n");
+                let today = chrono::Local::now().date_naive();
+                let finished = todo::finished_since(&todo::load(), today - chrono::Days::new(13));
+                let w = plan::week(&self.kind_time, &self.focus_log, &finished, &self.checkin_days, today);
+                let mut lines_ = plan::week_lines(&w);
+                let before = finished.iter().filter(|i| i.done_on.is_some_and(|d| d < today - chrono::Days::new(6))).count();
+                let compared = plan::compare(&plan::history_merge(&self.day_totals, &self.kind_time, &self.focus_log, today), today, w.finished, before);
+                if let Some((line, _)) = &compared {
+                    lines_.push(line.clone());
+                }
+                let verdict = match compared.and_then(|c| c.1) {
+                    Some(true) => "review_better",
+                    Some(false) => "review_worse",
+                    None => plan::week_verdict(&w),
+                };
+                let text = lines_.join("\n");
                 if copy {
                     ctx.copy_text(text.clone());
                     self.ignore_clip = text;
@@ -2416,8 +2471,22 @@ impl App {
                     self.desk_quip = lines::pick("desk_status");
                     self.desk.open();
                     self.desk.set_tab("week");
-                    r = Reply::say(format!("{} {}\n\n{text}", lines::pick("review_intro"), lines::pick(plan::week_verdict(&w)))).mood(Mood::Happy).btn("Copy as text", Act::Copy(text));
+                    r = Reply::say(format!("{} {}\n\n{text}", lines::pick("review_intro"), lines::pick(verdict))).mood(Mood::Happy).btn("Copy as text", Act::Copy(text));
                 }
+            }
+            Effect::ReviewCsv => {
+                // the last seven days as two spreadsheets in Documents
+                self.account_time();
+                let today = chrono::Local::now().date_naive();
+                let finished = todo::finished_since(&todo::load(), today - chrono::Days::new(6));
+                let (table, sessions) = plan::week_csv(&self.kind_time, &self.focus_log, &finished, &self.checkin_days, today);
+                let dir = dirs::document_dir().or_else(dirs::home_dir).unwrap_or_else(std::env::temp_dir);
+                let week = chrono::Datelike::iso_week(&today);
+                let (a, b) = (format!("Clipster week {}-{:02}.csv", week.year(), week.week()), format!("Clipster focus sessions {}-{:02}.csv", week.year(), week.week()));
+                r = match brain::write_atomic(&dir.join(&a), &table).and_then(|_| brain::write_atomic(&dir.join(&b), &sessions)) {
+                    Ok(()) => Reply::say(lines::pick("review_saved").replace("{x}", &a)).mood(Mood::Write).btn("Open the folder", Act::Open(dir.to_string_lossy().into_owned())),
+                    Err(e) => Reply::say(format!("I couldn't save the spreadsheet: {e}")).mood(Mood::Sad),
+                };
             }
             Effect::DeskLook(modern) => {
                 self.desk_modern = modern;

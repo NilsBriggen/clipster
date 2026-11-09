@@ -180,7 +180,7 @@ mod tests {
             focus_log: &focus_log,
             focus_now: None,
             checkins: &checkins,
-            streaks: (0, 0, 0),
+            streaks: vec![],
             status: Status::default(),
             quip: String::new(),
             prefs: Prefs::default(),
@@ -205,6 +205,7 @@ mod tests {
             sites: vec![],
             moved: &BTreeMap::new(),
             weather: None,
+            day_totals: Default::default(),
         };
         let kinds = |q: &str| search(q, &view, &files).iter().map(|h| (h.kind, h.go.clone())).collect::<Vec<_>>();
         assert!(kinds("printer").contains(&("Note", "notes".into())), "{:?}", kinds("printer"));

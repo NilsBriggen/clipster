@@ -20297,3 +20297,33 @@ All clear: no meetings, no reminders, nothing due.
 Today's the day: {x}!
 {x} is today! The countdown is over.
 The wait is over. It's {x} today.
+
+## week_day_free
+Nothing planned.
+A free day, so far.
+Nothing on yet.
+Wide open.
+
+## pattern_best_day
+You focus most on {x} (about {n} a day).
+{x} are your best focus days: about {n}.
+
+## pattern_mood_focus
+On days you feel great, you focus about {n} % more.
+Good days come with about {n} % more focus.
+
+## pattern_distraction_day
+Distractions peak on {x} (about {n}).
+{x} have the most distraction time: about {n}.
+
+## review_saved
+Saved "{x}" in your Documents folder, with a second file for the focus sessions.
+The week is in Documents as "{x}", plus one file with the focus sessions.
+
+## review_better
+Better than last week: more focus, fewer distractions.
+An improvement on last week. Nicely done.
+
+## review_worse
+A bit harder than last week: less focus, more distraction. Next week is a fresh start.
+Less focus than last week. It happens. Pick one thing for Monday.
