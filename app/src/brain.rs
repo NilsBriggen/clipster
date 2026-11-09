@@ -676,7 +676,7 @@ pub fn exact(input: &str) -> Option<Reply> {
         "thing" if ["set", "forget", "where", "in"].contains(&rest.split(' ').next().unwrap_or("")) && rest.contains(' ') => return Some(Reply::say("").effect(Effect::Things(rest.to_string()))),
         "things" if rest.is_empty() => return Some(Reply::say("").effect(Effect::Things("list".into()))),
         "until" | "countdown" => return Some(crate::powers::until(rest)),
-        "habit" if ["add", "done", "undone", "remove"].contains(&rest.split(' ').next().unwrap_or("")) && rest.contains(' ') => return Some(Reply::say("").effect(Effect::Habit(rest.to_string()))),
+        "habit" if ["add", "done", "undone", "remove", "target", "count", "times", "dose", "status"].contains(&rest.split(' ').next().unwrap_or("")) && rest.contains(' ') => return Some(Reply::say("").effect(Effect::Habit(rest.to_string()))),
         // the sub-commands only in their own shape: "journal day was long" is a line for today
         "journal" if rest.split_once(' ').is_some_and(|(v, a)| ["day", "set"].contains(&v) && chrono::NaiveDate::parse_from_str(a.split('|').next().unwrap_or("").trim(), "%Y-%m-%d").is_ok() || v == "mood" && crate::journal::MOODS.contains(&a.trim())) => return Some(Reply::say("").effect(Effect::Journal(rest.to_string()))),
         "journal" if !rest.is_empty() => return Some(Reply::say("").effect(Effect::Journal(format!("add {}", rest.trim_start_matches(':').trim())))),

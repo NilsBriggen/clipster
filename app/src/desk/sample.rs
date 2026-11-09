@@ -75,9 +75,9 @@ pub fn sample_extras() -> (Vec<crate::habits::Habit>, Vec<(String, chrono::Naive
     let today = chrono::Local::now().date_naive();
     let ago = |n: u64| today - chrono::Days::new(n);
     let habits = vec![
-        crate::habits::Habit { name: "Walk".into(), days: (1..7).map(ago).rev().collect() },
-        crate::habits::Habit { name: "2 l water".into(), days: vec![ago(4), ago(2), ago(1), today] },
-        crate::habits::Habit { name: "Read 10 pages".into(), days: vec![ago(5), ago(3)] },
+        crate::habits::Habit { name: "Walk".into(), days: (1..7).map(ago).rev().collect(), ..Default::default() },
+        crate::habits::Habit { name: "2 l water".into(), days: vec![ago(4), ago(2), ago(1), today], ..Default::default() },
+        crate::habits::Habit { name: "Read 10 pages".into(), days: vec![ago(5), ago(3)], ..Default::default() },
     ];
     let countdowns = vec![("Italy".to_string(), today + chrono::Days::new(23))];
     let sites = BTreeMap::from([(today.format("%Y-%m-%d").to_string(), BTreeMap::from([("youtube".to_string(), 21 * 60), ("netflix".to_string(), 6 * 60), ("github".to_string(), 48 * 60)]))]);

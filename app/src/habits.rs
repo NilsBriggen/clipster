@@ -2,13 +2,17 @@
 //! days ticked, the last 90). Changes come in as `brain::Effect::Habit` ("add walk", "done walk", "undone walk",
 //! "remove walk"); "I did my stretch" only counts for a habit he knows, like people's names.
 
-use chrono::{Days, NaiveDate};
+use chrono::{Days, NaiveDate, NaiveTime};
 use serde_json::{json, Value};
 
 #[derive(Clone, Debug, PartialEq, Default)]
 pub struct Habit {
     pub name: String,
-    pub days: Vec<NaiveDate>, // ticked, oldest first
+    pub days: Vec<NaiveDate>,            // ticked, oldest first
+    pub target: Option<u8>,              // a counting habit: this many a day ("8 glasses of water")
+    pub counts: Vec<(NaiveDate, u8)>,    // how many on each day, for counting habits
+    pub times: Vec<NaiveTime>,           // doses at these times ("pills at 8:00 and 20:00")
+    pub taken: Vec<(NaiveDate, NaiveTime, NaiveTime)>, // a dose: the day, its time, and when it was taken
 }
 
 /// At most this many habits: the point is a few.
@@ -16,13 +20,37 @@ pub const MAX: usize = 8;
 
 impl Habit {
     pub fn to_json(&self) -> Value {
-        json!({ "name": self.name, "days": self.days.iter().map(|d| d.to_string()).collect::<Vec<_>>() })
+        let hm = |t: &NaiveTime| t.format("%H:%M").to_string();
+        json!({
+            "name": self.name,
+            "days": self.days.iter().map(|d| d.to_string()).collect::<Vec<_>>(),
+            "target": self.target,
+            "counts": self.counts.iter().map(|(d, n)| json!([d.to_string(), n])).collect::<Vec<_>>(),
+            "times": self.times.iter().map(hm).collect::<Vec<_>>(),
+            "taken": self.taken.iter().map(|(d, slot, at)| json!([d.to_string(), hm(slot), hm(at)])).collect::<Vec<_>>(),
+        })
     }
 
     pub fn from_json(v: &Value) -> Option<Self> {
         let name = v["name"].as_str()?.trim().to_string();
-        let days = v["days"].as_array().into_iter().flatten().filter_map(|d| NaiveDate::parse_from_str(d.as_str()?, "%Y-%m-%d").ok()).collect();
-        (!name.is_empty()).then_some(Habit { name, days })
+        let day = |x: &Value| NaiveDate::parse_from_str(x.as_str()?, "%Y-%m-%d").ok();
+        let time = |x: &Value| NaiveTime::parse_from_str(x.as_str()?, "%H:%M").ok();
+        let days = v["days"].as_array().into_iter().flatten().filter_map(day).collect();
+        let target = v["target"].as_u64().map(|n| n.clamp(1, 99) as u8);
+        let counts = v["counts"].as_array().into_iter().flatten().filter_map(|c| Some((day(&c[0])?, c[1].as_u64()?.min(255) as u8))).collect();
+        let times = v["times"].as_array().into_iter().flatten().filter_map(time).collect();
+        let taken = v["taken"].as_array().into_iter().flatten().filter_map(|t| Some((day(&t[0])?, time(&t[1])?, time(&t[2])?))).collect();
+        (!name.is_empty()).then_some(Habit { name, days, target, counts, times, taken })
+    }
+
+    /// Today's count, for a counting habit.
+    pub fn count_on(&self, d: NaiveDate) -> u8 {
+        self.counts.iter().find(|(day, _)| *day == d).map_or(0, |(_, n)| *n)
+    }
+
+    /// When a dose of `d` was taken, by its time slot.
+    pub fn taken_on(&self, d: NaiveDate, slot: NaiveTime) -> Option<NaiveTime> {
+        self.taken.iter().find(|(day, s, _)| *day == d && *s == slot).map(|(_, _, at)| *at)
     }
 
     pub fn done_on(&self, d: NaiveDate) -> bool {
@@ -82,26 +110,95 @@ pub fn find(habits: &[Habit], name: &str) -> Option<usize> {
     habits.iter().position(|h| h.name.to_lowercase() == full).or_else(|| habits.iter().position(|h| h.name.to_lowercase() == n)).or_else(|| habits.iter().position(|h| !n.is_empty() && h.name.to_lowercase().starts_with(n)))
 }
 
-/// Apply "add <name>", "done <name>", "undone <name>", "remove <name>". Returns the pool to answer with and the habit's name.
+/// Mark a day ticked (once), keeping the last 90.
+fn tick(h: &mut Habit, today: NaiveDate) {
+    if !h.done_on(today) {
+        h.days.push(today);
+        h.days.sort();
+        let keep = h.days.len().saturating_sub(90);
+        h.days.drain(..keep);
+    }
+}
+
+/// Apply "add <name>", "done <name>", "undone <name>", "remove <name>", and for counting habits and doses
+/// "target <name>|8", "count <name>" (+1) or "count <name>|3", "times <name>|08:00,20:00", "dose <name>|08:00 <now HH:MM>".
+/// Returns the pool to answer with (or a ready line starting with "=") and the habit's name.
 pub fn change(habits: &mut Vec<Habit>, cmd: &str, today: NaiveDate) -> (&'static str, String) {
-    let (verb, name) = cmd.split_once(' ').unwrap_or((cmd, ""));
-    let name = name.trim();
+    let (verb, rest) = cmd.split_once(' ').unwrap_or((cmd, ""));
+    let (name, value) = rest.split_once('|').map_or((rest.trim(), ""), |(n, v)| (n.trim(), v.trim()));
     let at = find(habits, name);
     match (verb, at) {
+        // a counting habit: made if it isn't there yet
+        ("target", _) if !name.is_empty() => {
+            let Some(n) = value.parse::<u8>().ok().filter(|n| (1..=99).contains(n)) else { return ("habit_unknown", name.to_string()) };
+            let i = match at {
+                Some(i) => i,
+                None if habits.len() >= MAX => return ("habit_full", MAX.to_string()),
+                None => {
+                    habits.push(Habit { name: crate::writing::cap_first(&name.chars().take(40).collect::<String>()), ..Default::default() });
+                    habits.len() - 1
+                }
+            };
+            habits[i].target = Some(n);
+            ("habit_target", habits[i].name.clone())
+        }
+        ("count", Some(i)) => {
+            let n = match value.parse::<u8>() {
+                Ok(n) => n,
+                Err(_) => habits[i].count_on(today).saturating_add(1),
+            };
+            habits[i].counts.retain(|(d, _)| *d != today && *d + Days::new(90) > today);
+            habits[i].counts.push((today, n));
+            // the target reached: the day counts for the streak
+            match habits[i].target {
+                Some(t) if n >= t => tick(&mut habits[i], today),
+                _ => habits[i].days.retain(|d| *d != today),
+            }
+            ("habit_counted", habits[i].name.clone())
+        }
+        // doses: the times they ring (the app makes the reminders), and one taken
+        ("times", _) if !name.is_empty() => {
+            let mut times: Vec<NaiveTime> = value.split([',', ' ']).filter_map(|t| NaiveTime::parse_from_str(t.trim(), "%H:%M").ok()).collect();
+            times.sort();
+            times.dedup();
+            times.truncate(6);
+            let i = match at {
+                Some(i) => i,
+                None if habits.len() >= MAX => return ("habit_full", MAX.to_string()),
+                None => {
+                    habits.push(Habit { name: crate::writing::cap_first(&name.chars().take(40).collect::<String>()), ..Default::default() });
+                    habits.len() - 1
+                }
+            };
+            habits[i].times = times;
+            ("habit_times", habits[i].name.clone())
+        }
+        ("dose", Some(i)) => {
+            let mut parts = value.split_whitespace();
+            let slot = parts.next().and_then(|t| NaiveTime::parse_from_str(t, "%H:%M").ok());
+            let now = parts.next().and_then(|t| NaiveTime::parse_from_str(t, "%H:%M").ok()).unwrap_or(NaiveTime::MIN);
+            // no slot named: the nearest open one ("I took my pills")
+            let slot = slot.or_else(|| habits[i].times.iter().filter(|s| habits[i].taken_on(today, **s).is_none()).min_by_key(|s| (s.signed_duration_since(now)).num_minutes().abs()).copied());
+            let Some(slot) = slot else {
+                tick(&mut habits[i], today);
+                return ("habit_done", habits[i].name.clone());
+            };
+            habits[i].taken.retain(|(d, s, _)| !(*d == today && *s == slot) && *d + Days::new(90) > today);
+            habits[i].taken.push((today, slot, now));
+            if habits[i].times.iter().all(|s| habits[i].taken_on(today, *s).is_some()) {
+                tick(&mut habits[i], today);
+            }
+            ("habit_dose", habits[i].name.clone())
+        }
         ("add", Some(i)) => ("habit_exists", habits[i].name.clone()),
         ("add", None) if habits.len() >= MAX => ("habit_full", MAX.to_string()),
         ("add", None) if !name.is_empty() => {
             let name: String = name.chars().take(40).collect();
-            habits.push(Habit { name: crate::writing::cap_first(&name), days: vec![] });
+            habits.push(Habit { name: crate::writing::cap_first(&name), ..Default::default() });
             ("habit_added", habits.last().map(|h| h.name.clone()).unwrap_or_default())
         }
         ("done", Some(i)) => {
-            if !habits[i].done_on(today) {
-                habits[i].days.push(today);
-                habits[i].days.sort();
-                let keep = habits[i].days.len().saturating_sub(90);
-                habits[i].days.drain(..keep);
-            }
+            tick(&mut habits[i], today);
             ("habit_done", habits[i].name.clone())
         }
         ("undone", Some(i)) => {
@@ -142,5 +239,29 @@ mod tests {
         assert_eq!(find(&h, "wa"), Some(0), "a start is enough");
         assert_eq!(change(&mut h, "remove walk", d(9)), ("habit_removed", "Walk".to_string()));
         assert!(h.is_empty());
+    }
+
+    #[test]
+    fn counting_habits_and_doses() {
+        let mut h = vec![];
+        assert_eq!(change(&mut h, "target water|8", d(9)), ("habit_target", "Water".to_string()));
+        for _ in 0..7 {
+            change(&mut h, "count water", d(9));
+        }
+        assert!(!h[0].done_on(d(9)) && h[0].count_on(d(9)) == 7);
+        change(&mut h, "count water", d(9));
+        assert!(h[0].done_on(d(9)), "the eighth glass ticks the day");
+        change(&mut h, "count water|3", d(9));
+        assert!(!h[0].done_on(d(9)), "set back below the target: not ticked");
+        let t = |s: &str| NaiveTime::parse_from_str(s, "%H:%M").unwrap();
+        assert_eq!(change(&mut h, "times pills|20:00, 08:00", d(9)).0, "habit_times");
+        assert_eq!(h[1].times, vec![t("08:00"), t("20:00")]);
+        change(&mut h, "dose pills|08:00 08:04", d(9));
+        assert_eq!(h[1].taken_on(d(9), t("08:00")), Some(t("08:04")));
+        assert!(!h[1].done_on(d(9)));
+        change(&mut h, "dose pills|- 19:50", d(9)); // "I took my pills" in the evening: the open dose nearest now
+        assert!(h[1].taken_on(d(9), t("20:00")).is_some() && h[1].done_on(d(9)));
+        let back = Habit::from_json(&h[1].to_json()).unwrap();
+        assert_eq!(back, h[1], "doses survive a save");
     }
 }

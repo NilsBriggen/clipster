@@ -384,7 +384,8 @@ fn intent(s: &str, raw: &str) -> Option<Reply> {
         return Some(r); // before the commands, so "my favorite color is green" is a fact, not a new skin
     }
     // commands with side effects first, then conversation topics, then the broad keyword groups
-    timers(s, raw)
+    doses(s, raw)
+        .or_else(|| timers(s, raw))
         .or_else(|| appointment(s, raw))
         .or_else(|| notes(s, raw))
         .or_else(|| powers(s, raw))
@@ -504,6 +505,27 @@ fn grief(s: &str) -> Option<Reply> {
 }
 
 /// Things that are files ("where is my CV" is a file search, "where is my phone" isn't).
+/// Doses as one habit with times: "remind me to take my pills every day at 8 and 20" (two times or more; one time stays a
+/// plain repeating reminder), "add a medicine called vitamin d at 9". Before the timers, which would read only the 8.
+fn doses(s: &str, raw: &str) -> Option<Reply> {
+    // doses: "remind me to take my pills every day at 8 and 20", "add a medicine called vitamin d at 9"
+    if let Some((what, times)) = after(s, &["remind me to take my ", "remind me to take "]).and_then(|r| r.split_once(" every day at ").or_else(|| r.split_once(" daily at ")).or_else(|| r.split_once(" at "))) {
+        let slots: Vec<String> = times.split(" and ").flat_map(|t| t.split(", ")).filter_map(|t| {
+            let (hours, m, _) = hm(t.trim())?;
+            Some(format!("{:02}:{m:02}", hours[0]))
+        }).collect();
+        if slots.len() >= 2 {
+            return go(format!("habit times {}|{}", keep(raw, what), slots.join(",")));
+        }
+    }
+    if let Some((what, t)) = after(s, &["add a medicine called ", "add a medication called ", "add medicine ", "new medicine "]).and_then(|r| r.split_once(" at ")) {
+        if let Some((hours, m, _)) = hm(t.trim()) {
+            return go(format!("habit times {}|{:02}:{m:02}", keep(raw, what), hours[0]));
+        }
+    }
+    None
+}
+
 /// "dentist on Tuesday at 10", "doctor appointment Friday 14:30", "haircut tomorrow at 5": when, and what he can do
 /// about it (a reminder before, the evening before, a to-do). He always asks; nothing is set by itself.
 fn appointment(s: &str, raw: &str) -> Option<Reply> {
@@ -1613,6 +1635,39 @@ fn notes(s: &str, raw: &str) -> Option<Reply> {
         return go(if about_todos { "todos clear" } else { "forget notes" }.into());
     }
     // habits: "new habit stretch", "i did my stretch" (only for a habit he knows)
+    // counting habits: "8 glasses of water a day" (tidied to "… 1 day"), "+1 water", "i drank a glass of water", "water 3"
+    let words: Vec<&str> = s.split_whitespace().collect();
+    if let Some(end) = ["a day", "1 day", "per day", "every day", "each day"].iter().find_map(|t| s.strip_suffix(t)) {
+        let w: Vec<&str> = end.trim_start_matches("i want to ").trim_start_matches("drink ").trim_start_matches("read ").split_whitespace().collect();
+        if let (Some(n), true) = (w.first().and_then(|n| n.parse::<u8>().ok()), w.len() >= 2 && w.len() <= 5) {
+            // "8 glasses of water" -> water; "10 pages" -> pages
+            let what = w.iter().position(|x| *x == "of").map_or(w[1..].join(" "), |i| w[i + 1..].join(" "));
+            if !what.is_empty() && !["minutes", "hours", "times", "min"].contains(&what.as_str()) {
+                return go(format!("habit target {}|{n}", keep(raw, &what)));
+            }
+        }
+    }
+    if let Some(h) = s.strip_prefix("+1 ").or_else(|| s.strip_prefix("plus one ")).filter(|h| crate::habits::known(h)) {
+        return go(format!("habit count {h}"));
+    }
+    if let Some(h) = after(s, &["i drank a glass of ", "i had a glass of ", "another glass of ", "i drank a ", "i read a "]).filter(|h| crate::habits::known(h)) {
+        return go(format!("habit count {h}"));
+    }
+    if let [h, n] = words.as_slice() {
+        if n.parse::<u8>().is_ok() && crate::habits::known(h) {
+            return go(format!("habit count {h}|{n}"));
+        }
+    }
+    // "did I take my pills", "have I taken my vitamin d today", "I took my pills"
+    if let Some(h) = after(s, &["did i take my ", "have i taken my ", "did i take the ", "have i had my ", "did i drink my "]).map(|h| h.trim_end_matches(" today").trim_end_matches(" yet")).filter(|h| crate::habits::known(h)) {
+        return go(format!("habit status {h}"));
+    }
+    if let Some(h) = after(s, &["i took my ", "i have taken my ", "took my ", "i took the "]).map(|h| h.trim_end_matches(" today")).filter(|h| crate::habits::known(h)) {
+        return go(format!("habit dose {h}"));
+    }
+    if ["my medicines", "my medication", "my meds", "my doses"].contains(&s) {
+        return go("desk habits".into());
+    }
     if let Some(h) = after(s, &["new habit: ", "add a habit: ", "add habit: ", "new habit ", "add a habit ", "add habit ", "track a habit called ", "start a habit "]).filter(|h| !h.is_empty()) {
         return go(format!("habit add {}", keep(raw, h)));
     }
@@ -3021,6 +3076,22 @@ mod tests {
     }
 
     #[test]
+    fn counting_habits_and_doses_in_the_chat() {
+        assert_eq!(eff("8 glasses of water a day"), Effect::Habit("target water|8".into()));
+        assert_eq!(eff("remind me to take my pills every day at 8 and 20"), Effect::Habit("times pills|08:00,20:00".into()));
+        assert_eq!(eff("add a medicine called vitamin D at 9"), Effect::Habit("times vitamin D|09:00".into()));
+        assert!(matches!(eff("remind me every day at 8 to take my pills"), Effect::RepeatAt(..)), "one time stays a reminder");
+        crate::habits::set_names(&[crate::habits::Habit { name: "Water".into(), ..Default::default() }, crate::habits::Habit { name: "Pills".into(), ..Default::default() }]);
+        assert_eq!(eff("+1 water"), Effect::Habit("count water".into()));
+        assert_eq!(eff("I drank a glass of water"), Effect::Habit("count water".into()));
+        assert_eq!(eff("water 3"), Effect::Habit("count water|3".into()));
+        assert_eq!(eff("did I take my pills"), Effect::Habit("status pills".into()));
+        assert_eq!(eff("I took my pills"), Effect::Habit("dose pills".into()));
+        assert!(!matches!(eff("I took my time"), Effect::Habit(_)), "only habits he knows");
+        assert!(!matches!(eff("+1 meeting"), Effect::Habit(_)));
+    }
+
+    #[test]
     fn appointments_ask_first() {
         let r = respond("doctor appointment Friday 14:30");
         assert!(r.text.starts_with("Doctor appointment, Friday") && r.effect == Effect::None, "it asks, nothing is set: {}", r.text);
@@ -3160,7 +3231,7 @@ mod tests {
         assert_eq!(eff("pref weather on"), Effect::Pref("weather".into(), "on".into()));
         // "I did my walk" only counts for a habit he knows
         assert!(!matches!(eff("i did my homework"), Effect::Habit(_)));
-        crate::habits::set_names(&[crate::habits::Habit { name: "Walk".into(), days: vec![] }]);
+        crate::habits::set_names(&[crate::habits::Habit { name: "Walk".into(), days: vec![], ..Default::default() }]);
         assert_eq!(eff("i did my walk"), Effect::Habit("done walk".into()));
         crate::habits::set_names(&[]);
         // waiting on someone he knows: a to-do, then marked

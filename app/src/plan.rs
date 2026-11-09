@@ -716,7 +716,7 @@ mod tests {
         let todos = crate::todo::parse("- [ ] call the bank (due 2026-11-09) (top 2026-11-09)\n- [ ] taxes (due 2026-11-02)\n- [ ] numbers (due 2026-11-09) (waiting Ben)\n");
         let mut anna = crate::people::Person::new("Anna");
         anna.birthday = Some((None, 11, 11));
-        let habits = vec![crate::habits::Habit { name: "Walk".into(), days: vec![] }];
+        let habits = vec![crate::habits::Habit { name: "Walk".into(), days: vec![], ..Default::default() }];
         let b = briefing(&[ev("Standup", 9), ev("Review", 14)], &[], &todos, &[anna], &[], &habits, now, (8, 17)).join("\n");
         for want in ["2 meetings, the first: Standup at 9:00", "10:00–14:00", "Your top 1: call the bank", "1 due today, ⚠ 1 overdue", "Chase Ben about numbers", "Anna's birthday in 2 days", "Still to do: Walk"] {
             assert!(b.contains(want), "{want} in:\n{b}");

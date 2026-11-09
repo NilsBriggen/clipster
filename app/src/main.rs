@@ -2975,12 +2975,63 @@ impl App {
                 }
             }
             Effect::Undo => r = self.undo_restore(),
+            // "did I take my pills": from the log, plain words (no jokes about health)
+            Effect::Habit(cmd) if cmd.starts_with("status ") => {
+                let today = chrono::Local::now().date_naive();
+                r = match habits::find(&self.habits, &cmd[7..]).map(|i| self.habits[i].clone()) {
+                    None => Reply::say(format!("I don't keep \"{}\" yet. Tell me: remind me to take my {} every day at 8, and I'll keep track.", cmd[7..].trim(), cmd[7..].trim())).mood(Mood::Think),
+                    Some(h) if !h.times.is_empty() => {
+                        let doses: Vec<String> = h.times.iter().map(|s| match h.taken_on(today, *s) {
+                            Some(at) => format!("{}: taken at {}", brain::clock(*s), brain::clock(at)),
+                            None => format!("{}: not yet", brain::clock(*s)),
+                        }).collect();
+                        let mut r = Reply::say(format!("{} today:\n{}", h.name, doses.join("\n"))).mood(Mood::Think);
+                        if h.times.iter().any(|s| h.taken_on(today, *s).is_none()) {
+                            r = r.run("Taken now", &format!("habit dose {}", h.name));
+                        }
+                        r
+                    }
+                    Some(h) if h.target.is_some() => Reply::say(format!("{}: {} of {} today.", h.name, h.count_on(today), h.target.unwrap_or(0))).mood(Mood::Think).run("+1", &format!("habit count {}", h.name)),
+                    Some(h) if h.done_on(today) => Reply::say(format!("Yes, {} is ticked for today.", h.name.to_lowercase())).mood(Mood::Happy),
+                    Some(h) => Reply::say(format!("Not yet today: {}.", h.name.to_lowercase())).mood(Mood::Think).run("Tick it", &format!("habit done {}", h.name)),
+                };
+            }
             Effect::Habit(cmd) => {
                 let today = chrono::Local::now().date_naive();
+                // a dose without a time slot is taken now
+                let cmd = match cmd.split_once(' ') {
+                    Some(("dose", rest)) => {
+                        let (n, slot) = rest.split_once('|').map_or((rest, "-"), |(n, s)| (n, s.trim()));
+                        format!("dose {n}|{slot} {}", chrono::Local::now().format("%H:%M"))
+                    }
+                    _ => cmd,
+                };
                 let (pool, name) = habits::change(&mut self.habits, &cmd, today);
+                // doses ring as reminders of their own: "habit:Pills@08:00", every day at that time
+                if pool == "habit_times" || pool == "habit_removed" {
+                    let tag = format!("habit:{name}@");
+                    self.timers.retain(|t| !t.label.starts_with(&tag));
+                    if let Some(h) = habits::find(&self.habits, &name).map(|i| self.habits[i].clone()) {
+                        for slot in &h.times {
+                            let rule = format!("day {}", slot.format("%H:%M"));
+                            if let Some(at) = timers::next_fire(&rule, chrono::Local::now().naive_local()) {
+                                self.next_timer += 1;
+                                self.timers.push(timers::Timer { id: self.next_timer, at: timers::unix_of(at), label: format!("{tag}{}", slot.format("%H:%M")), every: 0, rule: Some(rule) });
+                            }
+                        }
+                    }
+                }
+                let h = habits::find(&self.habits, &name).map(|i| self.habits[i].clone());
+                let plain = match pool {
+                    "habit_target" => Some(format!("{name}: {} a day. Say +1 {} each time.", h.as_ref().and_then(|h| h.target).unwrap_or(0), name.to_lowercase())),
+                    "habit_counted" => h.as_ref().map(|h| format!("{}: {} of {} today.{}", h.name, h.count_on(today), h.target.unwrap_or(0), if h.done_on(today) { " Done for today." } else { "" })),
+                    "habit_times" => h.as_ref().map(|h| format!("{}: I'll ask at {} every day.", h.name, h.times.iter().map(|t| brain::clock(*t)).collect::<Vec<_>>().join(" and "))),
+                    "habit_dose" => h.as_ref().map(|h| format!("Noted: {} taken at {}.", h.name.to_lowercase(), brain::clock(chrono::Local::now()))),
+                    _ => None,
+                };
                 habits::set_names(&self.habits);
                 let streak = habits::find(&self.habits, &name).map_or(0, |i| self.habits[i].streak(today));
-                let mut text = lines::pick(pool).replace("{x}", &name).replace("{n}", &streak.to_string());
+                let mut text = plain.unwrap_or_else(|| lines::pick(pool).replace("{x}", &name).replace("{n}", &streak.to_string()));
                 if pool == "habit_done" && [7, 30, 100].contains(&streak) {
                     text = lines::pick("habit_streak").replace("{x}", &name).replace("{n}", &streak.to_string());
                     let best = self.stats.get("habit_best").copied().unwrap_or(0).max(streak as u64);
@@ -4045,6 +4096,16 @@ impl App {
                 sys::notify(l);
             }
             ctx.send_viewport_cmd(egui::ViewportCommand::RequestUserAttention(egui::UserAttentionType::Critical));
+            // a dose ("habit:Pills@08:00"): its own plain balloon with Taken, In 15 minutes, Skip today
+            if let [one] = labels.as_slice() {
+                if let Some((name, slot)) = one.strip_prefix("habit:").and_then(|r| r.split_once('@')) {
+                    let shown = chrono::NaiveTime::parse_from_str(slot, "%H:%M").map(brain::clock).unwrap_or_else(|_| slot.to_string());
+                    self.last_rung = vec![one.clone()]; // snoozed, it comes back as a dose (with Taken)
+                    self.show(Reply::say(format!("⏰ {name} ({shown})")).mood(Mood::Alarm).run("Taken", &format!("habit dose {name}|{slot}")).run("In 15 min", "snooze 15m").btn("Skip today", Act::Hide));
+                    return;
+                }
+            }
+            let labels: Vec<String> = labels.iter().map(|l| l.strip_prefix("habit:").map(|r| r.replace('@', " at ")).unwrap_or_else(|| l.clone())).collect();
             let label = if labels.len() == 1 { labels[0].clone() } else { labels.iter().map(|l| format!("• {l}")).collect::<Vec<_>>().join("\n") };
             // reminders that rang earlier with nobody there (no click since): listed too, or they'd be lost under this one
             let earlier = if self.unseen_rings.is_empty() { String::new() } else { format!("\n\nEarlier, while you were away:\n{}", self.unseen_rings.iter().map(|(at, l)| format!("• {at} {l}")).collect::<Vec<_>>().join("\n")) };
