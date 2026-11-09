@@ -39,7 +39,7 @@ pub fn tab(name: &str) -> Option<usize> {
 
 /// What the app knows that the Desk shows (borrowed for one frame).
 pub struct View<'a> {
-    pub timers: Vec<(String, u64, u64)>, // label, seconds left, repeats every (0 = once)
+    pub timers: Vec<crate::timers::Timer>, // soonest first
     pub kind_time: &'a BTreeMap<String, BTreeMap<String, u64>>, // day -> window kind -> seconds
     pub focus_log: &'a [crate::FocusLog],
     pub focus_now: Option<(String, u64, u64, u64)>, // label, seconds left, seconds so far, seconds distracted
@@ -122,7 +122,7 @@ pub enum Look {
 struct Files {
     at: Option<Instant>,
     todos: Vec<todo::Item>,
-    notes: Vec<String>,
+    notes: Vec<crate::notes::Note>,
     plan: Vec<(PathBuf, PathBuf)>,
     plan_desktop: bool,
     can_undo: bool,
@@ -266,7 +266,7 @@ impl Desk {
         self.files = Files {
             at: Some(Instant::now()),
             todos: todo::load(),
-            notes: std::fs::read_to_string(brain::notes_path()).unwrap_or_default().lines().filter(|l| !l.trim().is_empty()).map(String::from).collect(),
+            notes: crate::notes::load(),
             plan: dir.map(|d| crate::tidy::plan(&d)).unwrap_or_default(),
             plan_desktop: self.desktop,
             can_undo: crate::tidy::undo_log().exists(),
@@ -560,7 +560,7 @@ impl Desk {
         // the end-of-day card, over everything
         if self.wrapping {
             let lines: Vec<String> = std::iter::once("Here's your day.".to_string())
-                .chain(crate::plan::day_end_lines(&crate::plan::day_end(view.kind_time, view.focus_log, &self.files.todos, today_date), view.prefs.focus_goal))
+                .chain(crate::plan::day_end_lines(&crate::plan::day_end(view.kind_time, view.focus_log, &self.files.todos, today_date, running), view.prefs.focus_goal))
                 .collect();
             let open_top = self.files.todos.iter().any(|i| i.top_today(today_date));
             let buttons: Vec<&str> = if open_top { vec!["Move to tomorrow", "Lock", "Shut down", "Close"] } else { vec!["Lock", "Shut down", "Close"] };
@@ -614,7 +614,8 @@ impl Desk {
             look.group(&p, banner, "Plan my day");
             let picked = self.files.todos.iter().filter(|i| i.top_today(today)).count();
             let to_midnight = (chrono::Local::now().date_naive().and_hms_opt(23, 59, 59).unwrap() - chrono::Local::now().naive_local()).num_seconds().max(0) as u64;
-            let reminders: Vec<String> = view.timers.iter().filter(|t| t.1 <= to_midnight).take(3).map(|t| format!("{} in {}", if t.0.is_empty() { "Timer" } else { &t.0 }, brain::fmt_dur(t.1))).collect();
+            let now = crate::timers::unix_now();
+            let reminders: Vec<String> = view.timers.iter().filter(|t| t.left(now) <= to_midnight).take(3).map(|t| format!("{} in {}", if t.label.is_empty() { "Timer" } else { &t.label }, brain::fmt_dur(t.left(now)))).collect();
             let line = format!("Star up to three with ☆ ({picked} of 3).{}", if reminders.is_empty() { String::new() } else { format!(" Reminders today: {}", reminders.join(", ")) });
             let done = Rect::from_min_size(pos2(banner.max.x - 124.0, banner.min.y + 22.0), vec2(112.0, ctl));
             let g = clipped(&p, &line, look.font(12.0), look.text(), done.min.x - banner.min.x - 24.0);
@@ -865,13 +866,14 @@ impl Desk {
         }
         let rows = ((form - 22.0 - (right.min.y + 32.0)) / 36.0).max(0.0) as usize;
         let shown = notes.len().min(rows);
-        for (i, note) in notes.iter().take(rows).enumerate() {
+        for (i, (line, note)) in crate::notes::ordered(&notes).into_iter().take(rows).enumerate() {
+            let note = &note.text;
             let y = right.min.y + 32.0 + i as f32 * 36.0;
             let del = Rect::from_center_size(pos2(x1 - 14.0, y + 14.0), if look == Look::Modern { vec2(28.0, 28.0) } else { vec2(22.0, 20.0) });
             let g = clipped(&p, note, look.font(12.5), look.text(), x1 - 36.0 - x0);
             p.galley(pos2(x0, y + 14.0 - g.size().y / 2.0), g, look.text());
-            if look.button(ui, del, Id::unique(("desk-note", i)), "✕", true).clicked() {
-                out.push(format!("unnote {}", i + 1));
+            if look.button(ui, del, Id::unique(("desk-note", line)), "✕", true).clicked() {
+                out.push(format!("note #{line} remove"));
             }
             if i + 1 < shown {
                 look.divider(&p, x0, x1, y + 32.0);
@@ -896,7 +898,7 @@ impl Desk {
         let today = now.date();
         enum What<'e> {
             Event(&'e crate::calendar::Event),
-            Timer(String, u64), // label, repeats every
+            Timer(&'e crate::timers::Timer),
             Todo(String),
         }
         // (when, what) for the next 7 days; all-day things sort first in their day
@@ -904,10 +906,10 @@ impl Desk {
         for e in view.events.iter().filter(|e| e.end > now && e.start.date() < today + Duration::days(7)) {
             items.push((if e.all_day { e.start.date().max(today).and_time(NaiveTime::MIN) } else { e.start }, What::Event(e)));
         }
-        for (label, left, every) in &view.timers {
-            let at = now + Duration::seconds(*left as i64);
+        for t in &view.timers {
+            let at = t.when();
             if at.date() < today + Duration::days(7) {
-                items.push((at, What::Timer(label.clone(), *every)));
+                items.push((at.max(now), What::Timer(t)));
             }
         }
         for it in self.files.todos.iter().filter(|i| !i.done && i.list.is_none()) {
@@ -950,7 +952,14 @@ impl Desk {
                 Row::Item(t, w) => {
                     let (time, text, color) = match w {
                         What::Event(e) => (if e.all_day { "all day".to_string() } else { t.format("%-H:%M").to_string() }, e.title.clone(), look.text()),
-                        What::Timer(l, every) => (t.format("%-H:%M").to_string(), format!("{}{}", if l.is_empty() { "Timer" } else { l }, if *every > 0 { format!(" · every {}", brain::fmt_dur(*every)) } else { String::new() }), look.text()),
+                        What::Timer(tm) => {
+                            let again = match (&tm.rule, tm.every) {
+                                (Some(rule), _) => format!(" · {}", crate::timers::rule_text(rule)),
+                                (None, e) if e > 0 => format!(" · every {}", brain::fmt_dur(e)),
+                                _ => String::new(),
+                            };
+                            (t.format("%-H:%M").to_string(), format!("{}{again}", if tm.label.is_empty() { "Timer" } else { &tm.label }), look.text())
+                        }
                         What::Todo(text) => ("due".to_string(), format!("☐ {text}"), look.dim()),
                     };
                     p.text(pos2(x0 + 8.0, cy), Align2::LEFT_CENTER, time, look.font(11.5), look.dim());
@@ -963,10 +972,10 @@ impl Desk {
                             }
                             right = b.min.x - 6.0;
                         }
-                        What::Timer(l, _) if !l.is_empty() => {
+                        What::Timer(tm) => {
                             let b = Rect::from_min_size(pos2(x1 - 58.0, cy - (ctl - 4.0) / 2.0), vec2(58.0, ctl - 4.0));
-                            if look.button(ui, b, Id::unique(("agenda-cancel", l.as_str(), n)), "Cancel", true).clicked() {
-                                out.push(format!("cancel {l}"));
+                            if look.button(ui, b, Id::unique(("agenda-cancel", tm.id)), "Cancel", true).clicked() {
+                                out.push(format!("timer #{} cancel", tm.id));
                             }
                             right = b.min.x - 6.0;
                         }
@@ -2367,7 +2376,7 @@ fn sample_files(desktop: bool) -> Files {
         todo::Item { list: Some("shopping".into()), ..item("A plant that forgives neglect", None) },
         todo::Item { list: Some("packing".into()), ..item("Laptop charger", None) },
     ];
-    let notes = ["Printer code: 4711", "Ask IT about the second monitor", "Gerald says hi"].iter().map(|s| s.to_string()).collect();
+    let notes = ["Printer code: 4711", "Ask IT about the second monitor", "Gerald says hi"].iter().map(|s| crate::notes::Note { day: Some(today), pinned: false, text: s.to_string() }).collect();
     let base = PathBuf::from(if desktop { "/home/you/Desktop" } else { "/home/you/Downloads" });
     let plan = [("a.pdf", "Documents"), ("b.pdf", "Documents"), ("c.docx", "Documents"), ("d.png", "Images"), ("e.jpg", "Images"), ("f.zip", "Archives"), ("g.AppImage", "Installers"), ("h.mp3", "Music")]
         .iter()
@@ -2379,9 +2388,11 @@ fn sample_files(desktop: bool) -> Files {
 
 /// Made-up timers, times, sessions and check-ins for screenshots: (timers, kind_time, focus_log, checkins).
 #[allow(clippy::type_complexity)]
-pub fn sample() -> (Vec<(String, u64, u64)>, BTreeMap<String, BTreeMap<String, u64>>, Vec<crate::FocusLog>, BTreeMap<String, String>) {
+pub fn sample() -> (Vec<crate::timers::Timer>, BTreeMap<String, BTreeMap<String, u64>>, Vec<crate::FocusLog>, BTreeMap<String, String>) {
     let day = |n: i64| (chrono::Local::now() - chrono::Duration::days(n)).format("%Y-%m-%d").to_string();
-    let timers = vec![("Tea".into(), 4 * 60, 0), ("Stand up and stretch".into(), 40 * 60, 3600), ("Call Anna".into(), 20 * 3600, 0)];
+    let now = crate::timers::unix_now();
+    let timer = |id: u64, label: &str, secs: i64, every: u64| crate::timers::Timer { id, at: now + secs, label: label.into(), every, rule: None };
+    let timers = vec![timer(1, "Tea", 4 * 60, 0), timer(2, "Stand up and stretch", 40 * 60, 3600), timer(3, "Call Anna", 20 * 3600, 0)];
     let mut kind_time = BTreeMap::new();
     for n in 0..7 {
         let k = |s: &str, m: u64| (s.to_string(), m * 60 + n as u64 * 300);

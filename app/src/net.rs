@@ -247,12 +247,12 @@ pub fn pct_decode(s: &str) -> String {
     let mut out = vec![];
     let mut i = 0;
     while i < b.len() {
-        if b[i] == b'%' && i + 2 < b.len() {
-            if let Ok(n) = u8::from_str_radix(&s[i + 1..i + 3], 16) {
-                out.push(n);
-                i += 3;
-                continue;
-            }
+        // two hex digits after a %, read from the bytes (a letter like "é" after the % isn't a char boundary)
+        if b[i] == b'%' && i + 2 < b.len() && b[i + 1].is_ascii_hexdigit() && b[i + 2].is_ascii_hexdigit() {
+            let hex = |c: u8| (c as char).to_digit(16).unwrap_or(0) as u8;
+            out.push(hex(b[i + 1]) * 16 + hex(b[i + 2]));
+            i += 3;
+            continue;
         }
         out.push(if b[i] == b'+' { b' ' } else { b[i] });
         i += 1;
@@ -912,6 +912,8 @@ mod tests {
         assert_eq!(money_fmt(68123.456), "68,123.46");
         assert_eq!(money_fmt(12.0), "12.00");
         assert_eq!(pct_decode("What%20is%20%22H2O%22%3F"), "What is \"H2O\"?");
+        assert_eq!(pct_decode("100%aé 50%ü %4"), "100%aé 50%ü %4", "a % without two hex digits after it stays");
+        assert_eq!(pct_decode("caf%C3%A9"), "café");
         assert_eq!(strip_tags("<b>Big</b> news &amp; more"), "Big news & more");
     }
 

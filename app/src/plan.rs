@@ -44,10 +44,11 @@ pub struct DayEnd {
     pub open_top: Vec<String>,
 }
 
-pub fn day_end(kind_time: &KindTime, log: &[crate::FocusLog], todos: &[Item], today: NaiveDate) -> DayEnd {
+/// `running`: seconds of the focus session still going, so the card agrees with the Today tab.
+pub fn day_end(kind_time: &KindTime, log: &[crate::FocusLog], todos: &[Item], today: NaiveDate, running: u64) -> DayEnd {
     DayEnd {
         done: todos.iter().filter(|i| i.done && i.done_on == Some(today) && i.list.is_none()).map(|i| i.text.clone()).collect(),
-        focus: focus_today(log, today, 0),
+        focus: focus_today(log, today, running),
         apps: top_apps(kind_time, &[today], 3),
         open_top: todos.iter().filter(|i| i.top_today(today)).map(|i| i.text.clone()).collect(),
     }
@@ -83,6 +84,7 @@ pub struct Week {
     pub apps: Vec<(String, u64)>,
     pub tracked: u64,
     pub moods: Vec<(String, usize)>, // great, okay, meh, rough (only the ones that came up)
+    pub goals: (usize, usize),       // this week's three: (done, picked)
 }
 
 pub fn week(kind_time: &KindTime, log: &[crate::FocusLog], todos: &[Item], checkins: &BTreeMap<String, String>, today: NaiveDate) -> Week {
@@ -109,6 +111,7 @@ pub fn week(kind_time: &KindTime, log: &[crate::FocusLog], todos: &[Item], check
         apps: top_apps(kind_time, &days, 3),
         tracked: keys.iter().filter_map(|k| kind_time.get(k)).flat_map(|m| m.values()).sum(),
         moods,
+        goals: (todos.iter().filter(|i| i.week_goal(today) && i.done).count(), todos.iter().filter(|i| i.week_goal(today)).count()),
     }
 }
 
@@ -120,6 +123,9 @@ pub fn week_lines(w: &Week) -> Vec<String> {
         _ => "Focus: no sessions this week".to_string(),
     });
     out.push(format!("To-dos finished: {}", w.finished));
+    if w.goals.1 > 0 {
+        out.push(format!("This week's three: {} of {} done", w.goals.0, w.goals.1));
+    }
     if !w.apps.is_empty() {
         out.push(format!("Most time in: {}", apps_line(&w.apps)));
     }
@@ -165,7 +171,7 @@ mod tests {
             Item { done: true, done_on: Some(day(11, 10)), text: "call Anna".into(), ..Default::default() },
             Item { top: Some(today), text: "plan lunch".into(), ..Default::default() },
         ];
-        let d = day_end(&kt, &log, &todos, today);
+        let d = day_end(&kt, &log, &todos, today, 0);
         assert_eq!(d, DayEnd { done: vec!["send the report".into()], focus: 1500, apps: vec![("code".into(), 9000), ("email".into(), 1800)], open_top: vec!["plan lunch".into()] });
         let lines = day_end_lines(&d, 120);
         assert_eq!(lines[0], "Done today: send the report");

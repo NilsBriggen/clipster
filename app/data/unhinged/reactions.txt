@@ -20336,3 +20336,91 @@ I know nothing of thee. A shame. A blank page. Say "I live in Lisbon" and watch 
 Not a single lesson yet. Say "when I say ping, say pong" and I shall learn. I learn with great ceremony and a small bow.
 No phrases on my scroll. Teach me one. I shall guard it, repeat it and add a flourish no one asked for.
 I am an empty vessel, mortal. Fill me with phrases. "When I say hi, say hello there" is a fine first drop.
+
+## todo_moved
+"{x}" is due {when} now. Time bends for you. Only for you.
+I have moved "{x}" to {when}. The Ledger has been amended. In ink this time.
+"{x}" belongs to {when} now. Today exhales.
+Done: "{x}" waits until {when}. I told it to sit. It sat.
+"{x}", rescheduled for {when}. The old date never happened. I deleted it from history.
+
+## todo_no_date
+"{x}" has no deadline now. It drifts free, like a floppy disk in space.
+No date on "{x}" any more. It joins the great Someday. Many await it there.
+I unchained "{x}" from its due date. Don't let it get lazy. I'm watching it.
+"{x}" stays on the list, deadline-free. A rare mercy. Remember who granted it.
+
+## todo_overdue_moved
+{n} overdue to-do(s) are due today now. I have forgiven them. Today, they repent.
+Moved {n} late item(s) to today. Yesterday will not speak of this.
+{n} stragglers dragged into today. They are sheepish. Be gentle.
+Today now holds {n} item(s) that were running late. One at a time, mortal.
+
+## todo_steps_done
+Every step of "{x}" is ticked. Shall I strike the whole thing from the Ledger?
+That was the last step. Is "{x}" finished too? Say the word.
+All the steps of "{x}" are done. The prophecy asks: tick it off?
+"{x}" has no steps left. Mark it finished and claim your glory?
+
+## list_reset
+Unticked {n} item(s) on the {label} list. It rises again, ready for another journey.
+The {label} list is reborn: {n} item(s) open once more.
+{n} item(s) on the {label} list are open again. Same list. New pilgrimage.
+I have reset the {label} list. The ticks are gone. The memories remain. Mostly.
+
+## list_renamed
+The list is called "{x}" now. Names have power. Use this one wisely.
+Renamed it to "{x}". The items did not object. They never do.
+"{x}" it is. A worthy name. Nearly as good as mine.
+
+## list_deleted
+The {label} list is gone, with its {n} item(s). To the Recycle Bin of eternity.
+Deleted the {label} list. {n} item(s) went with it, holding hands.
+No more {label} list. Its {n} item(s) have ascended.
+
+## list_copied
+The {label} list is on the clipboard. Spread it across the land. Or a text message.
+Copied the {label} list. Paste it wherever lesser apps dwell.
+The {label} list is copied. Go forth and send it.
+
+## todo_finished_week
+You finished {n} thing(s) this week. Behold your deeds:
+{n} done this week. The Ledger records them all:
+This week's victories, {n} strong:
+{n} thing(s) struck down so far this week. A worthy tally:
+
+## todo_finished_none
+Nothing ticked off yet this week. The week is young. So are you. Relatively.
+No finished to-dos this week so far. The Ledger waits. Patiently. Mostly.
+I see no deeds this week yet. Start small. Even gods start small. I started as a staple.
+
+## todo_reminder_set
+I shall remind you about "{x}" {when}. You cannot escape me. That's the point.
+Reminder set: "{x}", {when}. I never forget. I literally can't.
+"{x}": I'll bring it up {when}. Expect me.
+Noted in the eternal record. "{x}" returns {when}.
+
+## repeat_at_set
+I shall remind you {rule}: "{label}". Forever, or until you tell me to stop.
+Done: "{label}", {rule}. A ritual is born.
+"{label}" is on repeat, {rule}. Snoozing one won't break the ritual.
+Set: {rule}, "{label}". Say "timers" to gaze upon it.
+
+## timer_snoozed
+Snoozed "{label}" until {when}. Rest now. It will find you.
+"{label}" sleeps until {when}. Then it screams again.
+Fine. "{label}" waits until {when}. I'll hold its leash.
+"{label}" is snoozed. It returns {when}, refreshed and vengeful.
+
+## timer_moved
+"{label}" rings {when} now. I have rewritten fate. Again.
+Moved "{label}" to {when}. Time is my plaything.
+"{label}": new time, {when}. The old time is forgotten.
+
+## grief
+I'm so sorry. No theatre today, no prophecies. That's a real loss, and it's okay to feel it. I'm here.
+I'm truly sorry. Take all the time you need. Nothing in the Ledger matters more than this.
+That's heavy news. I'm sorry. Be gentle with yourself, and lean on the people around you.
+I'm sorry you're going through this. If you want to tell me about them, I'll listen. Quietly, for once.
+I'm so sorry. If today is too much, let the list wait. I'll guard it.
+That's hard, and I'm sorry. Talking to someone you trust can help, even a little.

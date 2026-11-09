@@ -7,6 +7,8 @@ mod calendar;
 mod people;
 mod desk;
 mod find;
+mod notes;
+mod timers;
 mod plan;
 mod upkeep;
 mod welcome;
@@ -201,7 +203,11 @@ struct App {
     backup_progress: Option<(usize, usize, u64)>, // running: files done, files to copy, bytes
     dnd_restore: Option<String>, // a notification setting to put back if Clipster stopped mid-session
     stopwatch: Option<Instant>,
-    timers: Vec<(Instant, String, u64)>, // when, what, repeat every N seconds (0 = once)
+    timers: Vec<timers::Timer>, // what rings when (wall-clock, so a suspend doesn't delay it), each with an id
+    next_timer: u64,            // the last id handed out
+    summon_checked: f64,        // when the "come here" note of a second Clipster was last looked for
+    settings_locked: bool,      // settings.json exists but couldn't be read: don't save over it
+    settings_note: Option<String>, // what went wrong with it, for the greeting
     name: String,
     hat: Option<String>, // None = whatever the season suggests
     skin: String,
@@ -243,7 +249,7 @@ struct App {
     desk: desk::Desk,
     desk_modern: bool,                                        // the Desk in the modern look instead of Classic 98
     desk_status: String,                                      // its status-bar quip, picked when it opens
-    desk_sample: Option<(Vec<(String, u64, u64)>, std::collections::BTreeMap<String, std::collections::BTreeMap<String, u64>>, Vec<FocusLog>, std::collections::BTreeMap<String, String>)>,
+    desk_sample: Option<(Vec<timers::Timer>, std::collections::BTreeMap<String, std::collections::BTreeMap<String, u64>>, Vec<FocusLog>, std::collections::BTreeMap<String, String>)>,
     checkin_days: std::collections::BTreeMap<String, String>, // day -> great/okay/meh/rough (two weeks)
     notice_health: bool,
     quiet_until: Option<Instant>,
@@ -495,6 +501,10 @@ impl App {
             sample_clips: ["Printer code: 4711", "Meeting moved to 3 pm, room B", "https://example.com/quarterly-report", "Kind regards,\nSam", "SELECT * FROM paperclips WHERE bent = false;"].map(String::from).to_vec(),
             stopwatch: None,
             timers: vec![],
+            next_timer: 0,
+            settings_locked: false,
+            summon_checked: 0.0,
+            settings_note: None,
             name: String::new(),
             hat: None,
             skin: "silver".into(),
@@ -609,6 +619,11 @@ impl App {
                 g.text = format!("{hi}{}", if waiting > 0 { format!("\n\nYou have {waiting} reminder(s) running.") } else { String::new() });
                 app.balloon = Some(g);
             }
+            if let Some(note) = app.settings_note.clone() {
+                let mut g = app.balloon.take().unwrap_or_else(brain::greeting);
+                g.text = format!("{note}\n\n{}", g.text);
+                app.balloon = Some(g);
+            }
         }
         app.refresh_mood(); // screenshots too: CLIPSTER_MOOD=glitchy shows a glitchy day
         if app.screenshot.is_some() {
@@ -684,8 +699,8 @@ impl App {
         self.account_time();
         let today = chrono::Datelike::num_days_from_ce(&chrono::Local::now().date_naive()) as u64;
         let streak = |last: &str, n: &str| if self.stats.get(last).is_some_and(|d| d + 1 >= today) { self.stats.get(n).copied().unwrap_or(0) } else { 0 };
-        let mut timers: Vec<(String, u64, u64)> = self.timers.iter().map(|(at, l, every)| (l.clone(), at.saturating_duration_since(now).as_secs(), *every)).collect();
-        timers.sort_by_key(|t| t.1);
+        let mut timers = self.timers.clone();
+        timers.sort_by_key(|t| t.at);
         let focus_now = self.focus.as_ref().map(|f| (f.label.clone(), f.until.saturating_duration_since(now).as_secs(), now.duration_since(f.start).as_secs(), f.distracted));
         let look = if self.desk_modern { desk::Look::Modern } else { desk::Look::Classic };
         let status = self.desk_status.clone();
@@ -992,10 +1007,55 @@ impl App {
         }
     }
 
+    /// Start a timer `secs` from now (at most ten years); returns its id.
+    fn add_timer(&mut self, secs: u64, label: String, every: u64, rule: Option<String>) -> u64 {
+        self.next_timer += 1;
+        let at = timers::unix_now() + secs.clamp(1, timers::MAX_SECS) as i64;
+        self.timers.push(timers::Timer { id: self.next_timer, at, label, every: every.min(timers::MAX_SECS), rule });
+        self.next_timer
+    }
+
+    /// "cancel", "snooze <when>" ("10m", "1h", "evening", "tomorrow"), "at <when>" ("friday at 3"), "rename <text>".
+    fn timer_op(&mut self, id: u64, op: &str, from_desk: bool, silent: &mut bool) -> Reply {
+        let (verb, arg) = op.split_once(' ').unwrap_or((op, ""));
+        let Some(i) = self.timers.iter().position(|t| t.id == id) else {
+            return Reply::say("That timer has already rung or was cancelled.").mood(Mood::Think).run("Show my timers", "timers");
+        };
+        let label = if self.timers[i].label.is_empty() { "your timer".to_string() } else { self.timers[i].label.clone() };
+        let text = match verb {
+            "cancel" => {
+                self.timers.remove(i);
+                lines::pick("say_timer_cancelled").replace("{label}", &label)
+            }
+            "snooze" | "at" => {
+                // "snooze 10m" means from now; plain numbers are minutes
+                let arg = arg.trim();
+                let words = if arg.chars().all(|c| c.is_ascii_digit()) && !arg.is_empty() { format!("in {arg} minutes") } else if verb == "snooze" && brain::parse_dur(arg).is_some_and(|(_, rest)| rest.trim().is_empty()) { format!("in {arg}") } else { arg.to_string() };
+                match understand::when_secs(&words) {
+                    Some((secs, when)) => {
+                        self.timers[i].at = timers::unix_now() + secs as i64;
+                        lines::pick(if verb == "snooze" { "timer_snoozed" } else { "timer_moved" }).replace("{label}", &label).replace("{when}", &when)
+                    }
+                    None => format!("When? \"{arg}\" isn't a time I know. Try: in 20 minutes, at 3, tomorrow at 9."),
+                }
+            }
+            "rename" if !arg.trim().is_empty() => {
+                self.timers[i].label = arg.trim().to_string();
+                format!("Renamed to \"{}\".", arg.trim())
+            }
+            _ => return Reply::say("I can cancel, snooze, move or rename a timer."),
+        };
+        if from_desk {
+            self.desk_status = text;
+            *silent = true;
+            return Reply::say("");
+        }
+        Reply::say(text).mood(Mood::Alarm)
+    }
+
     /// The reminders as dates (for the agenda and "am I free?").
     fn reminders_at(&self) -> Vec<(chrono::NaiveDateTime, String)> {
-        let (now, wall) = (Instant::now(), chrono::Local::now().naive_local());
-        self.timers.iter().filter(|(_, _, every)| *every == 0).map(|(at, l, _)| (wall + chrono::Duration::seconds(at.saturating_duration_since(now).as_secs() as i64), l.clone())).collect()
+        self.timers.iter().filter(|t| t.every == 0).map(|t| (t.when(), t.label.clone())).collect()
     }
 
     /// "calendar add <link>", "remove 2", "refresh", "today", "tomorrow", "day 2026-11-13", "next", "free <unix time>".
@@ -1583,22 +1643,42 @@ impl App {
     }
 
     fn snapshot(&self) -> String {
-        let unix = |at: &Instant| (std::time::SystemTime::now() + at.saturating_duration_since(Instant::now())).duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0);
         serde_json::json!({
             "tips_every": self.tips_every, "notice_clip": self.notice_clip, "notice_programs": self.notice_programs, "notice_windows": self.notice_windows, "checkin": self.checkin, "facts": self.facts, "kind_time": self.kind_time, "focus_log": self.focus_log, "desk_look": if self.desk_modern { "modern" } else { "classic" }, "checkin_days": self.checkin_days,
             "pins": self.pins, "reading": self.reading, "calendars": self.calendars, "people": self.people.iter().map(|p| p.to_json()).collect::<Vec<_>>(), "workday": self.workday, "workday_ask": self.workday_ask, "welcome_seen": self.welcome_seen, "backup_sources": self.backup_sources, "backup_target": self.backup_target, "backup_last": self.backup_last, "backup_result": self.backup_result, "dnd_restore": self.dnd_restore, "dnd": self.dnd, "wrapup": self.wrapup, "upkeep_day": self.upkeep_day, "focus_goal": self.focus_goal, "budgets": self.budgets,
             "notice_health": self.notice_health, "check_updates": self.check_updates, "update_told": self.update_told, "sounds": self.sounds, "breaks": self.breaks, "name": self.name,
             "hat": self.hat, "skin": self.skin, "friendship": self.friendship, "highscores": self.highscores, "birthday": self.birthday.map(|(m, d)| [m, d]), "stats": self.stats, "unlocked": self.unlocked, "explored": self.explored, "persona": if self.unhinged { "unhinged" } else { "boring" }, "anchor": self.anchor.or(self.saved_anchor).map(|a| [a.x, a.y]),
-            "timers": self.timers.iter().map(|(at, l, every)| serde_json::json!([unix(at), l, every])).collect::<Vec<_>>(),
+            "timers": self.timers.iter().map(|t| serde_json::json!([t.at, t.label, t.every, t.id, t.rule])).collect::<Vec<_>>(),
         })
         .to_string()
     }
 
     fn load(&mut self) {
-        let Ok(text) = std::fs::read_to_string(Self::settings_path()) else { return };
-        let Ok(v) = serde_json::from_str::<serde_json::Value>(&text) else { return };
+        let path = Self::settings_path();
+        let text = match std::fs::read_to_string(&path) {
+            Ok(t) => t,
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => return,
+            Err(e) => {
+                self.settings_locked = true; // a file that's there but unreadable is never overwritten with defaults
+                self.settings_note = Some(format!("I couldn't read my settings ({e}), so I won't save over them this time."));
+                return;
+            }
+        };
+        let v = match serde_json::from_str::<serde_json::Value>(&text) {
+            Ok(v) => v,
+            Err(_) => {
+                // damaged (a crash mid-write, a typo by hand): keep it aside instead of saving defaults over it
+                let keep = path.with_file_name(format!("settings.json.broken-{}", timers::unix_now()));
+                let kept = std::fs::rename(&path, &keep).is_ok();
+                self.settings_locked = !kept;
+                self.settings_note = Some(if kept { format!("My settings file was damaged, so I started fresh. The old one is kept as {}.", keep.display()) } else { "My settings file is damaged and I couldn't move it aside, so I won't save over it.".into() });
+                return;
+            }
+        };
+        // one odd entry drops only itself, not the whole list
+        let strings = |k: &str| -> Vec<String> { v[k].as_array().into_iter().flatten().filter_map(|x| x.as_str().map(String::from)).collect() };
         let b = |k: &str, d: bool| v[k].as_bool().unwrap_or(d);
-        self.tips_every = v["tips_every"].as_u64().unwrap_or(self.tips_every);
+        self.tips_every = v["tips_every"].as_u64().unwrap_or(self.tips_every).min(24 * 60);
         (self.notice_clip, self.notice_programs, self.notice_health) = (b("notice_clip", true), b("notice_programs", true), b("notice_health", true));
         (self.notice_windows, self.checkin) = (b("notice_windows", true), b("checkin", true));
         for (k, v) in v["facts"].as_object().into_iter().flatten() {
@@ -1610,16 +1690,16 @@ impl App {
             *field = v[key].as_bool().unwrap_or(true);
         }
         self.focus_goal = v["focus_goal"].as_u64().unwrap_or(0);
-        self.pins = serde_json::from_value(v["pins"].clone()).unwrap_or_default();
-        self.reading = serde_json::from_value(v["reading"].clone()).unwrap_or_default();
-        self.calendars = serde_json::from_value(v["calendars"].clone()).unwrap_or_default();
+        self.pins = strings("pins");
+        self.reading = v["reading"].as_array().into_iter().flatten().filter_map(|r| Some((r[0].as_str()?.to_string(), r[1].as_str().unwrap_or("").to_string()))).collect();
+        self.calendars = strings("calendars");
         self.people = v["people"].as_array().into_iter().flatten().filter_map(people::Person::from_json).collect();
         people::set_names(&self.people);
-        self.workday = serde_json::from_value(v["workday"].clone()).unwrap_or_default();
+        self.workday = strings("workday");
         self.workday_ask = v["workday_ask"].as_bool().unwrap_or(true);
         self.welcome_seen = v["welcome_seen"].as_str().unwrap_or_default().to_string();
-        if let Ok(sources) = serde_json::from_value(v["backup_sources"].clone()) {
-            self.backup_sources = sources;
+        if v["backup_sources"].is_array() {
+            self.backup_sources = strings("backup_sources");
         }
         self.backup_target = v["backup_target"].as_str().unwrap_or_default().to_string();
         self.backup_last = v["backup_last"].as_i64();
@@ -1628,7 +1708,7 @@ impl App {
         if let Some(m) = v["dnd_restore"].as_str() {
             sys::dnd_restore(m);
         }
-        self.budgets = serde_json::from_value(v["budgets"].clone()).unwrap_or_default();
+        self.budgets = v["budgets"].as_object().into_iter().flatten().filter_map(|(k, m)| Some((k.clone(), m.as_u64()?.min(16 * 60)))).collect();
         let fortnight = (chrono::Local::now() - chrono::Duration::days(14)).format("%Y-%m-%d").to_string();
         for (day, a) in v["checkin_days"].as_object().into_iter().flatten().filter(|(d, _)| **d > fortnight) {
             self.checkin_days.insert(day.clone(), a.as_str().unwrap_or("okay").to_string());
@@ -1663,10 +1743,14 @@ impl App {
             self.highscores.insert(game.clone(), best.as_u64().unwrap_or(0) as u32);
         }
         self.saved_anchor = v["anchor"].as_array().and_then(|a| Some(pos2(a.first()?.as_f64()? as f32, a.get(1)?.as_f64()? as f32)));
-        let now_unix = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0);
+        // [unix, label, every, id, rule]; older files have only the first three, and get fresh ids
+        let now_unix = timers::unix_now();
         for t in v["timers"].as_array().into_iter().flatten() {
-            if let (Some(at), Some(label), Some(every)) = (t[0].as_u64(), t[1].as_str(), t[2].as_u64()) {
-                self.timers.push((Instant::now() + Duration::from_secs(at.saturating_sub(now_unix)), label.to_string(), every));
+            if let (Some(at), Some(label), Some(every)) = (t[0].as_i64(), t[1].as_str(), t[2].as_u64()) {
+                let id = t[3].as_u64().filter(|id| !self.timers.iter().any(|x| x.id == *id)).unwrap_or(self.next_timer + 1);
+                self.next_timer = self.next_timer.max(id);
+                let rule = t[4].as_str().map(String::from).filter(|r| timers::next_fire(r, chrono::Local::now().naive_local()).is_some());
+                self.timers.push(timers::Timer { id, at: at.min(now_unix + timers::MAX_SECS as i64), label: label.to_string(), every: every.min(timers::MAX_SECS), rule });
             }
         }
         self.saved = self.snapshot();
@@ -1676,7 +1760,7 @@ impl App {
         let snap = self.snapshot();
         if snap != self.saved && self.screenshot.is_none() {
             let p = Self::settings_path();
-            if std::fs::create_dir_all(p.parent().unwrap_or(&p)).and_then(|_| std::fs::write(&p, &snap)).is_ok() {
+            if !self.settings_locked && brain::write_atomic(&p, &snap).is_ok() {
                 self.saved = snap;
             }
         }
@@ -1759,8 +1843,25 @@ impl App {
                     r = Reply::say(format!("I don't have a game called \"{game}\". Try: let's play a game")).mood(Mood::Think);
                 }
             }
-            Effect::Timer(secs, label) => self.timers.push((Instant::now() + Duration::from_secs(secs), label, 0)),
-            Effect::Repeat(secs, label) => self.timers.push((Instant::now() + Duration::from_secs(secs), label, secs)),
+            Effect::Timer(secs, label) => {
+                self.add_timer(secs, label, 0, None);
+                if from_desk {
+                    self.desk_status = r.text.clone();
+                    silent = true;
+                }
+            }
+            Effect::Repeat(secs, label) => {
+                self.add_timer(secs, label, secs, None);
+            }
+            Effect::RepeatAt(rule, label) => match timers::next_fire(&rule, chrono::Local::now().naive_local()) {
+                Some(first) => {
+                    let secs = (timers::unix_of(first) - timers::unix_now()).max(1) as u64;
+                    self.add_timer(secs, label.clone(), 0, Some(rule.clone()));
+                    r.text = lines::pick("repeat_at_set").replace("{label}", &label).replace("{rule}", &timers::rule_text(&rule));
+                }
+                None => r = Reply::say("I couldn't work out when that should ring.").mood(Mood::Think),
+            },
+            Effect::TimerOp(id, op) => r = self.timer_op(id, &op, from_desk, &mut silent),
             Effect::SetName(n) => self.name = n,
             Effect::Checkin(answer) => r = self.checkin_answer(&answer),
             Effect::Focus(_, _) if self.focus.is_some() => r = Reply::say(lines::pick("focus_already")).run("Stop the session", "focus stop"),
@@ -1806,7 +1907,7 @@ impl App {
                 let on = value == "on";
                 match key.as_str() {
                     "persona" => self.set_persona(value == "unhinged"),
-                    "tips" => self.tips_every = value.parse().unwrap_or(self.tips_every),
+                    "tips" => self.tips_every = value.parse::<u64>().unwrap_or(self.tips_every).min(24 * 60),
                     "clip" => self.notice_clip = on,
                     "programs" => self.notice_programs = on,
                     "windows" => self.notice_windows = on,
@@ -1919,10 +2020,10 @@ impl App {
                 let quiet = matches!(op, todo::Op::StarAt(_) | todo::Op::PrioAt(_) | todo::Op::EditAt(..) | todo::Op::UndoneAt(_) | todo::Op::RemoveAt(_)) || (from_desk && matches!(op, todo::Op::AddTo(..) | todo::Op::ClearList(_)));
                 let (news, stale) = todo::apply(&op);
                 if let Some(label) = stale {
-                    self.timers.retain(|(_, l, _)| *l != label); // finished or renamed: no reminder for it
+                    self.timers.retain(|t| t.label != label); // finished, renamed or moved: no reminder for it
                 }
                 if let Effect::Timer(secs, label) = &news.effect {
-                    self.timers.push((Instant::now() + Duration::from_secs(*secs), label.clone(), 0));
+                    self.add_timer(*secs, label.clone(), 0, None);
                 }
                 if quiet {
                     self.desk_status = news.text.clone();
@@ -2054,6 +2155,49 @@ impl App {
                     silent = true;
                 }
             }
+            Effect::Note(cmd) => {
+                let mut list = notes::load();
+                let (verb, rest) = cmd.split_once(' ').unwrap_or((cmd.as_str(), ""));
+                let today = chrono::Local::now().date_naive();
+                if verb == "copy" {
+                    let text = rest.trim().parse::<usize>().ok().and_then(|n| n.checked_sub(1)).and_then(|i| list.get(i)).map(|n| n.text.clone());
+                    let line = match text {
+                        Some(t) => {
+                            ctx.copy_text(t.clone());
+                            self.ignore_clip = t;
+                            lines::pick("clip_copied")
+                        }
+                        None => "There's no note with that number.".to_string(),
+                    };
+                    if from_desk {
+                        self.desk_status = line;
+                        silent = true;
+                    } else {
+                        r = Reply::say(line);
+                    }
+                } else {
+                    match notes::change(&mut list, &cmd, today) {
+                        None => r = Reply::say("There's no note with that number.").run("Show my notes", "notes"),
+                        Some(line) => {
+                            let p = notes::path();
+                            let saved = brain::write_atomic(&p, &notes::format(&list)).is_ok();
+                            if !saved {
+                                r = Reply::say("Oops, I couldn't save that note. My filing cabinet is stuck.").mood(Mood::Shock);
+                            } else if verb == "clear" {
+                                // the reply already says so
+                            } else if from_desk {
+                                self.desk_status = line;
+                                silent = true;
+                            } else if verb == "add" && r.text.is_empty() {
+                                let text = list.last().map(|n| n.text.clone()).unwrap_or_default();
+                                r = Reply::say(lines::pick("say_note").replace("{note}", &text)).mood(Mood::Happy).run("Show all notes", "notes");
+                            } else if r.text.is_empty() {
+                                r = Reply::say(line).mood(Mood::Sly);
+                            }
+                        }
+                    }
+                }
+            }
             Effect::Reading(cmd) => {
                 let (verb, arg) = cmd.split_once(' ').unwrap_or((cmd.as_str(), ""));
                 let at = arg.trim_start_matches('#').parse::<usize>().ok().and_then(|n| n.checked_sub(1)).filter(|i| *i < self.reading.len());
@@ -2141,27 +2285,31 @@ impl App {
             Effect::Net(q) => self.ask_net(ctx, q),
             Effect::Quiet(secs) => self.quiet_until = Some(Instant::now() + Duration::from_secs(secs)),
             Effect::ListTimers => {
-                r.text = if self.timers.is_empty() {
+                let now = timers::unix_now();
+                let mut list = self.timers.clone();
+                list.sort_by_key(|t| t.at);
+                r.text = if list.is_empty() {
                     "No timers running. Try: timer 5m tea".into()
                 } else {
-                    let now = Instant::now();
-                    let list: String = self
-                        .timers
+                    let rows: String = list
                         .iter()
-                        .map(|(at, l, every)| {
-                            let again = if *every > 0 { format!(" (every {})", brain::fmt_dur(*every)) } else { String::new() };
-                            format!("• {} — {} left{again}\n", l, brain::fmt_dur(at.saturating_duration_since(now).as_secs()))
+                        .map(|t| {
+                            let again = match (&t.rule, t.every) {
+                                (Some(rule), _) => format!(" ({})", timers::rule_text(rule)),
+                                (None, e) if e > 0 => format!(" (every {})", brain::fmt_dur(e)),
+                                _ => String::new(),
+                            };
+                            format!("• {} — {} left{again}\n", if t.label.is_empty() { "Timer" } else { &t.label }, brain::fmt_dur(t.left(now)))
                         })
                         .collect();
-                    format!("Your timers:\n{list}")
+                    format!("Your timers:\n{rows}")
                 };
-                // one Cancel button per named timer (a few), then all of them
-                let mut labels: Vec<&String> = self.timers.iter().map(|(_, l, _)| l).filter(|l| !l.is_empty()).collect();
-                labels.dedup();
-                for l in labels.into_iter().take(4) {
-                    r = r.run(&format!("Cancel \"{l}\""), &format!("cancel {l}"));
+                // one Cancel button per timer (a few), then all of them
+                for t in list.iter().take(4) {
+                    let name: String = if t.label.is_empty() { "Timer".into() } else { t.label.chars().take(24).collect() };
+                    r = r.run(&format!("Cancel \"{name}\""), &format!("timer #{} cancel", t.id));
                 }
-                if !self.timers.is_empty() {
+                if !list.is_empty() {
                     r = r.run("Cancel all timers", "cancel");
                 }
             }
@@ -2169,7 +2317,12 @@ impl App {
             Effect::CancelTimer(name) => {
                 let before = self.timers.len();
                 let low = name.to_lowercase();
-                self.timers.retain(|(_, l, _)| !l.to_lowercase().contains(&low));
+                // the one with exactly that name; only if there's none, the ones whose name contains it
+                if self.timers.iter().any(|t| t.label.to_lowercase() == low) {
+                    self.timers.retain(|t| t.label.to_lowercase() != low);
+                } else {
+                    self.timers.retain(|t| !t.label.to_lowercase().contains(&low));
+                }
                 if self.timers.len() == before {
                     r = Reply::say(format!("I don't have a timer called \"{name}\".")).run("Show my timers", "timers");
                 }
@@ -2253,10 +2406,19 @@ impl App {
     fn tick(&mut self, ctx: &egui::Context) {
         let now = Instant::now();
         let t = self.t();
-        if let Some(i) = self.timers.iter().position(|(at, _, _)| *at <= now) {
-            let (_, label, every) = self.timers.remove(i);
-            if every > 0 {
-                self.timers.push((now + Duration::from_secs(every), label.clone(), every));
+        let now_unix = timers::unix_now();
+        if let Some(i) = self.timers.iter().position(|t| t.at <= now_unix) {
+            let mut fired = self.timers.remove(i);
+            let label = fired.label.clone();
+            // it comes back: after its interval, or on its rule's next day (same id, so the Desk keeps it)
+            let next = match (&fired.rule, fired.every) {
+                (Some(rule), _) => timers::next_fire(rule, chrono::Local::now().naive_local()).map(timers::unix_of),
+                (None, e) if e > 0 => Some(now_unix + e as i64),
+                _ => None,
+            };
+            if let Some(at) = next {
+                fired.at = at;
+                self.timers.push(fired);
             }
             self.sound("alarm-clock-elapsed");
             sys::notify(&label);
@@ -2266,8 +2428,10 @@ impl App {
                     let quip = lines::pick("timer_done");
                     if quip.contains("{label}") { quip.replace("{label}", &label) } else { format!("{quip}\n\n{label}") }
                 }))
-                    .mood(Mood::Shock)
-                    .run("Snooze 5 minutes", &format!("timer 5m {label}"))
+                    .mood(Mood::Alarm)
+                    .run("Snooze 10 min", &format!("timer 10m {label}"))
+                    .run("1 hour", &format!("timer 1h {label}"))
+                    .run("Tomorrow", &format!("remind me tomorrow at 9 to {}", if label.is_empty() { "look at this" } else { &label }))
                     .btn("Got it, thanks", Act::Hide),
             );
         }
@@ -2332,7 +2496,12 @@ impl App {
             self.desk_status = lines::pick("desk_status");
             self.desk.open();
         }
-        if self.tracker.as_ref().is_some_and(|tr| tr.take_summon()) {
+        // Meta+C, or a second Clipster that was started (it leaves a note and quits)
+        let poke = self.screenshot.is_none() && t - self.summon_checked > 1.0 && {
+            self.summon_checked = t;
+            sys::take_summon_note()
+        };
+        if poke || self.tracker.as_ref().is_some_and(|tr| tr.take_summon()) {
             let r = Reply::say(self.hello()).mood(Mood::Happy).run("Show me what you can do", "help");
             self.show(r);
             self.focus_input = true;
@@ -3769,6 +3938,12 @@ fn main() -> eframe::Result {
         ..Default::default()
     };
 
+    // one Clipster at a time: a second start shows the first one instead (screenshots run beside it)
+    let _instance = match screenshot.is_none().then(sys::claim_instance) {
+        Some(Err(())) => return Ok(()),
+        Some(Ok(lock)) => lock,
+        None => None,
+    };
     let result = eframe::run_native("Clipster", options, Box::new(move |cc| Ok(Box::new(App::new(cc, screenshot, say, play)))));
     relaunch();
     result

@@ -267,14 +267,16 @@ pub fn until(rest: &str) -> Reply {
     let today = Local::now().date_naive();
     let rest = rest.trim();
     if let Some(r) = rest.strip_prefix("in ") {
-        let n = num(r).unwrap_or(1) as i64;
+        let n = num(r).unwrap_or(1).min(100_000) as i64;
         let days = match r {
             r if r.contains("week") => n * 7,
             r if r.contains("month") => n * 30,
             r if r.contains("year") => n * 365,
             _ => n,
         };
-        let d = today + Duration::days(days);
+        let Some(d) = today.checked_add_signed(Duration::days(days)) else {
+            return Reply::say("That's further away than my calendar goes.").mood(Mood::Think);
+        };
         return Reply::say(format!("📅 In {} it'll be {}.", r.trim(), d.format("%A, %B %-d, %Y"))).mood(Mood::Think);
     }
     let Some((date, label)) = parse_day(rest, today) else {

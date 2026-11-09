@@ -31,6 +31,8 @@ pub enum Effect {
     Stopwatch(&'static str), // "start", "stop" or "show"
     CopyNow(String),
     Repeat(u64, String), // a reminder that comes back every N seconds
+    RepeatAt(String, String), // a reminder that comes back by the calendar: rule ("weekday 08:00"), label
+    TimerOp(u64, String),     // one timer by id: "cancel", "snooze 10m", "at friday at 3", "rename <text>"
     SetName(String),
     SayName,
     Hat(String),
@@ -62,6 +64,7 @@ pub enum Effect {
     Prank,                           // the April Fools window (also "prank", to see it)
     People(String),                  // "add Anna", "birthday Anna|3 March", "email Anna|a@b.ch", "every mum|14", "met mum", "last mum", "mail Anna", "forget Anna", "list", "birthdays", "import [file]"
     Calendar(String),                // "add <link>", "remove 2", "refresh", "day 2026-11-13", "next", "free <unix time>"
+    Note(String),                    // "add <text>", "remove 2", "edit 2 <text>", "pin 2", "copy 2", "clear" (applied by the app: it writes notes.txt)
     Reading(String),                 // the reading list: "save <link>" (none = the newest copied link), "open 2", "done 2", "list"
     UpkeepCheck,                     // run the checkup (on a background thread)
     OpenSystem(String),              // the system's own "updater" or "startup" settings
@@ -377,7 +380,7 @@ pub fn exact(input: &str) -> Option<Reply> {
         }
         "desk" if rest.is_empty() || rest == "open" || crate::desk::tab(rest).is_some() => return Some(Reply::say(lines::pick("desk_open")).mood(Mood::Happy).effect(Effect::OpenDesk(rest.trim_start_matches("open").trim().to_string()))),
         "desklook" if rest == "modern" || rest == "classic" => return Some(Reply::say("").effect(Effect::DeskLook(rest == "modern"))),
-        "unnote" => return Some(note_remove(rest.parse().unwrap_or(0))),
+        "unnote" => return Some(Reply::say("").effect(Effect::Note(format!("remove {rest}")))),
         "apptips" if rest.is_empty() => return Some(Reply::say("").effect(Effect::AppTips)),
         "apptips" => return Some(app_tip(rest)),
         "tidy" if rest == "undo" => return Some(Reply::say("").effect(Effect::TidyUndo)),
@@ -544,7 +547,7 @@ pub fn exact(input: &str) -> Option<Reply> {
         "flip" | "coin" => return Some(Reply::say(if rand::thread_rng().gen_bool(0.5) { "Heads!" } else { "Tails!" }).mood(Mood::Spin).run("Flip again", "flip")),
         "pick" | "choose" => return Some(choose(rest)),
         "password" | "pass" | "pw" | "passwd" => return Some(password(rest)),
-        "time" if !rest.is_empty() && !rest.starts_with("is") => return Some(net(Query::Place(Kind::Time, rest.into()), &format!("Checking the clocks in {rest}..."))),
+        "time" if !rest.is_empty() && rest != "is" && !rest.starts_with("is ") => return Some(net(Query::Place(Kind::Time, rest.into()), &format!("Checking the clocks in {rest}..."))),
         "time" | "date" | "clock" | "today" | "now" => return Some(time_now()),
         "battery" | "bat" | "power" => return Some(Reply::say(battery_text()).mood(Mood::Think)),
         "stats" | "cpu" | "ram" | "mem" | "memory" | "system" | "sys" | "status" => return Some(stats()),
@@ -570,31 +573,76 @@ pub fn exact(input: &str) -> Option<Reply> {
         "youtube" | "yt" | "video" => return Some(web("https://www.youtube.com/results?search_query=", rest, "To the videos!")),
         "map" | "maps" | "where" => return Some(web("https://www.openstreetmap.org/search?query=", rest, "Finding it on the map")),
         "weather" | "forecast" => return Some(net(Query::Place(Kind::Weather, rest.into()), "It looks like you're wondering about the weather. Checking the sky...")),
+        "timer" if rest.starts_with('#') => {
+            let (id, op) = rest[1..].split_once(' ').unwrap_or((&rest[1..], ""));
+            return Some(Reply::say("").effect(Effect::TimerOp(id.parse().ok()?, op.trim().to_string())));
+        }
+        "everyat" => {
+            let (rule, label) = rest.split_once('|')?;
+            crate::timers::next_fire(rule, chrono::Local::now().naive_local())?;
+            let label = label.trim().trim_start_matches("to ").trim();
+            return Some(Reply::say("").mood(Mood::Alarm).effect(Effect::RepeatAt(rule.to_string(), if label.is_empty() { "Reminder!".into() } else { label.to_string() })));
+        }
         "timer" | "alarm" => return Some(timer(rest, "")),
         "remind" | "reminder" => return Some(remind(rest)),
         "timers" => return Some(Reply::say("").effect(Effect::ListTimers)),
         "cancel" | "stop" if rest.is_empty() || rest == "all" => return Some(Reply::say(lines::pick("say_cancel")).effect(Effect::CancelTimers)),
         "cancel" => return Some(Reply::say(lines::pick("say_timer_cancelled").replace("{label}", rest)).effect(Effect::CancelTimer(rest.to_string()))),
-        "note" | "remember" => return Some(note_add(rest)),
+        // "note #3 edit …", "note #3 pin", "note #3 remove", "note #3 copy" (the Desk); anything else is a new note
+        "note" if note_op(rest).is_some() => return Some(Reply::say("").effect(Effect::Note(note_op(rest).unwrap_or_default()))),
+        "note" | "remember" if rest.is_empty() => return Some(Reply::say("Note what? Try: note call grandma")),
+        "note" | "remember" => return Some(Reply::say("").effect(Effect::Note(format!("add {rest}")))),
         "notes" => return Some(notes_list()),
-        // the Desk's commands name an item by its line: "todo #3 done", "todo #3 edit call Anna"
+        // the Desk's commands name an item by its line: "todo #3 done", "todo #3 edit call Anna", "todo #3 due friday"
         "todo" if rest.starts_with('#') => {
             use crate::todo::Op;
             let (n, what) = rest[1..].split_once(' ').unwrap_or((&rest[1..], ""));
             let (verb, text) = what.split_once(' ').unwrap_or((what, ""));
             let n: usize = n.parse().ok()?;
+            let text = text.trim();
+            let none = ["", "none", "-", "no", "off"].contains(&text.to_lowercase().as_str());
+            let value = || (!none).then(|| text.to_string());
+            let today = chrono::Local::now().date_naive();
             let op = match verb {
                 "done" => Op::DoneAt(n),
                 "undone" => Op::UndoneAt(n),
                 "star" => Op::StarAt(n),
+                "startomorrow" => Op::StarTomorrowAt(n),
+                "weekstar" => Op::WeekStarAt(n),
                 "prio" => Op::PrioAt(n),
                 "edit" => Op::EditAt(n, text.to_string()),
                 "remove" => Op::RemoveAt(n),
+                "due" => match crate::todo::parse_when(if text.is_empty() { "none" } else { text }, today) {
+                    Some(d) => Op::DueAt(n, d),
+                    None => return Some(Reply::say(format!("I don't know when \"{text}\" is. Try: friday, tomorrow, 3 dec, next week, or none.")).mood(Mood::Think)),
+                },
+                "at" => match crate::understand::hm(text) {
+                    _ if none => Op::AtTimeAt(n, None),
+                    Some((hours, m, _)) => Op::AtTimeAt(n, chrono::NaiveTime::from_hms_opt(if hours.len() == 2 && hours[0] < 8 { hours[1] } else { hours[0] }, m, 0)),
+                    None => return Some(Reply::say(format!("\"{text}\" isn't a time I know. Try: 14:00 or 3pm.")).mood(Mood::Think)),
+                },
+                "link" => Op::LinkAt(n, value()),
+                "note" => Op::NoteAt(n, value()),
+                "every" => Op::EveryAt(n, value()),
+                "list" => Op::ListAt(n, value()),
+                "waiting" => Op::WaitingAt(n, value()),
+                "steps" => Op::AddSteps(n, crate::todo::split_items(text.trim_start_matches("add ").trim())),
+                // a reminder about it: "todo #3 remind tomorrow at 8"
+                "remind" => {
+                    let items = crate::todo::load();
+                    let item = n.checked_sub(1).and_then(|i| items.get(i))?;
+                    let label = format!("To-do: {}", item.text);
+                    return Some(match crate::understand::when_secs(text) {
+                        Some((secs, when)) => Reply::say(lines::pick("todo_reminder_set").replace("{x}", &item.text).replace("{when}", &when)).mood(Mood::Alarm).effect(Effect::Timer(secs, label)),
+                        None => Reply::say(format!("When? \"{text}\" isn't a time I know. Try: in 2 hours, at 3, tomorrow at 8.")).mood(Mood::Think),
+                    });
+                }
                 _ => return None,
             };
             return Some(Reply::say("").effect(Effect::Todo(op)));
         }
-        // a named list: "onlist shopping", "onlist shopping add eggs, milk", "onlist shopping clear"
+        // a named list: "onlist shopping", "onlist shopping add eggs, milk", "onlist shopping clear", "… reset", "… rename trip",
+        // "… delete" (then "… delete confirmed"), "… copy", "… mail"
         "onlist" if !rest.is_empty() => {
             use crate::todo::Op;
             let (name, what) = rest.split_once(' ').unwrap_or((rest, ""));
@@ -602,10 +650,33 @@ pub fn exact(input: &str) -> Option<Reply> {
             return Some(match what.split_once(' ').unwrap_or((what, "")) {
                 ("", _) => crate::todo::show_list(&name),
                 ("clear", _) => Reply::say("").effect(Effect::Todo(Op::ClearList(name))),
+                ("reset", _) => Reply::say("").effect(Effect::Todo(Op::ResetList(name))),
+                ("rename", new) if !new.trim().is_empty() => Reply::say("").effect(Effect::Todo(Op::RenameList(name, new.to_string()))),
+                ("delete", "confirmed") => Reply::say("").effect(Effect::Todo(Op::DeleteList(name))),
+                ("delete", _) => {
+                    let n = crate::todo::load().iter().filter(|i| i.list.as_deref() == Some(name.as_str())).count();
+                    Reply::say(format!("Delete the {name} list and its {n} item(s)?")).mood(Mood::Think).run("Yes, delete it", &format!("onlist {name} delete confirmed")).btn("Keep it", Act::Hide)
+                }
+                ("copy", _) => Reply::say(lines::pick("list_copied").replace("{label}", &name)).mood(Mood::Write).effect(Effect::CopyNow(crate::todo::list_text(&crate::todo::load(), &name))),
+                ("mail", _) => {
+                    let text = crate::todo::list_text(&crate::todo::load(), &name);
+                    let (subject, body) = text.split_once('\n').unwrap_or((&text, ""));
+                    return Some(Reply::say("Opening an email with the list.").mood(Mood::Write).effect(Effect::Open(format!("mailto:?subject={}&body={}", url_encode(subject), url_encode(body)))));
+                }
                 ("add", items) if !items.trim().is_empty() => Reply::say("").effect(Effect::Todo(Op::AddTo(name, crate::todo::split_items(items)))),
+                ("remove", item) if !item.trim().is_empty() => Reply::say("").effect(Effect::Todo(Op::RemoveFrom(name, item.trim().to_string()))),
+                ("done", item) if !item.trim().is_empty() => Reply::say("").effect(Effect::Todo(Op::DoneOn(name, item.trim().to_string()))),
                 _ => return None,
             });
         }
+        // "todos move call anna|friday" (from "move call Anna to Friday"), "todos move the report|none"
+        "todos" if rest.starts_with("move ") && rest.contains('|') => {
+            let (what, when) = rest[5..].split_once('|')?;
+            let d = crate::todo::parse_when(when, chrono::Local::now().date_naive())?;
+            return Some(Reply::say("").effect(Effect::Todo(crate::todo::Op::DueFor(what.trim().to_string(), d))));
+        }
+        "todos" if rest == "overdue today" => return Some(Reply::say("").effect(Effect::Todo(crate::todo::Op::OverdueToToday))),
+        "todos" if rest == "done week" || rest == "done today" => return Some(crate::todo::finished_reply(rest.trim_start_matches("done "))),
         "todo" if rest == "tomorrow" => return Some(Reply::say("").effect(Effect::Todo(crate::todo::Op::Tomorrow))),
         "todo" | "to-do" if !rest.is_empty() => return Some(Reply::say("").effect(Effect::Todo(crate::todo::Op::Add(rest.to_string())))),
         "todo" | "to-do" | "todos" if rest.is_empty() => return Some(crate::todo::list()),
@@ -614,12 +685,13 @@ pub fn exact(input: &str) -> Option<Reply> {
         "done" if !rest.is_empty() => return Some(Reply::say("").effect(Effect::Todo(crate::todo::Op::Done(rest.to_string())))),
         "undone" if !rest.is_empty() => return Some(Reply::say("").effect(Effect::Todo(crate::todo::Op::Undone(rest.to_string())))),
         // notes are only wiped after a yes, and only when it's clearly about them ("forget it" is not)
-        "forget" if rest == "notes confirmed" => return Some(notes_clear()),
+        "forget" if rest == "notes confirmed" => return Some(Reply::say("Poof! All notes forgotten. What notes? I don't know what you're talking about.").mood(Mood::Sly).effect(Effect::Note("clear".into()))),
         "forget" if rest.is_empty() || ["notes", "my notes", "all notes", "all my notes", "the notes", "my list", "the list"].contains(&rest.to_lowercase().as_str()) => {
             return Some(notes_confirm());
         }
         "count" | "wc" => return Some(count(rest)),
         "upper" | "lower" | "reverse" | "mock" | "title" => return Some(transform(&head, rest)),
+        "mute" if rest.is_empty() => return Some(crate::powers::volume("mute")), // the sound; "be quiet" quiets him
         "quiet" | "shh" | "shush" | "silence" | "mute" => return Some(quiet()),
         "bye" | "quit" | "exit" | "goodbye" => return Some(Reply::say(lines::pick("goodbye")).effect(Effect::Exit).mood(Mood::Spin)),
         "birthday" | "bday" => {
@@ -1256,7 +1328,8 @@ pub fn parse_dur(s: &str) -> Option<(u64, &str)> {
         found = true;
         end = i;
     }
-    (found && total >= 1.0).then(|| (total as u64, s[end..].trim()))
+    // at most ten years: anything longer is a typo, and would overflow the clock
+    (found && total >= 1.0).then(|| (total.min(crate::timers::MAX_SECS as f64) as u64, s[end..].trim()))
 }
 
 fn timer(rest: &str, label: &str) -> Reply {
@@ -1290,9 +1363,10 @@ fn remind(rest: &str) -> Reply {
     if what.is_empty() {
         return Reply::say("Remind you of what, and when? Try: remind me in 10 min to stretch");
     }
-    let mut n = note_add(what);
-    n.text += "\n(You didn't say when, so I put it in your notes. Add a time like \"in 20 minutes\" or \"at 5pm\" for an alarm.)";
-    n
+    Reply::say(format!("Noted: \"{what}\"\n(You didn't say when, so I put it in your notes. Add a time like \"in 20 minutes\" or \"at 5pm\" for an alarm.)"))
+        .mood(Mood::Happy)
+        .run("Show all notes", "notes")
+        .effect(Effect::Note(format!("add {what}")))
 }
 
 fn random_number(rest: &str) -> Reply {
@@ -1330,6 +1404,22 @@ pub fn fmt_dur(secs: u64) -> String {
 
 /// Where notes, to-dos and the tidy log live. The tests get a folder of their own, so running them never
 /// touches the real notes or to-do list.
+/// Write a file so a crash or a full disk never leaves half of it: a `.tmp` next to it, flushed, then renamed over it.
+pub fn write_atomic(path: &std::path::Path, text: &str) -> std::io::Result<()> {
+    use std::io::Write;
+    if let Some(dir) = path.parent() {
+        std::fs::create_dir_all(dir)?;
+    }
+    let tmp = path.with_file_name(format!("{}.tmp", path.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default()));
+    let mut f = std::fs::File::create(&tmp)?;
+    f.write_all(text.as_bytes())?;
+    f.sync_all()?;
+    drop(f);
+    std::fs::rename(&tmp, path).inspect_err(|_| {
+        let _ = std::fs::remove_file(&tmp);
+    })
+}
+
 pub fn data_dir() -> PathBuf {
     if cfg!(test) {
         std::env::temp_dir().join(format!("clipster-test-{}", std::process::id()))
@@ -1339,53 +1429,28 @@ pub fn data_dir() -> PathBuf {
 }
 
 pub fn notes_path() -> PathBuf {
-    data_dir().join("notes.txt")
+    crate::notes::path()
 }
 
-fn note_add(text: &str) -> Reply {
-    if text.is_empty() {
-        return Reply::say("Note what? Try: note call grandma");
-    }
-    let p = notes_path();
-    let ok = std::fs::create_dir_all(p.parent().unwrap()).is_ok()
-        && std::fs::OpenOptions::new()
-            .create(true)
-            .append(true)
-            .open(&p)
-            .and_then(|mut f| std::io::Write::write_all(&mut f, format!("{text}\n").as_bytes()))
-            .is_ok();
-    if ok {
-        Reply::say(lines::pick("say_note").replace("{note}", text)).mood(Mood::Happy).run("Show all notes", "notes")
-    } else {
-        Reply::say("Oops, I couldn't save that note. My filing cabinet is stuck.").mood(Mood::Shock)
-    }
+/// "#3 edit call Anna" -> "edit 3 call Anna" (also pin, remove, copy): a change to note 3, not a new note that starts with "#3".
+fn note_op(rest: &str) -> Option<String> {
+    let (n, op) = rest.strip_prefix('#')?.split_once(' ')?;
+    let (verb, text) = op.split_once(' ').unwrap_or((op, ""));
+    (n.parse::<usize>().is_ok() && ["edit", "pin", "remove", "copy"].contains(&verb)).then(|| format!("{verb} {n} {text}").trim_end().to_string())
 }
 
 fn notes_list() -> Reply {
-    let text = std::fs::read_to_string(notes_path()).unwrap_or_default();
-    if text.trim().is_empty() {
+    let notes = crate::notes::load();
+    if notes.is_empty() {
         return Reply::say("No notes yet. Try: note buy more paperclips");
     }
-    let list: String = text.lines().enumerate().map(|(i, l)| format!("{}. {l}\n", i + 1)).collect();
+    let list: String = notes.iter().enumerate().map(|(i, n)| format!("{}. {}{}\n", i + 1, if n.pinned { "📌 " } else { "" }, n.text)).collect();
+    let all: String = notes.iter().map(|n| format!("{}\n", n.text)).collect();
     Reply::say(format!("Your notes:\n{list}"))
         .btn("Open notes file", Act::Open(notes_path().to_string_lossy().into_owned()))
-        .btn("Copy all", Act::Copy(text))
+        .btn("Copy all", Act::Copy(all))
         .run("Forget them all", "forget notes")
-}
-
-/// Remove note number `n` (as the Desk lists them: the non-empty lines).
-fn note_remove(n: usize) -> Reply {
-    let text = std::fs::read_to_string(notes_path()).unwrap_or_default();
-    let mut notes: Vec<&str> = text.lines().filter(|l| !l.trim().is_empty()).collect();
-    if n == 0 || n > notes.len() {
-        return Reply::say(format!("There's no note number {n}.")).run("Show my notes", "notes");
-    }
-    let gone = notes.remove(n - 1).to_string();
-    let rest: String = notes.iter().map(|l| format!("{l}\n")).collect();
-    match std::fs::write(notes_path(), rest) {
-        Ok(()) => Reply::say(format!("Gone: \"{gone}\"")).mood(Mood::Sly),
-        Err(e) => Reply::say(format!("I couldn't change your notes: {e}")).mood(Mood::Sad),
-    }
+        .run("Open the Desk", "desk notes")
 }
 
 fn notes_confirm() -> Reply {
@@ -1394,11 +1459,6 @@ fn notes_confirm() -> Reply {
         return Reply::say("There are no notes to forget. Clean slate already.");
     }
     Reply::say(format!("Forget all {n} note(s)? There's no undo, not even for me.")).mood(Mood::Shock).run("Yes, forget them", "forget notes confirmed").btn("Keep them", Act::Hide)
-}
-
-fn notes_clear() -> Reply {
-    let _ = std::fs::remove_file(notes_path());
-    Reply::say("Poof! All notes forgotten. What notes? I don't know what you're talking about.").mood(Mood::Sly)
 }
 
 // ---------- text ----------

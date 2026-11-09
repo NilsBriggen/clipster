@@ -20077,3 +20077,91 @@ Nothing on file. A nice, easy start would be "I live in Lisbon".
 No taught phrases yet. Say "when I say ping, say pong" to give me my first.
 Nothing taught. Try "when I say hi, say hello there" and I'll learn it.
 I haven't learned any of your phrases. Teach me one. I learn quickly, mostly by echo.
+
+## todo_moved
+"{x}" is due {when} now.
+Moved "{x}" to {when}. Future you has been informed.
+"{x}": new date, {when}. The old one never happened.
+Done: "{x}" waits until {when}.
+"{x}" now belongs to {when}. Today breathes a little easier.
+
+## todo_no_date
+"{x}" has no deadline now. It can take its time.
+No date on "{x}" any more. It's a someday thing.
+"{x}" is free of its due date. Don't let it get too comfortable.
+Took the date off "{x}". It stays on the list, just without the pressure.
+
+## todo_overdue_moved
+Moved {n} overdue to-do(s) to today. A fresh start, same tasks.
+{n} overdue item(s) are due today now. No judgement, just a new date.
+Today now holds {n} item(s) that were running late. One at a time.
+{n} to-do(s) brought forward to today. Yesterday doesn't need to know.
+
+## todo_steps_done
+Every step of "{x}" is ticked. Tick off the whole thing too?
+That was the last step. Is "{x}" done as well?
+All the steps of "{x}" are done. Shall I tick it off?
+"{x}" has no steps left. Mark it finished?
+
+## list_reset
+Unticked {n} item(s) on the {label} list. Ready to use again.
+The {label} list is fresh: {n} item(s) back to open.
+{n} item(s) on the {label} list are open again. Same list, new trip.
+Reset the {label} list. Everything's waiting to be ticked again.
+
+## list_renamed
+The list is called "{x}" now.
+Renamed it to "{x}". Same items, better name.
+"{x}" it is. The list didn't mind.
+
+## list_deleted
+The {label} list is gone, with its {n} item(s).
+Deleted the {label} list. {n} item(s) went with it.
+No more {label} list. Its {n} item(s) left together.
+
+## list_copied
+The {label} list is on the clipboard. Paste it anywhere.
+Copied the {label} list. Paste it into a message or a note.
+The {label} list is copied, ready to send.
+
+## todo_finished_week
+You finished {n} thing(s) this week:
+{n} done this week. Here they are:
+This week's finished list, {n} strong:
+{n} thing(s) ticked off so far this week:
+
+## todo_finished_none
+Nothing ticked off yet this week. The week isn't over.
+No finished to-dos this week so far. There's time.
+I don't see anything finished this week yet. Pick a small one?
+
+## todo_reminder_set
+I'll remind you about "{x}" {when}.
+Reminder set: "{x}", {when}.
+"{x}": I'll bring it up {when}.
+Noted. "{x}" comes back {when}.
+
+## repeat_at_set
+I'll remind you {rule}: "{label}".
+Done: "{label}", {rule}.
+"{label}" is on repeat, {rule}. Snoozing one doesn't move the others.
+Set up: {rule}, "{label}". Say "timers" to see it.
+
+## timer_snoozed
+Snoozed "{label}" until {when}.
+"{label}" will ring again {when}.
+Fine, "{label}" waits until {when}.
+"{label}" is snoozed. It's back {when}.
+
+## timer_moved
+"{label}" rings {when} now.
+Moved "{label}" to {when}.
+"{label}": new time, {when}.
+
+## grief
+I'm so sorry. That's a real loss, and it's okay to feel it. I'm here if you want to talk, or if you'd rather I stay quiet.
+I'm really sorry. Take all the time you need today. Nothing on your list is more important than this.
+That's heavy news. I'm sorry. Be gentle with yourself, and lean on the people around you if you can.
+I'm sorry you're going through this. If you want, tell me about them. If not, that's fine too.
+I'm so sorry. If today is too much, it's okay to let the to-dos wait.
+That's hard. I'm sorry. Talking to someone you trust can help, even a little.

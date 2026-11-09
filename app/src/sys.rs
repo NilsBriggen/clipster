@@ -1107,3 +1107,29 @@ mod tests {
         assert!(!os_name().is_empty());
     }
 }
+
+/// Where the single-instance lock and the "come here" note live.
+fn instance_dir() -> std::path::PathBuf {
+    dirs::runtime_dir().or_else(dirs::cache_dir).unwrap_or_else(std::env::temp_dir).join("clipster")
+}
+
+/// Claim the single-instance lock and hold the file for as long as Clipster runs. `Err(())` means another Clipster
+/// already holds it (it has been asked to show itself); `Ok(None)` means the lock can't be used here, so run anyway.
+pub fn claim_instance() -> Result<Option<std::fs::File>, ()> {
+    let dir = instance_dir();
+    let _ = std::fs::create_dir_all(&dir);
+    let Ok(f) = std::fs::OpenOptions::new().create(true).truncate(false).write(true).open(dir.join("instance.lock")) else { return Ok(None) };
+    match f.try_lock() {
+        Ok(()) => Ok(Some(f)),
+        Err(std::fs::TryLockError::WouldBlock) => {
+            let _ = std::fs::write(dir.join("summon"), b"");
+            Err(())
+        }
+        Err(_) => Ok(None),
+    }
+}
+
+/// A second Clipster asked this one to show itself (once).
+pub fn take_summon_note() -> bool {
+    std::fs::remove_file(instance_dir().join("summon")).is_ok()
+}

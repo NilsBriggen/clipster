@@ -359,8 +359,7 @@ pub fn fetch(sources: &[String]) -> (Vec<Event>, Vec<String>) {
         let text = match text {
             Ok(t) if t.contains("BEGIN:VCALENDAR") => {
                 if let Some(c) = &cache {
-                    let _ = c.parent().map(std::fs::create_dir_all);
-                    let _ = std::fs::write(c, &t);
+                    let _ = crate::brain::write_atomic(c, &t);
                 }
                 t
             }
