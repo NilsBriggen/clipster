@@ -2,6 +2,56 @@
 
 Each version's section is also its GitHub release description: the release workflow publishes it and refuses to release a version without one.
 
+## 0.5.0 (2026-11-09)
+
+The Desk release. Clipster's Desk was rebuilt tab by tab: every page shows more, and almost everything on it can now be changed right there instead of asked for in the balloon. Habits, countdowns and a one-line journal are new, and about 60 bugs were fixed along the way, many of them on Windows.
+
+### Highlights
+
+- **A new Desk throughout:**
+  - A status bar that says what happened, with **Undo** for anything you remove.
+  - "Are you sure?" questions on the Desk itself, not in a balloon.
+  - A find box (Ctrl+K) for anything on the Desk, or for a question to Clipster.
+  - Two sizes, keys for everything (Ctrl+Tab, Ctrl+1–9, Ctrl+Z, Esc), and Classic 98 or Modern.
+  - Browse… buttons, files you can drop on it, and Print… for lists and your agenda.
+- **Today:** what's coming up (appointments, reminders, due to-dos, the weather), focus controls with pause and +10 min, your top 3 and habits, time per app and per website, countdowns, and a wrap-up that closes the day: a journal line, tomorrow's three, and your work apps closed if you like.
+- **Week:** the last 7 days against the week before, the next 7 days with how busy each one is, your focus sessions, a short story of any day, and a spreadsheet of the week.
+- **To-do:** filters (Today, Important, No date, Repeats, Waiting), search, a date menu, and a details card for each to-do: a time, a link, a note, a repeat, steps, or someone you're waiting on. Plan your day or your week, keep named lists with a chip each, start new lists from a saved one, and show a list as a QR code for your phone.
+- **Agenda:** days or a whole month, free time between appointments (within your working hours), a card for each event and reminder, notes you can edit, a name, colour and heads-up setting for each calendar, public holidays for your country, and any reminder or to-do sent to your calendar app as a file.
+- **Clipboard:** turn a copy into a to-do, a note or a link to read later, or change it (UPPER CASE, one line, sorted, base64…). Name your pins, pause the history, see your saved links with their titles, and find recent files and new downloads on the new Files page.
+- **Upkeep:**
+  - **Right now** shows what's using your computer.
+  - **Space** shows what's taking room, and moves big files to the trash.
+  - **Tidy** lets you choose the files, and can tidy Downloads every Monday.
+  - **Backup** can skip names like `node_modules`, run on its own (when the drive is plugged in, or in the evening), stop halfway, show its history and get a single file back.
+- **You & me:** edit what he knows about you, edit and try the phrases you taught him, a card for each person (birthday, email, phone, keeping in touch, notes, present ideas) and a journal page with a month view.
+- **Settings:** five pages: General (personality, look, his outfit), My day (working days and hours, 12- or 24-hour clock, the first day of the week), Focus and goals, Comments (quiet times, what he keeps quiet about) and Your data (export, import, forget).
+- **New things to say:**
+  - "I did my walk" (habits), "count down to my holiday on 2 December", "journal: finished the slides"
+  - "I'm waiting for Ben's numbers", "remind me every weekday at 8 to take my pills"
+  - "focus until my next meeting", "pause my focus", "reset my packing list"
+- **About 60 fixes,** found by two rounds of bug hunting and a review. Among them:
+  - "every evening at 7" and "tonight at 9" rang in the morning.
+  - "start reboot" opened something on Windows instead of asking first.
+  - Reminders that mentioned a funeral or a hospital were silently not made.
+  - "my phone is going to die" got the helpline message.
+  - Renaming a person on the Desk didn't work, and editing a to-do's text lost its reminder.
+  - Windows paths with ’ in them broke the trash and screenshots.
+
+### Install
+
+- **Linux:** download `clipster_0.5.0_x86_64.AppImage`, make it executable (`chmod +x`) and replace your old AppImage with it. Or click **Install now** when he tells you about the update. Your settings, notes, to-dos and taught phrases are kept.
+- **Windows:** run `clipster_0.5.0_x64_en-US.msi`, or click **Install now** in Clipster. It replaces the old version and keeps your settings. The installer still isn't code-signed, so SmartScreen may say "Windows protected your PC". Choose **More info → Run anyway**.
+
+### Known limitations
+
+- **Windows, untested by hand:** the file and folder pickers (Browse…), Right now, moving files to the Recycle Bin and printing build and pass their tests on Windows, but haven't been tried on a real Windows PC yet. Please [report anything odd](https://github.com/NilsBriggen/clipster/issues).
+- **Backup page and network drives:** while the Backup page is open it lists your drives every 10 seconds. An unreachable network drive can make the Desk stutter while it waits.
+- **Holidays and weather** need the internet (date.nager.at and open-meteo.com). Without it, Today and the Agenda simply leave them out.
+- **Calendar time zones:** events created in another time zone (TZID) are still read as local time, so they can be off by the difference. UTC times are converted correctly.
+- **Saved links** take dropped files, not text dragged from a browser.
+- As before, outside KDE Plasma there are no global shortcuts on Linux and no mouse-following.
+
 ## 0.4.0 (2026-11-09)
 
 The assistant release. Clipster learned what a personal assistant needs to know: your appointments, the people in your life, your shopping list, where you saved that file and what you meant to read later. He also got a snake game, new animations, comments on 400 more programs and 400 websites, and more than twice as many lines as before (about 50,000 now), written to new limits you can read in `LORE.md`.
