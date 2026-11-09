@@ -11,21 +11,26 @@ A sarcastic desktop paperclip in the spirit of the 90s office helpers, except he
 
 Type to him in plain words, typos and all. Some things to try:
 
-- **Timers and reminders:** "remind me in 10 min to stretch", "remind me on Friday at 3 to call Anna", "timer 5m tea", "remind me every hour to drink water", "cancel the tea timer", "pomodoro"
-- **To-dos and lists:** "add call Anna to my to-do list", "todo send the report by friday", "what's on my list", "done call Anna", "add eggs, milk and bread to my shopping list", "what's on my packing list"
+- **Timers and reminders:** "remind me in 10 min to stretch", "remind me on Friday at 3 to call Anna", "timer 5m tea", "remind me every hour to drink water", "every 3 days water the plants", "every other week clean the fridge", "every year on 3 March renew the insurance", "every workday at 8" (skips public holidays), "cancel the tea timer", "pomodoro". Reminders that ring together come as one, and the ones you missed are listed under the next
+- **Appointments:** "dentist on Tuesday at 10", "lunch with Anna on Friday at 12" offer a reminder an hour before, one the evening before, or a to-do
+- **Your day:** "good morning" or "brief me" gives the day from what's on your computer (meetings and free time, reminders, your top 3, what's due, who to chase, birthdays, countdowns, habits), "what's on this weekend"
+- **To-dos and lists:** "add call Anna to my to-do list", "todo send the report by friday", "what's due today", "anything overdue", "what's on my list", "done call Anna", "remove call Anna from my list", "add eggs, milk and bread to my shopping list", "what's on my packing list", "what am I waiting for", "Ben sent the numbers"
 - **Your calendar:** give him your calendar's private iCal link ("add my calendar webcal://…", or the Desk's Agenda tab) and ask "my agenda", "what's on Friday", "my next meeting", "am I free on Friday at 3". He gives you a heads-up 10 minutes before each appointment, with a Join button for video calls
-- **People:** "Anna's birthday is on 3 March", "keep in touch with mum every 2 weeks", "I called mum", "upcoming birthdays", "email Anna", "import my contacts" (a .vcf file). He reminds you a few days before birthdays and when it's been a while
+- **People:** "Anna's birthday is on 3 March", "when is Anna's birthday", "what's Anna's number", "Anna would like a scarf", "what should I get Anna", "keep in touch with mum every 2 weeks", "I called mum", "upcoming birthdays", "write a thank-you note to Anna", "chase Ben", "import my contacts" (a .vcf file). He reminds you ten days before birthdays (with your present ideas), a few days before, and when it's been a while
+- **Where things are:** "my passport is in the top drawer", "I put the charger in the blue bag", "where is my passport", "what's in my blue bag" (with nothing kept, he looks in your notes)
+- **Renewals and expiry dates:** "my passport expires on 3 March 2027", "the car insurance renews on 1 March every year", "netflix renews on the 15th every month for 12.99", "what's expiring soon", "renewed the car insurance". He tells you ahead of time (months ahead for ID papers)
+- **Habits and doses:** "new habit walk", "I did my walk", "8 glasses of water a day", "+1 water", "remind me to take my pills every day at 8 and 20" (Taken, In 15 min, Skip), "did I take my pills". An evening word before a streak breaks
 - **Start my workday:** opens your work apps and links, shows your day and offers a focus session ("add firefox to my workday")
 - **Writing:** "proofread this" (the clipboard, or the text after it) finds doubled words, common misspellings, a/an mix-ups, its/it's and long sentences, and fixes the safe ones. "Write a complaint letter", "cover letter" or "out of office" give a fill-in-the-blanks template to copy or open as an email
 - **Focus:** "focus 45 minutes on the report" (he nudges you back if you drift to videos or social media), "where did my time go today?"
-- **Files:** "find my CV", "where did I save the invoice", "recent files", "save this link" (a reading list), "tidy my downloads" sorts loose files into folders by type (nothing is deleted, and "undo the tidy" puts everything back), "find duplicates in downloads", "old big files"
+- **Files and notes:** "find my CV", "where did I save the invoice", "recent files", "search my notes for dentist", "save this link" (a reading list), "tidy my downloads" sorts loose files into folders by type (nothing is deleted, and "undo the tidy" puts everything back), "find duplicates in downloads", "old big files"
 - **Goals and your day:** "set my focus goal to 2 hours", "limit video to 30 minutes a day", "plan my day" (today's top 3), "wrap up my day" (what got done, the rest moves to tomorrow), "my week in review"
 - **Looking after the computer:** "computer checkup" (free space, trash, temporary files, system updates, battery health, apps that start with the computer, the last backup, each with a fix), and backups to a USB drive or folder that copy only what changed and never delete anything
 - **Tips:** "any tips for this app?" gives a keyboard shortcut for what you're working in
 - **Math and conversions:** "12*(3+4)^2", "5 km to miles", "100 dollars to euros", "255 in hex", "2024 in roman", "tip 15% on 48", "days between june 3 and christmas"
 - **Your computer:** "how's my computer doing", "what's hogging my cpu", "how much ram is firefox using", "louder", "make the screen darker", "take a screenshot", "lock", "empty the trash"
 - **Launching:** "open firefox", "open my downloads", "find the file called report"
-- **The internet** (free, keyless services): "weather in Rome", "who was Ada Lovelace?", "define serendipity", "is github down?", "news", "bitcoin price"
+- **The internet** (free, keyless services): "weather in Rome", "time difference with Tokyo", "who was Ada Lovelace?", "define serendipity", "recipe with chicken" (and put its ingredients on your shopping list), "is github down?", "news", "bitcoin price"
 - **Text tools** (or whatever's on the clipboard): "base64 hello", "sort lines", "remove duplicates", "sha256 secret", "mock this"
 - **Fun:** jokes, roasts, riddles, would-you-rather, an emoji quiz, fortunes, achievements, and a few secrets
 
@@ -43,7 +48,7 @@ He also watches what you copy and offers useful things: pretty-printing JSON, cl
 - **You & me:** what he knows about you (add or change it), your phrases, achievements, the people in your life (a card each) and a journal.
 - **Settings:** your working days and hours, quiet times, the clock and week format, an outfit picker, and your data (export it for a new computer).
 
-It comes in the Windows 98 look, or a flat modern one for those who must, in two sizes.
+It comes in the Windows 98 look, or "Beige Box", a modern take on the 1997 tower he was compiled in (keycap buttons, label-maker titles, a green power light), in two sizes.
 
 **A proper welcome:** new installs get a Windows 98-style setup and tour window. "Show me around" opens the tour again.
 
