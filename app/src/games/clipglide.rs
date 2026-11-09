@@ -753,6 +753,10 @@ impl Game for Glide {
         self.state == State::Crashed
     }
 
+    fn abandon(&mut self) -> Option<Outcome> {
+        (self.state != State::Crashed && self.score > 0).then_some(Outcome::Score("clipglide", self.score))
+    }
+
     fn live(&self) -> bool {
         self.state != State::Crashed || self.since < 3.0 || self.confetti.active()
     }

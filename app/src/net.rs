@@ -182,7 +182,7 @@ pub fn download_update() -> Result<(std::path::PathBuf, String), String> {
     }
     let image = std::path::PathBuf::from(std::env::var_os("APPIMAGE").ok_or("not running as an AppImage")?);
     let mut part = image.clone().into_os_string();
-    part.push(".new");
+    part.push(format!(".new-{}", std::process::id())); // our own name: nothing else writes into it
     let part = std::path::PathBuf::from(part);
     download_to(&a, &part)?;
     #[cfg(unix)]

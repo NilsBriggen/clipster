@@ -101,6 +101,7 @@ pub struct Merge {
     prev_best: Option<u32>,
     record: bool,
     cheered: bool,
+    left: Option<u32>, // the score of a desk given up with F2, reported on the next frame
 }
 
 impl Merge {
@@ -134,6 +135,7 @@ impl Merge {
             confetti: Confetti::default(),
             best: None,
             prev_best: None,
+            left: None,
             record: false,
             cheered: false,
         }
@@ -595,7 +597,13 @@ impl Game for Merge {
     }
 
     fn new_round(&mut self) {
+        let left = (!self.over && self.score > 0).then_some(self.score);
         *self = Merge::new();
+        self.left = left; // a desk given up still counts for the high score
+    }
+
+    fn abandon(&mut self) -> Option<Outcome> {
+        (!self.over && self.score > 0).then_some(Outcome::Score("deskmerge", self.score))
     }
 
     fn status(&self) -> String {
@@ -616,6 +624,9 @@ impl Game for Merge {
 
     fn ui(&mut self, ui: &mut Ui, r: Rect, f: &mut Frame) {
         self.best = f.best;
+        if let Some(s) = self.left.take() {
+            f.out.push(Outcome::Score("deskmerge", s));
+        }
         let well = Rect::from_min_size(r.min, vec2(W + 4.0, H + 4.0));
         let o = well.min + vec2(2.0, 2.0);
         if f.input && !self.over {

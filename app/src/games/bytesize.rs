@@ -278,6 +278,10 @@ impl Game for Bytes {
         vec2(BOARD, HEAD + BOARD)
     }
 
+    fn abandon(&mut self) -> Option<Outcome> {
+        (!self.over && self.score > 0).then_some(Outcome::Score("bytesize", self.score))
+    }
+
     fn new_round(&mut self) {
         if self.score > 0 && !self.over {
             self.events.push(Outcome::Score("bytesize", self.score)); // starting over keeps the points

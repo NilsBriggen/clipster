@@ -683,6 +683,8 @@ pub fn dated(s: &str) -> Option<(u64, String, String)> {
     // the day phrase: (first word, one past its last word, the date)
     let day = (0..words.len()).find_map(|i| match words[i] {
         "tomorrow" => Some((i, i + 1, today + Duration::days(1))),
+        "tonight" => Some((i, i + 1, today)),
+        "this" if matches!(words.get(i + 1), Some(&"evening") | Some(&"afternoon")) => Some((i, i + 2, today)),
         "in" => {
             let n: u64 = words.get(i + 1)?.parse().ok()?;
             let unit = words.get(i + 2)?;
@@ -699,7 +701,12 @@ pub fn dated(s: &str) -> Option<(u64, String, String)> {
     });
     let (start, mut end, date) = day?;
     // the time: "at 3", "at 9:30am"; without am/pm, 1-7 means the afternoon (nobody books 3 a.m.)
-    let mut time = (9, 0);
+    let mut time = match words[start] {
+        "tonight" => (20, 0),
+        "this" if words.get(start + 1) == Some(&"evening") => (19, 0),
+        "this" => (15, 0),
+        _ => (9, 0),
+    };
     if let Some(a) = words.iter().position(|w| *w == "at") {
         let rest = words[a + 1..].join(" ");
         if let Some((hours, m, used)) = hm(&rest) {
@@ -1217,8 +1224,9 @@ fn agenda(s: &str, raw: &str) -> Option<Reply> {
         let evening = rest.starts_with("tonight");
         let clock = rest.trim_start_matches("today ").trim_start_matches("tonight ").strip_prefix("at ")?;
         let (hours, m, _) = hm(clock)?;
-        let hours = if evening { hours.into_iter().filter(|h| *h >= 12).collect() } else { hours };
-        hours.iter().filter_map(|h| today.and_hms_opt(*h, m, 0)).map(|t| t.and_local_timezone(chrono::Local).single().map(|t| t.timestamp())).flatten().find(|t| *t > now.timestamp())
+        let hours: Vec<u32> = if evening { hours.into_iter().filter(|h| *h >= 12).collect() } else { hours };
+        // the next one still to come: today, or else tomorrow ("am i free at 3" asked at 16:00)
+        [today, today + chrono::Days::new(1)].iter().flat_map(|d| hours.iter().filter_map(move |h| d.and_hms_opt(*h, m, 0))).map(|t| crate::timers::unix_of(t)).find(|t| *t > now.timestamp())
     }?;
     go(format!("calendar free {at}"))
 }

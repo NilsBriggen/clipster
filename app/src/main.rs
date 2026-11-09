@@ -207,7 +207,11 @@ struct App {
     next_timer: u64,            // the last id handed out
     summon_checked: f64,
     from_button: bool,
-    last_rung: Option<String>,  // the label of the timer that rang last ("snooze" brings it back)          // the next command comes from a balloon button: strict first, like the Desk's        // when the "come here" note of a second Clipster was last looked for
+    last_rung: Option<String>,
+    idle: Option<u64>,          // seconds since the last input, where the system tells (outside KDE the pointer can't)
+    idle_checked: f64,
+    installing: bool,
+    autostart: bool,            // starts with the computer (asked once; on Windows that's a registry read)           // an update is downloading (a second "Install now" waits for it)  // the label of the timer that rang last ("snooze" brings it back)          // the next command comes from a balloon button: strict first, like the Desk's        // when the "come here" note of a second Clipster was last looked for
     settings_locked: bool,      // settings.json exists but couldn't be read: don't save over it
     settings_note: Option<String>, // what went wrong with it, for the greeting
     name: String,
@@ -356,7 +360,9 @@ fn relaunch() {
     if cfg!(windows) {
         // the installer replaces this program, so it runs after we exit; then Clipster starts again
         let exe = std::env::current_exe().unwrap_or_default();
-        let script = format!("Start-Process msiexec -ArgumentList '/i','\"{}\"','/passive' -Wait; Start-Process '{}'", path.display(), exe.display());
+        // in PowerShell's single quotes a ' is written twice (C:\Users\O'Brien)
+        let q = |p: &std::path::Path| p.display().to_string().replace('\'', "''");
+        let script = format!("Start-Process msiexec -ArgumentList '/i','\"{}\"','/passive' -Wait; Start-Process '{}'", q(&path), q(&exe));
         let _ = sys::shell(&script).spawn();
     } else {
         let _ = std::process::Command::new(&path).spawn();
@@ -429,7 +435,13 @@ fn about_me(facts: &std::collections::BTreeMap<String, String>, birthday: Option
     let scores = scores
         .iter()
         .filter(|(_, s)| **s > 0 && **s != u32::MAX)
-        .filter_map(|(k, s)| games::NAMES.iter().find(|(id, _)| k.starts_with(id)).map(|(_, name)| (name.to_string(), *s)))
+        .filter_map(|(k, s)| {
+            let (id, name) = games::NAMES.iter().find(|(id, _)| k.starts_with(id))?;
+            // best times per difficulty ("bughunt-expert"): "Bug Hunt (Expert) 3:40", not points
+            let level = k.strip_prefix(id).and_then(|r| r.strip_prefix('-')).map(|l| format!(" ({})", writing::cap_first(l))).unwrap_or_default();
+            let value = if *id == "bughunt" { format!("{}:{:02}", s / 60, s % 60) } else { s.to_string() };
+            Some((format!("{name}{level}"), value))
+        })
         .collect();
     desk::Me { facts: rows, achievements, scores, friendship, days: stats.get("days").copied().unwrap_or(1) }
 }
@@ -463,7 +475,7 @@ impl App {
         if screenshot.is_none() {
             // the KWin script reports window titles on KDE; everywhere else the watcher asks for them
             watch::spawn(tx.clone(), cc.egui_ctx.clone(), cfg!(windows) || tracker.is_none());
-            if std::env::var_os("APPIMAGE").is_some() && sys::autostart_path().exists() {
+            if std::env::var_os("APPIMAGE").is_some() && sys::autostart_on() {
                 let _ = sys::set_autostart(true); // a new AppImage (or a moved one) keeps starting at login
             }
         } else {
@@ -528,6 +540,10 @@ impl App {
             summon_checked: 0.0,
             from_button: false,
             last_rung: None,
+            idle: None,
+            idle_checked: 0.0,
+            installing: false,
+            autostart: false,
             settings_note: None,
             name: String::new(),
             hat: None,
@@ -632,6 +648,7 @@ impl App {
                 cc.egui_ctx.set_embed_viewports(true); // draw the game inside the main window so the screenshot sees it
             }
         }
+        app.autostart = app.screenshot.is_none() && sys::autostart_on();
         let first_run = !Self::settings_path().exists();
         if app.screenshot.is_none() {
             app.load();
@@ -741,7 +758,7 @@ impl App {
             updates: self.check_updates,
             sounds: self.sounds,
             breaks: self.breaks,
-            autostart: self.screenshot.is_none() && sys::autostart_path().exists(),
+            autostart: self.autostart,
             quiet: self.quiet(),
             dnd: self.dnd,
             wrapup: self.wrapup,
@@ -772,7 +789,11 @@ impl App {
             return; // called every frame while the Desk is open: wait for a whole second, keeping the mark
         }
         self.kind_mark += Duration::from_secs(secs); // the part of a second left over counts next time
-        let away = self.tracker.is_some() && now.duration_since(self.last_move) > Duration::from_secs(300);
+        // away: the system's idle time where it tells us, else the pointer tracker
+        let away = match self.idle {
+            Some(idle) => idle > 300,
+            None => self.tracker.is_some() && now.duration_since(self.last_move) > Duration::from_secs(300),
+        };
         if secs > 3600 || away || !self.notice_windows || self.screenshot.is_some() {
             self.kind_mark = now;
             return; // a long gap means the computer slept
@@ -831,7 +852,8 @@ impl App {
         self.upkeep_running = true;
         let (tx, ctx) = (self.tx.clone(), ctx.clone());
         std::thread::spawn(move || {
-            let _ = tx.send(Event::Upkeep(Box::new(upkeep::run()), nudge));
+            let report = std::panic::catch_unwind(upkeep::run).unwrap_or_default(); // a panic still clears "Checking…"
+            let _ = tx.send(Event::Upkeep(Box::new(report), nudge));
             ctx.request_repaint();
         });
     }
@@ -845,7 +867,7 @@ impl App {
         self.calendar_at = Some(Instant::now());
         let (tx, ctx, sources, generation) = (self.tx.clone(), ctx.clone(), self.calendars.clone(), self.calendar_gen);
         std::thread::spawn(move || {
-            let (events, problems) = calendar::fetch(&sources);
+            let (events, problems) = std::panic::catch_unwind(|| calendar::fetch(&sources)).unwrap_or_else(|_| (vec![], vec!["I couldn't read a calendar (it has something I don't understand).".into()]));
             let _ = tx.send(Event::Calendar(generation, events, problems));
             ctx.request_repaint();
         });
@@ -1159,7 +1181,9 @@ impl App {
                 }
                 None => Reply::say("There's no calendar with that number.").mood(Mood::Think),
             },
+            // a fresh read; one that's still running is outdated by it (its answer is dropped)
             "refresh" => {
+                self.calendar_gen += 1;
                 self.calendar_running = false;
                 self.fetch_calendars(ctx);
                 Reply::say("Checking your calendars again...").mood(Mood::Search)
@@ -1248,18 +1272,21 @@ impl App {
         let (tx, ctx) = (self.tx.clone(), ctx.clone());
         self.backup_progress = Some((0, 0, 0));
         std::thread::spawn(move || {
-            let result = backup::plan(&sources, &target, limits).map(|plan| {
+            // a panic deep in the copying still ends with BackupDone, or the Desk would wait for it forever
+            let tx2 = tx.clone();
+            let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| backup::plan(&sources, &target, limits).map(|plan| {
                 let total = plan.copies.len();
                 let mut last = Instant::now();
                 let _ = tx.send(Event::BackupProgress(0, total, 0));
                 backup::run(&plan, &mut |done, bytes| {
                     if last.elapsed() > Duration::from_millis(250) || done == total {
                         last = Instant::now();
-                        let _ = tx.send(Event::BackupProgress(done, total, bytes));
+                        let _ = tx2.send(Event::BackupProgress(done, total, bytes));
                         ctx.request_repaint();
                     }
                 })
-            });
+            })))
+            .unwrap_or_else(|_| Err("something went wrong while copying".into()));
             let _ = tx.send(Event::BackupDone(result));
             ctx.request_repaint();
         });
@@ -1384,8 +1411,10 @@ impl App {
 
     /// The window you're working in changed (or its title did): maybe say something about it.
     fn window_title(&mut self, title: &str) {
-        if title.eq_ignore_ascii_case("clipster") || games::NAMES.iter().any(|(_, t)| *t == title) {
-            return; // his own windows
+        // his own windows: the pet, the Desk, the welcome, the arcade, the April Fools box
+        let prank = self.prank.as_ref().is_some_and(|p| p.0 == title);
+        if title.to_lowercase().contains("clipster") || games::NAMES.iter().any(|(_, t)| *t == title) || prank {
+            return;
         }
         let kind = lines::window_kind(title).or_else(|| Some("other".into()));
         self.window_text = title.to_string();
@@ -1562,7 +1591,7 @@ impl App {
             programs: self.notice_programs,
             windows: self.notice_windows,
             checkin: self.checkin,
-            autostart: self.screenshot.is_none() && sys::autostart_path().exists(),
+            autostart: self.autostart,
             updates: self.check_updates,
             sounds: self.sounds,
             open_desk: true,
@@ -1590,8 +1619,8 @@ impl App {
         }
         (self.notice_clip, self.notice_programs, self.notice_windows, self.checkin) = (s.clip, s.programs, s.windows, s.checkin);
         (self.check_updates, self.sounds) = (s.updates, s.sounds);
-        if self.screenshot.is_none() && s.autostart != sys::autostart_path().exists() {
-            let _ = sys::set_autostart(s.autostart);
+        if self.screenshot.is_none() && s.autostart != self.autostart {
+            self.autostart = sys::set_autostart(s.autostart).is_ok() == s.autostart;
         }
         if s.open_desk {
             self.desk_status = lines::pick("desk_status");
@@ -1777,12 +1806,12 @@ impl App {
             sys::dnd_restore(m);
         }
         self.budgets = v["budgets"].as_object().into_iter().flatten().filter_map(|(k, m)| Some((k.clone(), m.as_u64()?.min(16 * 60)))).collect();
-        let fortnight = (chrono::Local::now() - chrono::Duration::days(14)).format("%Y-%m-%d").to_string();
+        let fortnight = (chrono::Local::now().date_naive() - chrono::Days::new(14)).format("%Y-%m-%d").to_string();
         for (day, a) in v["checkin_days"].as_object().into_iter().flatten().filter(|(d, _)| **d > fortnight) {
             self.checkin_days.insert(day.clone(), a.as_str().unwrap_or("okay").to_string());
         }
         // the last week of time per app kind, and the last 60 focus sessions
-        let week_ago = (chrono::Local::now() - chrono::Duration::days(7)).format("%Y-%m-%d").to_string();
+        let week_ago = (chrono::Local::now().date_naive() - chrono::Days::new(7)).format("%Y-%m-%d").to_string();
         for (day, kinds) in v["kind_time"].as_object().into_iter().flatten().filter(|(d, _)| **d > week_ago) {
             let kinds = kinds.as_object().into_iter().flatten().map(|(k, s)| (k.clone(), s.as_u64().unwrap_or(0))).collect();
             self.kind_time.insert(day.clone(), kinds);
@@ -1860,6 +1889,7 @@ impl App {
             r.text = format!("{} {}", lines::pick("repeat").trim_end(), r.text);
         }
         let mut silent = false; // settings changed on the Desk: no balloon, just a word in its status bar
+        let asks_net = matches!(r.effect, Effect::Net(_));
         match std::mem::replace(&mut r.effect, Effect::None) {
             Effect::None => {}
             Effect::Commands(cmds) => {
@@ -2028,7 +2058,9 @@ impl App {
                     "workdayask" => self.workday_ask = on,
                     "quiet" => self.quiet_until = on.then(|| Instant::now() + Duration::from_secs(3600)),
                     "autostart" if self.screenshot.is_none() => {
-                        let _ = sys::set_autostart(on);
+                        if sys::set_autostart(on).is_ok() {
+                            self.autostart = on;
+                        }
                     }
                     "goal" => self.focus_goal = value.parse::<u64>().unwrap_or(0).min(16 * 60),
                     "budget" => {
@@ -2144,7 +2176,9 @@ impl App {
             Effect::InstallUpdate if !net::can_self_update() || self.screenshot.is_some() => {
                 r = Reply::say(lines::pick("say_update_failed").replace("{error}", "I can only replace myself as an AppImage or on Windows")).btn("Open the download page", Act::Open(net::RELEASES.into()));
             }
+            Effect::InstallUpdate if self.installing => r = Reply::say("I'm already downloading it. One moment.").mood(Mood::Search),
             Effect::InstallUpdate => {
+                self.installing = true;
                 let (tx, ctx2) = (self.tx.clone(), ctx.clone());
                 std::thread::spawn(move || {
                     let _ = tx.send(Event::Installed(net::download_update()));
@@ -2362,11 +2396,10 @@ impl App {
                 }
             }
             Effect::Skin(k) => self.skin = k,
-            Effect::Autostart(on) => {
-                if let Err(e) = sys::set_autostart(on) {
-                    r = Reply::say(format!("Hmm, I couldn't change that: {e}")).mood(Mood::Shock);
-                }
-            }
+            Effect::Autostart(on) => match sys::set_autostart(on) {
+                Ok(()) => self.autostart = on,
+                Err(e) => r = Reply::say(format!("Hmm, I couldn't change that: {e}")).mood(Mood::Shock),
+            },
             Effect::Open(target) => {
                 if let Err(e) = open(&target) {
                     r = Reply::say(format!("I tried to open \"{target}\", but it didn't work: {e}")).mood(Mood::Shock);
@@ -2479,6 +2512,9 @@ impl App {
         }
         r.text += &news;
         if !silent || !news.is_empty() {
+            if !asks_net {
+                self.net_id += 1; // a web answer still on its way mustn't replace this newer reply
+            }
             self.show(r);
         }
     }
@@ -2622,9 +2658,13 @@ impl App {
             self.focus_input = true;
             ctx.send_viewport_cmd(egui::ViewportCommand::Focus);
         }
-        // break reminders: 50 minutes of mouse activity without a 5-minute pause
+        // break reminders: 50 minutes of activity without a 5-minute pause (the pointer, or the system's idle time)
+        if self.screenshot.is_none() && t - self.idle_checked > 10.0 {
+            self.idle_checked = t;
+            self.idle = sys::idle_secs();
+        }
         let ptr = self.tracker.as_ref().and_then(|tr| *tr.pos.lock().unwrap());
-        if ptr.is_some() && ptr != self.last_ptr {
+        if ptr.is_some() && ptr != self.last_ptr || self.idle.is_some_and(|i| i < 15) {
             self.last_ptr = ptr;
             self.last_move = now;
             self.active_since.get_or_insert(now);
@@ -2649,7 +2689,13 @@ impl App {
             match ev {
                 Event::ShellDone(out) => {
                     let mut r = self.balloon.take().unwrap_or_else(|| Reply::say(""));
-                    r.text = format!("{}\n{}", r.text.trim_end_matches("(working on it...)").trim_end(), out.trim_end());
+                    // the balloon shows the start of a long output; "Copy output" has all of it
+                    let lines: Vec<&str> = out.trim_end().lines().collect();
+                    let mut shown: String = lines.iter().take(60).copied().collect::<Vec<_>>().join("\n").chars().take(4000).collect();
+                    if shown.len() < out.trim_end().len() {
+                        shown += &format!("\n… ({} lines in all: Copy output has everything)", lines.len());
+                    }
+                    r.text = format!("{}\n{}", r.text.trim_end_matches("(working on it...)").trim_end(), shown);
                     r.buttons.retain(|b| b.0 != "Copy output");
                     r.buttons.insert(0, ("Copy output".into(), Act::Copy(out)));
                     self.balloon = Some(r);
@@ -2682,6 +2728,7 @@ impl App {
                 Event::Program(p) if self.notice_programs => self.pipe_up(brain::react_program(&p)),
                 Event::Title(t) => self.window_title(&t),
                 Event::Installed(Ok((path, version))) => {
+                    self.installing = false;
                     self.show(Reply::say(lines::pick("say_update_ready").replace("{version}", &version)).mood(Mood::Party));
                     if let Ok(mut r) = RELAUNCH.lock() {
                         *r = Some(path);
@@ -2731,11 +2778,13 @@ impl App {
                     self.show(r);
                 }
                 Event::Installed(Err(e)) => {
+                    self.installing = false;
                     let r = Reply::say(lines::pick("say_update_failed").replace("{error}", &e)).mood(Mood::Sad);
                     self.show(r.btn("Open the download page", Act::Open(net::RELEASES.into())));
                 }
                 Event::Battery(p) if self.notice_health => self.pipe_up(brain::react_battery(p)),
                 Event::Busy(l) if self.notice_health => self.pipe_up(brain::react_busy(l)),
+                Event::Update(v) if v.is_empty() => self.next_update_check = Instant::now() + Duration::from_secs(15 * 60),
                 Event::Update(v) if net::newer(&v, env!("CARGO_PKG_VERSION")) => self.update = Some(v),
                 _ => {}
             }
@@ -2745,10 +2794,9 @@ impl App {
             self.next_update_check = now + Duration::from_secs(24 * 3600);
             let (tx, ctx2) = (self.tx.clone(), ctx.clone());
             std::thread::spawn(move || {
-                if let Ok(v) = net::latest_version() {
-                    let _ = tx.send(Event::Update(v));
-                    ctx2.request_repaint();
-                }
+                // "" = it didn't work (often: Wi-Fi isn't up yet at login): try again in a quarter of an hour
+                let _ = tx.send(Event::Update(net::latest_version().unwrap_or_default()));
+                ctx2.request_repaint();
             });
         }
         // tell you once per new version, when he isn't in the middle of something with you
@@ -2779,7 +2827,8 @@ impl App {
         if now.duration_since(self.kind_mark) > Duration::from_secs(30) {
             self.account_time();
             // a daily limit used up: one gentle word per kind per day (not during focus, which has its own)
-            if self.focus.is_none() && self.screenshot.is_none() && self.balloon.is_none() {
+            // (and only when he can say it: a quiet hour or typing doesn't use up the day's word)
+            if self.focus.is_none() && self.screenshot.is_none() && self.balloon.is_none() && !self.quiet() && self.input.is_empty() {
                 let day = self.kind_time.get(&today_key()).cloned().unwrap_or_default();
                 let over = self.budgets.iter().find(|(k, m)| day.get(*k).copied().unwrap_or(0) >= *m * 60 && self.stats.get(&format!("budget_{k}_day")) != Some(&today));
                 if let Some((kind, mins)) = over.map(|(k, m)| (k.clone(), *m)) {
@@ -2863,8 +2912,10 @@ impl App {
             self.auto_hide = None;
             self.balloon = None;
         }
-        if !self.late_warned && (0..4).contains(&chrono::Timelike::hour(&chrono::Local::now())) {
-            self.late_warned = true;
+        // once a night (Clipster can run for weeks), and only when he can say it
+        let night = chrono::Datelike::num_days_from_ce(&chrono::Local::now().date_naive()) as u64;
+        if !self.late_warned && self.stats.get("late_day") != Some(&night) && (0..4).contains(&chrono::Timelike::hour(&chrono::Local::now())) && !self.quiet() && self.input.is_empty() && self.focus.is_none() {
+            self.stats.insert("late_day".into(), night);
             self.pipe_up(brain::react_late());
         }
         if now >= self.next_tip {
@@ -2872,7 +2923,7 @@ impl App {
                 // focusing: no chatter
             } else if self.tips_every > 0 && self.balloon.is_none() && !self.memory_waiting() && self.ask_due() {
                 self.ask_something();
-            } else if self.tips_every > 0 && self.balloon.is_none() {
+            } else if self.tips_every > 0 && self.balloon.is_none() && !self.quiet() && self.input.is_empty() {
                 let nudge = self.memory_waiting();
                 if nudge {
                     let today = chrono::Datelike::num_days_from_ce(&chrono::Local::now().date_naive()) as u64;
@@ -3131,14 +3182,17 @@ impl eframe::App for App {
         if self.frames == 3 && self.screenshot.is_none() {
             // start in the bottom-right corner, where helpers traditionally lurk
             let corner = monitor.map(|m| pos2(m.x - CLIP_W - 24.0, m.y - MIN_H - 56.0));
-            let saved = self.saved_anchor.filter(|a| monitor.is_some_and(|m| a.x >= 0.0 && a.y >= 0.0 && a.x + CLIP_W <= m.x && a.y + MIN_H <= m.y));
+            // egui knows the current monitor's size, not where it is: a spot on a second monitor (right of, below or left
+            // of the first) is kept as long as it's within a few screens of it
+            let saved = self.saved_anchor.filter(|a| monitor.is_some_and(|m| a.x >= -3.0 * m.x && a.y >= -3.0 * m.y && a.x + CLIP_W <= 4.0 * m.x && a.y + MIN_H <= 4.0 * m.y));
             self.anchor = saved.or(corner);
             self.sent_size = Vec2::ZERO; // place the window now
             // ask again once visible: some window managers ignore the request made at startup
             ctx.send_viewport_cmd(egui::ViewportCommand::WindowLevel(egui::WindowLevel::AlwaysOnTop));
         }
         let (flip_left, flip_up) = match (self.anchor, monitor) {
-            (Some(a), Some(m)) if !held => (a.x + FULL_W > m.x, a.y + size.y > m.y),
+            // shortcut: monitors of the same size side by side: where he is on his own monitor, not on the first one
+            (Some(a), Some(m)) if !held && m.x > 0.0 && m.y > 0.0 => (a.x.rem_euclid(m.x) + FULL_W > m.x, a.y.rem_euclid(m.y) + size.y > m.y),
             _ => (self.sent_offset.x > 0.0, self.sent_offset.y > 0.0),
         };
         let offset = vec2(if flip_left { size.x - CLIP_W } else { 0.0 }, if flip_up { size.y - MIN_H } else { 0.0 });
@@ -3747,26 +3801,26 @@ fn draw_clipster(p: &egui::Painter, origin: Pos2, t: f32, at: f32, anim: Anim, l
 fn open(target: &str) -> std::io::Result<()> {
     if let Some(exec) = target.strip_prefix("app:") {
         // an installed app: its menu entry's launch line (Linux) or its Start-menu shortcut (Windows)
-        return if cfg!(windows) { sys::open_with_desktop(exec) } else { sys::shell(exec).spawn().map(|_| ()) };
+        return if cfg!(windows) { sys::open_with_desktop(exec) } else { sys::detach(&mut sys::shell(exec)) };
     }
     // "code ~/projects/report": a program on the PATH, with its arguments (a leading ~ becomes the home folder)
     let mut words = target.split_whitespace();
     if let (Some(prog), true) = (words.next(), target.contains(' ') && !std::path::Path::new(target).exists() && !target.contains("://")) {
         if sys::in_path(prog) {
             let args: Vec<String> = words.map(|w| brain::expand_home(w).to_string_lossy().into_owned()).collect();
-            return sys::command(prog).args(args).spawn().map(|_| ());
+            return sys::detach(sys::command(prog).args(args));
         }
     }
     let is_program = !target.contains(['/', '\\', ':', '.']) && !target.is_empty();
     if is_program {
         let mut parts = target.split_whitespace();
         if let Some(prog) = parts.next() {
-            if sys::command(prog).args(parts).spawn().is_ok() {
+            if sys::detach(sys::command(prog).args(parts)).is_ok() {
                 return Ok(());
             }
         }
         // not a program on the PATH: maybe a desktop entry (Linux) or something Windows knows how to start
-        return if cfg!(windows) { sys::open_with_desktop(target) } else { sys::command("gtk-launch").arg(target).spawn().map(|_| ()) };
+        return if cfg!(windows) { sys::open_with_desktop(target) } else { sys::detach(sys::command("gtk-launch").arg(target)) };
     }
     sys::open_with_desktop(target)
 }
@@ -3848,10 +3902,22 @@ fn memory_unlocked(seen: usize, days: u64, total: usize) -> bool {
 }
 
 /// Holiday outfits: (hat, skin). "" = keep the skin. Only used while the user hasn't picked their own.
+/// Today is your birthday (29 February is celebrated on the 28th in other years, as for people).
+fn birthday_today(birthday: Option<(u32, u32)>) -> bool {
+    use chrono::Datelike;
+    let d = chrono::Local::now().date_naive();
+    let leap = chrono::NaiveDate::from_ymd_opt(d.year(), 2, 29).is_some();
+    match birthday {
+        Some((2, 29)) if !leap => (d.month(), d.day()) == (2, 28),
+        Some(b) => b == (d.month(), d.day()),
+        None => false,
+    }
+}
+
 fn seasonal_look(birthday: Option<(u32, u32)>) -> (&'static str, &'static str) {
     use chrono::Datelike;
     let d = chrono::Local::now();
-    if birthday == Some((d.month(), d.day())) {
+    if birthday_today(birthday) {
         return ("party", "");
     }
     match (d.month(), d.day()) {
@@ -3869,7 +3935,7 @@ fn seasonal_look(birthday: Option<(u32, u32)>) -> (&'static str, &'static str) {
 fn occasion(birthday: Option<(u32, u32)>) -> Option<String> {
     use chrono::Datelike;
     let d = chrono::Local::now();
-    if birthday == Some((d.month(), d.day())) {
+    if birthday_today(birthday) {
         return Some("birthday".into());
     }
     let fixed = match (d.month(), d.day()) {

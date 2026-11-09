@@ -132,8 +132,7 @@ pub fn duplicates(dir: &Path) -> Vec<Vec<PathBuf>> {
     for (size, paths) in by_size.into_iter().filter(|(_, v)| v.len() > 1) {
         let mut by_hash: HashMap<String, Vec<PathBuf>> = HashMap::new();
         for p in paths {
-            if let Ok(bytes) = std::fs::read(&p) {
-                let h: String = ring::digest::digest(&ring::digest::SHA256, &bytes).as_ref().iter().map(|b| format!("{b:02x}")).collect();
+            if let Some(h) = file_hash(&p) {
                 by_hash.entry(h).or_default().push(p);
             }
         }
@@ -144,6 +143,22 @@ pub fn duplicates(dir: &Path) -> Vec<Vec<PathBuf>> {
     }
     groups.sort_by(|a, b| b.0.cmp(&a.0));
     groups.into_iter().map(|(_, v)| v).collect()
+}
+
+/// A file's SHA-256, read 64 KB at a time (two copies of a big video never sit in memory whole).
+fn file_hash(p: &Path) -> Option<String> {
+    use std::io::Read;
+    let mut f = std::fs::File::open(p).ok()?;
+    let mut ctx = ring::digest::Context::new(&ring::digest::SHA256);
+    let mut buf = vec![0u8; 64 * 1024];
+    loop {
+        let n = f.read(&mut buf).ok()?;
+        if n == 0 {
+            break;
+        }
+        ctx.update(&buf[..n]);
+    }
+    Some(ctx.finish().as_ref().iter().map(|b| format!("{b:02x}")).collect())
 }
 
 /// Files over 100 MB that haven't changed in 90 days, biggest first.

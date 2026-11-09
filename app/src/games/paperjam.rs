@@ -536,6 +536,10 @@ impl Game for Jam {
         vec2(SIDE_L + GAP + COLS as f32 * CELL + 4.0 + GAP + SIDE_R, ROWS as f32 * CELL + 4.0)
     }
 
+    fn abandon(&mut self) -> Option<Outcome> {
+        (!self.over && self.score > 0).then_some(Outcome::Score("paperjam", self.score))
+    }
+
     /// A round given up with points on the board still counts for the high score.
     fn new_round(&mut self) {
         let mut events = std::mem::take(&mut self.events);

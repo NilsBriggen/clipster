@@ -299,7 +299,7 @@ mod tests {
     #[test]
     fn accents_dont_break_the_fixes() {
         assert_eq!(fix("Hello there. élan is fine. über cool", &wrong()), "Hello there. Élan is fine. Über cool");
-        assert!(!proofread("Ça va. über alles", &wrong()).is_empty() || true, "no panic");
+        let _ = proofread("Ça va. über alles", &wrong()); // only that it doesn't panic
     }
 
     #[test]

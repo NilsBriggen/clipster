@@ -101,6 +101,10 @@ trait Game {
     fn best_key(&self, name: &str) -> String {
         name.to_string()
     }
+    /// The score of a round that's being given up (the window closes mid-round), for the high scores.
+    fn abandon(&mut self) -> Option<Outcome> {
+        None
+    }
     /// The game reads typed letters, so P can't mean pause (Esc still does).
     fn takes_text(&self) -> bool {
         false
@@ -224,6 +228,10 @@ impl Arcade {
             ctx.request_repaint();
         }
         if close {
+            // closing mid-round still counts for the high score
+            if let Some((_, g)) = self.open.as_mut() {
+                out.extend(g.abandon());
+            }
             self.open = None;
         }
         out

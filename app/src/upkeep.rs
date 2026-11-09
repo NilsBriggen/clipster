@@ -96,7 +96,7 @@ pub fn judge(r: &Readings) -> Vec<Check> {
         Some(0) => (Level::Good, "Up to date".to_string()),
         Some(n) => (if n >= 30 { Level::Needs } else { Level::Note }, format!("{n} update{} waiting", if n == 1 { "" } else { "s" })),
     };
-    out.push(check("updates", "System updates", level, text, Some(("Open updater", "system updates"))));
+    out.push(check("updates", "System updates", level, text, Some(("Open updater", "sysupdates"))));
     if let Some(h) = r.battery {
         let level = if h < 60 { Level::Needs } else if h < 80 { Level::Note } else { Level::Good };
         out.push(check("battery", "Battery health", level, format!("Holds {h}% of what it did new"), None));

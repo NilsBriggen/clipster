@@ -772,7 +772,7 @@ The International Space Station orbits Earth roughly every 90 minutes.
 The Voyager 1 probe, launched in 1977, is the farthest human-made object from Earth, and it's still sending data.
 The word "astronaut" means "star sailor" in Greek.
 The first photograph ever taken dates to the 1820s, and the exposure took hours.
-The first book printed with movable type in Europe was the Gutenberg Bible, around 1455.
+Gutenberg's printing press with movable type got going in Europe around 1450.
 The Roman Empire used urine in laundry, because the ammonia helps clean clothes. Your fabric softener has a history.
 The Colosseum could hold tens of thousands of spectators, and it had a retractable awning system.
 Pencil "lead" has never contained lead; it's graphite mixed with clay.
@@ -781,7 +781,6 @@ The first patented staplers show up in the 1860s, and they were big, clunky and 
 Scissors have existed for at least 3,000 years.
 The first typewriter that sold commercially was the Sholes and Glidden of 1873, which gave us QWERTY.
 Barcodes first scanned a product in 1974: a pack of chewing gum in Ohio.
-The world's smallest country by area, Vatican City, is about 0.44 square kilometers.
 The Sahara Desert was once green and filled with lakes, around 6,000 to 10,000 years ago.
 Lake Baikal in Russia holds roughly 20% of the world's unfrozen fresh water.
 
@@ -1336,7 +1335,7 @@ The jury has decided: {choice}. The jury is me.
 You went with {choice}. I'm writing it in my notes. Under "concerning".
 {choice}! Excellent. You may now proceed to regret it.
 Wow. {choice}. I had money on the other one. I have no money. I'm a paperclip.
-{choice}? That's the choice of a winner. Or a lunatic. I can't tell yet.
+{choice}? That's the choice of a winner. Or a gambler. I can't tell yet.
 Ooh, {choice}. That's spicy. I like it.
 {choice}. Not what I would pick, but I'm a bent piece of wire, what do I know.
 {choice}? I have follow-up questions. And some concern.
@@ -1595,7 +1594,6 @@ konami | Cheat Code | You found the Konami code. You're a legend. Or you read my
 🐝🎬 | bee movie
 🧽🍍 | spongebob squarepants
 🦆🦢 | the ugly duckling
-🐘🎪 | dumbo
 🦌🔴👃 | rudolph the red nosed reindeer
 
 ## songs
@@ -2045,7 +2043,7 @@ Tooth enamel is the hardest substance in the human body.
 Antarctica is technically a desert, because it gets very little precipitation.
 Russia spans eleven time zones.
 Canada has the longest coastline of any country in the world.
-Vatican City is the smallest country in the world, at roughly 0.44 square kilometers.
+Monaco is the second-smallest country in the world, at about 2 square kilometers.
 The Pacific Ocean is larger than all the land on Earth put together.
 Measured from base to peak, Mauna Kea in Hawaii is taller than Mount Everest, but most of it is under the sea.
 Scientists estimate there are about three trillion trees on Earth, many more than there are stars in the Milky Way.

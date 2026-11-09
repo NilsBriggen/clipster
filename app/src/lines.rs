@@ -83,6 +83,10 @@ fn db() -> RwLockReadGuard<'static, Vec<Section>> {
 }
 
 pub fn user_path() -> PathBuf {
+    if cfg!(test) {
+        // tests never touch the real file (like `brain::data_dir`)
+        return std::env::temp_dir().join(format!("clipster-test-{}", std::process::id())).join("lines.txt");
+    }
     dirs::config_dir().unwrap_or_else(std::env::temp_dir).join("clipster").join("lines.txt")
 }
 

@@ -306,6 +306,10 @@ impl Game for Chain {
         matches!(self.state, State::Over | State::Won)
     }
 
+    fn abandon(&mut self) -> Option<Outcome> {
+        (!self.finished() && self.score > 0).then_some(Outcome::Score("clipchain", self.score))
+    }
+
     fn live(&self) -> bool {
         self.state == State::Running || (self.finished() && self.since < 3.0) || self.confetti.active()
     }

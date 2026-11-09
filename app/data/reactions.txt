@@ -866,7 +866,7 @@ Git. Because "final_v2_REAL.doc" got old.
 > cargo | cargo-clippy
 Cargo! Compiling Rust. Go make a coffee. Make it a long one.
 Compiling, compiling, compiling. The borrow checker is going to love your code.
-Cargo clippy? Never heard of a certain other paperclip. Don't ask.
+Cargo's lint tool shares a name with a certain other paperclip. Don't ask.
 
 ## program rustc
 > rustc | rust-analyzer | rust-analyzer-
@@ -2131,7 +2131,6 @@ That's my poke quota for today. I'll allow it. Once more, and I might smile.
 
 ## drag
 Whoa, whoa, whoa!
-Where are we going?
 Weeee! Okay, that was a lot.
 Careful with the wire!
 I don't have legs, but I'm running anyway.

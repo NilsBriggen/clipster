@@ -15,7 +15,7 @@ use std::time::{Duration, Instant};
 
 const W: f32 = 720.0;
 const H: f32 = 520.0;
-const TABS: [&str; 8] = ["Today", "Week", "To-do", "Agenda", "Clipboard", "Upkeep", "You & me", "Settings"];
+pub const TABS: [&str; 8] = ["Today", "Week", "To-do", "Agenda", "Clipboard", "Upkeep", "You & me", "Settings"];
 
 /// A tab's index from its number or (the start of) its name: "2", "settings", "todo".
 pub fn tab(name: &str) -> Option<usize> {
@@ -76,7 +76,7 @@ pub struct Backup<'a> {
 pub struct Me {
     pub facts: Vec<(String, String)>, // (key to forget, "Pet: Mo (cat)")
     pub achievements: Vec<Achievement>,
-    pub scores: Vec<(String, u32)>, // game, best score
+    pub scores: Vec<(String, String)>, // game (with its difficulty), best score or time
     pub friendship: i32,
     pub days: u64,
 }
@@ -124,6 +124,7 @@ struct Files {
     todos: Vec<todo::Item>,
     notes: Vec<crate::notes::Note>,
     plan: Vec<(PathBuf, PathBuf)>,
+    plan_at: Option<Instant>, // when the tidy plan was made
     plan_desktop: bool,
     can_undo: bool,
     taught: Vec<(String, String)>, // your phrases: (when you say, what I do)
@@ -253,21 +254,30 @@ impl Desk {
         out
     }
 
-    /// Read the to-do list, the notes and the tidy plan again every few seconds (or right after a change).
+    /// Read the to-do list and the notes again every few seconds (or right after a change). The tidy plan looks at
+    /// every file in Downloads, so only while its page is open, and at most every ten seconds.
     fn refresh(&mut self) {
-        if self.files.at.is_some_and(|t| t.elapsed() < Duration::from_secs(3)) && self.files.plan_desktop == self.desktop {
+        let tidy_open = TABS[self.tab] == "Upkeep" && self.upkeep_page == 1;
+        let plan_stale = tidy_open && (self.files.plan_at.is_none_or(|t| t.elapsed() > Duration::from_secs(10)) || self.files.plan_desktop != self.desktop);
+        if self.files.at.is_some_and(|t| t.elapsed() < Duration::from_secs(3)) && !plan_stale {
             return;
         }
         if self.sample {
             self.files = sample_files(self.desktop);
             return;
         }
-        let dir = crate::tidy::folder(if self.desktop { "desktop" } else { "downloads" });
+        let (plan, plan_at) = if plan_stale || (tidy_open && self.files.at.is_none()) {
+            let dir = crate::tidy::folder(if self.desktop { "desktop" } else { "downloads" });
+            (dir.map(|d| crate::tidy::plan(&d)).unwrap_or_default(), Some(Instant::now()))
+        } else {
+            (std::mem::take(&mut self.files.plan), self.files.plan_at)
+        };
         self.files = Files {
             at: Some(Instant::now()),
             todos: todo::load(),
             notes: crate::notes::load(),
-            plan: dir.map(|d| crate::tidy::plan(&d)).unwrap_or_default(),
+            plan,
+            plan_at,
             plan_desktop: self.desktop,
             can_undo: crate::tidy::undo_log().exists(),
             taught: crate::lines::taught(),
@@ -551,7 +561,7 @@ impl Desk {
         let (fs, cs, days) = view.streaks;
         p.text(pos2(strip.min.x + 12.0, strip.min.y + 39.0), Align2::LEFT_CENTER, format!("Focus {} · Check-ins {} · {} with Clipster", plural(fs, "day"), plural(cs, "day"), plural(days, "day")), look.font(12.5), look.text());
         for d in 0..7 {
-            let day = (chrono::Local::now() - chrono::Duration::days(6 - d)).format("%Y-%m-%d").to_string();
+            let day = (chrono::Local::now().date_naive() - chrono::Days::new((6 - d) as u64)).format("%Y-%m-%d").to_string();
             face(&p, pos2(strip.max.x - 20.0 - (6 - d) as f32 * 22.0, strip.min.y + 40.0), view.checkins.get(&day).map(String::as_str), look);
         }
         if self.workday_open {
@@ -1657,7 +1667,7 @@ impl Desk {
         let p = ui.painter().clone();
         let (ctl, half) = (look.ctl(), ((c.width() - 12.0) / 2.0).round());
         let b = &view.backup;
-        if self.drives_at.is_none_or(|t| t.elapsed() > Duration::from_secs(3)) {
+        if self.drives_at.is_none_or(|t| t.elapsed() > Duration::from_secs(10)) {
             self.drives = if self.sample { vec![crate::sys::Drive { path: "/run/media/you/BACKUP".into(), label: "BACKUP".into(), fs: "exfat".into(), free: 412_000_000_000 }] } else { crate::sys::drives() };
             self.drives_at = Some(Instant::now());
         }
@@ -1826,7 +1836,7 @@ fn week(&mut self, ui: &mut Ui, c_all: Rect, view: &View, look: Look, out: &mut 
     let days: Vec<(String, [u64; 3], u64)> = (0..7)
         .rev()
         .map(|d| {
-            let date = chrono::Local::now() - chrono::Duration::days(d);
+            let date = chrono::Local::now().date_naive() - chrono::Days::new(d as u64); // whole days, also on a daylight-saving night
             let key = date.format("%Y-%m-%d").to_string();
             let mut g = [0u64; 3];
             for (kind, secs) in view.kind_time.get(&key).into_iter().flatten() {
@@ -2383,7 +2393,7 @@ fn sample_files(desktop: bool) -> Files {
         .map(|(f, c)| (base.join(f), base.join(c).join(f)))
         .collect();
     let taught = vec![("gm".to_string(), "\"Good morning, sunshine!\"".to_string()), ("work".to_string(), "open firefox → open code".to_string())];
-    Files { at: Some(Instant::now()), todos, notes, plan, plan_desktop: desktop, can_undo: true, taught }
+    Files { at: Some(Instant::now()), todos, notes, plan, plan_at: Some(Instant::now()), plan_desktop: desktop, can_undo: true, taught }
 }
 
 /// Made-up timers, times, sessions and check-ins for screenshots: (timers, kind_time, focus_log, checkins).

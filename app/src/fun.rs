@@ -92,7 +92,9 @@ pub fn emoji_quiz() -> Reply {
     let Some((emoji, answer)) = all.choose(&mut rng).and_then(|l| l.split_once(" | ")) else {
         return Reply::say("I lost all my emojis. 😶");
     };
-    let others: Vec<&str> = all.iter().filter_map(|l| l.split_once(" | ").map(|x| x.1)).filter(|o| *o != answer).collect();
+    let mut others: Vec<&str> = all.iter().filter_map(|l| l.split_once(" | ").map(|x| x.1)).filter(|o| *o != answer).collect();
+    others.sort_unstable();
+    others.dedup(); // two equal wrong answers would make two identical buttons
     let mut options: Vec<&str> = others.choose_multiple(&mut rng, 2).copied().collect();
     options.push(answer);
     options.shuffle(&mut rng);

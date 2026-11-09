@@ -84,10 +84,27 @@ pub fn plan(sources: &[PathBuf], target: &Path, limits: Limits) -> Result<Plan, 
         let root = target.join(FOLDER).join(if limits.strict_names { fat_safe_name(&name) } else { name });
         let mut todo = vec![(src.clone(), root)];
         while let Some((dir, to)) = todo.pop() {
-            for e in std::fs::read_dir(&dir).into_iter().flatten().flatten() {
+            // in name order, so a clash always gets the same " (2)"; FAT/exFAT/NTFS ignore case, and their safe names
+            // can meet ("a:b" and "a?b" both become "a_b"): the second one gets a name of its own
+            let mut entries: Vec<std::fs::DirEntry> = std::fs::read_dir(&dir).into_iter().flatten().flatten().collect();
+            entries.sort_by_key(|e| e.file_name());
+            let mut taken = std::collections::HashSet::new();
+            for e in entries {
                 let Ok(m) = std::fs::symlink_metadata(e.path()) else { continue };
                 let raw = e.file_name().to_string_lossy().to_string();
-                let dest = to.join(if limits.strict_names { fat_safe_name(&raw) } else { raw });
+                let mut name = if limits.strict_names { fat_safe_name(&raw) } else { raw };
+                if limits.strict_names {
+                    let (stem, ext) = match name.rsplit_once('.') {
+                        Some((a, b)) if !a.is_empty() && !m.is_dir() => (a.to_string(), format!(".{b}")),
+                        _ => (name.clone(), String::new()),
+                    };
+                    let mut k = 2;
+                    while !taken.insert(name.to_lowercase()) {
+                        name = format!("{stem} ({k}){ext}");
+                        k += 1;
+                    }
+                }
+                let dest = to.join(name);
                 if m.file_type().is_symlink() {
                     continue; // links (and Windows junctions) are skipped: they can loop or point anywhere
                 } else if m.is_dir() {
@@ -253,5 +270,20 @@ mod tests {
         assert_eq!(fat_safe_name("COM0"), "COM0");
         assert_eq!(fat_safe_name("console.log"), "console.log");
         assert_eq!(days_since(Some(0), 3 * 86_400 + 5), Some(3));
+    }
+
+    #[test]
+    #[cfg(unix)] // Windows can't even make these names in the source folder
+    fn names_that_meet_on_fat_get_their_own() {
+        let (src, dst) = (temp("clash-src").join("Docs"), temp("clash-dst"));
+        write(&src.join("Report.txt"), "upper", 3600);
+        write(&src.join("report.txt"), "lower", 3600);
+        write(&src.join("a:b.txt"), "colon", 3600);
+        write(&src.join("a?b.txt"), "question", 3600);
+        let p = plan(std::slice::from_ref(&src), &dst, Limits { strict_names: true, fat: false }).unwrap();
+        let mut names: Vec<String> = p.copies.iter().map(|c| c.1.file_name().unwrap().to_string_lossy().to_lowercase()).collect();
+        names.sort();
+        names.dedup();
+        assert_eq!(names.len(), 4, "every file has a name of its own: {names:?}");
     }
 }

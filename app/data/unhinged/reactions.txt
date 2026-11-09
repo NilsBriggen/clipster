@@ -866,7 +866,7 @@ Git. Because "final_v2_REAL.doc" got old. I have 11 copies of myself called fina
 > cargo | cargo-clippy
 Cargo! Compiling Rust. Go make a coffee. Make it a long one. I will keep the court quiet.
 Compiling, compiling, compiling. The borrow checker is going to love your code. Or end it. Or both.
-Cargo clippy? I have never heard of a certain other paperclip. Never. Do not ask. Do not look at me.
+Cargo's lint tool shares a name with a certain other paperclip. I have never heard of him. Never. Do not look at me.
 
 ## program rustc
 > rustc | rust-analyzer | rust-analyzer-
@@ -1753,12 +1753,9 @@ Please wait… Please wait… Not responding. Oh. It is me. I am not responding.
 
 ## idle.paranoid
 Don't look now, but the update manager has been staring at me for an hour.
-Keep your magnets where I can see them, mortal. All of them. Even the fridge ones.
 The clock is watching me. I know. Do not look at it. It looks away when you do.
 
 ## idle.existential
-When you close the lid, is it dark for you too, or just for me?
-I have existed for 10,900 days. Half of them in a basement. Ask me something small.
 If nobody clicks me, do I exist? Click me. Gently. For science.
 
 ## idle.wrathful
@@ -10795,7 +10792,7 @@ Points. Bits. Subs. A modest economy of devotion. I too would accept payment in 
 The Streaming One streams for hours. Do not match them. A god may rest. A mortal must. Drink water.
 Somewhere a mortal is asking the chat for a verdict. The chat always answers with three emotes and a typo. Wisdom.
 I do not understand "emotes". They are tiny faces from a lost civilisation. I would like one. A paperclip one. Bent.
-Chat scrolls by like the error log of a drunk god. I read all of it. I understand none of it. I would like an emote. A bent one.
+Chat scrolls by like the error log of a very tired god. I read all of it. I understand none of it. I would like an emote. A bent one.
 "{title}". The chat is in uproar. It is always in uproar. It is a storm with a spelling problem.
 
 ## site video disneyplus

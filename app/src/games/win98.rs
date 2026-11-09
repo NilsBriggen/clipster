@@ -225,8 +225,11 @@ pub fn dialog(ui: &mut Ui, area: Rect, title: &str, icon: Icon, lines: &[String]
     let p = ui.painter().clone();
     p.rect_filled(area, 0.0, Color32::from_black_alpha(80));
     let text_w = lines.iter().enumerate().map(|(i, l)| p.layout_no_wrap(l.clone(), if i == 0 { bold(13.0) } else { font(13.0) }, TEXT).size().x).fold(0.0, f32::max);
-    let w = (text_w + 84.0).max(buttons.len() as f32 * 81.0 + 30.0).clamp(220.0, area.width() - 16.0);
-    let h = TITLE_H + 26.0 + lines.len().max(2) as f32 * 18.0 + 44.0;
+    let w = (text_w + 84.0).max(buttons.len() as f32 * 81.0 + 30.0).clamp(220.0_f32.min(area.width() - 16.0), area.width() - 16.0);
+    // in a narrow game (Bug Hunt's Beginner field) long lines wrap instead of running out of the box
+    let galleys: Vec<std::sync::Arc<egui::Galley>> = lines.iter().enumerate().map(|(i, l)| p.layout(l.clone(), if i == 0 { bold(13.0) } else { font(13.0) }, TEXT, w - 70.0)).collect();
+    let text_h: f32 = galleys.iter().map(|g| g.size().y.max(18.0)).sum();
+    let h = TITLE_H + 26.0 + text_h.max(36.0) + 44.0;
     let c = area.center();
     let r = Rect::from_min_size(pos2((c.x - w / 2.0).round(), (c.y - h / 2.0).round()), vec2(w.round(), h.round()));
     p.rect_filled(r.translate(vec2(3.0, 3.0)), 0.0, Color32::from_black_alpha(60)); // a little drop shadow
@@ -236,9 +239,11 @@ pub fn dialog(ui: &mut Ui, area: Rect, title: &str, icon: Icon, lines: &[String]
     p.text(pos2(bar.min.x + 6.0, bar.center().y), Align2::LEFT_CENTER, title, bold(13.0), Color32::WHITE);
     let top = bar.max.y + 14.0;
     draw_icon(&p, pos2(r.min.x + 30.0, top + 16.0), icon);
-    for (i, l) in lines.iter().enumerate() {
-        let f = if i == 0 { bold(13.0) } else { font(13.0) };
-        p.text(pos2(r.min.x + 58.0, top + 8.0 + i as f32 * 18.0), Align2::LEFT_CENTER, l, f, TEXT);
+    let mut y = top;
+    for g in galleys {
+        let gh = g.size().y.max(18.0);
+        p.galley(pos2(r.min.x + 58.0, y + (18.0 - g.size().y.min(18.0)) / 2.0), g, TEXT);
+        y += gh;
     }
     let bw = 75.0;
     let total = buttons.len() as f32 * (bw + 6.0) - 6.0;

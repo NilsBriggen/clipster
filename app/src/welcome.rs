@@ -128,7 +128,11 @@ impl Welcome {
         clip(&p, pos2(side.center().x - 40.0, side.min.y + 18.0));
         let says = lines::all(&format!("welcome_say {id}"));
         let line = says.get((self.seed + self.page) % says.len().max(1)).cloned().unwrap_or_default();
-        let g = p.layout(line.replace("{name}", if setup.name.is_empty() { "friend" } else { &setup.name }), win98::font(11.5), win98::TEXT, side.width() - 24.0);
+        // at most three lines, so a long name can't push the chapters out of the panel
+        let mut job = egui::text::LayoutJob::simple(line.replace("{name}", if setup.name.is_empty() { "friend" } else { &setup.name }), win98::font(11.5), win98::TEXT, side.width() - 24.0);
+        job.wrap.max_rows = 3;
+        job.wrap.overflow_character = Some('…');
+        let g = p.layout_job(job);
         let note = Rect::from_min_size(pos2(side.min.x + 8.0, side.min.y + 158.0), vec2(side.width() - 16.0, g.size().y + 10.0));
         p.rect_filled(note, 0.0, Color32::from_rgb(255, 255, 225)); // the classic yellow tip
         p.rect_stroke(note, 0.0, Stroke::new(1.0, win98::DARK), egui::StrokeKind::Inside);
@@ -260,8 +264,11 @@ fn desk_sketch(p: &Painter, r: Rect) {
     win98::gradient(p, bar, win98::NAVY, win98::SKY);
     p.text(pos2(bar.min.x + 4.0, bar.center().y), Align2::LEFT_CENTER, "Clipster's Desk", win98::bold(10.0), Color32::WHITE);
     let mut x = w.min.x + 6.0;
-    for (i, t) in ["Today", "Week", "To-do", "Reminders", "Clipboard", "Upkeep", "You & me", "Settings"].iter().enumerate() {
+    for (i, t) in crate::desk::TABS.iter().enumerate() {
         let tw = p.layout_no_wrap(t.to_string(), win98::font(10.0), win98::TEXT).size().x + 8.0;
+        if x + tw > w.max.x - 6.0 {
+            break;
+        }
         let tab = Rect::from_min_size(pos2(x, bar.max.y + 6.0), vec2(tw, 15.0));
         win98::thin(p, tab, true);
         p.text(tab.center(), Align2::CENTER_CENTER, *t, if i == 0 { win98::bold(10.0) } else { win98::font(10.0) }, win98::TEXT);
@@ -271,6 +278,9 @@ fn desk_sketch(p: &Painter, r: Rect) {
     win98::bevel(p, page, true);
     for (i, frac) in [0.8, 0.5, 0.3].iter().enumerate() {
         let y = page.min.y + 5.0 + i as f32 * 7.0;
+        if y + 6.0 > page.max.y {
+            break; // a short sketch shows fewer bars, not bars over its edge
+        }
         p.rect_filled(Rect::from_min_size(pos2(page.min.x + 6.0, y), vec2(page.width() * 0.4 * frac, 4.0)), 0.0, win98::NAVY);
     }
 }

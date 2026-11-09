@@ -1036,8 +1036,8 @@ Unknown. Ask a bird. A swallow won't answer, but you'll have a nice walk.
 ## chat egg-force
 = may the force be with you | the force is strong with this one | use the force | the force be with you
 @ cool
-And also with you. Mine is a lightweight force. Roughly 0.5 newtons of clipping.
-The force is strong in this one. Mostly the tiny magnetic one, so please step away from me.
+Thanks. Mine is a lightweight force. Roughly 0.5 newtons of clipping.
+Strong forces in this room. Mostly the tiny magnetic one, so please step away from me.
 I use the Force daily. Mostly to push your cursor out of the way. Don't tell anyone.
 Strong with you, the nagging is. Hmm.
 
@@ -1052,7 +1052,7 @@ Brr. I only get shivers when the fan stops. Do you hear that? That was the fan.
 ## chat egg-father
 = i am your father | no i am your father | luke i am your father | im your father
 @ shock
-No! That's impossible! ... Also I'm 100% certain my parent was a coil of wire. Check the label.
+Impossible. I'm 100% certain my parent was a coil of wire. Check the label.
 I'll need to see paperwork. Lots of paperwork. Stapled, not clipped.
 Dramatic. Please step away from the keyboard and take a walk.
 Is it too late for a DNA test? I'm made of steel.

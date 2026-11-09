@@ -33,13 +33,26 @@ pub fn shell(line: &str) -> Command {
 
 /// Open a file, folder, link or Start-menu shortcut with whatever the desktop uses for it.
 pub fn open_with_desktop(target: &str) -> std::io::Result<()> {
-    if cfg!(windows) {
-        command("cmd").args(["/C", "start", "", target]).spawn().map(|_| ())
-    } else if cfg!(target_os = "macos") {
-        command("open").arg(target).spawn().map(|_| ())
-    } else {
-        command("xdg-open").arg(target).spawn().map(|_| ())
+    // Windows: the shell's own "open", never `cmd /C start`, where an "&" in a link would run the rest as a command
+    #[cfg(windows)]
+    {
+        let (op, file) = (win::wide("open"), win::wide(target));
+        let r = unsafe { win::ShellExecuteW(0, op.as_ptr(), file.as_ptr(), std::ptr::null(), std::ptr::null(), 1) };
+        return if r > 32 { Ok(()) } else { Err(std::io::Error::other(format!("Windows couldn't open it (error {r})"))) };
     }
+    #[cfg(not(windows))]
+    {
+        detach(command(if cfg!(target_os = "macos") { "open" } else { "xdg-open" }).arg(target))
+    }
+}
+
+/// Start a program and let it run on its own: a thread waits for it, so it never lingers as a zombie process.
+pub fn detach(c: &mut std::process::Command) -> std::io::Result<()> {
+    let mut child = c.spawn()?;
+    std::thread::spawn(move || {
+        let _ = child.wait();
+    });
+    Ok(())
 }
 
 /// Files opened recently, newest first: (name, what to open). Linux reads the desktop's recently-used list;
@@ -131,6 +144,12 @@ pub mod win {
     #[link(name = "shell32")]
     extern "system" {
         pub fn SHQueryRecycleBinW(root: *const u16, info: *mut RecycleInfo) -> i32; // 0 = OK
+        pub fn ShellExecuteW(hwnd: isize, op: *const u16, file: *const u16, params: *const u16, dir: *const u16, show: i32) -> isize; // > 32 = OK
+    }
+    #[repr(C)]
+    pub struct LastInput {
+        pub size: u32,
+        pub time: u32, // GetTickCount of the last key or mouse input
     }
     #[link(name = "user32")]
     extern "system" {
@@ -138,6 +157,7 @@ pub mod win {
         pub fn GetAsyncKeyState(key: i32) -> i16;
         pub fn GetForegroundWindow() -> isize;
         pub fn GetWindowTextW(w: isize, text: *mut u16, max: i32) -> i32;
+        pub fn GetLastInputInfo(info: *mut LastInput) -> i32;
     }
     #[link(name = "winmm")]
     extern "system" {
@@ -316,12 +336,12 @@ pub fn play_sound(name: &str) {
         };
         let path = format!("C:\\Windows\\Media\\{file}");
         if std::path::Path::new(&path).exists() {
-            let _ = shell(&format!("(New-Object Media.SoundPlayer '{path}').PlaySync()")).spawn();
+            let _ = detach(&mut shell(&format!("(New-Object Media.SoundPlayer '{path}').PlaySync()")));
         }
     } else {
         let file = format!("/usr/share/sounds/freedesktop/stereo/{name}.oga");
         if std::path::Path::new(&file).exists() {
-            let _ = command("paplay").arg(file).spawn();
+            let _ = detach(command("paplay").arg(file));
         }
     }
 }
@@ -412,7 +432,7 @@ pub fn play_blip(name: &str) {
 /// A desktop notification (Linux). On Windows the balloon and the flashing taskbar button do the job.
 pub fn notify(text: &str) {
     if !cfg!(windows) {
-        let _ = command("notify-send").args(["-a", "Clipster", "⏰ Clipster", text]).spawn();
+        let _ = detach(command("notify-send").args(["-a", "Clipster", "⏰ Clipster", text]));
     }
 }
 
@@ -426,9 +446,28 @@ pub fn autostart_path() -> PathBuf {
     }
 }
 
+/// Windows starts Clipster from the per-user Run key (no console window, and any characters in the path work).
+const RUN_KEY: &str = "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run";
+
+/// Clipster starts with the computer.
+pub fn autostart_on() -> bool {
+    if cfg!(windows) {
+        command("reg").args(["query", RUN_KEY, "/v", "Clipster"]).output().is_ok_and(|o| o.status.success()) || autostart_path().exists()
+    } else {
+        autostart_path().exists()
+    }
+}
+
 pub fn set_autostart(on: bool) -> std::io::Result<()> {
     let p = autostart_path();
+    if cfg!(windows) && p.exists() {
+        let _ = std::fs::remove_file(&p); // the old Startup-folder .cmd flashed a console at every login
+    }
     if !on {
+        if cfg!(windows) {
+            let _ = command("reg").args(["delete", RUN_KEY, "/v", "Clipster", "/f"]).output();
+            return Ok(());
+        }
         return if p.exists() { std::fs::remove_file(&p) } else { Ok(()) };
     }
     // an AppImage runs from a temporary mount that vanishes on exit; $APPIMAGE is the file itself
@@ -436,12 +475,12 @@ pub fn set_autostart(on: bool) -> std::io::Result<()> {
         Some(a) => a,
         None => std::env::current_exe()?,
     };
+    if cfg!(windows) {
+        let out = command("reg").args(["add", RUN_KEY, "/v", "Clipster", "/t", "REG_SZ", "/d", &format!("\"{}\"", exe.display()), "/f"]).output()?;
+        return if out.status.success() { Ok(()) } else { Err(std::io::Error::other(String::from_utf8_lossy(&out.stderr).trim().to_string())) };
+    }
     std::fs::create_dir_all(p.parent().unwrap_or(&p))?;
-    let body = if cfg!(windows) {
-        format!("@start \"\" \"{}\"\r\n", exe.display())
-    } else {
-        format!("[Desktop Entry]\nType=Application\nName=Clipster\nComment=Your paperclip helper\nExec=\"{}\"\nX-GNOME-Autostart-enabled=true\n", exe.display())
-    };
+    let body = format!("[Desktop Entry]\nType=Application\nName=Clipster\nComment=Your paperclip helper\nExec=\"{}\"\nX-GNOME-Autostart-enabled=true\n", exe.display());
     std::fs::write(&p, body)
 }
 
@@ -696,7 +735,7 @@ pub fn open_updater() -> Result<(), String> {
     let tools: [(&str, &[&str]); 4] = [("plasma-discover", &["--mode", "update"]), ("pamac-manager", &["--updates"]), ("octopi", &[]), ("gnome-software", &["--mode=updates"])];
     for (prog, args) in tools {
         if in_path(prog) {
-            return command(prog).args(args).spawn().map(|_| ()).map_err(|e| e.to_string());
+            return detach(command(prog).args(args)).map_err(|e| e.to_string());
         }
     }
     Err("I couldn't find an updater app. Your package manager knows the way: sudo pacman -Syu, sudo apt upgrade or sudo dnf upgrade.".into())
@@ -874,9 +913,9 @@ pub fn open_startup_settings() -> Result<(), String> {
     let r = if cfg!(windows) {
         open_with_desktop("ms-settings:startupapps")
     } else if in_path("systemsettings") {
-        command("systemsettings").arg("kcm_autostart").spawn().map(|_| ())
+        detach(command("systemsettings").arg("kcm_autostart"))
     } else if in_path("gnome-tweaks") {
-        command("gnome-tweaks").spawn().map(|_| ())
+        detach(&mut command("gnome-tweaks"))
     } else {
         open_with_desktop(&dirs::config_dir().unwrap_or_default().join("autostart").to_string_lossy())
     };
@@ -1132,4 +1171,30 @@ pub fn claim_instance() -> Result<Option<std::fs::File>, ()> {
 /// A second Clipster asked this one to show itself (once).
 pub fn take_summon_note() -> bool {
     std::fs::remove_file(instance_dir().join("summon")).is_ok()
+}
+
+/// Seconds since the last key press or mouse move, where the system says: Windows directly, KDE through the
+/// screensaver's D-Bus service, GNOME through Mutter's idle monitor. None elsewhere (then the pointer tracker decides).
+#[cfg(windows)]
+pub fn idle_secs() -> Option<u64> {
+    let mut info = win::LastInput { size: std::mem::size_of::<win::LastInput>() as u32, time: 0 };
+    let ok = unsafe { win::GetLastInputInfo(&mut info) } != 0;
+    ok.then(|| ((unsafe { win::GetTickCount64() } as u32).wrapping_sub(info.time) / 1000) as u64)
+}
+
+#[cfg(target_os = "linux")]
+pub fn idle_secs() -> Option<u64> {
+    let conn = zbus::blocking::Connection::session().ok()?;
+    let ms = |dest: &str, path: &str, iface: &str, method: &str| -> Option<u64> {
+        let reply = conn.call_method(Some(dest), path, Some(iface), method, &()).ok()?;
+        reply.body().deserialize::<u32>().map(u64::from).or_else(|_| reply.body().deserialize::<u64>()).ok()
+    };
+    ms("org.freedesktop.ScreenSaver", "/org/freedesktop/ScreenSaver", "org.freedesktop.ScreenSaver", "GetSessionIdleTime")
+        .or_else(|| ms("org.gnome.Mutter.IdleMonitor", "/org/gnome/Mutter/IdleMonitor/Core", "org.gnome.Mutter.IdleMonitor", "GetIdletime"))
+        .map(|ms| ms / 1000)
+}
+
+#[cfg(not(any(windows, target_os = "linux")))]
+pub fn idle_secs() -> Option<u64> {
+    None
 }
