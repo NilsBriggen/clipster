@@ -154,7 +154,7 @@ impl Desk {
             let w = line(ui, pos2(bx, banner.min.y + 52.0), &day, look.font(12.0), look.dim(), bw - 130.0);
             let now_unix = crate::timers::unix_now();
             let to_midnight = (today.and_hms_opt(23, 59, 59).unwrap_or_default() - now).num_seconds().max(0) as u64;
-            let reminders: Vec<String> = view.timers.iter().filter(|t| t.left(now_unix) <= to_midnight).take(4).map(|t| format!("{} at {}", if t.label.is_empty() { "Timer" } else { &t.label }, t.when().format("%H:%M"))).collect();
+            let reminders: Vec<String> = view.timers.iter().filter(|t| t.left(now_unix) <= to_midnight).take(4).map(|t| format!("{} at {}", if t.label.is_empty() { "Timer" } else { &t.label }, brain::clock(t.when()))).collect();
             if !reminders.is_empty() {
                 ui.interact(Rect::from_min_size(pos2(bx, banner.min.y + 44.0), vec2(w, 16.0)), Id::unique("desk-plan-reminders"), Sense::hover()).on_hover_text(format!("Reminders today: {}", reminders.join(", ")));
             }
@@ -355,9 +355,9 @@ impl Desk {
                             (false, Some(d)) => Some(if d < today {
                                 (format!("overdue · {}", d.format("%b %-d")), look.danger(), true)
                             } else if d == today {
-                                (it.at.map_or("today".to_string(), |t| format!("today {}", t.format("%H:%M"))), look.accent(), true)
+                                (it.at.map_or("today".to_string(), |t| format!("today {}", brain::clock(t))), look.accent(), true)
                             } else {
-                                (format!("{}{}", d.format("%a %b %-d"), it.at.map(|t| format!(" {}", t.format("%H:%M"))).unwrap_or_default()), look.dim(), false)
+                                (format!("{}{}", d.format("%a %b %-d"), it.at.map(|t| format!(" {}", brain::clock(t))).unwrap_or_default()), look.dim(), false)
                             }),
                             (false, None) if hover => Some(("+ date".to_string(), look.dim(), false)),
                             _ => None,

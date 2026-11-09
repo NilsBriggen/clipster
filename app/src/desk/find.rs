@@ -216,6 +216,7 @@ mod tests {
             space_log: &[],
             tidy_targets: &[],
             tidy_auto: false,
+            mini: &|_, _, _, _, _| {},
         };
         let kinds = |q: &str| search(q, &view, &files).iter().map(|h| (h.kind, h.go.clone())).collect::<Vec<_>>();
         assert!(kinds("printer").contains(&("Note", "notes".into())), "{:?}", kinds("printer"));

@@ -521,7 +521,7 @@ pub fn today_line() -> Option<String> {
 
 /// "9:00 Standup" or "All day: Holiday".
 pub fn label(e: &Event) -> String {
-    if e.all_day { format!("{} (all day)", e.title) } else { format!("{} {}", e.start.format("%-H:%M"), e.title) }
+    if e.all_day { format!("{} (all day)", e.title) } else { format!("{} {}", crate::brain::clock(e.start), e.title) }
 }
 
 /// The events on `day` (all-day ones that span it too, and timed ones still going on from the night before).
@@ -541,7 +541,7 @@ pub fn agenda_reply(events: &[Event], reminders: &[(NaiveDateTime, String)], day
         return Reply::say(lines::pick("calendar_none")).mood(Mood::Think).run("Open the Agenda", "desk agenda");
     }
     let mut items: Vec<(NaiveDateTime, String)> = on(events, day).into_iter().map(|e| (if e.all_day { e.start.date().and_time(NaiveTime::MIN) } else { e.start }, label(e))).collect();
-    items.extend(reminders.iter().filter(|(t, _)| t.date() == day).map(|(t, l)| (*t, format!("{} ⏰ {}", t.format("%-H:%M"), if l.is_empty() { "Reminder" } else { l }))));
+    items.extend(reminders.iter().filter(|(t, _)| t.date() == day).map(|(t, l)| (*t, format!("{} ⏰ {}", crate::brain::clock(*t), if l.is_empty() { "Reminder" } else { l }))));
     items.sort();
     let when = describe_day(day);
     if items.is_empty() {
@@ -560,7 +560,7 @@ pub fn agenda_reply(events: &[Event], reminders: &[(NaiveDateTime, String)], day
 
 /// "Am I free Friday at 3?"
 pub fn free_reply(events: &[Event], reminders: &[(NaiveDateTime, String)], at: NaiveDateTime, linked: bool) -> Reply {
-    let when = format!("{} at {}", describe_day(at.date()), at.format("%-H:%M"));
+    let when = format!("{} at {}", describe_day(at.date()), crate::brain::clock(at));
     if let Some(e) = busy_at(events, at) {
         return Reply::say(lines::pick("agenda_busy").replace("{when}", &when).replace("{x}", &e.title)).mood(Mood::Think).run("That day's agenda", &format!("calendar day {}", at.date()));
     }

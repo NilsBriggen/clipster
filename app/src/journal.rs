@@ -93,13 +93,19 @@ pub fn change(entries: &mut Vec<Entry>, cmd: &str, today: NaiveDate) -> Option<&
 
 /// The weeks of a month for a calendar grid, Monday first: each row has seven days (None outside the month).
 pub fn month_grid(year: i32, month: u32) -> Vec<[Option<NaiveDate>; 7]> {
+    month_grid_from(year, month, false)
+}
+
+/// `month_grid`, with the weeks starting on Sunday when `sunday` is set.
+pub fn month_grid_from(year: i32, month: u32, sunday: bool) -> Vec<[Option<NaiveDate>; 7]> {
     let Some(first) = NaiveDate::from_ymd_opt(year, month, 1) else { return vec![] };
     let mut rows = vec![];
     let mut row: [Option<NaiveDate>; 7] = [None; 7];
     let mut d = first;
     while d.month() == month {
-        row[d.weekday().num_days_from_monday() as usize] = Some(d);
-        if d.weekday().num_days_from_monday() == 6 {
+        let col = if sunday { d.weekday().num_days_from_sunday() } else { d.weekday().num_days_from_monday() } as usize;
+        row[col] = Some(d);
+        if col == 6 {
             rows.push(row);
             row = [None; 7];
         }
@@ -139,5 +145,6 @@ mod tests {
         assert_eq!(parse(&format(&e)), e);
         assert_eq!(month_grid(2026, 11).len(), 6, "November 2026 starts on a Sunday");
         assert_eq!(month_grid(2026, 11)[0][6], Some(d(11, 1)));
+        assert_eq!(month_grid_from(2026, 11, true)[0][0], Some(d(11, 1)), "a week from Sunday starts with the 1st");
     }
 }

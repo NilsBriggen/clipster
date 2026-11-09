@@ -47,6 +47,7 @@ pub fn tab(name: &str) -> Option<usize> {
         t if t.starts_with("person ") => "you".to_string(),
         "next7" | "nextweek" | "focuslog" => "week".to_string(),
         "proofread" | "letters" | "letter" => "write".to_string(),
+        "general" | "myday" | "focusgoals" | "comments" | "data" => "settings".to_string(),
         t => t.to_string(),
     };
     match t.parse::<usize>() {
@@ -141,6 +142,7 @@ pub struct View<'a> {
     pub space_log: &'a [[u64; 2]],                // free space over time
     pub tidy_targets: &'a [(String, String)],     // a tidy category -> your folder for it
     pub tidy_auto: bool,
+    pub mini: &'a dyn Fn(&Painter, Pos2, f32, &str, &str), // draws a small Clipster: foot, scale, hat, colour
 }
 
 /// A linked calendar on the Calendars page: what to call it, its colour and switches, and what went wrong.
@@ -213,6 +215,24 @@ pub struct Prefs {
     pub large: bool, // the Desk's larger size
     pub weather: bool, // the weather line on Today
     pub work_hours: (u32, u32), // the working day, from hour to hour (17 = until 17:59)
+    pub work_days: Vec<u32>,    // 1 = Monday … 7 = Sunday
+    pub clock12: bool,
+    pub week_sunday: bool,
+    pub quiet_until: Option<String>, // "be quiet" is on until this time
+    pub quiet_after: Option<u32>,
+    pub quiet_weekend: bool,
+    pub quiet_meetings: bool,
+    pub headsup: u32,
+    pub break_every: u32,
+    pub alarm_sound: bool,
+    pub muted: Vec<String>,
+    pub desk_morning: bool,
+    pub version: String,
+    pub update: Option<String>, // a newer version that's out
+    pub holidays: String,       // the country for public holidays ("" = off)
+    pub dnd_failed: bool,       // Do Not Disturb can't be switched here
+    pub hat: String,
+    pub skin: String,
 }
 
 #[derive(Clone, Copy, PartialEq)]
@@ -342,6 +362,9 @@ pub struct Desk {
     journal_month: Option<(i32, u32)>, // the journal's month (None = this one)
     journal_query: String,
     journal_edit: Option<(chrono::NaiveDate, String, String)>, // a journal day being written: day, mood, line
+    settings_page: usize,              // Settings: General, My day, Focus and goals, Comments, Your data
+    holiday_text: String,
+    import_text: String,
 }
 
 /// A card over the page with its own controls.
@@ -411,6 +434,9 @@ impl Desk {
             self.upkeep_page = page;
         }
         self.startup_list = name == "startup";
+        if let Some(page) = ["general", "myday", "focusgoals", "comments", "data"].iter().position(|p| *p == name) {
+            self.settings_page = page;
+        }
         match name {
             "week" | "last7" => self.week_page = 0,
             "next7" | "nextweek" => self.week_page = 1,
@@ -425,6 +451,11 @@ impl Desk {
     /// The Upkeep page that's open (Checkup 0, Right now 1, Tidy 2, Space 3, Backup 4), when the Upkeep tab is.
     pub fn upkeep_page(&self) -> Option<usize> {
         (self.open && TABS[self.tab] == "Upkeep" && !self.startup_list).then_some(self.upkeep_page)
+    }
+
+    /// Read the to-dos, notes and the rest again (after an import).
+    pub fn reload_files(&mut self) {
+        self.files.at = None;
     }
 
     /// Show a QR code of this text in a card, over whatever tab is open.
@@ -757,7 +788,7 @@ impl Desk {
             "To-do" => self.todos(ui, c, view, look, out),
             "Agenda" => self.reminders(ui, c, view, look, out),
             "Write" => self.write(ui, c, view, look, out),
-            "Settings" => self.settings(ui, c, &view.prefs, look, out),
+            "Settings" => self.settings(ui, c, view, look, out),
             "Clipboard" => self.clipboard(ui, c, view, look, out),
             "You & me" => self.you_and_me(ui, c, view, look, out),
             _ => self.upkeep(ui, c, view, look, out),
@@ -1014,8 +1045,16 @@ impl Desk {
         let editing = ui.memory(|m| m.has_focus(id));
         let mut text = if editing { self.numbers.get(key).cloned().unwrap_or_else(|| have.to_string()) } else { have.to_string() };
         let resp = look.input(ui, r, id, &mut text, "–");
+        // digits only; empty means none, on purpose; more than 16 hours is refused with a red edge
+        text.retain(|c| c.is_ascii_digit());
+        text.truncate(4);
+        let too_big = text.parse::<u64>().is_ok_and(|v| v > 960);
+        if too_big {
+            ui.painter().rect_stroke(r.expand(1.0), CornerRadius::same(if look == Look::Modern { 6 } else { 0 }), Stroke::new(1.5, look.danger()), StrokeKind::Outside);
+            resp.clone().on_hover_text("At most 16 hours (960 minutes)");
+        }
         self.numbers.insert(key.to_string(), text.clone());
-        (resp.lost_focus() && text.trim() != have).then(|| text.trim().parse::<u64>().unwrap_or(0))
+        (resp.lost_focus() && text.trim() != have && !too_big).then(|| text.trim().parse::<u64>().unwrap_or(0))
     }
 }
 

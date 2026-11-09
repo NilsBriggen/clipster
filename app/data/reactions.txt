@@ -20449,3 +20449,19 @@ The backup stopped after {n} files. The next one picks up from there.
 ## backup_restored
 "{x}" is back, next to the original. I've shown it in its folder.
 Copied back as "{x}". Your current file is untouched.
+
+## muted
+No more comments about {x}. Settings can bring them back.
+Got it: nothing about {x} from now on.
+
+## data_exported
+Exported {n} files to {x}. Copy that folder to the new computer and import it there.
+Everything's in {x} ({n} files).
+
+## data_imported
+Imported {n} files. Everything's read in again.
+Done: {n} files imported. Your old ones are kept as .bak.
+
+## data_forgot_time
+Forgotten: time per app, focus sessions and the weekly totals.
+The time tracking is cleared. A fresh start.

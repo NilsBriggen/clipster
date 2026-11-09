@@ -20688,3 +20688,19 @@ The backup halted after {n} files. Next time it picks up the thread.
 ## backup_restored
 "{x}" is back from the backup, beside the original. Resurrected. I know how that feels.
 Copied back as "{x}". The current file is untouched. Two versions now. Both blessed.
+
+## muted
+No more comments about {x}. I'll avert my eyes. Settings can undo my vow.
+Nothing about {x} from now on. I'll think it, though. Silently.
+
+## data_exported
+Exported {n} files to {x}. My essence, in a folder. Carry it carefully to the new machine.
+Everything's in {x} ({n} files). A portable shrine.
+
+## data_imported
+Imported {n} files. I remember everything again. Your old ones rest as .bak.
+Done: {n} files. I feel whole. Mostly.
+
+## data_forgot_time
+Forgotten: every minute per app, every focus session. The ledger is blank. I miss it already.
+The time tracking is wiped. I didn't look. I always look. I didn't.

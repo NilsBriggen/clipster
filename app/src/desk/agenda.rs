@@ -18,7 +18,7 @@ pub(super) fn remind_preview(text: &str, now: NaiveDateTime) -> Option<String> {
     let (secs, _) = crate::understand::when_secs(when)?;
     let at = now + Duration::seconds(secs as i64);
     let day = if at.date() == now.date() { "today".to_string() } else if at.date() == now.date() + Duration::days(1) { "tomorrow".to_string() } else { at.format("%a %-d %b").to_string() };
-    Some(format!("→ {day}, {}{}", at.format("%-H:%M"), if label.is_empty() { String::new() } else { format!(" · {label}") }))
+    Some(format!("→ {day}, {}{}", brain::clock(at), if label.is_empty() { String::new() } else { format!(" · {label}") }))
 }
 
 /// A calendar's colour.
@@ -214,7 +214,7 @@ impl Desk {
                 Row::Free(d, slots) => {
                     let mut x = p.text(pos2(x0 + 8.0, cy), Align2::LEFT_CENTER, "Free:", look.font(11.5), look.dim()).max.x + 6.0;
                     for (i, (a, b)) in slots.iter().enumerate() {
-                        let label = format!("{}–{}", a.format("%-H:%M"), crate::plan::end_text(*b));
+                        let label = format!("{}–{}", brain::clock(*a), crate::plan::end_text(*b));
                         let w = p.layout_no_wrap(label.clone(), look.font(11.5), look.text()).size().x + 12.0;
                         if x + w > x1 {
                             break;
@@ -228,7 +228,7 @@ impl Desk {
                             self.toggle_popup(&key);
                         }
                         let mins = ((*b - (*a).max(now)).num_minutes() - 5).clamp(10, 240);
-                        let mut choices = vec![format!("Remind me at {}", a.format("%-H:%M"))];
+                        let mut choices = vec![format!("Remind me at {}", brain::clock(*a))];
                         if *d == today && *a <= now + Duration::minutes(5) {
                             choices.insert(0, format!("Focus for {}", brain::fmt_dur(mins as u64 * 60)));
                         }
@@ -246,8 +246,8 @@ impl Desk {
                 Row::Item(t, w) => {
                     let mut right = x1;
                     let time = match (t, w) {
-                        (Some(t), What::Event(e)) => format!("{}–{}", t.format("%-H:%M"), e.end.format("%-H:%M")),
-                        (Some(t), _) => t.format("%-H:%M").to_string(),
+                        (Some(t), What::Event(e)) => format!("{}–{}", brain::clock(*t), brain::clock(e.end)),
+                        (Some(t), _) => brain::clock(*t),
                         (None, What::Event(_)) => "all day".to_string(),
                         _ => String::new(),
                     };
@@ -377,10 +377,10 @@ impl Desk {
                 self.month_shown = Some((m / 12, (m % 12 + 1) as u32));
             }
         }
-        let grid = crate::journal::month_grid(year, month);
+        let grid = crate::journal::month_grid_from(year, month, brain::week_sunday());
         let cols = (x1 - x0) / 7.0;
         let top = head_y + 18.0;
-        for (i, d) in ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].iter().enumerate() {
+        for (i, d) in (if brain::week_sunday() { ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] } else { ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] }).iter().enumerate() {
             p.text(pos2(x0 + cols * (i as f32 + 0.5), top + 6.0), Align2::CENTER_CENTER, *d, look.font(11.0), look.dim());
         }
         let row_h = ((area.max.y - top - 18.0) / grid.len().max(1) as f32).min(44.0);
@@ -547,7 +547,7 @@ impl Desk {
         let (x0, x1) = (inner.min.x, inner.max.x);
         let mut y = inner.min.y + 8.0;
         let mins = (e.end - e.start).num_minutes();
-        let when = if e.all_day { format!("{} (all day)", e.start.format("%A %-d %B")) } else { format!("{} {}–{} ({})", e.start.format("%A %-d %B,"), e.start.format("%-H:%M"), e.end.format("%-H:%M"), brain::fmt_dur(mins.max(0) as u64 * 60)) };
+        let when = if e.all_day { format!("{} (all day)", e.start.format("%A %-d %B")) } else { format!("{} {}–{} ({})", e.start.format("%A %-d %B,"), brain::clock(e.start), brain::clock(e.end), brain::fmt_dur(mins.max(0) as u64 * 60)) };
         line(ui, pos2(x0, y), &when, look.font(12.5), look.text(), x1 - x0);
         y += 24.0;
         if !e.place.is_empty() {
@@ -622,7 +622,7 @@ impl Desk {
         let (x0, x1) = (inner.min.x, inner.max.x);
         let lab = 64.0;
         let mut y = inner.min.y;
-        line(ui, pos2(x0, y + 8.0), &format!("Rings {}{}", if tm.when().date() == now.date() { "today at ".to_string() } else { tm.when().format("%A %-d %B at ").to_string() }, tm.when().format("%-H:%M")), look.font(12.5), look.text(), x1 - x0);
+        line(ui, pos2(x0, y + 8.0), &format!("Rings {}{}", if tm.when().date() == now.date() { "today at ".to_string() } else { tm.when().format("%A %-d %B at ").to_string() }, brain::clock(tm.when())), look.font(12.5), look.text(), x1 - x0);
         y += 28.0;
         p.text(pos2(x0, y + ctl / 2.0), Align2::LEFT_CENTER, "New time", look.font(12.0), look.dim());
         let field = Rect::from_min_size(pos2(x0 + lab, y), vec2(x1 - x0 - lab - 64.0, ctl));

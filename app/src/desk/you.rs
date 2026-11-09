@@ -511,10 +511,10 @@ impl Desk {
                 self.journal_month = Some((m / 12, (m % 12 + 1) as u32));
             }
         }
-        let grid = crate::journal::month_grid(year, month);
+        let grid = crate::journal::month_grid_from(year, month, brain::week_sunday());
         let (gx, gw) = (left.min.x + 10.0, left.width() - 20.0);
         let colw = gw / 7.0;
-        for (i, d) in ["M", "T", "W", "T", "F", "S", "S"].iter().enumerate() {
+        for (i, d) in (if brain::week_sunday() { ["S", "M", "T", "W", "T", "F", "S"] } else { ["M", "T", "W", "T", "F", "S", "S"] }).iter().enumerate() {
             p.text(pos2(gx + colw * (i as f32 + 0.5), left.min.y + 34.0), Align2::CENTER_CENTER, *d, look.font(11.0), look.dim());
         }
         let rowh = ((left.height() - 60.0) / grid.len().max(1) as f32).min(44.0);

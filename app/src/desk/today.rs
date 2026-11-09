@@ -27,7 +27,7 @@ pub(super) fn fit(p: &Painter, look: Look, text: &str, width: f32) -> String {
 /// "9:00 · in 12 min", "14:30 · in 3h 20m", "tomorrow 9:00".
 fn when_text(at: NaiveDateTime, now: NaiveDateTime) -> String {
     let mins = (at - now).num_minutes().max(0);
-    let clock = at.format("%H:%M");
+    let clock = brain::clock(at);
     if at.date() > now.date() {
         format!("tomorrow {clock}")
     } else if mins < 60 {
@@ -626,7 +626,7 @@ impl Desk {
         let running = view.focus_now.as_ref().map_or(0, |f| f.2.saturating_sub(f.3));
         let summary = crate::plan::day_end_lines(&crate::plan::day_end(view.kind_time, view.focus_log, &self.files.todos, today, running), view.prefs.focus_goal);
         let first = view.events.iter().filter(|e| e.start.date() == tomorrow || e.all_day && e.start.date() <= tomorrow && e.end.date() > tomorrow).min_by_key(|e| (!e.all_day, e.start));
-        let first = first.map(|e| if e.all_day { format!("Tomorrow: {} (all day).", e.title) } else { format!("Tomorrow starts with {} at {}.", e.title, e.start.format("%H:%M")) });
+        let first = first.map(|e| if e.all_day { format!("Tomorrow: {} (all day).", e.title) } else { format!("Tomorrow starts with {} at {}.", e.title, brain::clock(e.start)) });
         // tomorrow's three: open to-dos, the ones already picked first, then today's leftovers, the important, the due
         let mut picks: Vec<(usize, &todo::Item)> = self.files.todos.iter().enumerate().filter(|(_, i)| !i.done && i.list.is_none() && !i.is_step()).collect();
         picks.sort_by_key(|(_, i)| (i.top != Some(tomorrow), !i.top_today(today), !i.prio, i.due.unwrap_or(NaiveDate::MAX)));

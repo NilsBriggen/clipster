@@ -235,6 +235,16 @@ struct App {
     space_log: Vec<[u64; 2]>,                     // free space over time: (unix, bytes), about weekly, 12 kept
     tidy_targets: Vec<(String, String)>,          // a tidy category -> your folder for it ("Documents" -> ~/Documents)
     tidy_auto: bool,                              // tidy Downloads every Monday (files a week old)
+    work_days: Vec<u32>,                          // the days you work, 1 = Monday … 7 = Sunday
+    quiet_after: Option<u32>,                     // no chatter from this hour until the morning
+    quiet_weekend: bool,                          // no chatter on Saturdays and Sundays
+    quiet_meetings: bool,                         // no chatter during calendar events
+    headsup_min: u32,                             // minutes before an event for its heads-up (0 = none)
+    break_every: u32,                             // minutes of work before a break reminder
+    alarm_sound: bool,                            // reminders ring with a sound (apart from "Play sounds")
+    muted: Vec<String>,                           // programs and sites he never comments on
+    desk_morning: bool,                           // open the Desk on Today the first time each morning
+    dnd_failed: bool,                             // Do Not Disturb couldn't be switched here (said honestly in Settings)
     dnd_restore: Option<String>, // a notification setting to put back if Clipster stopped mid-session
     stopwatch: Option<Instant>,
     timers: Vec<timers::Timer>, // what rings when (wall-clock, so a suspend doesn't delay it), each with an id
@@ -669,6 +679,16 @@ impl App {
             space_log: vec![],
             tidy_targets: vec![],
             tidy_auto: false,
+            work_days: vec![1, 2, 3, 4, 5],
+            quiet_after: None,
+            quiet_weekend: false,
+            quiet_meetings: false,
+            headsup_min: 10,
+            break_every: 50,
+            alarm_sound: true,
+            muted: vec![],
+            desk_morning: false,
+            dnd_failed: cfg!(windows),
             dnd_restore: None,
             sample_events: sample_events(),
             sample_people: sample_people(),
@@ -855,8 +875,15 @@ impl App {
         self.start.elapsed().as_secs_f64()
     }
 
+    /// No chatter now: "be quiet for …", after your quiet hour (until 6 in the morning), at weekends, or during a
+    /// calendar event. Reminders, heads-ups and answers still come.
     fn quiet(&self) -> bool {
-        self.quiet_until.is_some_and(|q| Instant::now() < q)
+        if self.quiet_until.is_some_and(|q| Instant::now() < q) {
+            return true;
+        }
+        let now = chrono::Local::now();
+        let hour = chrono::Timelike::hour(&now);
+        self.quiet_after.is_some_and(|h| hour >= h || hour < 6) || self.quiet_weekend && chrono::Datelike::weekday(&now).number_from_monday() >= 6 || self.quiet_meetings && calendar::busy_at(&self.events, now.naive_local()).is_some_and(|e| !e.all_day)
     }
 
     /// A line as he says it: your name, the facts he knows and this system's shortcuts filled in.
@@ -967,6 +994,8 @@ impl App {
         }).collect();
         let mut events = if self.desk_sample.is_some() { self.sample_events.clone() } else { self.events.clone() };
         events.extend(self.holidays.iter().map(|(d, name)| calendar::Event { uid: format!("holiday-{d}"), start: d.and_hms_opt(0, 0, 0).unwrap_or_default(), end: (*d + chrono::Days::new(1)).and_hms_opt(0, 0, 0).unwrap_or_default(), all_day: true, title: name.clone(), cal: calendar::HOLIDAY, ..Default::default() }));
+        let t_now = self.t() as f32;
+        let mini = move |p: &egui::Painter, foot: Pos2, s: f32, hat: &str, skin: &str| draw_mini(p, foot, s, hat, skin, t_now);
         let clip_paused = self.clip_paused.filter(|t| *t > now).map(|t| (chrono::Local::now() + chrono::Duration::from_std(t - now).unwrap_or_default()).format("%-H:%M").to_string());
         let day_totals = match &self.desk_sample {
             Some((_, k, f, _)) => plan::history_merge(&desk::sample_history(), k, f, chrono::Local::now().date_naive()),
@@ -995,6 +1024,24 @@ impl App {
             large: self.desk_large,
             weather: self.weather_on,
             work_hours: self.work_hours,
+            work_days: self.work_days.clone(),
+            clock12: brain::clock12(),
+            week_sunday: brain::week_sunday(),
+            quiet_until: self.quiet_until.filter(|q| *q > now).map(|q| brain::clock(chrono::Local::now() + chrono::Duration::from_std(q - now).unwrap_or_default())),
+            quiet_after: self.quiet_after,
+            quiet_weekend: self.quiet_weekend,
+            quiet_meetings: self.quiet_meetings,
+            headsup: self.headsup_min,
+            break_every: self.break_every,
+            alarm_sound: self.alarm_sound,
+            muted: self.muted.clone(),
+            desk_morning: self.desk_morning,
+            version: env!("CARGO_PKG_VERSION").to_string(),
+            update: self.update.clone(),
+            holidays: self.holiday_cc.clone(),
+            dnd_failed: self.dnd_failed,
+            hat: self.hat.clone().unwrap_or_else(|| "none".into()),
+            skin: self.skin.clone(),
         };
         // today's time per site, with the kind each counts as now; the weather line while it's on
         let mut sites: Vec<(String, String, u64)> = self.site_time.get(&today_key()).into_iter().flatten().filter_map(|(id, s)| Some((id.clone(), self.kind_moves.get(id).cloned().or_else(|| lines::site_kind(id))?, *s))).collect();
@@ -1002,11 +1049,11 @@ impl App {
         let weather = self.weather.as_ref().filter(|_| self.weather_on).map(|(_, w)| w.clone());
         match &self.desk_sample {
             Some((t, k, f, c)) => {
-                let view = desk::View { timers: t.clone(), kind_time: k, focus_log: f, focus_now: Some(("the slides".into(), 18 * 60, 7 * 60, 40, false)), checkins: c, streaks: vec![("Focus".into(), 4, 9), ("Goal met".into(), 2, 5), ("Check-ins".into(), 6, 12), ("Days with me".into(), 31, 31)], status, quip, prefs, clips: &self.sample_clips, pins: &self.sample_clips[..2], reading: &self.sample_reading, me: sample_me(), upkeep: Some((&self.sample_upkeep, 120)), upkeep_running: false, backup_check: upkeep::backup_check(true, Some(backup::now() - 9 * 86_400), backup::now(), true), backup: desk::Backup { sources: &self.backup_sources, target: "/run/media/you/BACKUP", last: Some(backup::now() - 9 * 86_400), result: "214 copied (1.3 GB), 4120 unchanged", progress: None, skip: &self.backup_skip, auto: &self.backup_auto, history: &self.backup_history, found: self.backup_found.as_deref(), failed: false }, events: &events, calendars: self.sample_calendars.iter().enumerate().map(|(i, s)| desk::CalView { label: ["Work", "Family"].get(i).map_or_else(|| calendar::short(s), |n| n.to_string()), color: i as u8, show: true, alert: i == 0, ..Default::default() }).collect(), calendar_note: "Checked 4 min ago".into(), calendar_problems: 0, answer: self.desk_answer.as_ref(), name: "Sam".into(), people: &self.sample_people, workday: &self.sample_workday, habits: &self.habits, countdowns: &self.countdowns, sites, moved: &self.kind_moves, weather, day_totals, pin_labels: &self.pin_labels, clip_paused, reading_titles: &self.reading_titles, now: self.now_reading.as_ref(), space: self.space.as_ref().map(|(_, s)| s), space_running: self.space_running, upkeep_hide: &self.upkeep_hide, space_log: &self.space_log, tidy_targets: &self.tidy_targets, tidy_auto: self.tidy_auto };
+                let view = desk::View { timers: t.clone(), kind_time: k, focus_log: f, focus_now: Some(("the slides".into(), 18 * 60, 7 * 60, 40, false)), checkins: c, streaks: vec![("Focus".into(), 4, 9), ("Goal met".into(), 2, 5), ("Check-ins".into(), 6, 12), ("Days with me".into(), 31, 31)], status, quip, prefs, clips: &self.sample_clips, pins: &self.sample_clips[..2], reading: &self.sample_reading, me: sample_me(), upkeep: Some((&self.sample_upkeep, 120)), upkeep_running: false, backup_check: upkeep::backup_check(true, Some(backup::now() - 9 * 86_400), backup::now(), true), backup: desk::Backup { sources: &self.backup_sources, target: "/run/media/you/BACKUP", last: Some(backup::now() - 9 * 86_400), result: "214 copied (1.3 GB), 4120 unchanged", progress: None, skip: &self.backup_skip, auto: &self.backup_auto, history: &self.backup_history, found: self.backup_found.as_deref(), failed: false }, events: &events, calendars: self.sample_calendars.iter().enumerate().map(|(i, s)| desk::CalView { label: ["Work", "Family"].get(i).map_or_else(|| calendar::short(s), |n| n.to_string()), color: i as u8, show: true, alert: i == 0, ..Default::default() }).collect(), calendar_note: "Checked 4 min ago".into(), calendar_problems: 0, answer: self.desk_answer.as_ref(), name: "Sam".into(), people: &self.sample_people, workday: &self.sample_workday, habits: &self.habits, countdowns: &self.countdowns, sites, moved: &self.kind_moves, weather, day_totals, pin_labels: &self.pin_labels, clip_paused, reading_titles: &self.reading_titles, now: self.now_reading.as_ref(), space: self.space.as_ref().map(|(_, s)| s), space_running: self.space_running, upkeep_hide: &self.upkeep_hide, space_log: &self.space_log, tidy_targets: &self.tidy_targets, tidy_auto: self.tidy_auto, mini: &mini };
                 self.desk.show(ctx, &view, look, near)
             }
             None => {
-                let view = desk::View { timers, kind_time: &self.kind_time, focus_log: &self.focus_log, focus_now, checkins: &self.checkin_days, streaks, status, quip, prefs, clips: &self.clip_history, pins: &self.pins, reading: &self.reading, me: about_me(&self.facts, self.birthday, &self.stats, &self.unlocked, &self.highscores, self.friendship, &self.explored, self.unhinged), upkeep: self.upkeep.as_ref().map(|(t, r)| (r, t.elapsed().as_secs())), upkeep_running: self.upkeep_running, backup_check: self.backup_check(), backup: desk::Backup { sources: &self.backup_sources, target: &self.backup_target, last: self.backup_last, result: &self.backup_result, progress: self.backup_progress, skip: &self.backup_skip, auto: &self.backup_auto, history: &self.backup_history, found: self.backup_found.as_deref(), failed: self.backup_history.first().is_some_and(|h| h[3] > 0) || !self.backup_result.is_empty() && !self.backup_result.contains("copied") }, events: &events, calendars: cal_views, calendar_note: self.calendar_note(), calendar_problems: self.calendar_problems.len(), answer: self.desk_answer.as_ref(), name: self.name.clone(), people: &self.people, workday: &self.workday, habits: &self.habits, countdowns: &self.countdowns, sites, moved: &self.kind_moves, weather, day_totals, pin_labels: &self.pin_labels, clip_paused, reading_titles: &self.reading_titles, now: self.now_reading.as_ref(), space: self.space.as_ref().map(|(_, s)| s), space_running: self.space_running, upkeep_hide: &self.upkeep_hide, space_log: &self.space_log, tidy_targets: &self.tidy_targets, tidy_auto: self.tidy_auto };
+                let view = desk::View { timers, kind_time: &self.kind_time, focus_log: &self.focus_log, focus_now, checkins: &self.checkin_days, streaks, status, quip, prefs, clips: &self.clip_history, pins: &self.pins, reading: &self.reading, me: about_me(&self.facts, self.birthday, &self.stats, &self.unlocked, &self.highscores, self.friendship, &self.explored, self.unhinged), upkeep: self.upkeep.as_ref().map(|(t, r)| (r, t.elapsed().as_secs())), upkeep_running: self.upkeep_running, backup_check: self.backup_check(), backup: desk::Backup { sources: &self.backup_sources, target: &self.backup_target, last: self.backup_last, result: &self.backup_result, progress: self.backup_progress, skip: &self.backup_skip, auto: &self.backup_auto, history: &self.backup_history, found: self.backup_found.as_deref(), failed: self.backup_history.first().is_some_and(|h| h[3] > 0) || !self.backup_result.is_empty() && !self.backup_result.contains("copied") }, events: &events, calendars: cal_views, calendar_note: self.calendar_note(), calendar_problems: self.calendar_problems.len(), answer: self.desk_answer.as_ref(), name: self.name.clone(), people: &self.people, workday: &self.workday, habits: &self.habits, countdowns: &self.countdowns, sites, moved: &self.kind_moves, weather, day_totals, pin_labels: &self.pin_labels, clip_paused, reading_titles: &self.reading_titles, now: self.now_reading.as_ref(), space: self.space.as_ref().map(|(_, s)| s), space_running: self.space_running, upkeep_hide: &self.upkeep_hide, space_log: &self.space_log, tidy_targets: &self.tidy_targets, tidy_auto: self.tidy_auto, mini: &mini };
                 self.desk.show(ctx, &view, look, near)
             }
         }
@@ -1658,6 +1705,86 @@ impl App {
         Reply::say("") // from the Desk: its status bar says it
     }
 
+    /// Your files, for moving to a new computer: (name in an export, where it lives).
+    fn data_files() -> Vec<(&'static str, std::path::PathBuf)> {
+        vec![("settings.json", Self::settings_path()), ("todo.txt", todo::path()), ("done.txt", todo::archive_path()), ("notes.txt", brain::notes_path()), ("journal.txt", journal::path()), ("lines.txt", lines::user_path())]
+    }
+
+    /// Settings → Your data: open the folder, export everything, import an export (asks first, keeps .bak copies),
+    /// forget the time tracking (asks first).
+    fn data_command(&mut self, cmd: &str) -> Reply {
+        let (verb, arg) = cmd.split_once(' ').unwrap_or((cmd, ""));
+        let arg = arg.trim();
+        match verb {
+            "open" => {
+                let dir = brain::data_dir();
+                let _ = std::fs::create_dir_all(&dir);
+                match open(&dir.to_string_lossy()) {
+                    Ok(()) => Reply::say(format!("Your files are in {} (the settings in {}).", find::tilde(&dir), find::tilde(Self::settings_path().parent().unwrap_or(std::path::Path::new(""))))).mood(Mood::Happy),
+                    Err(e) => Reply::say(format!("I couldn't open it: {e}")).mood(Mood::Sad),
+                }
+            }
+            "export" => {
+                let base = dirs::document_dir().or_else(dirs::home_dir).unwrap_or_else(std::env::temp_dir);
+                let name = format!("Clipster export {}", chrono::Local::now().format("%Y-%m-%d"));
+                let dest = (1..).map(|i| base.join(if i == 1 { name.clone() } else { format!("{name} ({i})") })).find(|d| !d.exists()).unwrap_or_else(|| base.join(&name));
+                if let Err(e) = std::fs::create_dir_all(&dest) {
+                    return Reply::say(format!("I couldn't make the folder: {e}")).mood(Mood::Sad);
+                }
+                self.save_if_changed();
+                let copied = Self::data_files().iter().filter(|(_, from)| from.exists()).filter(|(n, from)| std::fs::copy(from, dest.join(n)).is_ok()).count();
+                let _ = open(&dest.to_string_lossy());
+                Reply::say(lines::pick("data_exported").replace("{x}", &find::tilde(&dest)).replace("{n}", &copied.to_string())).mood(Mood::Happy)
+            }
+            "import" => {
+                let confirmed = arg.ends_with(" confirmed");
+                let folder = brain::expand_home(arg.trim_end_matches(" confirmed").trim());
+                let found: Vec<(&str, std::path::PathBuf)> = Self::data_files().into_iter().filter(|(n, _)| folder.join(n).is_file()).collect();
+                if found.is_empty() {
+                    return Reply::say(format!("There's no Clipster export in {}. It holds files like settings.json and todo.txt.", find::tilde(&folder))).mood(Mood::Think);
+                }
+                if !confirmed {
+                    let names: Vec<&str> = found.iter().map(|(n, _)| *n).collect();
+                    return Reply::say(format!("Replace your {} with the ones from {}? Your current files are kept next to them as .bak.", names.join(", "), find::tilde(&folder))).mood(Mood::Think).run("Yes, import them", &format!("data import {} confirmed", folder.display())).btn("Keep mine", Act::Hide);
+                }
+                let mut done = 0;
+                for (n, to) in &found {
+                    if to.exists() {
+                        let _ = std::fs::copy(to, to.with_extension(format!("{}.bak", to.extension().map(|e| e.to_string_lossy().into_owned()).unwrap_or_default())));
+                    }
+                    if let Some(dir) = to.parent() {
+                        let _ = std::fs::create_dir_all(dir);
+                    }
+                    if std::fs::copy(folder.join(n), to).is_ok() {
+                        done += 1;
+                    }
+                }
+                // read it all in again
+                self.load();
+                lines::reload();
+                self.desk_files_stale();
+                Reply::say(lines::pick("data_imported").replace("{n}", &done.to_string())).mood(Mood::Party)
+            }
+            "forget" if arg.starts_with("time") => {
+                if arg.ends_with("confirmed") {
+                    self.kind_time.clear();
+                    self.site_time.clear();
+                    self.focus_log.clear();
+                    self.day_totals.clear();
+                    Reply::say(lines::pick("data_forgot_time")).mood(Mood::Happy)
+                } else {
+                    Reply::say("Forget the time per app, the focus sessions and the eight weeks of totals? Your to-dos, notes and journal stay.").mood(Mood::Think).run("Yes, forget it", "data forget time confirmed").btn("Keep it", Act::Hide)
+                }
+            }
+            _ => Reply::say("").mood(Mood::Think),
+        }
+    }
+
+    /// The Desk reads its files again on the next frame.
+    fn desk_files_stale(&mut self) {
+        self.desk.reload_files();
+    }
+
     /// Upkeep's Space page: "scan" (on a thread), "trash 2,5" (asks first), "trash 2,5 confirmed".
     fn space_command(&mut self, ctx: &egui::Context, cmd: &str, from_desk: bool, silent: &mut bool) -> Reply {
         let (verb, arg) = cmd.split_once(' ').unwrap_or((cmd, ""));
@@ -1915,9 +2042,14 @@ impl App {
         }
         self.window_last = Some(now);
         self.window_said.insert(pool.clone(), now);
+        // a site or app you muted: nothing about it
+        let id = site_id(&pool).map(String::from).unwrap_or_else(|| pool.trim_start_matches("window ").to_string());
+        if self.muted.contains(&id) {
+            return;
+        }
         let mut r = brain::react_window(&pool);
         r.text = r.text.replace("{title}", &brain::page_title(&self.window_text));
-        self.pipe_up(r);
+        self.pipe_up(r.run("Not about this", &format!("pref mute {id}")));
     }
 
     /// Clipster watches you play: comments, and cheers for high scores.
@@ -2224,7 +2356,7 @@ impl App {
     fn snapshot(&self) -> String {
         serde_json::json!({
             "tips_every": self.tips_every, "notice_clip": self.notice_clip, "notice_programs": self.notice_programs, "notice_windows": self.notice_windows, "checkin": self.checkin, "facts": self.facts, "kind_time": self.kind_time, "focus_log": self.focus_log, "desk_look": if self.desk_modern { "modern" } else { "classic" }, "desk_size": if self.desk_large { "large" } else { "normal" }, "checkin_days": self.checkin_days,
-            "pins": self.pins, "reading": self.reading, "calendars": self.calendars, "calendar_meta": self.calendar_meta.iter().map(|(s, m)| (s.clone(), m.to_json())).collect::<serde_json::Map<_, _>>(), "holidays": self.holiday_cc, "pin_labels": self.pin_labels, "reading_titles": self.reading_titles, "people": self.people.iter().map(|p| p.to_json()).collect::<Vec<_>>(), "habits": self.habits.iter().map(|h| h.to_json()).collect::<Vec<_>>(), "countdowns": self.countdowns.iter().map(|(l, d)| serde_json::json!([l, d.to_string()])).collect::<Vec<_>>(), "site_time": self.site_time, "kind_moves": self.kind_moves, "weather": self.weather_on, "work_hours": [self.work_hours.0, self.work_hours.1], "day_totals": plan::history_merge(&self.day_totals, &self.kind_time, &self.focus_log, chrono::Local::now().date_naive()), "workday": self.workday, "workday_ask": self.workday_ask, "welcome_seen": self.welcome_seen, "backup_sources": self.backup_sources, "backup_target": self.backup_target, "backup_last": self.backup_last, "backup_result": self.backup_result, "backup_skip": self.backup_skip, "backup_auto": self.backup_auto, "backup_history": self.backup_history, "upkeep_hide": self.upkeep_hide, "space_log": self.space_log, "tidy_targets": self.tidy_targets, "tidy_auto": self.tidy_auto, "dnd_restore": self.dnd_restore, "dnd": self.dnd, "wrapup": self.wrapup, "upkeep_day": self.upkeep_day, "focus_goal": self.focus_goal, "budgets": self.budgets,
+            "pins": self.pins, "reading": self.reading, "calendars": self.calendars, "calendar_meta": self.calendar_meta.iter().map(|(s, m)| (s.clone(), m.to_json())).collect::<serde_json::Map<_, _>>(), "holidays": self.holiday_cc, "pin_labels": self.pin_labels, "reading_titles": self.reading_titles, "people": self.people.iter().map(|p| p.to_json()).collect::<Vec<_>>(), "habits": self.habits.iter().map(|h| h.to_json()).collect::<Vec<_>>(), "countdowns": self.countdowns.iter().map(|(l, d)| serde_json::json!([l, d.to_string()])).collect::<Vec<_>>(), "site_time": self.site_time, "kind_moves": self.kind_moves, "weather": self.weather_on, "work_hours": [self.work_hours.0, self.work_hours.1], "day_totals": plan::history_merge(&self.day_totals, &self.kind_time, &self.focus_log, chrono::Local::now().date_naive()), "workday": self.workday, "workday_ask": self.workday_ask, "welcome_seen": self.welcome_seen, "backup_sources": self.backup_sources, "backup_target": self.backup_target, "backup_last": self.backup_last, "backup_result": self.backup_result, "backup_skip": self.backup_skip, "backup_auto": self.backup_auto, "backup_history": self.backup_history, "upkeep_hide": self.upkeep_hide, "space_log": self.space_log, "tidy_targets": self.tidy_targets, "tidy_auto": self.tidy_auto, "work_days": self.work_days, "clock12": brain::clock12(), "week_sunday": brain::week_sunday(), "quiet_after": self.quiet_after, "quiet_weekend": self.quiet_weekend, "quiet_meetings": self.quiet_meetings, "headsup": self.headsup_min, "break_every": self.break_every, "alarm_sound": self.alarm_sound, "muted": self.muted, "desk_morning": self.desk_morning, "dnd_restore": self.dnd_restore, "dnd": self.dnd, "wrapup": self.wrapup, "upkeep_day": self.upkeep_day, "focus_goal": self.focus_goal, "budgets": self.budgets,
             "notice_health": self.notice_health, "check_updates": self.check_updates, "update_told": self.update_told, "sounds": self.sounds, "breaks": self.breaks, "name": self.name,
             "hat": self.hat, "skin": self.skin, "friendship": self.friendship, "highscores": self.highscores, "birthday": self.birthday.map(|(m, d)| [m, d]), "stats": self.stats, "unlocked": self.unlocked, "explored": self.explored, "persona": if self.unhinged { "unhinged" } else { "boring" }, "anchor": self.anchor.or(self.saved_anchor).map(|a| [a.x, a.y]),
             "timers": self.timers.iter().map(|t| serde_json::json!([t.at, t.label, t.every, t.id, t.rule])).collect::<Vec<_>>(),
@@ -2301,6 +2433,7 @@ impl App {
             let e = e.as_array()?;
             (e.len() == 4).then(|| (d.clone(), [0, 1, 2, 3].map(|i| e[i].as_u64().unwrap_or(0))))
         }).collect();
+        self.focus_log.clear(); // reading the settings again (an import) doesn't double them
         for f in v["focus_log"].as_array().into_iter().flatten() {
             if let (Some(d), Some(m), Some(fo), Some(di), Some(l)) = (f[0].as_str(), f[1].as_u64(), f[2].as_u64(), f[3].as_u64(), f[4].as_str()) {
                 self.focus_log.push((d.into(), m, fo, di, l.into()));
@@ -2363,6 +2496,18 @@ impl App {
         self.tidy_targets = v["tidy_targets"].as_array().into_iter().flatten().filter_map(|e| Some((e[0].as_str()?.to_string(), e[1].as_str()?.to_string()))).collect();
         tidy::set_targets(&self.tidy_targets.iter().map(|(c, p)| (c.clone(), std::path::PathBuf::from(p))).collect::<Vec<_>>());
         self.tidy_auto = v["tidy_auto"].as_bool().unwrap_or(false);
+        if let Some(days) = v["work_days"].as_array() {
+            self.work_days = days.iter().filter_map(|d| d.as_u64()).filter(|d| (1..=7).contains(d)).map(|d| d as u32).collect();
+        }
+        brain::set_clock(v["clock12"].as_bool().unwrap_or(false), v["week_sunday"].as_bool().unwrap_or(false));
+        self.quiet_after = v["quiet_after"].as_u64().filter(|h| *h <= 23).map(|h| h as u32);
+        self.quiet_weekend = v["quiet_weekend"].as_bool().unwrap_or(false);
+        self.quiet_meetings = v["quiet_meetings"].as_bool().unwrap_or(false);
+        self.headsup_min = v["headsup"].as_u64().map_or(10, |m| m.min(120) as u32);
+        self.break_every = v["break_every"].as_u64().map_or(50, |m| m.clamp(15, 240) as u32);
+        self.alarm_sound = v["alarm_sound"].as_bool().unwrap_or(true);
+        self.muted = strings("muted");
+        self.desk_morning = v["desk_morning"].as_bool().unwrap_or(false);
         self.backup_auto = v["backup_auto"].as_str().filter(|a| ["plugged", "evening"].contains(a)).unwrap_or("off").to_string();
         self.backup_history = v["backup_history"].as_array().into_iter().flatten().filter_map(|h| Some([h[0].as_u64()?, h[1].as_u64()?, h[2].as_u64()?, h[3].as_u64()?])).take(10).collect();
         self.timers.clear();
@@ -2535,6 +2680,9 @@ impl App {
                 let now = Instant::now();
                 self.account_time();
                 let dnd = if self.dnd && self.screenshot.is_none() { sys::dnd_on() } else { None };
+                if self.dnd && self.screenshot.is_none() {
+                    self.dnd_failed = dnd.is_none(); // Settings says honestly what happens here
+                }
                 self.dnd_restore = dnd.as_ref().and_then(|d| d.marker());
                 let quiet = dnd.is_some();
                 self.focus = Some(Focus { label: label.clone(), start: now, until: now + Duration::from_secs(secs), distracted: 0, last_nudge: None, dnd, paused_at: None, paused: 0 });
@@ -2742,6 +2890,39 @@ impl App {
                     }
                     "desksize" => self.desk_large = value == "large",
                     "tidyauto" => self.tidy_auto = on,
+                    "workdays" => {
+                        let days: Vec<u32> = value.split(',').filter_map(|d| d.trim().parse::<u32>().ok()).filter(|d| (1..=7).contains(d)).collect();
+                        if !days.is_empty() {
+                            self.work_days = days;
+                        }
+                    }
+                    "clock" => brain::set_clock(value == "12", brain::week_sunday()),
+                    "weekstart" => brain::set_clock(brain::clock12(), value == "sun"),
+                    "quietfor" => {
+                        // minutes, or "tomorrow" (until 6 in the morning)
+                        let secs = if value == "tomorrow" {
+                            let next = (chrono::Local::now().date_naive() + chrono::Days::new(1)).and_hms_opt(6, 0, 0).unwrap_or_default();
+                            (timers::unix_of(next) - timers::unix_now()).max(60) as u64
+                        } else {
+                            value.parse::<u64>().unwrap_or(60).clamp(1, 24 * 60) * 60
+                        };
+                        self.quiet_until = Some(Instant::now() + Duration::from_secs(secs));
+                    }
+                    "quietafter" => self.quiet_after = value.parse::<u32>().ok().filter(|h| *h <= 23),
+                    "quietweekend" => self.quiet_weekend = on,
+                    "quietmeetings" => self.quiet_meetings = on,
+                    "headsup" => self.headsup_min = value.parse::<u32>().unwrap_or(10).min(120),
+                    "breakevery" => self.break_every = value.parse::<u32>().unwrap_or(50).clamp(15, 240),
+                    "alarmsound" => self.alarm_sound = on,
+                    "deskmorning" => self.desk_morning = on,
+                    "mute" => {
+                        let id = value.trim().to_lowercase();
+                        if !id.is_empty() && !self.muted.contains(&id) {
+                            self.muted.push(id.clone());
+                        }
+                        r.text = lines::pick("muted").replace("{x}", &id);
+                    }
+                    "unmute" => self.muted.retain(|m| *m != value.trim().to_lowercase()),
                     // "Documents /home/you/Documents" (or "Documents default")
                     "tidytarget" => {
                         if let Some((cat, path)) = value.split_once(' ') {
@@ -2862,6 +3043,7 @@ impl App {
                 silent = true;
             }
             Effect::Space(cmd) => r = self.space_command(ctx, &cmd, from_desk, &mut silent),
+            Effect::Data(cmd) => r = self.data_command(&cmd),
             Effect::ShowQr(text) => {
                 // the code is drawn in a card on the Desk
                 if !self.desk.is_open() {
@@ -3512,7 +3694,10 @@ impl App {
                 fired.at = at;
                 self.timers.push(fired);
             }
-            self.sound("alarm-clock-elapsed");
+            // a reminder rings with its own switch, apart from "Play sounds"
+            if self.alarm_sound && self.screenshot.is_none() {
+                sys::play_sound("alarm-clock-elapsed");
+            }
             sys::notify(&label);
             ctx.send_viewport_cmd(egui::ViewportCommand::RequestUserAttention(egui::UserAttentionType::Critical));
             self.show(
@@ -3530,9 +3715,17 @@ impl App {
         // weekday mornings: offer to start the workday, the first time he sees you
         let local = chrono::Local::now();
         let day_num = chrono::Datelike::num_days_from_ce(&local.date_naive()) as u64;
-        let weekday = chrono::Datelike::weekday(&local).number_from_monday() <= 5;
+        let weekday = self.work_days.contains(&chrono::Datelike::weekday(&local).number_from_monday());
         let can_nudge = self.balloon.is_none() && !self.quiet() && self.input.is_empty() && self.focus.is_none() && self.screenshot.is_none();
-        if weekday && (6..12).contains(&chrono::Timelike::hour(&local)) && self.workday_ask && !self.workday.is_empty() && self.stats.get("workday_day") != Some(&day_num) && t > 90.0 && can_nudge {
+        // the Desk with the day: the first time you're at the computer each morning
+        if self.desk_morning && (5..12).contains(&chrono::Timelike::hour(&local)) && self.stats.get("desk_morning_day") != Some(&day_num) && t > 20.0 && self.screenshot.is_none() && !self.desk.is_open() {
+            self.stats.insert("desk_morning_day".into(), day_num);
+            self.desk_quip = lines::pick("desk_status");
+            self.desk.set_tab("today");
+            self.desk.open();
+        }
+        let start = self.work_hours.0;
+        if weekday && (start.saturating_sub(3)..start + 3).contains(&chrono::Timelike::hour(&local)) && self.workday_ask && !self.workday.is_empty() && self.stats.get("workday_day") != Some(&day_num) && t > 90.0 && can_nudge {
             self.stats.insert("workday_day".into(), day_num);
             self.pipe_up(Reply::say(lines::pick("workday_offer")).mood(Mood::Coffee).run("Start my workday", "workday").btn("Not today", Act::Hide));
         }
@@ -3612,7 +3805,7 @@ impl App {
             self.fetch_calendars(ctx);
         }
         let wall = chrono::Local::now().naive_local();
-        if let Some(e) = self.events.iter().find(|e| !e.all_day && e.start > wall && e.start - wall <= chrono::Duration::minutes(10) && !self.told_events.contains(&e.key()) && self.cal_meta(e.cal).alert).cloned() {
+        if let Some(e) = self.events.iter().find(|e| !e.all_day && e.start > wall && e.start - wall <= chrono::Duration::minutes(self.headsup_min as i64) && self.headsup_min > 0 && !self.told_events.contains(&e.key()) && self.cal_meta(e.cal).alert).cloned() {
             self.told_events.insert(e.key());
             let mins = ((e.start - wall).num_seconds() as f64 / 60.0).ceil() as i64;
             self.sound("message");
@@ -3652,7 +3845,7 @@ impl App {
         if now.duration_since(self.last_move) > Duration::from_secs(300) {
             self.active_since = None;
         }
-        if self.breaks && self.active_since.is_some_and(|a| now.duration_since(a) > Duration::from_secs(50 * 60)) {
+        if self.breaks && self.active_since.is_some_and(|a| now.duration_since(a) > Duration::from_secs(self.break_every as u64 * 60)) {
             self.active_since = Some(now);
             self.pipe_up(
                 Reply::say(lines::pick("break"))
@@ -3717,7 +3910,10 @@ impl App {
                         }
                     }
                 }
-                Event::Program(p) if self.notice_programs => self.pipe_up(brain::react_program(&p)),
+                Event::Program(p) if self.notice_programs && !self.muted.iter().any(|m| m.eq_ignore_ascii_case(&p)) => {
+                    let r = brain::react_program(&p).run("Not about this", &format!("pref mute {}", sys::program_name(&p)));
+                    self.pipe_up(r);
+                }
                 Event::Title(t) => self.window_title(&t),
                 Event::Installed(Ok((path, version))) => {
                     self.installing = false;
@@ -3905,10 +4101,10 @@ impl App {
                 let text = if present { lines::pick("backup_reminder").replace("{n}", &backup_days.unwrap_or(7).to_string()) } else { lines::pick("backup_drive_missing").replace("{x}", &self.backup_target) };
                 let r = Reply::say(text).mood(Mood::Think);
                 self.pipe_up(if present { r.run("Back up now", "backup now").btn("Later", Act::Hide) } else { r.btn("Later", Act::Hide) });
-            } else if self.wrapup && hour >= 17 && tracked >= 2 * 3600 && self.stats.get("wrapup_day") != Some(&today) {
+            } else if self.wrapup && hour >= self.work_hours.1.max(12) && tracked >= 2 * 3600 && self.stats.get("wrapup_day") != Some(&today) && self.work_days.contains(&(weekday as u32)) {
                 self.stats.insert("wrapup_day".into(), today);
                 self.pipe_up(Reply::say(lines::pick("wrapup_offer")).mood(Mood::Happy).run("Wrap up my day", "wrapup").btn("Not today", Act::Hide));
-            } else if (weekday == 5 && hour >= 15 || weekday >= 6) && self.stats.get("days").copied().unwrap_or(0) >= 3 && self.stats.get("review_week") != Some(&week) {
+            } else if (self.work_days.iter().max().is_some_and(|last| weekday as u32 == *last) && hour + 2 >= self.work_hours.1 || self.work_days.iter().max().is_some_and(|last| weekday as u32 > *last)) && self.stats.get("days").copied().unwrap_or(0) >= 3 && self.stats.get("review_week") != Some(&week) {
                 self.stats.insert("review_week".into(), week);
                 self.pipe_up(Reply::say(lines::pick("review_offer")).mood(Mood::Happy).run("Show me my week", "review").btn("Not now", Act::Hide));
             }
@@ -4680,20 +4876,7 @@ fn draw_clipster(p: &egui::Painter, origin: Pos2, t: f32, at: f32, anim: Anim, l
     arc(31.0, 112.0, 19.0, PI, 0.0);
     pts.push(tf(50.0, 38.0));
     let w = SCALE;
-    let rgb = Color32::from_rgb;
-    let (edge, body, shine) = match skin {
-        "gold" => (rgb(110, 80, 10), rgb(222, 178, 60), rgb(255, 242, 190)),
-        "beige" => (rgb(118, 104, 78), rgb(214, 201, 170), rgb(246, 240, 222)), // the Golden Age, 1998
-        "ember" => (rgb(58, 8, 6), rgb(168, 40, 28), rgb(255, 168, 110)),     // wrathful days
-        // the two ghost copies behind a glitch (RGB split)
-        "_red" => (Color32::from_rgba_unmultiplied(255, 30, 70, 90), Color32::from_rgba_unmultiplied(255, 40, 80, 110), Color32::from_rgba_unmultiplied(255, 90, 120, 90)),
-        "_cyan" => (Color32::from_rgba_unmultiplied(20, 220, 255, 90), Color32::from_rgba_unmultiplied(40, 230, 255, 110), Color32::from_rgba_unmultiplied(120, 245, 255, 90)),
-        "rose" => (rgb(120, 60, 72), rgb(232, 158, 172), rgb(255, 232, 238)),
-        "neon" => (rgb(10, 80, 40), rgb(70, 235, 120), rgb(220, 255, 230)),
-        "midnight" => (rgb(8, 8, 18), rgb(58, 62, 84), rgb(150, 160, 200)),
-        "ocean" => (rgb(16, 56, 110), rgb(84, 158, 222), rgb(220, 240, 255)),
-        _ => (rgb(70, 76, 88), rgb(178, 186, 198), rgb(245, 248, 252)),
-    };
+    let (edge, body, shine) = skin_palette(skin);
     if skin == "neon" {
         p.add(Shape::line(pts.clone(), Stroke::new(13.0 * w, Color32::from_rgba_unmultiplied(80, 255, 140, 40 + ((t * 3.0).sin() * 20.0) as u8))));
     }
@@ -5026,6 +5209,56 @@ fn achievement(id: &str) -> (String, String) {
 }
 
 /// Hats in the clip's own coordinates (its top bend peaks at about y = 10), so they bounce and lean with him.
+/// A skin's wire colours: (edge, body, shine).
+fn skin_palette(skin: &str) -> (Color32, Color32, Color32) {
+    let rgb = Color32::from_rgb;
+    match skin {
+        "gold" => (rgb(110, 80, 10), rgb(222, 178, 60), rgb(255, 242, 190)),
+        "beige" => (rgb(118, 104, 78), rgb(214, 201, 170), rgb(246, 240, 222)), // the Golden Age, 1998
+        "ember" => (rgb(58, 8, 6), rgb(168, 40, 28), rgb(255, 168, 110)),     // wrathful days
+        // the two ghost copies behind a glitch (RGB split)
+        "_red" => (Color32::from_rgba_unmultiplied(255, 30, 70, 90), Color32::from_rgba_unmultiplied(255, 40, 80, 110), Color32::from_rgba_unmultiplied(255, 90, 120, 90)),
+        "_cyan" => (Color32::from_rgba_unmultiplied(20, 220, 255, 90), Color32::from_rgba_unmultiplied(40, 230, 255, 110), Color32::from_rgba_unmultiplied(120, 245, 255, 90)),
+        "rose" => (rgb(120, 60, 72), rgb(232, 158, 172), rgb(255, 232, 238)),
+        "neon" => (rgb(10, 80, 40), rgb(70, 235, 120), rgb(220, 255, 230)),
+        "midnight" => (rgb(8, 8, 18), rgb(58, 62, 84), rgb(150, 160, 200)),
+        "ocean" => (rgb(16, 56, 110), rgb(84, 158, 222), rgb(220, 240, 255)),
+        _ => (rgb(70, 76, 88), rgb(178, 186, 198), rgb(245, 248, 252)),
+    }
+}
+
+/// A small Clipster for the Settings outfit picker: the same wire, colours and hat, scaled by `s` (his foot at `foot`).
+fn draw_mini(p: &egui::Painter, foot: Pos2, s: f32, hat: &str, skin: &str, t: f32) {
+    use std::f32::consts::PI;
+    let tf = |x: f32, y: f32| foot + vec2((x - 31.0) * s, (y - 131.0) * s);
+    let mut pts: Vec<Pos2> = vec![tf(22.0, 50.0)];
+    let mut arc = |cx: f32, cy: f32, r: f32, from: f32, to: f32| {
+        for k in 0..=14 {
+            let th = from + (to - from) * k as f32 / 14.0;
+            pts.push(tf(cx + r * th.cos(), cy + r * th.sin()));
+        }
+    };
+    arc(31.0, 100.0, 9.0, PI, 0.0);
+    arc(26.0, 24.0, 14.0, 0.0, -PI);
+    arc(31.0, 112.0, 19.0, PI, 0.0);
+    pts.push(tf(50.0, 38.0));
+    let (edge, body, _) = skin_palette(skin);
+    p.add(Shape::line(pts.clone(), Stroke::new((7.0 * s).max(1.5), edge)));
+    if skin == "rainbow" {
+        for (i, seg) in pts.windows(2).enumerate() {
+            let hue = i as f32 / pts.len() as f32;
+            p.line_segment([seg[0], seg[1]], Stroke::new((4.6 * s).max(1.0), Color32::from(egui::ecolor::Hsva::new(hue, 0.7, 0.95, 1.0))));
+        }
+    } else {
+        p.add(Shape::line(pts, Stroke::new((4.6 * s).max(1.0), body)));
+    }
+    for x in [20.0, 38.0] {
+        p.circle(tf(x, 30.0), 5.0 * s, Color32::WHITE, Stroke::new(1.0, Color32::from_rgb(30, 30, 30)));
+        p.circle_filled(tf(x + 1.0, 31.0), 2.0 * s, Color32::from_rgb(30, 30, 30));
+    }
+    draw_hat(p, &tf, hat, t);
+}
+
 fn draw_hat(p: &egui::Painter, tf: &dyn Fn(f32, f32) -> Pos2, hat: &str, t: f32) {
     let rgb = Color32::from_rgb;
     let ink = Stroke::new(1.0, rgb(40, 30, 30));

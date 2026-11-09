@@ -1362,6 +1362,19 @@ fn notes(s: &str, raw: &str) -> Option<Reply> {
     if let Some(h) = after(s, &["stop tracking ", "remove the habit ", "remove habit ", "delete the habit "]).filter(|h| crate::habits::known(h)) {
         return go(format!("habit remove {h}"));
     }
+    // quiet for longer, and comments you don't want about one app or site
+    if has(s, &["be quiet until tomorrow", "quiet until tomorrow", "shut up until tomorrow", "no chatter until tomorrow", "silence until tomorrow"]) {
+        return go("pref quietfor tomorrow".into());
+    }
+    if let Some(what) = after(s, &["stop commenting on ", "dont comment on ", "do not comment on ", "never comment on ", "no more comments about ", "stop talking about "]) {
+        let id: String = what.trim_end_matches(".com").split_whitespace().next().unwrap_or("").chars().filter(|c| c.is_ascii_alphanumeric() || *c == '-').collect();
+        if id.len() >= 3 {
+            return go(format!("pref mute {id}"));
+        }
+    }
+    if has(s, &["export my data", "export everything", "back up my clipster data", "move clipster to a new computer", "export my settings"]) {
+        return go("data export".into());
+    }
     // "stop watching my clipboard for a bit": the history looks away for a while
     if has(s, &["stop watching my clipboard", "stop recording my clipboard", "pause the clipboard", "pause my clipboard", "pause clipboard history", "dont watch my clipboard", "do not watch my clipboard", "look away from my clipboard"]) {
         let dur = after(s, &["stop watching my clipboard for ", "pause the clipboard for ", "pause my clipboard for "]).filter(|d| brain::parse_dur(d).is_some()).unwrap_or("15m");
@@ -2661,6 +2674,9 @@ mod tests {
         assert_eq!(eff("stop watching my clipboard for a bit"), Effect::Clip("pause 15m".into()));
         assert_eq!(eff("pause the clipboard for 30 minutes"), Effect::Clip("pause 30 minutes".into()));
         assert_eq!(eff("watch my clipboard again"), Effect::Clip("resume".into()));
+        assert_eq!(eff("be quiet until tomorrow"), Effect::Pref("quietfor".into(), "tomorrow".into()));
+        assert_eq!(eff("stop commenting on youtube"), Effect::Pref("mute".into(), "youtube".into()));
+        assert_eq!(eff("export my data"), Effect::Data("export".into()));
         assert!(matches!(eff("when am I free"), Effect::Calendar(c) if c.starts_with("freeday ")));
         assert!(matches!(eff("am i free friday at 3"), Effect::Calendar(c) if c.starts_with("free ")), "the one-time question still works");
         assert!(!matches!(eff("I'm waiting for the bus"), Effect::Commands(_)), "not a person he knows");

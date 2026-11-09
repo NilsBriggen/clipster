@@ -162,6 +162,7 @@ pub mod win {
         pub fn GetDriveTypeW(root: *const u16) -> u32; // 2 removable, 3 fixed
         pub fn GetVolumeInformationW(root: *const u16, name: *mut u16, name_len: u32, serial: *mut u32, max_part: *mut u32, flags: *mut u32, fs: *mut u16, fs_len: u32) -> i32;
         pub fn SetThreadErrorMode(new: u32, old: *mut u32) -> i32; // 1 = no "insert a disk" box for empty card readers
+        pub fn GetUserDefaultLocaleName(name: *mut u16, len: i32) -> i32; // "de-CH"
     }
     #[link(name = "shell32")]
     extern "system" {
@@ -185,6 +186,27 @@ pub mod win {
     extern "system" {
         pub fn PlaySoundW(sound: *const u16, module: isize, flags: u32) -> i32;
     }
+}
+
+/// The country of your language setting ("de_CH.UTF-8" or "de-CH" → "CH"), for the public holidays' default.
+/// Nothing is asked online.
+pub fn locale_region() -> Option<String> {
+    #[cfg(windows)]
+    let tag = {
+        let mut buf = [0u16; 85];
+        let n = unsafe { win::GetUserDefaultLocaleName(buf.as_mut_ptr(), buf.len() as i32) };
+        String::from_utf16_lossy(&buf[..(n.max(1) - 1) as usize])
+    };
+    #[cfg(not(windows))]
+    let tag = ["LC_ALL", "LC_MESSAGES", "LANG"].iter().filter_map(|k| std::env::var(k).ok()).find(|v| !v.is_empty() && v != "C" && v != "POSIX").unwrap_or_default();
+    region_of(&tag)
+}
+
+/// "de_CH.UTF-8" → "CH", "en-US" → "US".
+pub fn region_of(tag: &str) -> Option<String> {
+    let base = tag.split(['.', '@']).next().unwrap_or("");
+    let region = base.split(['_', '-']).nth(1)?;
+    (region.len() == 2 && region.chars().all(|c| c.is_ascii_alphabetic())).then(|| region.to_uppercase())
 }
 
 // ---------- what you're working in ----------
@@ -1233,6 +1255,7 @@ mod tests {
         assert_eq!(close_command("a b; rm"), if cfg!(windows) { "taskkill /IM abrm.exe" } else { "pkill -x abrm" });
         assert_eq!(parse_proc_stat("4711 (Web Content (x)) S 1 2 3 4 5 6 7 8 9 10 250 50 0 0"), Some(("Web Content (x)".into(), 300)));
         assert_eq!(parse_proc_stat("garbage"), None);
+        assert_eq!((region_of("de_CH.UTF-8"), region_of("en-US"), region_of("C"), region_of("sr_RS@latin")), (Some("CH".into()), Some("US".into()), None, Some("RS".into())));
         assert_eq!(parse_top_json(r#"[{"Name":"firefox","Mem":2097152,"Cpu":12.5},{"Name":"code","Mem":1048576,"Cpu":null}]"#), vec![("firefox".into(), 2048, 12.5), ("code".into(), 1024, 0.0)]);
         assert_eq!(parse_top_json(r#"{"Name":"one","Mem":1024,"Cpu":1}"#).len(), 1, "a single process comes as an object");
         assert!(uptime() > 0);

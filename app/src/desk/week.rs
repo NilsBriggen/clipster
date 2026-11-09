@@ -239,7 +239,7 @@ impl Desk {
                 match item {
                     Ahead::Event { at, title } => {
                         let text = match at {
-                            Some(t) => format!("{} {title}", t.format("%-H:%M")),
+                            Some(t) => format!("{} {title}", brain::clock(*t)),
                             None => title.clone(),
                         };
                         if at.is_none() {
@@ -251,7 +251,7 @@ impl Desk {
                     }
                     Ahead::Reminder { at, label } => {
                         p.circle_filled(pos2(x0 + 3.0, cy), 3.0, look.score(70));
-                        line(ui, pos2(x0 + 10.0, cy), &format!("{} {}", at.format("%-H:%M"), if label.is_empty() { "Timer" } else { label }), look.font(11.5), look.text(), w - 10.0);
+                        line(ui, pos2(x0 + 10.0, cy), &format!("{} {}", brain::clock(*at), if label.is_empty() { "Timer" } else { label }), look.font(11.5), look.text(), w - 10.0);
                     }
                     Ahead::Todo { line: n, text, done } => {
                         if look.checkbox(ui, Rect::from_center_size(pos2(x0 + s / 2.0, cy), vec2(s, s)), *done, Id::unique(("desk-ahead-todo", i, j))).clicked() {

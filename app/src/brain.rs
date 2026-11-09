@@ -90,6 +90,7 @@ pub enum Effect {
     Reveal(String),                  // show this file in its folder
     UpkeepHide(String, bool),        // a checkup row that isn't for you: its id, hide (true) or bring back
     Space(String),                   // Upkeep's Space page: "scan", "trash 2,5" (asks first), "trash 2,5 confirmed"
+    Data(String),                    // your files: "open", "export", "import <folder>" (asks first), "forget time" (asks first)
     SaveStarter(String),             // keep this named list as one to start new lists from (written to your lines file)
     OpenDesk(String),                // Clipster's Desk, on this tab ("" = where it was): stats, to-dos, reminders, upkeep
     DeskLook(bool),                  // the Desk's look: true = modern, false = classic 98
@@ -242,7 +243,7 @@ pub fn respond(input: &str) -> Reply {
 
 /// Strict commands ("joke", "timer 5m tea", "5 km to miles"). `None` = not a command I know.
 /// The settings the Desk's `pref <key> <value>` may change.
-pub const PREF_KEYS: &[&str] = &["persona", "tips", "clip", "programs", "windows", "checkin", "health", "updates", "sounds", "breaks", "dnd", "wrapup", "upkeepday", "workdayask", "quiet", "autostart", "goal", "budget", "classiclook", "desksize", "weather", "workhours", "holidays", "tidyauto", "tidytarget"];
+pub const PREF_KEYS: &[&str] = &["persona", "tips", "clip", "programs", "windows", "checkin", "health", "updates", "sounds", "breaks", "dnd", "wrapup", "upkeepday", "workdayask", "quiet", "autostart", "goal", "budget", "classiclook", "desksize", "weather", "workhours", "holidays", "tidyauto", "tidytarget", "workdays", "clock", "weekstart", "quietfor", "quietafter", "quietweekend", "quietmeetings", "headsup", "breakevery", "alarmsound", "deskmorning", "mute", "unmute"];
 
 /// Command words that are also ordinary English words only count in their command shape: "drink" alone is a
 /// cocktail, "drink water" is advice; "top" alone lists programs, "top 10 movies" is a question.
@@ -420,6 +421,8 @@ pub fn exact(input: &str) -> Option<Reply> {
             return Some(Reply::say("").effect(Effect::UpkeepHide(id.trim().to_string(), verb == "hide")));
         }
         "space" if rest == "scan" || rest.starts_with("trash ") => return Some(Reply::say("").effect(Effect::Space(rest.to_string()))),
+        // Settings → Your data: "data open", "data export", "data import <folder>", "data forget time"
+        "data" if ["open", "export", "import", "forget"].contains(&rest.split(' ').next().unwrap_or("")) => return Some(Reply::say("").effect(Effect::Data(rest.to_string()))),
         "upkeep" if rest == "cleartemp" => {
             let what = if cfg!(windows) { "the temporary files older than a week" } else { "the thumbnails" };
             return Some(Reply::say(format!("Clear {what}? Programs make new ones when they need them.")).mood(Mood::Think).run("Yes, clear them", crate::sys::temp_clear_command()).btn("No, leave them", Act::Hide));
@@ -1069,6 +1072,33 @@ const WORK_KINDS: &[&str] = &["code", "writing", "letter", "spreadsheet", "slide
 /// A site's id as a name: "youtube" → "Youtube", "google_docs" → "Google docs".
 pub fn site_name(id: &str) -> String {
     crate::writing::cap_first(&id.replace(['_', '-'], " "))
+}
+
+// How times and weeks are shown (Settings → My day): 2:30 pm or 14:30, weeks from Sunday or Monday.
+static CLOCK12: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+static WEEK_SUNDAY: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+
+pub fn set_clock(twelve: bool, sunday: bool) {
+    CLOCK12.store(twelve, std::sync::atomic::Ordering::Relaxed);
+    WEEK_SUNDAY.store(sunday, std::sync::atomic::Ordering::Relaxed);
+}
+
+pub fn clock12() -> bool {
+    CLOCK12.load(std::sync::atomic::Ordering::Relaxed)
+}
+
+pub fn week_sunday() -> bool {
+    WEEK_SUNDAY.load(std::sync::atomic::Ordering::Relaxed)
+}
+
+/// A time of day as you like it: "14:30", or "2:30 pm".
+pub fn clock(t: impl chrono::Timelike) -> String {
+    let (h, m) = (t.hour(), t.minute());
+    if clock12() {
+        format!("{}:{m:02} {}", if h % 12 == 0 { 12 } else { h % 12 }, if h < 12 { "am" } else { "pm" })
+    } else {
+        format!("{h}:{m:02}")
+    }
 }
 
 /// The facts the Desk can add by hand ("+ Add" on the You page).

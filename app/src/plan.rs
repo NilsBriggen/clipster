@@ -388,7 +388,7 @@ pub fn free_slots(events: &[crate::calendar::Event], from: chrono::NaiveDateTime
 /// The end of a free stretch as people say it: the working day's 17:59 is "18:00".
 pub fn end_text(t: chrono::NaiveDateTime) -> String {
     let t = if chrono::Timelike::minute(&t) == 59 { t + chrono::Duration::minutes(1) } else { t };
-    t.format("%-H:%M").to_string()
+    crate::brain::clock(t)
 }
 
 /// "Mondays", "Tuesdays"… for weekday 0 (Monday) to 6.
