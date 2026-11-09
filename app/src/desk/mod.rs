@@ -655,9 +655,14 @@ impl Desk {
                     win98::bevel(p, thumb, true);
                 }
                 Look::Modern => {
-                    let wide = resp.hovered() || resp.dragged();
-                    let t = if wide { thumb } else { thumb.shrink2(vec2(2.0, 0.0)) };
-                    p.rect_filled(t, CornerRadius::same(4), if wide { tok::DIM } else { tok::CONTROL_BORDER });
+                    // a moulded groove in the case, and a small keycap in it to slide
+                    p.rect_filled(track, CornerRadius::same(4), tok::PAGE);
+                    p.hline(track.min.x + 2.0..=track.max.x - 2.0, track.min.y + 0.5, Stroke::new(1.0, tok::FRAME_EDGE));
+                    let lit = resp.hovered() || resp.dragged();
+                    let cap = thumb.shrink2(vec2(1.0, 1.0));
+                    p.rect_filled(cap.translate(vec2(0.0, 2.0)), CornerRadius::same(4), tok::KEY_LIP);
+                    p.rect_filled(cap, CornerRadius::same(4), if lit { tok::ACCENT_SOFT } else { tok::SECONDARY });
+                    p.rect_stroke(cap, CornerRadius::same(4), Stroke::new(1.0, if lit { tok::ACCENT } else { tok::KEY_LIP }), StrokeKind::Inside);
                 }
             }
         }
@@ -987,61 +992,66 @@ impl Desk {
         let (w, h) = (win.width(), win.height());
         let o = win.min.to_vec2();
         let at = |x: f32, y: f32, w: f32, h: f32| Rect::from_min_size(pos2(x, y) + o, vec2(w, h));
+        // the case: putty plastic with a darker plinth, a recessed plate for the page, a label and a power light
         let card = at(8.0, 6.0, w - 16.0, h - 14.0);
-        p.add(egui::epaint::Shadow { offset: [0, 2], blur: 8, spread: 0, color: Color32::from_rgba_unmultiplied(0x17, 0x20, 0x33, 0x26) }.as_shape(card, CornerRadius::same(12)));
-        p.rect(card, CornerRadius::same(12), tok::FRAME, Stroke::new(1.0, tok::BORDER), StrokeKind::Inside);
-        p.hline(card.x_range(), o.y + 48.0, Stroke::new(1.0, tok::DIVIDER));
-        p.add(Shape::line(PAPERCLIP.iter().map(|(x, y)| pos2(*x, *y) + o).collect(), Stroke::new(1.4, tok::PAPERCLIP)));
-        p.text(pos2(50.0, 26.0) + o, Align2::LEFT_CENTER, "Clipster's Desk", look.bold(15.0), tok::TEXT);
+        p.add(egui::epaint::Shadow { offset: [0, 4], blur: 10, spread: 0, color: Color32::from_rgba_unmultiplied(40, 30, 10, 0x48) }.as_shape(card, CornerRadius::same(14)));
+        p.rect_filled(card, CornerRadius::same(14), tok::FRAME_EDGE);
+        p.rect(Rect::from_min_max(card.min, pos2(card.max.x, card.max.y - 4.0)), CornerRadius::same(14), tok::FRAME, Stroke::new(1.0, tok::FRAME_EDGE), StrokeKind::Inside);
+        p.hline(card.min.x + 14.0..=card.max.x - 14.0, card.min.y + 1.5, Stroke::new(1.0, Color32::from_white_alpha(150)));
+        let plate = at(14.0, 88.0, w - 28.0, h - 134.0);
+        p.rect(plate, CornerRadius::same(10), tok::PAGE, Stroke::new(1.0, tok::BORDER), StrokeKind::Inside);
+        p.hline(plate.min.x + 10.0..=plate.max.x - 10.0, plate.min.y + 1.5, Stroke::new(1.5, Color32::from_black_alpha(26)));
+        p.add(Shape::line(PAPERCLIP.iter().map(|(x, y)| pos2(*x, *y) + o).collect(), Stroke::new(1.8, tok::PAPERCLIP)));
+        let label = look::tape(&p, pos2(50.0, 15.0) + o, "Clipster's Desk", 13.0, look.bold(13.0));
+        look::led(&p, pos2(label.max.x + 14.0, label.center().y), true);
+        p.text(pos2(label.max.x + 23.0, label.center().y), Align2::LEFT_CENTER, "ON", look.bold(10.0), tok::DIM);
         let mover = ui.interact(at(8.0, 6.0, 170.0, 42.0), Id::unique("desk-modern-title"), Sense::click_and_drag());
         if drag && mover.drag_started() {
             ui.ctx().send_viewport_cmd(egui::ViewportCommand::StartDrag);
         }
         self.find_box(ui, at(w - 470.0, 14.0, 264.0, 28.0), look);
         // the look switch: both segments are always there, so Classic is one click away
-        p.rect(at(w - 196.0, 14.0, 142.0, 28.0), CornerRadius::same(6), tok::CARD, Stroke::new(1.0, tok::CONTROL_BORDER), StrokeKind::Inside);
-        for (seg, label, active) in [(at(w - 196.0, 14.0, 70.0, 28.0), "Classic 98", false), (at(w - 126.0, 14.0, 72.0, 28.0), "Modern", true)] {
-            let resp = ui.interact(seg, Id::unique(("desk-look", label)), Sense::click()).on_hover_text(if active { "The look you have" } else { "Switch to the 98 look" });
-            let fill = match (active, resp.is_pointer_button_down_on(), resp.hovered()) {
-                (true, true, _) => Some(tok::ACCENT_SOFT_PRESSED),
-                (true, _, true) => Some(tok::ACCENT_SOFT_HOVER),
-                (true, ..) => Some(tok::ACCENT_SOFT),
-                (false, true, _) => Some(tok::SECONDARY_PRESSED),
-                (false, _, true) => Some(tok::SECONDARY_HOVER),
-                _ => None,
-            };
-            if let Some(f) = fill {
-                p.rect_filled(seg.shrink(2.0), CornerRadius::same(4), f);
-            }
-            p.text(seg.center(), Align2::CENTER_CENTER, label, if active { look.bold(11.5) } else { look.font(11.5) }, if active { tok::ACCENT_PRESSED } else { tok::DIM });
+        // the look switch: two keys, the one you have pressed in and lit, so Classic is one click away
+        for (seg, label, active) in [(at(w - 196.0, 14.0, 72.0, 28.0), "Classic 98", false), (at(w - 122.0, 14.0, 70.0, 28.0), "Modern", true)] {
+            let resp = look.tab(ui, seg, label, active).on_hover_text(if active { "The look you have" } else { "Switch to the 98 look" });
             if resp.clicked() && !active && !modal {
                 out.push("desklook classic".into());
             }
         }
         let x = at(w - 46.0, 14.0, 28.0, 28.0);
         let close = ui.interact(x, Id::unique("desk-modern-close"), Sense::click()).on_hover_text("Close (Esc)");
-        if close.hovered() {
-            p.rect_filled(x, CornerRadius::same(6), if close.is_pointer_button_down_on() { tok::DANGER.gamma_multiply(0.85) } else { tok::DANGER });
-        }
-        cross(&p, x.center(), 5.0, 1.4, if close.hovered() { Color32::WHITE } else { tok::DIM });
-        // tabs: each as wide as its label in Medium, so nothing shifts when one becomes active
+        let down = close.is_pointer_button_down_on();
+        let f = look::keycap(&p, x, if close.hovered() { tok::DANGER } else { tok::SECONDARY }, if close.hovered() { tok::DANGER.gamma_multiply(0.7) } else { tok::KEY_LIP }, tok::CONTROL_BORDER, down);
+        cross(&p, f.center(), 4.5, 1.8, if close.hovered() { Color32::WHITE } else { tok::TEXT });
+        // tabs: keys, each as wide as its label in bold plus room for its light, so nothing shifts when one opens
         let mut tx = 16.0;
         for (i, name) in TABS.iter().enumerate() {
             let shown = match self.badge(name, view) {
                 Some(b) => format!("{name} · {b}"),
                 None => name.to_string(),
             };
-            let tw = p.layout_no_wrap(shown.clone(), look.bold(12.5), tok::TEXT).size().x + 18.0;
-            if look.tab(ui, at(tx, 54.0, tw, 30.0), &shown, self.tab == i).clicked() && !modal {
+            let tw = p.layout_no_wrap(shown.clone(), look.bold(12.5), tok::TEXT).size().x + 24.0;
+            if look.tab(ui, at(tx, 52.0, tw, 31.0), &shown, self.tab == i).clicked() && !modal {
                 self.tab = i;
                 self.back();
             }
-            tx += tw + 2.0;
+            tx += tw + 3.0;
         }
-        p.hline(o.x + 16.0..=o.x + w - 16.0, o.y + h - 40.0, Stroke::new(1.0, tok::DIVIDER));
-        let line = at(20.0, h - 38.0, w - 40.0, 28.0);
-        self.status_text(&p, line, view, look);
-        self.status_rect = Some(line);
+        // the status on a small LCD
+        let lcd = at(16.0, h - 40.0, w - 32.0, 24.0);
+        p.rect(lcd, CornerRadius::same(4), tok::LCD, Stroke::new(1.0, tok::FRAME_EDGE), StrokeKind::Inside);
+        p.hline(lcd.min.x + 4.0..=lcd.max.x - 4.0, lcd.min.y + 1.5, Stroke::new(1.0, Color32::from_black_alpha(40)));
+        let line = lcd.shrink2(vec2(10.0, 0.0));
+        let text = match (view.status.fresh(), view.status.tone) {
+            (true, Tone::Done) => format!("✓ {}", view.status.text),
+            (true, Tone::Problem) => format!("! {}", view.status.text),
+            (true, Tone::Info) => view.status.text.clone(),
+            (false, _) => view.quip.clone(),
+        };
+        let room = line.width() - if view.status.fresh() && view.status.action.is_some() { 96.0 } else { 0.0 };
+        let g = clipped(&p, &text.replace('\n', " "), if view.status.fresh() { look.bold(11.5) } else { look.font(11.5) }, tok::LCD_TEXT, room);
+        p.galley(pos2(line.min.x, line.center().y - g.size().y / 2.0), g, tok::LCD_TEXT);
+        self.status_rect = Some(Rect::from_min_max(line.min, pos2(line.max.x + 8.0, line.max.y)));
         (at(20.0, 92.0, w - 40.0, h - 140.0), close.clicked())
     }
 

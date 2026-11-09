@@ -24,37 +24,79 @@ pub(super) mod tok {
     const fn hex(v: u32) -> Color32 {
         Color32::from_rgb((v >> 16) as u8, (v >> 8) as u8, v as u8)
     }
-    pub const TEXT: Color32 = hex(0x222B3A);
-    pub const DIM: Color32 = hex(0x596578);
-    pub const ACCENT: Color32 = hex(0x3158C9);
-    pub const ACCENT_HOVER: Color32 = hex(0x2748A8);
-    pub const ACCENT_PRESSED: Color32 = hex(0x1F3C8C);
-    pub const ACCENT_SOFT: Color32 = hex(0xE9EEFC);
-    pub const ACCENT_SOFT_HOVER: Color32 = hex(0xDCE5FB);
-    pub const ACCENT_SOFT_PRESSED: Color32 = hex(0xCEDAF8);
-    pub const FRAME: Color32 = hex(0xF3F5F8);
-    pub const PAGE: Color32 = hex(0xFBFCFE);
-    pub const CARD: Color32 = hex(0xFFFFFF);
-    pub const WELL: Color32 = hex(0xFAFBFD);
-    pub const BORDER: Color32 = hex(0xD6DDE7);
-    pub const DIVIDER: Color32 = hex(0xE8ECF2);
-    pub const CONTROL_BORDER: Color32 = hex(0x778397);
-    pub const SECONDARY: Color32 = hex(0xEDF0F5);
-    pub const SECONDARY_HOVER: Color32 = hex(0xE2E8F0);
-    pub const SECONDARY_PRESSED: Color32 = hex(0xD4DCE7);
-    pub const DISABLED_TEXT: Color32 = hex(0x626E80);
-    pub const TRACK: Color32 = hex(0xE4E9F0);
-    pub const SUCCESS: Color32 = hex(0x24744F);
-    pub const WARNING: Color32 = hex(0x965900);
-    pub const DANGER: Color32 = hex(0xA93636);
-    pub const KIND5: Color32 = hex(0xB86218);
-    pub const NEUTRAL: Color32 = hex(0x6E7A8C);
-    pub const PAPERCLIP: Color32 = hex(0x4E6E87);
-    pub const FACE_INK: Color32 = hex(0x455164);
-    pub const FACE_GREAT: Color32 = hex(0xC9E9D7);
-    pub const FACE_OKAY: Color32 = hex(0xF3DFAC);
-    pub const FACE_MEH: Color32 = hex(0xE3E8EF);
-    pub const FACE_ROUGH: Color32 = hex(0xF0C8C4);
+    // "Beige Box": the 1997 tower he was compiled in. Putty plastic, keycaps with a lip, label-maker tape for
+    // titles, a green power LED for whatever is on, and an LCD strip for the status.
+    pub const TEXT: Color32 = hex(0x2A2722);
+    pub const DIM: Color32 = hex(0x5E574A);
+    pub const ACCENT: Color32 = hex(0x1F7A4D); // the power LED
+    pub const ACCENT_HOVER: Color32 = hex(0x1A6942);
+    pub const ACCENT_PRESSED: Color32 = hex(0x135536);
+    pub const ACCENT_SOFT: Color32 = hex(0xDCEFE2); // its glow
+    pub const ACCENT_SOFT_HOVER: Color32 = hex(0xCDE8D6);
+    pub const FRAME: Color32 = hex(0xDCD3BF); // the case
+    pub const FRAME_EDGE: Color32 = hex(0xAFA389);
+    pub const PAGE: Color32 = hex(0xE9E3D4); // the recessed plate
+    pub const CARD: Color32 = hex(0xF8F5EE); // a panel
+    pub const WELL: Color32 = hex(0xFBF9F4);
+    pub const BORDER: Color32 = hex(0xC9BEA6);
+    pub const DIVIDER: Color32 = hex(0xE2DACA);
+    pub const CONTROL_BORDER: Color32 = hex(0x8D826B);
+    pub const SECONDARY: Color32 = hex(0xFBF8F1); // a keycap
+    pub const SECONDARY_HOVER: Color32 = hex(0xF2EDE1);
+    pub const SECONDARY_PRESSED: Color32 = hex(0xE7E0CF);
+    pub const KEY_LIP: Color32 = hex(0xB7AB91); // a keycap's lower edge
+    pub const TAPE: Color32 = hex(0x23211E); // label-maker tape
+    pub const TAPE_TEXT: Color32 = hex(0xF4F1EA);
+    pub const LCD: Color32 = hex(0xC8D2AE);
+    pub const LCD_TEXT: Color32 = hex(0x26301F);
+    pub const LED_OFF: Color32 = hex(0xB4AB97);
+    pub const DISABLED_TEXT: Color32 = hex(0x6B6455);
+    pub const TRACK: Color32 = hex(0xDDD5C3);
+    pub const SUCCESS: Color32 = hex(0x2C7A4B);
+    pub const WARNING: Color32 = hex(0x9A5A00); // the amber LED
+    pub const DANGER: Color32 = hex(0xB2352B); // the reset button
+    pub const KIND5: Color32 = hex(0xC46A1C);
+    pub const NEUTRAL: Color32 = hex(0x8C8473);
+    pub const PAPERCLIP: Color32 = hex(0x6E7278);
+    pub const FACE_INK: Color32 = hex(0x3D3930);
+    pub const FACE_GREAT: Color32 = hex(0xCDE8D2);
+    pub const FACE_OKAY: Color32 = hex(0xF4E2A8);
+    pub const FACE_MEH: Color32 = hex(0xE8E2D3);
+    pub const FACE_ROUGH: Color32 = hex(0xF1CBC2);
+}
+
+/// A recessed area: a darker line along its inside top, as if pressed into the plastic.
+fn recess(p: &Painter, r: Rect, radius: u8, fill: Color32) {
+    p.rect(r, CornerRadius::same(radius), fill, Stroke::new(1.0, tok::BORDER), StrokeKind::Inside);
+    p.hline(r.min.x + radius as f32..=r.max.x - radius as f32, r.min.y + 1.5, Stroke::new(1.0, Color32::from_black_alpha(22)));
+}
+
+/// A keycap: a face over a darker lip; pressed, the face sinks onto the lip. Returns the face.
+pub(super) fn keycap(p: &Painter, r: Rect, face: Color32, lip: Color32, border: Color32, down: bool) -> Rect {
+    p.rect_filled(r, CornerRadius::same(6), lip);
+    let f = if down { Rect::from_min_max(r.min + vec2(0.0, 2.0), r.max) } else { Rect::from_min_max(r.min, pos2(r.max.x, r.max.y - 3.0)) };
+    p.rect(f, CornerRadius::same(6), face, Stroke::new(1.0, border), StrokeKind::Inside);
+    f
+}
+
+/// Label-maker tape with white capitals, its left top at `at`. Returns the tape.
+pub(super) fn tape(p: &Painter, at: Pos2, text: &str, size: f32, font: FontId) -> Rect {
+    let mut job = egui::text::LayoutJob::default();
+    job.append(&text.to_uppercase(), 0.0, egui::TextFormat { font_id: FontId::new(size, font.family), color: tok::TAPE_TEXT, extra_letter_spacing: size * 0.09, ..Default::default() });
+    let g = p.layout_job(job);
+    let r = Rect::from_min_size(at, g.size() + vec2(14.0, 5.0));
+    p.rect_filled(r.translate(vec2(0.0, 1.0)), CornerRadius::same(2), Color32::from_black_alpha(40));
+    p.rect_filled(r, CornerRadius::same(2), tok::TAPE);
+    p.galley(pos2(r.min.x + 7.0, r.center().y - g.size().y / 2.0), g, tok::TAPE_TEXT);
+    r
+}
+
+/// A small LED: lit (green with a glow) or off.
+pub(super) fn led(p: &Painter, c: Pos2, lit: bool) {
+    if lit {
+        p.circle_filled(c, 4.5, tok::ACCENT_SOFT_HOVER);
+    }
+    p.circle_filled(c, 2.4, if lit { tok::ACCENT } else { tok::LED_OFF });
 }
 
 // ---------- the two looks ----------
@@ -152,24 +194,18 @@ impl Look {
                 p.text(t.center(), Align2::CENTER_CENTER, label, if active { self.bold(13.0) } else { self.font(13.0) }, self.text());
             }
             Look::Modern => {
-                let fill = match (active, resp.is_pointer_button_down_on(), resp.hovered()) {
-                    (true, true, _) => Some(tok::ACCENT_SOFT_PRESSED),
-                    (true, _, true) => Some(tok::ACCENT_SOFT_HOVER),
-                    (true, ..) => Some(tok::ACCENT_SOFT),
-                    (false, true, _) => Some(tok::SECONDARY_PRESSED),
-                    (false, _, true) => Some(tok::SECONDARY_HOVER),
-                    _ => None,
-                };
-                if let Some(f) = fill {
-                    p.rect_filled(r, CornerRadius::same(6), f);
-                }
-                p.text(r.center(), Align2::CENTER_CENTER, label, if active { self.bold(12.5) } else { self.font(12.5) }, if active { tok::ACCENT_PRESSED } else { tok::TEXT });
+                // a key with a Caps-Lock style LED in its corner: the open tab is pressed in and lit
+                let down = active || resp.is_pointer_button_down_on();
+                let face = if resp.hovered() && !active { tok::SECONDARY_HOVER } else if active { tok::ACCENT_SOFT } else { tok::SECONDARY };
+                let f = keycap(p, r.shrink2(vec2(1.0, 1.0)), face, tok::KEY_LIP, tok::CONTROL_BORDER, down);
+                led(p, pos2(f.max.x - 6.5, f.min.y + 6.5), active);
+                p.text(f.center() - vec2(2.0, 0.0), Align2::CENTER_CENTER, label, if active { self.bold(12.5) } else { self.font(12.5) }, if active { tok::ACCENT_PRESSED } else { tok::TEXT });
             }
         }
         resp
     }
 
-    /// A labelled group: a 98 etched group box, or a white card with a Medium title.
+    /// A labelled group: a 98 etched group box, or a panel set into the case with a label-maker title.
     pub(super) fn group(self, p: &Painter, r: Rect, title: &str) {
         match self {
             Look::Classic => {
@@ -182,8 +218,9 @@ impl Look {
                 p.galley(tr.min + vec2(3.0, 0.0), g, self.text());
             }
             Look::Modern => {
-                p.rect(r, CornerRadius::same(8), tok::CARD, Stroke::new(1.0, tok::BORDER), StrokeKind::Inside);
-                p.text(pos2(r.min.x + 12.0, r.min.y + 14.3), Align2::LEFT_CENTER, title, self.bold(12.0), tok::TEXT);
+                p.rect(r, CornerRadius::same(10), tok::CARD, Stroke::new(1.0, tok::BORDER), StrokeKind::Inside);
+                p.hline(r.min.x + 10.0..=r.max.x - 10.0, r.max.y - 1.5, Stroke::new(1.0, Color32::from_white_alpha(160)));
+                tape(p, pos2(r.min.x + 10.0, r.min.y - 4.0), title, 10.5, self.bold(10.5));
             }
         }
     }
@@ -195,13 +232,11 @@ impl Look {
                 p.rect_filled(r, 0.0, Color32::WHITE);
                 win98::bevel(p, r, false);
             }
-            Look::Modern => {
-                p.rect(r, CornerRadius::same(8), tok::WELL, Stroke::new(1.0, tok::BORDER), StrokeKind::Inside);
-            }
+            Look::Modern => recess(p, r, 8, tok::WELL),
         }
     }
 
-    /// A line between list rows: etched in 98, a hairline in Modern.
+    /// A line between list rows: etched in 98, a moulded groove in Modern.
     pub(super) fn divider(self, p: &Painter, x0: f32, x1: f32, y: f32) {
         match self {
             Look::Classic => {
@@ -210,6 +245,7 @@ impl Look {
             }
             Look::Modern => {
                 p.hline(x0..=x1, y, Stroke::new(1.0, tok::DIVIDER));
+                p.hline(x0..=x1, y + 1.0, Stroke::new(1.0, Color32::from_white_alpha(170)));
             }
         }
     }
@@ -236,9 +272,9 @@ impl Look {
                 r.min.y + head + 14.0
             }
             Look::Modern => {
-                p.add(egui::epaint::Shadow { offset: [0, 4], blur: 16, spread: 0, color: Color32::from_black_alpha(40) }.as_shape(r, CornerRadius::same(10)));
-                p.rect(r, CornerRadius::same(10), tok::CARD, Stroke::new(1.0, tok::BORDER), StrokeKind::Inside);
-                p.text(pos2(r.min.x + 20.0, r.min.y + 24.0), Align2::LEFT_CENTER, title, self.bold(15.0), tok::TEXT);
+                p.add(egui::epaint::Shadow { offset: [0, 6], blur: 16, spread: 0, color: Color32::from_rgba_unmultiplied(50, 40, 20, 60) }.as_shape(r, CornerRadius::same(12)));
+                p.rect(r, CornerRadius::same(12), tok::CARD, Stroke::new(1.0, tok::FRAME_EDGE), StrokeKind::Inside);
+                tape(&p, pos2(r.min.x + 18.0, r.min.y + 13.0), title, 12.0, self.bold(12.0));
                 self.card_close(ui, Rect::from_center_size(pos2(r.max.x - 24.0, r.min.y + 24.0), vec2(26.0, 26.0)), title);
                 r.min.y + head + 10.0
             }
@@ -316,9 +352,9 @@ impl Look {
                 self.card_close(ui, Rect::from_center_size(pos2(bar.max.x - 11.0, bar.center().y), vec2(16.0, 14.0)), title)
             }
             Look::Modern => {
-                p.add(egui::epaint::Shadow { offset: [0, 4], blur: 16, spread: 0, color: Color32::from_black_alpha(40) }.as_shape(r, CornerRadius::same(10)));
-                p.rect(r, CornerRadius::same(10), tok::CARD, Stroke::new(1.0, tok::BORDER), StrokeKind::Inside);
-                p.text(pos2(r.min.x + 20.0, r.min.y + 24.0), Align2::LEFT_CENTER, title, self.bold(15.0), tok::TEXT);
+                p.add(egui::epaint::Shadow { offset: [0, 6], blur: 16, spread: 0, color: Color32::from_rgba_unmultiplied(50, 40, 20, 60) }.as_shape(r, CornerRadius::same(12)));
+                p.rect(r, CornerRadius::same(12), tok::CARD, Stroke::new(1.0, tok::FRAME_EDGE), StrokeKind::Inside);
+                tape(&p, pos2(r.min.x + 18.0, r.min.y + 13.0), title, 12.0, self.bold(12.0));
                 self.card_close(ui, Rect::from_center_size(pos2(r.max.x - 24.0, r.min.y + 24.0), vec2(26.0, 26.0)), title)
             }
         };
@@ -369,19 +405,20 @@ impl Look {
             cross(p, r.center(), 5.0, 1.3, if hover { tok::TEXT } else { tok::DIM });
             return resp;
         }
-        let pick = |normal, h, d| if down { d } else if hover { h } else { normal };
-        let (fill, border, text) = if !enabled {
-            // disabled looks it: no fill of its own, a faint outline
-            (tok::PAGE, Some(tok::BORDER), tok::DISABLED_TEXT)
-        } else if kind == Kind::Primary {
-            (pick(tok::ACCENT, tok::ACCENT_HOVER, tok::ACCENT_PRESSED), None, Color32::WHITE)
-        } else if kind == Kind::Danger {
-            (pick(tok::CARD, tok::SECONDARY_HOVER, tok::SECONDARY_PRESSED), Some(tok::DANGER), tok::DANGER)
-        } else {
-            (pick(tok::SECONDARY, tok::SECONDARY_HOVER, tok::SECONDARY_PRESSED), Some(tok::CONTROL_BORDER), tok::TEXT)
+        if !enabled {
+            // disabled: flat, no lip, as if the key were missing
+            recess(p, r, 6, tok::PAGE);
+            p.text(r.center(), Align2::CENTER_CENTER, label, self.bold(12.0), tok::DISABLED_TEXT);
+            return resp;
+        }
+        let pick = |normal, h| if hover { h } else { normal };
+        let (face, lip, border, text) = match kind {
+            Kind::Primary => (pick(tok::ACCENT, tok::ACCENT_HOVER), tok::ACCENT_PRESSED, tok::ACCENT_PRESSED, Color32::WHITE),
+            Kind::Danger => (pick(tok::SECONDARY, tok::SECONDARY_HOVER), tok::KEY_LIP, tok::DANGER, tok::DANGER),
+            Kind::Secondary => (pick(tok::SECONDARY, tok::SECONDARY_HOVER), tok::KEY_LIP, tok::CONTROL_BORDER, tok::TEXT),
         };
-        p.rect(r, CornerRadius::same(6), fill, border.map_or(Stroke::NONE, |c| Stroke::new(1.0, c)), StrokeKind::Inside);
-        p.text(r.center(), Align2::CENTER_CENTER, label, self.bold(12.0), text);
+        let f = keycap(p, r, if down && kind != Kind::Primary { tok::SECONDARY_PRESSED } else { face }, lip, border, down);
+        p.text(f.center(), Align2::CENTER_CENTER, label, self.bold(12.0), text);
         resp
     }
 
@@ -402,11 +439,13 @@ impl Look {
             }
             Look::Modern => {
                 if checked {
+                    // lit: green with a glow around it
+                    p.rect_filled(r.expand(2.0), CornerRadius::same(6), tok::ACCENT_SOFT_HOVER);
                     p.rect_filled(r, CornerRadius::same(4), if down { tok::ACCENT_PRESSED } else if hover { tok::ACCENT_HOVER } else { tok::ACCENT });
-                    tick(p, [(3.5, 8.0), (7.0, 11.0), (12.5, 4.5)], 1.8, Color32::WHITE);
+                    tick(p, [(3.5, 8.0), (7.0, 11.0), (12.5, 4.5)], 2.0, Color32::WHITE);
                 } else {
-                    let fill = if down { tok::SECONDARY_PRESSED } else if hover { tok::SECONDARY_HOVER } else { tok::CARD };
-                    p.rect(r, CornerRadius::same(4), fill, Stroke::new(1.5, if down { tok::ACCENT_PRESSED } else { tok::CONTROL_BORDER }), StrokeKind::Inside);
+                    recess(p, r, 4, if down { tok::SECONDARY_PRESSED } else if hover { tok::SECONDARY_HOVER } else { tok::WELL });
+                    p.rect_stroke(r, CornerRadius::same(4), Stroke::new(1.2, tok::CONTROL_BORDER), StrokeKind::Inside);
                 }
             }
         }
@@ -428,10 +467,14 @@ impl Look {
                 }
             }
             Look::Modern => {
-                let r = Rect::from_center_size(r.center(), vec2(r.width(), 6.0));
-                p.rect_filled(r, CornerRadius::same(3), tok::TRACK);
+                // a groove with a lit strip in it
+                let r = Rect::from_center_size(r.center(), vec2(r.width(), 8.0));
+                p.rect_filled(r, CornerRadius::same(4), tok::TRACK);
+                p.hline(r.min.x + 3.0..=r.max.x - 3.0, r.min.y + 0.5, Stroke::new(1.0, Color32::from_black_alpha(30)));
                 if frac > 0.0 {
-                    p.rect_filled(Rect::from_min_size(r.min, vec2((r.width() * frac).max(6.0), 6.0)), CornerRadius::same(3), color);
+                    let f = Rect::from_min_size(r.min + vec2(1.0, 1.0), vec2((r.width() * frac).max(8.0) - 2.0, 6.0));
+                    p.rect_filled(f, CornerRadius::same(3), color);
+                    p.hline(f.min.x + 2.0..=f.max.x - 2.0, f.min.y + 1.0, Stroke::new(1.0, Color32::from_white_alpha(70)));
                 }
             }
         }
@@ -469,7 +512,7 @@ impl Look {
         let widths: Vec<f32> = labels.iter().map(|l| p.layout_no_wrap(l.to_string(), self.bold(12.0), self.text()).size().x + 22.0).collect();
         let all = Rect::from_min_size(at, vec2(widths.iter().sum::<f32>() + if self == Look::Modern { 4.0 } else { 0.0 }, h));
         if self == Look::Modern {
-            p.rect(all, CornerRadius::same(6), tok::CARD, Stroke::new(1.0, tok::CONTROL_BORDER), StrokeKind::Inside);
+            recess(&p, all, 7, tok::PAGE);
         }
         let mut x = at.x + if self == Look::Modern { 2.0 } else { 0.0 };
         let mut hit = None;
@@ -489,13 +532,18 @@ impl Look {
                     p.text(r.center() + if on { vec2(1.0, 1.0) } else { vec2(0.0, 0.0) }, Align2::CENTER_CENTER, *label, if on { self.bold(12.5) } else { self.font(12.5) }, self.text());
                 }
                 Look::Modern => {
-                    let inner = r.shrink2(vec2(0.0, 2.0));
+                    // a row of switches in a groove: the chosen one is a raised cap with its light on
+                    let inner = r.shrink2(vec2(1.0, 2.0));
                     if on {
-                        p.rect_filled(inner, CornerRadius::same(4), if resp.hovered() { tok::ACCENT_SOFT_HOVER } else { tok::ACCENT_SOFT });
-                    } else if resp.hovered() {
-                        p.rect_filled(inner, CornerRadius::same(4), tok::SECONDARY_HOVER);
+                        let f = keycap(&p, inner, if resp.hovered() { tok::SECONDARY_HOVER } else { tok::SECONDARY }, tok::KEY_LIP, tok::CONTROL_BORDER, false);
+                        p.hline(f.min.x + 6.0..=f.max.x - 6.0, f.max.y - 3.0, Stroke::new(2.0, tok::ACCENT));
+                        p.text(f.center() - vec2(0.0, 1.0), Align2::CENTER_CENTER, *label, self.bold(12.0), tok::TEXT);
+                    } else {
+                        if resp.hovered() {
+                            p.rect_filled(inner, CornerRadius::same(5), tok::SECONDARY_HOVER);
+                        }
+                        p.text(r.center(), Align2::CENTER_CENTER, *label, self.font(12.0), tok::TEXT);
                     }
-                    p.text(r.center(), Align2::CENTER_CENTER, *label, if on { self.bold(12.0) } else { self.font(12.0) }, if on { tok::ACCENT_PRESSED } else { tok::TEXT });
                 }
             }
             if resp.clicked() && !on {
@@ -555,7 +603,8 @@ impl Look {
                 } else {
                     Stroke::new(1.0, tok::CONTROL_BORDER)
                 };
-                ui.painter().rect(r, CornerRadius::same(6), tok::CARD, stroke, StrokeKind::Inside);
+                recess(ui.painter(), r, 6, tok::WELL);
+                ui.painter().rect_stroke(r, CornerRadius::same(6), stroke, StrokeKind::Inside);
                 (12.5, egui::Margin::symmetric(8, 5))
             }
         };

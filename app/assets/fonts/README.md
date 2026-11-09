@@ -4,4 +4,7 @@
 
 Copyright (c) the Wine project authors. Source: https://gitlab.winehq.org/wine/wine/-/tree/master/fonts
 
-`NotoSans-Regular.ttf` and `NotoSans-Medium.ttf` are [Noto Sans](https://github.com/notofonts/latin-greek-cyrillic) version 2.015, unmodified, licensed under the **SIL Open Font License 1.1** (see `OFL-1.1.txt`). They are the type of the Desk's Modern look.
+`NotoSans-Digits.ttf` and `NotoSans-Medium-Digits.ttf` are [Noto Sans](https://github.com/notofonts/latin-greek-cyrillic) version 2.015 Regular and Medium, **modified**: subset with fonttools to the ten digits 0–9 and nothing else. They are licensed under the **SIL Open Font License 1.1** (see `OFL-1.1.txt`). The Modern look puts them in front of Atkinson Hyperlegible so times and numbers have a plain zero (Atkinson's is slashed).
+
+`AtkinsonHyperlegible-Regular.ttf` and `AtkinsonHyperlegible-Bold.ttf` are [Atkinson Hyperlegible](https://www.brailleinstitute.org/freefont/), unmodified, from the Google Fonts repository (`ofl/atkinsonhyperlegible`), licensed under the **SIL Open Font License 1.1** (see `AtkinsonHyperlegible-OFL.txt`). They are the type of the Desk's Modern look.
+Copyright 2020 Braille Institute of America, Inc.
