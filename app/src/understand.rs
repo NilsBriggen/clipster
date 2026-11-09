@@ -2677,6 +2677,8 @@ mod tests {
         assert_eq!(eff("be quiet until tomorrow"), Effect::Pref("quietfor".into(), "tomorrow".into()));
         assert_eq!(eff("stop commenting on youtube"), Effect::Pref("mute".into(), "youtube".into()));
         assert_eq!(eff("export my data"), Effect::Data("export".into()));
+        assert_eq!(crate::brain::exact("fact city|Bern").map(|r| r.effect), Some(Effect::Remember(vec![("city".into(), "Bern".into())])), "the Desk's + Add, not a fun fact");
+        assert!(crate::brain::exact("fact password|x").is_none(), "only the listed kinds");
         assert!(matches!(eff("when am I free"), Effect::Calendar(c) if c.starts_with("freeday ")));
         assert!(matches!(eff("am i free friday at 3"), Effect::Calendar(c) if c.starts_with("free ")), "the one-time question still works");
         assert!(!matches!(eff("I'm waiting for the bus"), Effect::Commands(_)), "not a person he knows");

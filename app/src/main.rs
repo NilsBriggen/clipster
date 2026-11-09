@@ -546,24 +546,13 @@ fn about_me(facts: &std::collections::BTreeMap<String, String>, birthday: Option
         .collect();
     // every arcade game with its best (any difficulty), for Play
     let games: Vec<(String, String, Option<String>)> = games::NAMES.iter().map(|(id, name)| (id.to_string(), name.to_string(), scores.iter().filter(|(k, s)| k.starts_with(id) && **s > 0 && **s != u32::MAX).map(|(_, s)| score_text(id, *s)).next())).collect();
-    let scores = scores
-        .iter()
-        .filter(|(_, s)| **s > 0 && **s != u32::MAX)
-        .filter_map(|(k, s)| {
-            let (id, name) = games::NAMES.iter().find(|(id, _)| k.starts_with(id))?;
-            // best times per difficulty ("bughunt-expert"): "Bug Hunt (Expert) 3:40", not points
-            let level = k.strip_prefix(id).and_then(|r| r.strip_prefix('-')).map(|l| format!(" ({})", writing::cap_first(l))).unwrap_or_default();
-            let value = if *id == "bughunt" { format!("{}:{:02}", s / 60, s % 60) } else { s.to_string() };
-            Some((format!("{name}{level}"), value))
-        })
-        .collect();
     let untried = TRY_THESE.iter().filter(|(_, words, _)| !words.iter().any(|w| explored.contains(*w))).map(|(l, _, c)| (l.to_string(), c.to_string())).collect();
     let memories = unhinged.then(|| {
         let total = lines::all("memories").len() as u64;
         let seen = stats.get("memories").copied().unwrap_or(0).min(total);
         (seen, total, memory_unlocked(seen as usize, stats.get("days").copied().unwrap_or(1), total as usize))
     });
-    desk::Me { facts: rows, achievements, scores, friendship, days: stats.get("days").copied().unwrap_or(1), games, untried, memories }
+    desk::Me { facts: rows, achievements, friendship, days: stats.get("days").copied().unwrap_or(1), games, untried, memories }
 }
 
 /// Made-up facts, progress and scores for screenshots of the Desk.
@@ -1014,7 +1003,6 @@ impl App {
             sounds: self.sounds,
             breaks: self.breaks,
             autostart: self.autostart,
-            quiet: self.quiet(),
             dnd: self.dnd,
             wrapup: self.wrapup,
             upkeep_day: self.upkeep_day,
@@ -1050,11 +1038,11 @@ impl App {
         let weather = self.weather.as_ref().filter(|_| self.weather_on).map(|(_, w)| w.clone());
         match &self.desk_sample {
             Some((t, k, f, c)) => {
-                let view = desk::View { timers: t.clone(), kind_time: k, focus_log: f, focus_now: Some(("the slides".into(), 18 * 60, 7 * 60, 40, false)), checkins: c, streaks: vec![("Focus".into(), 4, 9), ("Goal met".into(), 2, 5), ("Check-ins".into(), 6, 12), ("Days with me".into(), 31, 31)], status, quip, prefs, clips: &self.sample_clips, pins: &self.sample_clips[..2], reading: &self.sample_reading, me: sample_me(), upkeep: Some((&self.sample_upkeep, 120)), upkeep_running: false, backup_check: upkeep::backup_check(true, Some(backup::now() - 9 * 86_400), backup::now(), true), backup: desk::Backup { sources: &self.backup_sources, target: "/run/media/you/BACKUP", last: Some(backup::now() - 9 * 86_400), result: "214 copied (1.3 GB), 4120 unchanged", progress: None, skip: &self.backup_skip, auto: &self.backup_auto, history: &self.backup_history, found: self.backup_found.as_deref(), failed: false }, events: &events, calendars: self.sample_calendars.iter().enumerate().map(|(i, s)| desk::CalView { label: ["Work", "Family"].get(i).map_or_else(|| calendar::short(s), |n| n.to_string()), color: i as u8, show: true, alert: i == 0, ..Default::default() }).collect(), calendar_note: "Checked 4 min ago".into(), calendar_problems: 0, answer: self.desk_answer.as_ref(), name: "Sam".into(), people: &self.sample_people, workday: &self.sample_workday, habits: &self.habits, countdowns: &self.countdowns, sites, moved: &self.kind_moves, weather, day_totals, pin_labels: &self.pin_labels, clip_paused, reading_titles: &self.reading_titles, now: self.now_reading.as_ref(), space: self.space.as_ref().map(|(_, s)| s), space_running: self.space_running, upkeep_hide: &self.upkeep_hide, space_log: &self.space_log, tidy_targets: &self.tidy_targets, tidy_auto: self.tidy_auto, mini: &mini };
+                let view = desk::View { timers: t.clone(), kind_time: k, focus_log: f, focus_now: Some(("the slides".into(), 18 * 60, 7 * 60, 40, false)), checkins: c, streaks: vec![("Focus".into(), 4, 9), ("Goal met".into(), 2, 5), ("Check-ins".into(), 6, 12), ("Days with me".into(), 31, 31)], status, quip, prefs, clips: &self.sample_clips, pins: &self.sample_clips[..2], reading: &self.sample_reading, me: sample_me(), upkeep: Some((&self.sample_upkeep, 120)), upkeep_running: false, backup_check: upkeep::backup_check(true, Some(backup::now() - 9 * 86_400), backup::now(), true), backup: desk::Backup { sources: &self.backup_sources, target: "/run/media/you/BACKUP", last: Some(backup::now() - 9 * 86_400), result: "214 copied (1.3 GB), 4120 unchanged", progress: None, skip: &self.backup_skip, auto: &self.backup_auto, history: &self.backup_history, found: self.backup_found.as_deref(), failed: false }, events: &events, calendars: self.sample_calendars.iter().enumerate().map(|(i, s)| desk::CalView { label: ["Work", "Family"].get(i).map_or_else(|| calendar::short(s), |n| n.to_string()), color: i as u8, show: true, alert: i == 0, ..Default::default() }).collect(), calendar_note: "Checked 4 min ago".into(), calendar_problems: 0, answer: self.desk_answer.as_ref(), name: "Sam".into(), people: &self.sample_people, workday: &self.sample_workday, habits: &self.habits, countdowns: &self.countdowns, sites, moved: &self.kind_moves, weather, day_totals, pin_labels: &self.pin_labels, clip_paused, reading_titles: &self.reading_titles, now: self.now_reading.as_ref(), space: self.space.as_ref().map(|(_, s)| s), space_running: self.space_running, upkeep_hide: &self.upkeep_hide, space_log: &self.space_log, tidy_auto: self.tidy_auto, mini: &mini };
                 self.desk.show(ctx, &view, look, near)
             }
             None => {
-                let view = desk::View { timers, kind_time: &self.kind_time, focus_log: &self.focus_log, focus_now, checkins: &self.checkin_days, streaks, status, quip, prefs, clips: &self.clip_history, pins: &self.pins, reading: &self.reading, me: about_me(&self.facts, self.birthday, &self.stats, &self.unlocked, &self.highscores, self.friendship, &self.explored, self.unhinged), upkeep: self.upkeep.as_ref().map(|(t, r)| (r, t.elapsed().as_secs())), upkeep_running: self.upkeep_running, backup_check: self.backup_check(), backup: desk::Backup { sources: &self.backup_sources, target: &self.backup_target, last: self.backup_last, result: &self.backup_result, progress: self.backup_progress, skip: &self.backup_skip, auto: &self.backup_auto, history: &self.backup_history, found: self.backup_found.as_deref(), failed: self.backup_history.first().is_some_and(|h| h[3] > 0) || !self.backup_result.is_empty() && !self.backup_result.contains("copied") }, events: &events, calendars: cal_views, calendar_note: self.calendar_note(), calendar_problems: self.calendar_problems.len(), answer: self.desk_answer.as_ref(), name: self.name.clone(), people: &self.people, workday: &self.workday, habits: &self.habits, countdowns: &self.countdowns, sites, moved: &self.kind_moves, weather, day_totals, pin_labels: &self.pin_labels, clip_paused, reading_titles: &self.reading_titles, now: self.now_reading.as_ref(), space: self.space.as_ref().map(|(_, s)| s), space_running: self.space_running, upkeep_hide: &self.upkeep_hide, space_log: &self.space_log, tidy_targets: &self.tidy_targets, tidy_auto: self.tidy_auto, mini: &mini };
+                let view = desk::View { timers, kind_time: &self.kind_time, focus_log: &self.focus_log, focus_now, checkins: &self.checkin_days, streaks, status, quip, prefs, clips: &self.clip_history, pins: &self.pins, reading: &self.reading, me: about_me(&self.facts, self.birthday, &self.stats, &self.unlocked, &self.highscores, self.friendship, &self.explored, self.unhinged), upkeep: self.upkeep.as_ref().map(|(t, r)| (r, t.elapsed().as_secs())), upkeep_running: self.upkeep_running, backup_check: self.backup_check(), backup: desk::Backup { sources: &self.backup_sources, target: &self.backup_target, last: self.backup_last, result: &self.backup_result, progress: self.backup_progress, skip: &self.backup_skip, auto: &self.backup_auto, history: &self.backup_history, found: self.backup_found.as_deref(), failed: self.backup_history.first().is_some_and(|h| h[3] > 0) || !self.backup_result.is_empty() && !self.backup_result.contains("copied") }, events: &events, calendars: cal_views, calendar_note: self.calendar_note(), calendar_problems: self.calendar_problems.len(), answer: self.desk_answer.as_ref(), name: self.name.clone(), people: &self.people, workday: &self.workday, habits: &self.habits, countdowns: &self.countdowns, sites, moved: &self.kind_moves, weather, day_totals, pin_labels: &self.pin_labels, clip_paused, reading_titles: &self.reading_titles, now: self.now_reading.as_ref(), space: self.space.as_ref().map(|(_, s)| s), space_running: self.space_running, upkeep_hide: &self.upkeep_hide, space_log: &self.space_log, tidy_auto: self.tidy_auto, mini: &mini };
                 self.desk.show(ctx, &view, look, near)
             }
         }

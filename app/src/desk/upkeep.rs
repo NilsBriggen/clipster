@@ -207,7 +207,7 @@ impl Desk {
     }
 
     /// Right now: load, memory, battery and uptime, and the programs using the most (Close… asks first).
-    fn right_now(&mut self, ui: &mut Ui, c: Rect, view: &View, look: Look, out: &mut Vec<String>) {
+    fn right_now(&mut self, ui: &mut Ui, c: Rect, view: &View, look: Look, _out: &mut Vec<String>) {
         let p = ui.painter().clone();
         let ctl = look.ctl();
         let Some(now) = view.now else {
@@ -308,13 +308,13 @@ impl Desk {
         // rows: a folder, then (when open) its files
         enum Row {
             Folder(usize),
-            File(usize, usize), // group, plan index (1-based)
+            File(usize), // its place in the plan (1-based)
         }
         let mut rows = vec![];
         for (g, (cat, _, ix)) in groups.iter().enumerate() {
             rows.push(Row::Folder(g));
             if self.tidy_open.contains(cat) {
-                rows.extend(ix.iter().map(|i| Row::File(g, *i)));
+                rows.extend(ix.iter().map(|i| Row::File(*i)));
             }
         }
         let list = Rect::from_min_max(pos2(area.min.x, area.min.y + 44.0), pos2(area.max.x, area.max.y - 20.0));
@@ -358,7 +358,7 @@ impl Desk {
                         self.files.plan_at = None;
                     }
                 }
-                Row::File(_, i) => {
+                Row::File(i) => {
                     let Some((from, _)) = plan.get(i - 1) else { continue };
                     let keep = self.tidy_skip.contains(i);
                     if look.checkbox(ui, Rect::from_center_size(pos2(x0 + 24.0, cy), vec2(s, s)), !keep, Id::unique(("tidy-file", *i))).clicked() && !self.tidy_skip.remove(i) {

@@ -140,7 +140,6 @@ pub struct View<'a> {
     pub space_running: bool,
     pub upkeep_hide: &'a [String],                // checks you hid
     pub space_log: &'a [[u64; 2]],                // free space over time
-    pub tidy_targets: &'a [(String, String)],     // a tidy category -> your folder for it
     pub tidy_auto: bool,
     pub mini: &'a dyn Fn(&Painter, Pos2, f32, &str, &str), // draws a small Clipster: foot, scale, hat, colour
 }
@@ -175,7 +174,6 @@ pub struct Backup<'a> {
 pub struct Me {
     pub facts: Vec<(String, String)>, // (key to forget, "Pet: Mo (cat)")
     pub achievements: Vec<Achievement>,
-    pub scores: Vec<(String, String)>, // game (with its difficulty), best score or time
     pub friendship: i32,
     pub days: u64,
     pub games: Vec<(String, String, Option<String>)>, // every arcade game: id, name, your best
@@ -204,7 +202,6 @@ pub struct Prefs {
     pub sounds: bool,
     pub breaks: bool,
     pub autostart: bool,
-    pub quiet: bool,
     pub dnd: bool,
     pub wrapup: bool,
     pub upkeep_day: bool,
@@ -663,7 +660,7 @@ impl Desk {
             at.x = screen.max.x - size.x - 4.0;
         }
         let mut picked = None;
-        let area = egui::Area::new(Id::new(("desk-popup", key))).order(egui::Order::Foreground).fixed_pos(at).show(&ctx, |ui| {
+        let area = egui::Area::new(Id::unique(("desk-popup", key))).order(egui::Order::Foreground).fixed_pos(at).show(&ctx, |ui| {
             let (r, _) = ui.allocate_exact_size(size, Sense::hover());
             let p = ui.painter();
             match look {
@@ -675,7 +672,7 @@ impl Desk {
             }
             for (i, item) in items.iter().enumerate() {
                 let ir = Rect::from_min_size(pos2(r.min.x + 4.0, r.min.y + 4.0 + i as f32 * row), vec2(r.width() - 8.0, row));
-                let resp = ui.interact(ir, Id::new(("desk-popup-item", key, i)), Sense::click());
+                let resp = ui.interact(ir, Id::unique(("desk-popup-item", key, i)), Sense::click());
                 let on = resp.hovered();
                 if on {
                     ui.painter().rect_filled(ir, CornerRadius::same(if look == Look::Modern { 4 } else { 0 }), if look == Look::Modern { tok::ACCENT_SOFT } else { win98::NAVY });
@@ -1032,20 +1029,6 @@ impl Desk {
 
 
 
-    /// Wheel scrolling for a list drawn row by row: the first row to show, kept per list.
-    fn first_row(&mut self, ui: &Ui, key: &'static str, area: Rect, total: usize, fits: usize) -> usize {
-        let max = total.saturating_sub(fits) as f32;
-        let at = self.scroll.entry(key).or_insert(0.0);
-        if ui.rect_contains_pointer(area) {
-            *at -= ui.input(|i| i.smooth_scroll_delta.y) / 24.0;
-        }
-        *at = at.clamp(0.0, max);
-        at.round() as usize
-    }
-
-
-
-
 }
 
 impl Desk {
@@ -1123,16 +1106,6 @@ fn plural(n: u64, word: &str) -> String {
     format!("{n} {word}{}", if n == 1 { "" } else { "s" })
 }
 
-/// A thin scroll thumb along the right edge of `area` when not all rows fit.
-fn scrollbar(p: &Painter, look: Look, area: Rect, first: usize, fits: usize, total: usize) {
-    if total <= fits || total == 0 {
-        return;
-    }
-    let track = Rect::from_min_max(pos2(area.max.x - 6.0, area.min.y + 6.0), pos2(area.max.x - 3.0, area.max.y - 6.0));
-    let h = (track.height() * fits as f32 / total as f32).max(16.0);
-    let y = track.min.y + (track.height() - h) * first as f32 / (total - fits) as f32;
-    p.rect_filled(Rect::from_min_size(pos2(track.min.x, y), vec2(track.width(), h)), CornerRadius::same(2), if look == Look::Modern { tok::CONTROL_BORDER } else { win98::SHADOW });
-}
 
 /// One line of text at `at` (its left middle), cut with "…" where it would pass `width`; the whole text on hover when cut.
 /// Returns how wide it came out.

@@ -31,7 +31,19 @@ Type to him in plain words, typos and all. Some things to try:
 
 He also watches what you copy and offers useful things: pretty-printing JSON, cleaning tracking junk out of links, decoding base64, turning timestamps into dates, searching an error message. He comments on programs as you open them and on what you're working in ("It looks like you're writing a letter…"), then gets out of the way after a few seconds.
 
-**Clipster's Desk** ("open my desk", Meta+Shift+C, or right-click him): one window with eight tabs: Today (time per app, focus and goals, your top 3, start my workday), Week (with a week in review you can copy), To-do (and your shopping, packing or any other lists), Agenda (your calendar, reminders and due to-dos by day, and notes), Clipboard (history, pinned snippets and links saved to read later), Upkeep (checkup, tidying, backups), You & me (what he knows about you, the people in your life, your taught phrases, achievements) and Settings. It comes in the Windows 98 look, or a flat modern one for those who must.
+**Clipster's Desk** ("open my desk", Meta+Shift+C, or right-click him): one window with nine tabs.
+
+- **Today:** what's coming up (meetings with Join, reminders to snooze, birthdays, what's due, countdowns, the weather if you switch it on), time per app (click one to see the sites in it and file one elsewhere), focus with +10 min and pause, your top 3 and your habits, and a wrap-up that keeps a line for your journal and picks tomorrow's three.
+- **Week:** the last seven days (click a day for what happened), the next seven as a planner, every focus session, streaks, how this week compares with the last, and a spreadsheet or a printout.
+- **To-do:** filters and search, dates from a menu, details (a link, a note, steps, who you're waiting on, a reminder), Plan my day with suggestions, the week's three, and named lists you can start from a ready-made one, print or show as a QR code for your phone.
+- **Agenda:** your calendar by day or by month, free time, an event's card (map, join, meeting notes), reminders you can snooze and move, holidays, and notes you can edit, pin and search.
+- **Clipboard:** your recent copies (turn one into a to-do or a note, or change it with a text tool), named pins, links saved to read later, and files (find, show in folder, recent, the newest downloads).
+- **Write:** proofreading with the text in front of you, and letters to fill in, with your own templates.
+- **Upkeep:** the checkup, what's using the computer right now, what fills the disk, tidying you can choose, and backups that can run on their own and give a file back.
+- **You & me:** what he knows about you (add or change it), your phrases, achievements, the people in your life (a card each) and a journal.
+- **Settings:** your working days and hours, quiet times, the clock and week format, an outfit picker, and your data (export it for a new computer).
+
+It comes in the Windows 98 look, or a flat modern one for those who must, in two sizes.
 
 **A proper welcome:** new installs get a Windows 98-style setup and tour window. "Show me around" opens the tour again.
 
@@ -86,7 +98,7 @@ Almost everything Clipster says is plain text in `app/data/` (the Unhinged perso
 
 ## Privacy
 
-Clipster runs locally. He reads your clipboard and the list of running programs to comment on them, and keeps clipboard history in memory only. To comment on what you're doing he reads the title of the window you're working in. Titles, how long you spend in each kind of app (for the time report and the Desk), the facts you tell him, the people and birthdays you give him, your reading list and your calendar links stay on your computer (in `settings.json`); switch the comments off in Settings. Your calendar links are only ever fetched from your computer, and file search never leaves it. Pinned clipboard snippets are saved; the clipboard history isn't. Backups go only where you point them. The upkeep checkup asks your own package manager (or Windows Update) how many updates are waiting. He uses the internet only when you ask for something live (weather, an encyclopedia lookup, exchange rates…), through free public services, and once a day to ask GitHub whether a newer Clipster is out (switch that off in Settings). There's no telemetry.
+Clipster runs locally. He reads your clipboard and the list of running programs to comment on them, and keeps clipboard history in memory only. To comment on what you're doing he reads the title of the window you're working in. Titles, how long you spend in each kind of app (for the time report and the Desk), the facts you tell him, the people and birthdays you give him, your reading list and your calendar links stay on your computer (in `settings.json`); switch the comments off in Settings. Your calendar links are only ever fetched from your computer, and file search never leaves it. Your journal, habits, countdowns and the time per site stay on your computer too. QR codes are drawn by Clipster himself. The weather line (off unless you switch it on) asks open-meteo.com for your city; public holidays (off unless you pick a country) send only the country code and the year to date.nager.at. Pinned clipboard snippets are saved; the clipboard history isn't. Backups go only where you point them. The upkeep checkup asks your own package manager (or Windows Update) how many updates are waiting. He uses the internet only when you ask for something live (weather, an encyclopedia lookup, exchange rates…), through free public services, and once a day to ask GitHub whether a newer Clipster is out (switch that off in Settings). There's no telemetry.
 
 ## License
 

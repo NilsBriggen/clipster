@@ -109,7 +109,8 @@ pub fn restore(file: &Path, original: &Path) -> std::io::Result<PathBuf> {
     Ok(dest)
 }
 
-/// What to copy from `sources` into `target/Clipster backup/<folder name>/`.
+/// What to copy from `sources` into `target/Clipster backup/<folder name>/` (the app uses `plan_skipping`).
+#[cfg(test)]
 pub fn plan(sources: &[PathBuf], target: &Path, limits: Limits) -> Result<Plan, String> {
     plan_skipping(sources, target, limits, &[])
 }

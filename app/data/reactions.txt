@@ -6075,19 +6075,19 @@ The version check asks GitHub once a day whether a newer Clipster is out. Nothin
 • Click me, or press Meta+C anywhere.\n• Meta+Shift+C opens my Desk.\n• Right-click me for a menu: the Desk, Settings, a quiet hour.\n• Double-click me for a trick.\n• Type in plain words, typos and all. The up arrow repeats what you typed.\n• "help" shows everything I can do, by topic.
 
 ## welcome reminders
-• "remind me in 10 min to stretch", "remind me on Friday at 3 to call Anna", "remind me every hour to drink water"\n• "todo send the report by friday", "todo water the plants every monday"\n• "what's on my list", "done send the report"\n• Lists: "add eggs, milk and bread to my shopping list", "what's on my packing list".\n• Your calendar: give me its private iCal link and I'll show your day on the Agenda and give you a heads-up before meetings.\n• On the Desk, star up to three to-dos for today's top 3.
+• "remind me in 10 min to stretch", "remind me on Friday at 3 to call Anna", "remind me every hour to drink water"\n• "todo send the report by friday", "todo water the plants every monday"\n• "what's on my list", "done send the report"\n• Lists: "add eggs, milk and bread to my shopping list", "what's on my packing list".\n• Your calendar: give me its private iCal link and I'll show your day on the Agenda and give you a heads-up before meetings.\n• On the Desk, star up to three to-dos for today's top 3, give a to-do a link, a note or steps, and see the next seven days at once.\n• Habits and countdowns: "new habit walk", "I did my walk", "count down to my holiday on 2 December".
 
 ## welcome writing
 • Copy some text and say "proofread this": doubled words, common misspellings, a/an, its/it's and long sentences, with a button that fixes the safe ones.\n• "write a complaint letter", "cover letter", "out of office": a template to fill in, then copy it or open it as an email.\n• "another word for happy", "define serendipity".
 
 ## welcome focus
-• "focus 45 minutes on the report": I stay quiet, silence notifications where the system lets me, and nudge you back from videos and social media.\n• "set my focus goal to 2 hours", "limit video to 30 minutes a day".\n• "where did my time go today?" (from window titles, which stay on this computer).
+• "focus 45 minutes on the report": I stay quiet, silence notifications where the system lets me, and nudge you back from videos and social media.\n• "set my focus goal to 2 hours", "limit video to 30 minutes a day".\n• "where did my time go today?" (from window titles, which stay on this computer).\n• "focus until my next meeting"; while it runs: +10 min, pause and resume on the Desk.
 
 ## welcome day
-• "plan my day": pick today's top 3 in the morning.\n• "wrap up my day": what got done and what's left (move it to tomorrow), then lock or shut down. I offer it after 5 pm on busy days.\n• "my week in review": on Friday afternoons I offer a summary you can copy.
+• "plan my day": pick today's top 3 in the morning.\n• "wrap up my day": what got done and what's left (move it to tomorrow), then lock or shut down. I offer it after 5 pm on busy days.\n• "my week in review": on Friday afternoons I offer a summary you can copy, print or save as a spreadsheet.\n• The Desk's Today shows what's coming up (meetings, reminders, birthdays, what's due) and your habits; the wrap-up keeps a line for your journal.
 
 ## welcome upkeep
-• "computer checkup": free space, the trash, temporary files, system updates, battery health, apps that start with the computer, the last backup. A fix for each, and I ask before anything is deleted.\n• "tidy my downloads" sorts loose files into folders ("undo the tidy" puts them back).\n• Backups to a USB drive or folder: only new and changed files, and nothing is ever deleted.\n• "find my CV", "where did I save the invoice", "recent files".
+• "computer checkup": free space, the trash, temporary files, system updates, battery health, apps that start with the computer, the last backup. A fix for each, and I ask before anything is deleted.\n• "tidy my downloads" sorts loose files into folders ("undo the tidy" puts them back).\n• Backups to a USB drive or folder: only new and changed files, and nothing is ever deleted.\n• "find my CV", "where did I save the invoice", "recent files".\n• On the Desk: what's using the computer right now, what fills the disk, backups that run when the drive is plugged in, and getting a file back from the backup.
 
 ## welcome desk
 One window for all of it. Open it with "open my desk", with Meta+Shift+C, or from my right-click menu. It comes in Classic 98, or Modern for the faint of heart.
@@ -6096,7 +6096,7 @@ One window for all of it. Open it with "open my desk", with Meta+Shift+C, or fro
 • An arcade: Paper Jam, Clip Glide, Desk Merge, Bug Hunt, Byte Size, Clip Chain, chess and hangman, each in its own window.\n• Jokes, riddles, quizzes, fortunes, a few secrets, and achievements to unlock.\n• "wear a wizard hat", "turn gold".
 
 ## welcome yours
-• Tell me things: "my cat is called Mo", "I live in Bern". I bring them up later, and you can see and forget them on the Desk.\n• Teach me: "when I say gm, say good morning".\n• People: "Anna's birthday is on 3 March", "keep in touch with mum every 2 weeks". I'll remind you.\n• The Desk's Clipboard keeps your last copies (pin the ones you'll need) and the links you saved to read later.
+• Tell me things: "my cat is called Mo", "I live in Bern". I bring them up later, and you can see and forget them on the Desk.\n• Teach me: "when I say gm, say good morning".\n• People: "Anna's birthday is on 3 March", "keep in touch with mum every 2 weeks". I'll remind you.\n• The Desk's Clipboard keeps your last copies (pin the ones you'll need) and the links you saved to read later.\n• A journal: "journal: finished the slides", one line a day with your mood, kept on this computer.
 
 ## welcome done
 That's the tour. Say "show me around" any time to see it again, or "help" for everything by topic.

@@ -35,11 +35,6 @@ pub fn folder(which: &str) -> Option<PathBuf> {
     }
 }
 
-/// The categories, in order (for "Where to" on the Desk).
-pub fn categories() -> Vec<&'static str> {
-    CATEGORIES.iter().map(|(c, _)| *c).chain(std::iter::once("Other")).collect()
-}
-
 // Where a category goes instead of a subfolder ("Documents" → your real Documents folder), from the settings.
 static TARGETS: std::sync::Mutex<Vec<(String, PathBuf)>> = std::sync::Mutex::new(Vec::new());
 

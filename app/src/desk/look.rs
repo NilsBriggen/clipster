@@ -42,15 +42,12 @@ pub(super) mod tok {
     pub const SECONDARY: Color32 = hex(0xEDF0F5);
     pub const SECONDARY_HOVER: Color32 = hex(0xE2E8F0);
     pub const SECONDARY_PRESSED: Color32 = hex(0xD4DCE7);
-    pub const DISABLED: Color32 = hex(0xEEF1F5);
     pub const DISABLED_TEXT: Color32 = hex(0x626E80);
     pub const TRACK: Color32 = hex(0xE4E9F0);
     pub const SUCCESS: Color32 = hex(0x24744F);
     pub const WARNING: Color32 = hex(0x965900);
     pub const DANGER: Color32 = hex(0xA93636);
-    pub const KIND3: Color32 = hex(0x8B478F);
     pub const KIND5: Color32 = hex(0xB86218);
-    pub const KIND6: Color32 = hex(0x14757F);
     pub const NEUTRAL: Color32 = hex(0x6E7A8C);
     pub const PAPERCLIP: Color32 = hex(0x4E6E87);
     pub const FACE_INK: Color32 = hex(0x455164);
@@ -121,18 +118,6 @@ impl Look {
         }
     }
 
-    /// The bar colour for the i-th longest row: by rank, so the rows on screen never share a colour.
-    pub(super) fn rank_color(self, i: usize) -> Color32 {
-        const CLASSIC: [(u8, u8, u8); 8] = [(52, 101, 196), (226, 125, 40), (46, 160, 67), (180, 70, 170), (0, 150, 160), (210, 70, 60), (120, 100, 200), (190, 150, 30)];
-        const MODERN: [Color32; 8] = [tok::ACCENT, tok::SUCCESS, tok::KIND3, tok::NEUTRAL, tok::KIND5, tok::KIND6, tok::DANGER, tok::WARNING];
-        match self {
-            Look::Classic => {
-                let (r, g, b) = CLASSIC[i % 8];
-                Color32::from_rgb(r, g, b)
-            }
-            Look::Modern => MODERN[i % 8],
-        }
-    }
     /// A focus score: good, so-so, poor.
     pub(super) fn score(self, pct: u32) -> Color32 {
         match (self, pct) {

@@ -519,7 +519,7 @@ impl Desk {
 
     /// A to-do's details: text, date and time, repeat, important, list, link, note, waiting, steps, a reminder.
     #[allow(clippy::too_many_arguments)]
-    fn todo_card(&mut self, ui: &mut Ui, c: Rect, view: &View, look: Look, out: &mut Vec<String>, line_no: usize, today: NaiveDate) {
+    fn todo_card(&mut self, ui: &mut Ui, c: Rect, view: &View, look: Look, out: &mut Vec<String>, line_no: usize, _today: NaiveDate) {
         let Some(it) = self.files.todos.get(line_no.wrapping_sub(1)).cloned() else {
             self.card = None;
             return;
@@ -550,7 +550,7 @@ impl Desk {
         };
         let n = format!("todo #{line_no}");
         // a field that sends its command when you leave it or press Enter (and only when it changed)
-        let mut field = |ui: &mut Ui, r: Rect, key: &str, value: &mut String, hint: &str, was: &str, cmd: &str, out: &mut Vec<String>| {
+        let field = |ui: &mut Ui, r: Rect, key: &str, value: &mut String, hint: &str, was: &str, cmd: &str, out: &mut Vec<String>| {
             let resp = look.input(ui, r, Id::unique(("desk-todo-card", key, line_no)), value, hint);
             if resp.lost_focus() && value.trim() != was {
                 out.push(format!("{n} {cmd} {}", if value.trim().is_empty() { "none" } else { value.trim() }));

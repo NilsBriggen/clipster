@@ -214,7 +214,6 @@ mod tests {
             space_running: false,
             upkeep_hide: &[],
             space_log: &[],
-            tidy_targets: &[],
             tidy_auto: false,
             mini: &|_, _, _, _, _| {},
         };

@@ -821,7 +821,7 @@ fn reply(op: &Op, pool: &str, x: &str, items: &[Item], today: NaiveDate) -> Repl
         "todo_week_unstarred" => format!("\"{x}\" is out of this week's three."),
         "todo_week_full" => "This week already has three. Take one out first.".to_string(),
         "todo_time_set" => match item.and_then(|i| i.at) {
-            Some(t) => format!("\"{x}\" at {} on {when}.", t.format("%H:%M")),
+            Some(t) => format!("\"{x}\" at {} on {when}.", crate::brain::clock(t)),
             None => format!("\"{x}\" has no time now."),
         },
         "todo_detail" => format!("Saved for \"{x}\"."),
@@ -844,7 +844,7 @@ fn reply(op: &Op, pool: &str, x: &str, items: &[Item], today: NaiveDate) -> Repl
     if let Some(it) = fresh.filter(|i| !i.done) {
         if let Some(due) = it.due {
             if matches!(op, Op::Add(_)) {
-                r.text += &format!(" (due {}{})", due.format("%A, %B %-d"), it.at.map(|t| format!(" at {}", t.format("%H:%M"))).unwrap_or_default());
+                r.text += &format!(" (due {}{})", due.format("%A, %B %-d"), it.at.map(|t| format!(" at {}", crate::brain::clock(t))).unwrap_or_default());
             }
             let at = crate::timers::unix_of(due.and_time(it.at.unwrap_or(NaiveTime::from_hms_opt(9, 0, 0).unwrap_or_default()))) - crate::timers::unix_now();
             if at > 60 {
