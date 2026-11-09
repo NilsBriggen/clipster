@@ -415,6 +415,13 @@ impl Desk {
                     b.push(("Show".to_string(), "desk todo".to_string()));
                     (text, b)
                 }
+                Upcoming::Chase { line, who, text } => {
+                    let mut b = vec![("Got it".to_string(), format!("todo #{} waiting none", line + 1)), ("Later".to_string(), format!("todo #{} due in 3 days", line + 1))];
+                    if view.people.iter().any(|p| p.name.eq_ignore_ascii_case(&who) && p.email.is_some()) {
+                        b.insert(0, ("Write".to_string(), format!("person mail {who}")));
+                    }
+                    (format!("Ask {who} about \u{201c}{text}\u{201d}?"), b)
+                }
                 Upcoming::Countdown { label, days } => {
                     let n = view.countdowns.iter().position(|(l, _)| *l == label).map_or(0, |i| i + 1);
                     (format!("⏳ {}", crate::plan::countdown_text(&label, days)), vec![("✕".to_string(), format!("countdown remove {n}"))])

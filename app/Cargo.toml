@@ -16,6 +16,7 @@ dirs = "6"
 ureq = { version = "3", features = ["json"] }
 serde_json = "1"
 chrono = { version = "0.4", default-features = false, features = ["clock"] }
+qrcode = { version = "0.14", default-features = false } # QR codes drawn here (lists for your phone), not by a website
 ring = "0.17" # SHA-256 for checking downloaded updates (already built in through ureq's TLS)
 
 [target.'cfg(target_os = "linux")'.dependencies]

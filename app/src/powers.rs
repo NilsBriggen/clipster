@@ -232,9 +232,8 @@ pub fn qr(rest: &str) -> Reply {
     if rest.trim().is_empty() {
         return Reply::say("A QR code for what? Try: qr code for https://example.com");
     }
-    Reply::say("Here's your QR code! Point a phone at it.")
-        .mood(Mood::Happy)
-        .effect(Effect::Open(format!("https://api.qrserver.com/v1/create-qr-code/?size=400x400&data={}", crate::brain::url_encode(rest.trim()))))
+    // drawn here, on the Desk: the text never goes to a website
+    Reply::say(crate::lines::pick("qr_ready")).mood(Mood::Happy).effect(Effect::ShowQr(rest.trim().to_string()))
 }
 
 // ---------- dates ----------

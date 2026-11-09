@@ -20327,3 +20327,33 @@ An improvement on last week. Nicely done.
 ## review_worse
 A bit harder than last week: less focus, more distraction. Next week is a fresh start.
 Less focus than last week. It happens. Pick one thing for Monday.
+
+## liststart weekend
+Weekend away | Phone charger | Toothbrush and toothpaste | Change of clothes | Pyjamas | Medication | Keys | Wallet | Book or e-reader | Snacks for the journey | Rain jacket
+
+## liststart business_trip
+Business trip | Laptop and charger | Phone charger | Travel adapter | Tickets and booking confirmation | ID or passport | Business cards | Notebook and pen | Smart outfit | Comfortable shoes | Toiletries | Headphones | Presentation on a USB stick
+
+## liststart beach
+Beach holiday | Sunscreen | Sunglasses | Swimsuit | Beach towel | Hat | Sandals | Water bottle | After-sun lotion | Book | Passport | Travel insurance details | Plug adapter
+
+## liststart moving
+Moving house | Book the van or movers | Boxes, tape and markers | Tell the post office the new address | Update the address at the bank | Update the address at work | Read the meters | Clean the old place | Collect the deposit | Hand over the keys | Set up internet at the new place | Label the box with the kettle
+
+## liststart party
+Before a party | Send the invitations | Count who's coming | Drinks | Ice | Snacks | Plates, cups and napkins | Music playlist | Clean the bathroom | Space in the fridge | Bin bags | Ask about allergies
+
+## liststart groceries
+Weekly groceries | Bread | Milk | Eggs | Butter | Cheese | Fruit | Vegetables | Pasta or rice | Coffee or tea | Toilet paper | Washing-up liquid
+
+## qr_ready
+Here's your QR code. Point your phone's camera at it. I made it here: nothing was sent anywhere.
+A QR code, made right here. Your phone's camera can read it.
+
+## list_starter_saved
+Saved. "New list" can start from your {label} list now.
+Your {label} list is now one to start from.
+
+## plan_week_done
+Picked {n} for the week. They're on the Week tab.
+The week's three are set ({n} picked). Friday's review will count them.

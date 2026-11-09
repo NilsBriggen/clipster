@@ -252,7 +252,7 @@ pub fn parse(text: &str, user: bool, out: &mut Vec<Section>) -> Vec<String> {
         };
         let s = &mut out[i];
         // process names and window-title pieces are matched as they are, not tidied like sentences
-        let program = ["program ", "window ", "site ", "answer ", "template ", "tips "].iter().any(|p| s.name.starts_with(p));
+        let program = ["program ", "window ", "site ", "answer ", "template ", "tips ", "liststart "].iter().any(|p| s.name.starts_with(p));
         // triggers are tidied exactly like what people type, so "what's" in the file matches "whats" typed
         let mut list = |rest: &str, exact: bool| -> Vec<String> {
             let mut out = vec![];
@@ -444,25 +444,56 @@ pub fn ensure_user_file() -> PathBuf {
 
 /// A letter template of your own in the user's file: `## template my_<name>` (one line, the whole text).
 pub fn save_template(name: &str, text: &str) -> std::io::Result<()> {
+    save_own("template", name, text)
+}
+
+/// A section of yours (`## <kind> my_<name>`, one line of text) in the user's file, replacing one of that name.
+fn save_own(kind: &str, name: &str, text: &str) -> std::io::Result<()> {
     let id: String = name.trim().to_lowercase().chars().map(|c| if c.is_alphanumeric() { c } else { '_' }).collect();
-    forget_template(&format!("my_{id}"))?;
+    forget_own(kind, &format!("my_{id}"))?;
     let path = ensure_user_file();
     let mut all = std::fs::read_to_string(&path)?;
     let words = name.trim().replace(" | ", " ");
-    all += &format!("\n## template my_{id}\n> {words}\n{}\n", text.trim().replace('\n', "\\n"));
+    all += &format!("\n## {kind} my_{id}\n> {words}\n{}\n", text.trim().replace('\n', "\\n"));
     crate::brain::write_atomic(&path, &all)?;
     reload();
     Ok(())
 }
 
+/// A list you saved to start new ones from: its name and items.
+pub fn save_starter(name: &str, items: &[String]) -> std::io::Result<()> {
+    let clean = |s: &str| s.replace(" | ", " ").replace(['\n', '\r'], " ");
+    save_own("liststart", name, &std::iter::once(clean(name)).chain(items.iter().map(|i| clean(i))).collect::<Vec<_>>().join(" | "))
+}
+
+/// The lists to start from: (id, name, items), yours first.
+pub fn starters() -> Vec<(String, String, Vec<String>)> {
+    let mut all: Vec<(String, String, Vec<String>)> = sections_with_prefix("liststart ")
+        .into_iter()
+        .filter_map(|(id, _)| {
+            let line = all(&format!("liststart {id}")).into_iter().next()?;
+            let mut parts = line.split(" | ").map(|p| p.trim().to_string());
+            let name = parts.next()?;
+            Some((id, name, parts.filter(|p| !p.is_empty()).collect()))
+        })
+        .collect();
+    all.sort_by_key(|(id, _, _)| !id.starts_with("my_"));
+    all
+}
+
 /// Remove a template of yours (only `my_` ones); false when there was none.
 pub fn forget_template(id: &str) -> std::io::Result<bool> {
+    forget_own("template", id)
+}
+
+/// Remove a section of yours of this kind (only `my_` ones); false when there was none.
+fn forget_own(kind: &str, id: &str) -> std::io::Result<bool> {
     if !id.starts_with("my_") {
         return Ok(false);
     }
     let path = user_path();
     let Ok(text) = std::fs::read_to_string(&path) else { return Ok(false) };
-    let head = format!("## template {id}");
+    let head = format!("## {kind} {id}");
     let mut out = String::new();
     let mut skipping = false;
     let mut found = false;

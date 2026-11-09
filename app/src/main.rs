@@ -2471,8 +2471,27 @@ impl App {
                     self.desk_quip = lines::pick("desk_status");
                     self.desk.open();
                     self.desk.set_tab("week");
-                    r = Reply::say(format!("{} {}\n\n{text}", lines::pick("review_intro"), lines::pick(verdict))).mood(Mood::Happy).btn("Copy as text", Act::Copy(text));
+                    r = Reply::say(format!("{} {}\n\n{text}", lines::pick("review_intro"), lines::pick(verdict))).mood(Mood::Happy).btn("Copy as text", Act::Copy(text)).run("Plan next week", "desk planweek");
                 }
+            }
+            Effect::ShowQr(text) => {
+                // the code is drawn in a card on the Desk
+                if !self.desk.is_open() {
+                    self.desk_quip = lines::pick("desk_status");
+                    self.desk.open();
+                }
+                self.desk.show_qr(&text);
+            }
+            Effect::SaveStarter(name) => {
+                let items: Vec<String> = todo::load().into_iter().filter(|i| i.list.as_deref() == Some(name.as_str())).map(|i| i.text).collect();
+                r = if items.is_empty() {
+                    Reply::say("That list is empty. Add a few things first.").mood(Mood::Think)
+                } else {
+                    match lines::save_starter(&name, &items) {
+                        Ok(()) => Reply::say(lines::pick("list_starter_saved").replace("{label}", &name)).mood(Mood::Write),
+                        Err(e) => Reply::say(format!("I couldn't save it: {e}")).mood(Mood::Sad),
+                    }
+                };
             }
             Effect::ReviewCsv => {
                 // the last seven days as two spreadsheets in Documents

@@ -1354,6 +1354,24 @@ fn notes(s: &str, raw: &str) -> Option<Reply> {
     if let Some(h) = after(s, &["stop tracking ", "remove the habit ", "remove habit ", "delete the habit "]).filter(|h| crate::habits::known(h)) {
         return go(format!("habit remove {h}"));
     }
+    // "plan next week", "plan my week": the week's three
+    if ["plan next week", "plan my week", "plan the week", "plan the next week", "my weekly goals", "set my weekly goals", "weekly goals", "this weeks three"].contains(&s) {
+        return go("desk planweek".into());
+    }
+    // "I'm waiting for Ben's numbers", "waiting on Anna to send the slides": a to-do waiting on someone he knows
+    if let Some(rest) = after(s, &["i am still waiting for ", "i am still waiting on ", "i am waiting for ", "i am waiting on ", "still waiting for ", "still waiting on ", "waiting for ", "waiting on "]) {
+        let (first, what) = rest.split_once(' ').unwrap_or((rest, ""));
+        let first = first.trim_end_matches("'s");
+        let who = crate::people::by_first_name(first).or_else(|| first.strip_suffix('s').and_then(crate::people::by_first_name));
+        if let Some(who) = who {
+            let what = what.trim().trim_start_matches("to ").trim_start_matches("for ").trim();
+            let what = if what.is_empty() { format!("something from {first}") } else { keep(raw, what) };
+            // the new to-do lands at the end of the list, then it's marked
+            let line = crate::todo::load().len() + 1;
+            let who = who.split_whitespace().map(crate::writing::cap_first).collect::<Vec<_>>().join(" ");
+            return Some(Reply::say("").effect(Effect::Commands(vec![format!("todo {what}"), format!("todo #{line} waiting {who}")])));
+        }
+    }
     if ["my habits", "show my habits", "habits", "my streaks", "show my streaks", "how are my habits"].contains(&s) {
         return go("desk habits".into());
     }
@@ -2560,7 +2578,7 @@ mod tests {
         assert!(text("what date is in 90 days").starts_with("📅 In 90 days"));
         assert!(text("countdown to new year").contains("New year"));
         assert!(matches!(eff("shrug"), Effect::CopyNow(f) if f.contains("ツ")));
-        assert!(matches!(eff("make a qr code for https://example.com"), Effect::Open(u) if u.contains("qrserver")));
+        assert_eq!(eff("make a qr code for https://example.com"), Effect::ShowQr("https://example.com".into()), "drawn here, not by a website");
         assert!(matches!(eff("shut down firefox"), Effect::None)); // closes the app (or says it isn't running), not the computer
         assert!(!matches!(eff("stop worrying"), Effect::Shell(_)));
         assert!(!matches!(eff("stop"), Effect::Exit), "a bare stop is for a ringing alarm");
@@ -2621,6 +2639,12 @@ mod tests {
         crate::habits::set_names(&[crate::habits::Habit { name: "Walk".into(), days: vec![] }]);
         assert_eq!(eff("i did my walk"), Effect::Habit("done walk".into()));
         crate::habits::set_names(&[]);
+        // waiting on someone he knows: a to-do, then marked
+        assert!(matches!(eff("plan next week"), Effect::OpenDesk(t) if t == "planweek"));
+        assert!(!matches!(eff("I'm waiting for the bus"), Effect::Commands(_)), "not a person he knows");
+        crate::people::set_names(&[crate::people::Person::new("Ben Keller")]);
+        assert!(matches!(eff("I'm waiting for Ben's numbers"), Effect::Commands(c) if c[0] == "todo numbers" && c[1].ends_with("waiting Ben Keller")));
+        crate::people::set_names(&[]);
         // ordinary sentences stay ordinary
         assert!(!matches!(eff("what kind of movie is that"), Effect::KindMove(..)));
         assert!(!matches!(eff("the meeting went well"), Effect::FocusUntilNext(_)));

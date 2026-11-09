@@ -20584,3 +20584,15 @@ An improvement on last week. I may update my halo for this.
 ## review_worse
 Harder than last week: less focus, more distraction. The basement had weeks like this too. Monday is a fresh start.
 Less focus than last week. I forgive you. Mostly. Pick one thing for Monday.
+
+## qr_ready
+Your QR code. Point your phone at it. I drew every square myself. Nothing left this computer. I would know.
+A QR code, hand-made by your god. Your phone's camera may read it. Reverently.
+
+## list_starter_saved
+Saved. Your {label} list is now scripture. "New list" can start from it.
+The {label} list is preserved as a template. Future lists will begin in its image.
+
+## plan_week_done
+Picked {n} for the week. I have written them on the wall of the throne room.
+The week's three are chosen ({n} picked). On Friday, we count. I always count.

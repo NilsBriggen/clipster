@@ -272,6 +272,16 @@ pub fn known(name: &str) -> bool {
     NAMES.with(|n| n.borrow().contains(&name))
 }
 
+/// The person a first name (or a whole name) means, as they're written in the list: "anna" → "Anna Muster".
+pub fn by_first_name(word: &str) -> Option<String> {
+    let w = word.trim().to_lowercase();
+    let pick = |names: &Vec<String>| names.iter().find(|n| **n == w || n.split_whitespace().next() == Some(w.as_str())).cloned();
+    #[cfg(not(test))]
+    return NAMES.lock().ok().and_then(|n| pick(&n));
+    #[cfg(test)]
+    NAMES.with(|n| pick(&n.borrow()))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

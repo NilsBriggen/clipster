@@ -85,6 +85,8 @@ pub enum Effect {
     Wrapup,                          // the end-of-day card on the Desk
     Review(bool),                    // the week in review (true = copy it as text)
     ReviewCsv,                       // the last seven days as spreadsheets in Documents
+    ShowQr(String),                  // a QR code of this text, drawn on the Desk (nothing leaves the computer)
+    SaveStarter(String),             // keep this named list as one to start new lists from (written to your lines file)
     OpenDesk(String),                // Clipster's Desk, on this tab ("" = where it was): stats, to-dos, reminders, upkeep
     DeskLook(bool),                  // the Desk's look: true = modern, false = classic 98
     Tidy(String),                    // move a folder's files into subfolders by type (after a yes)
@@ -698,7 +700,7 @@ pub fn exact(input: &str) -> Option<Reply> {
                 "undone" => Op::UndoneAt(n),
                 "star" => Op::StarAt(n),
                 "startomorrow" => Op::StarTomorrowAt(n),
-                "weekstar" => Op::WeekStarAt(n),
+                "weekstar" => Op::WeekStarAt(n, text == "next"),
                 "prio" => Op::PrioAt(n),
                 "edit" => Op::EditAt(n, text.to_string()),
                 "remove" => Op::RemoveAt(n),
@@ -754,6 +756,13 @@ pub fn exact(input: &str) -> Option<Reply> {
                     return Some(Reply::say("Opening an email with the list.").mood(Mood::Write).effect(Effect::Open(format!("mailto:?subject={}&body={}", mail_encode(subject), mail_encode(body)))));
                 }
                 ("add", items) if !items.trim().is_empty() => Reply::say("").effect(Effect::Todo(Op::AddTo(name, crate::todo::split_items(items)))),
+                ("qr", _) => Reply::say(lines::pick("qr_ready")).mood(Mood::Happy).effect(Effect::ShowQr(crate::todo::list_text(&crate::todo::load(), &name))),
+                ("savestart", _) => Reply::say("").effect(Effect::SaveStarter(name)),
+                // "onlist packing from weekend": the items of a list to start from
+                ("from", id) => match crate::lines::starters().into_iter().find(|(i, n, _)| i == id.trim() || n.eq_ignore_ascii_case(id.trim())) {
+                    Some((_, _, items)) => Reply::say("").effect(Effect::Todo(Op::AddTo(name, items))),
+                    None => Reply::say(format!("I don't know a list called \"{}\" to start from.", id.trim())).mood(Mood::Think),
+                },
                 ("remove", item) if !item.trim().is_empty() => Reply::say("").effect(Effect::Todo(Op::RemoveFrom(name, item.trim().to_string()))),
                 ("done", item) if !item.trim().is_empty() => Reply::say("").effect(Effect::Todo(Op::DoneOn(name, item.trim().to_string()))),
                 _ => return None,

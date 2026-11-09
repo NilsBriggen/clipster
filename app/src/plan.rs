@@ -142,6 +142,7 @@ pub enum Upcoming {
     Reminder { id: u64, label: String, at: chrono::NaiveDateTime },
     Birthday { name: String, days: i64, age: Option<i32>, email: bool },
     Due { today: usize, overdue: usize },
+    Chase { line: usize, who: String, text: String }, // a to-do waiting on someone, due for a follow-up
     Countdown { label: String, days: i64 },
 }
 
@@ -161,7 +162,11 @@ pub fn coming_up(events: &[crate::calendar::Event], timers: &[crate::timers::Tim
     for (days, p, age) in soon.into_iter().take(2) {
         out.push(Upcoming::Birthday { name: p.name.clone(), days, age, email: p.email.is_some() });
     }
-    let open = todos.iter().filter(|i| !i.done && i.list.is_none());
+    // waiting on someone and the follow-up day has come: "ask Ben about the numbers?"
+    for (line, i) in todos.iter().enumerate().filter(|(_, i)| !i.done && i.waiting.is_some() && i.due.is_some_and(|d| d <= today)).take(2) {
+        out.push(Upcoming::Chase { line, who: i.waiting.clone().unwrap_or_default(), text: i.text.clone() });
+    }
+    let open = todos.iter().filter(|i| !i.done && i.list.is_none() && i.waiting.is_none());
     let (due_today, overdue) = open.fold((0, 0), |(t, o), i| match i.due {
         Some(d) if d == today => (t + 1, o),
         Some(d) if d < today => (t, o + 1),
@@ -350,6 +355,34 @@ pub fn week_ahead(events: &[crate::calendar::Event], timers: &[crate::timers::Ti
             DayPlan { date, items, busy: (busy as f32 / span as f32).clamp(0.0, 1.0) }
         })
         .collect()
+}
+
+/// Up to `n` to-dos to suggest for today's top 3, by fixed rules: overdue, then due today, then important, then due
+/// soonest, then the oldest. Lines in the list (0-based); not the ones already picked, waiting or on lists.
+pub fn suggest_top3(todos: &[Item], today: NaiveDate, n: usize) -> Vec<usize> {
+    let mut open: Vec<(usize, &Item)> = todos.iter().enumerate().filter(|(_, i)| !i.done && i.list.is_none() && !i.is_step() && i.waiting.is_none() && !i.top_today(today)).collect();
+    open.sort_by_key(|(line, i)| (!i.due.is_some_and(|d| d < today), i.due != Some(today), !i.prio, i.due.unwrap_or(NaiveDate::MAX), *line));
+    open.into_iter().take(n).map(|(line, _)| line).collect()
+}
+
+/// The free stretches of a working day from `from` on (at least 15 minutes each), between timed events.
+pub fn free_slots(events: &[crate::calendar::Event], from: chrono::NaiveDateTime, hours: (u32, u32)) -> Vec<(chrono::NaiveDateTime, chrono::NaiveDateTime)> {
+    let date = from.date();
+    let (open, close) = (date.and_hms_opt(hours.0.min(23), 0, 0).unwrap_or(from), date.and_hms_opt(hours.1.min(23), 59, 0).unwrap_or(from));
+    let mut busy: Vec<(chrono::NaiveDateTime, chrono::NaiveDateTime)> = events.iter().filter(|e| !e.all_day && e.end > open && e.start < close).map(|e| (e.start, e.end)).collect();
+    busy.sort();
+    let mut out = vec![];
+    let mut at = open.max(from);
+    for (a, b) in busy {
+        if a > at && (a - at).num_minutes() >= 15 {
+            out.push((at, a.min(close)));
+        }
+        at = at.max(b);
+    }
+    if close > at && (close - at).num_minutes() >= 15 {
+        out.push((at, close));
+    }
+    out
 }
 
 /// "Mondays", "Tuesdays"… for weekday 0 (Monday) to 6.
@@ -567,6 +600,21 @@ mod tests {
         assert_eq!(w[4].items, vec![]);
         assert_eq!(w[5].items, vec![Ahead::Birthday("Anna".into())]);
         assert_eq!(w[6].items, vec![Ahead::Countdown("Italy".into())]);
+    }
+
+    #[test]
+    fn suggestions_and_free_time() {
+        let today = day(11, 9);
+        let todos = crate::todo::parse("- [ ] later thing\n- [ ] ! important\n- [ ] report (due 2026-11-09)\n- [ ] licence (due 2026-11-02)\n- [ ] picked (top 2026-11-09)\n- [ ] numbers (waiting Ben) (due 2026-11-09)\n- [ ] eggs (list shopping)\n");
+        assert_eq!(suggest_top3(&todos, today, 3), vec![3, 2, 1], "overdue, due today, important; not picked, waiting or listed");
+        let at = |h: u32, m: u32| today.and_hms_opt(h, m, 0).unwrap();
+        let ev = |s: chrono::NaiveDateTime, e: chrono::NaiveDateTime| crate::calendar::Event { uid: String::new(), start: s, end: e, all_day: false, title: "x".into(), place: String::new(), join: None };
+        let events = vec![ev(at(10, 0), at(11, 0)), ev(at(10, 30), at(12, 0)), ev(at(14, 0), at(14, 10))];
+        let free = free_slots(&events, at(9, 30), (9, 17));
+        assert_eq!(free, vec![(at(9, 30), at(10, 0)), (at(12, 0), at(14, 0)), (at(14, 10), at(17, 59))]);
+        let up = coming_up(&[], &[], &todos, &[], &[], at(8, 0));
+        assert!(matches!(&up[0], Upcoming::Chase { line: 5, who, .. } if who == "Ben"), "{up:?}");
+        assert_eq!(up[1], Upcoming::Due { today: 1, overdue: 1 }, "the waiting one isn't yours to do");
     }
 
     #[test]

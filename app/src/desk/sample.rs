@@ -21,6 +21,12 @@ pub(super) fn sample_files(desktop: bool) -> Files {
         todo::Item { list: Some("shopping".into()), done: true, ..item("Sticky notes (yellow, obviously)", None) },
         todo::Item { list: Some("shopping".into()), ..item("A plant that forgives neglect", None) },
         todo::Item { list: Some("packing".into()), ..item("Laptop charger", None) },
+        todo::Item { link: Some("https://example.com/brief".into()), note: Some("Gerald wants it short. One page.".into()), at: chrono::NaiveTime::from_hms_opt(14, 0, 0), ..item("Read the offsite brief", d(1)) },
+        todo::Item { waiting: Some("Ben".into()), ..item("Finish the budget", d(0)) },
+        todo::Item { steps: Some("slides".into()), ..item("Prepare the offsite slides", d(4)) },
+        todo::Item { list: Some("steps-slides".into()), done: true, ..item("Draft the outline", None) },
+        todo::Item { list: Some("steps-slides".into()), ..item("Check the numbers", None) },
+        todo::Item { list: Some("steps-slides".into()), ..item("Send them to Anna", None) },
     ];
     let notes = ["Printer code: 4711", "Ask IT about the second monitor", "Gerald says hi"].iter().map(|s| crate::notes::Note { day: Some(today), pinned: false, text: s.to_string() }).collect();
     let base = PathBuf::from(if desktop { "/home/you/Desktop" } else { "/home/you/Downloads" });

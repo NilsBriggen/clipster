@@ -35,7 +35,8 @@ pub const TABS: [&str; 9] = ["Today", "Week", "To-do", "Agenda", "Clipboard", "W
 /// A tab's index from its number or (the start of) its name: "2", "settings", "todo".
 pub fn tab(name: &str) -> Option<usize> {
     let t = match name.trim().to_lowercase().replace('-', "").as_str() {
-        "plan" | "planweek" => "todo".to_string(), // plan my day, plan next week
+        "plan" | "planweek" | "newlist" | "older" => "todo".to_string(), // plan my day, plan next week, the cards
+        t if t.starts_with("todo #") => "todo".to_string(),        // a to-do's details
         "wrapup" | "workday" | "habits" | "countdowns" => "today".to_string(),
         t if t.starts_with("kind ") => "today".to_string(), // what made up one kind of time today
         "checkup" | "tidy" | "backup" | "startup" | "rightnow" | "space" => "upkeep".to_string(),
@@ -273,6 +274,16 @@ pub struct Desk {
     add_for: Option<chrono::NaiveDate>, // Next 7 days: a to-do being added for this day
     add_text: String,
     agenda_day: Option<chrono::NaiveDate>, // the Agenda opens on this day
+    popup: Option<String>,             // the drop-down menu that's open (its key)
+    todo_filter: usize,                // To-do: All, Today, Important, No date, Repeats, Waiting
+    todo_query: String,                // To-do: the search field
+    done_open: bool,                   // To-do: the Done group is open
+    expanded: std::collections::BTreeSet<usize>, // To-do: to-dos (by line) showing their steps
+    todo_edit: Option<todos::TodoEdit>, // the to-do details card's fields
+    new_list: String,
+    new_list_items: String,
+    renaming_list: Option<String>,     // a named list being renamed: the new name so far
+    planning_week: bool,               // "plan next week": the To-do tab asks for the week's three
 }
 
 /// A card over the page with its own controls.
@@ -287,6 +298,7 @@ pub(super) enum Card {
     Habits,
     Kind(String), // what made up one kind of time today
     Countdown,
+    Older, // to-dos finished over the last month
 }
 
 impl Desk {
@@ -310,12 +322,12 @@ impl Desk {
         self.card = match name {
             "habits" => Some(Card::Habits),
             "countdowns" => Some(Card::Countdown),
-            _ => name.strip_prefix("kind ").map(|k| Card::Kind(k.trim().to_string())),
+            "newlist" => Some(Card::NewList),
+            "older" => Some(Card::Older),
+            _ => name.strip_prefix("kind ").map(|k| Card::Kind(k.trim().to_string())).or_else(|| name.strip_prefix("todo #").and_then(|n| n.trim().parse().ok()).map(Card::Todo)),
         };
-        if self.card.is_some() {
-            self.tab = 0;
-        }
         self.planning = name == "plan";
+        self.planning_week = name == "planweek";
         self.list_tab = name.strip_prefix("list ").map(|l| l.trim().to_lowercase());
         self.calendars_open = name == "calendars";
         self.workday_open = name == "workday";
@@ -339,6 +351,11 @@ impl Desk {
         if self.startup_list {
             self.upkeep_page = 0;
         }
+    }
+
+    /// Show a QR code of this text in a card, over whatever tab is open.
+    pub fn show_qr(&mut self, text: &str) {
+        self.card = Some(Card::Qr(text.to_string()));
     }
 
     /// The window's size: 720×560, or 900×660 (still fits a 1366×768 laptop) when the larger Desk is chosen.
@@ -433,12 +450,13 @@ impl Desk {
 
     /// A card is open over the page (an "are you sure?", the wrap-up, an editor): the tabs and menu wait.
     fn modal(&self) -> bool {
-        self.confirming.is_some() || self.wrapping || self.forget_all || self.workday_open || self.card.is_some()
+        self.confirming.is_some() || self.wrapping || self.forget_all || self.workday_open || self.card.is_some() || self.renaming_list.is_some()
     }
 
     /// Leave a sub-page (Calendars, start-up apps, Plan my day, a named list): true when there was one.
     fn back(&mut self) -> bool {
-        let was = self.calendars_open || self.startup_list || self.planning || self.list_tab.is_some();
+        let was = self.calendars_open || self.startup_list || self.planning || self.planning_week || self.list_tab.is_some();
+        self.planning_week = false;
         self.calendars_open = false;
         self.startup_list = false;
         self.planning = false;
@@ -516,6 +534,97 @@ impl Desk {
         false
     }
 
+    /// A drop-down menu under `anchor`, while it's the open one (`self.popup == key`): returns the item clicked. A
+    /// click anywhere else, or Esc, closes it. It sits on its own layer, above the page.
+    fn popup(&mut self, ui: &Ui, look: Look, key: &str, anchor: Rect, items: &[String]) -> Option<usize> {
+        if self.popup.as_deref() != Some(key) {
+            return None;
+        }
+        let ctx = ui.ctx().clone();
+        let row = if look == Look::Modern { 28.0 } else { 22.0 };
+        let font = look.font(12.5);
+        let w = items.iter().map(|i| ui.painter().layout_no_wrap(i.clone(), font.clone(), Color32::BLACK).size().x).fold(0.0, f32::max) + 44.0;
+        let size = vec2(w.max(anchor.width()).max(120.0), items.len() as f32 * row + 8.0);
+        let mut at = pos2(anchor.min.x, anchor.max.y + 2.0);
+        let screen = ui.clip_rect();
+        if at.y + size.y > screen.max.y {
+            at.y = anchor.min.y - 2.0 - size.y; // no room below: open upwards
+        }
+        if at.x + size.x > screen.max.x {
+            at.x = screen.max.x - size.x - 4.0;
+        }
+        let mut picked = None;
+        let area = egui::Area::new(Id::new(("desk-popup", key))).order(egui::Order::Foreground).fixed_pos(at).show(&ctx, |ui| {
+            let (r, _) = ui.allocate_exact_size(size, Sense::hover());
+            let p = ui.painter();
+            match look {
+                Look::Classic => win98::panel(p, r, win98::FACE, true),
+                Look::Modern => {
+                    p.add(egui::epaint::Shadow { offset: [0, 4], blur: 12, spread: 0, color: Color32::from_black_alpha(40) }.as_shape(r, CornerRadius::same(8)));
+                    p.rect(r, CornerRadius::same(8), tok::CARD, Stroke::new(1.0, tok::BORDER), StrokeKind::Inside);
+                }
+            }
+            for (i, item) in items.iter().enumerate() {
+                let ir = Rect::from_min_size(pos2(r.min.x + 4.0, r.min.y + 4.0 + i as f32 * row), vec2(r.width() - 8.0, row));
+                let resp = ui.interact(ir, Id::new(("desk-popup-item", key, i)), Sense::click());
+                let on = resp.hovered();
+                if on {
+                    ui.painter().rect_filled(ir, CornerRadius::same(if look == Look::Modern { 4 } else { 0 }), if look == Look::Modern { tok::ACCENT_SOFT } else { win98::NAVY });
+                }
+                let color = if on && look == Look::Classic { Color32::WHITE } else { look.text() };
+                ui.painter().text(pos2(ir.min.x + 12.0, ir.center().y), Align2::LEFT_CENTER, item, font.clone(), color);
+                if resp.clicked() {
+                    picked = Some(i);
+                }
+            }
+        });
+        let outside = ctx.input(|i| i.pointer.any_click() && i.pointer.interact_pos().is_some_and(|p| !area.response.rect.contains(p) && !anchor.contains(p)));
+        if picked.is_some() || outside || ctx.input(|i| i.key_pressed(egui::Key::Escape)) {
+            self.popup = None;
+        }
+        picked
+    }
+
+    /// A QR code of `text`, drawn here (a phone's camera reads it as text, nothing is sent anywhere).
+    fn qr_card(&mut self, ui: &mut Ui, c: Rect, look: Look, text: &str, out: &mut Vec<String>) {
+        let ctl = look.ctl();
+        let side = (c.height() - 150.0).clamp(160.0, 320.0);
+        let inner = look.sheet(ui, c.expand(12.0), "QR code", vec2(side + 140.0, side + ctl + 60.0));
+        let p = ui.painter().clone();
+        match qrcode::QrCode::with_error_correction_level(text.as_bytes(), qrcode::EcLevel::L) {
+            Ok(code) => {
+                let n = code.width();
+                let total = n + 8; // four light modules of quiet zone on each side
+                let px = (side / total as f32).floor().max(1.0);
+                let size = px * total as f32;
+                let origin = pos2((inner.center().x - size / 2.0).round(), inner.min.y);
+                p.rect_filled(Rect::from_min_size(origin, vec2(size, size)), 0.0, Color32::WHITE);
+                for (i, m) in code.to_colors().iter().enumerate() {
+                    if *m == qrcode::Color::Dark {
+                        let (x, y) = ((i % n + 4) as f32, (i / n + 4) as f32);
+                        p.rect_filled(Rect::from_min_size(origin + vec2(x * px, y * px), vec2(px, px)), 0.0, Color32::BLACK);
+                    }
+                }
+                p.text(pos2(inner.center().x, origin.y + size + 14.0), Align2::CENTER_CENTER, "Point your phone's camera at it. Made here: nothing was sent anywhere.", look.font(11.5), look.dim());
+            }
+            Err(_) => {
+                p.text(pos2(inner.center().x, inner.min.y + 40.0), Align2::CENTER_CENTER, "That's too long for one QR code. Copy it instead.", look.font(12.5), look.text());
+            }
+        }
+        let by = inner.max.y - ctl;
+        if look.button(ui, Rect::from_min_size(pos2(inner.max.x - 80.0 - 8.0 - 110.0, by), vec2(110.0, ctl)), Id::unique("desk-qr-copy"), "Copy the text", true).clicked() {
+            out.push(format!("copy {text}"));
+        }
+        if look.button(ui, Rect::from_min_size(pos2(inner.max.x - 80.0, by), vec2(80.0, ctl)), Id::unique("desk-qr-close"), "Close", true).clicked() || ui.input(|i| i.key_pressed(egui::Key::Escape)) {
+            self.card = None;
+        }
+    }
+
+    /// Open or close a drop-down menu by its key.
+    fn toggle_popup(&mut self, key: &str) {
+        self.popup = if self.popup.as_deref() == Some(key) { None } else { Some(key.to_string()) };
+    }
+
     /// The light-up a row gets for a moment after it was added or found (true while it lasts).
     fn lit(&self, text: &str) -> bool {
         self.found_at.as_ref().is_some_and(|(t, at)| at.elapsed() < Duration::from_millis(1800) && (t == text || text.contains(t.as_str()) && t.len() > 3))
@@ -555,7 +664,7 @@ impl Desk {
         if ctrl && key(egui::Key::W) {
             return true;
         }
-        if esc && !modal && !typing && !self.menu && !self.back() {
+        if esc && !modal && !typing && !self.menu && self.popup.is_none() && !self.back() {
             return true;
         }
         let (c, close, view_menu) = match look {
@@ -575,6 +684,10 @@ impl Desk {
             "Clipboard" => self.clipboard(ui, c, view, look, out),
             "You & me" => self.you_and_me(ui, c, view, look, out),
             _ => self.upkeep(ui, c, view, look, out),
+        }
+        // a QR code can come from any tab, or from the chat
+        if let Some(Card::Qr(text)) = self.card.clone() {
+            self.qr_card(ui, c, look, &text, out);
         }
         // the status line's button and the find box's results sit on top of the page
         self.status_action(ui, view, look, out);

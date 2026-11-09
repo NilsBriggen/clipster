@@ -84,7 +84,7 @@ pub enum Op {
     ListAt(usize, Option<String>),
     WaitingAt(usize, Option<String>),
     /// One of this week's three (again to take it out).
-    WeekStarAt(usize),
+    WeekStarAt(usize, bool), // true: next week's three (planning on a Friday)
     /// One of tomorrow's top 3 (again to take it out).
     StarTomorrowAt(usize),
     /// Steps under an item.
@@ -412,6 +412,8 @@ fn new_item(text: &str, today: NaiveDate) -> Item {
         (None, Some(_)) => Some(today + Days::new(1)),
         (d, _) => d,
     };
+    // "water the plants, every monday": the comma before the repeat goes too
+    let text = text.trim_end_matches([',', ';', ' ']).to_string();
     Item { prio, text, due, at, every, ..Default::default() }
 }
 
@@ -555,8 +557,8 @@ pub fn change(items: &mut Vec<Item>, op: &Op, today: NaiveDate) -> (&'static str
                 None => missing(n),
             }
         }
-        Op::WeekStarAt(n) => {
-            let wk = week_key(today);
+        Op::WeekStarAt(n, next) => {
+            let wk = week_key(if *next { today + Days::new(7) } else { today });
             match at(*n, items) {
                 Some(i) if items[i].week.as_deref() == Some(wk.as_str()) => {
                     items[i].week = None;
@@ -579,7 +581,27 @@ pub fn change(items: &mut Vec<Item>, op: &Op, today: NaiveDate) -> (&'static str
         },
         Op::EditAt(n, text) => match at(*n, items).filter(|_| !text.trim().is_empty()) {
             Some(i) => {
-                items[i].text = text.trim().to_string();
+                // a new text may carry a date, a time or a repeat, like a new to-do ("call Anna by friday",
+                // "every monday"); "by none" takes the date away. Done, the top 3 and the rest stay.
+                let (text, undated) = match text.trim().strip_suffix(" by none").or_else(|| text.trim().strip_suffix(" no date")) {
+                    Some(t) => (t, true),
+                    None => (text.trim(), false),
+                };
+                let new = new_item(text, today);
+                if !new.text.is_empty() {
+                    items[i].text = new.text;
+                }
+                items[i].prio |= new.prio;
+                if undated {
+                    items[i].due = None;
+                    items[i].at = None;
+                } else if new.due.is_some() {
+                    items[i].due = new.due;
+                    items[i].at = new.at.or(items[i].at.filter(|_| new.due == items[i].due));
+                }
+                if new.every.is_some() {
+                    items[i].every = new.every;
+                }
                 ("todo_edited", items[i].text.clone())
             }
             None => missing(n),
@@ -744,7 +766,7 @@ fn set_due(items: &mut [Item], i: usize, d: Option<NaiveDate>) -> (&'static str,
 /// The item an `At` op (or a text op) is about, before the change.
 fn subject(items: &[Item], op: &Op) -> Option<usize> {
     match op {
-        Op::DoneAt(n) | Op::UndoneAt(n) | Op::StarAt(n) | Op::PrioAt(n) | Op::EditAt(n, _) | Op::RemoveAt(n) | Op::DueAt(n, _) | Op::AtTimeAt(n, _) | Op::LinkAt(n, _) | Op::NoteAt(n, _) | Op::EveryAt(n, _) | Op::ListAt(n, _) | Op::WaitingAt(n, _) | Op::WeekStarAt(n) | Op::StarTomorrowAt(n) | Op::AddSteps(n, _) => {
+        Op::DoneAt(n) | Op::UndoneAt(n) | Op::StarAt(n) | Op::PrioAt(n) | Op::EditAt(n, _) | Op::RemoveAt(n) | Op::DueAt(n, _) | Op::AtTimeAt(n, _) | Op::LinkAt(n, _) | Op::NoteAt(n, _) | Op::EveryAt(n, _) | Op::ListAt(n, _) | Op::WaitingAt(n, _) | Op::WeekStarAt(n, _) | Op::StarTomorrowAt(n) | Op::AddSteps(n, _) => {
             n.checked_sub(1).filter(|i| *i < items.len())
         }
         Op::Done(q) | Op::DueFor(q, _) => find(items, q, false),
@@ -771,7 +793,7 @@ pub fn apply(op: &Op) -> (Reply, Option<String>) {
 fn reply(op: &Op, pool: &str, x: &str, items: &[Item], today: NaiveDate) -> Reply {
     let quiet = matches!(
         op,
-        Op::StarAt(_) | Op::PrioAt(_) | Op::EditAt(..) | Op::UndoneAt(_) | Op::RemoveAt(_) | Op::DueAt(..) | Op::AtTimeAt(..) | Op::LinkAt(..) | Op::NoteAt(..) | Op::EveryAt(..) | Op::ListAt(..) | Op::WaitingAt(..) | Op::WeekStarAt(_) | Op::StarTomorrowAt(_) | Op::AddSteps(..) | Op::ResetList(_) | Op::RenameList(..) | Op::DeleteList(_)
+        Op::StarAt(_) | Op::PrioAt(_) | Op::EditAt(..) | Op::UndoneAt(_) | Op::RemoveAt(_) | Op::DueAt(..) | Op::AtTimeAt(..) | Op::LinkAt(..) | Op::NoteAt(..) | Op::EveryAt(..) | Op::ListAt(..) | Op::WaitingAt(..) | Op::WeekStarAt(..) | Op::StarTomorrowAt(_) | Op::AddSteps(..) | Op::ResetList(_) | Op::RenameList(..) | Op::DeleteList(_)
     );
     let label = match op {
         Op::AddTo(l, _) | Op::ClearList(l) | Op::ResetList(l) | Op::DeleteList(l) | Op::RemoveFrom(l, _) | Op::DoneOn(l, _) => l.clone(),
@@ -1120,9 +1142,9 @@ mod tests {
         assert_eq!(items[1].list, None);
         // this week's three and tomorrow's
         for n in [1, 2, 3] {
-            assert_eq!(change(&mut items, &Op::WeekStarAt(n), today).0, "todo_week_starred");
+            assert_eq!(change(&mut items, &Op::WeekStarAt(n, false), today).0, "todo_week_starred");
         }
-        assert_eq!(change(&mut items, &Op::WeekStarAt(5), today).0, "todo_week_full");
+        assert_eq!(change(&mut items, &Op::WeekStarAt(5, false), today).0, "todo_week_full");
         assert!(items[0].week_goal(today) && !items[0].week_goal(day(11, 16)));
         assert_eq!(change(&mut items, &Op::StarTomorrowAt(2), today).0, "todo_tomorrow");
         assert_eq!(items[1].top, Some(day(11, 10)));
@@ -1184,6 +1206,13 @@ mod tests {
         assert_eq!(change(&mut items, &Op::PrioAt(n), today).0, "todo_prio");
         assert_eq!(change(&mut items, &Op::EditAt(n, "d, but better".into()), today), ("todo_edited", "d, but better".into()));
         assert_eq!(change(&mut items, &Op::EditAt(99, "x".into()), today).0, "todo_not_found");
+        // a new text can carry a date or a repeat, and "by none" takes the date away
+        change(&mut items, &Op::EditAt(n, "d, but better by friday".into()), today);
+        assert_eq!((items[n - 1].text.as_str(), items[n - 1].due), ("d, but better", Some(day(11, 13))));
+        change(&mut items, &Op::EditAt(n, "d, every monday".into()), today);
+        assert_eq!((items[n - 1].text.as_str(), items[n - 1].every.as_deref()), ("d", Some("monday")));
+        change(&mut items, &Op::EditAt(n, "d, but better by none".into()), today);
+        assert_eq!((items[n - 1].text.as_str(), items[n - 1].due), ("d, but better", None));
         // wrapping up: the unfinished top 3 move to tomorrow
         assert_eq!(change(&mut items, &Op::Tomorrow, today), ("wrapup_moved", "2".into()));
         assert!(items.iter().all(|i| !i.top_today(today)) && items[n - 3].due == Some(day(11, 10)));
