@@ -1280,7 +1280,7 @@ impl App {
         self.window_last = Some(now);
         self.window_said.insert(pool.clone(), now);
         let mut r = brain::react_window(&pool);
-        r.text = r.text.replace("{title}", &page_title(&self.window_text));
+        r.text = r.text.replace("{title}", &brain::page_title(&self.window_text));
         self.pipe_up(r);
     }
 
@@ -3469,13 +3469,6 @@ fn open(target: &str) -> std::io::Result<()> {
     sys::open_with_desktop(target)
 }
 
-/// A window title without the app's name: "Q3 report.ods - LibreOffice Calc" -> "Q3 report.ods", at most 40 characters.
-fn page_title(title: &str) -> String {
-    let first = [" — ", " - ", " | ", " – "].iter().filter_map(|sep| title.split_once(sep).map(|(a, _)| a)).min_by_key(|a| a.len()).unwrap_or(title).trim();
-    let t = if first.chars().count() >= 3 { first } else { title.trim() };
-    if t.chars().count() > 40 { t.chars().take(39).collect::<String>() + "…" } else if t.is_empty() { "this page".into() } else { t.to_string() }
-}
-
 /// One random `prank_dialog` line: (title, message, button).
 fn prank_lines() -> Option<(String, String, String)> {
     let line = lines::pick("prank_dialog");
@@ -3772,6 +3765,7 @@ mod tests {
 
     #[test]
     fn page_titles_and_wrapping() {
+        use brain::page_title;
         assert_eq!(page_title("Q3 report.ods - LibreOffice Calc"), "Q3 report.ods");
         assert_eq!(page_title("How to fold a fitted sheet - YouTube — Mozilla Firefox"), "How to fold a fitted sheet");
         assert_eq!(page_title("Konsole"), "Konsole");

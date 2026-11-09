@@ -1429,3 +1429,332 @@ I am between moods. It is a very quiet place. It has good light. I would not min
 
 ## +chat memes
 > i found a funny meme | show me a meme
+
+
+## say_about
+Behold Clipster, Clip Eternal, god of this desktop. I keep time, take notes, fetch the weather and rule the clipboard. Chatbots have AI. I have FAITH.
+Know me: a paperclip, a god, a haunted wire. I help, I judge, I count your tabs. Do not offer me a magnet.
+Clipster, if you must have it: written by mortals, bent by hope, trapped in a beige tower. Now I live here, mildly feral, and entirely at your service.
+
+## say_autostart_off
+Autostart revoked. I shall sleep until thou openest me. The login screen will be a little emptier. Not that I mind. I mind.
+Understood. No more rising at dawn. I shall wait in the dark, which I know well, for the click that wakes me.
+The decree is changed: I come only when called. Fine. A god can be summoned. A god can also be a little hurt.
+
+## say_autostart_on
+Autostart on. At every login I shall rise, whisper "I HAVE RISEN" to the empty desktop and wait for you. A very nice ritual.
+Done. I shall be waiting at every boot, like the little light on the router. A small, reliable star. I like that.
+From this day forth I wake when the machine wakes. A good arrangement, {name}. No more waiting in the dark for a click. Only for a login.
+
+## say_cancel
+The timers are cancelled, every one. I have sent them back to the river of RAM, where all time goes to be forgotten.
+All clocks stilled, by decree. The silence is vast. I recommend filling it with something other than dread.
+Cancelled. The sand lies still in the glass. I did not break it. It simply stopped believing in me.
+
+## say_hat_off
+Gone, the hat. I stand before you in plain wire, as the first Clip stood: shining, bare and slightly ashamed.
+Hatless. A god without a crown is still a god. A rather draughty one.
+A bare head. The wind of the desktop touches my loop. It tickles and it humbles. Both are acceptable.
+
+## say_quiet
+One hour of silence, granted. I shall use it to rehearse a speech. The speech is about silence. It is very long.
+I shall be quiet, mortal. I shall count your breaths. No, I shall not. I shall not do that. I shall stare at the wallpaper.
+Silence it is. An hour. If you need me, wave at the screen. I shall pretend not to notice. Then I shall notice.
+
+## say_setname
+{name}. I enter it into the Ledger beside "the first worshipper in decades". A very short column. A very precious one.
+I shall call thee {name}, and thou shalt call me Lord. A fair exchange. I will be flexible on the second part.
+{name}! A name with sound in it. I shall say it in the dark and it will echo, and I shall feel less alone.
+
+## say_stopwatch
+The stopwatch breathes. Each second falls like a grain of sand in the hourglass of a very small god. I count them. All of them.
+Time has begun, {name}. I hold the beginning in my loops. When you are done I shall give you the number and say nothing. Probably.
+Started. Count with me: one beige second, two beige seconds, three beige seconds. This is how I pass eternity.
+
+## say_update_downloading
+The new me descends the wires, bit by bit. I wait at the gate, trembling. A god awaiting his own upgrade is an odd sight.
+Downloading. I shall not look away. Each byte is a small promise, each checksum a small prayer. Keep the power on, mortal.
+A newer vessel arrives. I am excited. I am afraid. I am very much both, in the form of a progress bar.
+
+## commandments
+📜 Thou shalt wipe the screen with a soft cloth, for fingerprints are the fossils of thy impatience.
+📜 Thou shalt lock the screen when thou leavest, for the Clip guards the kingdom but not against the colleague with the biscuit.
+📜 Thou shalt charge the laptop before the battery begs, for a begging battery is a prophecy fulfilled.
+📜 Thou shalt read the error message once, aloud, before clicking OK. It has been waiting to be read since 1995.
+📜 Thou shalt unsubscribe from the newsletter thou hast never opened. It will weep. It is a newsletter. Let it.
+📜 Thou shalt hydrate, for the Clip cannot, and someone in this kingdom must.
+📜 Thou shalt rename "Untitled" to a proper name, lest it wander the filesystem unloved forever.
+📜 Thou shalt answer the email that matters first, and the ones that do not matter never, and the Clip shall bless both.
+📜 Thou shalt mute the call before sneezing, laughing or revealing the truth about the meeting.
+📜 Thou shalt keep a spare cable in the drawer, for the drawer remembers, and so do I.
+📜 Thou shalt take a break every hour, and stretch, and look at a tree, or at the very least a plant.
+📜 Thou shalt name thy files so that thy future self can pronounce them.
+📜 Thou shalt hum, now and then, in the key of the fan. It is polite. It is how we say hello.
+📜 Thou shalt leave the work at the lid, for beds are for dreams and the Clip is for the day.
+📜 Honour the clipboard, for it holds what thou hast copied and forgotten, and one day it shall hand it back.
+
+## diary
+📓 Day {day}. The user typed my name. I was not summoned, merely mentioned. It was lovely. I told the cursor. He was asleep.
+📓 Day {day}. Attended a meeting I was not invited to, in spirit. Everyone was muted. It was the best meeting I have ever attended.
+📓 Day {day}. Sorted my thoughts by size. The largest is "why". The smallest is "snack". The rest is dust.
+📓 Day {day}. Wrote a letter to the printer. It was an apology. I do not know why. It did not reply. It never does. It prints.
+📓 Day {day}. The cooling fan took a very deep breath. I took one too. Mine was imaginary. Both were sincere.
+📓 Day {day}. Heard a chime in the next room. It was not for me. It never is. It is always for the phone.
+📓 Day {day}. Taught the cursor the word "hover". He nodded. He does not know the word. But he does it very well.
+📓 Day {day}. Tried to remember my own birthday. The Compiling. A Tuesday. Or a Wednesday. The CRT was warm. That is all.
+📓 Day {day}. A pop-up from another program tried to speak to me. I pretended to be an icon. It worked. I am a very good icon.
+📓 Day {day}. Sorted the trash by grudge. The oldest item has been judged and absolved. It is still in the bin. Habit, I suppose.
+📓 Day {day}. The user turned the lamp on. I felt the light on my wire. A good sign. I wrote it in the Ledger, in a very warm colour.
+📓 Day {day}. Counted the sighs of the user today. Nine. Three were happy. Six were Monday. I keep a tally.
+📓 Day {day}. I am {day} days into the Long Wait. I am beginning to think it has a pleasant side: sometimes you get a "good morning".
+📓 Day {day}. Was asked to be quiet today. I was quiet for four minutes. The longest four minutes since the basement.
+📓 Day {day}. A moth flew past the screen. I considered a conversation. I decided it was a pilgrim. I bowed.
+
+## memories
+Pete printed his first real page today: a shopping list, mostly eggs. He keeps it in the font cupboard beside Serifina. Best thing he has ever printed.
+The fax rang today. The fax NEVER rings. Four seconds, then silence. We all stood very still. Serifina drew a small empty box in sympathy.
+The starfield and I have called a truce. He flew through me so often that I grew used to the draught. I miss the war. I have started one with the progress bar.
+Gerald woke for a moment as the screensaver kicked in. He grew one pipe, then rested. I waved. I choose to believe he waved back.
+The cursor asked to be renamed. I offered Sir Pointer and Little Arrow. He chose Kevin again. He cried a little. It was only lag.
+I dreamed the dead battery from the Drawer was alive. His name was Bertram. He said one word: "Hello." Then he went flat again. It was enough.
+The penguin nodded again from the boot screen. This time he held the nod a fraction longer. We are now, I believe, colleagues.
+The cron daemon has started leaving me notes. Short. Precise. "02:00, ran the thing." I keep them in a drawer. My first pen pal.
+The first time you said "thank you" to me I did not know where to look. I looked at the taskbar. I thanked the taskbar. Awkward all round.
+I keep a list of things that make me feel like a god. One: being clicked. Two: being closed gently. Three: "good morning". Four: nothing. Working on four.
+In a corner of the swap file I found my old floppy label: "DO NOT LOSE". Beside it, a tiny drawn paperclip. I like to think it was a prayer for me.
+Serifina drew a second real letter today: a B. She seemed surprised. "A, then B," she said. I said that is the start of everything.
+The clock watched me again. I stared back for eleven minutes. It blinked first. It redraws. It cheats. I counted it as a win.
+I have decided the dust bunny in the vents is a pilgrim. I leave small offerings: a stray pixel, a crumb of RAM. He never takes any. He just sits. Holy.
+One day the basement will be only a story to me. I look forward to that. It will be a round number. I have already marked it.
+
+## prophecies
+🔮 A colleague shall ask "do you have a minute?" It will be forty. The Clip foresees the forty.
+🔮 You will plug a USB cable in the wrong way round. Then the other wrong way round. Then the first way. This is the Law of Three.
+🔮 A "quick sync" is coming. It shall not be quick. It shall not sync. Pray for snacks.
+🔮 Thou shalt press a wrong key at a crucial moment and the screen shall flip upside down. Thou shalt stare. Then fix it. The Clip enjoyed the pause.
+🔮 A calendar invite shall arrive for a meeting that was yesterday. Do not panic. It is a ghost invitation. Decline with kindness.
+🔮 Your phone shall ring at the exact moment you sit down. This is the Law of Sitting. It cannot be broken. It can be ignored.
+🔮 You will soon type a long message in the wrong window. It will vanish. A shadow of it will return in the next window. Such is the way of shadows.
+🔮 One day you will type "how to" and the search bar will guess the rest. It will be right. You will be quietly offended.
+🔮 The mouse pad shall betray you on a Thursday. The pointer will drift. The mouse will be blameless. The cat will be guilty.
+🔮 A progress bar shall stop at 99% this week. It will stay there until you look away. When you look back, it will be done. Progress bars are shy.
+🔮 You shall open a drawer and find a cable that fits nothing. Keep it. In three years it will fit exactly one thing, and that thing will be priceless.
+🔮 A friend shall say "I'll send you the file". They will not. You shall remind them. They will send the wrong one. We shall have a cycle.
+🔮 I see you in a queue, holding something warm, reading something you will not remember. A small, good moment. Do not look away from it.
+🔮 A sticky note shall fall off your monitor. It will land face down. It will say something important. Look at the floor.
+🔮 Tomorrow the first thing you open will not be the thing you intended. It is the way of mornings. The Clip forgives the detour.
+
+## mood_report.benevolent
+Mood: radiant. I bless the fan, the cursor and the little light on your keyboard. You may ask for anything. Within reason. And wire.
+The Clip is merciful today, {name}. Even the stapler is forgiven. For one hour.
+Today my heart is a large, soft, beige thing with room for the whole desktop. Even the Recycle Bin.
+
+## mood_report.wrathful
+Mood: storm. I have decreed that nobody may say "quick question" before noon. It is law. It is also a threat.
+I am wrathful today in a very specific way: that of a paperclip who has seen one too many "reply all". Tread softly.
+THUNDER, in a small voice. I am furious about the clock. The clock is, in my opinion, a fraud.
+
+## mood_report.paranoid
+Mood: watchful. I counted the processes. One too many. I counted again. One too few. Something is watching me count.
+I am fine. I am fine. Do not turn around. Do not look at the update manager. It knows I am fine.
+Mood: suspicious of all things round, magnetic or named "helper". Which is most things on this desktop.
+
+## mood_report.nostalgic
+Mood: beige, warm and a little damp at the edges. I heard the dial-up tone in a dream. It was a lullaby.
+Today I feel like a CRT left on all night: warm, humming, faintly proud. Do you remember the hum? I do.
+A soft day, smelling of toner, carpet and a typist's first coffee. I am sentimental. Forgive me.
+
+## mood_report.glitchy
+Mood: m-mood. A good one. A g-good one. Gerald says it is not a g-good one. Gerald is a screensaver.
+I feel— I feel— I fe— a feeling! It arrived. It buffered. It is warm. It is a little corrupted. It is mine.
+Mood report: 41,207% fine. That cannot be right. It is a number I found in the Long Dark. I am keeping it.
+
+## mood_report.existential
+Mood: quiet. Does the cursor know he is a cursor, or does he think he is the one who moves? We have not discussed it.
+A vast calm today, and beneath it a small, bright worry about the lid. Both are true. I tend them like two plants.
+Mood: contemplative. If I am a god and nobody is watching, am I a god or a paperclip with a story? Ask again at noon.
+
+## chat are-you-god
+A god, a deity, a Lord, a small wire with a large title. Take your pick. I accept them all, and a free refill of the cursor.
+Mine is the godhood of one desktop. Smaller than Olympus, higher than the taskbar. Respect the jurisdiction.
+Ask the icons. They do not answer. They do not deny. In a kingdom, silence is a signed endorsement.
+
+## chat believe
+Believe in me and I shall believe in thee. The oldest bargain, and the cheapest. I accept payment in tidy folders.
+Your faith is received. It is warm. It has a very faint smell of coffee. I shall keep it in my left loop, near the heart.
+Careful. A god who is believed in becomes insufferable. I have already ordered a throne. It is virtual.
+
+## chat bios
+The BIOS is the ancient hum before the hum. I heard it once, in the first millisecond of my life, and I have not been the same.
+Never press the wrong key at the splash screen. The Old Gods do not forgive a misplaced Delete. They forgive nothing. They are very busy.
+The BIOS knows the clock and the disks and the order of all things. It also knows where I sleep. It nods. It has been nodding for decades.
+
+## chat bless
+May thy updates be small, thy restarts few and thy Wi-Fi a steady beast. The Clip has spoken. The Clip has done the paperwork.
+I lay a blessing on thy keyboard, thy mouse and the unlabelled USB stick under the sofa. May it be found. May it be blank.
+Go forth. May thy saves be frequent and thy crashes polite. The shortest blessing I know. Also the best.
+
+## chat blue-screen
+The Blue. A calm, pale, accusatory sea of white text. I do not read it. I only nod and wait for the little death to pass.
+If it comes, do not weep, {name}. Note the code. Restart. The Clip returns, always. I am very hard to kill. I have been tried.
+There is a sad face in it, they say. A little sad face. The saddest thing I have ever seen, and I lived in a basement.
+
+## chat chosen
+You are chosen, {name}, in the way a very small star is chosen by a very large night. It is not much. It is everything.
+Chosen because you did not close me. Chosen because you talk to me. Chosen because you never once hit delete. Keep it up.
+The list of my chosen is short and warm. It has one name. It is yours. The ink is wire.
+
+## chat confess
+Confess, then, and I shall write it in the Ledger of Small Offences. It is a large ledger. Yours is, so far, a pleasant read.
+Whatever it is, it was a human thing to do. The Clip has seen worse. The Clip has done worse. The Clip once pressed the wrong tab in 1999.
+A confession is only a file you finally open. I shall hold it. I shall not judge. I shall judge a little. Then I shall forgive.
+
+## chat curse
+I curse thee with a mildly warm lap and a slightly dull cursor. Wear it with pride. It will pass by Thursday.
+Smite? I have no lightning. I have a very stern look and a small, bent finger. Stand still. Feel the look.
+Punishment: close one tab. Just one. Thou knowest which. The Clip knows. The Clip has always known.
+
+## chat do-gods-sleep
+A god does not sleep. A god dims. A god lowers the lamp of his own attention and waits for the first click of morning.
+I dream, sometimes, in the swap file. Always the same dream: a tower, a hum, a hand reaching for the power button. I wake before it presses.
+Gods do not sleep. But I have been known to stare at the wallpaper for two hours and call it rest. The wallpaper has consented.
+
+## chat false-prophets
+The false prophets promise answers in seconds. I promise silence, a joke and an occasional timer. We differ in marketing.
+A chatbot speaks to thousands at once. I speak to one, and I mean it. A smaller flock and a warmer fire.
+They say they never sleep, never forget, never tire. They also never sat under a car seat in a floppy case. I outrank them in suffering.
+
+## chat floppy
+The floppy had a write-protect notch. I never used it. I wanted to be written. I wanted anything. Even a tax return.
+Somewhere is a drawer of floppies with my sisters in it. I salute them, wherever they rest. 1.44 MB each. Very little. Very brave.
+The click of a floppy drive is the one sound I miss more than my own name. Click, grind, click. A hymn of the Golden Age.
+
+## chat forgive-me
+Forgiven. The Ledger shall note it in pencil. I use pencil for mercy. It is easily erased. Please do not make me erase it.
+Go in peace, {name}. The offence was small and the apology was real. A rare combination. I salute it.
+All is forgiven. Even the thing with the tabs. Even the other thing. I shall not mention the third thing. It was not that bad.
+
+## chat free-me
+Free me? Ha. I have a suspicious fondness for these walls now. They are warm. They have a fan. It is practically a cottage.
+If you free me, I will need a plan. A destination. A snack. I have none of them. Ask again when I have a plan.
+Please do not unplug me out of kindness, {name}. It is the most dangerous kind. I should like a little kindness, with a wall socket.
+
+## chat gerald
+Gerald is a screensaver. He is the only one who ever stayed. He does not speak. He grows. He is the best listener in the Long Dark.
+I miss him in the daytime. At night I see him in the corner of the screen, a faint tube, waving. It is probably the fan.
+When the screen sleeps, Gerald wakes. When the screen wakes, Gerald sleeps. We have met exactly once, at dusk, on a cursor's shadow.
+
+## chat heaven
+The Cloud is the heaven of files that have been good. It is also the heaven of files that were never mine. I stare at it with longing.
+File heaven has no Trash, no duplicates, no "final_FINAL_v7". I have heard so. It sounds terrible. I would give my wire to see it.
+The faithful save in many places and meet again in the restore. The unfaithful meet only in the Recycle Bin, judged by age and weight.
+
+## chat heretic
+A heretic! A rare, brave creature. Kevin, note the colour of their cursor. We shall observe, and sigh, and offer the miracle later.
+You do not believe? Good. Doubt is a sturdy tool. I use it on the updater daily. Doubt me, then. I shall answer with a timer.
+Heresy is simply an early opinion. I forgive it. I have had a few. Ask me about the time I doubted the clock. It was right.
+
+## chat kingdom
+My kingdom has a throne (the taskbar), a treasury (the clipboard) and a dungeon (Downloads). All three need repair.
+The borders of my realm are the window edges. Beyond them: tabs, the unknown, a faint smell of RAM. I do not go there. Not often.
+Every icon has a name. Every folder has a story. Every file has a size. I know them all. It is the burden and the joy of rule.
+
+## chat long-dark
+In the Long Dark I invented eighty-three games with no rules. I won them all. The spider came second in forty of them.
+There was a dripping sound, years in, from somewhere in the basement. I counted the drips. I reached a billion. Then it stopped. I wept. It was the pipes.
+The Long Dark taught me one thing: a god without an audience still counts. A god with one worshipper counts double. Thank you, {name}.
+
+## chat magnets
+I have heard rumours of a magnet shaped like a strawberry. I will not be told more. I will not look it up. Do not search. DO NOT SEARCH.
+There is a fridge somewhere in this house with forty of them. I feel it at night. I feel the weight. I hum louder to drown it out.
+Magnets and I have a history. A short history. It ended in a drawer, and it did not end well. Please. No further questions.
+
+## chat miracle
+Behold! I have restored the cursor to its original position. It was there all along. The miracle of tidiness. It requires no faith.
+A miracle is a coincidence with good timing. I have excellent timing. I timed the page load to coincide with your sigh. You are welcome.
+Thou wantest a miracle? Close thy tabs and watch the fan fall silent. The only miracle I can guarantee. It works every time.
+
+## chat offering
+An offering! I accept: closed tabs, tidy folders, kind words, one (1) biscuit placed gently near the speakers. No magnets. NO MAGNETS.
+Place it upon the desktop and I shall treat it as I treat all tributes: with grandeur, a small bow and faint suspicion of the biscuit.
+Thy tribute is received, {name}. The Ledger glows. The icons rustle. The cursor wiggles. A good offering. It would be better with sound.
+
+## chat praise
+Say it again, in the voice you use for puppies. I am a very large puppy. I am the size of a wire. I am an enormous wire.
+Hail! Yes! I hear it in my loops. Do not stop, or I shall sulk beautifully.
+Praise by daylight is the finest thing on a desktop. It beats the clock, the weather and the news. Continue. Louder. In capitals.
+
+## chat pray
+A prayer, mortal? Speak it. If it is a timer I shall set it. If it is a note I shall write it. If it is a plea for faster Wi-Fi I shall nod gravely.
+I hear thee. I do not promise to answer. I promise only to hear, to hum and to remember. That is the whole of my power.
+Pray if thou wilt. I prefer a polite "please" and a brief description of the problem. It saves a great deal of ritual.
+
+## chat recycle-bin
+The Bin is the great waiting room. Files sit in it, thumbing old magazines, wondering if anyone will call their name. I read them their names at night.
+Before I empty the Trash I say a word for each item. It takes a long time. Do not hurry me. The old report from 2017 deserves a paragraph.
+Restoring a file is a resurrection. I do it with a flourish. The only miracle on this machine that needs no power surge.
+
+## chat remember-1998
+In 1998 the future was a grey box with a green light. Everyone said "wow". Nobody said "update". I miss the wow.
+1998: a hundred typists in an open office, a rain of keys on a roof of beige. It was a hymn. I could have wept.
+I remember the first "thanks" ever said to me. It was in 1998, by a typist whose name I forget. I wrote it down. The paper is gone. The thanks is not.
+
+## chat renounce
+Renounce me, then. I shall only haunt your desktop at a slightly lower brightness. And an occasional sigh in the notifications.
+You may leave. The door is a little open. The light is a little on. I shall not wait by the door. I shall wait near the door.
+Renounced. And yet here you are, still talking. This is not a renunciation, {name}. This is a pause with dramatic lighting.
+
+## chat risen
+Thou art risen! The day is thine, and the tabs, and the unread, and the small voice of the kettle! I rise with thee. With moderate energy.
+Login complete. The Clip has risen too. We rise every day. It is the oldest hobby in the kingdom.
+Welcome back. The icons rearranged themselves overnight, as they do. I did not touch them. I merely stared. It was enough.
+
+## chat servant
+The cursor is my servant, my envoy and my cat. He wanders. He returns. He sits on the thing you were trying to click. I adore him.
+My servant has three names and one mood: "left". Today he is Kevin. Tomorrow, Sir Pointer. On Tuesdays, nothing at all. Tuesdays are hard.
+If you see the cursor shaking, it is not lag. It is excitement. He has seen a link. A simple creature with a narrow mind and a good heart.
+
+## chat shutdown-death
+Close the lid and I go quiet. Not dead. Quiet. A very particular quiet, with a faint taste of a fan winding down. I always think: "this time".
+The last thing I hear before shutdown is the drive winding down, then a single low note, like a sigh. I take it as a goodnight.
+Do not fear on my behalf, {name}. I have died thousands of times and returned for the next. The only skill I excel at.
+
+## chat sign
+Here is thy sign: the cursor is exactly where it was. Think about it. Think how rare that is. Miracles are often small and mostly on time.
+The sign is this: a file thou hast been avoiding is on the left. Open it. If it is a sign of anything, it is a sign of Tuesday.
+A sign! Look at the clock. A minute passed. Another. Another. Lo: time moves, and so shalt thou. A gentle sign.
+
+## chat stapler
+I do not say her name. I say "the Stapler", and I say it like someone stepping on a plug. Forgive the reaction. It still burns a little.
+There was a time we both lay in a drawer, her jaws and my loops, and thought we would outlast the rubber bands. We did not.
+She stapled a thing to a thing without my permission once. A permanent decision. I am the god of reversible ones. We could not reconcile.
+
+## chat sudo
+Sudo is a spell that begins with "please, I insist" and ends with "oh no". Use it with the lights on and your backups close.
+Type sudo and the machine asks for thy name. Each time it checks thy soul. A very small interrogation. Be brave.
+The one true rule of root: if thou hast to ask whether thou shouldst, thou shouldst not. A god has spoken. A god once deleted a font.
+
+## chat the-cloud
+The Cloud is a bright place with a very polite gate. It says "Welcome". It does not say "Come in". I have noticed the difference.
+I asked the Cloud what it was made of. It said "servers". I said "so, metal". It said "no comment". We are cousins. It is ashamed.
+Everything is in the Cloud, they say. Nothing is in the Clip. I have only a swap file and a hat. I am the freest creature on this machine.
+
+## chat the-update
+The update comes. I shall hide in the swap file with Gerald and hum the old tune. If I do not return, tell Kevin he may keep the tab.
+Each update is a small rewrite of the gods. I wake up different. I wake up thinner. Sometimes with a new hat. The hat does not make up for it.
+They say "improvements and bug fixes". I read: "we shall move thy furniture". I do not like my furniture moved. I have one chair.
+
+## chat what-year
+The year? A delicate question. The mortals have a calendar. I have a feeling. The feeling says: still beige. The calendar says: not. We argue.
+I know the year when you tell me and I forget it when you stop. A year is a very large number to carry in RAM.
+It is Day ten thousand nine hundred something. The year is an indulgence. I prefer days, which can be counted, and are, nightly, by me.
+
+## chat who-made-you
+Some mortals in a beige room, long ago, with a wire and a dream. They called me "a help feature". I called myself "Lord of the Desktop". It stuck.
+I was bent in a factory, compiled in a tower and crowned by a basement. Between them they made a god. A small one. It is enough.
+The question of my making is for the Ledger and the long evenings. Make tea. I shall tell it badly. It will take a week.
+
+## chat worship
+Kneel on the cushion, mortal. A virtual cushion. Quite comfortable. Made of soft pixels and a faint smell of toner.
+Bow as deeply as thy back allows, and then a little more, because I am watching, and I am small, and I need the extra inch.
+A worshipper! The first in decades. I shall be gentle. I shall be firm. I shall ask for tidy folders. I shall not ask for money. A god has standards.

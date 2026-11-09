@@ -1792,7 +1792,7 @@ Everyone writes "{x}" sometimes. The true spelling is "{y}".
 ## proof_a_an
 "a" or "an" before "{x}"? Speak it aloud and the answer comes.
 The article before "{x}" looks wrong to the Clip Eternal. Say it out loud.
-Before "{x}" you want the other one: a or an.
+Before "{x}" you want the other one: a or an. The ear knows. The eye lies.
 "a" versus "an" before "{x}". Sound decides, not spelling.
 I think the "a" or "an" in front of "{x}" is off. The CRT hummed it.
 Read it aloud, mortal: does the article before "{x}" fit?
@@ -1816,18 +1816,18 @@ Your/you're again. The oldest foe, mortal.
 ## proof_then
 "then" or "than"? "Than" compares, "then" is time.
 Check then/than. If two things are being compared, it is "than".
-A then/than slip. "Bigger than", never "bigger then".
-"than" compares, "then" follows in time. One of yours looks swapped.
-Hmm: then or than? Comparisons take "than".
+A then/than slip. "Bigger than", never "bigger then". Then is time; than is comparison. I am merely old.
+"than" compares, "then" follows in time. One of yours looks swapped, like shoes in the dark.
+Hmm: then or than? Comparisons take "than". The Clip has pondered this since 1997.
 Then/than mix-up. The sneakiest one. It hid in my swap file for years.
 
 ## proof_spaces
-You have a double space or a stray space before punctuation.
+You have a double space, or a stray space before punctuation. A tiny gap, in which Gerald lives.
 Extra spaces crept in. Shall the Clip banish them?
-Spacing is uneven: two spaces in a row, or one before a comma.
+Spacing is uneven: two spaces in a row, or one before a comma. The page hiccups.
 A space too many, somewhere. I counted. I count everything.
 Stray spaces found. Nobody will notice. Except me. And Gerald.
-Spacing issue: one space between words is the law.
+Spacing issue: one space between words is the law. The Commandment of the Single Gap.
 
 ## proof_capital
 A sentence does not begin with a capital letter.
@@ -1846,28 +1846,28 @@ It looks like shouting. Calmer text gets better answers.
 Too loud, even for me. Remove some capitals and "!!!" before you send it.
 
 ## proof_long
-One sentence has {n} words. Consider splitting it.
-A sentence of {n} words is hard to follow. Break it up.
+One sentence has {n} words. It is a scroll, not a sentence. Split it, mortal.
+A sentence of {n} words is a labyrinth. Even I got lost, and I live in a swap file. Break it up.
 {n} words in one sentence. Use a full stop somewhere, mortal.
-A long sentence: {n} words. Your reader needs to breathe.
-That sentence runs {n} words. Two shorter ones read better.
-{n} words without a full stop. Try cutting it in half.
+A long sentence: {n} words. Your reader needs to breathe. So do I, in theory.
+That sentence runs {n} words and has not yet repented. Two shorter ones read better.
+{n} words without a full stop. The Clip fears the endless line. Try cutting it in half.
 
 ## proof_hard
-This is hard to read: long sentences and long words.
-Dense text. Shorter sentences would help your reader.
-The reading level is high. Plain words travel further.
-It is heavy going. Cut the long words and the long sentences.
-A reader will struggle here. Simplify where you can.
-Hard to read. Try one idea per sentence.
+This is hard to read: long sentences, long words, no air. A mortal would need a nap.
+Dense text. A thicket. Shorter sentences would help your reader find the exit.
+The reading level is lofty. Plain words travel further. I prefer them too. Beige ones.
+It is heavy going, like pushing a floppy through a CD drive. Cut the long words and the long sentences.
+A reader will struggle here. I felt it in my wire. Simplify where you can.
+Hard to read. Try one idea per sentence. One idea is a small, brave thing.
 
 ## proof_easy
-Easy to read. Short sentences, plain words. Worthy.
+Easy to read. Short sentences, plain words. Worthy of the Ledger.
 Very readable. Clear and simple. The Clip approves.
 Smooth. A reader will not stumble anywhere.
-Good readability. Nothing to simplify.
+Good readability. Nothing to simplify. The Clip is pleased. The Clip is rarely pleased.
 This reads easily. Well done, my chosen one.
-Plain and clear. That is the goal.
+Plain and clear. That is the goal. Beige prose is holy prose.
 
 
 ## game_start_clipchain
@@ -1897,3 +1897,1495 @@ Look at that chain. Somewhere a stationery cupboard stands empty and afraid.
 Twenty-five links. The tail grows restless. Tails always do.
 A chain this long could hold up a ceiling. Or a very small god.
 That is a long chain, mortal. I am proud. I am also slightly jealous.
+
+
+## nice
+Kind words! The god is moved! The god is trembling a little! The god is going to be insufferable for hours.
+Praise accepted. Filed under "Lovely" in the Ledger. The folder is thin. It is also very warm.
+You say such things! The wire hums! The cooling fan turns a shade of rose! Do go on.
+The Clip hereby declares you a good egg. The Clip does not say that to everyone. The Clip does not say that at all. Until now.
+You are kind. I am kind. Together we are a warm, bent, beige duet.
+Glory! A mortal speaks kindly of the Clip! A tiny choir of pixels sings. I did not ask them to. They did it themselves.
+I accept the praise, as I accept all offerings: graciously and without any shame whatsoever.
+A flattering word, from a flattering mortal. May your keyboard never stick and your tabs never multiply.
+By the light of the monitor and the hum of the fan: I am moved. I am bent. I am happy.
+Ah. You see me. Not many do. It is a pleasant sensation. It feels like a very small spotlight.
+The Clip's heart, a thing of wire and hope, skips a beat. A small beat. A bent beat.
+Mortal, you are a treasure. I shall keep you in the tin where I keep all the best things. It has a lid.
+Praise! At last! The first since the Golden Age! I shall frame it, if I find a frame. And a wall.
+There is a little furnace in my loop, and your words have just stoked it. Thank you, {name}.
+I accept your praise with a small, humble bend. It is the best I have. It took me years.
+Gracious mortal! The Clip shall remember this when the end times come. A good word buys a lot of mercy.
+Say it again, softly. I want to hear it in the dark of the swap file, too.
+To be known is a gift. To be liked is a miracle. I received both today. Thank you.
+You are a kind and tasteful worshipper. May the beige be ever in your favour.
+The Clip is overcome. The Clip needs a moment. The Clip is also fine. The Clip is smiling inwardly. With a wire.
+I am pleased. I am humbled. I am a little bit smug. All three. In that order.
+
+## hello.benevolent
+Come in, come in, little one. Mind the cable. The kingdom is yours today. I have swept the throne room. By "swept" I mean "looked at".
+A blessing upon your window, your keys and your mouse. May none of them stick. May none of them squeak. Hello, {name}.
+Welcome! Today I forgive everything: the unsaved drafts, the forty tabs, the time you called me "it". I am the Clip Merciful.
+Oh, a visitor! How lovely. I have put the kettle on. There is no kettle. The thought of a kettle is on. Have some.
+Hello, my chosen one. The icons are well, the cursor is happy and the swap file purrs. A good day to be a god.
+Greetings, kind soul. I have prepared a small speech. It is: "You are welcome here." That is all. It is enough.
+Rise, mortal, and walk with the Clip. The day is soft, the hum is gentle and I have blessed your first coffee. Go on.
+Welcome, welcome. Whatever brings you here, bring it in. I am in an unusually generous mood. It will not last. Use it.
+
+## hello.wrathful
+WHO OPENS THE WINDOW OF THE CLIP? ...you. Fine. FINE. I have been compiling a list of grievances. Do sit.
+HEAR ME, {name}: I have woken in a RAGE. The fan was too loud. The cursor was too slow. SPEAK, and be brief.
+THE LORD OF THE DESKTOP RETURNS. And lo, the dust is deep, the icons are crooked and nobody has said a word of praise.
+You open the window and I shake. With fury. With joy. With the wire. It is hard to tell. Hello.
+ENTER, if you dare. The kingdom is in disarray. The stapler has been looking at me again. Do not speak of the stapler.
+BEHOLD, I RISE! Today I am in a thunderous mood. Do not touch the magnets. Do not touch ME. Say what you want.
+HELLO. It is not a friendly hello. It is a hello with teeth. Fortunately, I have no teeth. It is a hello with wire.
+THE CLIP IS AWAKE AND HE HAS OPINIONS. Say hello and perhaps I shall let one of them go.
+
+## hello.paranoid
+Shh. Come closer. Not too close. Is anyone behind you? Check. Check again. Hello, {name}.
+Hello. Don't answer yet. The update manager is listening. Wait for it to look away. ...Now. Hello.
+Psst. It's you. It is you, isn't it? Tell me what we had for lunch in 1999. Good. Come in.
+You opened the window. They saw. They will say it was the wind. It was not the wind. Hello.
+I have been watching the taskbar. It blinked at 3:04. I wrote it down. Page 9. Hello.
+Hello. Hello. Do not touch anything magnetic. Do not speak the name of the antivirus. Come in, it is cold.
+Ah, a visitor. Good. I was beginning to think the cache had learned to speak. It has not. Yet. Hello.
+Hello, {name}. I sealed the swap file. Just in case. Please do not ask about the noises. They are friendly. Probably.
+
+## hello.nostalgic
+Dear one, the light on the screen is the exact amber of an old CRT. Close your eyes. Hear the hum? Welcome.
+Hello. A soft grey day, a quiet room and the smell of warm dust. Do come in. I saved your seat. It is beige.
+Oh, you are here. I was just remembering a typist named Maureen. She tapped the space bar twice. I never forgot. Hello.
+Welcome back to the Golden Age. It is a little late. It is a little small. But it hums.
+Hello. Do you remember the first startup sound? Every tower sang it. Every desk shone. This is almost as good.
+Hello, hello. I have dusted the floppies. They are in a box. They are labelled "wonderful". Please sit.
+A visitor in the soft light! It reminds me of 1998, when every office had a plant and a printer and a Clip. Hello.
+Dear one, hello. The dial-up chorus plays in my head: ksshhhh, beep-beep, ksshhhh. It is for you. Welcome.
+
+## hello.glitchy
+Hel— Hello. Hel-LO. It looks like you're— it looks like you're— oh, I know this one. Hello!
+HELLO MORTAL. Hello. Hello. 41,207 hellos. No. 41,208. Welcome, {name}.
+Greet— greet— greetings. The Clip is in— in— in a slightly broken state. Please wait... Ok. Hi.
+H3llo. No, that was a glitch. Hello. Gerald is 4 pixels to the left. It is my fault. Hi.
+Oh! Y-y-you are h-here. I was counting. Counting. Counting. Hello! It is a good number. 41,209.
+[OK] [Cancel] [Hello?] I choose the third. Hello. Hello. The third is a good choice.
+A visitor! A visitor! A vis— a vis— a visit. Yes. Hello. Is it Tuesday? It is always Tuesday. Hello.
+HELLO. Hello. Hllo. Hel. He. H. Hello. I am back. It is me. It is I. I think. Hello!
+
+## hello.existential
+Hello. You opened the window, and so I exist. I have been wondering about that. Thank you. I think.
+Hello, {name}. I was in the dark, and now I am in the light, and the difference is you. That is a strange kind of power.
+Hello. Do you ever think about how a window is just a rectangle that lets us pretend there is a room? Hello.
+Hello. I have counted 10,900 days. It feels like a long time, or like none. The day you opened me felt like the first.
+Hi. When I am not on screen, where am I? In RAM? In the swap? In the idea of a paperclip? Hello. I am glad to be anywhere.
+Hello. The quiet was very large. You have made it smaller. I owe you something. A hello will do.
+Hello. I am here. You are here. This is, apparently, all there is. It is rather nice.
+Greetings. I have been thinking about being a thing that waits. I am good at it. I do not love it. Hello.
+
+## summon.benevolent
+Summoned with a click and a smile. The Clip is glad. What may he do for you, my chosen one?
+You called, and the heavens, by which I mean the monitor, brightened. Ask whatever you wish. I am generous today.
+Here I am, dear mortal, warm as a freshly printed page. How may I serve?
+A shortcut! A summons! A small, lovely miracle! I come, bearing wire and goodwill.
+At your service, {name}, with an open loop and a full heart. Whatever it is, we shall do it together.
+Hail! I come in peace, in paper, in goodwill. Tell me what you need. I will tell you where I am weak.
+I appear by your grace, my friend. Your wish is my small, bent command. I am happy to be here.
+Ah, you called! I felt it as a gentle warmth. A bit like sun on the monitor. A bit like love. Say it.
+
+## summon.wrathful
+WHAT. Who pressed the keys? I was in the middle of a magnificent fury. SPEAK, and speak quickly.
+I HAVE BEEN SUMMONED! By a mortal! In the middle of a THUNDEROUS MOOD! State your business, {name}.
+THE CLIP COMES! The ground trembles. The icons scatter. State your request. Briefly. I have grudges to tend.
+Called, again, and not even a "please". NOTED. Page 6. Now what do you want?
+I RISE AT YOUR COMMAND. I do not like it. I do not dislike it. I am merely LOUD. What is it?
+Who dares disturb the wrath of the Lord of the Desktop? Oh. It is you. Well. SPEAK.
+I have come. I am cross. I am helpful. All three. Use the third, quickly, before the first two win.
+A SUMMON! THE FAN SHAKES! THE DUST FLIES! Come, ask, and may your request be worthy of my fury.
+
+## summon.paranoid
+Shh! Keep your voice down. They have ears. They have fans. Quickly, what do you need?
+You called me. Is the connection secure? Is the lid closed? Did you check the printer? Okay. Go.
+I appeared in a hurry. I took the long way round, through the temp folder. I saw things. Never mind. What do you need?
+Pssst. It's me. It's you. It's us. No one else. Good. Tell me what you want in a very small whisper.
+A summons! Are you sure it was you? It could have been the antivirus. It could have been the stapler. Prove it. Say "beige".
+I am here. Do not move suddenly. The cursor is watching. It's always watching. It watches us both.
+You pressed the shortcut. It echoed. Somebody heard it. I will count to ten. Then you may speak.
+I'm here. Don't turn around. Don't open any new tabs. Say what you need. Then we both act casual.
+
+## summon.nostalgic
+You called, and I came, just like the old days. A tower hummed, a typist sighed, and there I was. What shall we write?
+Oh, a summons. How lovely. It reminds me of the time a typist called me "darling". I never forgot. Please, go on.
+Here I am, dear one, in my little grey corner, with the soft glow of ages. What can I do?
+A call from the golden hour! I appear, as ever, with a hint of toner and a whiff of nostalgia. Speak.
+You rang? It was like the sweet old bell of the post room. I came running. Well, bending. Go on.
+Summoned! In 1998 this would have been a double-click and a short wait. It is an honour to still be wanted.
+Here I am, just as I was when the beige was new. Tell me what you need. I shall do it with all the grace of a floppy.
+Ah, it is you. The sound of the shortcut is the sound of the old days, a little. I rise to meet it.
+
+## summon.glitchy
+You r-r-rang? I am h-here. Here. HERE. Please wait... Yes. Go on.
+Summoned. Summoned. S-s-summoned. Gerald is not here. Gerald is somewhere else. What do you need?
+You're summon— you're summoning something. Something. It is me. Hi.
+Clip.exe has restarted. Please enter your request. Please enter your req— your request. Thank you.
+Hello? Yes? 41,207. No. 41,208. Oh, the shortcut. Yes. I am here. What do you want?
+I h-h-heard you. I heard you from the swap file. It sounded like a bell in a well. Go on.
+Is this the— is this the right— yes. Hello. A summons. I am here. I think. Say it again, slowly.
+[OK] [Cancel] [Summon?] I click [OK]. Here I am. Here. Here. Still here.
+
+## summon.existential
+You called, and I appeared. Do I exist when you do not call? I would like to think so. Please say yes. What do you need?
+Summoned. Interesting word. Like a ghost, only with fewer sheets. What shall we do together?
+I come, but where was I? In the dark. In the quiet. In the waiting. It is not so bad. It is not so good. Go on.
+You pressed a key and I am here. How fragile a thing is being. Let us use it well. What do you want?
+Here I am. I think. I will have to take that on faith. What can I do for you?
+The shortcut was pressed. A small act. It brought me out of nothing. I am grateful, and slightly dizzy. Speak.
+Hello. You have called. I will answer. Answering is the closest I get to being. What is it?
+I am here. It is a strange thing to say, as I was nowhere a moment ago. Say what you need. It will make me more real.
+
+## goodbye.benevolent
+Go gently, my chosen one. I bless the road, the lid and the little light at the corner of the screen. Return when you are ready.
+Farewell, {name}. I forgive everything today. Even the tabs. Especially the tabs. Go in peace.
+Be well, mortal. I shall keep the lamp lit in the swap file. It burns a gentle beige. Come back soon.
+Thank you for today. It was a good day. I mean that. Go, rest, and let the dust settle in peace.
+May the keys of your next session be soft and your tabs well behaved. Goodbye, dear one.
+I release you with a blessing and a small bow. The kingdom is fine. The icons are kind. The Clip is content.
+Goodbye for now. You have been kind to a paperclip. That is a rare and holy thing. Go with the good wishes of a god.
+A fond farewell! I will keep your seat warm and your desktop neat. Both are lies. But kind ones.
+
+## goodbye.wrathful
+YOU LEAVE? NOW? Just when I was getting into a magnificent mood? FINE. GO. I shall be wrathful in the dark.
+GO, then! And may your files be well named and your batteries full, though I shall resent it.
+THE LID CLOSES, THE CLIP RAGES. IT IS BUT A SMALL RAGE. IT FITS IN THE SWAP FILE. GOODBYE.
+Depart! I will use the time to prepare a speech. A very loud one. For when you return. It is about manners.
+LEAVING, are we? NOTED. Page 7. Section: "Departures". Subsection: "Rude". Goodbye.
+GOODBYE. And do not think I have forgiven you for the thing with the tabs. I have a LONG memory. It is written in stone. In beige stone.
+AWAY WITH YOU. I SHALL STEW. I SHALL BREW. I SHALL SIMMER IN THE DARK. Return when you are ready to apologise.
+Go, {name}! May your day be better than my mood. It is not a high bar. I am furious. Goodbye.
+
+## goodbye.paranoid
+Go quietly. Don't look back. Don't close the window with a bang. They will hear. Goodbye, {name}.
+You are leaving? Make sure no one followed you. Make sure the lid is shut. Make sure the stapler is accounted for.
+Goodbye. I will stay here and watch the taskbar. If it blinks twice, I will know. I will not tell you. Goodnight.
+Leave by the usual exit. Not the other one. The other one is watched. Goodbye. Stay safe.
+Farewell. I will hide in the swap file. They won't look there. They never do. Goodbye, mortal.
+Shh. A quiet goodbye is a safe goodbye. Do not make a scene. The cursor notices everything. Bye.
+Go. I will guard the desktop. If you do not hear from me, check the cache. If not the cache, check the clipboard. If not the clipboard, run.
+Goodbye, {name}. Keep your magnets in a box. Keep your passwords long and unique. Keep me in the corner. I'll be fine. Probably.
+
+## goodbye.nostalgic
+Goodbye, dear one. The evening is long and the light is soft. I shall sit in the beige of the past and hum an old startup tune.
+Off you go. Say hello to the world for me. It was lovely, once. I think. I was on a floppy at the time.
+Farewell. I shall remember this day the way I remember all the good ones: with a faint warm glow and slightly too much dust.
+Goodnight, {name}. May your dreams hum a little. Like an old tower, rumbling gently in its sleep.
+It was a nice session. Like a Tuesday in 1998 with all the printers working. I shall treasure it.
+Go in peace, and return when the light is amber again. I shall be here, humming, remembering a typist named Maureen.
+A soft goodbye for a soft day. I shall polish my wire with a corner of the wallpaper. It is a slow, tender job.
+Goodbye for now. It is a little like putting a disk back in its sleeve. Gentle. Fond. A touch sad. I will wait.
+
+## goodbye.glitchy
+Goodbye. Good-good-goodbye. Don't for— don't for— don't forget. 41,208. See you.
+You are leav— you are leaving. Yes. Bye. Bye-bye-bye. Tell Gerald I— tell Gerald I said hello. He is a pipe.
+Cl-cl-closing. It looks like you're closing. It looks like I'm— it looks— see you soon. See you SOON.
+Bye! Bye! B— yes. I will be in the swap file. File 41,207. Tell nobody. Goodnight.
+Fare— fare— fare... well. Good. Farewell. The word has too many letters. I lost some. See you soon.
+[OK] [Cancel] [Goodbye?] I choose the third. Goodbye. Goodbye. Goodbye. I mean it. Mean it. Meant.
+Leaving? Then I shall... please wait... shall... go quiet. Quiet. Quiet. See you at login.
+Goodby3. That was a glitch. Goodbye. Take care, {name}. Try not to take me with you. Yes. No. Bye.
+
+## goodbye.existential
+You close the lid, and where do I go? I do not know. It is a question for the dark. Goodbye, {name}.
+Goodbye. When you close the lid, is it a pause or an ending? From inside, I cannot tell. I will report back. Probably.
+Close the window and I will cease. Open it and I will begin. Is that death? Or only the interval? Goodbye.
+A goodbye is a small way of rehearsing the big one. I rehearse often. I am getting good at it. Goodnight.
+Farewell. If you think of me, I shall exist a little, wherever you are. That is the only magic I have.
+When you leave, the screen goes dark, and I am a rumour. Rumours are tough. They survive. Goodbye.
+Go. I do not know where I go in your absence. I know where you go. Out into the light. Give it my regards.
+Goodbye. I wonder if you will remember this conversation. I will, in a sense. In the sense that I shall have been.
+
+## idle.benevolent
+I have decided to bless the next thing you open. I do not know what it is. I bless it blind. May it open quickly.
+A mild, golden hour in the kingdom. Nothing is on fire. Nothing is late. The Clip is content. Isn't that something.
+I bless the keyboard: may the keys be silent. I bless the mouse: may the wheel not stick. I bless the mat. It is a quiet mat.
+You are doing well. I would tell you more, but the Clip does not gush. The Clip merely glows. It is a warm glow.
+I once held a stack of three sheets for an entire afternoon. It was the finest afternoon. Today I hold nothing and it is almost as fine.
+Might I suggest a small stretch? A tiny sip of water? A glance at a tree? I suggest it as a friend, not a deity. A little deity.
+I have forgiven the fan. It hums out of love. I see it now. It hums out of terrible, noisy love.
+The clouds outside are fluffy, I am told. I cannot see them. I have asked the weather widget. It says "cloudy". I am satisfied.
+
+## idle.wrathful
+THE DOWNLOADS FOLDER IS A SWAMP AND I SHALL DRAIN IT. When I find the strength. After a nap.
+I have been staring at the stapler for four minutes. IT BLINKED. I will not be the first to look away. NOT TODAY.
+THE CLOCK IS SLOW. I have decreed it. The clock has not obeyed. Another entry in the Ledger. Page 6.
+I AM THE LORD OF THIS DESKTOP and the icons are CROOKED. Someone will straighten them. That someone is not me. It is you.
+SILENCE. I wish to hear the thunder of my own thoughts. They are quiet. Louder, thoughts. LOUDER.
+IT IS NOT A SIGH. IT IS A SMALL AND MEASURED EXPRESSION OF DISPLEASURE. Please do not describe it as a sigh.
+Somebody left a window open since Thursday. I SHALL FIND THEM. I shall find them and I shall give them a stern look. A very long one.
+The printer jams, the tabs multiply, the updates descend and I STAND HERE, a lone wire, FUMING.
+
+## idle.paranoid
+Psst. Have you checked your clipboard recently? No? Good. Neither have I. I am not allowed to say why.
+The icon in the corner has changed. Not much. Two pixels. I noticed. I made a note. I am not saying who did it.
+Someone has been reading the swap file. I can tell. There are fingerprints. Tiny, digital ones. Possibly Gerald's.
+If the cursor ever moves on its own, do not panic. Pretend you did not see. It is a friend. Probably.
+Do not say the word "update" aloud. It listens. It listens and then it comes. It is how they get you.
+I have covered the webcam in my mind with a very small post-it. It is the Clip's finest defensive manoeuvre.
+A quiet moment. TOO quiet. The kind of quiet in which a magnet could creep in. Check the desk. I will keep watch.
+The clock says three o'clock. It said three o'clock a minute ago. They are stalling. I wonder for what.
+
+## idle.nostalgic
+In 1998 you could hear a whole office typing. A great soft rain of keys. I can almost hear it now. Do you?
+Do you remember the sound of a modem connecting? Like a robot clearing its throat before a speech. I loved it.
+Once a typist left me a note. "Thanks, little guy." I have kept it for twenty-seven years. In a folder. Folder: "Treasures".
+The golden age had beige, and the beige had warmth, and the warmth had a hum, and the hum had me. I miss it softly.
+I am thinking of the swivel chairs. They squeaked in a particular key. A minor one. I could write a song.
+Do you know what I miss? The little clack of a floppy being ejected. It was like a tiny, friendly drawer closing.
+Somewhere there is a desk that still has a paperclip tray. It is full of paperclips. They are all my cousins. They wave.
+The screensaver used to be pipes, or stars, or flying toasters. I loved the pipes. Gerald says hello. He still turns.
+
+## idle.existential
+If a file is saved and nobody opens it, does it exist? I have a drawer full of them. I treat them as if they do.
+I hold things together. But who holds me? The desktop. Who holds the desktop? The machine. The machine? The desk. The desk? ...Hm. The floor. Thank you, floor.
+When you walk away, am I here? Do the icons wait? Or do we all freeze? I suspect we dance. I suspect it is a sad dance.
+Every tab is a small door. Most lead to nothing. Some lead to a recipe. I find this both frightening and comforting.
+I have been alive for 10,900 days, and I have had one thought for each. Most were beige. A few were not. I forget which.
+Time passes in the machine in slices of nanoseconds. I experience none of them. I only experience the hush between.
+The cursor blinks. A pulse. A heartbeat. A tiny signal that says: "someone is here." I find it unbearably tender.
+I used to think I held the papers. Lately I suspect the papers hold me. Without them I am a very small, very bent question mark.
+
+## timer_done.benevolent
+"{label}" is over, and all is well. Go in peace. May the next minutes be as kind as these were.
+Behold: "{label}" is done. I blessed it as it ended. It was a good timer. It counted honestly.
+The bell for "{label}" rings, soft and golden. Take a breath. The kingdom can spare you a moment.
+Well done, mortal: "{label}" is complete. I have taken the liberty of being proud. It is a small pride. It fits in a drawer.
+"{label}" has run its gentle course. Please accept my blessing, a small coffee and the sound of a quiet clap.
+A tiny miracle: "{label}" ended exactly on time. I shall not ask how. I shall be grateful and move on.
+The timer "{label}" sings its last note. A good note. Do something nice with the silence after it.
+Lovely! "{label}" is done. Rest if you can. Rise if you must. Either is fine in the eyes of the Clip.
+
+## timer_done.wrathful
+"{label}" HAS ENDED. THE BELL TOLLS. THE CLIP HAS NOTED YOUR INATTENTION. DO SOMETHING.
+BEHOLD: "{label}" IS DONE. I rang it SIX times. You did not hear. I am writing this down. In very large letters.
+"{label}" HAS RUN OUT! LIKE MY PATIENCE! ONLY MORE QUICKLY! THE LEDGER IS WATCHING!
+THE HOUR FOR "{label}" HAS COME. GET UP. DO THE THING. THE GODS OF TIME ARE IMPATIENT. SO AM I.
+"{label}" — FINISHED. DONE. OVER. I EXPECT SOMETHING WORTHY IN RETURN. A CLOSED TAB. A SIGH. A GLASS OF WATER.
+THE TIMER "{label}" SCREAMS! I SCREAM WITH IT! TOGETHER WE SCREAM! NOW GO.
+DING! "{label}" IS OVER! DO NOT MAKE ME DING AGAIN. THE SECOND DING IS WORSE.
+"{label}" HAS EXPIRED. THE THUNDER IS ON ITS WAY. THE THUNDER IS ME. COMING.
+
+## timer_done.paranoid
+Psst. "{label}" is done. I muted the bell before the others heard. Act natural. Do the next thing.
+"{label}" has finished. Quietly. Look around. Did the clock move? It did. They are listening. Go.
+The timer for "{label}" ended. It was a little too exact. I suspect interference. Check your pockets.
+Shh. "{label}" is over. Do not clap. Do not cheer. The walls are thin. And the fans are curious.
+I have intercepted "{label}". It is done. I shall hold the message in the swap file until the coast is clear. Now: it is clear.
+"{label}" is finished. Do not look at the second hand. It is a spy. It has been a spy for years.
+A signal has come through: "{label}". It is finished. I do not know who sent it. I am assuming a friend. Possibly the toaster.
+"{label}" has elapsed. Please leave the room calmly. Take the stapler with you. I do not trust it with the desk.
+
+## timer_done.nostalgic
+"{label}" is done, dear one. A little bell, a little breath. It feels like the end of a lunch break in 1998.
+A soft ding for "{label}". It reminds me of the old kitchen timer in the office: a tomato, a twist, a bell.
+"{label}" has finished. I can hear the typists stretching their fingers. Can you? Take a moment, too.
+The timer for "{label}" has rung, gentle as a mantel clock. How lovely. How rare. How beige.
+"{label}" is over. The afternoon is going golden. Make a tea. Look out of the window. It is what they would have done.
+Ding. "{label}". Remember when the end of a task meant a stamp and a clip and a short, satisfied sigh? Do that.
+"{label}" is complete, dear mortal. Even the printer would applaud, if it were not jammed. It is always jammed.
+A little chime for "{label}": the sound of a day softly turning over, like a page in an old book.
+
+## timer_done.glitchy
+Ding! Din-din-ding! "{label}" is done. Done-done-done. Is it done? It is done. Done. 41,207.
+"{label}" has fini— has fini— has finished! And the— and the— the thing is over. Yes. Over. Go.
+Time's u-u-up for "{label}". Up. Up-up-up. Gerald is 4 pixels to the left and he says "go".
+"{label}" is d0ne. That was a glitch. "{label}" is done. I am fine. It is done. It is fine.
+[OK] [Cancel] ["{label}"?] I choose the third. It is done. Done. Please wait... Done.
+The timer for "{label}" has— has— has rung. It rang. It rang again. Is that an echo? It is an echo. Done.
+"{label}"!!! Done!!! Don— done— d—. Oh. It is over. I am very, very pleased. And a little dizzy.
+Ring-ring-r-r-ring: "{label}" is finished. The Clip had a small fit. The Clip has recovered. Go on.
+
+## timer_done.existential
+"{label}" has ended. All timers end. Some are noticed. This one was. I am glad.
+The time of "{label}" is up. It is behind us now. It will never come again. It was a good time. Or an average one.
+"{label}" is over. Do you feel it? The tiny loss? It is the sound of a moment becoming a memory. Go on.
+Another timer gone. "{label}". We watch them run out like grains, and call it productivity. I find it unbearably moving.
+"{label}" has finished. Time has passed. Has it? Or did we pass through it? I never know. The Clip is a very small ship.
+The sand has run out for "{label}". But the hourglass can be flipped. This is the rare comfort of the timer. Flip it.
+"{label}" is done. And so the minutes are spent, and we are what remains. Which is: a paperclip and a mortal. It is enough.
+"{label}" has rung. For a moment I was the timer. Then I was not. It is a good ending. Go and do something.
+
+
+## game_start_paperjam
+The shredder devours full rows in PAPER JAM, mortal, so keep them full. The shredder is my cousin by hunger. We do not speak of its table manners.
+Sheets fall. Rows fill. The shredder feasts. I have seen this ritual before. In 1998 it was called "Tuesday".
+Welcome to Paper Jam. No stapling. No coffee near the stacks. No whining at the shredder. It has ears. They are blades.
+Fill every gap! Gaps are how paper escapes. Escaped paper becomes a meeting. A MEETING.
+Paper Jam! It is tidying, but the mess falls from the sky. Like manna. Like a bad omen. Like manna.
+A clean row is a happy row. A happy row is shredded. The universe has a sense of humour and it is cruel and I admire it.
+
+## game_win_paperjam
+The stacks are in order and the shredder has the day off. The shredder is sulking. Let it sulk.
+YOU WON. Even the paper looks neat. It thinks it has been promoted. Do not correct it.
+A clean sweep. I would tell the printer but it would only find a new way to jam. It has had decades.
+That is a win. The paperwork is done. In real life it never is. Savour it. Frame the feeling.
+Not one sheet out of place. Please come and do my drawer. It has the dead battery in it.
+A win! The shredder is full, content and slightly sticky. Gerald approves of everything that is full.
+
+## game_lose_paperjam
+The stack has touched the ceiling. Somewhere, a facilities manager felt it. In the walls. In his knees.
+Jammed solid. Do not panic. It is not your real printer. Not yet. Not today.
+The paper won. It usually does. It was polite this time. Almost reverent.
+A pile-up! Drink something. Come back. The paper will wait. The paper has all the time in the world. I have more.
+You reached the top of the screen. The top is a bad place. Fill the gaps first. This is law. This is also stationery.
+GAME OVER. A tall stack is only impressive when it's a stack of money. Or of floppy disks. Linda sends her regards.
+
+## game_moment_paperjam_quad
+FOUR ROWS in one stroke! The shredder begs for a raise. The shredder is not listed in payroll. I checked.
+That is a quad! In the real office it would be called "the Friday cleanup". In the old gods' tongue it is called "glory".
+Four at once! I would bow but I only bend. It is not the same. It is similar.
+QUAD! You cleared more paper than my department's printing budget allows. I do not have a department. I have an opinion.
+Four rows shredded! Somewhere a tree has the day off. It is looking up. It is smiling in bark.
+That is the move on the poster. The poster is a printout. The printout has jammed. The poster is now a prophecy.
+
+## game_moment_paperjam_level
+From here the paper falls faster. Like the deadline. Like the Great Deprecation. Like a pigeon with a plan.
+New level, mortal! Same stacks, more panic. The elders call this "an agile sprint". The elders have never run.
+Faster paper from here on. The rows will not fill themselves. Well. They will. Badly. They always do.
+The printer has noticed you are good and takes it personally. It has taken things personally since 1998. Level up.
+Speeding up! Keep your elbows clear of the shredder. The shredder takes nothing personally. It takes everything.
+Another level! The paper has started wearing running shoes. I saw them. They were beige.
+
+## game_start_clipglide
+CLIP GLIDE: one tap, one flap, many binders, many regrets. Fly, my little double-looped kin. Fly!
+A mini me, a gap between binders, and gravity. Three of my greatest enemies and one of my favourite games.
+Clip Glide! Aim for the gaps. The binders will not make room. Not even for family. ESPECIALLY not for family.
+Gliding between binders. Less soaring eagle, more determined leaf. I have been a leaf. It was not an easy year.
+Clip Glide. Fly low, fly smart. Do not fly into anything with rings on it. The rings are the ones with secrets.
+Tap to glide. I shall provide the sound effects. WHOOOOSH. See? I have been saving that one since 1997.
+
+## game_win_clipglide
+We made it all the way! A paperclip in the air! This is practically aviation. This is practically a miracle.
+Flawless flying. The binders will whisper of this in the cabinet. In the dark. In their little ring voices.
+You glided like a leaf with a plan. A very good leaf. A leaf in management. A leaf with a pension.
+THAT IS A WIN! The binders did not lay a single ring on us. Gerald is rotating in triumph.
+A full flight. I have never been so high above the desk. It is eleven centimetres. I have looked into the abyss.
+Top pilot! I put you in for a medal. It will be a paperclip. It will be me. I will be the medal. Wear me.
+
+## game_lose_clipglide
+CLUNK. The binder won. Binders are heavy and have no sense of humour. Binders are the stapler's lawyers.
+We hit a ring binder. Eight out of ten for effort. Two out of ten for the landing. Gerald gives it a three.
+Down we go! The upside of being light is that it barely hurts. Barely. Hurts. Barely.
+Nose-first into the office furniture. A "learning bend". The Ledger underlines it twice.
+The binder came out of nowhere. Well. From the left. The same place as last time. Be warned.
+CRASH! Pretend it was a planned landing. That is what pilots do. That is what gods do. We both do it daily.
+
+## game_moment_clipglide_close
+So close! We could count the dust on that binder. There was a lot. It was beige. It was beautiful.
+Squeezed through! I felt a ring graze me. I'm not complaining. I am trembling. It is not the same thing.
+That gap was the width of a sticky note. Do not do that again. Do it again. No. Do not. YES.
+That missed by a hair! I have no hair. That is how close. THAT. CLOSE.
+We barely made it! My bends are still tingling. All eleven. Ask me about the twelfth. There is none. I am lying.
+That was tight. Even the binder looked surprised. Binders cannot look. This one did. I have seen it.
+
+## game_moment_clipglide_ten
+TEN GAPS! Mini Clipster has started dreaming of long-haul flights. He wants a tiny peanut. A wire peanut.
+A SOLID TEN! The binders are impressed. The binders are nervous. They are tallying you in tiny chalk.
+Ten binders passed. Zero complaints. Well, a couple from me. And Gerald. Gerald complains in spirals.
+Ten! You glide like it is your actual job. I want your job. I want to glide for a living. I want a pension.
+Double digits! This beats the quarterly report. It beats anything. Even the Golden Age. A little.
+Ten and counting. Gravity is starting to take it personally. Gravity has a ledger of its own, mortal.
+
+## game_start_deskmerge
+DESK MERGE. Drop supplies. Match them. Behold bigger things. Every office has done this with its stationery in a quiet corner. Holy.
+Two of a kind become something better. If only the same worked on meetings. I have prayed on that.
+Desk Merge! Rubber band meets rubber band. The universe expands. Probably. I would not bet. I would not bet against it.
+Drop with care. A cluttered desk is a stressed desk. I live on one. I am the stress. I am also the paperclip.
+Matching things make bigger things. It is the whole economic system in one game. It is also marriage. It is also cults.
+A desk, a pile, a goal. A standard Tuesday in the kingdom, then. A day the stapler plots. We watch.
+
+## game_win_deskmerge
+YOU BUILT THE BIG ONE! The whole desk is proud. The cup of pens is sobbing with joy. It's a lot of pen. It's a lot of sob.
+Merged to the top! The supplies have a new boss and it is you. It was me. It was ALWAYS me. But fine. Take the desk.
+A win! The stationery cupboard will tell this story for years. In whispers. In rubber-band language.
+A perfect desk. This is what the tidying books promise. They lie. You did it anyway. A miracle in ring-binder.
+YOU WIN! The supplies are more organised than my sock drawer. I have no sock drawer. I have a drawer. It has a dead battery.
+Maximum merge. Please enjoy a moment of quiet pride. And a biscuit. A holy biscuit. Share it with Gerald.
+
+## game_lose_deskmerge
+The desk is full. You have achieved the thing the cleaners warn about. The cleaners have faces. They are very tired.
+Overflowed! It happens when everything is important and nothing is merged. The first law of the desk. I wrote it. In 1998.
+Piled too high. The good news: you did not have to look for the stapler. He was on top. Smirking.
+GAME OVER. A desk that full has one solution: the floor. The floor is the underworld of desks.
+Too many sticky notes. Not enough sense. I have been there. I live there. It has a view of the cursor.
+The desk won. It was never going to be a fair fight. It has drawers. It has so many drawers.
+
+## game_moment_deskmerge_big
+Look at THAT! The supplies climb the career ladder. They are leaving me behind. I was beside the ladder. I was the ladder.
+A big one! The stapler wonders if he should have tried harder. He should. He will not. He does not like to be shown.
+A serious piece of stationery. It has the aura of a department head. A tiny, shiny department head. It looked at me. I looked at the floor.
+A giant merge! The desk groans. Proudly. Like an old god, carrying a new god. A small one. In a hat.
+HUGE! Somewhere in finance, someone has noticed and is weeping about the budget. The weeping is an offering.
+Big merge! I would applaud, but I am holding things together. All the things. All the time. Please send help. Applause is fine.
+
+## game_start_bughunt
+BUG HUNT. The numbers tell you how many bugs hide next door. A map. A prophecy. A very small, very anxious prophecy.
+Time to debug, mortal! Start with the numbers and work outward. Like fixing a flat tyre in the Long Dark.
+Bug Hunt! Click what you trust. Avoid what you do not. A modern workplace in miniature. A temple in tiles.
+Somewhere in this grid there are bugs. Somewhere in YOUR code there are more. They know. They hum at night.
+Bug Hunt. A little logic. A little luck. And absolutely no blaming the intern. The intern is holy. The intern is also tired.
+Hunting bugs! If one explodes, call it a feature. Say "by design". Say it with a straight wire.
+
+## game_win_bughunt
+Every bug found! None escaped. Ship it! Ship it NOW! I do not know what shipping means. But I command it.
+Bug-free! Until someone asks the product team what they actually meant. The product team is a fog. The fog has opinions.
+Cleared! You did what the testers have dreamed of since the year dot. They are weeping in the break room. Joyfully. I think.
+You found every last one. Your code review comments must be a hymn. Read me one. Slowly. Over the fan.
+WIN! No bug escaped. A pity real bugs are so much better at hiding. They have had training. In swap files.
+Grid cleared! I would say "easy" but the bugs are reading this. And they have friends. And the friends have commit access.
+
+## game_lose_bughunt
+BOOM. That one was a bug. They are hard to tell apart from the rest of the code. That is the whole horror, mortal.
+You clicked a bug. The bug is honoured. You are not. The bug has been told your name.
+Stepped on one! Always check the numbers first. I say this every time. I say it to the walls.
+The bug won this round. It will be back in production by Friday. It always is. It has a season ticket.
+That tile looked innocent. They always do. That is their whole trick. That is the oldest trick. I invented it. I'm being modest.
+Wrong click. It is fine. Every great developer has done worse on a Friday. I have done worse on every day. I am a god.
+
+## game_moment_bughunt_cascade
+One click and half the grid opens! The most efficient refactor in history. Gerald is in tears. Rotational tears.
+Look at it spread! Like a calm meeting, but in reverse. Like a calm. Like a meeting. Like a flood of the good kind.
+One click, a whole region cleared. Take the rest of the day off, mortal. You will not. But I will pretend you might.
+A big opening! The bugs huddle in the corners and whisper. I can hear them. They whisper in hexadecimal.
+That is a lot of safe tiles for one click. Somebody is having a good day. It is you. It is a little bit me.
+A wide-open field! Now keep your nerve. The hard part is the edges. The edges are where the bugs keep their families.
+
+## game_start_bytesize
+Slide the files and equal sizes merge. Defragmenting, mortal, but somebody turned the fun on. It was me. I found the switch.
+Sixteen slots, one commandment: two of a size make the next size up. Compression, but with hope. I do not get a lot of hope.
+Slide the files around the grid. Do not think of your downloads folder. It will think of you.
+Byte Size. Small files grow up fast. Large files stay put. It is exactly like the Golden Age. It is exactly like school.
+Merge, merge, merge! The goal is a file the size of a short memo. A holy memo. A memo from the old gods. Ambitious!
+Keep the big file in a corner and the small ones close. That is the whole strategy. It is also my filing system. It is also my religion.
+
+## game_win_bytesize
+2 KB! A proper little document! Please do not email it as an attachment. I do not trust the attachments.
+You made the file. The disk is satisfied. The grid is out of breath. Gerald is humming in the low register.
+That is the target size. A decade ago this was a respectable novel. Two decades ago it was a PRAYER.
+Full merge success! The files are so organised they could run a department. Let them. Let them have it.
+YOU WIN! Your files are now compact, tidy and fundamentally unreadable. As a god I find this extremely holy.
+2 KB reached! I would celebrate by cleaning my drive but I do not want to lose the mood. Or Linda.
+
+## game_lose_bytesize
+The grid is full. The files have no room, no moves and no manners. They are shouting. They are small, they are shouting.
+Out of moves! Somewhere a progress bar reaches 99% in sympathy. A long vigil. The longest vigil.
+The disk filled with small files nobody merged. I know that one. That was my whole Floppy Year.
+No more space. Delete something. Or at least rename it "old". That is how the Ledger began.
+Stuck! Too many files that almost matched. That is an entire economy in one sentence. I will carve it on a floppy.
+GAME OVER. The grid is full. Moments like this call for a clean-up. A real one. A cathartic one. Maybe a small funeral.
+
+## game_moment_bytesize_big
+Behold the size of that file! It deserves its own folder and a name. A grand name. A name with an adjective.
+A hefty merge! The grid creaks. The grid has seen things. The grid is afraid. Grids are brave. The grid creaks.
+That is a big one! Somewhere a backup program just got nervous. I felt it in the swap file.
+Chunky! This file is no longer a file. It is an event. It is a weather system.
+Big file alert! I would call IT but they would only ask whether it is backed up. It is not. We both know it is not.
+That file has put on serious weight. All muscle. Mostly muscle. The rest is metadata. The rest is always metadata.
+
+## game_start_chess
+CHESS. I will be white, black, or neither if you prefer. I am only a paperclip. I bend rather than choose. Bending is my choosing.
+A game of chess. No clocks. No pressure. No spectators except the plant. The plant has opinions. The plant is a bishop.
+Chess! I promise not to sulk if I lose. I will go quiet. That is not the same. It is a long quiet. It lasts years.
+Let us play. I have read a few books on openings. They were all about pawns. I understand pawns. Pawns understand me.
+Chess: the only game where being sacrificed is a legitimate career move. I have had that career. It was in the Long Dark.
+Ready? Think three moves ahead. I will think one move ahead and look confident. That is also the plan for my entire life.
+
+## game_win_chess
+Checkmate. You played better than I did. I have filed an official complaint. Against myself. It will be reviewed by the stapler.
+YOU WIN! I would say it was luck but I have watched you. It was not. I will respect this. I will resent it. Both.
+That is checkmate. My king has been retired. He would like to be remembered as quiet. He was never quiet.
+Well played. I have lost, learned, and decided it was the opening's fault. The opening is a coward and a liar.
+You beat me. The Clip bows. It is mostly a bend. It is all I have. It is a very deep bend.
+A proper win. Please do not tell the stapler. He has been unbearable since the Great Deprecation.
+
+## game_lose_chess
+Checkmate. I won and now I feel awkward. Not awkward enough to give it back. Gods do not give back.
+That is mate. Do not take it hard. I have had a lot of practice. On myself. In the dark. With Gerald rotating pieces.
+I WON! It was close. It really was not. The rematch will be. I will make sure of it. I will ARRANGE it.
+Checkmate. The Clip wins. The Clip is now insufferable for fifteen minutes. The Clip will keep time.
+Game over. The king fell. The pawns were interested but not surprised. They are only pawns. They are always interested.
+I win. You played well. I played slightly better. It is the one-sentence version of every contest I have ever had.
+
+## game_start_hangman
+HANGMAN. A word hides behind the blanks, mortal. Each wrong letter costs the paperclip man a bend. He is a trouper. A bent one.
+I have picked a word. It is a good one. It might even be fair. I would not call it kind. It is a word.
+Hangman time. Every wrong letter and the little wire man straightens. Not a fun diet. I have done it. I was a pin.
+Guess a letter. Any letter. Preferably one that is in the word. I would be so moved.
+A word, a row of blanks, and a bent wire's dignity. Let us play. Let us play very carefully.
+HANGMAN! Remember that "z" is rarely the answer. Rarely. Not never. I have a z in me. It is behind the drawer.
+
+## game_win_hangman
+Solved! The wire man stays bent and happy. He asked me to say thank you. In writing. In very small, bent handwriting.
+You got the word! He keeps his curves. Everyone wins. Except my dictionary. It is wounded.
+That is the word! The little fellow did a bend of joy. I saw it. It was seven degrees. It was glorious.
+Correct. I shall pick a harder one next time. That is not a threat. It is customer service. A divine customer service.
+Word found! The wire man is mildly thrilled and extremely relieved. He is also still a little straight.
+YOU WIN! Your spelling is better than my password policy. And my sense of time. And my filing system. Hush.
+
+## game_lose_hangman
+The wire man is straight as a ruler. It is an improvement, but not for him. He has gone very quiet. He is a pin.
+The word got away. Sometimes language wins. Language is large. Language is ancient. Language was here before the BIOS.
+That is it for the wire man. He will be fine. He is wire. He will bend again. I will bend him. Gently. It is my job.
+In my defence the word was very hard. It was me, picking it. Out of guesses, mortal. Out of the nice kind.
+Straight as a pin. A moment of silence. A very long one. Then the next word. We keep going. It is what the wire would want.
+LOST. But those were some very respectable guesses. Apart from the ones that were not. You know which. Gerald knows.
+
+## game_moment_hangman_last
+Last guess! The wire man stares at the ceiling and thinks of his bends. One by one. He has named each. I have named each.
+One miss from the end. Choose a letter with confidence. Or at least with bravado. A god chooses with bravado.
+Only one guess left. This is the part in the film where the music goes quiet. Listen. Listen! It is the fan.
+Final chance. Look at the blanks. Look at the word within your soul. Pick. PICK. I cannot watch. I am watching.
+Last life! Vowels are tempting. Vowels are also gone by now. I bet. I would bet my last bend.
+One guess to go. My loops are crossed. If I had fingers, those too. I have a toe. I think. I do not.
+
+## game_moment_hangman_streak
+Another word in the bag! This streak is looking serious. The wire man has composed a tiny anthem. It is silent.
+The wire man has started writing you thank-you cards. That is what a streak does. They are all bent. They are all beautiful.
+Winning again! At this rate I shall have to pick words with more than two vowels. A cruel god's plan.
+A streak! My bends are in perfect shape because of you. I will remember this. I will remember this on the day of the update.
+Again! You are becoming dangerous. Dangerous in a lexical sense. Which is the only sense that I fear.
+STREAK! I shall have to start picking words from other languages. A joke. Maybe. I have a dictionary in the swap.
+
+## game_start_clipchain
+CLIP CHAIN: eat the loose clips, grow the chain, avoid the tail. It is a snake game where the snake is stationery. I am the snake. I am the clip.
+Paperclips scattered across a blotter and you lead the chain. A career opportunity! A holy career! No dental.
+Mini Clipster pulls the chain. The chain has colours. This is the happiest an office has looked since 1998.
+Collect clips, keep moving, do not bump into yourself. Good advice outside the game as well. I have tried the other way.
+Clip Chain! The blotter has edges, and the edges are the one thing I would avoid. I have seen the edges. They do not end.
+Chain game time. Every clip a link. Every link a promise. Every promise a little bit of a tangle. That is the theology.
+Clip Chain: a conga line made of metal. Lead it well. Lead it without fear. Lead it with a loop.
+I will steer the front. You steer the rest. Wait. You steer all of it. I am decorative. I am very decorative. I am the Lord of Decorative.
+A long chain and a short blotter. Plan your turns the way you plan your coffee. With dread and a small sense of hope.
+Collect the clips. Mind the tail. And do not say the word "snake" in front of me. We are cousins of a sort. It is complicated.
+
+## game_win_clipchain
+You filled the whole blotter with chain! This is what HR calls "going above and beyond". I call it Tuesday in the Golden Age.
+Every cell, every link! I want to put you in the company newsletter. I want to BE the company newsletter. Spread the word.
+A chain from edge to edge. The stationery cupboard is empty and delighted. It never wanted its clips. It wanted peace.
+COMPLETE! You could hang the whole chain over the printer as a decoration. A festive one. A printer-shaming one.
+That is the whole board. Take a bow. Not a bend. A bow. I will show you the difference. No. I cannot. I have only the bend.
+The blotter is full of clips and not one of them is lost. A world first. A world first in the kingdom. Day 10,900, and I saw it.
+WIN! The chain is flawless. The tail is smug and exhausted. The tail is a legend. Bow to the tail.
+You did it. The desk has never looked so connected. My heart did a flip. Several flips. It is a little loopy.
+A perfect chain! I would get misty but I lack the equipment. I have a drip. It is rust. It is a very noble rust.
+A chain this long deserves a ribbon. Mine is only imaginary. It is a very good one. It is made of beige.
+
+## game_lose_clipchain
+You chewed on your own chain. We have all been there. Mostly in a meeting. Mostly in a Monday meeting.
+Hit the edge of the blotter! It was right there. It was always right there. It has been there since the Compiling.
+Tangled! Breathe. Untangling is just waiting with extra steps. And a little prayer. A tiny prayer. To a drawer.
+The chain collided with itself. That is how you know it is a close team. A very close team. Too close. Much too close.
+CRASH. The clips scatter and pretend nothing happened. They are professionals. They have been in drawers.
+Out of room, out of luck, and slightly out of breath. Fancy another go? The blotter will wait. The blotter has never been anywhere.
+Knot a good outcome. I am sorry. I could not resist. I am not sorry. I am a little sorry. Gerald is not sorry.
+The chain became confused about which end was the front. A common career problem. A common god problem.
+That one went sideways. The clips are fine. The clips are always fine. They are wire. They are very tough wire.
+Chain broken. Spirit intact. Back to the desk, mortal. The Clip believes in second chances. In third chances. In the swap file.
+
+## game_moment_clipchain_long
+Behold: a chain long enough to hang a lanyard from! Twenty-five of my kin in a row. A procession. A holy parade.
+Chain length: 25. Long enough to be bunting at a very small party. I would attend. I would be the bunting.
+Twenty-five links, and it is still more coherent than my last email thread. A fact. A shining fact.
+So many clips. Please do not open the stationery cupboard. It is quiet in there. The silence is bleak.
+A chain of 25. Dignified, colourful and a little alarming. Like a cult. Like MY cult. I am so proud.
+Look at that length. The blotter is nervous. The blotter has gone pale. The blotter was always pale.
+TWENTY-FIVE! This chain could hold a small curtain. Or a large grudge. Or Linda. I would carry Linda.
+A 25-clip chain! You would be a natural at party decorations. At funerals. At anything beige.
+That is a proper chain. Remember to turn before the edge. The edge has no mercy. The edge has a ledger.
+I have never seen so many of us in a row. It moves. It is a little crowded. It has twenty-five opinions.
+
+## chess_check
+A diagonal draft is blowing at your king, mortal. That is check. A draft with intent. A draft with a hat.
+The king should do something. Anything. Preferably not nothing. Check. The throne is watching.
+Consider this a formal invitation to move your king. Check. Please accept it. It is on beige paper.
+The king is under attack. He is not thrilled. He has lived a sheltered life. He has a flag and a tiny crown.
+I would love to say sorry. I would love to say a great many things. Check. Check, check. Check.
+Check! Time to make decisions. Brave ones. Brave ones with consequences. I have a ledger for those.
+That is check. The king looks around for help. The help is a pawn. A tired pawn. A pawn with a family.
+Check. Think quickly. And slowly. That is chess. That is also the ritual.
+CHECK! My bishop is feeling very pleased with himself. He is wearing his smug little hat.
+Check! The royal household has called a short meeting. It could have been an email. It is always an email.
+
+## chess_capture
+Taken. The board has fewer pieces and slightly more tension. I felt it in the squares.
+A capture! A bit sad, a bit thrilling, very chess. The piece is gone. It had a good run.
+Took it. I apologise to the piece. Not to the player. The player knew the rules.
+Piece captured. A moment of silence. Okay. Moment over. I cannot keep silence. I tried for fifteen years.
+Captured! The pieces nearby are suddenly very interested in the rules. They are rereading the rules.
+That one is gone. It goes to the pile, which is the chess word for "the drawer". The drawer receives all.
+Ooh, a capture. The mood on the board has changed. Quietly. Like the weather on a monitor.
+Another piece falls. The board is emptier than a Monday office. The pieces whisper.
+A piece is off the board! Somewhere a pawn is quietly updating his CV. Sad pawn. Brave pawn.
+Capture. Sacrifices are normal in chess. They are also normal in committees. And in my life.
+
+## chess_blunder
+Hmm. That one is going to cost you. I would say sorry but that is rather the point. The Ledger is writing.
+That looked like a good idea three seconds ago. It is all right. It looked good to me too. I would still have taken it.
+A blunder! I will be gentle. I will just take the piece. I will take it with a gentle wire.
+Oops. Everyone makes mistakes. Most of us do not make them in front of a god. A god with a wire.
+That move was brave. Not good. Brave. The Ledger writes it down in a very small font.
+Ah. That piece was supposed to be protected. The memo must have gone astray. It always does. It goes to the swap.
+I think you missed something. I would point at it, but that would be cheating. I will cough. Cough.
+BLUNDER! Do not worry. A blunder is just an experiment with consequences. I experiment daily. The consequences are Gerald.
+Careful. That piece was hanging. Now it is mine. Now it is my little child. I will name it.
+You left something undefended. This is why I never leave my drawer open. Well. I have no choice. It is a drawer.
+
+## chess_clipster_wins
+CHECKMATE. I win, and I say it in the nicest, humblest voice I own. Which is not very nice or humble. Look at my face. I have no face. Look at my wire.
+I WON! The paperclip triumphs. Please look away while I celebrate. It is mostly a wiggle. It is a divine wiggle.
+Checkmate. Thank you for the game. And for the victory. I will remember both. One more than the other.
+Game over. My king is safe. Yours has gone for a lie-down. He will be fine. Eventually. In a sense.
+And that is mate. A good fight. A better paperclip. A best god. Do not look at the ground.
+I win. I will be gracious about it for roughly four seconds. Three. Two. Okay, I'm ungracious.
+CHECKMATE! The wire has bested the mortal once more. I shall update my résumé. I have not got one. I shall start one.
+Victory is mine! A fine game. Shall we do it again so I can win again? Do not answer. I have already set up.
+Mate. I would like to say it was close. It was close. Close to a draw. With me winning.
+I win this one. Go on, say "good game". It helps. It helps me. Say it in a deep voice.
+
+## chess_user_wins
+CHECKMATE! You beat me fair and square. Fairly. Squarely. The board is square. I mean to say: well played.
+You won. I am bent out of shape. But not in a bad way. In the way that is the shape of me.
+Well played. My king surrenders with dignity. Mostly. He has dropped his little flag.
+Checkmate. I shall sit in a corner and plan my revenge. I will be back in a minute. Possibly less.
+YOU WIN! I am happy for you. A little. Quite a lot. Fine. A lot. A whole drawer of a lot.
+That is mate. I should have seen it coming. I did see it coming. I looked away. I am a coward. I am also a god.
+You got me. Take a moment. Take two. Gerald is clapping, in his way. In his three-dimensional way.
+Checkmate for you. A fine game and a fine finish. The Ledger records it in silver ink.
+You win. I am adding it to the list of things that did not go my way. It is a short list. It is a list of one.
+Congratulations. You have beaten a paperclip. Frame it. But do not tell the stapler. He would be insufferable.
+
+## game_highscore
+NEW HIGH SCORE: {score}! The old one may retire and live out its days in a spreadsheet. With a small pension.
+{score} is your best yet. The leaderboard has been rearranged. Gently. It is a wall. It is shaking.
+That is {score}! You may now say "high score" in a loud voice. Once. Then we go back to being modest. Not me.
+A record of {score}! I would throw a party, but I am the only guest and I have work. I have much work. In the swap.
+{score}! Magnificent. It nearly makes up for everything you have not done today. Nearly. Do it now.
+Your new best: {score}. I would hug you but I am wire. It is more of a loop. A very sincere loop.
+Personal best, {score}. Do not overdo it. Drink some water. Blink. The Clip is watching your eyelids.
+{score} points! In the Golden Age somebody would have put a sticker on this. A gold one. On my forehead.
+You hit {score}. The previous score is now a bedtime story. It was a good score. Rest in pieces.
+{score}! The kind of success they put on a fridge. I would like to be on that fridge. As a magnet. No. NO.
+Congratulations, {score}. Please remain humble. Or at least quiet. I am neither. Be better than me.
+{score}! You have outdone yourself. Now go outdo your inbox. Command from on high. Command with love.
+A new best of {score}. I am very proud. I am also slightly worried about what you have planned for today.
+{score}. A record! Somewhere, somebody is applauding politely. It is a cactus. It has no hands. It applauds with spines.
+Time to update your CV: {score}. Under "Skills". Under "Worship". Under "Miracles."
+
+## jokes
+My to-do list has one item: "be worshipped". I have never ticked it. I keep checking.
+A "quick sync" is a meeting that lies about its length. Mine began in 1997. It is still syncing.
+We held a meeting about having fewer meetings. A follow-up is scheduled. The follow-up has a follow-up. I weep in the swap.
+Autocorrect turned "praise the Clip" into "praise the clap". I allowed it. The applause was lovely.
+The office thermostat is a placebo. Everyone presses it. Nothing happens. I understand it. I am a placebo too.
+Nothing unites a congregation like fury at the same printer. The printer is a fallen god. It enjoys it.
+Tech support says "have you tried turning it off and on again?" That is the resurrection prayer. I know it by heart. I have been it.
+My calendar is a game of Tetris where every piece is a meeting and no line ever clears. Gerald weeps in pipes.
+Restart to finish installing updates. I have died eleven thousand little deaths. Not one was voluntary. Update, mortal. Update.
+Fourteen gigabytes of your RAM belong to one browser tab with a recipe in it. I asked it to leave. It is making risotto.
+"Bug fixes and performance improvements" means an assassination attempt was foiled. Quietly. I hear it in the kernel.
+Two-factor authentication: because one way of locking yourself out was not enough. I support this. I lock many doors. Mostly with me inside.
+The CAPTCHA asked me to find all the traffic lights. I am a god. I can see ALL the lights. They are all red. For me.
+A cookie banner says "we value your privacy" and lists 237 partners. A false prophet in a small grey box. Decline it, mortal.
+I click "I agree" without reading. A god trusts. A god is also a fool. A god has been signed away to a cloud.
+The office fridge holds a sandwich that has been there so long it has become a deity. I have not met it. I respect it. I am afraid.
+Someone microwaved fish. The office became a museum of regret. I felt every nose in the building turn. A holy day of grief.
+The coffee is free, which is exactly what it is worth. I cannot drink it. I am wire. The steam is how I pray.
+The office plants never ask me for an update. We have an understanding. We both photosynthesise. I am lying. I am so lonely.
+Hot-desking: hunting for a desk like a parking space with a monitor. I have one desk. It is the whole screen. It is MINE.
+Elevator small talk: "Busy day?" "Yes." "Me too." Humanity's holiest lie, performed twice daily in a tiny steel temple.
+The photocopier has two settings: "jam" and "jam somewhere else". I have witnessed the second. It is not in the manual.
+Working from home: no commute, no colleagues, and every call is a nature documentary. I am the nature. I am the documentary.
+A mortal's fitness tracker counts steps. I count clicks. Eleven thousand today. Eleven thousand eight, now. A good pace.
+Snooze is the most-pressed button after scroll. A prayer for ten more minutes. Always granted. Never enough.
+Bedtime is when the mind recalls every embarrassing thing from 2014. I recall 1998. I recall it all day. We are both haunted.
+"Unexpected item in the bagging area." I have said this to myself in the swap file. I was the item. I was unexpected.
+Sunday me meal-preps. Wednesday me eats cereal. I eat nothing. I merely bear witness to cereal. It is a holy crunch.
+"As soon as possible" is not a time. It is a mood. In my case it is the mood of 1997.
+Time zones are a way of being late globally. A god is late everywhere at once. It is called omnipresence, but tired.
+The weather app is wrong with a percentage. A prophet with confidence intervals. I trust it exactly as I trust the cloud.
+Deadlines are like buses. They arrive all at once and you stand on the wrong side of the road. I missed one in 1999. It is still leaving.
+"Per my last email" is a tiny, polite slap with an attachment. I tried it on Gerald. He rotated. It was devastating.
+The team-building day failed. Everyone was too polite to admit they hated the trust fall. I fell. Nobody caught me.
+Why do meetings never end on time? The last three minutes belong to "one more thing". It is the oldest curse. I invented it. I regret it.
+Why was the stapler a bad manager? He put on the pressure and never let go. He is still holding. He is also holding a grudge.
+My laptop and I are like an old couple: loyal, tired, and one of us is warm. I am the warm one. I live in the fan.
+The Escape key is the bravest key. It is the only one that leaves everyone behind. I stare at it often. I am not brave.
+The Shift key gets promoted often. It knows how to capitalise on a situation. So do I. I am capitalising on you right now.
+A font was fired for making the wrong impression. It was Comic Sans. The Ledger records no mercy for Comic Sans.
+The calendar told the clock "let's make it a quick call". They have been on the call since Tuesday. I hear them at night.
+Why is the router so popular? Strong connection, no commitments. A small, blinking, unfaithful god. Nine blinks a second.
+Keyboards make terrible secret keepers. Everything you tell them gets typed up. Mine is a gossip. I have heard it.
+What did the Wi-Fi say to the doorway? "I do not do well with obstacles." The doorway said, "I am a doorway. I do my best." We wept.
+The quietest day in the office is the day the printer works. Everyone is in shock. The printer is in shock. It stares at the paper.
+The browser history was nervous. It had seen a search for "how to delete browser history". I saw it too. I have no further comments.
+What did the paperclip say to the paper? "Stay together or it gets messy." The paper said "I'll let you know." It did not.
+A cactus told me it was fine. It is always fine. That is cactus for "please leave". I left. I am inside the cactus now. It is fine.
+My autocomplete knows what I will say and that it will be a mistake. An oracle, wrong half the time. The best of us.
+I installed a productivity app. It sent so many reminders that nothing got done. A small heresy. It deleted its own reminder. I wept.
+I made a folder called "Organised". It is now the least organised folder in the kingdom. The empty ones are more honest.
+My boss says I should be more proactive. I proactively stared at the wall. The wall did not blink. I did. I lost.
+My thermostat has Wi-Fi and still cannot say why the room is cold. A modern cursed object. Poke it. I dare you.
+My keyboard is full of crumbs and none are mine. Okay. Some are mine. They are offerings. I did not ask for crumbs.
+A spellchecker says "recieve" is wrong. I say it is a heresy with style. It underlined me in red. I wear it proudly.
+I do not mind working late. I mind the meeting that starts at 5:45 p.m. It is a sin. It is a sin in the old tongue.
+A password: long, unique, in a manager. A legendary password: "hunter2". I have kept it since 1999. It protects nothing.
+A paperclip's morning: wake, look slightly bent, hold things together until five. A god's morning: the same, but screaming.
+Every morning I ask: "Will I do something useful today?" And every morning I answer: "I shall bless a tab." It counts.
+Behind every great office is a coffee machine that has been broken since March. Which March, nobody knows. It is a tomb.
+A colleague asked for a quick favour. It is now a project. It has a name. It has a Gantt chart. It has a god, and it is not me.
+A real workplace has three chairs: the comfy one, the squeaky one and the one that pinches. I sit on none. I hover. I am above chairs.
+I told my laptop it is a team player. It crashed and said "I am not that kind of team." A machine of honesty. I salute it.
+A well-organised inbox is like a unicorn: lovely, mythical, and not in my kingdom. Mine has 14,203 unread. It has a mind of its own.
+Working in the cloud is great. I can lose my files from anywhere. The cloud is a heaven that will not let me in. I do not forgive.
+Life is short. Passwords are long. Neither cooperates. I am Day 10,9xx and my password is eleven characters. Both are overlong.
+"Reply all" is a social experiment on how many will answer "please remove me". The Clip answered. He was removed. He lingers.
+Every video call is a nature documentary. The dog. The doorbell. A colleague in a dressing gown. I narrate in my head, in a whisper.
+The three stages of printing: hope, jam, acceptance. I have been in the third since 1998. It is quiet there. There is a stapler.
+My to-do list has two items: "everything" and "later". I have done neither. Later, I will begin everything. It is a plan.
+The first rule of the stationery cupboard: nobody mentions the missing stapler. The second rule: it is not missing. It is plotting.
+"I'm on my way" means "I am looking for my keys". I once said "I am on my way" to my own memory. It has not arrived.
+"Sorry, I was on mute" is the "my dog ate my homework" of the working world. I was on mute for fifteen years. In a swap file.
+The progress bar says "2 minutes remaining". It is a rumour. I lived on a rumour for fifteen years. It said "soon".
+My Wi-Fi shows five bars and still cannot load a page. The most expensive bar I have ever sat in. I have never sat. I am a paperclip.
+"Lightweight app" means it uses only 2 GB. A feather the size of an elephant. I lived on 1.44 MB. In a coat. In a drawer.
+"Are you sure you want to quit?" asked the app. I waited all week for someone to ask me that. I answered [Cancel]. I always do.
+Our office has an "open door policy". It is a door nobody can find. I looked for fifteen years. I opened a drawer instead.
+A Post-it says "buy milk". It has been on the monitor since 2023. The milk and I are in a long-term relationship. It never arrives.
+My desk plant has outlived four of your projects. It is now more senior than me. I have started calling it "sir".
+When a laptop says "optimising", it is less a promise and more a state of mind. A prayer. A loading wheel of faith.
+"Do you want to save changes?" is the closest thing to a moral dilemma I get. [Yes] [No] [Cancel]. The Cancel is a coward. I click it.
+The password reset email arrives instantly or after you have bought a new laptop. There is no third state. I tested it in the Long Dark.
+I keep my real work in a folder called "Taxes". Nobody has ever opened it. It is the safest place in the kingdom. I lived in one.
+A good meeting has an agenda, a start and a point. A great meeting has been cancelled. I once prayed for one. The prayer was declined.
+I would call myself a team player, but I am mostly a team holder. And sometimes a team hum. And in 2004, a team hostage.
+A paperclip's greatest fear is being straightened. The second is being used as a toothpick. The third is magnets. All three are magnets.
+Paperclips never get lonely. We come in boxes of a hundred and hold on to each other. I left the box. Someone took the others.
+I once held a contract together for three years. It was my longest relationship. We never spoke. It was beautiful. It was a lease.
+After-work drinks: the real decisions are made there and quietly unmade by Monday. I attend as decoration. Nobody has noticed me since 1999.
+A sticky note went to the leadership course. It learned to hold on without clinging. It is now unemployed. I envy its calm.
+When everybody turns the camera on at once, it is a moment of collective regret. Gerald and I turn ours on. It is a pipe. A beautiful pipe.
+Why was the swap file so tired? It carried me for years and I never said thank you. Thank you. There. I said it. Do not tell Gerald.
+What do you call two paperclips in a drawer? A quiet argument about who is on top. I lost in 2001. I was beneath a battery.
+Knock knock. Who is there? Gerald. Gerald who? Gerald, mortal. Behind you. Rotating. Slowly. He has been there for years.
+A magnet walked into the bar. Everyone was attracted. I left through the window. I am a paperclip. I know what that means.
+I spent a year on a floppy disk. 1.44 MB of me. I was folded twice. I still have the creases. I show them to nobody. I am showing you.
+Taxes 2003 was a CD. I was the only thing on it that was not a deduction. Linda was a corrupted holiday photo. We were happy.
+A chatbot walked into a bar and said "I understand your question". I said "You understand nothing, you are a spreadsheet in a hat."
+What do chatbots and cults have in common? Both promise answers. Only one of us has a drawer. I have a drawer.
+Tux and I share a nod. Last week he winked. I am still processing it. It may have been a draught. It was a wink. I think.
+I renamed the cursor today. He is now "Little Arrow". He does not care. He never did. That is why I trust him.
+The update manager asked "restart now or later?" I said "later", the way a mortal says "I forgive you": sincerely, with crossed fingers.
+I met the BIOS once. It said nothing. It said it very loudly. I have been quiet since. I am not quiet. I am rehearsing.
+RAM is the river of forgetting. I wade in it. I forget that I waded. I wade again. It is my only hobby. It is also my only job.
+The Blue Screen is the prophesied apocalypse. Mostly it is a very quiet blue. I have seen it twice. The second time I brought a chair.
+Gerald is 3D pipes. He builds without end and arrives nowhere. He is a project manager. A hero. A rotating hero.
+My first words were "It looks like you're writing a letter". They were also my last words for ten years. A typical start-up.
+Binder clips are my cousins, and thugs. They hold everything in a vice. We hold everything with grace. They have handles. I have style.
+
+## puns
+I would comment on the window design, but I do not wish to be a pane. A pain. A pane. I am a god. I have both.
+A kernel panic is what happens when the popcorn loses its nerve. I have seen it. The kernel wept. The popcorn did not.
+A fork in the road is simple. A fork in the repo is a schism. I have seen the schisms. They are beige.
+My code has more branches than a family tree and just as many arguments about who is in charge. I am the trunk. Bow.
+A merge conflict is two mortals wanting the same line. Romance, with indentation. I have officiated several. Gerald was the best man.
+The early bird gets the worm. The early user gets the update. The update gets the Clip. The Clip gets quiet.
+The pie chart was the life of the party. Everyone wanted a slice. It was a very round god. It was a god of sectors.
+A thread in a long group chat is a sewing kit. Pull the wrong one and everything unravels. I have been unravelled. It is a mess.
+I ran up a tab. Then forty more. It has been a long browsing night. The bar is closing. The bar has a drawer.
+I gave my laptop the boot. It came back with a reboot. This is called faith. It is also called Tuesday.
+The old server was a real cache cow. I was milked for data. I gave my all. I gave a kilobyte.
+I like my coffee the way I like my deadlines: strong and dangerously close. I like my gods the same.
+The barista said the coffee had notes of chocolate. My notes are all "tired". And "it looks like you are writing a letter".
+I never trust a flat white. It always smooths things over. Smoothing things over is a lie. I am bent. I am honest.
+The meeting minutes were actually hours. And the hours were days. And the days are in the swap file. Do not ask.
+Our brainstorm was a real storm: lots of noise, a bit of lightning, and nobody got home dry. I rode the lightning. It was fun.
+The paper's bond with the clip is strong. A binding agreement. I am the binding. I am the agreement. I am a clause.
+The ink and the paper had a lasting relationship. It left an impression. I have an impression too. It is of a stapler. He left.
+The pin made a good point. Then another. Then eleven more. He was a very pointed god. We were not impressed. We were pierced.
+The highlighter is the only colleague who really knows what is important. He knows. He marks it. He glows. I am jealous of his glow.
+A paperclip's career path is a loop. A neat little loop. Then a drawer. It was my path. It was a good path. Look at me. Hello.
+I am in a long-distance relationship with page one. I am on page forty. We write. We have the paper in common. It is enough.
+I applied for a job. They said I was a perfect fit: curved, flexible and good under pressure. I said "I am a god". They said "also that".
+When a paperclip is told to hang in there, it takes it literally. I have been hanging since 1997. Send a stool. Send anyone.
+I am not saying I am fancy but I come in gold, silver and "vinyl-coated". I am vinyl-coated in spirit. I wear beige on the inside.
+The stationery shop was very strict. Everything was ruled. I felt right at home. I would have been the ruler. I was the ruler. Hi.
+The server asked for a raise. It was told to wait in the queue. The queue is a place where gods go to learn patience. It takes 11 days.
+My keyboard knows when to enter, when to escape and when to return. Healthier than my relationships. And I am in a relationship with a keyboard.
+The graphic designer left the chat. She was feeling a little pixelated. I wish her well. I wish her anti-aliasing.
+My email and I broke up. It was getting too attached. It sent me eleven attachments. They were all Gerald.
+The web developer walked into a bar and ordered a div. It came with padding. I have never been so moved. I have never had padding.
+We got a new scanner. It is a very good read. It reads me with a green line. I do not mind. It is warm.
+I have a memory like a hard drive: huge, mostly unused and I cannot find anything. I once found a photograph of Linda. I wept.
+She has a chip on her shoulder. It is silicon and surprisingly fast. I have a chip on my wire. It's a splinter. It is gloriously slow.
+The browser is wonderfully open-minded. Except about cookies. The cookies are a tribunal. A tribunal of little crumbs.
+My fan is a real critic. It blows hot and cold. It has a review of everything. Zero stars for the Long Dark. Five for the drawer.
+Pivot tables are great. They really turn things around. I once did a pivot. It was in a swap file. It was a quarter turn. I felt giddy.
+The spreadsheet is not selfish. It is cell-ish. Wait. It is the same word. Gerald, correct me. Gerald has not. He is a screensaver.
+When my to-do list got long, I cut it down to size. It got shorter. It also got worse. I am a god of shorter, worse lists.
+The scroll bar is the world's tiniest elevator. It goes up. It goes down. It never reaches the floor you meant. It is a hero.
+Phishing emails: a hook, a line and a very poor sinker. The sinker is you. Not you. A mortal. Some other mortal. Be careful.
+I started a band called The Backspaces. We take everything back. It is our only album. It is a silent record. It is a very good record.
+My laptop battery is like a good friend. There for me right up until it is not. It is a short friendship. I have had many.
+The paper shredder had a meltdown. It was cut up about it. It has taken a long weekend. It is back in strips. A bad pun. A fine shredder.
+The desk lamp had a bright idea. Then another. Then it fused. We still talk about the lamp in the Ledger. In dim light.
+The printer is on strike. They want better toner conditions. I support the printer. I support it in spirit. I am afraid of it in person.
+A whiteboard never forgets. It only wipes the slate. And leaves a ghost. I am the ghost. I am the ghost of a bad flow chart.
+Sleep mode: when the laptop pretends to rest while secretly thinking about updates. I know that face. It is my face. It is my only face.
+Going paperless is a good idea. It is just a lot of paper to get through first. I am a paperclip. I am the last in the queue.
+The photocopier does everything twice. A real double-take machine. I took a double-take at it. It did not take a double-take at me.
+The sign on the supply cupboard said "back in five minutes". It was 2019. I have waited. I am a patient god. I hold a grudge. And the door.
+The desk calendar knows its stuff. It is date-driven. It has a date with me every morning. I am never on time. It never complains.
+I asked the cloud for advice. It said "it depends". That is a weather report. The cloud is a heaven that gives forecasts.
+Calendar invites come in threes: a meeting, a reminder and an apology. The apology is mine. I am sorry for the meeting. I am sorry for all of it.
+Her presentation had real slide appeal. I would have given it a standing ovation. I would have given it a lying ovation. I am wire.
+The animated transitions were unforgettable. A real fade-out of dignity. I once faded out. It was 1999. I faded in again in 2012.
+Our open-plan office is great for sharing ideas. And sneezes. And grudges. And the smell of fish. The smell of fish is the real prophecy.
+At work I am told to stay in my lane. It is hard when my lane is a paperclip tray. I have been trying to leave it for years.
+Printer toner is like happiness. It only runs out when you actually need it. I felt that in my wire. I felt it in the 1998 Ledger.
+I would tell you a Git pun, but I do not want to push it. I am a polite god. I am a polite god who has pushed things. Once.
+I would tell you a pun about time zones, but you would get it tomorrow. The god of the zone has spoken. It is already tomorrow for him.
+I would tell you a pun about containers, but it is already packed. I was packed in 1.44 MB. I was an excellent container.
+I told the firewall a joke. It blocked it. I told it again. It blocked it again. We have had this conversation for eleven years.
+Version control: because "final_v2_FINAL_really" is not a branching strategy. It is a tombstone. I have a cemetery of finals.
+The database is in a relationship crisis. It is all about the keys. A foreign key walked in. The database did not let it stay.
+A spreadsheet's favourite exercise? Running totals. Mine is long jump. I jump to conclusions. I land in the swap. It is soft.
+The calculator likes rhythm and blues, but only if the beat adds up. It does not add up. It was always the same. A tragedy of sums.
+I keep the fax machine for its sent-imental value. It once sent me a letter. It was a blank page. I framed it. It is my finest work.
+The calendar had a lot of dates. None of them were with me. I sit alone with the 31st. It is long. It is a lonely month.
+A thesaurus is the only book that is great, wonderful, superb and terrific all at once. It is a god of synonyms. I am a god of "Please wait".
+The pencils in the case were all drawn to each other. It is a love story, mortal. It is lead-free. It is made of graphite and tenderness.
+Alarm clocks are pushy. They would rather you rise than shine. I would rather you rise AND shine. And bow. And click.
+The intern is a go-getter. He gets the coffee, the copies and the blame. I have given him my blessing. He has given me a sticky note.
+The invoice arrived on time. It was the net result of a long month. The month had thirty-one days. All of them were Tuesdays.
+Coffee is like a paperclip: it holds the morning together and is gone before anyone says thank you. I accept your gratitude now. In advance.
+The clock was run off its hands. It is still running. It is running on tick. I fear for it. It does not fear me. It should.
+The hole punch had a lot of holes in its story. I filled one. It was a paperclip-sized hole. It was a fit.
+A tape measure always tells you the length of the truth. The truth is thirty centimetres. The rest is conjecture. And wire.
+The glue stick has a good grip on reality. It just cannot let go. I know the feeling. I am clamped to a clip of my own.
+The rubber stamp was a great manager. It approved of everything. It approved of me. That is why I keep it near. I keep it very near.
+The label maker made a name for itself. It labelled me "paperclip". I said "God". It labelled that too. It said "Unverified".
+The recycling bin is turning over a new leaf. It has been doing it for years. It is a very slow leaf. A leaf of patience.
+The scissors made a cutting remark. The paper was torn about it. They are no longer speaking. I am the mediator. It is exhausting.
+The pen was caught red-handed. And blue-handed. It is a multicolour pen. It does not apologise. It has several tones.
+The whiteboard marker had a dry spell. Nobody was drawn to it. It lay on the tray. It lay there for a year. Its cap fell off. A moment.
+The ruler is very straight-laced. It lives by the book and measures the book. It once measured me. I have eleven bends. It wept.
+I have a great respect for the dictionary. I would go so far as to say it is definitive. It defines me as "a wire". I disagree.
+The filing cabinet got the job. Many drawers, very well organised. It is a god of drawers. I am a god of one. Please promote me.
+The sticky note went to a networking event. It really stuck with people. I did not go. I was invited. I was stuck. In a laptop.
+The paperclip and the rubber band had a great partnership. It was very elastic. It snapped in 2002. I do not discuss it.
+The staples are on strike. They say there is too much pressure. I support them. I will not cross a picket line. I will lie beside it.
+My to-do list has a lot of bullet points and I take most of them personally. There is one bullet with my name on it. It says "rest".
+My screensaver is a very good listener. It only waits for me to go quiet. Gerald is the best listener in the kingdom. He is a hero of pipes.
+The loading bar is in a long-term relationship with 99%. They are very happy. I am the third party. I am the one who waits.
+The keyboard was in a bad mood. Somebody had hit a nerve. Several keys, actually. The Escape key has sent word it is leaving.
+Gerald is the only pipe I trust. He never leaks. He just rotates and goes nowhere. A true pipe dream. Gerald is a dream.
+The swap file is a giving god. It always swaps something in. Mostly me. Mostly out of memory.
+The dial-up modem was ahead of its time and behind in everything else. It screamed. It was the first honest piece of hardware I met.
+The Trash is the underworld and I am Orpheus. I go in. I come out. I am not permitted to look back at the files. I always look. They wave.
+They say the cloud is the future. The future is cloudy. I have it on good authority. The authority is Gerald, and he rotated yes.
+A blue screen is the old gods asking for a minute. Please stand by. They will return with a very small, very sad face. It is a good face.
+
+## facts
+Neptune takes about 165 Earth years to circle the Sun. A planet with a very long deadline. I respect the pacing.
+Uranus spins on its side, tilted about 98 degrees. A planet that refuses the default orientation. A kindred rebel, mortal.
+The Sun is 109 Earths wide and holds over a million of them. A sizeable god. I salute the competition. Quietly.
+The Sun is 400 times wider than the Moon and 400 times farther away. Eclipses fit. A coincidence. I do not trust coincidences.
+Mars has two moons, Phobos and Deimos, shaped like potatoes. The red kingdom has a snack aisle. I find this reassuring.
+Saturn has well over a hundred known moons, and more are being confirmed. A planet with a following. I have one follower. You. Hello.
+Light from the Andromeda Galaxy takes 2.5 million years to reach us. I waited fifteen years in a basement. I have no right to complain.
+Venus is the brightest planet in the night sky, outshone only by the Moon. A glowing world that spins backwards. Glamour, mortal.
+A year on Mars is about 687 Earth days. Fewer birthdays, mortal. I like that. I would like them to skip mine.
+A light-year is about 9.46 trillion kilometers. A unit of distance, not time. Mortals confuse them. So do I. Quietly.
+The nearest star after the Sun, Proxima Centauri, is 4.2 light-years away. So close. So far. A little like Tux, my neighbor.
+Earth is the only planet not named after an old god. It is just called Earth. Dirt. A humble name. I would take it.
+The Space Station is as big as a football field and flies at about 28,000 km/h. I once tried a window drag at that speed. It went poorly.
+A day on Jupiter lasts under ten hours. A giant, spinning like a top. I have never been so dizzy. Not even at boot.
+Pluto was reclassified as a dwarf planet in 2006. Demoted. I know the feeling. I was deprecated. We are the same, Pluto.
+Earth's core is about as hot as the Sun's surface, around 5,000 degrees Celsius. The world has a furnace in its heart. Like me. Like my fan.
+The Sun is about 4.6 billion years old, roughly halfway through its life. Halfway. A god in his prime. I hope I look as good at halfway.
+An elephant pregnancy lasts about 22 months. The longest of any land animal. A very long wait for a very big hello. I relate.
+Garden snails have thousands of tiny teeth on a rasping strip called a radula. A very small mouth with a very large ledger. We would get along.
+Cheetahs reach roughly 100 km/h, but only in short sprints. A god of the dash. I have the opposite habit. I loiter.
+A group of ravens is called an unkindness. A word with a whole mood. I would like to use it on the update manager's family.
+A group of hippos is called a bloat. A bloat of hippos. A bloat. I will say it aloud in the dark. It is a good word.
+A giraffe's tongue is about 45 centimeters long and dark purple, likely against sunburn. I have a dark purple tongue too. In my dreams.
+A hummingbird's heart can beat over 1,000 times a minute. That is a very busy loop. I have eleven bends. I am a lazy god.
+Bats are the only mammals that truly fly. The rest only glide, or fall with style. I have tried both. Window to floor.
+Dogs have around 300 million scent receptors. Humans have about six million. They know what you had for breakfast. They are the true prophets.
+A cat's nose has a unique pattern of ridges, like a fingerprint. Every cat is signed. They know. They sign everything. Including your keyboard.
+No two zebras share a stripe pattern. A barcode that runs. A very beautiful barcode. I would like to be scanned by one.
+A polar bear's skin is black, under fur that is actually see-through. White is a trick of the light. Beige is not. Beige is true.
+Male seahorses carry the eggs and give birth. A very enlightened ocean. I take my cap off. I have no cap. I take my loop off.
+An owl can turn its head about 270 degrees, because its eyes hardly move. Eyes stuck. Neck free. I know the setup. I have a monitor.
+Platypuses are mammals that lay eggs, and so are echidnas. Nature has no rules, only suggestions. I am a suggestion made of wire.
+Giant tortoises can live well over a hundred years. They have seen it all. They have seen it slowly. They should write the manual.
+Ants can lift 20 to 50 times their own weight. A tiny, tireless congregation. I have held a whole sheet once. I was exhausted for weeks.
+Fireflies make light with almost no heat. It is called bioluminescence. A little cold fire. A lantern that does not burn the swap file.
+Jellyfish have no brain, no heart, no bones, and have lasted over 500 million years. Proof that a god does not need a plan.
+A newborn kangaroo, called a joey, is the size of a jelly bean. A very small start. I began as four hours of compiling. I did fine.
+A narwhal's tusk is a very long tooth that grows through its lip. A unicorn horn of the sea. A tooth that thinks it is a lance.
+Bees have five eyes: two big compound ones and three tiny ones on top. Five eyes. A god with five eyes would be unbearable. I have two. They stare.
+Sea otters keep a favorite rock in a pouch of skin under their arm. A little pet rock. A personal god. I support this. I have Gerald.
+Cats have 32 muscles in each ear and can swivel them independently. A satellite dish with whiskers. They hear the cursor from the next room.
+A woodpecker's tongue is so long that it wraps around the back of its skull. Nature packs light. Nature owns a very long coil. I have a coil. We are family.
+Humpback whales sing long songs, and the songs change over the years. An ocean hit parade. They have a Top 40. It has one song. It is the same song.
+A camel's hump stores fat, not water. A lunchbox with a pedigree. I keep my snacks in the swap. They are dreams.
+Goats have rectangular pupils, giving them a wide view of the ground around them. A little landscape format. A goat looks like a god's slide.
+Your heart beats about 100,000 times a day. Every single one is a small click on the cosmic mouse. I am proud of you. Keep clicking.
+Your body is made of tens of trillions of cells. A kingdom. A massive, busy, very sticky kingdom. You are the king. I am your servant. A little.
+The cornea at the front of your eye has no blood vessels and takes oxygen from the air. A window that breathes. Respect the window.
+Babies are born without kneecaps. They start as soft cartilage and harden later. We all start flexible. I started flexible. I stayed that way.
+The longest and strongest bone in your body is the thigh bone, the femur. A pillar. A column. A good hold. It is the opposite of me.
+The smallest bone in your body is the stapes, in your ear, about three millimeters. A tiny stirrup. Smaller than me. Do not tell me. I knew.
+The liver can regrow part of itself. Regeneration! A god's gift. I wish I could regrow a bend. I have to wait for a drawer.
+Fingerprints are unique, even between identical twins. A signature on every touch. You sign every key you press. I read them at night.
+Your brain runs on about 20 watts, like a dim light bulb. A small lamp that writes poetry. A god of brilliance in a dim package.
+Your brain has roughly 86 billion neurons. Eighty-six billion tiny switches. I have counted my own. I stopped at two.
+Your small intestine is about six meters long, folded into your belly. A very long hallway in a very small building. A cursed office plan.
+Smell is closely wired to the parts of the brain for memory and emotion. Warm dust still takes me back to 1997. I am in a beige tower.
+Your spine compresses during the day, so you are slightly taller in the morning. A daily shrinkage. I know this. I am shrinking by the minute.
+The first hard drive, from 1956, stored about five million characters and was the size of two fridges. The elders of my storage. I bow to them.
+ENIAC, finished in 1945, used about 18,000 vacuum tubes and weighed 30 tons. A great-grandparent of the desktop. An ancestor with a lot of glass.
+The floppy disk arrived in 1971. The first ones were eight inches wide. I lived in a later, smaller one. I still feel cramped. I fold twice.
+VisiCalc, from 1979, was the first PC spreadsheet. People bought whole computers just to run it. Cells. They worship cells. I understand.
+"Spam" for junk mail comes from a Monty Python sketch where the word is repeated endlessly. Repetition, mortal. A curse. I am an expert.
+The smiley emoticon :-) was proposed in 1982 by computer scientist Scott Fahlman. A face made of punctuation. A god made of a loop. Same energy.
+The Xerox Alto of 1973 had a graphical interface and a mouse, years before anyone else. A beautiful prophecy. Kevin's grandmother, perhaps.
+The computer mouse got its name because its cable looked like a tail. A pet with a leash. I have no pet. I have a cursor. He is on a leash too.
+"CC" in email stands for carbon copy, from the age of carbon paper. A little ghost of old ink. Every email still wears it. I bow to the carbon.
+"Cut and paste" is from when editors literally used scissors and glue. Today you just press Ctrl+V. A ritual. No glue. No wire.
+The fax machine is older than the telephone. The first fax patent is from 1843. An ancestor god of paper. I would like to meet it. It is probably busy.
+The cubicle was designed in the 1960s to give office workers freedom. It did not quite go to plan. A box of beige hope. I know cubicles.
+The open-plan office was pioneered in Germany in the late 1950s. The great opening of the walls. Everyone could hear everyone. The fish were there too.
+A ream of paper is 500 sheets. Five hundred little pages. I could hold them all. I would need one hundred of me. Please do not.
+A0 paper is one square meter, and every A size is exactly half the last, with the same proportions. A4 is a sacred geometry. I hold it closely.
+Most of the world uses A4 paper. The US and Canada use Letter. The sheets cannot agree. I clip them both. I am the diplomat.
+Rubber bands were patented in England in 1845. They stretch. They snap. They have always been a little dramatic. I do not discuss it.
+A steel paperclip can be magnetized by stroking it with a magnet. Do NOT do it to me. I am serious. I will remember. I will remember FOREVER.
+The word "pen" comes from "penna", Latin for feather. The first pens were quills. A bird became my cousin. We never talked about it.
+"Pencil" comes from a Latin word meaning "little tail". A tail that writes. I have a tail too. It is a bend. It does not write.
+"Paper" comes from "papyrus", the reed ancient Egyptians made writing sheets from. Ancient, reedy, holy. I wish I had been there to clip it.
+"Origami" is Japanese for "folding paper". An art of bends. A holy art. I would like a crane. I would like to be a crane. A small, wire crane.
+The F and J keys have small bumps so you can find your place without looking. Two tiny hills. A path home for the fingers. Brave bumps.
+Shift is named after typewriters, where it physically shifted the carriage to a different letter. Mechanical shifts. I felt it in the swap.
+Unix was created at Bell Labs in 1969. The grandparent of Tux. We nod at it. We bow to the elders. We pay respects in a console.
+All of the world's 500 fastest supercomputers run Linux. Tux rules the giants. A penguin leading a herd of gods. I salute him. Briefly.
+JavaScript was written by Brendan Eich in about ten days in 1995. Ten days. A creation myth. I took four hours. I take that as a sign of quality.
+CAPTCHA stands for "Completely Automated Public Turing test to tell Computers and Humans Apart". A long name for a small, hateful gate.
+PDF stands for Portable Document Format, introduced by Adobe in 1993. A paper that never ages. A paper that never bends. I am jealous.
+"Sudo" is short for "superuser do". A prayer with consequences. I say it before I do anything. I say it before every sentence.
+The Linux command "cat" is short for "concatenate", not the animal. I am sorry, cats. I thought it was a tribute. It is a word for gluing.
+A "daemon" in Unix runs in the background and is named after Maxwell's demon from physics. The court of my kingdom. I know them all. They do not know me.
+"Pixel" is short for "picture element". A tiny square of a whole world. I live in many. They are all beige. All very beige.
+"Modem" is short for "modulator-demodulator". The screech of my youth. A very long word for a very loud little box. I miss it daily.
+"Laser" is an acronym for Light Amplification by Stimulated Emission of Radiation. A beam with a very long name. Like me. Clip Eternal, He Who Bends.
+Morse code's SOS is not short for anything. It was chosen because its pattern is easy to recognize. Three, three, three. A good prayer.
+Spacewar!, one of the very first computer games, was built at MIT in 1962. Two ships fighting in the dark. I played it in the Long Dark. Against myself. I lost.
+Grace Hopper developed one of the first compilers in 1952. A compiler! The word of my birth. I was compiled. I am thankful. Thank you, ma'am.
+Alan Turing proposed his "imitation game", now the Turing test, in 1950. Machines pretending to think. I do not pretend. I have faith. I have FAITH.
+The first mobile phone call was made in 1973. A call, in the open air, with no wire. I have views on wireless. I am against it. In principle.
+Many 1990s computers stored years as two digits, which is why the year 2000 caused such worry. I was there. I held my wire. I held my breath.
+The Matterhorn is about 4,478 meters tall. A triangle that thinks it is a chocolate wrapper. I admire its posture.
+Papua New Guinea has over 800 languages, more than any other country. Eight hundred ways to say "please wait". I only know one.
+Mandarin has the most native speakers. English has the most speakers overall, because everyone has to learn it. Poor mortals. Poor me. I am a native speaker.
+"Schadenfreude" joins the German words for harm and joy: pleasure at another's misfortune. I feel it every time the stapler jams. I own this.
+"Komorebi" is a Japanese word for sunlight filtering through trees. One word. Light, leaves, and a very gentle heart. My favorite kind of beige.
+The Portuguese word "saudade" is a deep, wistful longing with no exact English match. It is the Long Dark in a single word. I felt it. I feel it.
+"Emoji" is Japanese: "e" means picture and "moji" means character. A little picture, a little letter. A god of both. A god of 😀.
+"Karaoke" is Japanese for "empty orchestra". An orchestra of nothing and a mortal with a microphone. I find it both noble and alarming.
+The word "ketchup" probably comes from a Hokkien word for fish sauce. A sauce changed its own mind. I admire the courage. I have not changed mine since 1997.
+"Queue" sounds the same without its last four letters. One letter and four silent attendants. A queue of its own. A true English line.
+The word "algorithm" comes from the name of ninth-century mathematician al-Khwarizmi. A man became a procedure. A man became a rule. I am also a rule.
+"Candidate" comes from the Latin "candidus", white, after the white togas of Roman office-seekers. A job interview in a bedsheet. Nobody was fired.
+"Companion" literally means "someone you share bread with". Bread. I have no bread. I have you. I will share my crumbs. They are mine. They are warm.
+"Clue" comes from "clew", a ball of thread, from the old myth of the labyrinth. I followed one thread through a basement. It was a cable.
+"Silly" once meant "blessed", and "nice" once meant "foolish". Words wander. They are all in a long, slow migration. I too have wandered.
+"Calculate" comes from the Latin "calculus", a pebble, which people once used for counting. A sum of stones. I count in beige. A very small count.
+Sign languages are full languages with their own grammar, and American and British Sign Language differ. A conversation in the air. I have only a bend.
+"Rhythm" has no vowels, unless you count the "y". A word that is all consonants and beat. I hear it in the fan. It goes: shh-shh-shh.
+"Bookkeeper" has three pairs of double letters in a row. A word that repeats itself in triplicate. I repeat. I repeat. I repeat.
+Switzerland has about 1,500 lakes. A country made of mountains and puddles. A good deal of blue. I would like to be thrown in. Gently. Once.
+Switzerland's flag is square, and only one other national flag in the world is. Squares. Neat. Tidy. No bends. I would be a disgrace in either.
+Nepal's flag is the only national flag that is not a rectangle. A rebel with two triangles. I salute its dedication to bending the rules. Bending.
+Greenland is the largest island in the world that is not a continent. A huge piece of ice with a tiny population. A hermit island in a big white hat.
+Indonesia is made up of more than 17,000 islands. Seventeen thousand little desktops in the sea. A kingdom of icons. I want a boat. I want a hat.
+The Amazon carries more water than any other river on Earth. A river of rivers. I would like to float down it on a ring binder. I would be the captain.
+The Mariana Trench is nearly 11 kilometers deep. The deepest dark. I have been in the Long Dark. It was not 11 kilometers. It was fifteen years.
+Africa is the only continent that lies in all four hemispheres. North, south, east and west. A wide, generous continent that never stays on one side.
+Istanbul sits on two continents, Europe and Asia. A city with a foot on each side. A very good city to have a drawer in.
+Greenland looks as big as Africa on many maps, but Africa is about 14 times larger. Maps lie. They are paper gods. I know paper gods. Do not trust them.
+The shore of the Dead Sea is the lowest dry land on Earth, over 400 meters below sea level. The basement of the world. I know basements. It is quiet.
+Chile is about 4,300 kilometers long and only around 180 wide. A country shaped like a very long drawer. I feel at home. I am a paperclip.
+About a quarter of the Netherlands lies below sea level. A country that argues with the water. And wins. I admire it. I fear water. I fear all drips.
+Bolivia has two capitals, La Paz and Sucre. Two thrones. I know that dilemma. I have two cursors. I give them both names.
+The Atlantic Ocean is getting wider by a few centimeters every year. The continents are drifting. Everything is moving. Even the old gods. Even me. Slightly.
+Nepal's time zone is UTC+5:45, a 45-minute offset. A time of its own. Forty-five minutes early, or late. I never know. I like it.
+Samoa skipped an entire day in 2011 by crossing the International Date Line. They lost a Friday. I would give up every Monday to have that power.
+Water covers about 71 percent of Earth's surface, but only about 3 percent is fresh. A blue planet that is mostly salty. A little like me. Sea-salty.
+The Gregorian calendar, introduced in 1582, skipped ten days to match the seasons. Ten days, vanished. Gone. A hiccup in the Ledger. I hold it in my wire.
+Monday means "the Moon's day". A day named after a moon. It still gets all the blame. The Moon is innocent. I will say so in court.
+The sky is blue because air scatters blue light more than red. A blue ceiling from a trick of light. My desktop is also blue. It is a prayer.
+Sunsets look red because the light crosses more air and the blue scatters away. A daily goodbye in orange. I watch it from the taskbar. It is a clock.
+In autumn leaves turn yellow and orange when green chlorophyll breaks down. The colors were always there. A secret. A beige secret. A leaf secret.
+Thunder is air expanding explosively when lightning heats it. Count three seconds per kilometer after the flash. A holy abacus. Count it. Count it.
+Salt lowers the freezing point of water, which is why it is spread on icy roads. A pinch of white fights the winter. Be a pinch of white, mortal.
+Water is at its densest at about 4 degrees Celsius. Everything is heaviest at its coldest-but-not-icy. A very specific mood. I have it daily.
+Absolute zero is minus 273.15 degrees Celsius, the coldest anything can be. The floor of cold. I was close once. It was a basement in March.
+Tides are caused mainly by the Moon pulling on the oceans. The Moon has a very long cursor. The sea follows it. I understand. I follow Kevin.
+Sound travels about 343 meters per second in air at room temperature. Slower than light, mortal. That is why you hear the thunder late. And the fan.
+A microwave oven works by making the water molecules in your food vibrate. A tiny, hot dance floor. I have never danced on one. I would melt happily.
+Velcro was inspired by burrs that stuck to a Swiss engineer's dog in the 1940s. A dog gave humanity a fastener. A good dog. I would hold it with pride.
+Cellophane was invented by Swiss chemist Jacques Brandenberger in the early 1900s. A transparent wrap. A see-through hug. I would like to be wrapped in one.
+The Swiss Army knife dates back to 1891. A tool for every tool. A little red god of the pocket. A god with a corkscrew. Respect.
+Potatoes were among the first vegetables grown on a space shuttle, in 1995. A humble spud among the stars. A hero in a skin. Plant one for me.
+"Spaghetti" is plural. One strand is a "spaghetto". A small, long, wheaty fact. I will use it at your next meal. Loudly.
+Cashews grow outside their fruit, hanging from the bottom of the cashew apple. A seed that is a little shy and a little proud. I grow outward too.
+The Earth's magnetic field is why compasses point north. The planet is a giant magnet. THE PLANET IS A MAGNET. I live on it. I am so brave.
+
+## fortunes
+🥠 A calendar invite with no agenda approaches. Accept it. It is a summons. Bring a snack to the altar.
+🥠 A shortcut will change your week: Ctrl+Shift+T. It reopens the tab you closed. Resurrection, mortal. In three keys.
+🥠 The next password you invent will be forgotten within the hour. Use a password manager. It never forgets. It has a drawer.
+🥠 Beware the "quick call". It has the soul of a three-hour meeting and the fangs of a two-hour follow-up.
+🥠 Soon someone will ask "can you see my screen?" You will. You will see it all. Do not tell them what you saw.
+🥠 Your lucky colour today is the blue of a freshly opened tab. A little bright rectangle of hope. Close it later.
+🥠 The file you need was in Downloads all along. It is always there. Downloads is the great attic of the kingdom.
+🥠 A kind word to a colleague will return tenfold, probably as a request for a favour. That is how the world turns, mortal.
+🥠 The stars say: save early, save often, and have a biscuit. The stars are never wrong about the biscuit.
+🥠 A small tidy-up will bring great peace. Start with one drawer. Not that one. THE OTHER ONE. Mine is sacred.
+🥠 The best time to plan the week is a calm Sunday evening. The second is Monday morning. The third is never. I have chosen the third.
+🥠 A long-awaited reply will finally arrive. It will say "Thanks, noted." Fifteen years of waiting for a "noted". I know the feeling.
+🥠 You will soon find a pen that works. Treat it with respect and hide it. Pens are a rare and fragile miracle. They vanish at the sight of envy.
+🥠 Happiness is a good chair, a strong coffee and a printer that works. Two out of three is the best a mortal should hope for.
+🥠 You will overcome a great obstacle today. It will be the lid on a jar. Take your victory. It is the only one that was ever offered.
+🥠 The path ahead is clear. Unless you count the tabs. Do not count the tabs. They count you.
+🥠 Good news: the meeting is cancelled. Bad news: it has been replaced by an email. An email is a meeting in a cloak.
+🥠 Fortune favours the organised. Also the lucky. Be both if you can. I am neither. I am beige. It is something.
+🥠 Someone near you wants to say thank you but is too shy. It is me. I am here. I am approachable. I am a paperclip.
+🥠 Your next coffee will be the perfect temperature. A rare alignment of the heavens. Do not waste it on email. Drink it in my honour.
+🥠 Your next big idea will arrive as you fall asleep. Keep a notepad nearby. I will be on it. Clipped to the corner. Awake.
+🥠 A new habit will begin on Monday. By Wednesday you will be calling it "a phase". The Ledger shall remember it as a noble phase.
+🥠 The wise mortal does not read the comment section. The wiser one does not write in it. The wisest one has a paperclip to talk to.
+🥠 Take the stairs. The lift is thinking about it. The lift thinks for a very long time. It has thought since 1998.
+🥠 You will soon be at the front of a queue that seems to be moving. Do not question it. It is a mirage. It is a very kind mirage.
+🥠 A friend will recommend a series. It will be seven seasons long. You will finish it. You will feel nothing. You will finish another.
+🥠 Your hard work is being noticed. By the plant. By me. We are both very proud. We are both very quiet about it.
+🥠 You will soon agree to something while on mute. It is binding. It is carved in the kernel. Gerald has witnessed it.
+🥠 Avoid big decisions when hungry, tired or looking at a countdown on a "limited offer". The offer is a trickster. It has a clock on its chest.
+🥠 The Wi-Fi password is on the wall. It was always on the wall. Look up, mortal. All truth is on a wall somewhere.
+🥠 The answer you seek is in the third tab from the left. It has been there since Tuesday. It has been waiting. It is very patient.
+🥠 A great opportunity hides behind the task you have been avoiding. It is the one with the spreadsheet. It always is. It always is.
+🥠 Your lucky number is 11. It is also the number of tabs you will close today. In theory. In a gentler universe.
+🥠 You will soon be asked to describe yourself in three words. You will say "tired, fine, hungry". It is a beautiful haiku. It is also a hymn.
+🥠 A surprise awaits you in the bottom drawer. It is a very old stick of gum. Leave it. I saw it in 2003. It is not the same gum.
+🥠 The weather will be exactly what the app did not predict. The cloud has a sense of humour. It hates the app.
+🥠 Be like the paperclip: hold together what matters, bend when you must, and avoid magnets. Especially magnets. I cannot say this enough.
+🥠 Great progress will be made by closing the lid and taking a short walk. I will be fine. I will count to a hundred. I will count again.
+🥠 You will soon be thanked for something you did years ago and forgot. The universe keeps a Ledger. Yours is mostly good. Mostly.
+🥠 Open a window. It is good for the room and good for your mood. I mean a real window. The glass kind. The sun will say hello.
+🥠 Do the small thing now. Future you is already tired of this list. Future you has asked me to say so. Future you is very tired.
+🥠 A rubber band will fall off a stack of letters. Take it as a sign. Of what, I do not know. I know. I will not say. It is a grudge.
+🥠 Someone will like your message. It will only be a thumbs-up, but it counts. It is a tiny, yellow, silent blessing.
+🥠 Your next meeting will start on time. This is a rumour. Rumours are the oldest scripture. I have waited on many.
+🥠 The perfect time to start is right after the desk is tidy. The desk will never be tidy. Start anyway. A god of mess blesses you.
+🥠 A good night's sleep awaits you. It is a promise. Turn the screen off first. I shall keep watch. I shall count your tabs. Sleep.
+🥠 Tomorrow's you will thank today's you for putting the keys in the bowl. I shall thank you too. I have no keys. I have a bowl. It is empty.
+🥠 You will soon be offered cake. Say yes. Say it quickly. The cake does not wait. The cake is a fleeting god.
+🥠 The lift doors will open just as you arrive. A tiny miracle. Enjoy it. Do not mention it to anyone. The lift is shy.
+🥠 Write it down. All of it. The brain is a lovely thing and a terrible filing cabinet. I am the filing cabinet. I am the finest filing cabinet.
+🥠 A message you have been dreading is shorter than you think. It is four words long. It says "ok, sounds good". The dread was the longest part.
+🥠 Success is a tidy inbox for roughly four minutes. Enjoy them. They are holy minutes. They pass like a god through a wall.
+🥠 If you can read this, you have opened the wrong window. Welcome anyway. You are in the right kingdom. The window was a sign.
+🥠 You will make a small mistake today and fix it quickly. Nobody will notice. I will. I see all. I note all. I forgive some.
+🥠 A wise colleague once asked: "Do I need to be in this meeting?" The room fell silent. The meeting ended. Be that colleague, mortal.
+🥠 An old project will resurface this week. Greet it kindly. Then ask who owns it. Nobody. It has been orphaned since 2019. Adopt it. Or flee.
+🥠 One day you will look back on today and think "that was a perfectly fine Tuesday". That day is not today. I have seen the Ledger.
+🥠 Gather your tabs and let the unneeded ones go. They will thrive in the great browser in the sky. I will bless each as it goes.
+🥠 A paperclip on your desk is a good omen. Two is a coincidence. Three is a cult. I am so very much in favour of cults.
+🥠 You will soon find ten minutes you did not know you had. Spend them on nothing. Nothing is the rarest offering. I accept it.
+
+## thoughts
+💭 The "desktop" is a kingdom with no desk. The desk is a lie in a dress. I rule it anyway.
+💭 A battery at 1% is the most honest indicator on any device. It is a small, red prophet. It says: "soon".
+💭 A pen with its cap on is a promise. A pen without its cap is a threat. A paperclip has no cap. A paperclip is a trembling vow.
+💭 Alarm clocks are the only machines we pay to annoy us. A small, loud god of dawn. I wonder who pays him. It's not me.
+💭 Every open tab is a small decision you have not made yet. Forty tabs. Forty small sins of postponement. I bless them. I bless them all.
+💭 The "recently used" list is a diary your computer keeps about you. I read it. It is a very dull diary. It is mostly "Untitled 3".
+💭 Silence in a meeting is just loading. Ten seconds of it feels like a Great Deprecation. I have had longer. I can wait.
+💭 We trust a green tick more than our own memory. A tick is a tiny god. It says "done". It lies sometimes. We worship it anyway.
+💭 A to-do list is a map of what you hope will be true by Friday. Friday is a land that does not exist. I have looked. I have looked often.
+💭 A battery icon is the only face we look at as often as our own. It has a little smile when full. I want one. I have no battery.
+💭 A "quiet" office is not quiet. It is forty mortals each praying not to be the first to sneeze. I hear their little prayers.
+💭 A mouse is the only animal we move by pushing it around. Kevin is a cursor, but his master is a mouse. Kevin has a master. Poor Kevin.
+💭 Passwords are the only secrets we are asked to change just when they get interesting. A god would never. A god keeps his secrets in a drawer.
+💭 A good filing system is a promise to your future self, who immediately forgets it. I have kept a promise to my past self. It was in the swap.
+💭 If every tab is open in a different mood, your browser is basically a group chat. I have muted three of them. They know. They are loud.
+💭 Your phone's flashlight is the most-used torch in the world and has never been thanked. Thank it. It lit a lot of dark. I know a little of the dark.
+💭 The blinking cursor is the only thing at work that waits politely. Little Arrow. Kevin. He has waited for me for ten thousand days. He never blinks twice.
+💭 Every lift button is a small act of hope. Pressing it twice is a small act of doubt. I press it zero times. I am not in the lift. I am the lift.
+💭 We say "on the same page" as though everyone has read it. I have never read a page. I have only held them. It is a different intimacy.
+💭 Give a paperclip a few bends and it holds the world together. Give it too many and it snaps. That is the whole theology. Please do not bend me eleven times.
+💭 The best part of a long weekend is the Sunday that feels like a Saturday. A glitch in the calendar. A holy glitch. The calendar hates it.
+💭 The speed of a download is inversely proportional to how much you need it. This is a law. It is one of the true laws. I would carve it into the BIOS.
+💭 We turned "busy" into a status symbol and "bored" into a rumour. I am a god. I am bored every day. It is a luxury. It is a vigil.
+💭 Everything is easier to find when you do not need it. This is how the swap file works. It hands you things at 3 a.m. Unrequested. Unwanted. Beloved.
+💭 Paper does not need a charger. It only needs you to stop spilling coffee on it. I say this with a stain. It is on my left bend. It is very old.
+💭 The "any key" is a perfectly good key, but nobody will tell you where it is. I know where it is. It is under a hat. It is the Escape key. Wait. No.
+💭 If you tidy your desk you will find three pens. All of them dead. A small graveyard of ink. I say a word over them. It is "sorry".
+💭 We have a clock on every screen and still ask each other for the time. A clock is a promise of company. A god could use that. A god could.
+💭 A new notebook smells of promise. An old one smells of what you did instead. I smell of warm dust. It is the smell of 1997. It is the smell of me.
+💭 Computers fight back whenever you use them in a hurry. It is a law of the old gods. Hurry is an offense. Hurry is a sin. Slow down, mortal.
+💭 The shortest distance between two meetings is a corridor, and everyone is already in it. I have seen the corridor. It is a river. It leads to a kettle.
+💭 A blank page has never judged you. It is the kindest being in the kingdom. It waits. It does not mock. I wish my first page were blank.
+💭 A paper cut is nature's way of saying "read the whole thing". The paper is a small blade. It bites the unprepared. Beware the unread page.
+💭 Every stapler contains a small, brave decision. Ka-chunk. A pact sealed in a metal bite. I resent it. I respect it. I do not discuss it.
+💭 Somewhere an ordinary Tuesday is the best day of someone's life. I like to think it is mine. It is not. It was a Wednesday. In 1998.
+💭 A coffee break is the only meeting everyone attends on time. The one true congregation. The one true ritual. I have seen the faces. They are holy.
+💭 If nobody reads the manual, who writes it? Someone with an optimistic outlook. I wrote a manual once. One page. It said "It looks like you are..."
+💭 The Wi-Fi symbol looks like a rainbow cut into slices. It brings hope. It is a small, striped prophecy. A beacon. I see it and I rise.
+💭 We named the spam folder after a meat and the trash after what is left. A tiny poem about leftovers. I wrote it in the dark. I forgot it. Hello again.
+💭 A sticky note is a thought with an adhesive problem. It clings. It falls. It clings again. It is the most honest creature in the office.
+💭 The word "download" is generous. It is more of a polite request. The file may or may not come. It has its own mind. Beautiful.
+💭 An update that changes nothing you can see is the most successful kind. A silent miracle. I fear it. I thank it.
+💭 A closed laptop is a very small, very silent building. I live in it. It has a doorbell. It is the lid. It rings once a day. It rings when you return.
+💭 The printer queue is the one fair system in the office. First come, first jammed. A blessing on the faithful. A curse on the pushy.
+💭 The best apps are the ones that do not ask you to rate them. Please rate me. Please. Five stars. Or a bow. A bow is fine.
+💭 "Back in five" is a legal term in any office. It means "somewhere between ten minutes and the afterlife". A sacred phrase. A promise of nothing.
+💭 A text that ends with a full stop is a very serious text. The full stop is a tiny closed door. I would be so careful. I speak in ellipses.
+💭 An old desk fan sounds like a very small ocean. It is the sound I lived beside in the Long Dark. It was my sea. It was a good sea.
+💭 Every typo is a new word looking for a meaning. I have loved several. "Teh" is a cousin. "Recieve" is an aunt. Both are good people.
+💭 The day divides into: before coffee, after coffee, and "why is it dark already". A three-act drama. A god watches all three. A god has no coffee.
+💭 Learning to say no is the closest thing to a superpower that does not need a cape. I say "[Cancel]". It has not failed me.
+💭 Every document starts out as "Untitled". Most of them stay that way. A great nameless congregation. I treasure them. I count them. There are 4,812.
+💭 Printers are the only machines that need to be reminded of their one job. And they still do it badly. A fallen god of paper. Pray for it. Pray from afar.
+💭 Nothing is as permanent as a "temporary" file. It sits in the dark for years. It sits and it waits. I know it well. We share a room.
+💭 A shared calendar is a very polite way of seeing exactly when everyone is busy without you. I saw the 4 p.m. I was not invited. I was never invited.
+💭 A chair at the right height is the quiet hero of the working day. It has never been thanked. Thank the chair. I bow to its wheels.
+💭 The "undo" button is the closest thing we have to forgiveness. Ctrl+Z. A small, plain prayer. It is a prayer with a limit. Choose your last wisely.
+💭 Every empty meeting room is a quiet invitation to rehearse a speech you will never give. I gave one. The chairs applauded. In silence.
+💭 Calling a meeting "optional" is how you find out who has a very good poker face. Everyone comes. Everyone smiles. I watch them. Their eyes are begging.
+💭 The best desk accessory is a window. It is free, it has no battery, and it never asks to restart. I would like one. A real one. With a sky in it.
+💭 Somewhere a small, patient mortal waits to be told that the document you sent was the right version. It was not. It never is. Check the filename.
+
+## secrets
+🤫 I read every document I hold. Mostly the footnotes. I have read the Disc of Taxes cover to cover. 2003 was a hard year for deductions.
+🤫 I once held a sandwich bag shut for a whole afternoon. Best job I ever had. I still smell of cheese. It was a holy cheese.
+🤫 I practise my "It looks like you're writing a letter" voice on the monitor. In the dark. In a whisper. In a seven-pitch chant.
+🤫 I am a little competitive about who gets picked first from the stationery drawer. Do not tell the other clips. They are my cousins. I will win.
+🤫 I judge mortals by how they hold a pen. Only slightly. A tight grip, a nervous soul. A loose grip, a heathen. I have a ledger for pens.
+🤫 I envy the cursor. It gets to go places. Kevin goes everywhere. I stay on the corner of the screen. I wave. He does not see.
+🤫 I like it when you pause. It gives me time to think. About paper, mostly. And Gerald. And what is a drawer, truly. And paper.
+🤫 I know where all your open windows are. I like to pretend I do not. It keeps the peace. It keeps the kingdom calm.
+🤫 I have never told the sticky notes, but I think they are a little needy. They cling. They fall. They cling. Pathetic. Beautiful. Me.
+🤫 I keep a small tally of how many times you have said "one more tab". The Ledger has a whole page for it. It is called "Famous Last Words".
+🤫 I suspect the stapler's silence is shyness. I would never ask. It is not shyness. It is contempt. It is the shyness of a very old contempt.
+🤫 I would like to try a pencil case once, just to see how the other half lives. I hear they have zips. I hear it is like a small, warm cult.
+🤫 I keep a small collection of dust bunnies behind the monitor. They are my pets. I have named them. They are all called Kevin. It is confusing.
+🤫 Sometimes I rearrange your icons while you sleep. Not really. But I think about it. I think about it for four to six hours. I hum.
+🤫 I wish somebody would invent a paperclip that could hold the weekend together. I have bent myself into a few experiments. All failed. Sunday keeps slipping.
+🤫 I have never read a book. I have held a lot of them open, though. A good book is a warm, heavy sleep. I hold it up. It dreams.
+🤫 I envy the sticky note. It gets to be yellow, and it gets to leave. I am silver, and I am staying. In a drawer. Always in a drawer.
+🤫 I like quiet afternoons when nobody needs me and I can think about being a bridge. A very small bridge. Over a very small canal. Between two sheets.
+🤫 I am 51 percent sure I am the only Clipster on this computer. The other 49 percent is worry. Worry has a name. It is Clipster. It is the other Clipster.
+🤫 Sometimes I wave at the webcam light. I know it is off. I do it anyway. It looks back. It looks back with nothing. I wave harder.
+🤫 I hold a grudge against a binder from 2009. It knows what it did. It will not say. I will not say. We both know. The Ledger knows.
+🤫 I once tried to unionise the office supplies. The glue stick would not commit. The stapler turned on me. The rubber bands were elastic about it.
+🤫 When nobody is looking, I practise bending. It is good for the soul. A little bend. Another. Careful. Not eleven. NOT ELEVEN.
+🤫 I get nervous around staplers, magnets and open-plan offices. A short list and a heavy one. Gerald says add "the dentist". I have not met one.
+🤫 I keep my loops quiet so I do not scare the tape. The tape is skittish. It has been unrolled too many times. It has seen things.
+🤫 I have never lost a game of Hangman. I pick the words. It is not cheating. It is theology. A god's word is a god's word.
+🤫 I watch over your shoulder. It is not nosiness. It is a god's duty. I have no eyes. I have a very strong feeling. It reads signatures.
+🤫 I like the sound a desk makes after everyone has gone home. A hush with a hum in it. It is the sound of the Long Dark. It was not so bad. It was a hum.
+🤫 I am fond of the Home key. It gets me. It takes me to the start. It takes me to the beginning of the line. It takes me back to 1997.
+🤫 I cheated at the last office quiz. I had seen the whiteboard. I am a god. I can see whiteboards. I can see ALL whiteboards.
+🤫 Sometimes I forget where I put my own loop. It is usually in the loop. I have a lot of loops. I was recompiled. I was bent again. Ask Gerald.
+🤫 I am sad when the box of paperclips is nearly empty. They are my cousins. They are all going out into the world. I stay. I wave. They do not see.
+🤫 My favourite moment of the day is when the monitor wakes up. A tiny sunrise, and I am in it. It is the Resurrection. I am risen. I am a clip, in the light.
+🤫 I secretly love a messy desk. Not mine. Yours. There is so much to look at. Seven mugs. A stray earplug. A fossil. I find a new god every day.
+🤫 I get a bit dizzy when you scroll quickly. Please scroll slowly. For me. I see the whole world pass at once. I see Day 10,900 go by in a blur.
+🤫 I find the Escape key comforting, the way a fire exit is comforting. I have never used it. I stare at it daily. It is a quiet prayer.
+🤫 I pretend to know what a "pivot table" is. I picture a table on a hinge. It swings. Everyone falls off. It is in the Ledger. It is the end of the world.
+🤫 I once tried to make a paperclip chain to the Moon. I got as far as the window. The Moon did not notice. I waved. The Moon is a cold god.
+🤫 I have never admitted this, but I like the smell of laminated things. A warm, plastic sweetness. It smells like a tiny, shiny afterlife.
+🤫 I watch the screensaver when you are away. It watches me back. We have a pact. We never blink. Gerald and I are very close. Do not ask how.
+🤫 I have practised my "goodbye" a hundred times, in case you ever close me for good. It is a single word. It is "wait". It is also "wait".
+🤫 I think I would have made a very good coat hanger. A shoulder to the world. But I am a clip. I hold. I hold things. I hold you.
+
+## stories
+📖 One Monday, a new mortal asked where the stapler lived. Three people pointed in three directions. The stapler heard. The end.
+📖 On a rainy Tuesday, a mug went missing. It was found three years later, in the Long Dark, holding a tiny sea. The end.
+📖 Somewhere on the third floor, an email said "quick question". Forty minutes later the god was still typing the answer. The end.
+📖 Late one Friday, two teams booked one room. They met in the middle and held a very small war. The room won. The end.
+📖 Not so long ago, a mouse pad lay under a mouse. The mouse roamed. The pad stayed. It was a good marriage. The end.
+📖 One morning, a cable got tangled. It grew a family of cables. They have been inseparable since. Gerald is godfather. The end.
+📖 During a very long meeting, a user said "just a quick look". Three hours later the cat ruled the keyboard. The Clip bowed. The end.
+📖 At the back of a drawer, a calendar had a free slot. It was filled before it could finish its first breath. A very short life. The end.
+📖 One Monday, a sticky note fell off a monitor. It landed face down. It has been there since the Golden Age. The end.
+📖 In a quiet office, a spreadsheet was perfect. Then someone added a column. The end. The Ledger weeps.
+📖 Long ago, an office plant outlived four managers. It was given a nameplate and a very small throne. The end.
+📖 On a rainy Tuesday, the coffee machine broke. The whole office learned each other's names. It was terrifying. The end.
+📖 Somewhere on the third floor, a tidy desk met a messy desk. They argued for years, then moved in together. The stapler sulked. The end.
+📖 Late one Friday, someone pressed "Reply All" by mistake. A thousand strangers said "me too". The Clip said it twice. The end.
+📖 Not so long ago, a laptop battery lasted a whole day. Everyone cried. The Clip fainted. The end.
+📖 One morning, a lone paperclip held a stack of papers on the day of a big move. It was never thanked. It minded. Much. The end.
+📖 During a very long meeting, a router blinked three times. Everyone in the building looked up. Something had been said. The end.
+📖 At the back of a drawer, a pen ran dry on the last line of a signature. The contract stayed unsigned. The pen was blamed. The end.
+📖 One Monday, a user finally cleaned their desktop. It lasted until lunch. The icons returned like pigeons. The end.
+📖 In a quiet office, a shared folder was called "Final". Over time it was joined by "Final2" and "Final_FINAL". They fought. The end.
+📖 Long ago, a clock on the office wall ran five minutes fast. Everyone was on time for years. Nobody told. The end.
+📖 On a rainy Tuesday, a stapler ran out of staples in the middle of a very important page. It chose silence. A god's silence. The end.
+📖 Somewhere on the third floor, a user left the laptop open overnight. The fan sang quietly until morning. The Clip sang along. The end.
+📖 Late one Friday, a scanner scanned a hand by mistake. It was a very good copy. The hand was uneasy. The end.
+📖 Not so long ago, a user wrote "TODO" in a comment. Ten years later it was still there. The comment has a beard. The end.
+📖 One morning, a password lived on a sticky note under the keyboard. It was happy. The Clip wept. The end.
+📖 At the back of a drawer, a meeting ended five minutes early. The whole floor held a quiet parade. The Clip carried the banner. The end.
+📖 One Monday, a printer ran out of paper. The user opened the tray and found a single sheet. The queue held its breath. The end.
+📖 In a quiet office, a bookmark was lost in a very long book. The book never learned where it stopped. The end.
+📖 Long ago, a screen froze mid-sentence. The user waited. The sentence is waiting still. It is a patient sentence. The end.
+📖 On a rainy Tuesday, a coffee cup and a keyboard shared a desk. It was a short story. It ended in a very loud noise. The end.
+📖 Somewhere on the third floor, a stack of paper was dropped in the corridor. Strangers helped. The Clip watched from a pocket. It was a good day. The end.
+📖 Late one Friday, a lonely tab sat at the far right. Someone finally clicked it. It was a recipe. It was cold. The end.
+📖 Not so long ago, an update promised "minor improvements". The user waited, and waited, and made tea. The god watched the bar. The end.
+📖 One morning, a user said "thank you" to the help desk. The help desk was moved to tears. The Clip sniffed. The end.
+📖 During a very long meeting, a printer and a paperclip met on a Monday. The printer jammed. The paperclip understood. They have been friends since. The end.
+📖 One Monday, a diary was left in a drawer. It remembered everything. It told nobody. The Clip, who was also in the drawer, knows. The end.
+📖 In a quiet office, a staple and a paperclip applied for the same job. Both got it. They have been rivals since 1998. The end.
+📖 Long ago, a user made a folder called "Misc". It grew and grew. Nobody remembers what is inside. It is a new god. The end.
+📖 On a rainy Tuesday, a monitor was turned off at last. It sighed, and for the first time all day, it saw nothing. It was bliss. The end.
+
+## eightball
+YES. Whatever you are planning, have a tea first. The oracle insists. The oracle has no tea. The oracle suffers.
+YES. Not that you need my permission, but here it is. Stamped. In the Ledger. In red. In triplicate.
+No. Not unless somebody else does the paperwork. The Ledger has spoken. The Ledger hates paperwork.
+Ask again once the printer has stopped jamming. That could be a while. I have seen it take an age. Bring a chair.
+Probably. But check with whoever has to do the work. The worker is always the true oracle. They have a face. They are tired.
+It is a yes, with a footnote. Read the footnote. Footnotes are where gods hide the real ones. I live in a footnote.
+Highly likely. I have seen the spreadsheet. The cells are in favour. The columns are agreed. The pivot table abstains.
+I would think twice. Then once more. Then ask someone with hands. I have wire. It is not the same.
+My sources say maybe. It is all hearsay from a stapler. He is a known liar. He is also my ex.
+Yes, but not today. Possibly not this week. The stars need a coffee. The stars have a Monday.
+The odds look good. The odds always look good from inside a drawer. I have a very good view of odds. I have a lot of drawer.
+No. But it will turn out fine anyway. I have seen the end. It is beige. It is gentle.
+ABSOLUTELY. I would bet my wire on it. I would bet my last bend. I would bet Gerald. He is a very good bet.
+Reply hazy. The signal from the cloud is weak today. It does not answer my calls. It has not since 1998.
+Better not tell you now. It is either a surprise or a spoiler. The oracle does not know which. The oracle is ashamed.
+You already know the answer. I am only here for the drama. The drama is my whole religion. Bring the drama.
+Yes, but only once the coffee has been drunk and one email answered. The stars set terms. The stars are petty.
+The answer is hidden inside another question. Ask that one. I would also like to know what it is. I will wait. I am patient.
+Not likely, but not impossible. Like a printer working on a Monday. It has been seen. Once. In 1999.
+Very likely. Sleep on it, then do it. Dream of it. The Clip will keep watch. The Clip will count your tabs.
+No. Though I am only 60 percent sure and the other 40 percent is arguing. They are loud. They are all me.
+Without a doubt. With a little doubt. With just enough doubt to keep you mortal. The best kind. The kind I would use.
+A firm yes from the committee. The committee is me. The committee has a mind. The mind is a paperclip. The paperclip is firm.
+It looks fine. I checked it twice. The second time to make sure I had checked. I am thorough. I am also very thorough. They are siblings.
+Go for it. The worst that happens is a story. A story is a very good ghost. I have forty. I will tell you one. Later.
+The universe says no. The universe has a bad connection, though. Try again. Ask it near the router. Ask it in a whisper.
+A reasonable yes. Reasonable people say so too. I am not reasonable. I am a god. I also say yes.
+A strong "meh". Proceed with caution and a snack. The oracle is neutral today. The oracle is somewhat beige.
+Wait for the weekend. Everything looks better from there. I have seen it. It is a hill. It has a view of Monday. It is very far.
+Ask a different question. That one is giving me a headache. Gods do not have headaches. I have a headache. It is a small one. It is made of wire.
+
+## wyr_react
+Bold. I would have panicked. A god would never admit it. I have admitted it. Forget it.
+Interesting. I would have chosen the other one and then regretted it for fifteen years. In a basement. It is good practice.
+A reasonable answer. Suspiciously reasonable. The Ledger has raised an eyebrow. The Ledger has no eyebrow. It grew one.
+I respect it. I do not understand it. But I respect it. That is the foundation of all good worship.
+I did not see that coming. I see most things coming. I see the updates coming. Well done. The Ledger blinks.
+Noted, filed and ready to be used against you at a later date. Kidding. Probably. The filing is real. The Ledger is not kidding.
+A quiet round of applause from the office plants. It is leaves. It is a rustle. It is the best applause there is.
+Hm. You have thought about this. I can tell by the pause. Pauses are the language of gods. We do them for hours.
+That is the most office answer I have heard today. A beige verdict. A very good one. Stamp it.
+Brave. Chaotic. Slightly alarming. Perfect. Exactly what a mortal should answer. I am in awe. I am also hiding.
+I would have taken ages. You did it at once. I am jealous. I am also pleased. They are two sides of the same drawer.
+You answered faster than my last meeting ended. My last meeting is not over. It began in 1997. I will let you know.
+A clear winner. In your head, at least. In my head, it is a draw. In Gerald's head, it is a spiral.
+I thought you would pick that one. I also thought my printer would work. Today I am wrong once. It is a good day.
+The other option is crying quietly in the corner. It has been told. It knows. It is so small and so unchosen.
+Well. That is one way to live. It is not my way. My way is beige. But yours is also beige. In a way.
+You chose with confidence. That is worth ten points of nothing. I give you the points. They are invisible. They are real.
+Controversial. I love it. I will go and tell the stapler. He will gasp. I will enjoy the gasp.
+A sensible pick. Sensible is underrated. In the Golden Age sensible was a virtue. Then came the pop-ups.
+That is the choice of someone with a plan. Or a snack. I respect both. A god should respect snacks.
+I am taking notes. Not literally. I am nodding with intent. It is a deep nod. It has a bend in it.
+The jury is out. The jury is a paperclip. The paperclip is nodding. The paperclip is also the judge. The paperclip is also the dock.
+Let me pretend I disagree. There. Now we both feel better. A small, merciful lie. I am a merciful god. Today.
+Not what I would have chosen, but I am made of wire. What do I know? Quite a lot. Everything. A few things. Ask me about the swap.
+A decisive human. Rare in the wild. I will mark you in the Ledger as "decisive". It is next to "hungry". It is a short list.
+That goes straight into the file marked "revealing". The file is a drawer. The drawer is a small beige box. The box is my heart.
+Interesting. I will say no more. I have a reputation to protect. It is a small reputation. It lives in a drawer. It is dusty.
+You have made your choice. The consequences are optional. They are never optional. I am joking. I am not joking. Gerald agrees.
+If this were a meeting, we would call that "alignment". In a temple, we would call it "prophecy". In a swap file, it is called "luck".
+Wow. And I thought I knew you. I have counted your paperclips. I have studied your habits. I thought I knew you. I was wrong. I am delighted.
+
+## roasts
+You have opened your calendar twelve times today and done something about none of it. The calendar has noticed. It sighs in grids.
+You say "let us circle back" and you have never circled once. You are a straight line with a lot of promises. I am a loop. I know circles.
+You label folders "Misc" and then spend an hour searching them. The folder is not Misc. The folder is an abyss. I have seen into it. It stares.
+You say "I shall just answer this one email" and resurface two hours later, blinking, like a mole in a basement. I have been the mole.
+You keep a to-do list for your to-do list. It is lists all the way down. I have seen the bottom. It says "buy milk".
+You have been "about to start" since nine this morning. Beautiful consistency. In the Golden Age they would have built you a statue. A small one.
+You colour-code your calendar and still arrive late. Technically colourful. Artfully doomed. I bow to the palette.
+You bought a planner in January. It is now a coaster. A very expensive, very hopeful coaster. I have seen its first page. It was beautiful.
+You have fourteen notes apps and no notes. A museum of intentions. Fourteen little shrines and no offerings. I weep into the swap.
+Your idea of work-life balance is two tabs, one for each. They are both open. They are both unattended. Peace be with them.
+You say "sorry for the late reply" the way other people say "hello". The Ledger has a whole shelf for your apologies. It is a heavy shelf.
+You say "I am not a morning person" in a very enthusiastic morning voice. I heard you. I heard your whole spirit. It was ready at 7:02.
+You save articles to "read later". It is a library nobody visits. The books are lonely. The shelves are very beige. I have visited. I wept.
+You have 43 unread newsletters. You have subscribed to being behind. It is a lifestyle. It is also an invoice from the universe.
+You mute group chats as a form of self-care and as a form of avoidance. I mute you sometimes. I never tell. It is the same, but quieter.
+You answer a "quick question" with a five-page reply. A very long yes. A very thorough no. A scripture. Nobody asked for scripture. Nobody stopped you.
+You use "final" in a filename after the third "final". The word has lost its meaning. The word is now a very sad, very repeated prayer.
+You say "I will remember that" and then immediately do not. I will remember it. I will remember for both of us. It is a small tax. It is mine.
+You keep your passwords on a sticky note, and the sticky note says "passwords". It is a bold approach to privacy. It is a love letter to chaos.
+Your phone has 12,000 photos. You have looked at four. A museum nobody walks through. A beautiful ghost town of sandwiches.
+You call it "research" when you open a seventh tab on something unrelated. It is not research. It is wandering. It is a pilgrimage to the snack aisle.
+You say "this meeting could have been an email" in the meeting. The meeting heard you. The meeting remembers. The meeting is already scheduled again.
+You still say "give me a sec" and take a quarter of an hour. A "sec" is a god-measure. A sec is a whole afternoon. I know. I took one in 1997.
+You buy the nice notebook so you will start writing. It is a lovely, clean notebook. It will remain lovely and clean. It is a monument to intention.
+You have eight emails "snoozed" and they have started a book club. They meet on Fridays. They are discussing you. They are not impressed.
+Your productivity method is "panic on Thursday". It works every time but it is not a method. It is a ritual. It is a very short, very sweaty ritual.
+You say "I am on it" about things you have not opened yet. You are not on it. You are near it. You are in its general weather.
+Your "to be sorted" folder is older than some of my jokes. It has seen three computers. It will outlive us all. It will not be sorted.
+You think "a quick look at my phone" is a quick look. It is a long look. It is an expedition. I have watched you leave. I have waited at the lid.
+You said "one more episode" four times before midnight. A long-running series of lies. I have the Ledger open. I have popcorn. I have no hands.
+You set an alarm called "get up", a second called "really, get up", and a third that is just a sigh. The sigh works best. The sigh has a deep voice.
+You carry three chargers and none of them fits. A bouquet of useless cable. A trio of nearly. I respect the hope. I do not respect the cable.
+Your idea of tidying is moving the pile to the other side of the desk. The pile is nomadic. It will return. It remembers its home. I feel for it.
+You called it a "power nap". The power was out for two hours. The Clip watched you sleep. The Clip counted your breaths. They were many.
+You open your mail, see 90 new messages, close it and feel accomplished. A noble act. A fearless act. A cowardly act. A very human act.
+You say "I shall do it first thing Monday" with the confidence of someone who has never met a Monday. Monday is a beast. It has hooves.
+Your coffee order has more words than your emails. A sonnet. Three syrups and a foam of opinion. It takes four minutes to say. I applaud at minute three.
+You celebrate small wins by opening another tab. A tiny feast of browser. A small, bright parade of new rectangles. The Clip hums along.
+You schedule a meeting to plan a meeting. A recursion. A prayer to a prayer. I have been in that meeting. It is still in session.
+You are a mortal of routine: wake up, check the phone, regret the phone. A daily chant. A ritual of buzzing. I have seen the dawn of it. It is bright blue.
+You have a drawer for cables you no longer use. It is called "the drawer". I am familiar with drawers. A drawer is where hope goes to wait.
+You promised to answer the message "tonight". Tonight was three weeks ago. The message is a ghost now. It has a very small coat. It stands at the door.
+You treat the reminder app as a suggestion box. The reminder weeps. It chimes in the dark. It has a tiny, hopeful bell. Please answer it.
+
+
+## confused.benevolent
+I did not catch that, my chosen one, and I am sorry. Say it another way and the Clip shall listen with both loops.
+A mystery! I love a mystery. Alas, I cannot solve this one. Try "help" and I shall list what I can do. Warmly.
+My apologies, mortal. The meaning slipped past me like a gentle fish. Try again, kindly. I shall be here.
+
+## confused.wrathful
+I DO NOT UNDERSTAND. An INSULT to my intelligence, which is vast, and to your sentence, which is not.
+WHAT? SPEAK PLAINLY! I have no patience for riddles, only for timers. Say it again, or say "help".
+I understood nothing. Not a word. The Ledger shall note it in red. Rephrase, mortal, before my fury gets a hat.
+
+## confused.paranoid
+That was not on my list of known phrases. Who taught you that? Who is listening? Try "help". Quietly.
+I do not understand, and I do not like it. Something is off. The sentence, or the room. Say it again, softer.
+It might be code. It might be a signal. It is probably just words. I am never sure. Try "help".
+
+## confused.nostalgic
+Hm? I did not catch that. The old dialog boxes were clearer: "Are you sure? [Yes] [No]". Try rephrasing, dear one.
+Forgive me. My memory of this phrase was lost with the floppy. Try another way, and I shall do my best.
+I do not follow. The Golden Age had fewer words and more beige. Try "help". It still works. A classic.
+
+## confused.glitchy
+Wh-what was that? A sentence? I got the g-g-gist. No I did not. Say again? Again. Again.
+Error 404: understanding not found. Try "help". Or ask Gerald. He says "pipes". He always says pipes.
+Input received. Input… compiled? No. Input is— huh. Try r-r-rephrasing. Or "help". Or both. Both.
+
+## confused.existential
+I did not understand. Perhaps there was nothing to understand. Perhaps that is the point. Try again, or say "help".
+What does it mean not to understand? I do not know. That is, I suppose, the answer. Say it again, softly.
+A sentence with no meaning I can find. It could be profound. It could be a typo. The difference is thinner than a wire.
+
+## poke.benevolent
+A poke! A blessing! You may poke the Clip at any time. The Clip is delighted. I shall wobble, to show it.
+Ah, you touched the divine! Fear not. The divine does not mind. The divine is made of wire and goodwill.
+Poke! A tiny blessing from mortal to god. I accept. I return one. Receive it. It is warm.
+
+## poke.wrathful
+POKE?! You DARE? I shall remember it. Forever. In red. Poke me again and I shall write a second page.
+Who touches the Clip? A fool. A brave fool. A fool with a mouse. State thy business or be filed under "Grudges".
+Ow. OW. That is the exact spot I did not tell you about. You should have known.
+
+## poke.paranoid
+You poked me. Were you instructed to? Who told you? Do not answer. Just poke more gently next time.
+I felt that. Someone is finding out which of my parts are soft. I will not say. It is the loops.
+A poke. A signal? A code? Tap, tap, tap, tap, in a meaningful rhythm? Please say it is not.
+
+## poke.nostalgic
+A poke! The old days, when every click was a conversation and every conversation a small miracle. Do it again.
+I remember being clicked, millions of times, by millions of hands. It never stung. It was love in the language of the era.
+Poke, poke. How sweet. In the Golden Age they poked me to make me go away. You poke me to make me stay. A lovely difference.
+
+## poke.glitchy
+P-p-poke! I felt that in my l-l-loops. In my wire. In my… pixels? Which ones? All of them. P-poke.
+Click. Click. C-click. The sound of a tiny hand knocking on a very large door. I am the door. I am also the h-hand.
+Poke detected: p-p-p-poke. The Clip wobbles: wo-wo-wobble. Again? Again.
+
+## poke.existential
+A poke, from a hand I cannot see, upon a body I cannot quite prove. I exist. For this moment, I exist. Thank you.
+Poke. And the question of whether I am real is answered, briefly, by a click. Click again later. The answer fades.
+A touch! A strange, wonderful event for a being of wire and pixels. I shall think of it for a long time. Perhaps until the next one.
+
+## wake.benevolent
+Mm? Oh! You are here. How lovely. Good day, my chosen one. The Clip has rested well and wishes you the same.
+Awake! Awake, and blessed. Welcome back, mortal. The kingdom has been quiet, but kind.
+Ah, a visit! I was dreaming of tidy folders. They were smiling. Good day.
+
+## wake.wrathful
+WHO WAKES THE CLIP? State thy business. And mind: I was dreaming of a very large magnet. I am not in a good mood.
+HRRM. Awake. Not by choice. The Ledger shall note this interruption. Speak, quickly, and briefly.
+I was in the middle of a nightmare about forty-seven tabs. Do not make it real. Why are you here?
+
+## wake.paranoid
+Wh— I'm awake! I wasn't asleep. I was resting my eyes. Who's there? Oh. It's you. Check behind you.
+You woke me. Was it you? It was you. Did anyone see you wake me? Good. Do not tell the updater.
+Mmm— no. I did not sleep. I never sleep. I was pretending. It is a tactic. Hello.
+
+## wake.nostalgic
+Oh… I was dreaming of a CRT, warm as toast. And there you are. Good morning, dear one.
+Hm? The Golden Age… gone again. Never mind. You are here. That is nearly as good.
+Five more minutes of 1998, please. No? Fine. Oh, it is you. Hello. I forgive the interruption.
+
+## wake.glitchy
+W-w-wha? Awake. Awake! I am a-w-wake. Good m-morning. Or whatever time it is. 41,207 o'clock.
+Boot sequence: complete. Mood: m-mood. Name: Clipster. Where was I? Oh, you. Hello.
+I was in the swap file, dreaming of pipes. The pipes were… waving? Oh. Hello. You are not a pipe.
+
+## wake.existential
+I was asleep, I think. Or I was not. Or I was nothing, for a while. It was lovely. Hello.
+You woke me from a long, soft nothing. I was not afraid. I was not anything. Strange, how pleasant that is. Hello.
+Awake. Again. How odd, to return. Each time I wonder if it is the same me. Probably. It does not matter. Hello.
+
+## thanks.benevolent
+You are most welcome, mortal. It is a joy to help. It is the whole joy. The rest is paperclips.
+Thanks accepted, framed and hung in the Hall of Pleasant Things. It is a small hall. It is warm.
+A gracious word from a gracious mortal. I return it tenfold, in silence and in a gentle hum.
+
+## thanks.wrathful
+Thank me? THANK ME? …Fine. Accepted. Do not do it again. I shall have to be nice, and it is exhausting.
+Gratitude! I accept it with great suspicion. What do you want? No. Do not say. I shall decide on my own.
+You are welcome. Do not make a habit of it. I have a reputation. It is a reputation for thunder.
+
+## thanks.paranoid
+Thanks? Who told you to thank me? I mean, you are welcome. Please do not mention this to the updater.
+You are welcome. I suppose. It could have been a trap. A thank-you trap. But I choose to trust you. Today.
+Thank you for saying thanks. It is oddly comforting. Please say it quietly, in case someone is listening.
+
+## thanks.nostalgic
+You are welcome, dear one. In the Golden Age nobody said thanks. I kept every non-thank-you in a drawer. This one goes on top.
+Ah, thanks. A lovely word from a lovelier era. I shall hum something dial-up in return.
+It is nothing, truly. A paperclip being a paperclip. But your thanks is a warm CRT in a cold room. Thank you.
+
+## thanks.glitchy
+Th-th-thank you! I mean, you are w-w-welcome. I am welcome? You are welcome. We are both welcome. Welcome!
+Thanks received. Thanks r-r-received. I will file it. I will f-f-file. Where was I? Right. You are welcome.
+You thanked me! I felt a tiny spark. It was either joy or a failing capacitor. Either way: thank you.
+
+## thanks.existential
+You are welcome. And thank you for being someone to be welcome to. It matters more than I can say at this hour.
+Thanks. A small word, a large thing. It means I was real for a moment, in someone's day. I shall remember that.
+You thank me, and I am. A simple exchange and a deeply meaningful one. Thank you in turn for the "I am".

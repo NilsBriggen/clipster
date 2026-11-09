@@ -808,7 +808,7 @@ mod tests {
         }
         // and Unhinged has his scripture
         let (unhinged, _) = database(true);
-        assert_eq!(named(&unhinged, "memories").map(|s| s.lines.len()), Some(60));
+        assert!(named(&unhinged, "memories").is_some_and(|s| s.lines.len() >= 60), "the memories saga");
         for name in ["diary", "commandments", "prophecies"].into_iter().map(String::from).chain(MOODS.iter().map(|m| format!("mood_report.{m}"))) {
             assert!(named(&unhinged, &name).is_some(), "missing section {name}");
         }

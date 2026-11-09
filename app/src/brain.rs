@@ -390,7 +390,10 @@ pub fn exact(input: &str) -> Option<Reply> {
         // shows the comment for a window title, e.g. "window Untitled 1 - LibreOffice Writer" (for trying it out)
         "window" => {
             let pool = lines::window_site(rest).or_else(|| lines::window_kind(rest).map(|k| format!("window {k}")));
-            return Some(pool.map(|p| react_window(&p)).unwrap_or_else(|| Reply::say("No comment on that window.")));
+            return Some(pool.map(|p| react_window(&p)).map(|mut r| {
+                r.text = r.text.replace("{title}", &page_title(rest));
+                r
+            }).unwrap_or_else(|| Reply::say("No comment on that window.")));
         }
         "updates" | "update" => return Some(net(Query::Update, "Checking for a newer me...")),
         "install" if ["update", "the update", "updates"].contains(&rest.to_lowercase().as_str()) => {
@@ -881,6 +884,13 @@ pub const TIME_SINKS: &[&str] = &["video", "social"];
 pub fn window_ok(last_any: Option<std::time::Instant>, last_same: Option<std::time::Instant>, now: std::time::Instant) -> bool {
     let since = |t: std::time::Instant, secs| now.duration_since(t) >= std::time::Duration::from_secs(secs);
     last_any.is_none_or(|t| since(t, 180)) && last_same.is_none_or(|t| since(t, 1800))
+}
+
+/// A window title without the app's name: "Q3 report.ods - LibreOffice Calc" -> "Q3 report.ods", at most 40 characters.
+pub fn page_title(title: &str) -> String {
+    let first = [" — ", " - ", " | ", " – "].iter().filter_map(|sep| title.split_once(sep).map(|(a, _)| a)).min_by_key(|a| a.len()).unwrap_or(title).trim();
+    let t = if first.chars().count() >= 3 { first } else { title.trim() };
+    if t.chars().count() > 40 { t.chars().take(39).collect::<String>() + "…" } else if t.is_empty() { "this page".into() } else { t.to_string() }
 }
 
 /// What to say about a window: `section` is its `## site …` or `## window <kind>` section.
