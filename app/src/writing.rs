@@ -358,6 +358,29 @@ pub fn fill(template: &str, date: &str) -> String {
 }
 
 /// "letter complaint": a short preview, Copy, Open as email.
+/// A letter for someone: the template that fits `kind` ("thank you", "follow up"), their name in the blanks that ask
+/// for a name, and "Open as email" straight to their address when it's known.
+pub fn letter_to(kind: &str, who: &str, email: Option<&str>) -> Reply {
+    let Some(id) = template_for(kind).or_else(|| lines::sections_with_prefix("template ").into_iter().map(|(id, _)| id).find(|id| *id == kind.replace(' ', "_"))) else {
+        return letter(kind);
+    };
+    let Some(template) = lines::all(&format!("template {id}")).first().cloned() else { return letter(kind) };
+    let first = who.split_whitespace().next().unwrap_or(who);
+    let full = fill(&template, &chrono::Local::now().format("%B %-d, %Y").to_string()).replace("[Name]", first).replace("[name]", first).replace("[Recipient]", who).replace("[recipient]", who);
+    let (subject, body) = full.split_once("\n\n").map(|(s, b)| (s.trim_start_matches("Subject: ").to_string(), b.to_string())).unwrap_or_default();
+    let preview: String = body.lines().filter(|l| !l.trim().is_empty()).take(3).collect::<Vec<_>>().join("\n");
+    let to = email.unwrap_or("");
+    let mut r = Reply::say(format!("{}\n\n✉ To {who}: {subject}\n{preview}\n…", lines::pick("template_intro")))
+        .mood(Mood::Write)
+        .btn("Copy it", Act::Copy(full.clone()))
+        // a long mailto: body can be cut by the system, so Copy stays next to it
+        .btn("Open as email", Act::Open(format!("mailto:{to}?subject={}&body={}", crate::brain::mail_encode(&subject), crate::brain::mail_encode(&body))));
+    if email.is_none() {
+        r.text += &format!("\n(I don't have {first}'s email. Tell me: {first}'s email is …)");
+    }
+    r
+}
+
 pub fn letter(kind: &str) -> Reply {
     let all = lines::sections_with_prefix("template ");
     let id = all.iter().map(|(id, _)| id.clone()).find(|id| *id == kind.replace(' ', "_")).or_else(|| template_for(kind));

@@ -278,6 +278,12 @@ pub fn known(name: &str) -> bool {
     NAMES.with(|n| n.borrow().contains(&name))
 }
 
+/// Where someone is in the list: the whole name, or else the first name ("anna" finds "Anna Muster").
+pub fn find(people: &[Person], name: &str) -> Option<usize> {
+    let w = name.trim().to_lowercase();
+    people.iter().position(|p| p.name.to_lowercase() == w).or_else(|| people.iter().position(|p| p.name.to_lowercase().split_whitespace().next() == Some(w.as_str())))
+}
+
 /// The person a first name (or a whole name) means, as they're written in the list: "anna" → "Anna Muster".
 pub fn by_first_name(word: &str) -> Option<String> {
     let w = word.trim().to_lowercase();

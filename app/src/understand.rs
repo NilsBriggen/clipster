@@ -1349,6 +1349,53 @@ fn people_talk(s: &str, raw: &str) -> Option<Reply> {
             }
         }
     }
+    // someone you know, asked about: "when is Anna's birthday", "what's Anna's number", "what should I get Anna",
+    // "tell me about Anna" (only for names on your list; anyone else goes on to the encyclopedia)
+    let known = |w: &str| crate::people::by_first_name(w.trim());
+    fn possessive<'a>(w: &'a str, tail: &str) -> Option<&'a str> {
+        w.strip_suffix(tail).and_then(|n| n.strip_suffix("'s").or_else(|| n.strip_suffix("’s")).or_else(|| n.strip_suffix(" s")).or_else(|| n.strip_suffix("s"))).map(str::trim)
+    }
+    for (prefix, tail, what) in [("when is ", " birthday", "birthday"), ("what is ", " birthday", "birthday"), ("what is ", " number", "phone"), ("what is ", " phone number", "phone"), ("what is ", " email", "email"), ("what is ", " email address", "email")] {
+        if let Some(name) = s.strip_prefix(prefix).and_then(|r| possessive(r, tail)).and_then(known) {
+            return go(format!("person show {name}|{what}"));
+        }
+    }
+    if let Some(name) = after(s, &["what should i get ", "what can i give ", "gift ideas for ", "present ideas for ", "what should i buy ", "what to get "]).map(|n| n.trim_end_matches(" for her birthday").trim_end_matches(" for his birthday").trim_end_matches(" for christmas")).and_then(known) {
+        return go(format!("person show {name}|gifts"));
+    }
+    if let Some(name) = after(s, &["tell me about ", "who is "]).and_then(known) {
+        return go(format!("person show {name}|all"));
+    }
+    // "gift idea for Anna: a book", "Anna would like a scarf"
+    if let Some((name, idea)) = after(s, &["gift idea for ", "present idea for ", "a gift for "]).and_then(|r| r.split_once(": ").or_else(|| r.split_once(" maybe ")).or_else(|| r.split_once(" - "))) {
+        if let Some(n) = known(name) {
+            return go(format!("person gift {n}|{}", keep(raw, idea.trim_start_matches("a ").trim_start_matches("an "))));
+        }
+    }
+    for verb in [" would like ", " wants ", " would love "] {
+        if let Some((name, idea)) = s.split_once(verb) {
+            if let Some(n) = known(name).filter(|_| idea.split_whitespace().count() <= 6) {
+                return go(format!("person gift {n}|{}", keep(raw, idea.trim_start_matches("a ").trim_start_matches("an "))));
+            }
+        }
+    }
+    // a letter to someone: "write a thank-you note to Anna", "follow-up email to Ben", "chase Ben", "invite mum to dinner"
+    for (words, kind) in [(&["thank you note to ", "thank-you note to ", "thank you letter to ", "thank you email to ", "thanks to "][..], "thank you"), (&["follow up email to ", "follow-up email to ", "follow up to ", "a follow up to "][..], "follow up"), (&["apology to ", "an apology to ", "apology email to "][..], "apology"), (&["draft an email to ", "draft a letter to ", "draft a mail to ", "write an email to ", "write a letter to "][..], "follow up")] {
+        if let Some(rest) = words.iter().find_map(|w| s.split_once(w).map(|(_, r)| r)) {
+            let name = rest.split(" about ").next().unwrap_or(rest).trim();
+            if let Some(n) = known(name) {
+                return go(format!("person letter {kind}|{n}"));
+            }
+        }
+    }
+    if let Some(n) = after(s, &["chase ", "nudge ", "remind "]).filter(|n| n.split_whitespace().count() <= 2).and_then(known) {
+        return go(format!("person letter follow up|{n}"));
+    }
+    if let Some((name, _)) = after(s, &["invite "]).and_then(|r| r.split_once(" to ")) {
+        if let Some(n) = known(name) {
+            return go(format!("person letter invitation|{n}"));
+        }
+    }
     // "keep in touch with mum every 2 weeks"
     if let Some(rest) = after(s, &["keep in touch with ", "stay in touch with "]) {
         let (who, when) = rest.split_once(" every ")?;
@@ -1558,6 +1605,36 @@ fn notes(s: &str, raw: &str) -> Option<Reply> {
             return None; // "done with it" is a feeling, not an item
         }
         return go(format!("done {}", keep(raw, what)));
+    }
+    // "what's due today", "anything overdue", "what am I waiting for"
+    let due = |w: &str| go(format!("todos due {w}"));
+    if ["what is due today", "due today", "what is due", "what do i have to do today", "what is due for today", "anything due today", "what needs doing today"].contains(&s) {
+        return due("today");
+    }
+    if ["what is due tomorrow", "due tomorrow", "anything due tomorrow", "what do i have to do tomorrow"].contains(&s) {
+        return due("tomorrow");
+    }
+    if ["what is due this week", "due this week", "what is due the week", "anything due this week", "what do i have to do this week"].contains(&s) {
+        return due("week");
+    }
+    if ["what is overdue", "anything overdue", "overdue", "what is late", "overdue to dos", "my overdue to dos", "is anything overdue", "do i have anything overdue"].contains(&s) {
+        return due("overdue");
+    }
+    if ["what am i waiting for", "who am i waiting on", "who am i waiting for", "what am i waiting on", "waiting for", "my waiting list", "what is pending from others"].contains(&s) {
+        return go("todos waiting".into());
+    }
+    // "follow up with Ben on Friday": a to-do for that day
+    if let Some((who, when)) = after(s, &["follow up with ", "follow up on ", "check back with ", "get back to "]).and_then(|r| r.rsplit_once(" on ").or_else(|| r.rsplit_once(" by ")).or_else(|| r.rsplit_once(" next ").map(|(a, _)| (a, "next week")))) {
+        if crate::todo::parse_when(when, chrono::Local::now().date_naive()).is_some_and(|d| d.is_some()) && !who.is_empty() {
+            return go(format!("todo Follow up with {} by {when}", keep(raw, who)));
+        }
+    }
+    // "Ben sent the numbers", "got the slides from Anna": ticks the one thing you were waiting on from them
+    let from = s.split_once(" sent ").map(|(w, _)| w).or_else(|| s.split_once(" replied").map(|(w, _)| w)).or_else(|| s.split_once(" got back to me").map(|(w, _)| w)).or_else(|| s.strip_prefix("got ").and_then(|r| r.rsplit_once(" from ")).map(|(_, w)| w));
+    if let Some(who) = from.filter(|w| !w.is_empty() && w.split_whitespace().count() <= 2 && !["i", "you", "he", "she", "they", "it", "we", "someone"].contains(w)) {
+        if let Some(r) = go(format!("todos gotfrom {}", keep(raw, who))) {
+            return Some(r);
+        }
     }
     if ["to do list", "todo list", "to do", "my to do", "to dos", "the to do list", "show to do list"].contains(&s) {
         return go("todos".into()); // "to do list" is asking to see it, not adding an item called "list"
@@ -2817,6 +2894,25 @@ mod tests {
         assert!(!matches!(eff("in 5 years i want to be rich"), Effect::Timer(..) | Effect::RepeatAt(..)));
         assert_eq!(eff("snooze tomorrow").clone(), eff("snooze tomorrow"));
         assert!(matches!(eff("snooze tomorrow"), Effect::Snooze(s) if s > 60));
+    }
+
+    #[test]
+    fn people_in_the_chat() {
+        crate::people::set_names(&[crate::people::Person::new("Anna Muster"), crate::people::Person::new("Ben")]);
+        let p = |t: &str| match eff(t) {
+            Effect::People(c) => c,
+            e => panic!("{t}: {e:?}"),
+        };
+        assert_eq!(p("when is Anna's birthday"), "show anna muster|birthday");
+        assert_eq!(p("what's Anna's number"), "show anna muster|phone");
+        assert_eq!(p("what should I get Ben"), "show ben|gifts");
+        assert_eq!(p("tell me about Anna"), "show anna muster|all");
+        assert_eq!(p("Anna would like a scarf"), "gift anna muster|scarf");
+        assert_eq!(p("write a thank-you note to Anna"), "letter thank you|anna muster");
+        assert_eq!(p("chase Ben"), "letter follow up|ben");
+        assert_eq!(p("invite Ben to dinner"), "letter invitation|ben");
+        assert!(matches!(eff("who is Ada Lovelace"), Effect::Net(_)), "strangers go to the encyclopedia");
+        assert!(!matches!(eff("the weather would like a word"), Effect::People(_)));
     }
 
     #[test]

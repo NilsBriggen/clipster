@@ -400,7 +400,7 @@ pub fn exact(input: &str) -> Option<Reply> {
         "workday" if rest.starts_with("add ") || rest.starts_with("remove ") || rest == "close" => return Some(Reply::say("").effect(Effect::Workday(rest.to_string()))),
         "prank" if rest.is_empty() => return Some(Reply::say("").effect(Effect::Prank)),
         // people: "person birthday Anna|3 March", "people", "contacts import"
-        "person" if ["add", "birthday", "email", "every", "met", "last", "mail", "forget", "note", "phone", "gift", "ungift", "rename"].contains(&rest.split(' ').next().unwrap_or("")) && rest.contains(' ') => {
+        "person" if ["add", "birthday", "email", "every", "met", "last", "mail", "forget", "note", "phone", "gift", "ungift", "rename", "show", "letter"].contains(&rest.split(' ').next().unwrap_or("")) && rest.contains(' ') => {
             return Some(Reply::say("").effect(Effect::People(rest.to_string())));
         }
         "people" if ["", "list", "birthdays"].contains(&rest) => return Some(Reply::say("").effect(Effect::People(if rest.is_empty() { "list".into() } else { rest.to_string() }))),
@@ -847,6 +847,14 @@ pub fn exact(input: &str) -> Option<Reply> {
             return Some(Reply::say("").effect(Effect::Todo(crate::todo::Op::DueFor(what.trim().to_string(), d))));
         }
         "todos" if rest == "overdue today" => return Some(Reply::say("").effect(Effect::Todo(crate::todo::Op::OverdueToToday))),
+        "todos" if rest.starts_with("due") => return Some(crate::todo::due_reply(rest.trim_start_matches("due").trim())),
+        "todos" if rest == "waiting" => return Some(crate::todo::waiting_reply()),
+        "todos" if rest.starts_with("gotfrom ") => {
+            let items = crate::todo::load();
+            let n = crate::todo::waiting_on(&items, rest[8..].trim())?;
+            let what = items[n - 1].text.clone();
+            return Some(Reply::say(format!("Ticked off: {what}. One less thing to chase.")).mood(Mood::Happy).effect(Effect::Todo(crate::todo::Op::DoneAt(n))).run("Undo", "undo"));
+        }
         "todos" if rest == "done week" || rest == "done today" => return Some(crate::todo::finished_reply(rest.trim_start_matches("done "))),
         "todo" if rest == "tomorrow" => return Some(Reply::say("").effect(Effect::Todo(crate::todo::Op::Tomorrow))),
         "todo" | "to-do" if !rest.is_empty() => return Some(Reply::say("").effect(Effect::Todo(crate::todo::Op::Add(rest.to_string())))),

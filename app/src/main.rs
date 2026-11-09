@@ -1310,6 +1310,53 @@ impl App {
                 },
                 None => Reply::say(say("person_unknown", name)).mood(Mood::Think),
             },
+            // "letter thank you|Anna": that template, to her
+            "letter" => {
+                let (kind, who) = arg.split_once('|').unwrap_or(("follow up", arg));
+                match people::find(&self.people, who.trim()).map(|i| &self.people[i]) {
+                    Some(p) => writing::letter_to(kind, &p.name, p.email.as_deref()),
+                    None => writing::letter_to(kind, who.trim(), None),
+                }
+            }
+            // what you know about someone: "show Anna|birthday" (phone, email, gifts, all)
+            "show" => {
+                let (who, what) = arg.split_once('|').unwrap_or((arg, "all"));
+                match people::find(&self.people, who.trim()).map(|i| self.people[i].clone()) {
+                    None => Reply::say(say("person_unknown", who.trim())).mood(Mood::Think),
+                    Some(p) => {
+                        let first = p.name.split_whitespace().next().unwrap_or(&p.name).to_string();
+                        let bday = p.birthday.map(|b| {
+                            let left = p.next_birthday(today).map(|(d, age)| format!(", {}{}", if d == 0 { "today".to_string() } else { format!("in {d} days") }, age.map(|a| format!(", turning {a}")).unwrap_or_default())).unwrap_or_default();
+                            format!("{}{left}", people::birthday_text(b))
+                        });
+                        let field = |label: &str, v: Option<String>, ask: &str| v.map(|v| format!("{label}: {v}")).unwrap_or_else(|| format!("I don't know {first}'s {ask} yet. Tell me: {first}'s {ask} is …"));
+                        let mut r = match what.trim() {
+                            "birthday" => Reply::say(field(&format!("{first}'s birthday"), bday, "birthday")).mood(Mood::Gift),
+                            "phone" => Reply::say(field(&format!("{first}'s number"), p.phone.clone(), "number")).mood(Mood::Think),
+                            "email" => Reply::say(field(&format!("{first}'s email"), p.email.clone(), "email")).mood(Mood::Write),
+                            "gifts" if p.gifts.is_empty() => Reply::say(format!("No present ideas for {first} yet. Tell me: {first} would like a scarf.")).mood(Mood::Gift),
+                            "gifts" => Reply::say(format!("Your ideas for {first}: {}.", p.gifts.join(", "))).mood(Mood::Gift).run(&format!("To-do: a present for {first}"), &format!("todo present for {}", p.name)),
+                            _ => {
+                                let mut lines = vec![p.name.clone()];
+                                lines.extend(bday.map(|b| format!("🎂 {b}")));
+                                lines.extend(p.email.clone().map(|e| format!("✉ {e}")));
+                                lines.extend(p.phone.clone().map(|ph| format!("☎ {ph}")));
+                                lines.extend(p.last.map(|d| format!("Last talked: {}", d.format("%-d %b"))));
+                                lines.extend((!p.gifts.is_empty()).then(|| format!("Present ideas: {}", p.gifts.join(", "))));
+                                lines.extend(p.note.clone());
+                                Reply::say(lines.join("\n")).mood(Mood::Read)
+                            }
+                        };
+                        if let Some(ph) = p.phone.clone().filter(|_| matches!(what.trim(), "phone" | "all")) {
+                            r = r.btn("Copy the number", Act::Copy(ph));
+                        }
+                        if let Some(e) = p.email.clone().filter(|_| matches!(what.trim(), "email" | "all")) {
+                            r = r.btn("Copy the address", Act::Copy(e));
+                        }
+                        r.run(&format!("Open {first}'s card"), &format!("desk person {}", p.name))
+                    }
+                }
+            }
             "mail" => match at.map(|i| &self.people[i]) {
                 Some(p) if p.email.is_some() => Reply::say(format!("Writing to {}...", p.name)).mood(Mood::Write).effect(Effect::Open(format!("mailto:{}", p.email.clone().unwrap_or_default()))),
                 Some(p) => Reply::say(format!("I don't have {0}'s email address. Tell me: {0}'s email is …", p.name)).mood(Mood::Think),

@@ -1060,6 +1060,78 @@ pub fn finished_reply(days: &str) -> Reply {
     Reply::say(text).mood(Mood::Party).btn("Copy as text", Act::Copy(all))
 }
 
+/// "What's due today / tomorrow / this week / overdue": up to six to-dos, with their dates.
+pub fn due_reply(when: &str) -> Reply {
+    due_reply_on(&load(), when, Local::now().date_naive())
+}
+
+fn due_reply_on(items: &[Item], when: &str, today: NaiveDate) -> Reply {
+    let tomorrow = today + Days::new(1);
+    let week_end = crate::brain::week_start(today) + Days::new(6);
+    let open = items.iter().enumerate().filter(|(_, i)| !i.done && i.list.is_none() && !i.is_step() && i.waiting.is_none());
+    let (title, hits): (&str, Vec<(usize, &Item)>) = match when {
+        "overdue" => ("Overdue", open.filter(|(_, i)| i.overdue(today)).collect()),
+        "tomorrow" => ("Due tomorrow", open.filter(|(_, i)| i.due == Some(tomorrow)).collect()),
+        "week" => ("Due this week", open.filter(|(_, i)| i.due.is_some_and(|d| d >= today && d <= week_end)).collect()),
+        _ => ("Due today", open.filter(|(_, i)| i.due == Some(today) || i.top_today(today)).collect()),
+    };
+    let overdue = items.iter().filter(|i| i.overdue(today)).count();
+    if hits.is_empty() {
+        let text = match when {
+            "overdue" => "Nothing overdue. Not one thing.".to_string(),
+            "tomorrow" => "Nothing is due tomorrow.".to_string(),
+            "week" => "Nothing else is due this week.".to_string(),
+            _ => "Nothing is due today.".to_string(),
+        };
+        let r = Reply::say(if overdue > 0 && when != "overdue" { format!("{text} But {overdue} {} overdue.", if overdue == 1 { "is" } else { "are" }) } else { text }).mood(Mood::Happy);
+        return if overdue > 0 && when != "overdue" { r.run("Show the overdue ones", "todos due overdue") } else { r.run("Show my list", "todos") };
+    }
+    let mut text = format!("{title} ({}):", hits.len());
+    for (_, i) in hits.iter().take(6) {
+        let date = match i.due {
+            Some(d) if d < today => format!(" (since {})", d.format("%a %-d %b")),
+            Some(d) if when == "week" => format!(" ({})", d.format("%a")),
+            _ => String::new(),
+        };
+        text += &format!("\n{} {}{date}{}", if i.prio { "!" } else { "•" }, i.text, i.at.map(|t| format!(" at {}", crate::brain::clock(t))).unwrap_or_default());
+    }
+    if hits.len() > 6 {
+        text += &format!("\n…and {} more", hits.len() - 6);
+    }
+    let mut r = Reply::say(text).mood(Mood::Read);
+    if overdue > 0 {
+        r = r.run("Move the overdue ones to today", "todos overdue today");
+    }
+    r.run("Open my to-dos", "desk todo")
+}
+
+/// "What am I waiting for": who, what, and the follow-up day.
+pub fn waiting_reply() -> Reply {
+    let items = load();
+    let today = Local::now().date_naive();
+    let w: Vec<&Item> = items.iter().filter(|i| !i.done && i.waiting.is_some()).collect();
+    if w.is_empty() {
+        return Reply::say("You're not waiting on anyone. Everyone owes you nothing.").mood(Mood::Happy);
+    }
+    let mut text = format!("Waiting on {} {}:", w.len(), if w.len() == 1 { "thing" } else { "things" });
+    for i in &w {
+        let when = match i.due {
+            Some(d) if d <= today => " (chase now)".to_string(),
+            Some(d) => format!(" (chase {})", d.format("%a %-d %b")),
+            None => String::new(),
+        };
+        text += &format!("\n• {} from {}{when}", i.text, i.waiting.as_deref().unwrap_or("someone"));
+    }
+    Reply::say(text).mood(Mood::Read).run("Open my to-dos", "desk todo")
+}
+
+/// "Ben sent the numbers": the open waiting item for that person, when there's exactly one (its line number).
+pub fn waiting_on(items: &[Item], who: &str) -> Option<usize> {
+    let who = who.to_lowercase();
+    let hits: Vec<usize> = items.iter().enumerate().filter(|(_, i)| !i.done && i.waiting.as_deref().is_some_and(|w| w.to_lowercase() == who || w.to_lowercase().split_whitespace().next() == Some(who.as_str()))).map(|(n, _)| n + 1).collect();
+    (hits.len() == 1).then(|| hits[0])
+}
+
 /// A named list ("what's on my shopping list"), each open item with a tick button.
 pub fn show_list(name: &str) -> Reply {
     let items = load();
@@ -1357,5 +1429,18 @@ mod tests {
         let (what, rep) = split_every("renew the passport every year", today);
         assert_eq!((what.as_str(), rep), ("renew the passport", Some(("year".to_string(), today))));
         assert_eq!(parse(&format(&parse("- [ ] water plants (due 2026-11-12) (every days-3)\n")))[0].every.as_deref(), Some("days-3"));
+    }
+
+    #[test]
+    fn whats_due() {
+        let today = day(11, 9);
+        let items = parse("- [ ] call the bank (due 2026-11-09)\n- [ ] ! file taxes (due 2026-11-05)\n- [ ] buy a gift (due 2026-11-12)\n- [ ] ask Ben (due 2026-11-01) (waiting Ben)\n- [ ] eggs (list shopping) (due 2026-11-09)\n");
+        assert!(due_reply_on(&items, "today", today).text.contains("call the bank") && !due_reply_on(&items, "today", today).text.contains("eggs"), "lists and waiting items stay out");
+        let o = due_reply_on(&items, "overdue", today);
+        assert!(o.text.contains("file taxes") && !o.text.contains("ask Ben"), "{}", o.text);
+        assert!(due_reply_on(&items, "week", today).text.contains("buy a gift (Thu)"));
+        assert!(due_reply_on(&items, "tomorrow", today).text.contains("But 1 is overdue"));
+        assert_eq!(waiting_on(&items, "ben"), Some(4));
+        assert_eq!(waiting_on(&items, "anna"), None);
     }
 }
