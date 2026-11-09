@@ -85,15 +85,27 @@ fn fits(days: &str, d: NaiveDate) -> bool {
     }
 }
 
+/// Public holidays (from the `holidays` setting), for rules that skip them (" -h": "weekday 08:00 -h").
+static HOLIDAYS: std::sync::RwLock<Vec<NaiveDate>> = std::sync::RwLock::new(Vec::new());
+
+pub fn set_holidays(days: Vec<NaiveDate>) {
+    *HOLIDAYS.write().unwrap_or_else(|e| e.into_inner()) = days;
+}
+
 /// The first time after `after` that `rule` rings.
 pub fn next_fire(rule: &str, after: NaiveDateTime) -> Option<NaiveDateTime> {
+    let (rule, skip_holidays) = rule.strip_suffix(" -h").map_or((rule, false), |r| (r, true));
     let (days, time) = rule.split_once(' ')?;
     let time = NaiveTime::parse_from_str(time, "%H:%M").ok()?;
-    (0..400).map(|n| after.date() + chrono::Days::new(n)).filter(|d| fits(days, *d)).map(|d| d.and_time(time)).find(|t| *t > after)
+    let holidays = if skip_holidays { HOLIDAYS.read().map(|h| h.clone()).unwrap_or_default() } else { vec![] };
+    (0..400).map(|n| after.date() + chrono::Days::new(n)).filter(|d| fits(days, *d) && !holidays.contains(d)).map(|d| d.and_time(time)).find(|t| *t > after)
 }
 
 /// "every weekday at 8:00", "every Monday at 10:00", "on the 1st of every month at 9:00".
 pub fn rule_text(rule: &str) -> String {
+    if let Some(r) = rule.strip_suffix(" -h") {
+        return format!("{}, not on public holidays", rule_text(r));
+    }
     let Some((days, time)) = rule.split_once(' ') else { return rule.to_string() };
     let Ok(time) = NaiveTime::parse_from_str(time, "%H:%M") else { return rule.to_string() };
     let time = crate::brain::clock(time);
@@ -146,7 +158,9 @@ pub fn parse_rule(s: &str) -> Option<(String, String)> {
         "day" | "days" => ("day".to_string(), (9, 0)),
         "morning" | "mornings" => ("day".to_string(), (8, 0)),
         "evening" | "evenings" | "night" | "nights" => ("day".to_string(), (19, 0)),
-        "weekday" | "weekdays" | "workday" | "workdays" | "working" => ("weekday".to_string(), (9, 0)),
+        // "every workday" skips public holidays too; "every weekday" is the calendar's weekdays
+        "workday" | "workdays" | "working" => ("weekday".to_string(), (9, 0)),
+        "weekday" | "weekdays" => ("weekday".to_string(), (9, 0)),
         "weekend" | "weekends" => ("weekend".to_string(), (10, 0)),
         w => (DAY_NAMES[w.trim_end_matches('s').parse::<Weekday>().ok()?.num_days_from_monday() as usize].to_string(), (9, 0)),
     };
@@ -157,7 +171,8 @@ pub fn parse_rule(s: &str) -> Option<(String, String)> {
         rest = r;
     }
     let (time, rest) = rule_time(rest, default)?;
-    Some((format!("{days} {:02}:{:02}", time.0, time.1), rest.to_string()))
+    let holidays_off = if ["workday", "workdays", "working"].contains(&first.trim_end_matches(',')) { " -h" } else { "" };
+    Some((format!("{days} {:02}:{:02}{holidays_off}", time.0, time.1), rest.to_string()))
 }
 
 /// "morning …" -> 8:00 and the rest; also afternoon, evening and night.
@@ -340,5 +355,8 @@ mod tests {
         assert_eq!(rule_text("n21/2026-11-13 16:00"), "every 3 weeks on Friday at 16:00");
         assert_eq!(rule_text("M2/2026-11-09 09:00"), "every 2 months on the 9th at 9:00");
         assert_eq!(rule_text("y03-03 09:00"), "every year on March 3 at 9:00");
+        // "every workday" skips public holidays
+        assert_eq!(parse_rule("workday at 8 pills"), Some(("weekday 08:00 -h".into(), "pills".into())));
+        assert_eq!(rule_text("weekday 08:00 -h"), "every weekday at 8:00, not on public holidays");
     }
 }

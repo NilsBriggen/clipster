@@ -247,7 +247,7 @@ pub fn respond(input: &str) -> Reply {
 
 /// Strict commands ("joke", "timer 5m tea", "5 km to miles"). `None` = not a command I know.
 /// The settings the Desk's `pref <key> <value>` may change.
-pub const PREF_KEYS: &[&str] = &["persona", "tips", "clip", "programs", "windows", "checkin", "health", "updates", "sounds", "breaks", "dnd", "wrapup", "upkeepday", "workdayask", "quiet", "autostart", "goal", "budget", "classiclook", "desksize", "weather", "workhours", "holidays", "tidyauto", "tidytarget", "workdays", "clock", "weekstart", "quietfor", "quietafter", "quietweekend", "quietmeetings", "headsup", "breakevery", "alarmsound", "deskmorning", "mute", "unmute"];
+pub const PREF_KEYS: &[&str] = &["persona", "tips", "clip", "programs", "windows", "checkin", "health", "updates", "sounds", "breaks", "dnd", "wrapup", "upkeepday", "workdayask", "quiet", "autostart", "goal", "budget", "classiclook", "desksize", "weather", "workhours", "holidays", "tidyauto", "tidytarget", "workdays", "clock", "weekstart", "quietfor", "quietafter", "quietweekend", "quietmeetings", "headsup", "breakevery", "alarmsound", "deskmorning", "mute", "unmute", "giftlead", "habitnudge", "aftermeeting"];
 
 /// Command words that are also ordinary English words only count in their command shape: "drink" alone is a
 /// cocktail, "drink water" is advice; "top" alone lists programs, "top 10 movies" is a question.

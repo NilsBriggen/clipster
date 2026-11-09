@@ -183,6 +183,9 @@ struct App {
     habits: Vec<habits::Habit>,     // a few daily ticks with streaks
     countdowns: Vec<(String, chrono::NaiveDate)>, // pinned countdowns: "Italy", 2 December
     things: things::Things,                       // where things are: passport → top drawer
+    gift_lead: u32,                               // days before a birthday for the present nudge (0 = off)
+    habit_nudge: bool,                            // an evening word when a habit streak is about to break
+    after_meeting: bool,                          // "how did it go?" after a meeting ends
     site_time: std::collections::BTreeMap<String, std::collections::BTreeMap<String, u64>>, // day -> site id ("youtube") -> seconds
     kind_moves: std::collections::BTreeMap<String, String>, // site id -> the kind it counts as instead ("Count as" on the Desk)
     weather_on: bool,                                       // the weather line on the Desk's Today tab
@@ -255,6 +258,7 @@ struct App {
     summon_checked: f64,
     from_button: bool,
     last_rung: Vec<String>, // what rang last, for Snooze
+    unseen_rings: Vec<(String, String)>, // reminders that rang since your last click or command: (time, label)
     idle: Option<u64>,          // seconds since the last input, where the system tells (outside KDE the pointer can't)
     idle_checked: f64,
     installing: bool,
@@ -623,6 +627,9 @@ impl App {
             habits: vec![],
             countdowns: vec![],
             things: Default::default(),
+            gift_lead: 10,
+            habit_nudge: true,
+            after_meeting: true,
             site_time: Default::default(),
             kind_moves: Default::default(),
             weather_on: false,
@@ -700,6 +707,7 @@ impl App {
             summon_checked: 0.0,
             from_button: false,
             last_rung: vec![],
+            unseen_rings: vec![],
             idle: None,
             idle_checked: 0.0,
             installing: false,
@@ -2601,7 +2609,7 @@ impl App {
     fn snapshot(&self) -> String {
         serde_json::json!({
             "tips_every": self.tips_every, "notice_clip": self.notice_clip, "notice_programs": self.notice_programs, "notice_windows": self.notice_windows, "checkin": self.checkin, "facts": self.facts, "kind_time": self.kind_time, "focus_log": self.focus_log, "desk_look": if self.desk_modern { "modern" } else { "classic" }, "desk_size": if self.desk_large { "large" } else { "normal" }, "checkin_days": self.checkin_days,
-            "pins": self.pins, "reading": self.reading, "calendars": self.calendars, "calendar_meta": self.calendar_meta.iter().map(|(s, m)| (s.clone(), m.to_json())).collect::<serde_json::Map<_, _>>(), "holidays": self.holiday_cc, "pin_labels": self.pin_labels, "reading_titles": self.reading_titles, "people": self.people.iter().map(|p| p.to_json()).collect::<Vec<_>>(), "habits": self.habits.iter().map(|h| h.to_json()).collect::<Vec<_>>(), "countdowns": self.countdowns.iter().map(|(l, d)| serde_json::json!([l, d.to_string()])).collect::<Vec<_>>(), "things": self.things, "site_time": self.site_time, "kind_moves": self.kind_moves, "weather": self.weather_on, "work_hours": [self.work_hours.0, self.work_hours.1], "day_totals": plan::history_merge(&self.day_totals, &self.kind_time, &self.focus_log, chrono::Local::now().date_naive()), "workday": self.workday, "workday_ask": self.workday_ask, "welcome_seen": self.welcome_seen, "backup_sources": self.backup_sources, "backup_target": self.backup_target, "backup_last": self.backup_last, "backup_result": self.backup_result, "backup_skip": self.backup_skip, "backup_auto": self.backup_auto, "backup_history": self.backup_history, "upkeep_hide": self.upkeep_hide, "space_log": self.space_log, "tidy_targets": self.tidy_targets, "tidy_auto": self.tidy_auto, "work_days": self.work_days, "clock12": brain::clock12(), "week_sunday": brain::week_sunday(), "quiet_after": self.quiet_after, "quiet_until": self.quiet_until.filter(|q| *q > timers::unix_now()), "quiet_weekend": self.quiet_weekend, "quiet_meetings": self.quiet_meetings, "headsup": self.headsup_min, "break_every": self.break_every, "alarm_sound": self.alarm_sound, "muted": self.muted, "desk_morning": self.desk_morning, "dnd_restore": self.dnd_restore, "dnd": self.dnd, "wrapup": self.wrapup, "upkeep_day": self.upkeep_day, "focus_goal": self.focus_goal, "budgets": self.budgets,
+            "pins": self.pins, "reading": self.reading, "calendars": self.calendars, "calendar_meta": self.calendar_meta.iter().map(|(s, m)| (s.clone(), m.to_json())).collect::<serde_json::Map<_, _>>(), "holidays": self.holiday_cc, "pin_labels": self.pin_labels, "reading_titles": self.reading_titles, "people": self.people.iter().map(|p| p.to_json()).collect::<Vec<_>>(), "habits": self.habits.iter().map(|h| h.to_json()).collect::<Vec<_>>(), "countdowns": self.countdowns.iter().map(|(l, d)| serde_json::json!([l, d.to_string()])).collect::<Vec<_>>(), "things": self.things, "gift_lead": self.gift_lead, "habit_nudge": self.habit_nudge, "after_meeting": self.after_meeting, "site_time": self.site_time, "kind_moves": self.kind_moves, "weather": self.weather_on, "work_hours": [self.work_hours.0, self.work_hours.1], "day_totals": plan::history_merge(&self.day_totals, &self.kind_time, &self.focus_log, chrono::Local::now().date_naive()), "workday": self.workday, "workday_ask": self.workday_ask, "welcome_seen": self.welcome_seen, "backup_sources": self.backup_sources, "backup_target": self.backup_target, "backup_last": self.backup_last, "backup_result": self.backup_result, "backup_skip": self.backup_skip, "backup_auto": self.backup_auto, "backup_history": self.backup_history, "upkeep_hide": self.upkeep_hide, "space_log": self.space_log, "tidy_targets": self.tidy_targets, "tidy_auto": self.tidy_auto, "work_days": self.work_days, "clock12": brain::clock12(), "week_sunday": brain::week_sunday(), "quiet_after": self.quiet_after, "quiet_until": self.quiet_until.filter(|q| *q > timers::unix_now()), "quiet_weekend": self.quiet_weekend, "quiet_meetings": self.quiet_meetings, "headsup": self.headsup_min, "break_every": self.break_every, "alarm_sound": self.alarm_sound, "muted": self.muted, "desk_morning": self.desk_morning, "dnd_restore": self.dnd_restore, "dnd": self.dnd, "wrapup": self.wrapup, "upkeep_day": self.upkeep_day, "focus_goal": self.focus_goal, "budgets": self.budgets,
             "notice_health": self.notice_health, "check_updates": self.check_updates, "update_told": self.update_told, "sounds": self.sounds, "breaks": self.breaks, "name": self.name,
             "hat": self.hat, "skin": self.skin, "friendship": self.friendship, "highscores": self.highscores, "birthday": self.birthday.map(|(m, d)| [m, d]), "stats": self.stats, "unlocked": self.unlocked, "explored": self.explored, "persona": if self.unhinged { "unhinged" } else { "boring" }, "anchor": self.anchor.or(self.saved_anchor).map(|a| [a.x, a.y]),
             "timers": self.timers.iter().map(|t| serde_json::json!([t.at, t.label, t.every, t.id, t.rule])).collect::<Vec<_>>(),
@@ -2734,6 +2742,9 @@ impl App {
         habits::set_names(&self.habits);
         // a countdown cheers on its day and is gone the next
         let today = chrono::Local::now().date_naive();
+        self.gift_lead = v["gift_lead"].as_u64().map_or(10, |d| d.min(60) as u32);
+        self.habit_nudge = v["habit_nudge"].as_bool().unwrap_or(true);
+        self.after_meeting = v["after_meeting"].as_bool().unwrap_or(true);
         self.things = v["things"].as_object().into_iter().flatten().filter_map(|(k, e)| Some((k.clone(), (e[0].as_str()?.to_string(), e[1].as_str().unwrap_or_default().to_string())))).collect();
         self.countdowns = v["countdowns"].as_array().into_iter().flatten().filter_map(|c| Some((c[0].as_str()?.to_string(), chrono::NaiveDate::parse_from_str(c[1].as_str()?, "%Y-%m-%d").ok()?))).filter(|c| c.1 >= today).collect();
         if v["backup_sources"].is_array() {
@@ -2816,6 +2827,7 @@ impl App {
 
     fn run(&mut self, ctx: &egui::Context, cmd: &str) {
         self.settings_dirty = true;
+        self.unseen_rings.clear(); // you're here: the reminders that rang have been seen
         // the Desk's buttons send exact commands: they're never re-read as a sentence ("todo clear the desk"
         // is a to-do, "cancel Pomodoro" cancels that timer)
         let mut from_desk = std::mem::take(&mut self.literal);
@@ -3182,6 +3194,9 @@ impl App {
                     "quietweekend" => self.quiet_weekend = on,
                     "quietmeetings" => self.quiet_meetings = on,
                     "headsup" => self.headsup_min = value.parse::<u32>().unwrap_or(10).min(120),
+                    "giftlead" => self.gift_lead = value.parse::<u32>().unwrap_or(10).min(60),
+                    "habitnudge" => self.habit_nudge = on,
+                    "aftermeeting" => self.after_meeting = on,
                     "breakevery" => self.break_every = value.parse::<u32>().unwrap_or(50).clamp(15, 240),
                     "alarmsound" => self.alarm_sound = on,
                     "deskmorning" => self.desk_morning = on,
@@ -3957,6 +3972,7 @@ impl App {
 
     fn act(&mut self, ctx: &egui::Context, a: Act) {
         self.waiting = None; // a click instead of an answer: the question is off
+        self.unseen_rings.clear(); // and the reminders that rang have been seen
         match a {
             Act::Run(c) => {
                 // a button's command is a command: strict first, so "joke dev" or "ask is the internet off" mean what they say
@@ -4030,10 +4046,16 @@ impl App {
             }
             ctx.send_viewport_cmd(egui::ViewportCommand::RequestUserAttention(egui::UserAttentionType::Critical));
             let label = if labels.len() == 1 { labels[0].clone() } else { labels.iter().map(|l| format!("• {l}")).collect::<Vec<_>>().join("\n") };
+            // reminders that rang earlier with nobody there (no click since): listed too, or they'd be lost under this one
+            let earlier = if self.unseen_rings.is_empty() { String::new() } else { format!("\n\nEarlier, while you were away:\n{}", self.unseen_rings.iter().map(|(at, l)| format!("• {at} {l}")).collect::<Vec<_>>().join("\n")) };
+            let rang_at = brain::clock(chrono::Local::now());
+            self.unseen_rings.extend(labels.iter().map(|l| (rang_at.clone(), l.clone())));
+            self.unseen_rings.truncate(12);
             self.show(
                 Reply::say(format!("⏰ {}", {
                     let quip = lines::pick(if labels.len() == 1 { "timer_done" } else { "timers_done" });
-                    if quip.contains("{label}") { quip.replace("{label}", &label) } else { format!("{quip}\n\n{label}") }
+                    let text = if quip.contains("{label}") { quip.replace("{label}", &label) } else { format!("{quip}\n\n{label}") };
+                    format!("{text}{earlier}")
                 }))
                     .mood(Mood::Alarm)
                     // snooze keeps the labels as they were: "timer 10m 5 min call" would read the 5 as more time
@@ -4100,6 +4122,18 @@ impl App {
                 }
             }
         }
+        // an evening word when a habit streak of 3 days or more would break tonight
+        if self.habit_nudge && can_nudge && (20..23).contains(&chrono::Timelike::hour(&local)) && self.stats.get("habit_nudge_day") != Some(&day_num) && t > 120.0 {
+            let today = local.date_naive();
+            if let Some(h) = self.habits.iter().filter(|h| !h.done_on(today) && h.streak(today) >= 3).max_by_key(|h| h.streak(today)).cloned() {
+                self.stats.insert("habit_nudge_day".into(), day_num);
+                let r = Reply::say(format!("Your {} streak is {} days. Still time today.", h.name.to_lowercase(), h.streak(today))).mood(Mood::Think)
+                    .run("Did it", &format!("habit done {}", h.name))
+                    .btn("Not today", Act::Hide);
+                self.pipe_up(r);
+                can_nudge = false;
+            }
+        }
         // a countdown's day: he cheers once (it's gone tomorrow)
         if can_nudge && t > 90.0 && self.stats.get("countdown_day") != Some(&day_num) {
             let today = chrono::Local::now().date_naive();
@@ -4113,9 +4147,28 @@ impl App {
         if chrono::Timelike::hour(&chrono::Local::now()) >= 8 && self.stats.get("people_day") != Some(&day_num) && t > 120.0 && !self.people.is_empty() && can_nudge {
             self.stats.insert("people_day".into(), day_num);
             let today = chrono::Local::now().date_naive();
+            // ten days ahead (gift_lead) there's still time for a present that ships: with the ideas you saved, unless a
+            // present to-do is already on the list
+            let lead = self.gift_lead as i64;
+            let open_todos = todo::load();
+            let has_present = |name: &str| open_todos.iter().any(|i| !i.done && i.text.to_lowercase().contains("present") && i.text.to_lowercase().contains(&name.to_lowercase()));
+            let early = (lead > 3).then(|| self.people.iter().filter_map(|p| p.next_birthday(today).map(|(d, a)| (d, a, p))).find(|(d, _, p)| *d == lead && !has_present(&p.name)).map(|(d, a, p)| (d, a, p.clone()))).flatten();
             let birthday = self.people.iter().filter_map(|p| p.next_birthday(today).map(|(d, _)| (d, p))).filter(|(d, _)| *d == 0 || *d == 3).min_by_key(|(d, _)| *d).map(|(d, p)| (d, p.clone()));
             let due = self.people.iter().filter_map(|p| p.due(today).map(|n| (n, p.clone()))).max_by_key(|(n, _)| *n);
-            if let Some((d, p)) = birthday {
+            if let Some((d, age, p)) = early.filter(|_| birthday.is_none()) {
+                let first = p.name.split_whitespace().next().unwrap_or(&p.name).to_string();
+                let turning = age.map(|a| format!(" (turning {a})")).unwrap_or_default();
+                let ideas = if p.gifts.is_empty() { format!("Any present ideas? Tell me: {first} would like …") } else { format!("Your ideas: {}.", p.gifts.join(", ")) };
+                let by = (today + chrono::Days::new((d - 3).max(1) as u64)).format("%Y-%m-%d");
+                let mut r = Reply::say(format!("{}'s birthday is in {d} days{turning}. {ideas}", p.name)).mood(Mood::Gift);
+                for idea in p.gifts.iter().take(2) {
+                    r = r.run(&format!("To-do: {idea}"), &format!("todo present for {first}: {idea} by {by}"));
+                }
+                if p.gifts.is_empty() {
+                    r = r.run("To-do: a present", &format!("todo present for {} by {by}", p.name));
+                }
+                self.pipe_up(r.btn("Not this year", Act::Hide));
+            } else if let Some((d, p)) = birthday {
                 let text = if d == 0 { lines::pick("birthday_today").replace("{x}", &p.name) } else { lines::pick("birthday_soon").replace("{x}", &p.name).replace("{n}", &d.to_string()) };
                 let mut r = Reply::say(text).mood(Mood::Gift);
                 if let Some(e) = &p.email {
@@ -4155,6 +4208,24 @@ impl App {
                 r = r.btn("Join the call", Act::Open(j.clone()));
             }
             self.show(r.run("Open the Agenda", "desk agenda").btn("Thanks", Act::Hide));
+        }
+        // after a meeting (one with heads-ups on): "how did it go?", with notes and a follow-up to-do. Within 15 minutes of
+        // its end, not when the next one starts in under 10, at most three a day, and never during a meeting
+        let asked_today = self.stats.get("after_meeting_day") == Some(&day_num_now()) ;
+        let asked = if asked_today { self.stats.get("after_meeting_count").copied().unwrap_or(0) } else { 0 };
+        if self.after_meeting && asked < 3 && self.balloon.is_none() && !self.quiet() && self.screenshot.is_none() && self.focus.is_none() {
+            let ended = self.events.iter().find(|e| !e.all_day && e.end <= wall && wall - e.end <= chrono::Duration::minutes(15) && (e.end - e.start) >= chrono::Duration::minutes(15) && self.cal_meta(e.cal).alert && !self.told_events.contains(&format!("after {}", e.key()))).cloned();
+            let next_soon = self.events.iter().any(|n| !n.all_day && n.start > wall && n.start - wall < chrono::Duration::minutes(10));
+            if let Some(e) = ended.filter(|_| !next_soon) {
+                self.told_events.insert(format!("after {}", e.key()));
+                self.stats.insert("after_meeting_day".into(), day_num_now());
+                self.stats.insert("after_meeting_count".into(), asked + 1);
+                let r = Reply::say(format!("How did \"{}\" go? Anything to write down or follow up?", e.title)).mood(Mood::Write)
+                    .run("Notes", &format!("calendar notes {}", e.key()))
+                    .run("A follow-up to-do", &format!("todo Follow up: {} by tomorrow", e.title))
+                    .btn("Nothing", Act::Hide);
+                self.pipe_up(r);
+            }
         }
         if self.tracker.as_ref().is_some_and(|tr| tr.take_desk()) {
             self.desk_quip = lines::pick("desk_status");
@@ -4294,6 +4365,7 @@ impl App {
                 Event::Calendar(generation, _) if generation != self.calendar_gen => {} // the list changed since
                 Event::Holidays(cc, days) => {
                     if cc == self.holiday_cc {
+                        timers::set_holidays(days.iter().map(|(d, _)| *d).collect());
                         self.holidays = days;
                     }
                 }
@@ -4435,7 +4507,9 @@ impl App {
             self.account_time();
             // a daily limit used up: one gentle word per kind per day (not during focus, which has its own)
             // (and only when he can say it: a quiet hour or typing doesn't use up the day's word)
-            if self.focus.is_none() && self.screenshot.is_none() && self.balloon.is_none() && !self.quiet() && self.input.is_empty() {
+            // (and not on a public holiday: no limits that day)
+            let holiday = self.holidays.iter().any(|(d, _)| *d == chrono::Local::now().date_naive());
+            if self.focus.is_none() && self.screenshot.is_none() && self.balloon.is_none() && !self.quiet() && self.input.is_empty() && !holiday {
                 let day = self.kind_time.get(&today_key()).cloned().unwrap_or_default();
                 let over = self.budgets.iter().find(|(k, m)| day.get(*k).copied().unwrap_or(0) >= *m * 60 && self.stats.get(&format!("budget_{k}_day")) != Some(&today));
                 if let Some((kind, mins)) = over.map(|(k, m)| (k.clone(), *m)) {
@@ -4470,7 +4544,7 @@ impl App {
                 let text = if present { lines::pick("backup_reminder").replace("{n}", &backup_days.unwrap_or(7).to_string()) } else { lines::pick("backup_drive_missing").replace("{x}", &self.backup_target) };
                 let r = Reply::say(text).mood(Mood::Think);
                 self.pipe_up(if present { r.run("Back up now", "backup now").btn("Later", Act::Hide) } else { r.btn("Later", Act::Hide) });
-            } else if self.wrapup && hour >= self.work_hours.1.max(12) && tracked >= 2 * 3600 && self.stats.get("wrapup_day") != Some(&today) && self.work_days.contains(&(weekday as u32)) {
+            } else if self.wrapup && hour >= self.work_hours.1.max(12) && tracked >= 2 * 3600 && self.stats.get("wrapup_day") != Some(&today) && self.work_days.contains(&(weekday as u32)) && !self.holidays.iter().any(|(d, _)| *d == chrono::Local::now().date_naive()) {
                 self.stats.insert("wrapup_day".into(), today);
                 self.pipe_up(Reply::say(lines::pick("wrapup_offer")).mood(Mood::Happy).run("Wrap up my day", "wrapup").btn("Not today", Act::Hide));
             } else if (self.work_days.iter().max().is_some_and(|last| weekday as u32 == *last) && hour + 2 >= self.work_hours.1 || self.work_days.iter().max().is_some_and(|last| weekday as u32 > *last)) && self.stats.get("days").copied().unwrap_or(0) >= 3 && self.stats.get("review_week") != Some(&week) {
@@ -5417,6 +5491,11 @@ fn open(target: &str) -> std::io::Result<()> {
         return if cfg!(windows) { sys::open_with_desktop(target) } else { sys::detach(sys::command("gtk-launch").arg(target)) };
     }
     sys::open_with_desktop(target)
+}
+
+/// Today as a day number, the key the once-a-day nudges keep in `stats`.
+fn day_num_now() -> u64 {
+    chrono::Datelike::num_days_from_ce(&chrono::Local::now().date_naive()) as u64
 }
 
 /// One random `prank_dialog` line: (title, message, button).
