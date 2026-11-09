@@ -196,7 +196,13 @@ struct App {
     calendar_at: Option<Instant>,   // when they were last read
     calendar_running: bool,
     calendar_gen: u64, // bumped when the calendar list changes: answers from older fetches are dropped
-    calendar_problems: Vec<String>,
+    calendar_problems: Vec<(usize, String)>,                // calendars that couldn't be read: (place, why)
+    calendar_names: Vec<String>,                            // each calendar's own name (X-WR-CALNAME), "" when none
+    calendar_meta: std::collections::BTreeMap<String, calendar::CalMeta>, // your name, colour, show and heads-up per calendar
+    events_all: Vec<calendar::Event>,                       // every event read; `events` leaves out the hidden calendars
+    holiday_cc: String,                                     // public holidays for this country ("" = off)
+    holidays: Vec<(chrono::NaiveDate, String)>,
+    holidays_asked: bool,
     told_events: std::collections::HashSet<String>, // events that already got their heads-up
     sample_clips: Vec<String>, // made-up copies for screenshots of the Desk
     sample_reading: Vec<(String, String)>,
@@ -578,6 +584,12 @@ impl App {
             calendar_running: false,
             calendar_gen: 0,
             calendar_problems: vec![],
+            calendar_names: vec![],
+            calendar_meta: Default::default(),
+            events_all: vec![],
+            holiday_cc: String::new(),
+            holidays: vec![],
+            holidays_asked: false,
             told_events: Default::default(),
             upkeep: None,
             sample_upkeep: upkeep::Report {
@@ -594,7 +606,7 @@ impl App {
             sample_events: sample_events(),
             sample_people: sample_people(),
             sample_workday: ["firefox", "code ~/projects/report", "https://mail.example.com"].map(String::from).to_vec(),
-            sample_calendars: vec!["https://calendar.google.com/calendar/ical/you/private-x/basic.ics".into()],
+            sample_calendars: vec!["https://calendar.google.com/calendar/ical/you/private-x/basic.ics".into(), "https://calendar.google.com/calendar/ical/family/private-y/basic.ics".into()],
             sample_reading: [("https://en.wikipedia.org/wiki/Paper_clip", "2026-11-07"), ("https://www.example.com/blog/how-to-run-a-meeting-that-ends-on-time?utm_source=news", "2026-11-05"), ("https://news.ycombinator.com/item?id=4711", "2026-11-02")].map(|(a, b)| (a.to_string(), b.to_string())).to_vec(),
             sample_clips: ["Printer code: 4711", "Meeting moved to 3 pm, room B", "https://example.com/quarterly-report", "Kind regards,\nSam", "SELECT * FROM paperclips WHERE bent = false;"].map(String::from).to_vec(),
             stopwatch: None,
@@ -712,6 +724,7 @@ impl App {
                 app.focus_goal = 120; // so the pictures show a goal and a limit
                 let (habits, countdowns, sites, weather) = desk::sample_extras();
                 (app.habits, app.countdowns, app.site_time, app.weather_on, app.weather) = (habits, countdowns, sites, true, Some((Instant::now(), weather)));
+                app.holidays = vec![(chrono::Local::now().date_naive() + chrono::Days::new(6), "St. Gerald's Day (sample)".into())];
                 app.budgets.insert("video".into(), 30);
             }
         } else if let Some(game) = play.clone().filter(|g| g != "welcome") {
@@ -856,6 +869,14 @@ impl App {
             let now = streak(last, n);
             streaks.push((label.to_string(), now, best(n, now)));
         }
+        // the linked calendars, and the events with this year's public holidays among them
+        let cal_views: Vec<desk::CalView> = self.calendars.iter().enumerate().map(|(i, src)| {
+            let m = self.cal_meta(i);
+            let own_name = self.calendar_names.get(i).filter(|n| !n.is_empty()).cloned();
+            desk::CalView { label: if m.name.is_empty() { own_name.unwrap_or_else(|| calendar::short(src)) } else { m.name.clone() }, own: m.name.clone(), color: m.color, show: m.show, alert: m.alert, problem: self.calendar_problems.iter().find(|(n, _)| *n == i).map(|(_, p)| p.clone()) }
+        }).collect();
+        let mut events = if self.desk_sample.is_some() { self.sample_events.clone() } else { self.events.clone() };
+        events.extend(self.holidays.iter().map(|(d, name)| calendar::Event { uid: format!("holiday-{d}"), start: d.and_hms_opt(0, 0, 0).unwrap_or_default(), end: (*d + chrono::Days::new(1)).and_hms_opt(0, 0, 0).unwrap_or_default(), all_day: true, title: name.clone(), cal: calendar::HOLIDAY, ..Default::default() }));
         let day_totals = match &self.desk_sample {
             Some((_, k, f, _)) => plan::history_merge(&desk::sample_history(), k, f, chrono::Local::now().date_naive()),
             None => plan::history_merge(&self.day_totals, &self.kind_time, &self.focus_log, chrono::Local::now().date_naive()),
@@ -890,11 +911,11 @@ impl App {
         let weather = self.weather.as_ref().filter(|_| self.weather_on).map(|(_, w)| w.clone());
         match &self.desk_sample {
             Some((t, k, f, c)) => {
-                let view = desk::View { timers: t.clone(), kind_time: k, focus_log: f, focus_now: Some(("the slides".into(), 18 * 60, 7 * 60, 40, false)), checkins: c, streaks: vec![("Focus".into(), 4, 9), ("Goal met".into(), 2, 5), ("Check-ins".into(), 6, 12), ("Days with me".into(), 31, 31)], status, quip, prefs, clips: &self.sample_clips, pins: &self.sample_clips[..2], reading: &self.sample_reading, me: sample_me(), upkeep: Some((&self.sample_upkeep, 120)), upkeep_running: false, backup_check: upkeep::backup_check(true, Some(backup::now() - 9 * 86_400), backup::now(), true), backup: desk::Backup { sources: &self.backup_sources, target: "/run/media/you/BACKUP", last: Some(backup::now() - 9 * 86_400), result: "214 copied (1.3 GB), 4120 unchanged", progress: None }, events: &self.sample_events, calendars: &self.sample_calendars, calendar_note: "Checked 4 min ago".into(), calendar_problems: 0, answer: self.desk_answer.as_ref(), name: "Sam".into(), people: &self.sample_people, workday: &self.sample_workday, habits: &self.habits, countdowns: &self.countdowns, sites, moved: &self.kind_moves, weather, day_totals };
+                let view = desk::View { timers: t.clone(), kind_time: k, focus_log: f, focus_now: Some(("the slides".into(), 18 * 60, 7 * 60, 40, false)), checkins: c, streaks: vec![("Focus".into(), 4, 9), ("Goal met".into(), 2, 5), ("Check-ins".into(), 6, 12), ("Days with me".into(), 31, 31)], status, quip, prefs, clips: &self.sample_clips, pins: &self.sample_clips[..2], reading: &self.sample_reading, me: sample_me(), upkeep: Some((&self.sample_upkeep, 120)), upkeep_running: false, backup_check: upkeep::backup_check(true, Some(backup::now() - 9 * 86_400), backup::now(), true), backup: desk::Backup { sources: &self.backup_sources, target: "/run/media/you/BACKUP", last: Some(backup::now() - 9 * 86_400), result: "214 copied (1.3 GB), 4120 unchanged", progress: None }, events: &events, calendars: self.sample_calendars.iter().enumerate().map(|(i, s)| desk::CalView { label: ["Work", "Family"].get(i).map_or_else(|| calendar::short(s), |n| n.to_string()), color: i as u8, show: true, alert: i == 0, ..Default::default() }).collect(), calendar_note: "Checked 4 min ago".into(), calendar_problems: 0, answer: self.desk_answer.as_ref(), name: "Sam".into(), people: &self.sample_people, workday: &self.sample_workday, habits: &self.habits, countdowns: &self.countdowns, sites, moved: &self.kind_moves, weather, day_totals };
                 self.desk.show(ctx, &view, look, near)
             }
             None => {
-                let view = desk::View { timers, kind_time: &self.kind_time, focus_log: &self.focus_log, focus_now, checkins: &self.checkin_days, streaks, status, quip, prefs, clips: &self.clip_history, pins: &self.pins, reading: &self.reading, me: about_me(&self.facts, self.birthday, &self.stats, &self.unlocked, &self.highscores, self.friendship), upkeep: self.upkeep.as_ref().map(|(t, r)| (r, t.elapsed().as_secs())), upkeep_running: self.upkeep_running, backup_check: self.backup_check(), backup: desk::Backup { sources: &self.backup_sources, target: &self.backup_target, last: self.backup_last, result: &self.backup_result, progress: self.backup_progress }, events: &self.events, calendars: &self.calendars, calendar_note: self.calendar_note(), calendar_problems: self.calendar_problems.len(), answer: self.desk_answer.as_ref(), name: self.name.clone(), people: &self.people, workday: &self.workday, habits: &self.habits, countdowns: &self.countdowns, sites, moved: &self.kind_moves, weather, day_totals };
+                let view = desk::View { timers, kind_time: &self.kind_time, focus_log: &self.focus_log, focus_now, checkins: &self.checkin_days, streaks, status, quip, prefs, clips: &self.clip_history, pins: &self.pins, reading: &self.reading, me: about_me(&self.facts, self.birthday, &self.stats, &self.unlocked, &self.highscores, self.friendship), upkeep: self.upkeep.as_ref().map(|(t, r)| (r, t.elapsed().as_secs())), upkeep_running: self.upkeep_running, backup_check: self.backup_check(), backup: desk::Backup { sources: &self.backup_sources, target: &self.backup_target, last: self.backup_last, result: &self.backup_result, progress: self.backup_progress }, events: &events, calendars: cal_views, calendar_note: self.calendar_note(), calendar_problems: self.calendar_problems.len(), answer: self.desk_answer.as_ref(), name: self.name.clone(), people: &self.people, workday: &self.workday, habits: &self.habits, countdowns: &self.countdowns, sites, moved: &self.kind_moves, weather, day_totals };
                 self.desk.show(ctx, &view, look, near)
             }
         }
@@ -982,6 +1003,33 @@ impl App {
         });
     }
 
+    /// The events of the calendars you show (for the Desk, the chat and the heads-ups); the cache follows.
+    fn show_calendars(&mut self) {
+        self.events = self.events_all.iter().filter(|e| self.cal_meta(e.cal).show).cloned().collect();
+        calendar::set_cache(&self.events);
+    }
+
+    /// How you set up the calendar at this place in the list.
+    fn cal_meta(&self, i: usize) -> calendar::CalMeta {
+        self.calendars.get(i).and_then(|s| self.calendar_meta.get(s)).cloned().unwrap_or_default()
+    }
+
+    /// Public holidays for the chosen country: the cached copy for this year and next, else asked on a thread
+    /// (only the country code and the year go out).
+    fn fetch_holidays(&mut self, ctx: &egui::Context) {
+        self.holidays.clear();
+        if self.holiday_cc.is_empty() || self.screenshot.is_some() {
+            return;
+        }
+        let (tx, ctx, cc) = (self.tx.clone(), ctx.clone(), self.holiday_cc.clone());
+        std::thread::spawn(move || {
+            let year = chrono::Datelike::year(&chrono::Local::now());
+            let days: Vec<(chrono::NaiveDate, String)> = [year, year + 1].iter().flat_map(|y| net::holidays(&cc, *y).unwrap_or_default()).collect();
+            let _ = tx.send(Event::Holidays(cc, days));
+            ctx.request_repaint();
+        });
+    }
+
     /// Read the calendars again, on a thread.
     fn fetch_calendars(&mut self, ctx: &egui::Context) {
         if self.calendar_running || self.screenshot.is_some() || self.calendars.is_empty() {
@@ -991,8 +1039,8 @@ impl App {
         self.calendar_at = Some(Instant::now());
         let (tx, ctx, sources, generation) = (self.tx.clone(), ctx.clone(), self.calendars.clone(), self.calendar_gen);
         std::thread::spawn(move || {
-            let (events, problems) = std::panic::catch_unwind(|| calendar::fetch(&sources)).unwrap_or_else(|_| (vec![], vec!["I couldn't read a calendar (it has something I don't understand).".into()]));
-            let _ = tx.send(Event::Calendar(generation, events, problems));
+            let found = std::panic::catch_unwind(|| calendar::fetch(&sources)).unwrap_or_else(|_| (vec![], vec![(0, "I couldn't read a calendar (it has something I don't understand).".into())], vec![]));
+            let _ = tx.send(Event::Calendar(generation, found));
             ctx.request_repaint();
         });
     }
@@ -1211,7 +1259,7 @@ impl App {
         if self.calendar_running {
             return "Checking…".into();
         }
-        if let Some(p) = self.calendar_problems.first() {
+        if let Some((_, p)) = self.calendar_problems.first() {
             return format!("Couldn't read {p}");
         }
         match self.calendar_at {
@@ -1321,6 +1369,94 @@ impl App {
                     }
                 }
                 None => calendar::agenda_reply(&self.events, &self.reminders_at(), today, linked),
+            },
+            // your name, colour, showing and heads-ups per calendar: "name 2 Family", "show 2 off", "alert 2 off", "color 2 3"
+            "name" | "show" | "alert" | "color" => {
+                let (n, value) = arg.split_once(' ').unwrap_or((arg, ""));
+                let Some(src) = n.trim_start_matches('#').parse::<usize>().ok().and_then(|n| n.checked_sub(1)).and_then(|i| self.calendars.get(i)).cloned() else {
+                    return Reply::say("There's no calendar with that number.").mood(Mood::Think);
+                };
+                let m = self.calendar_meta.entry(src).or_default();
+                let on = value.trim() == "on";
+                let text = match verb {
+                    "name" => {
+                        m.name = value.trim().chars().take(30).collect();
+                        if m.name.is_empty() { "That calendar goes by its own name again.".to_string() } else { format!("That calendar is \"{}\" now.", m.name) }
+                    }
+                    "show" => {
+                        m.show = on;
+                        (if on { "Its events show again." } else { "Its events are hidden on the Desk and in the chat." }).to_string()
+                    }
+                    "alert" => {
+                        m.alert = on;
+                        (if on { "Its events get a heads-up again." } else { "No more heads-ups for that calendar." }).to_string()
+                    }
+                    _ => {
+                        m.color = value.trim().parse::<u8>().unwrap_or(0).min(7);
+                        "New colour.".to_string()
+                    }
+                };
+                if verb == "show" {
+                    self.show_calendars();
+                }
+                Reply::say(text).mood(Mood::Happy)
+            }
+            // when you're free on a day, within your working hours: "freeday 2026-11-13"
+            "freeday" => {
+                let day = chrono::NaiveDate::parse_from_str(arg, "%Y-%m-%d").unwrap_or(today);
+                let now = chrono::Local::now().naive_local();
+                let from = if day == today { now } else { day.and_hms_opt(0, 0, 0).unwrap_or(now) };
+                let slots: Vec<String> = plan::free_slots(&self.events, from, self.work_hours).iter().filter(|(a, b)| (*b - *a).num_minutes() >= 30).map(|(a, b)| format!("{}–{}", a.format("%-H:%M"), plan::end_text(*b))).collect();
+                let when = calendar::describe_day(day);
+                if slots.is_empty() {
+                    Reply::say(lines::pick("agenda_no_free").replace("{when}", &when)).mood(Mood::Think)
+                } else {
+                    Reply::say(lines::pick("agenda_free_slots").replace("{when}", &when).replace("{x}", &slots.join(", "))).mood(Mood::Happy).run("Open the Agenda", "desk agenda")
+                }
+            }
+            // a reminder or a due to-do as an .ics file your own calendar app adds: "export timer 4", "export todo 3"
+            "export" => {
+                let (kind, id) = arg.split_once(' ').unwrap_or((arg, ""));
+                let id: usize = id.trim().trim_start_matches('#').parse().unwrap_or(0);
+                let what = match kind {
+                    "timer" => self.timers.iter().find(|t| t.id == id as u64).map(|t| (if t.label.is_empty() { "Reminder".to_string() } else { t.label.clone() }, t.when(), false)),
+                    _ => todo::load().get(id.wrapping_sub(1)).filter(|i| i.due.is_some()).map(|i| {
+                        let day = i.due.unwrap_or(today);
+                        match i.at {
+                            Some(at) => (i.text.clone(), day.and_time(at), false),
+                            None => (i.text.clone(), day.and_hms_opt(0, 0, 0).unwrap_or_default(), true),
+                        }
+                    }),
+                };
+                match what {
+                    Some((title, start, all_day)) => {
+                        let file = dirs::cache_dir().unwrap_or_else(std::env::temp_dir).join("clipster").join(format!("{}.ics", title.chars().filter(|c| c.is_alphanumeric() || *c == ' ').take(40).collect::<String>().trim().replace(' ', "-")));
+                        match brain::write_atomic(&file, &calendar::to_ics(&title, start, start + chrono::Duration::minutes(30), all_day)).and_then(|_| open(&file.to_string_lossy())).map_err(|e| e.to_string()) {
+                            Ok(()) => Reply::say(lines::pick("calendar_exported").replace("{x}", &title)).mood(Mood::Write),
+                            Err(e) => Reply::say(format!("I couldn't hand it to your calendar app: {e}")).mood(Mood::Sad),
+                        }
+                    }
+                    None => Reply::say("I couldn't find that one (a to-do needs a due date).").mood(Mood::Think),
+                }
+            }
+            // a notes file for a meeting, started with its title, time and place, opened in your editor
+            "notes" => match self.events.iter().find(|e| e.key() == arg).cloned() {
+                Some(e) => {
+                    let dir = dirs::document_dir().or_else(dirs::home_dir).unwrap_or_else(std::env::temp_dir).join("Clipster notes");
+                    let name: String = e.title.chars().map(|c| if c.is_alphanumeric() || " -_".contains(c) { c } else { ' ' }).collect::<String>().split_whitespace().collect::<Vec<_>>().join(" ");
+                    let file = dir.join(format!("{} {}.txt", e.start.format("%Y-%m-%d"), name.chars().take(60).collect::<String>()));
+                    let made = if file.exists() {
+                        Ok(())
+                    } else {
+                        let head = format!("{}\n{}{}\n\n", e.title, if e.all_day { e.start.format("%A %-d %B %Y").to_string() } else { format!("{}–{}", e.start.format("%A %-d %B %Y, %-H:%M"), e.end.format("%-H:%M")) }, if e.place.is_empty() { String::new() } else { format!(" · {}", e.place) });
+                        brain::write_atomic(&file, &head)
+                    };
+                    match made.and_then(|_| open(&file.to_string_lossy())).map_err(|e| e.to_string()) {
+                        Ok(()) => Reply::say(lines::pick("meeting_notes_made").replace("{x}", &e.title)).mood(Mood::Write),
+                        Err(err) => Reply::say(format!("I couldn't make the notes file: {err}")).mood(Mood::Sad),
+                    }
+                }
+                None => Reply::say("That event isn't on your calendar any more.").mood(Mood::Think),
             },
             "free" => match arg.parse::<i64>().ok().and_then(|t| chrono::DateTime::from_timestamp(t, 0)) {
                 Some(t) => calendar::free_reply(&self.events, &self.reminders_at(), t.with_timezone(&chrono::Local).naive_local(), linked),
@@ -1887,7 +2023,7 @@ impl App {
     fn snapshot(&self) -> String {
         serde_json::json!({
             "tips_every": self.tips_every, "notice_clip": self.notice_clip, "notice_programs": self.notice_programs, "notice_windows": self.notice_windows, "checkin": self.checkin, "facts": self.facts, "kind_time": self.kind_time, "focus_log": self.focus_log, "desk_look": if self.desk_modern { "modern" } else { "classic" }, "desk_size": if self.desk_large { "large" } else { "normal" }, "checkin_days": self.checkin_days,
-            "pins": self.pins, "reading": self.reading, "calendars": self.calendars, "people": self.people.iter().map(|p| p.to_json()).collect::<Vec<_>>(), "habits": self.habits.iter().map(|h| h.to_json()).collect::<Vec<_>>(), "countdowns": self.countdowns.iter().map(|(l, d)| serde_json::json!([l, d.to_string()])).collect::<Vec<_>>(), "site_time": self.site_time, "kind_moves": self.kind_moves, "weather": self.weather_on, "work_hours": [self.work_hours.0, self.work_hours.1], "day_totals": plan::history_merge(&self.day_totals, &self.kind_time, &self.focus_log, chrono::Local::now().date_naive()), "workday": self.workday, "workday_ask": self.workday_ask, "welcome_seen": self.welcome_seen, "backup_sources": self.backup_sources, "backup_target": self.backup_target, "backup_last": self.backup_last, "backup_result": self.backup_result, "dnd_restore": self.dnd_restore, "dnd": self.dnd, "wrapup": self.wrapup, "upkeep_day": self.upkeep_day, "focus_goal": self.focus_goal, "budgets": self.budgets,
+            "pins": self.pins, "reading": self.reading, "calendars": self.calendars, "calendar_meta": self.calendar_meta.iter().map(|(s, m)| (s.clone(), m.to_json())).collect::<serde_json::Map<_, _>>(), "holidays": self.holiday_cc, "people": self.people.iter().map(|p| p.to_json()).collect::<Vec<_>>(), "habits": self.habits.iter().map(|h| h.to_json()).collect::<Vec<_>>(), "countdowns": self.countdowns.iter().map(|(l, d)| serde_json::json!([l, d.to_string()])).collect::<Vec<_>>(), "site_time": self.site_time, "kind_moves": self.kind_moves, "weather": self.weather_on, "work_hours": [self.work_hours.0, self.work_hours.1], "day_totals": plan::history_merge(&self.day_totals, &self.kind_time, &self.focus_log, chrono::Local::now().date_naive()), "workday": self.workday, "workday_ask": self.workday_ask, "welcome_seen": self.welcome_seen, "backup_sources": self.backup_sources, "backup_target": self.backup_target, "backup_last": self.backup_last, "backup_result": self.backup_result, "dnd_restore": self.dnd_restore, "dnd": self.dnd, "wrapup": self.wrapup, "upkeep_day": self.upkeep_day, "focus_goal": self.focus_goal, "budgets": self.budgets,
             "notice_health": self.notice_health, "check_updates": self.check_updates, "update_told": self.update_told, "sounds": self.sounds, "breaks": self.breaks, "name": self.name,
             "hat": self.hat, "skin": self.skin, "friendship": self.friendship, "highscores": self.highscores, "birthday": self.birthday.map(|(m, d)| [m, d]), "stats": self.stats, "unlocked": self.unlocked, "explored": self.explored, "persona": if self.unhinged { "unhinged" } else { "boring" }, "anchor": self.anchor.or(self.saved_anchor).map(|a| [a.x, a.y]),
             "timers": self.timers.iter().map(|t| serde_json::json!([t.at, t.label, t.every, t.id, t.rule])).collect::<Vec<_>>(),
@@ -1954,6 +2090,7 @@ impl App {
         }
         self.kind_moves = v["kind_moves"].as_object().into_iter().flatten().filter_map(|(k, m)| Some((k.clone(), m.as_str().filter(|m| brain::COUNT_AS.contains(m))?.to_string()))).collect();
         self.weather_on = v["weather"].as_bool().unwrap_or(false);
+        self.holiday_cc = v["holidays"].as_str().filter(|c| c.len() == 2 && c.chars().all(|ch| ch.is_ascii_alphabetic())).map(|c| c.to_uppercase()).unwrap_or_default();
         if let (Some(a), Some(b)) = (v["work_hours"][0].as_u64(), v["work_hours"][1].as_u64()) {
             self.work_hours = ((a as u32).min(23), (b as u32).clamp(a as u32, 23));
         }
@@ -2002,6 +2139,7 @@ impl App {
         self.reading = v["reading"].as_array().into_iter().flatten().filter_map(|r| Some((r[0].as_str()?.to_string(), r[1].as_str().unwrap_or("").to_string()))).collect();
         if strings("calendars") != self.calendars {
             self.calendars = strings("calendars");
+            self.calendar_meta = v["calendar_meta"].as_object().into_iter().flatten().map(|(s, m)| (s.clone(), calendar::CalMeta::from_json(m))).collect();
             self.calendar_gen += 1;
             self.calendar_at = None; // read them again
         }
@@ -2391,6 +2529,11 @@ impl App {
                         if let Some((a, b)) = value.split_once('-').and_then(|(a, b)| Some((a.trim().parse::<u32>().ok()?, b.trim().parse::<u32>().ok()?))).filter(|(a, b)| a <= b && *b <= 23) {
                             self.work_hours = (a, b);
                         }
+                    }
+                    "holidays" => {
+                        let cc = value.trim().to_uppercase();
+                        self.holiday_cc = if cc.len() == 2 && cc.chars().all(|c| c.is_ascii_alphabetic()) { cc } else { String::new() };
+                        self.fetch_holidays(ctx);
                     }
                     "weather" => {
                         self.weather_on = on;
@@ -3055,11 +3198,16 @@ impl App {
         }
         // calendars: read again every 15 minutes; a heads-up 10 minutes before each timed event (like a reminder, it
         // comes through quiet mode and focus)
+        // public holidays: asked once per start (and when the country changes); the net module keeps a yearly copy
+        if !self.holiday_cc.is_empty() && self.holidays.is_empty() && !self.holidays_asked {
+            self.holidays_asked = true;
+            self.fetch_holidays(ctx);
+        }
         if self.calendar_at.is_none_or(|at| now.duration_since(at) > Duration::from_secs(15 * 60)) {
             self.fetch_calendars(ctx);
         }
         let wall = chrono::Local::now().naive_local();
-        if let Some(e) = self.events.iter().find(|e| !e.all_day && e.start > wall && e.start - wall <= chrono::Duration::minutes(10) && !self.told_events.contains(&e.key())).cloned() {
+        if let Some(e) = self.events.iter().find(|e| !e.all_day && e.start > wall && e.start - wall <= chrono::Duration::minutes(10) && !self.told_events.contains(&e.key()) && self.cal_meta(e.cal).alert).cloned() {
             self.told_events.insert(e.key());
             let mins = ((e.start - wall).num_seconds() as f64 / 60.0).ceil() as i64;
             self.sound("message");
@@ -3182,17 +3330,23 @@ impl App {
                     }
                 }
                 Event::BackupProgress(done, total, bytes) => self.backup_progress = Some((done, total, bytes)),
-                Event::Calendar(generation, _, _) if generation != self.calendar_gen => {} // the list changed since
+                Event::Calendar(generation, _) if generation != self.calendar_gen => {} // the list changed since
+                Event::Holidays(cc, days) => {
+                    if cc == self.holiday_cc {
+                        self.holidays = days;
+                    }
+                }
                 Event::Weather(line) => {
                     if let Some(l) = line {
                         self.weather = Some((Instant::now(), l));
                     }
                 }
-                Event::Calendar(_, events, problems) => {
+                Event::Calendar(_, (events, problems, names)) => {
                     self.calendar_running = false;
-                    calendar::set_cache(&events);
-                    self.events = events;
+                    self.events_all = events;
                     self.calendar_problems = problems;
+                    self.calendar_names = names;
+                    self.show_calendars();
                 }
                 Event::BackupDone(result) => {
                     self.backup_progress = None;
@@ -4306,12 +4460,12 @@ fn sample_people() -> Vec<people::Person> {
 fn sample_events() -> Vec<calendar::Event> {
     let today = chrono::Local::now().date_naive();
     let at = |days: u64, h: u32, m: u32| (today + chrono::Days::new(days)).and_hms_opt(h, m, 0).unwrap_or_default();
-    let ev = |title: &str, start: chrono::NaiveDateTime, mins: i64, join: Option<&str>| calendar::Event { uid: title.into(), start, end: start + chrono::Duration::minutes(mins), all_day: false, title: title.into(), place: String::new(), join: join.map(String::from) };
+    let ev = |title: &str, start: chrono::NaiveDateTime, mins: i64, join: Option<&str>| calendar::Event { uid: title.into(), start, end: start + chrono::Duration::minutes(mins), all_day: false, title: title.into(), place: String::new(), join: join.map(String::from), ..Default::default() };
     vec![
         ev("Standup", at(0, 9, 0), 15, Some("https://meet.google.com/abc-defg-hij")),
-        ev("Lunch with Anna", at(0, 12, 30), 60, None),
-        ev("Quarterly review", at(0, 15, 0), 60, Some("https://zoom.us/j/123")),
-        ev("Dentist", at(1, 8, 30), 45, None),
+        calendar::Event { place: "Café Fédéral".into(), cal: 1, ..ev("Lunch with Anna", at(0, 12, 30), 60, None) },
+        calendar::Event { note: "Bring the Q3 numbers.\nGerald presents the stapler budget.".into(), ..ev("Quarterly review", at(0, 15, 0), 60, Some("https://zoom.us/j/123")) },
+        calendar::Event { place: "Bahnhofstrasse 12, 2nd floor".into(), cal: 1, ..ev("Dentist", at(1, 8, 30), 45, None) },
         calendar::Event { all_day: true, end: at(4, 0, 0), ..ev("Team offsite", at(3, 0, 0), 0, None) },
     ]
 }

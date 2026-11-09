@@ -20357,3 +20357,19 @@ Your {label} list is now one to start from.
 ## plan_week_done
 Picked {n} for the week. They're on the Week tab.
 The week's three are set ({n} picked). Friday's review will count them.
+
+## agenda_free_slots
+{when} you're free {x}.
+Free time {when}: {x}.
+
+## agenda_no_free
+{when} is full: no free stretch of half an hour in your working hours.
+No gaps {when}, I'm afraid. Not even half an hour.
+
+## calendar_exported
+"{x}" is open in your calendar app. Add it there and it's in your real calendar.
+I handed "{x}" to your calendar app. It should offer to add it.
+
+## meeting_notes_made
+Notes for "{x}" are open, with the time and place already written at the top.
+A notes file for "{x}" is ready in Documents, in Clipster notes.

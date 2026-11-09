@@ -16,7 +16,8 @@ pub enum Event {
     Upkeep(Box<crate::upkeep::Report>, bool),          // the checkup's readings (true = the weekly nudge asked)
     BackupProgress(usize, usize, u64),                // files done, files to copy, bytes copied
     BackupDone(Result<crate::backup::Summary, String>),
-    Calendar(u64, Vec<crate::calendar::Event>, Vec<String>), // which fetch, the next weeks' events, the sources that failed
+    Calendar(u64, crate::calendar::Fetched),                 // which fetch, and what it found (events, problems, names)
+    Holidays(String, Vec<(chrono::NaiveDate, String)>),      // a country's public holidays (this year and next)
     Weather(Option<String>),                                 // the Today tab's weather line (None: couldn't get it)
 }
 

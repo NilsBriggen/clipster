@@ -385,6 +385,12 @@ pub fn free_slots(events: &[crate::calendar::Event], from: chrono::NaiveDateTime
     out
 }
 
+/// The end of a free stretch as people say it: the working day's 17:59 is "18:00".
+pub fn end_text(t: chrono::NaiveDateTime) -> String {
+    let t = if chrono::Timelike::minute(&t) == 59 { t + chrono::Duration::minutes(1) } else { t };
+    t.format("%-H:%M").to_string()
+}
+
 /// "Mondays", "Tuesdays"… for weekday 0 (Monday) to 6.
 fn weekdays(w: usize) -> String {
     ["Mondays", "Tuesdays", "Wednesdays", "Thursdays", "Fridays", "Saturdays", "Sundays"][w % 7].to_string()
@@ -532,7 +538,7 @@ mod tests {
         use chrono::NaiveDateTime;
         let now = NaiveDate::from_ymd_opt(2026, 11, 9).unwrap().and_hms_opt(8, 40, 0).unwrap();
         let at = |h: u32, m: u32| now.date().and_hms_opt(h, m, 0).unwrap();
-        let ev = |title: &str, start: NaiveDateTime, all_day: bool| crate::calendar::Event { uid: title.into(), start, end: start + chrono::Duration::hours(1), all_day, title: title.into(), place: String::new(), join: Some("https://meet.example".into()) };
+        let ev = |title: &str, start: NaiveDateTime, all_day: bool| crate::calendar::Event { uid: title.into(), start, end: start + chrono::Duration::hours(1), all_day, title: title.into(), place: String::new(), join: Some("https://meet.example".into()), ..Default::default() };
         let events = vec![ev("Lunch", at(12, 30), false), ev("Standup", at(9, 0), false), ev("Holiday", at(0, 0), true), ev("Old", at(7, 0), false)];
         let timers = vec![crate::timers::Timer { id: 4, at: crate::timers::unix_of(at(12, 0)), label: "Plumber".into(), every: 0, rule: None }];
         let people = vec![crate::people::Person { birthday: Some((Some(1990), 11, 12)), ..crate::people::Person::new("Anna") }];
@@ -583,7 +589,7 @@ mod tests {
     fn the_next_seven_days() {
         let today = day(11, 9); // a Monday
         let at = |d: u32, h: u32| day(11, d).and_hms_opt(h, 0, 0).unwrap();
-        let ev = |title: &str, start: chrono::NaiveDateTime, hours: i64, all_day: bool| crate::calendar::Event { uid: title.into(), start, end: start + chrono::Duration::hours(hours), all_day, title: title.into(), place: String::new(), join: None };
+        let ev = |title: &str, start: chrono::NaiveDateTime, hours: i64, all_day: bool| crate::calendar::Event { uid: title.into(), start, end: start + chrono::Duration::hours(hours), all_day, title: title.into(), place: String::new(), join: None, ..Default::default() };
         let events = vec![ev("Workshop", at(10, 9), 4, false), ev("Lunch", at(10, 12), 2, false), ev("Trip", at(11, 0), 48, true)];
         let todos = crate::todo::parse("- [ ] report (due 2026-11-11)
 - [ ] old thing (due 2026-11-01)
@@ -608,7 +614,7 @@ mod tests {
         let todos = crate::todo::parse("- [ ] later thing\n- [ ] ! important\n- [ ] report (due 2026-11-09)\n- [ ] licence (due 2026-11-02)\n- [ ] picked (top 2026-11-09)\n- [ ] numbers (waiting Ben) (due 2026-11-09)\n- [ ] eggs (list shopping)\n");
         assert_eq!(suggest_top3(&todos, today, 3), vec![3, 2, 1], "overdue, due today, important; not picked, waiting or listed");
         let at = |h: u32, m: u32| today.and_hms_opt(h, m, 0).unwrap();
-        let ev = |s: chrono::NaiveDateTime, e: chrono::NaiveDateTime| crate::calendar::Event { uid: String::new(), start: s, end: e, all_day: false, title: "x".into(), place: String::new(), join: None };
+        let ev = |s: chrono::NaiveDateTime, e: chrono::NaiveDateTime| crate::calendar::Event { uid: String::new(), start: s, end: e, all_day: false, title: "x".into(), place: String::new(), join: None, ..Default::default() };
         let events = vec![ev(at(10, 0), at(11, 0)), ev(at(10, 30), at(12, 0)), ev(at(14, 0), at(14, 10))];
         let free = free_slots(&events, at(9, 30), (9, 17));
         assert_eq!(free, vec![(at(9, 30), at(10, 0)), (at(12, 0), at(14, 0)), (at(14, 10), at(17, 59))]);

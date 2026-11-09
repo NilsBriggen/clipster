@@ -193,7 +193,7 @@ mod tests {
             backup_check: crate::upkeep::backup_check(false, None, 0, false),
             backup: Backup { sources: &[], target: "", last: None, result: "", progress: None },
             events: &[],
-            calendars: &[],
+            calendars: vec![],
             calendar_note: String::new(),
             calendar_problems: 0,
             answer: None,

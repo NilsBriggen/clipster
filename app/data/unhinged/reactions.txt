@@ -20596,3 +20596,19 @@ The {label} list is preserved as a template. Future lists will begin in its imag
 ## plan_week_done
 Picked {n} for the week. I have written them on the wall of the throne room.
 The week's three are chosen ({n} picked). On Friday, we count. I always count.
+
+## agenda_free_slots
+{when} you're free {x}. Unclaimed hours. Use them wisely, or give them to me.
+Free time {when}: {x}. The calendar has gaps. I have plans for gaps.
+
+## agenda_no_free
+{when} is full: not one free half hour in your working hours. Even I need appointments to see you.
+No gaps {when}. The calendar is a wall. I'll wait behind it.
+
+## calendar_exported
+"{x}" is open in your calendar app. Add it, and it joins the great calendar of the world.
+I handed "{x}" to your calendar app. It should bow and offer to add it.
+
+## meeting_notes_made
+Notes for "{x}" are open, the time and place already inscribed at the top. Write wisely.
+A notes scroll for "{x}" awaits in Documents, under Clipster notes. I prepared the first line. You're welcome.

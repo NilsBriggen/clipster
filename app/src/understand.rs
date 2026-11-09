@@ -1217,6 +1217,14 @@ fn agenda(s: &str, raw: &str) -> Option<Reply> {
             return go(format!("calendar day {d}"));
         }
     }
+    // "when am i free tomorrow", "free time on friday", "when do i have time today": the gaps in a working day
+    if let Some(day) = after(t, &["when am i free", "when am i not busy", "my free time", "free time", "when do i have time", "when do i have free time"]) {
+        let day = day.trim().trim_start_matches("on ").trim_start_matches("this ").trim();
+        let d = if day.is_empty() || day == "today" { Some(today) } else { crate::powers::parse_day(day, today).map(|(d, _)| d).filter(|_| day.split_whitespace().count() <= 3) };
+        if let Some(d) = d {
+            return go(format!("calendar freeday {d}"));
+        }
+    }
     // "am i free friday at 3", "am i busy tomorrow at 10", "do i have anything at 2"
     let rest = after(t, &["am i free ", "am i busy ", "do i have anything ", "do i have something ", "is there anything "])?;
     let day_words = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
@@ -2641,6 +2649,9 @@ mod tests {
         crate::habits::set_names(&[]);
         // waiting on someone he knows: a to-do, then marked
         assert!(matches!(eff("plan next week"), Effect::OpenDesk(t) if t == "planweek"));
+        assert!(matches!(eff("when am i free tomorrow"), Effect::Calendar(c) if c.starts_with("freeday ")));
+        assert!(matches!(eff("when am I free"), Effect::Calendar(c) if c.starts_with("freeday ")));
+        assert!(matches!(eff("am i free friday at 3"), Effect::Calendar(c) if c.starts_with("free ")), "the one-time question still works");
         assert!(!matches!(eff("I'm waiting for the bus"), Effect::Commands(_)), "not a person he knows");
         crate::people::set_names(&[crate::people::Person::new("Ben Keller")]);
         assert!(matches!(eff("I'm waiting for Ben's numbers"), Effect::Commands(c) if c[0] == "todo numbers" && c[1].ends_with("waiting Ben Keller")));

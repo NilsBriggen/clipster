@@ -634,8 +634,16 @@ impl Desk {
             out.push(format!("{n} remove"));
             self.card = None;
         }
+        bx += 88.0;
+        if it.due.is_some() {
+            let cw = btn_w(&p, look, "Add to my calendar");
+            if look.button(ui, Rect::from_min_size(pos2(bx, by), vec2(cw, ctl)), Id::unique("desk-todo-card-ics"), "Add to my calendar", true).on_hover_text("Opens it in your calendar app, which offers to add it").clicked() {
+                out.push(format!("calendar export todo {line_no}"));
+            }
+            bx += cw + 8.0;
+        }
         if let Some(s) = &steps_line {
-            line(ui, pos2(bx + 92.0, by + ctl / 2.0), s, look.font(11.5), look.dim(), inner.max.x - 100.0 - bx - 92.0);
+            line(ui, pos2(bx + 4.0, by + ctl / 2.0), s, look.font(11.5), look.dim(), inner.max.x - 100.0 - bx - 4.0);
         }
         if look.primary(ui, Rect::from_min_size(pos2(inner.max.x - 80.0, by), vec2(80.0, ctl)), Id::unique("desk-todo-card-close"), "Close", true).clicked() || ui.input(|i| i.key_pressed(egui::Key::Escape)) && self.popup.is_none() {
             // what's typed but not yet sent goes in with Close

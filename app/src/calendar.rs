@@ -7,7 +7,7 @@ use crate::lines;
 use chrono::{Datelike, Days, Duration, Local, Months, NaiveDate, NaiveDateTime, NaiveTime, TimeZone, Weekday};
 use std::sync::Mutex;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct Event {
     pub uid: String,
     pub start: NaiveDateTime, // local time
@@ -16,6 +16,36 @@ pub struct Event {
     pub title: String,
     pub place: String,
     pub join: Option<String>, // a video-call link from the location, URL or description
+    pub note: String,         // the start of its description
+    pub cal: usize,           // which calendar it's from (its place in the list); HOLIDAY for public holidays
+}
+
+/// `Event.cal` of a public holiday (not from a linked calendar).
+pub const HOLIDAY: usize = usize::MAX;
+
+/// How you set up one linked calendar on the Desk: your name for it, its colour (0 to 7), whether its events show,
+/// and whether they get a heads-up.
+#[derive(Clone, Debug, PartialEq)]
+pub struct CalMeta {
+    pub name: String,
+    pub color: u8,
+    pub show: bool,
+    pub alert: bool,
+}
+
+impl Default for CalMeta {
+    fn default() -> Self {
+        CalMeta { name: String::new(), color: 0, show: true, alert: true }
+    }
+}
+
+impl CalMeta {
+    pub fn to_json(&self) -> serde_json::Value {
+        serde_json::json!({ "name": self.name, "color": self.color, "show": self.show, "alert": self.alert })
+    }
+    pub fn from_json(v: &serde_json::Value) -> Self {
+        CalMeta { name: v["name"].as_str().unwrap_or("").to_string(), color: v["color"].as_u64().unwrap_or(0).min(7) as u8, show: v["show"].as_bool().unwrap_or(true), alert: v["alert"].as_bool().unwrap_or(true) }
+    }
 }
 
 impl Event {
@@ -375,7 +405,8 @@ pub fn parse(ics: &str, from: NaiveDate, days: u64) -> Vec<Event> {
                 continue;
             }
             let join = join_link(&r.place).or_else(|| join_link(&r.url)).or_else(|| join_link(&r.description));
-            out.push(Event { uid: r.uid.clone(), start: s, end: e, all_day, title: if r.title.is_empty() { "(no title)".into() } else { r.title.clone() }, place: r.place.clone(), join });
+            let note: String = r.description.trim().chars().take(300).collect();
+            out.push(Event { uid: r.uid.clone(), start: s, end: e, all_day, title: if r.title.is_empty() { "(no title)".into() } else { r.title.clone() }, place: r.place.clone(), join, note, cal: 0 });
         }
     }
     out.sort_by_key(|e| (e.start, e.title.clone()));
@@ -403,12 +434,20 @@ fn cache_file(src: &str) -> Option<std::path::PathBuf> {
     base.map(|d| d.join(format!("calendar-{hash:016x}.ics")))
 }
 
+/// A calendar's own name (`X-WR-CALNAME`), when it has one.
+pub fn cal_name(ics: &str) -> Option<String> {
+    ics.lines().find_map(|l| l.strip_prefix("X-WR-CALNAME:")).map(|n| unescape(n.trim())).filter(|n| !n.is_empty())
+}
+
+/// What `fetch` found: the events, a problem per calendar that failed (its place, what went wrong), and each
+/// calendar's own name ("" when it has none).
+pub type Fetched = (Vec<Event>, Vec<(usize, String)>, Vec<String>);
+
 /// Read every source (a link, or a file), falling back to the cached copy when one can't be reached.
-/// Returns the events of the next 30 days and a problem per source that failed with no cache.
-pub fn fetch(sources: &[String]) -> (Vec<Event>, Vec<String>) {
+pub fn fetch(sources: &[String]) -> Fetched {
     let today = Local::now().date_naive();
-    let (mut events, mut problems) = (vec![], vec![]);
-    for src in sources {
+    let (mut events, mut problems, mut names) = (vec![], vec![], vec![]);
+    for (n, src) in sources.iter().enumerate() {
         let text = if src.starts_with("http") { crate::net::get_calendar(src) } else { std::fs::read_to_string(src).map_err(|e| e.to_string()) };
         let cache = cache_file(src);
         let text = match text {
@@ -420,23 +459,38 @@ pub fn fetch(sources: &[String]) -> (Vec<Event>, Vec<String>) {
             }
             other => match cache.and_then(|c| std::fs::read_to_string(c).ok()) {
                 Some(t) => {
-                    problems.push(format!("{} (showing the last saved copy)", short(src)));
+                    problems.push((n, format!("{} (showing the last saved copy)", short(src))));
                     t
                 }
                 None => {
-                    problems.push(match other {
+                    problems.push((n, match other {
                         Ok(_) => format!("{} isn't a calendar", short(src)),
                         Err(e) => format!("{}: {e}", short(src)),
-                    });
+                    }));
+                    names.push(String::new());
                     continue;
                 }
             },
         };
-        events.extend(parse(&text, today - Days::new(1), 32));
+        names.push(cal_name(&text).unwrap_or_default());
+        events.extend(parse(&text, today - Days::new(1), 32).into_iter().map(|e| Event { cal: n, ..e }));
     }
     events.sort_by_key(|e| (e.start, e.title.clone()));
     events.dedup_by(|a, b| a.key() == b.key());
-    (events, problems)
+    (events, problems, names)
+}
+
+/// One event as an .ics file, for your own calendar app to add (times are local, "floating", as the app's zone).
+pub fn to_ics(title: &str, start: NaiveDateTime, end: NaiveDateTime, all_day: bool) -> String {
+    let esc = |s: &str| s.replace('\\', "\\\\").replace(';', "\\;").replace(',', "\\,").replace('\n', "\\n");
+    let stamp = chrono::Utc::now().format("%Y%m%dT%H%M%SZ");
+    let uid = format!("{}-{}@clipster", start.format("%Y%m%dT%H%M%S"), title.bytes().fold(0u32, |h, b| h.wrapping_mul(31).wrapping_add(b as u32)));
+    let (s, e) = if all_day {
+        (format!("DTSTART;VALUE=DATE:{}", start.format("%Y%m%d")), format!("DTEND;VALUE=DATE:{}", end.max(start + Duration::days(1)).format("%Y%m%d")))
+    } else {
+        (format!("DTSTART:{}", start.format("%Y%m%dT%H%M%S")), format!("DTEND:{}", end.max(start + Duration::minutes(15)).format("%Y%m%dT%H%M%S")))
+    };
+    format!("BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Clipster//Desk//EN\r\nBEGIN:VEVENT\r\nUID:{uid}\r\nDTSTAMP:{stamp}\r\n{s}\r\n{e}\r\nSUMMARY:{}\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n", esc(title))
 }
 
 /// A source for showing: the host of a link (never its secret path), or a file's name.
@@ -544,6 +598,19 @@ mod tests {
         d(y, m, day).and_hms_opt(h, min, 0).unwrap()
     }
 
+    #[test]
+    fn written_out_and_read_back() {
+        let ics = to_ics("Dentist, new address; bring card", t(2026, 11, 12, 8, 30), t(2026, 11, 12, 9, 15), false);
+        let e = parse(&ics, d(2026, 11, 10), 5);
+        assert_eq!(e.len(), 1);
+        assert_eq!((e[0].title.as_str(), e[0].start, e[0].end), ("Dentist, new address; bring card", t(2026, 11, 12, 8, 30), t(2026, 11, 12, 9, 15)));
+        let day = parse(&to_ics("Holiday", t(2026, 11, 13, 0, 0), t(2026, 11, 13, 0, 0), true), d(2026, 11, 10), 5);
+        assert!(day[0].all_day && day[0].end == t(2026, 11, 14, 0, 0), "an all-day thing lasts the day");
+        assert_eq!(cal_name("BEGIN:VCALENDAR\r\nX-WR-CALNAME:Family\\, home\r\n"), Some("Family, home".into()));
+        let desc = parse("BEGIN:VCALENDAR\nBEGIN:VEVENT\nUID:a\nDTSTART:20261112T100000\nSUMMARY:Review\nDESCRIPTION:Bring the Q3 numbers\\nand coffee\nEND:VEVENT\nEND:VCALENDAR\n", d(2026, 11, 10), 5);
+        assert_eq!(desc[0].note, "Bring the Q3 numbers\nand coffee");
+    }
+
     const GOOGLE: &str = "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Google Inc//Google Calendar 70.9054//EN\r\nBEGIN:VTIMEZONE\r\nTZID:Europe/Zurich\r\nEND:VTIMEZONE\r\n\
 BEGIN:VEVENT\r\nDTSTART;TZID=Europe/Zurich:20261109T090000\r\nDTEND;TZID=Europe/Zurich:20261109T091500\r\nRRULE:FREQ=WEEKLY;BYDAY=MO,WE,FR\r\nEXDATE;TZID=Europe/Zurich:20261111T090000\r\nUID:standup@google.com\r\nSUMMARY:Standup\r\nLOCATION:https://meet.google.com/abc-defg-hij\r\nBEGIN:VALARM\r\nACTION:DISPLAY\r\nDESCRIPTION:This is an event reminder\r\nEND:VALARM\r\nEND:VEVENT\r\n\
 BEGIN:VEVENT\r\nDTSTART;TZID=Europe/Zurich:20261113T100000\r\nDTEND;TZID=Europe/Zurich:20261113T101500\r\nRECURRENCE-ID;TZID=Europe/Zurich:20261113T090000\r\nUID:standup@google.com\r\nSUMMARY:Standup (moved)\r\nEND:VEVENT\r\n\
@@ -599,13 +666,13 @@ BEGIN:VEVENT\r\nDTSTART;TZID=Europe/Zurich:20261110T140000\r\nDTEND;TZID=Europe/
         let tomorrow = (Local::now().date_naive() + Days::new(1)).format("%Y%m%d");
         std::fs::write(&file, format!("BEGIN:VCALENDAR\nBEGIN:VEVENT\nUID:x\nSUMMARY:Planning\nDTSTART:{tomorrow}T100000\nDTEND:{tomorrow}T110000\nEND:VEVENT\nEND:VCALENDAR\n")).unwrap();
         let src = file.to_string_lossy().into_owned();
-        let (ev, problems) = fetch(std::slice::from_ref(&src));
+        let (ev, problems, _) = fetch(std::slice::from_ref(&src));
         assert!(problems.is_empty() && ev.iter().any(|e| e.title == "Planning"), "{ev:?} {problems:?}");
         std::fs::remove_file(&file).unwrap();
-        let (ev, problems) = fetch(std::slice::from_ref(&src));
+        let (ev, problems, _) = fetch(std::slice::from_ref(&src));
         assert!(ev.iter().any(|e| e.title == "Planning"), "the cached copy stands in");
-        assert!(problems.iter().any(|p| p.contains("last saved copy")), "and says so: {problems:?}");
-        let (ev, problems) = fetch(&["/nowhere/at/all.ics".to_string()]);
+        assert!(problems.iter().any(|p| p.0 == 0 && p.1.contains("last saved copy")), "and says so: {problems:?}");
+        let (ev, problems, _) = fetch(&["/nowhere/at/all.ics".to_string()]);
         assert!(ev.is_empty() && problems.len() == 1);
         let _ = std::fs::remove_dir_all(&dir);
         let _ = cache_file(&src).map(std::fs::remove_file);
@@ -616,7 +683,7 @@ BEGIN:VEVENT\r\nDTSTART;TZID=Europe/Zurich:20261110T140000\r\nDTEND;TZID=Europe/
     #[ignore]
     fn calendar_live() {
         let url = std::env::var("CLIPSTER_ICS_URL").expect("set CLIPSTER_ICS_URL");
-        let (ev, problems) = fetch(&[url]);
+        let (ev, problems, _) = fetch(&[url]);
         println!("{} events, problems: {problems:?}", ev.len());
         for e in ev.iter().take(10) {
             println!("{} {} {:?}", e.start, e.title, e.join);

@@ -213,6 +213,25 @@ pub(crate) fn get_calendar(url: &str) -> Result<String, String> {
     res.body_mut().with_config().limit(50 * 1024 * 1024).read_to_string().map_err(|e| e.to_string())
 }
 
+/// A country's public holidays in a year (the nationwide ones), from date.nager.at: only the country code and the
+/// year are sent, and the answer is kept for the year, so it's asked once.
+pub fn holidays(cc: &str, year: i32) -> Result<Vec<(chrono::NaiveDate, String)>, String> {
+    let cc: String = cc.chars().filter(|c| c.is_ascii_alphabetic()).take(2).collect::<String>().to_uppercase();
+    let base = if cfg!(test) { std::env::temp_dir().join(format!("clipster-test-{}", std::process::id())) } else { dirs::cache_dir().unwrap_or_else(std::env::temp_dir).join("clipster") };
+    let file = base.join(format!("holidays-{cc}-{year}.json"));
+    if let Some(v) = std::fs::read_to_string(&file).ok().and_then(|t| serde_json::from_str::<Value>(&t).ok()) {
+        return Ok(parse_holidays(&v));
+    }
+    let v = get(&format!("https://date.nager.at/api/v3/PublicHolidays/{year}/{cc}"))?;
+    let _ = crate::brain::write_atomic(&file, &v.to_string());
+    Ok(parse_holidays(&v))
+}
+
+/// The nationwide holidays in nager.date's answer: (day, English name).
+pub fn parse_holidays(v: &Value) -> Vec<(chrono::NaiveDate, String)> {
+    v.as_array().into_iter().flatten().filter(|h| h["global"].as_bool().unwrap_or(true)).filter_map(|h| Some((chrono::NaiveDate::parse_from_str(h["date"].as_str()?, "%Y-%m-%d").ok()?, s(&h["name"])))).collect()
+}
+
 pub(crate) fn get_text(url: &str) -> Result<String, String> {
     let mut res = agent().get(url).header("Accept", "text/plain").call().map_err(|e| e.to_string())?;
     res.body_mut().read_to_string().map_err(|e| e.to_string())
@@ -888,6 +907,12 @@ mod tests {
         assert_eq!(home_or("Rome", Some("Bern")), "Rome");
         assert_eq!(home_or("", None), "", "unknown home: by internet address");
         assert_eq!(home_or("here", Some("Bern")), "here");
+    }
+
+    #[test]
+    fn holidays_are_the_nationwide_ones() {
+        let v = serde_json::json!([{"date": "2026-08-01", "name": "Swiss National Day", "global": true}, {"date": "2026-01-02", "name": "St. Berchtold's Day", "global": false}, {"date": "bad", "name": "x"}]);
+        assert_eq!(parse_holidays(&v), vec![(chrono::NaiveDate::from_ymd_opt(2026, 8, 1).unwrap(), "Swiss National Day".to_string())]);
     }
 
     #[test]

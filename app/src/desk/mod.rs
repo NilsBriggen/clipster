@@ -42,7 +42,7 @@ pub fn tab(name: &str) -> Option<usize> {
         "checkup" | "tidy" | "backup" | "startup" | "rightnow" | "space" => "upkeep".to_string(),
         t if t.starts_with("list ") => "todo".to_string(), // "list shopping": a named list on the To-do tab
         "links" | "files" => "clipboard".to_string(),      // the saved links and files pages
-        "reminders" | "notes" | "calendar" | "calendars" | "month" => "agenda".to_string(),
+        "reminders" | "notes" | "calendar" | "calendars" | "month" | "event" => "agenda".to_string(),
         "people" | "journal" => "you".to_string(),
         "next7" | "nextweek" | "focuslog" => "week".to_string(),
         "proofread" | "letters" | "letter" => "write".to_string(),
@@ -117,7 +117,7 @@ pub struct View<'a> {
     pub backup_check: crate::upkeep::Check,
     pub backup: Backup<'a>,
     pub events: &'a [crate::calendar::Event], // the calendars' next weeks
-    pub calendars: &'a [String],              // their links or files
+    pub calendars: Vec<CalView>,              // the linked calendars, as the Calendars page shows them
     pub calendar_note: String,                // "Checked 3 min ago", or what went wrong
     pub calendar_problems: usize,             // calendars that couldn't be read
     pub answer: Option<&'a Answer>,           // a web or file answer meant for the Desk (words, files found…)
@@ -130,6 +130,17 @@ pub struct View<'a> {
     pub moved: &'a BTreeMap<String, String>, // sites you moved to another kind: id -> kind
     pub weather: Option<String>,             // the weather line, when it's on and came
     pub day_totals: crate::plan::History,    // eight weeks of daily totals
+}
+
+/// A linked calendar on the Calendars page: what to call it, its colour and switches, and what went wrong.
+#[derive(Clone, Default)]
+pub struct CalView {
+    pub label: String,           // your name for it, its own name, or its host
+    pub own: String,             // your name for it ("" = none)
+    pub color: u8,
+    pub show: bool,
+    pub alert: bool,
+    pub problem: Option<String>,
 }
 
 /// What the Backup page shows.
@@ -284,6 +295,14 @@ pub struct Desk {
     new_list_items: String,
     renaming_list: Option<String>,     // a named list being renamed: the new name so far
     planning_week: bool,               // "plan next week": the To-do tab asks for the week's three
+    agenda_month: bool,                // the Agenda shows a month instead of the days
+    month_shown: Option<(i32, u32)>,   // which month (year, month); None = this one
+    notes_query: String,
+    note_edit: Option<(usize, String)>, // a note being edited: its line, the text so far
+    timer_when: String,                // a reminder's card: the new time typed
+    timer_label: String,
+    note_when: String,                 // "remind me about this note": when
+    cal_rename: Option<(usize, String)>, // a calendar being named
 }
 
 /// A card over the page with its own controls.
@@ -299,6 +318,8 @@ pub(super) enum Card {
     Kind(String), // what made up one kind of time today
     Countdown,
     Older, // to-dos finished over the last month
+    Timer(u64),        // a reminder, by id
+    NoteRemind(usize), // a reminder about a note, by line
 }
 
 impl Desk {
@@ -324,12 +345,16 @@ impl Desk {
             "countdowns" => Some(Card::Countdown),
             "newlist" => Some(Card::NewList),
             "older" => Some(Card::Older),
+            "event" => Some(Card::Event(String::new())),
             _ => name.strip_prefix("kind ").map(|k| Card::Kind(k.trim().to_string())).or_else(|| name.strip_prefix("todo #").and_then(|n| n.trim().parse().ok()).map(Card::Todo)),
         };
         self.planning = name == "plan";
         self.planning_week = name == "planweek";
         self.list_tab = name.strip_prefix("list ").map(|l| l.trim().to_lowercase());
         self.calendars_open = name == "calendars";
+        if name == "month" {
+            self.agenda_month = true;
+        }
         self.workday_open = name == "workday";
         if name == "people" || name == "you" {
             self.me_page = usize::from(name == "people");

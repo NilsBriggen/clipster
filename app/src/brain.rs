@@ -238,7 +238,7 @@ pub fn respond(input: &str) -> Reply {
 
 /// Strict commands ("joke", "timer 5m tea", "5 km to miles"). `None` = not a command I know.
 /// The settings the Desk's `pref <key> <value>` may change.
-pub const PREF_KEYS: &[&str] = &["persona", "tips", "clip", "programs", "windows", "checkin", "health", "updates", "sounds", "breaks", "dnd", "wrapup", "upkeepday", "workdayask", "quiet", "autostart", "goal", "budget", "classiclook", "desksize", "weather", "workhours"];
+pub const PREF_KEYS: &[&str] = &["persona", "tips", "clip", "programs", "windows", "checkin", "health", "updates", "sounds", "breaks", "dnd", "wrapup", "upkeepday", "workdayask", "quiet", "autostart", "goal", "budget", "classiclook", "desksize", "weather", "workhours", "holidays"];
 
 /// Command words that are also ordinary English words only count in their command shape: "drink" alone is a
 /// cocktail, "drink water" is advice; "top" alone lists programs, "top 10 movies" is a question.
@@ -393,7 +393,7 @@ pub fn exact(input: &str) -> Option<Reply> {
             let verb = rest.split(' ').next().unwrap_or("");
             let cmd = match verb {
                 "" => "today".to_string(),
-                "add" | "remove" | "refresh" | "today" | "tomorrow" | "day" | "next" | "free" => rest.to_string(),
+                "add" | "remove" | "refresh" | "today" | "tomorrow" | "day" | "next" | "free" | "freeday" | "name" | "show" | "alert" | "color" | "export" | "notes" => rest.to_string(),
                 _ if crate::calendar::source(rest).is_some() => format!("add {rest}"), // a bare link
                 _ => return None,
             };
