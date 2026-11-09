@@ -166,7 +166,14 @@ impl Desk {
                     let note = format!("{}{} in a month", if d < 0 { "−" } else { "+" }, crate::upkeep::size(d.unsigned_abs()));
                     ui.interact(spark, Id::unique("upkeep-spark"), Sense::hover()).on_hover_text(note);
                 }
-                text_x = spark.max.x + 10.0;
+                text_x = spark.max.x + 8.0;
+                // the trend in words beside the line: free space over the weeks it covers
+                if let (Some(first), Some(last)) = (view.space_log.first(), view.space_log.last()) {
+                    let d = last[1] as i64 - first[1] as i64;
+                    let weeks = (last[0].saturating_sub(first[0]) / (7 * 86_400)).max(1);
+                    let trend = format!("{}{} in {}", if d < 0 { "−" } else { "+" }, crate::upkeep::size(d.unsigned_abs()), plural(weeks, "week"));
+                    text_x += p.text(pos2(text_x, cy), Align2::LEFT_CENTER, &trend, look.font(11.5), ink(if d < 0 { look.text() } else { look.dim() })).width() + 12.0;
+                }
             }
             line(ui, pos2(text_x, cy), &check.text, look.font(12.5), ink(look.dim()), right - text_x);
             if n + 1 < rows.len() {
@@ -336,7 +343,12 @@ impl Desk {
                     let label = format!("{} {}", if open { "▾" } else { "▸" }, if here { cat.clone() } else { format!("{cat} → {}", crate::find::tilde(dir)) });
                     line(ui, pos2(x0, cy), &label, look.font(12.5), look.text(), 250.0);
                     let kept = ix.iter().filter(|i| self.tidy_skip.contains(i)).count();
-                    look.bar(&p, Rect::from_min_size(pos2(x0 + 266.0, cy - 5.0), vec2(x1 - x0 - 266.0 - 150.0, 10.0)), (ix.len() - kept) as f32 / max, look.accent());
+                    if ix.len() <= 3 {
+                        // a few files: their names say more than a bar
+                        line(ui, pos2(x0 + 266.0, cy), &names.join(", "), look.font(11.5), look.dim(), x1 - x0 - 266.0 - 150.0);
+                    } else {
+                        look.bar(&p, Rect::from_min_size(pos2(x0 + 266.0, cy - 5.0), vec2(x1 - x0 - 266.0 - 150.0, 10.0)), (ix.len() - kept) as f32 / max, look.accent());
+                    }
                     p.text(pos2(x1 - 110.0, cy), Align2::RIGHT_CENTER, if kept > 0 { format!("{} of {}", ix.len() - kept, ix.len()) } else { ix.len().to_string() }, look.font(12.0), look.dim());
                     // where this kind goes: its folder in Downloads, or your own folder for it
                     let wr = Rect::from_min_size(pos2(x1 - 96.0, cy - (ctl - 6.0) / 2.0), vec2(96.0, ctl - 6.0));
@@ -603,10 +615,27 @@ impl Desk {
         }
         if self.drives.is_empty() && b.target.is_empty() {
             let g = p.layout("No USB drive plugged in. Plug one in, or pick any folder below (a second disk, a network folder). Or drop one here.".to_string(), look.font(12.0), look.dim(), x1 - x0);
+            let gh = g.size().y;
             p.galley(pos2(x0, y), g, look.dim());
+            y += gh;
         }
         // automatic backups
         let ay = right.max.y - 2.0 * ctl - 20.0;
+        // the last runs, in the room between the drives and "On its own" (History… has all ten)
+        let hfits = ((ay - 10.0 - (y + 14.0) - 20.0) / 20.0).floor().max(0.0) as usize;
+        if !b.history.is_empty() && hfits > 0 {
+            let mut hy = y + 14.0;
+            look.divider(&p, x0, x1, hy - 6.0);
+            p.text(pos2(x0, hy + 8.0), Align2::LEFT_CENTER, "Last backups", look.bold(11.5), look.dim());
+            hy += 20.0;
+            for run in b.history.iter().take(hfits) {
+                let when = chrono::DateTime::from_timestamp(run[0] as i64, 0).map(|t| t.with_timezone(&chrono::Local).format("%a %-d %b").to_string()).unwrap_or_default();
+                let ww = p.text(pos2(x0, hy + 10.0), Align2::LEFT_CENTER, &when, look.font(12.0), look.text()).width();
+                let what = format!("{} copied · {}{}", run[1], crate::upkeep::size(run[2]), if run[3] > 0 { format!(" · {} failed", run[3]) } else { String::new() });
+                line(ui, pos2(x0 + ww.max(86.0) + 8.0, hy + 10.0), &what, look.font(11.5), if run[3] > 0 { look.danger() } else { look.dim() }, x1 - x0 - ww.max(86.0) - 8.0);
+                hy += 20.0;
+            }
+        }
         let auto = match b.auto {
             "plugged" => "When it's plugged in (once a day)",
             "evening" => "Every evening at 18:00",

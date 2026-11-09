@@ -42,7 +42,7 @@ impl Desk {
         let today = chrono::Local::now().date_naive();
         let side = Rect::from_min_max(pos2(c.max.x - 236.0, c.min.y), c.max);
         let left = Rect::from_min_max(c.min, pos2(side.min.x - 12.0, c.max.y));
-        let strip = Rect::from_min_max(pos2(left.min.x, left.max.y - 84.0), left.max);
+        let strip = Rect::from_min_max(pos2(left.min.x, left.max.y - if look == Look::Modern { 88.0 } else { 84.0 }), left.max);
         let chart = Rect::from_min_max(left.min, pos2(left.max.x, strip.min.y - 10.0));
         // the week in words
         look.group(&p, side, "In words");
@@ -67,40 +67,67 @@ impl Desk {
                 text.push(l.replace("{x}", &x).replace("{n}", &n).replace("{pct}", &n));
             }
         }
-        let bottom = side.max.y - 2.0 * ctl - 70.0;
-        for (i, l) in text.iter().enumerate() {
-            let g = p.layout(l.clone(), if i == 0 { look.bold(12.0) } else { look.font(12.0) }, look.text(), sw);
-            let h = g.size().y;
-            if y + h > bottom {
+        // the exports only once there's something to export
+        let weeks = crate::plan::focus_weeks(&view.day_totals, today);
+        let has_weeks = weeks.iter().any(|w| *w > 0);
+        let buttons_y = side.max.y - 2.0 * ctl - 18.0;
+        let chart_top = if tracked { buttons_y } else { side.max.y - 8.0 } - if has_weeks { 82.0 } else { 0.0 };
+        // label and value rows: "Focus" dim on the left, the value wrapped on the right; a sentence without a label
+        // (the comparisons, the patterns) runs across in a smaller size
+        let rows: Vec<(Option<&str>, &str)> = text.iter().skip(1).map(|l| match l.split_once(": ") {
+            Some((label, value)) if label.len() <= 18 => (Some(label), value),
+            _ => (None, l.as_str()),
+        }).collect();
+        let lw = rows.iter().filter_map(|r| r.0).map(|l| p.layout_no_wrap(l.to_string(), look.font(11.5), look.dim()).size().x).fold(0.0, f32::max).min(92.0) + 8.0;
+        if let Some(head) = text.first() {
+            y += wrapped(ui, pos2(sx, y), &[(head.as_str(), look.bold(12.0), look.text())], sw, 1) + 8.0;
+        }
+        for (label, value) in rows {
+            let parts = match label {
+                Some(_) => [(value, look.font(12.0), look.text())],
+                None => [(value, look.font(11.5), look.dim())],
+            };
+            let (x, w) = if label.is_some() { (sx + lw, sw - lw) } else { (sx, sw) };
+            let h = p.layout_job(wrap_job(&parts, w, 3)).size().y;
+            if y + h > chart_top - 6.0 {
                 break;
             }
-            p.galley(pos2(sx, y), g, look.text());
-            y += h + 7.0;
+            if let Some(l) = label {
+                line(ui, pos2(sx, y + 8.0), l, look.font(11.5), look.dim(), lw - 6.0);
+            }
+            wrapped(ui, pos2(x, y), &parts, w, 3);
+            y += h + 6.0;
         }
-        // focus for four weeks, as small bars
-        let weeks = crate::plan::focus_weeks(&view.day_totals, today);
-        if weeks.iter().any(|w| *w > 0) {
-            let by = side.max.y - 2.0 * ctl - 30.0;
-            p.text(pos2(sx, by - 30.0), Align2::LEFT_CENTER, "Focus, four weeks", look.font(11.5), look.dim());
+        // focus for four weeks: bars on a baseline, each with its time above and its week under it
+        if has_weeks {
+            let base = chart_top + 60.0;
+            p.text(pos2(sx, chart_top + 6.0), Align2::LEFT_CENTER, "Focus, four weeks", look.font(11.5), look.dim());
+            p.hline(sx..=sx + sw, base, Stroke::new(1.0, look.rule()));
             let max = weeks.iter().copied().max().unwrap_or(1).max(1) as f32;
-            let bw = (sw - 3.0 * 8.0) / 4.0;
+            let bw = (sw - 3.0 * 10.0) / 4.0;
             for (i, secs) in weeks.iter().enumerate() {
-                let h = (*secs as f32 / max * 22.0).max(1.0);
-                let r = Rect::from_min_max(pos2(sx + i as f32 * (bw + 8.0), by - h), pos2(sx + i as f32 * (bw + 8.0) + bw, by));
-                look.column(&p, r, if i == 3 { look.accent() } else { look.groups()[2].1 });
-                let hover = Rect::from_min_max(pos2(r.min.x, by - 24.0), pos2(r.max.x, by + 2.0));
-                ui.interact(hover, Id::unique(("desk-week-bar", i)), Sense::hover()).on_hover_text(format!("{}: {}", ["Three weeks ago", "Two weeks ago", "Last week", "This week"][i], brain::fmt_dur(*secs)));
+                let x = sx + i as f32 * (bw + 10.0);
+                let h = (*secs as f32 / max * 28.0).max(if *secs > 0 { 2.0 } else { 0.0 });
+                let r = Rect::from_min_max(pos2(x, base - h), pos2(x + bw, base));
+                if h > 0.0 {
+                    look.column(&p, r, if i == 3 { look.accent() } else { look.groups()[2].1 });
+                }
+                p.text(pos2(r.center().x, base - h - 2.0), Align2::CENTER_BOTTOM, if *secs > 0 { brain::fmt_dur(*secs).replace(" min", "m") } else { "–".into() }, look.font(10.5), if i == 3 { look.text() } else { look.dim() });
+                p.text(pos2(r.center().x, base + 9.0), Align2::CENTER_CENTER, ["3 wk ago", "2 wk ago", "Last wk", "This wk"][i], if i == 3 { look.bold(10.5) } else { look.font(10.5) }, look.dim());
+                ui.interact(Rect::from_min_max(pos2(x, base - 40.0), pos2(x + bw, base + 16.0)), Id::unique(("desk-week-bar", i)), Sense::hover()).on_hover_text(format!("{}: {}", ["Three weeks ago", "Two weeks ago", "Last week", "This week"][i], brain::fmt_dur(*secs)));
             }
         }
-        let copy = Rect::from_min_size(pos2(sx, side.max.y - 2.0 * ctl - 18.0), vec2(sw * 0.6, ctl));
-        if look.button(ui, Rect::from_min_max(pos2(copy.max.x + 6.0, copy.min.y), pos2(sx + sw, copy.max.y)), Id::unique("desk-review-print"), "Print…", tracked).on_hover_text("A page for printing or saving as PDF").clicked() {
-            out.push("print week".into());
-        }
-        if look.button(ui, copy, Id::unique("desk-review-copy"), "Copy as text", tracked).on_hover_text(if tracked { "The week in words, for a report or a timesheet" } else { "Nothing to copy yet" }).clicked() {
-            out.push("review copy".into());
-        }
-        if look.button(ui, copy.translate(vec2(0.0, ctl + 6.0)), Id::unique("desk-review-csv"), "Save as spreadsheet", tracked).on_hover_text("Two CSV files in Documents: the days, and the focus sessions").clicked() {
-            out.push("review csv".into());
+        if tracked {
+            let copy = Rect::from_min_size(pos2(sx, buttons_y), vec2(sw * 0.6, ctl));
+            if look.button(ui, Rect::from_min_max(pos2(copy.max.x + 6.0, copy.min.y), pos2(sx + sw, copy.max.y)), Id::unique("desk-review-print"), "Print…", true).on_hover_text("A page for printing or saving as PDF").clicked() {
+                out.push("print week".into());
+            }
+            if look.button(ui, copy, Id::unique("desk-review-copy"), "Copy as text", true).on_hover_text("The week in words, for a report or a timesheet").clicked() {
+                out.push("review copy".into());
+            }
+            if look.button(ui, copy.translate(vec2(0.0, ctl + 6.0)), Id::unique("desk-review-csv"), "Save as spreadsheet", true).on_hover_text("Two CSV files in Documents: the days, and the focus sessions").clicked() {
+                out.push("review csv".into());
+            }
         }
         // the chart
         look.group(&p, chart, "The last seven days");
@@ -122,10 +149,14 @@ impl Desk {
         let tall = base - chart.min.y - 56.0;
         let slot = (chart.width() - 16.0) / 7.0;
         if days.iter().all(|d| d.1.iter().sum::<u64>() == 0 && d.2 == 0) {
+            // his line, how time gets counted, and the switch right under it when it's off
             let off = !view.prefs.windows;
-            let msg = if off { "Nothing tracked these seven days.\nTime counts only while window comments are on." } else { "Nothing tracked these seven days yet." };
-            p.text(chart.center() - vec2(0.0, 24.0), Align2::CENTER_CENTER, msg, look.font(12.0), look.dim());
-            if off && look.button(ui, Rect::from_center_size(chart.center() + vec2(0.0, 16.0), vec2(90.0, ctl)), Id::unique("desk-week-on"), "Turn on", true).clicked() {
+            let msg = format!("{}\n\n{}", daily("desk_empty_week", &view.name), if off { "Time counts only while window comments are on." } else { "Time per kind of app is counted from the active window's title, on this computer only." });
+            let g = p.layout(msg, look.font(12.0), look.dim(), (chart.width() - 80.0).min(380.0));
+            let top = chart.min.y + 48.0;
+            let gh = g.size().y;
+            p.galley(pos2(chart.center().x - g.size().x / 2.0, top), g, look.dim());
+            if off && look.button(ui, Rect::from_center_size(pos2(chart.center().x, top + gh + 10.0 + ctl / 2.0), vec2(90.0, ctl)), Id::unique("desk-week-on"), "Turn on", true).clicked() {
                 out.push("pref windows on".into());
             }
         }
@@ -176,19 +207,41 @@ impl Desk {
         focus_mark(&p, pos2(label.min.x - 10.0, ly), look);
         // streaks, and the last fortnight's check-ins
         look.group(&p, strip, "Streaks and moods");
-        let mut parts: Vec<String> = view.streaks.iter().map(|(what, now, best)| if *best > *now { format!("{what} {now} (best {best})") } else { format!("{what} {now}") }).collect();
+        let pad = if look == Look::Modern { 4.0 } else { 0.0 }; // the label tape needs a little more room under it
+        // each streak as a chip ("Focus 4 · best 9"); the ones that don't fit are "+2", listed on hover
+        let mut parts: Vec<String> = view.streaks.iter().filter(|s| s.1 > 0).map(|(what, now, best)| if *best > *now { format!("{what} {now} · best {best}") } else { format!("{what} {now}") }).collect();
         parts.extend(view.habits.iter().filter(|h| h.streak(today) > 0).map(|h| format!("{} {}", h.name, h.streak(today))));
-        let words = if view.streaks.iter().all(|s| s.1 == 0) && parts.len() == view.streaks.len() { "No streaks going yet. They start with one day.".to_string() } else { parts.join(" · ") };
-        line(ui, pos2(strip.min.x + 12.0, strip.min.y + 30.0), &words, look.font(12.0), look.text(), strip.width() - 24.0);
+        let (cx0, cx1, ccy) = (strip.min.x + 12.0, strip.max.x - 12.0, strip.min.y + 30.0 + pad);
+        if parts.is_empty() {
+            line(ui, pos2(cx0, ccy), "No streaks going yet. They start with one day.", look.font(12.0), look.dim(), cx1 - cx0);
+        }
+        let chip_fill = if look == Look::Modern { tok::ACCENT_SOFT } else { Color32::from_rgb(222, 222, 222) };
+        let mut x = cx0;
+        for (k, part) in parts.iter().enumerate() {
+            let w = p.layout_no_wrap(part.clone(), look.font(11.5), look.text()).size().x + 14.0;
+            let rest = parts.len() - k;
+            if x + w > cx1 - if rest > 1 { 40.0 } else { 0.0 } {
+                let r = p.text(pos2(x + 2.0, ccy), Align2::LEFT_CENTER, format!("+{rest}"), look.bold(11.5), look.dim());
+                ui.interact(r.expand(3.0), Id::unique("desk-streaks-more"), Sense::hover()).on_hover_text(parts[k..].join("\n"));
+                break;
+            }
+            let chip = Rect::from_min_size(pos2(x, ccy - 9.0), vec2(w, 18.0));
+            p.rect_filled(chip, CornerRadius::same(9), chip_fill);
+            if look == Look::Classic {
+                p.rect_stroke(chip, CornerRadius::same(9), Stroke::new(1.0, win98::SHADOW), StrokeKind::Inside);
+            }
+            p.text(chip.center(), Align2::CENTER_CENTER, part, look.font(11.5), look.text());
+            x += w + 6.0;
+        }
         let step = ((strip.width() - 24.0) / 14.0).min(26.0);
         for d in 0..14u64 {
             let date = today - chrono::Days::new(13 - d);
             let key = date.format("%Y-%m-%d").to_string();
             let answer = view.checkins.get(&key).map(String::as_str).or_else(|| self.files.journal.iter().find(|e| e.day == date).and_then(|e| e.mood.as_deref()));
             let cx = strip.min.x + 12.0 + step * (d as f32 + 0.5);
-            let c = pos2(cx, strip.min.y + 54.0);
+            let c = pos2(cx, strip.min.y + 54.0 + pad);
             face(&p, c, answer, look);
-            p.text(pos2(cx, strip.min.y + 72.0), Align2::CENTER_CENTER, initial(date), if d == 13 { look.bold(10.5) } else { look.font(10.5) }, look.dim());
+            p.text(pos2(cx, strip.min.y + 72.0 + pad), Align2::CENTER_CENTER, initial(date), if d == 13 { look.bold(10.5) } else { look.font(10.5) }, look.dim());
             ui.interact(Rect::from_center_size(c, vec2(step, 30.0)), Id::unique(("desk-face", d)), Sense::hover()).on_hover_text(format!("{}: {}", date.format("%a %-d %b"), answer.unwrap_or("no check-in")));
         }
     }
@@ -367,9 +420,10 @@ impl Desk {
             let (_, pct) = brain::focus_score(s.2, (s.2 + s.3).max(1));
             let what = if s.3 >= 60 { format!("{} of {} min · drifted {}", s.2 / 60, s.1, brain::fmt_dur(s.3)) } else { format!("{} of {} min", s.2 / 60, s.1) };
             p.text(pos2(x0 + 272.0, cy), Align2::LEFT_CENTER, what, look.font(12.0), look.dim());
+            // one verb per row, and only when it can run (not while a session is on)
             let again = Rect::from_min_size(pos2(right - 64.0, cy - (ctl - 2.0) / 2.0), vec2(64.0, ctl - 2.0));
             look.bar(&p, Rect::from_min_size(pos2(again.min.x - 72.0, cy - 5.0), vec2(60.0, 10.0)), pct as f32 / 100.0, look.score(pct));
-            if look.button(ui, again, Id::unique(("desk-focus-again", first + i)), "Again", view.focus_now.is_none()).on_hover_text(format!("Focus {} min on this again", s.1)).clicked() {
+            if view.focus_now.is_none() && look.button(ui, again, Id::unique(("desk-focus-again", first + i)), "Again", true).on_hover_text(format!("Focus {} min on this again", s.1)).clicked() {
                 out.push(crate::brain::focus_command(s.1 as u64, &s.4));
             }
         }
