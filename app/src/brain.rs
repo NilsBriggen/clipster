@@ -61,6 +61,7 @@ pub enum Effect {
     Undo,                            // put back what the last removal on the Desk took
     Habit(String),                   // "add walk", "done walk", "undone walk", "remove walk"
     Countdown(String),               // "add Italy|2 december", "remove 2", "list"
+    Things(String),                  // where things are: "set passport|top drawer", "forget passport", "where passport", "in blue bag", "list"
     Journal(String),                 // "add <line>", "mood great", "day 2026-11-05|rough|<line>" (written to journal.txt)
     SaveTemplate(String, String),    // a letter template of your own: name, text (written to your lines file)
     ForgetTemplate(String),
@@ -669,6 +670,8 @@ pub fn exact(input: &str) -> Option<Reply> {
         "qr" => return Some(crate::powers::qr(&or_clipboard(rest))),
         "countdown" if rest.starts_with("add ") || rest.starts_with("remove ") || rest == "list" => return Some(Reply::say("").effect(Effect::Countdown(rest.to_string()))),
         "countdowns" => return Some(Reply::say("").effect(Effect::Countdown("list".into()))),
+        "thing" if ["set", "forget", "where", "in"].contains(&rest.split(' ').next().unwrap_or("")) && rest.contains(' ') => return Some(Reply::say("").effect(Effect::Things(rest.to_string()))),
+        "things" if rest.is_empty() => return Some(Reply::say("").effect(Effect::Things("list".into()))),
         "until" | "countdown" => return Some(crate::powers::until(rest)),
         "habit" if ["add", "done", "undone", "remove"].contains(&rest.split(' ').next().unwrap_or("")) && rest.contains(' ') => return Some(Reply::say("").effect(Effect::Habit(rest.to_string()))),
         // the sub-commands only in their own shape: "journal day was long" is a line for today

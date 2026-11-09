@@ -23,6 +23,7 @@ mod pointer;
 mod powers;
 mod props;
 mod sys;
+mod things;
 mod tidy;
 mod todo;
 mod understand;
@@ -181,6 +182,7 @@ struct App {
     people: Vec<people::Person>,    // birthdays, keeping in touch, email addresses
     habits: Vec<habits::Habit>,     // a few daily ticks with streaks
     countdowns: Vec<(String, chrono::NaiveDate)>, // pinned countdowns: "Italy", 2 December
+    things: things::Things,                       // where things are: passport → top drawer
     site_time: std::collections::BTreeMap<String, std::collections::BTreeMap<String, u64>>, // day -> site id ("youtube") -> seconds
     kind_moves: std::collections::BTreeMap<String, String>, // site id -> the kind it counts as instead ("Count as" on the Desk)
     weather_on: bool,                                       // the weather line on the Desk's Today tab
@@ -620,6 +622,7 @@ impl App {
             people: vec![],
             habits: vec![],
             countdowns: vec![],
+            things: Default::default(),
             site_time: Default::default(),
             kind_moves: Default::default(),
             weather_on: false,
@@ -1189,6 +1192,56 @@ impl App {
             let _ = tx.send(Event::Calendar(generation, found));
             ctx.request_repaint();
         });
+    }
+
+    /// Where things are: "set passport|top drawer", "forget passport", "where passport", "in blue bag", "list".
+    fn things_command(&mut self, cmd: &str) -> Reply {
+        let (verb, rest) = cmd.split_once(' ').unwrap_or((cmd, ""));
+        let today = chrono::Local::now().format("%Y-%m-%d").to_string();
+        match verb {
+            "set" | "forget" => {
+                let (text, undo) = things::change(&mut self.things, cmd, &today);
+                let r = Reply::say(text).mood(Mood::Write);
+                match undo {
+                    Some(u) if verb == "set" => r.run("Not that", &u).run("Where things are", "things"),
+                    Some(u) => r.run("Undo", &u),
+                    None => r,
+                }
+            }
+            "where" => {
+                if let Some((thing, (place, day))) = things::find(&self.things, rest) {
+                    let when = chrono::NaiveDate::parse_from_str(day, "%Y-%m-%d").map(|d| format!(" (you told me on {})", d.format("%-d %b"))).unwrap_or_default();
+                    let mut r = Reply::say(format!("Your {thing}: {place}{when}.")).mood(Mood::Think);
+                    // a path or link gets its own button
+                    if place.contains('/') || place.contains('\\') || place.contains("://") {
+                        r = r.btn("Open it", Act::Open(brain::expand_home(place.trim_start_matches("in ")).to_string_lossy().into_owned()));
+                    }
+                    return r.run("I moved it", &format!("thing forget {thing}"));
+                }
+                // nothing kept: maybe a note says it ("remember the key is under the mat"), else a file, else a shrug
+                let words: Vec<String> = things::key(rest).split_whitespace().map(String::from).collect();
+                let hits: Vec<String> = notes::load().into_iter().filter(|n| words.iter().all(|w| n.text.to_lowercase().contains(w.as_str()))).map(|n| n.text).take(3).collect();
+                if !hits.is_empty() {
+                    return Reply::say(format!("I don't have a place for it, but your notes say:\n{}", hits.iter().map(|h| format!("• {h}")).collect::<Vec<_>>().join("\n"))).mood(Mood::Read);
+                }
+                if understand::looks_like_a_file(rest) {
+                    if let Some(r) = brain::exact(&format!("findfile {}", things::key(rest))) {
+                        return r;
+                    }
+                }
+                Reply::say(lines::pick("lost_things").replace("{x}", &things::key(rest))).mood(Mood::Think).btn("When you find it, tell me where", Act::Hide)
+            }
+            "in" => {
+                let found = things::in_place(&self.things, rest);
+                if found.is_empty() {
+                    Reply::say(format!("Nothing I know of is in the {}.", things::key(rest))).mood(Mood::Think)
+                } else {
+                    Reply::say(format!("In the {}: {}.", things::key(rest), found.iter().map(|s| s.as_str()).collect::<Vec<_>>().join(", "))).mood(Mood::Think)
+                }
+            }
+            _ if self.things.is_empty() => Reply::say("I don't know where anything is yet. Tell me: my passport is in the top drawer.").mood(Mood::Think),
+            _ => Reply::say(format!("Where things are:\n{}", self.things.iter().map(|(t, (p, _))| format!("• {t}: {p}")).collect::<Vec<_>>().join("\n"))).mood(Mood::Read),
+        }
     }
 
     /// "add Anna", "birthday Anna|3 March", "email Anna|a@b.ch", "every mum|14", "met mum", "last mum", "mail Anna",
@@ -2507,7 +2560,7 @@ impl App {
     fn snapshot(&self) -> String {
         serde_json::json!({
             "tips_every": self.tips_every, "notice_clip": self.notice_clip, "notice_programs": self.notice_programs, "notice_windows": self.notice_windows, "checkin": self.checkin, "facts": self.facts, "kind_time": self.kind_time, "focus_log": self.focus_log, "desk_look": if self.desk_modern { "modern" } else { "classic" }, "desk_size": if self.desk_large { "large" } else { "normal" }, "checkin_days": self.checkin_days,
-            "pins": self.pins, "reading": self.reading, "calendars": self.calendars, "calendar_meta": self.calendar_meta.iter().map(|(s, m)| (s.clone(), m.to_json())).collect::<serde_json::Map<_, _>>(), "holidays": self.holiday_cc, "pin_labels": self.pin_labels, "reading_titles": self.reading_titles, "people": self.people.iter().map(|p| p.to_json()).collect::<Vec<_>>(), "habits": self.habits.iter().map(|h| h.to_json()).collect::<Vec<_>>(), "countdowns": self.countdowns.iter().map(|(l, d)| serde_json::json!([l, d.to_string()])).collect::<Vec<_>>(), "site_time": self.site_time, "kind_moves": self.kind_moves, "weather": self.weather_on, "work_hours": [self.work_hours.0, self.work_hours.1], "day_totals": plan::history_merge(&self.day_totals, &self.kind_time, &self.focus_log, chrono::Local::now().date_naive()), "workday": self.workday, "workday_ask": self.workday_ask, "welcome_seen": self.welcome_seen, "backup_sources": self.backup_sources, "backup_target": self.backup_target, "backup_last": self.backup_last, "backup_result": self.backup_result, "backup_skip": self.backup_skip, "backup_auto": self.backup_auto, "backup_history": self.backup_history, "upkeep_hide": self.upkeep_hide, "space_log": self.space_log, "tidy_targets": self.tidy_targets, "tidy_auto": self.tidy_auto, "work_days": self.work_days, "clock12": brain::clock12(), "week_sunday": brain::week_sunday(), "quiet_after": self.quiet_after, "quiet_until": self.quiet_until.filter(|q| *q > timers::unix_now()), "quiet_weekend": self.quiet_weekend, "quiet_meetings": self.quiet_meetings, "headsup": self.headsup_min, "break_every": self.break_every, "alarm_sound": self.alarm_sound, "muted": self.muted, "desk_morning": self.desk_morning, "dnd_restore": self.dnd_restore, "dnd": self.dnd, "wrapup": self.wrapup, "upkeep_day": self.upkeep_day, "focus_goal": self.focus_goal, "budgets": self.budgets,
+            "pins": self.pins, "reading": self.reading, "calendars": self.calendars, "calendar_meta": self.calendar_meta.iter().map(|(s, m)| (s.clone(), m.to_json())).collect::<serde_json::Map<_, _>>(), "holidays": self.holiday_cc, "pin_labels": self.pin_labels, "reading_titles": self.reading_titles, "people": self.people.iter().map(|p| p.to_json()).collect::<Vec<_>>(), "habits": self.habits.iter().map(|h| h.to_json()).collect::<Vec<_>>(), "countdowns": self.countdowns.iter().map(|(l, d)| serde_json::json!([l, d.to_string()])).collect::<Vec<_>>(), "things": self.things, "site_time": self.site_time, "kind_moves": self.kind_moves, "weather": self.weather_on, "work_hours": [self.work_hours.0, self.work_hours.1], "day_totals": plan::history_merge(&self.day_totals, &self.kind_time, &self.focus_log, chrono::Local::now().date_naive()), "workday": self.workday, "workday_ask": self.workday_ask, "welcome_seen": self.welcome_seen, "backup_sources": self.backup_sources, "backup_target": self.backup_target, "backup_last": self.backup_last, "backup_result": self.backup_result, "backup_skip": self.backup_skip, "backup_auto": self.backup_auto, "backup_history": self.backup_history, "upkeep_hide": self.upkeep_hide, "space_log": self.space_log, "tidy_targets": self.tidy_targets, "tidy_auto": self.tidy_auto, "work_days": self.work_days, "clock12": brain::clock12(), "week_sunday": brain::week_sunday(), "quiet_after": self.quiet_after, "quiet_until": self.quiet_until.filter(|q| *q > timers::unix_now()), "quiet_weekend": self.quiet_weekend, "quiet_meetings": self.quiet_meetings, "headsup": self.headsup_min, "break_every": self.break_every, "alarm_sound": self.alarm_sound, "muted": self.muted, "desk_morning": self.desk_morning, "dnd_restore": self.dnd_restore, "dnd": self.dnd, "wrapup": self.wrapup, "upkeep_day": self.upkeep_day, "focus_goal": self.focus_goal, "budgets": self.budgets,
             "notice_health": self.notice_health, "check_updates": self.check_updates, "update_told": self.update_told, "sounds": self.sounds, "breaks": self.breaks, "name": self.name,
             "hat": self.hat, "skin": self.skin, "friendship": self.friendship, "highscores": self.highscores, "birthday": self.birthday.map(|(m, d)| [m, d]), "stats": self.stats, "unlocked": self.unlocked, "explored": self.explored, "persona": if self.unhinged { "unhinged" } else { "boring" }, "anchor": self.anchor.or(self.saved_anchor).map(|a| [a.x, a.y]),
             "timers": self.timers.iter().map(|t| serde_json::json!([t.at, t.label, t.every, t.id, t.rule])).collect::<Vec<_>>(),
@@ -2640,6 +2693,7 @@ impl App {
         habits::set_names(&self.habits);
         // a countdown cheers on its day and is gone the next
         let today = chrono::Local::now().date_naive();
+        self.things = v["things"].as_object().into_iter().flatten().filter_map(|(k, e)| Some((k.clone(), (e[0].as_str()?.to_string(), e[1].as_str().unwrap_or_default().to_string())))).collect();
         self.countdowns = v["countdowns"].as_array().into_iter().flatten().filter_map(|c| Some((c[0].as_str()?.to_string(), chrono::NaiveDate::parse_from_str(c[1].as_str()?, "%Y-%m-%d").ok()?))).filter(|c| c.1 >= today).collect();
         if v["backup_sources"].is_array() {
             self.backup_sources = strings("backup_sources");
@@ -2881,6 +2935,7 @@ impl App {
                 }
                 r = Reply::say(text).mood(if pool.ends_with("unknown") || pool.ends_with("full") || pool.ends_with("exists") { Mood::Think } else { Mood::Write });
             }
+            Effect::Things(cmd) => r = self.things_command(&cmd),
             Effect::Countdown(cmd) => {
                 let today = chrono::Local::now().date_naive();
                 let (verb, arg) = cmd.split_once(' ').unwrap_or((cmd.as_str(), ""));

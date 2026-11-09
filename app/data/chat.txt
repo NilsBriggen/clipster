@@ -11286,7 +11286,7 @@ On a video call, join quietly and skip the long apology. Just start listening.
 Breathe. Running late is a problem of minutes, not of character.
 
 ## chat org-lost-keys
-> i lost my keys | i cannot find my keys | where did i put my keys | i lost my phone again | i cannot find my wallet
+> i lost my keys | i cannot find my keys | i lost my phone again | i cannot find my wallet
 @ search
 The keys are somewhere logical. That's the cruel part: you put them there on purpose.
 Retrace your steps backwards. Check yesterday's coat and the other bag.

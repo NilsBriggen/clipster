@@ -486,6 +486,8 @@ fn grief(s: &str) -> Option<Reply> {
         "partner", "boyfriend", "girlfriend", "cousin", "nephew", "niece", "baby", "colleague", "coworker", "boss", "neighbour", "neighbor", "teacher", "grandparent",
     ];
     let w: Vec<&str> = s.split_whitespace().collect();
+    // "my dog is in heaven", "grandma is with the angels now"
+    let heaven = ["in heaven", "with the angels", "over the rainbow bridge", "crossed the rainbow bridge"].iter().any(|h| s.contains(h)) && w.iter().any(|x| LIVING.contains(x) || crate::people::known(x));
     let loss = w.iter().position(|x| ["died", "passed", "dead"].contains(x)).filter(|&i| {
         let near: Vec<&str> = w[i.saturating_sub(3)..i].to_vec();
         let who = near.iter().any(|x| LIVING.contains(x) || crate::people::known(x));
@@ -497,10 +499,65 @@ fn grief(s: &str) -> Option<Reply> {
         i > 0 && who && form
     });
     let ill = has(s, &["i have cancer", "has cancer", "got cancer", "diagnosed with", "terminally ill", "in the hospital", "in hospital", "had a miscarriage", "funeral", "lost my mum", "lost my mom", "lost my dad", "lost my father", "lost my mother", "lost my husband", "lost my wife", "lost my baby", "lost my brother", "lost my sister", "lost my friend", "lost my dog", "lost my cat", "lost my grandma", "lost my grandpa", "had to put my", "put down today", "was put down"]);
-    (loss.is_some() || ill).then(|| Reply::say(lines::pick("grief")).mood(Mood::Sad))
+    (loss.is_some() || ill || heaven).then(|| Reply::say(lines::pick("grief")).mood(Mood::Sad))
 }
 
 /// Things that are files ("where is my CV" is a file search, "where is my phone" isn't).
+/// Saying and asking where a thing is. Only for things: not people or pets ("my mum is in Rome"), not feelings or
+/// idioms ("my head is in the clouds"), and never a code or password (things.rs refuses those).
+fn where_things(s: &str, raw: &str) -> Option<Reply> {
+    const NOT_THINGS: &[&str] = &["head", "heart", "mind", "money", "ball", "life", "soul", "love", "focus", "attention", "faith", "trust", "hope", "mood", "brain", "stomach", "back", "leg", "arm", "foot", "hand", "eye", "eyes", "work", "job", "boss", "wife", "husband", "partner", "mum", "mom", "dad", "mother", "father", "son", "daughter", "kid", "kids", "child", "children", "brother", "sister", "friend", "family", "girlfriend", "boyfriend", "grandma", "grandpa", "dog", "cat", "pet", "car insurance", "flight", "train", "meeting", "birthday", "name", "favorite", "favourite", "phone number", "email", "address"];
+    let thingy = |t: &str| {
+        let k = crate::things::key(t);
+        !k.is_empty() && k.split_whitespace().count() <= 3 && !NOT_THINGS.contains(&k.as_str()) && !NOT_THINGS.iter().any(|n| k.ends_with(&format!(" {n}"))) && !crate::people::known(&k) && !PETS.iter().any(|p| k == *p)
+    };
+    // asking
+    for p in ["where is my ", "where are my ", "where did i put my ", "where did i leave my ", "where did i put the ", "where did i leave the ", "where is the ", "where are the ", "where is our ", "where did i put "] {
+        // "where is my tax pdf" is a file to search for, not a thing in the house
+        if let Some(t) = s.strip_prefix(p).filter(|t| thingy(t) && !looks_like_a_file(t)) {
+            // "where is the eiffel tower" stays a map: "the …" only for things a house has
+            if p.contains(" the ") && !p.contains("did i") && !household(t) {
+                continue;
+            }
+            return go(format!("thing where {}", keep(raw, t)));
+        }
+    }
+    if let Some(place) = after(s, &["what is in my ", "what is in the ", "what did i put in the ", "what did i put in my ", "what is inside my "]).filter(|p| p.split_whitespace().count() <= 4) {
+        if !["news", "weather", "calendar", "agenda", "list", "notes", "to do list", "diary", "journal", "trash", "bin", "recycle bin", "inbox", "clipboard", "downloads", "cloud"].contains(&crate::things::key(place).as_str()) {
+            return go(format!("thing in {}", keep(raw, place)));
+        }
+    }
+    if let Some(t) = after(s, &["forget where my ", "forget where the ", "forget where "]).map(|t| t.trim_end_matches(" is").trim_end_matches(" are")) {
+        return go(format!("thing forget {}", keep(raw, t)));
+    }
+    // saying: "my passport is in the top drawer", "the spare key is with anna", "i put the charger in the blue bag"
+    let places = [" is in ", " is on ", " is under ", " is with ", " is at ", " is behind ", " is inside ", " are in ", " are on ", " are under ", " are with ", " are at "];
+    let said = s.strip_prefix("my ").or_else(|| s.strip_prefix("the ")).or_else(|| s.strip_prefix("our ")).and_then(|r| places.iter().find_map(|p| r.split_once(p).map(|(t, pl)| (t, format!("{}{pl}", p.trim_start().split_once(' ').map_or("", |x| x.1))))));
+    // ("i left my charger at home" is forgetting it, not keeping it there)
+    let put = after(s, &["i put my ", "i put the ", "i moved my ", "i moved the ", "i keep my ", "i keep the ", "i hid my ", "i hid the "]).and_then(|r| [" in ", " on ", " under ", " with ", " at ", " behind ", " inside ", " to "].iter().find_map(|p| r.split_once(p).map(|(t, pl)| (t, format!("{}{pl}", if *p == " to " { "in " } else { &p[1..] })))));
+    if let Some((thing, place)) = said.or(put) {
+        // "my mum is in Rome", "my head is in the clouds", "my dog is in heaven", "the meeting is at 3": not a thing's place
+        let days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday", "today", "tomorrow", "tonight", "the weekend"];
+        let past_or_time = place.split_whitespace().any(|w| w.chars().all(|c| c.is_ascii_digit() || c == ':') || days.contains(&w))
+            || ["heaven", "hospital", "the past", "trouble", "love", "pain", "a meeting", "cloud", "fire", "a language", "danger", "a hurry", "a mess", "pieces", "tears", "shock", "the way", "progress", "the mail", "the post"].iter().any(|w| place.contains(w));
+        if thingy(thing) && !past_or_time && place.split_whitespace().count() <= 8 {
+            let at = crate::things::key(thing);
+            return go(format!("thing set {}|{}", keep(raw, &at), keep(raw, place.trim())));
+        }
+    }
+    None
+}
+
+fn household(t: &str) -> bool {
+    const HOUSEHOLD: &[&str] = &["key", "keys", "phone", "wallet", "glasses", "remote", "charger", "umbrella", "passport", "headphones", "earbuds", "bag", "backpack", "purse", "card", "cards", "scissors", "tape", "stapler", "pen", "pens", "book", "jacket", "coat", "shoes", "hat", "gloves", "drill", "hammer", "ladder", "screwdriver", "batteries", "torch", "flashlight", "ticket", "tickets", "receipt", "watch", "ring", "cable", "adapter", "manual", "papers", "documents", "toolbox", "vacuum", "iron", "warranty", "certificate", "license", "licence"];
+    t.split_whitespace().count() <= 3 && t.split_whitespace().last().is_some_and(|w| HOUSEHOLD.contains(&w))
+}
+
+/// "my CV", "the invoice pdf": a file on the computer rather than a thing in the house.
+pub fn looks_like_a_file(t: &str) -> bool {
+    t.to_lowercase().split_whitespace().any(|w| FILE_WORDS.contains(&w))
+}
+
 const FILE_WORDS: &[&str] = &["file", "document", "pdf", "photo", "picture", "spreadsheet", "presentation", "slides", "doc", "docx", "cv", "resume", "invoice", "report", "contract", "screenshot", "video", "song"];
 
 const TIMER_WORDS: &[&str] = &[
@@ -1605,6 +1662,10 @@ fn notes(s: &str, raw: &str) -> Option<Reply> {
             return None; // "done with it" is a feeling, not an item
         }
         return go(format!("done {}", keep(raw, what)));
+    }
+    // where things are: "my passport is in the top drawer", "I put the charger in the blue bag", "where is my passport"
+    if let Some(r) = where_things(s, raw) {
+        return Some(r);
     }
     // "what's due today", "anything overdue", "what am I waiting for"
     let due = |w: &str| go(format!("todos due {w}"));
@@ -2894,6 +2955,24 @@ mod tests {
         assert!(!matches!(eff("in 5 years i want to be rich"), Effect::Timer(..) | Effect::RepeatAt(..)));
         assert_eq!(eff("snooze tomorrow").clone(), eff("snooze tomorrow"));
         assert!(matches!(eff("snooze tomorrow"), Effect::Snooze(s) if s > 60));
+    }
+
+    #[test]
+    fn where_things_are_in_the_chat() {
+        let t = |s: &str| match eff(s) {
+            Effect::Things(c) => c,
+            e => panic!("{s}: {e:?}"),
+        };
+        assert_eq!(t("my passport is in the top drawer"), "set passport|in the top drawer");
+        assert_eq!(t("I put the charger in the blue bag"), "set charger|in the blue bag");
+        assert_eq!(t("the spare key is with Anna"), "set spare key|with Anna");
+        assert_eq!(t("where is my passport"), "where passport");
+        assert_eq!(t("where's the spare key"), "where spare key");
+        assert_eq!(t("what's in my blue bag"), "in blue bag");
+        for not in ["my head is in the clouds", "my mum is in Rome", "the meeting is at 3", "where is bern", "what's in the news"] {
+            assert!(!matches!(eff(not), Effect::Things(_)), "{not}");
+        }
+        assert!(lines::all("grief").contains(&respond("my dog is in heaven").text) || lines::all("grief").is_empty());
     }
 
     #[test]
