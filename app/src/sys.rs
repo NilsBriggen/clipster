@@ -591,7 +591,8 @@ pub fn play_blip(name: &str) {
 /// A desktop notification (Linux). On Windows the balloon and the flashing taskbar button do the job.
 pub fn notify(text: &str) {
     if !cfg!(windows) {
-        let _ = detach(command("notify-send").args(["-a", "Clipster", "⏰ Clipster", text]));
+        // "--": a reminder called "-5 min stretch" is text, not an option
+        let _ = detach(command("notify-send").args(["-a", "Clipster", "--", "⏰ Clipster", text]));
     }
 }
 

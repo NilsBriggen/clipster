@@ -466,6 +466,7 @@ I'm just a paperclip, but I'm here. And I'll be annoying as long as you need dis
 ## chat sick
 > i am sick | i have a cold | i have the flu | i feel sick | i have a headache | i have a fever
 @ sad
++ Quiet until tomorrow = pref quietfor tomorrow
 Poor you. Drink water, rest, and for once, listen to the paperclip. Work can wait.
 Sick days exist for a reason. Let the spreadsheet sulk without you.
 Get cozy, hydrate, and don't check email. I'll guard the desktop and sneeze on your behalf.
@@ -747,6 +748,7 @@ Harsh. I'll add it to my review. It's just a pile of sticky notes by now.
 > go away forever | i never want to see you again | disappear forever | get lost forever | leave me alone forever
 @ sad
 % -5
++ Quiet for an hour = pref quietfor 60
 Fine. Sulking in the corner now. No hard feelings. Just soft, bent ones.
 Forever is a long time. I'll be here when you need me. Which will be in six minutes.
 You'll miss me. I'll be right here, not missing you. Okay, a little.
@@ -2386,7 +2388,7 @@ Ah, the dreaded "have to". Start with the smallest piece. I'll wait.
 Have to {x}? Then let's make it small and doable. I can set a timer.
 You've got this. Do the first five minutes, the rest follows.
 Obligations: the main reason desktops are cluttered. I'm here if you need a break.
-Duty calls. I'll mute the pop-ups on my side. All of them.
+Duty calls. Go get it done, I'll be here after.
 I could remind you or nag you. Both are included at no extra cost.
 Do it now or do it later, but do it. I'll be here with a gentle shove.
 Honestly? Writing it down makes it smaller. Say "note" and I'll help.
@@ -5405,6 +5407,7 @@ Even if you do not have a standing desk, stand up once an hour. Free upgrade.
 ## chat posture
 > is my posture bad | how is my posture | should i sit straighter | am i slouching
 @ wink
++ Remind me every hour = remind me every hour to stretch
 I cannot see you. But I bet you are slouching. Everyone is. Sit up, roll your shoulders, carry on.
 A quick stretch every hour does wonders. I will remind you. Gently.
 Feet flat, shoulders back, screen at eye level. There. I am a posture expert now.
@@ -6595,6 +6598,7 @@ Let me know how it goes. I'll keep your spot warm.
 ## pattern the-deadline
 ~ the deadline * | my deadline * | our deadline * | the deadlines *
 @ shock
++ Quiet for an hour = pref quietfor 60
 The deadline {x}. Okay. What's the next smallest piece?
 Deadlines are easier to handle in thirds: plan, do, check. Don't skip the third.
 Want a focus session? Twenty-five minutes, no distractions, no snacks. Okay, snacks.
@@ -6826,6 +6830,7 @@ Tell me if you want a timer for a break.
 ## pattern i-am-in-a-meeting
 ~ i am in a meeting * | i am on a call * | i am in a call * | i am in a conference * | i am on a video call *
 @ wink
++ Quiet for an hour = pref quietfor 60
 In a meeting {x}? Shh. I'll stay quiet. Muted. Like you should be.
 Is your microphone muted? I'm very sure it isn't.
 Take notes. I'll be here when it's over. Or when it isn't.

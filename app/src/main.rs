@@ -830,6 +830,7 @@ impl App {
         if app.screenshot.is_none() {
             app.load();
             app.daily();
+            app.refresh_mood(); // before the greeting, so "welcome back" can be in today's mood
             if !app.name.is_empty() {
                 let waiting = app.timers.len();
                 let mut g = brain::greeting();
@@ -2111,6 +2112,18 @@ impl App {
             return;
         }
         let mut r = brain::react_window(&pool);
+        // a private window's title is never quoted: another line, or none
+        if lines::private_title(&self.window_text) {
+            for _ in 0..12 {
+                if !r.text.contains("{title}") {
+                    break;
+                }
+                r = brain::react_window(&pool);
+            }
+            if r.text.contains("{title}") {
+                return;
+            }
+        }
         r.text = r.text.replace("{title}", &brain::page_title(&self.window_text));
         self.pipe_up(r.run("Not about this", &format!("pref mute {id}")));
     }
@@ -2280,6 +2293,14 @@ impl App {
         self.welcome_seen = env!("CARGO_PKG_VERSION").to_string();
         let s = match done {
             welcome::Done::Finish(s) => s,
+            welcome::Done::TourEnd(open_desk) => {
+                if open_desk {
+                    self.desk_quip = lines::pick("desk_status");
+                    self.desk.open();
+                    self.desk.set_tab("today");
+                }
+                return self.show(Reply::say(lines::pick("welcome_say done")).mood(Mood::Party).run("What can you do?", "help"));
+            }
             welcome::Done::Cancel(was_unhinged) => {
                 if was_unhinged != self.unhinged {
                     self.set_persona(was_unhinged); // "keep things as they are"
@@ -2538,6 +2559,9 @@ impl App {
         lines::set_facts(&self.facts);
         self.birthday = v["birthday"].as_array().and_then(|a| Some((a.first()?.as_u64()? as u32, a.get(1)?.as_u64()? as u32)));
         self.pins = strings("pins");
+        // only labels of snippets still pinned (older versions kept an unpinned one's text here)
+        let pins = self.pins.clone();
+        self.pin_labels.retain(|k, _| pins.contains(k));
         self.reading = v["reading"].as_array().into_iter().flatten().filter_map(|r| Some((r[0].as_str()?.to_string(), r[1].as_str().unwrap_or("").to_string()))).collect();
         if strings("calendars") != self.calendars {
             self.calendars = strings("calendars");
@@ -3354,7 +3378,9 @@ impl App {
                         Some("clip_resumed")
                     }
                     "unpin" => at(target).filter(|(l, i)| *l == 'p' && *i < self.pins.len()).map(|(_, i)| {
-                        self.pins.remove(i);
+                        // its label goes too: the snippet's text was its key in settings.json
+                        let gone = self.pins.remove(i);
+                        self.pin_labels.remove(&gone);
                         "clip_unpinned"
                     }),
                     "clear" => {
@@ -3790,6 +3816,12 @@ impl App {
     fn tick(&mut self, ctx: &egui::Context) {
         let now = Instant::now();
         let t = self.t();
+        // a new day while he runs: the day counter, the streak and Unhinged's mood of the day move on at midnight
+        if self.screenshot.is_none() && self.stats.get("last_day").copied() != Some(chrono::Datelike::num_days_from_ce(&chrono::Local::now().date_naive()) as u64) {
+            self.daily();
+            let today = chrono::Local::now().date_naive();
+            self.countdowns.retain(|(_, d)| *d >= today); // yesterday's countdown is done
+        }
         // is the backup drive there? Asked on a thread every 30 s: an unreachable network share can take seconds or
         // hang, and that must never freeze the window. A check that hangs holds the next one back for an hour.
         if !self.backup_target.is_empty() && self.backup_here_at.is_none_or(|a| a.elapsed() > Duration::from_secs(30)) {

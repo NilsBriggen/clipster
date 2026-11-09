@@ -4989,22 +4989,6 @@ Nothing left on the list. Enjoy this moment. It lasts until the next email.
 All done! Treat yourself. You've earned at least a coffee.
 The list is empty. If you feel suspicious, that's normal. Savour it anyway.
 
-## todo_due
-"{x}" is due now. Time to do the thing.
-Heads up: "{x}" is due right now. No pressure, just a lot of it.
-Due now: "{x}". Open the thing, do the thing, close the thing.
-It's time for "{x}". It was a good plan when you wrote it down.
-"{x}" has arrived at its due date. It's punctual. Be more like it.
-Reminder: "{x}" is due. I'd say good luck, but you only need a few minutes.
-
-## todo_overdue
-{n} overdue items. It's fine. It's mostly fine. Let's pick the smallest one and start.
-You have {n} overdue to-dos. Deep breath. One at a time, smallest first.
-{n} things are past their date. They're not angry, just a bit late. So are you.
-Overdue: {n}. Let's triage. Pick the one that scares you least and go.
-{n} overdue. It happens. Reschedule, delete, or finish. All three are valid.
-The list has {n} overdue items. Nothing a short focus session can't dent.
-
 ## todo_empty
 Your to-do list is empty. Either you're a legend or you're hiding things.
 Nothing on the list. Add something with "todo <thing>". Or enjoy the calm.
@@ -5742,14 +5726,6 @@ One moment, I'm giving things a quick look.
 Running the checkup. Nothing will be changed.
 Looking at disk, trash, updates and more. Just looking.
 
-## upkeep_all_good
-Everything looks good. Nothing needs attention.
-Checkup done: all fine. Go and enjoy your computer.
-Clean bill of health. Not a single nudge from me.
-Every check passed, {name}. Well looked after.
-All good here. I'll look again next week.
-Nothing to fix. I'd claim credit, but you did the work.
-
 ## upkeep_day
 Upkeep day: {n} things could use a look. Nothing urgent.
 Weekly checkup: {n} small things worth a glance, {name}.
@@ -5757,42 +5733,6 @@ It's upkeep day. {n} items to look at, whenever you like.
 A gentle nudge: {n} things on the upkeep list. Five minutes, tops.
 Upkeep time. {n} items, none of them scary.
 Quick checkup says {n} things could be tidier. Shall we?
-
-## upkeep_disk_low
-Free disk space is down to {x}. A little tidying would help.
-Only {x} free on the disk. Not urgent, but worth a clear-out.
-{x} of disk space left. The Downloads folder might have ideas.
-Disk space: {x} free. A tidy-up now saves a headache later.
-
-## upkeep_restart
-The computer hasn't restarted for {n} days. A restart would do it good.
-{n} days since the last restart. A proper restart, not just shutting the lid.
-Up for {n} days straight. A restart clears the cobwebs.
-{n} days without a restart. Do it when convenient, {name}.
-
-## upkeep_updates
-{n} updates are waiting. Install them whenever you have a minute.
-There are {n} system updates ready. No rush, but don't forget.
-{n} updates pending. They'll keep, but not forever.
-{n} updates waiting for you. A coffee break is plenty of time.
-
-## upkeep_battery
-The battery holds about {n} percent of what it did when new. That's normal ageing.
-Battery health: {n} percent of new. Perfectly fine for daily use.
-Your battery manages {n} percent of its original capacity. It's doing its best.
-Battery health is {n} percent. Batteries age gracefully, mostly.
-
-## upkeep_trash
-The trash holds {x}. Empty it when you're sure.
-There's {x} sitting in the trash. A look, then an empty, might help.
-Trash is at {x}. I'll never empty it without asking.
-{x} in the trash, {name}. Might be time to let go.
-
-## upkeep_cache_cleared
-Temporary files cleared. Nothing of yours was touched.
-Cache cleaned. Everything important is still where you left it.
-Done. Only temporary files went away.
-Temp files cleared. Your computer says thanks.
 
 ## upkeep_startup_off
 {x} no longer starts with the computer. Faster logins, probably.
@@ -5857,12 +5797,6 @@ Do Not Disturb is on for this focus session. Notifications are quiet.
 Notifications silenced until the focus session ends.
 Quiet mode on. Nothing will ping you.
 Do Not Disturb enabled. Only you and the task now.
-
-## dnd_off
-Do Not Disturb is off. Notifications are back.
-Focus session over. Notifications are on again.
-Quiet mode off. The pings return.
-Notifications restored. Back to normal.
 
 ## dnd_unsupported
 This system won't let me silence notifications. I'll stay quiet myself.
@@ -19054,14 +18988,6 @@ Marked "{x}" as done. Momentum is a real thing. Use it.
 Struck through: "{x}". There's a lovely sound to that. I imagine it.
 "{x}" is out of the way. The next one looks smaller already.
 
-## todo_due
-It's time: "{x}". The clock says now.
-"{x}" is due as of this moment. Do it, or move it. Both are choices.
-The due date for "{x}" has arrived. Small steps count, so start with one.
-Knock, knock: "{x}" would like a minute of your time.
-"{x}" can't wait any longer, so I'm pointing at it. This is me pointing.
-Ding: "{x}" is due. Close it out before the next distraction does.
-
 ## todo_edited
 Fixed: "{x}".
 Done, it now says "{x}".
@@ -19095,14 +19021,6 @@ No luck with "{x}". A couple of key words from the item usually does it.
 Nothing matches "{x}". It may already be done, or worded differently.
 Searched the list for "{x}". Zero hits. The list is innocent.
 Hm, "{x}" isn't in there. Try "todos" to see the exact wording.
-
-## todo_overdue
-{n} overdue. Nothing is on fire. Start with whichever is oldest.
-{n} items slipped past their dates. Dates are suggestions, but let's catch up.
-Overdue count: {n}. Pick one and finish it. The number drops, so does the guilt.
-{n} to-dos are late. They're waiting by the door with their coats on.
-You have {n} overdue items. Ten minutes on one of them would help a lot.
-{n} past due. Move the dates or do the tasks. Pretending is the only wrong answer.
 
 ## todo_repeat
 Checked off "{x}". See you next time.
@@ -19142,34 +19060,6 @@ Not done after all? "{x}" is a to-do again.
 Marked "{x}" as open. Unticking is the polite way to say "almost".
 "{x}" is active again. Finish it properly this time. Or cheat, I'm a paperclip.
 
-## upkeep_all_good
-All checks green. Next look is in a week.
-Disk, trash, updates, startup: nothing to report. Pleasantly dull.
-The checkup found nothing. Boring results are the best results.
-Your computer passes. Gold star, no notes.
-Nothing needs doing. Spend the time on something that's yours.
-Fully tidy, {name}. I'll go and stare at the wall.
-
-## upkeep_battery
-Battery check: {n} percent health. Normal wear for the age.
-The battery gives {n} percent of its original capacity. Still a trouper.
-{n} percent of new. Batteries lose a little every year, like most things.
-At {n} percent health, the battery is ageing along the usual curve.
-Capacity check: {n} percent of when it was new. No action needed.
-Your battery sits at {n} percent health. It's a gradual slope, not a cliff.
-{n} percent battery health. Charging between 20 and 80 percent keeps it going longer.
-Battery report: {n} percent of original. Nothing to do but charge it sensibly.
-
-## upkeep_cache_cleared
-Cache swept. Your documents and settings weren't touched.
-Temporary files are gone. Only things the system can remake went.
-Cleanup done. Everything that matters is exactly where it was.
-All clear: just temp files removed. Nothing personal.
-The cache is empty. Programs may start a hair slower once while they rebuild it.
-Done. Only throwaway files were cleared, and the disk is a little roomier.
-Housekeeping finished. Your files are exactly as you left them.
-Temp folder emptied. I touched nothing else, scout's honour.
-
 ## upkeep_checking
 Doing the rounds: disk, trash, updates, startup. A moment.
 Checkup in progress. I'm only reading, not changing.
@@ -19187,26 +19077,6 @@ Upkeep roundup: {n} small things. Open the checkup whenever it suits.
 The weekly scan found {n} items. Take a look, or ignore me till next week.
 {n} things on this week's list. I've counted. I've also made it short.
 Maintenance moment: {n} items to see. Won't hurt a bit.
-
-## upkeep_disk_low
-Free space has dropped to {x}. A quick clear-out, and it's comfortable again.
-{x} free on the disk. Big downloads and old installers are the usual suspects.
-The disk has {x} left. Plenty for now, but it's shrinking.
-Heads up: {x} of free space. Empty the trash and see how far that gets you.
-{x} free. A computer likes a bit of elbow room, same as people.
-Disk space is at {x}. The tidy tool can sort the Downloads folder, if you like.
-You have {x} of room left. Videos and old backups are usually the big ones.
-Free space is {x}. Not an emergency, just an early word.
-
-## upkeep_restart
-The machine has been on for {n} days. A restart now and then helps it tidy up after itself.
-{n} days of uptime. Impressive, but updates only finish after a restart.
-It's been {n} days since a restart. Five minutes of rebooting, a fresher computer.
-Uptime: {n} days. Restart when you reach a good stopping point.
-{n} days running. Save your work, restart, and enjoy the speed.
-No restart for {n} days. Worth doing today or tomorrow, whichever suits.
-{n} days awake. Even computers like a clean start.
-Your computer would like a restart. It's been {n} days. No rush, but it's been a while.
 
 ## upkeep_startup_off
 {x} is off the startup list. Login should be a touch lighter.
@@ -19227,26 +19097,6 @@ Done. {x} wakes up with the computer from now on.
 Autostart for {x} is back. It'll be waiting when you log in.
 {x} rejoins the login lineup. Reversible at any time.
 Switched on: {x} at startup. One less thing to open by hand.
-
-## upkeep_trash
-The trash is holding {x}. Take a look inside before emptying.
-{x} is sitting in the trash. Empty it when you're sure it's all junk.
-Trash check: {x}. Emptying frees the space straight away.
-You have {x} in the trash. I'll wait for your go-ahead.
-{x} of deleted things are still around. Once emptied, they're gone for good, so glance first.
-The trash has grown to {x}. A quick scroll, then empty. Your call.
-There's {x} in the bin. A fine thing to clear while the kettle heats.
-Trash holds {x}. I never empty it on my own. Your files, your decision.
-
-## upkeep_updates
-{n} updates are ready to install. A restart may be needed afterwards.
-Pending: {n} updates. They tend to include security fixes, so don't leave them too long.
-{n} updates available. Run them over lunch.
-There are {n} things to update. Nothing urgent, but not forever either.
-Your system has {n} updates queued. Takes a few minutes, usually.
-{n} updates ready. Better now than at the worst possible moment later.
-Updates: {n} waiting. Install, restart, forget about it.
-{n} pending updates. I'd say "install them", but you know the drill.
 
 ## wrapup_goodnight
 Good night. Tomorrow's list is ready and waiting.
@@ -19381,18 +19231,6 @@ That calendar's no longer linked. I've stopped reading it.
 Gone. I'm blind to your schedule now, which is a relief for both of us.
 Okay, I've dropped it. Keep an eye on the clock yourself, or paste the link again.
 Calendar removed. Your meetings can surprise you again.
-
-## calendar_failed
-I couldn't fetch that calendar. The link might be wrong, or the internet is out.
-No luck with that calendar. Check that you copied the whole private iCal link.
-Couldn't read that link. It may be the wrong kind: I need the private iCal one.
-The calendar didn't load. Either the link is off, or you're offline.
-Failed to fetch your calendar. Check the link, and check the connection.
-That link gave me nothing. Copy it again; they're long and easy to cut short.
-I couldn't get your calendar. If you reset its link, the old one stops working.
-No calendar came back. Offline? Wrong link? Sleepy server? I can't tell which.
-Calendar fetch failed. Google calls the right one "Secret address in iCal format". Outlook and Nextcloud have their own.
-That didn't work. Many calendar links end in .ics. Try again, slowly.
 
 ## calendar_none
 No calendar linked yet. Paste its private iCal link and I'll start watching it.
@@ -20041,11 +19879,6 @@ The shelf is bare. Plenty of room for a tidy-up.
 Your list is empty. Add a task with "todo <thing>" and I'll start counting.
 No to-dos. Either you're a legend or you haven't written them down yet.
 Empty list, empty mind. Pick one thing, any thing, and write it here.
-
-## dnd_off
-Do Not Disturb is off. The world can ping you again.
-Back to normal: notifications are live.
-Quiet's over. Pings incoming, probably about nothing.
 
 ## dnd_on
 Notifications are off while you focus. I'll keep the desktop quiet.

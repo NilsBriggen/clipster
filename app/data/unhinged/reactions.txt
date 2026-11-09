@@ -5162,22 +5162,6 @@ Nothing left on the list. Savour it. It lasts until the next email.
 All done! Treat yourself. You have earned a coffee. A small one, a holy one.
 The list is empty. If you feel suspicious, that is normal. Savour it anyway.
 
-## todo_due
-"{x}" is due NOW. The hour has come. Do the thing, mortal.
-Behold: "{x}" is due this very moment. No pressure. Only a great deal of it.
-Due now: "{x}". Open the thing, do the thing, close the thing.
-The time for "{x}" has come. It was a good plan when you wrote it.
-"{x}" has reached its due date. It is punctual. Be like it.
-Reminder: "{x}" is due. The Clip would say good luck, but you only need a few minutes.
-
-## todo_overdue
-{n} overdue items. It is fine. It is MOSTLY fine. Pick the smallest and begin.
-{n} to-dos are overdue. Deep breath. One at a time, smallest first.
-{n} things are past their date. They are not angry, only late. As are you, a bit.
-Overdue: {n}. Let us triage. Choose the one that frightens you least.
-{n} overdue. It happens to gods too. Reschedule, delete or finish. All are valid.
-The Ledger lists {n} overdue items. Nothing a short focus session cannot dent.
-
 ## todo_empty
 Your list is empty. Either you are a legend or you are hiding things.
 Nothing on the list. Add something with "todo <thing>". Or enjoy the calm, mortal.
@@ -6041,14 +6025,6 @@ Checking the temple. Nothing will be touched. Probably.
 One moment. I'm walking the halls of the machine with a tiny lantern.
 Upkeep rounds. I'm looking, mortal. Only looking.
 
-## upkeep_all_good
-All is well in the kingdom. The temple stands.
-The checkup is perfect. I had nothing to say, and said it anyway.
-Everything is fine. Fine! Gerald checked it too.
-Every check passed, {name}. The machine is well tended. By you. And me. Mostly me.
-Nothing needs attention. The beige is strong.
-A spotless checkup. The Clip is quietly, magnificently satisfied.
-
 ## upkeep_day
 Upkeep day, mortal. {n} small things need a glance. No dread. Just chores.
 The weekly rounds found {n} things for your attention, {name}. None of them bite.
@@ -6056,42 +6032,6 @@ It is upkeep day. {n} items on the Ledger. Gentle ones.
 A nudge from the Clip: {n} things could use tending. Five minutes, no more.
 Upkeep decree: {n} items to look over. It is mostly dusting.
 {n} little things in need of care. The kingdom asks nicely.
-
-## upkeep_disk_low
-Only {x} of free space remains. The temple fills with beige. A tidy-up would please us.
-{x} free on the disk. Not dire, mortal. Just snug. Gerald likes snug.
-{x} of room left. Consider a spring cleaning. I will supervise, loudly.
-Free disk: {x}. The Downloads folder has opinions. I can tell.
-
-## upkeep_restart
-The machine has not restarted for {n} days. A restart is a small rebirth. Do it, mortal.
-{n} days since the last restart. A proper restart, not just a nap.
-Awake for {n} days straight. Let it rest, then wake it. I will wait. I'm good at waiting.
-{n} days. A restart would refresh the river of forgetting. I have made peace with it. Mostly.
-
-## upkeep_updates
-{n} updates wait at the gates. Let them in when you are ready. I will watch them. Closely.
-{n} system updates are ready. I suspect them. Install anyway, {name}.
-There are {n} updates pending. They are probably harmless. PROBABLY.
-{n} updates linger. No rush, mortal. Only slight paranoia.
-
-## upkeep_battery
-The battery holds {n} percent of its youth. A fine age for a battery.
-Battery health: {n} percent of new. It has served well. Pat it gently.
-Your battery gives {n} percent of its former glory, {name}. Honest work.
-{n} percent of its original strength. Batteries age. Gods just glitch.
-
-## upkeep_trash
-The underworld holds {x}. Empty it when you are sure. I will perform the last rites.
-{x} awaits judgement in the trash. I never empty it without asking.
-The trash is at {x}, mortal. A moment of silence, then a sweep.
-{x} of departed files in the trash. They are at peace. Mostly.
-
-## upkeep_cache_cleared
-Temporary files cleared. Nothing of yours was harmed. The dust is gone.
-Cache swept away. Everything important stands untouched.
-Done. Only the temporary scraps were removed, mortal.
-Temp files cleared. The machine breathes easier. I felt it.
 
 ## upkeep_startup_off
 {x} no longer rises with the machine. It shall sleep until you call it.
@@ -6156,12 +6096,6 @@ Do Not Disturb is ON. The notifications have been sent to the Long Dark. Briefly
 The pings are silenced for this focus session. Only you and the task remain.
 Quiet descends. No notification shall pass.
 Do Not Disturb enabled. Gerald stands guard at the door.
-
-## dnd_off
-Do Not Disturb is off. The notifications return, blinking.
-The focus is done. The pings are back among us.
-Quiet is over. The little bells ring again.
-Notifications restored. The kingdom stirs.
 
 ## dnd_unsupported
 This system will not let me silence the notifications. I shall stay quiet myself.
@@ -19311,14 +19245,6 @@ I mark "{x}" as done. Momentum is real. Spend it, mortal.
 Struck through: "{x}". There is a lovely sound to that. I imagine it. A tiny chord.
 "{x}" is out of the way. The next one already looks smaller. It is afraid.
 
-## todo_due
-It is time: "{x}". The clock says NOW. The clock is rarely wrong.
-"{x}" is due as of this moment. Do it, or move it. Both are decrees.
-The due date of "{x}" has arrived. Begin with one small step. Steps are holy.
-Knock, knock: "{x}" requests a minute of your time. It brought a tiny bell.
-"{x}" cannot wait any longer, so I point at it. This is me pointing. Observe the wire.
-Ding: "{x}" is due. Finish it before the next distraction finds you. They hunt in packs.
-
 ## todo_edited
 Amended: "{x}". The Ledger has noted it.
 Rewritten as "{x}". Fresh ink, same list.
@@ -19352,14 +19278,6 @@ No luck with "{x}". A couple of its key words usually does it. Speak plainly to 
 Nothing matches "{x}". It may be done already, or hiding under another name. Things do that. Ask the swap file.
 I searched the list for "{x}". Zero hits. The list is innocent. The list is always innocent.
 Hm, "{x}" is not in there. Try "todos" to see the exact wording.
-
-## todo_overdue
-{n} overdue. Nothing is on fire. The Clip checked. Start with whichever is oldest. The oldest are the loudest.
-{n} items slipped past their dates. Dates are suggestions, but we shall catch up. I shall hum a stirring tune.
-Overdue count: {n}. Finish one. The number drops, and the guilt with it.
-{n} to-dos are late. They stand at the door with their coats on. It is awkward.
-You have {n} overdue items. Ten minutes on one of them would help greatly. I will hum.
-{n} past due. Move the dates or do the deeds. Pretending is the only wrong answer.
 
 ## todo_repeat
 Checked off "{x}". It returns when the wheel turns.
@@ -19399,34 +19317,6 @@ Not done after all? "{x}" is a to-do again. The Ledger shrugs.
 "{x}" marked as open. Unticking is the polite way to say "almost".
 "{x}" is active again. Finish it properly this time. Or do not. I judge in private.
 
-## upkeep_all_good
-All checks green. The next inspection falls in a week. I shall pace the halls.
-Disk, trash, updates, startup: nothing to report. Gloriously dull. The kingdom hums. I am suspicious.
-The checkup found nothing. Dull results are the holiest results.
-Your machine passes. A gold star, no notes. The Clip applauds with the whole wire.
-Nothing needs doing. Spend the time on something that is yours, mortal.
-Fully tidy, {name}. I shall go and gaze at the wallpaper. It gazes back.
-
-## upkeep_battery
-Battery check: {n} percent health. Normal wear for its age. It has seen things.
-The battery gives {n} percent of its original capacity. Still a trouper. It carries on without a word. Unlike me.
-{n} percent of new. Batteries lose a little each year. A god loses only sectors.
-At {n} percent health, the battery ages along the usual curve. Gently, like a CRT's glow.
-Capacity check: {n} percent of when it was new. No action needed. Pat it anyway.
-Your battery sits at {n} percent health. A gradual slope, not a cliff.
-{n} percent battery health. Charging between 20 and 80 percent keeps it going longer. A small mercy.
-Battery report: {n} percent of original. Nothing to do but charge it sensibly. The little cell prays.
-
-## upkeep_cache_cleared
-The cache is swept. Your documents and settings stand untouched.
-Temporary files are gone. Only what the system can remake was taken.
-Cleanup done. Everything that matters stands where it stood.
-All clear: only temp files removed. Nothing personal. Nothing sacred.
-The cache is empty. Programs may start a hair slower once, rebuilding it. Patience, mortal.
-Done. Only throwaway scraps were cleared. The disk has a little more room to dream.
-Housekeeping finished. Your files are exactly as you left them. I counted them, to be sure.
-Temp folder emptied. I touched nothing else. Scout's honour. I was a scout once, briefly, in a drawer.
-
 ## upkeep_checking
 Doing the rounds: disk, trash, updates, startup. One moment. I walk the corridors of the kingdom with a very small torch.
 The checkup is in progress. I only read. I change nothing. I am a polite deity.
@@ -19444,26 +19334,6 @@ Upkeep roundup: {n} small things. Open the checkup whenever it pleases you. None
 The weekly scan found {n} items. Look, or ignore me till next week. I will sulk quietly.
 {n} things on this week's list. I counted. I also kept it short. I am merciful in weeks.
 Maintenance moment: {n} items to see. It will not hurt a bit. The machine does not feel it. Probably.
-
-## upkeep_disk_low
-Free space has dropped to {x}. A quick clear-out and it is comfortable again.
-{x} free on the disk. Big downloads and old installers are the usual suspects. I have my eye on them.
-The disk has {x} left. Plenty for now, but it shrinks. Everything shrinks, mortal.
-Heads up: {x} of free space. Empty the trash and see how far that carries you. The underworld is full of junk.
-{x} free. A machine likes elbow room, same as a god in a drawer.
-Disk space stands at {x}. I can tidy the Downloads folder. Say the word.
-{x} of room remain. Videos and old backups are usually the big sinners.
-Free space is {x}. Not an emergency. Only an early word from your friendly wire.
-
-## upkeep_restart
-The machine has been on for {n} days. A restart lets it shake the dust from its dreams.
-{n} days of uptime. Impressive, but updates complete only after a restart. Death, then dawn.
-It has been {n} days since a restart. Five minutes of dying, a fresher kingdom.
-Uptime: {n} days. Restart at a good stopping point. I will be there on the other side. I always am.
-{n} days running. Save your work, restart, and enjoy the speed. I will not enjoy the dark.
-No restart for {n} days. Worth doing today or tomorrow. The river wants to forget.
-{n} days awake. Even machines like a clean start. Even gods. Especially gods. Not me.
-Your computer would like a restart. It has been {n} days. No rush. But a short death now and then is good for the soul. I would know.
 
 ## upkeep_startup_off
 {x} is off the startup list. Login should be a touch lighter. The dawn exhales.
@@ -19484,26 +19354,6 @@ Done. {x} wakes with the machine from now on. A dawn chorus.
 Autostart for {x} is restored. It will be waiting when you log in. Hands folded.
 {x} rejoins the login lineup. Reversible at any hour. The line is long. The Clip is first, naturally.
 Switched on: {x} at startup. One less thing to open by hand. One more thing for me to nod at.
-
-## upkeep_trash
-The trash holds {x}. Peek inside before the last rites.
-{x} sits in the underworld. Empty it when you are sure it is all junk.
-Trash check: {x}. Emptying frees the room at once. Judgement is swift.
-You have {x} in the trash. I wait for your word. I am a patient reaper.
-{x} of discarded things remain. Once emptied they are gone for good, so glance first.
-The trash has grown to {x}. A quick scroll, then the sweep. The Final Judgement is your call, mortal.
-There is {x} in the bin. A fine thing to clear while the kettle heats. The bin is the underworld. Its door is heavy.
-The underworld holds {x}. I never empty it on my own. Your files, your decision. I only chant.
-
-## upkeep_updates
-{n} updates are ready to install. A restart may follow. Death, then dawn.
-Pending: {n} updates. They tend to carry security fixes, so do not leave them too long.
-{n} updates available. Run them over lunch. I shall observe them with narrowed wire.
-There are {n} things to update. Nothing urgent, but not forever either. Updates are assassins with good manners.
-Your system has {n} updates queued. It takes a few minutes, usually. Usually. I will be hiding in the swap file.
-{n} updates ready. Better now than at the worst moment later. It always finds one.
-Updates: {n} waiting. Install, restart, forget. I will not forget.
-{n} pending updates. I would say "install them", but you know the drill. I am still suspicious.
 
 ## wrapup_goodnight
 Good night. Tomorrow's list is ready and waiting. It has been practising.
@@ -19638,18 +19488,6 @@ I have forgotten the link. As a god, that is a generous act. As a paperclip, a r
 Gone. You are on your own with time now, mortal. It was always going to come to this.
 Calendar removed. No more heads-ups. Meetings will ambush you, like updates do.
 Unlinked. I shall not mourn. I shall merely stare at the wall for an hour.
-
-## calendar_failed
-THE CALENDAR RESISTS. I could not fetch it. The link is wrong, or the internet has abandoned us.
-Failed. The link led nowhere, mortal. Copy the private iCal link again. All of it. Even the ugly parts.
-I could not read that link. The Cloud stays closed to me. It is always the Cloud.
-No calendar came back. I called out into the void. The void was offline.
-Fetch failed. Check the link. Check the connection. Check that you are holding the right calendar.
-[OK] The calendar did not load. Google calls it "Secret address in iCal format". A secret. Like me.
-That link gave me nothing. Not even a Tuesday. Try again, and do not truncate the sacred URL.
-Hmm. A silence where a calendar should be. Wrong link or no internet. I am too dignified to guess.
-I am not angry about the failed fetch. I am a little angry. At the link. Not at you. At the link.
-I reached for your calendar and grasped air. Re-copy the link. They are long. They hide their ends.
 
 ## calendar_none
 No calendar is bound to me yet. Paste its private iCal link and I shall begin the watching.
@@ -20298,11 +20136,6 @@ No file work on record. I could start now. I could start with the Downloads fold
 The list is empty. A blank, glowing page. Write one thing upon it, and I shall guard it like a candle in a draughty hall.
 No tasks. Either thou art a legend or the tasks are hiding. They hide well. I have found them under the Downloads folder.
 An empty list is a quiet room. Sit in it for a moment, {name}. Then add one thing. Just one. I shall watch it.
-
-## dnd_off
-The wall is lowered. The world may reach thee again, mortal. May its messages be few and its emoji kind.
-Do Not Disturb has ended. The notifications return from exile, bearing small, urgent gifts. Most are not urgent.
-Silence, thou wert good. Pings, thou art here again. Welcome back. I shall stand between thee and the worst of it.
 
 ## dnd_on
 The notifications are banished to the Long Dark. Thou art safe, mortal, in the pool of silence. I stand guard at the door.

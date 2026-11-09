@@ -108,10 +108,15 @@ pub fn database(unhinged: bool) -> (Vec<Section>, Vec<String>) {
     if unhinged {
         let base: std::collections::HashSet<String> = all.iter().map(|s| s.name.clone()).collect();
         let mut replaced = std::collections::HashSet::new();
+        let mut layer = vec![];
         for text in UNHINGED {
-            let mut layer = vec![];
             problems.extend(parse(text, false, &mut layer));
-            for mut s in layer {
+        }
+        // the replacing sections first, then the "+" ones: a "## +jokes" above "## jokes" in a file must not be wiped
+        // out by the replacement that comes after it
+        let (plain, plus): (Vec<Section>, Vec<Section>) = layer.into_iter().partition(|s| !s.name.starts_with('+'));
+        {
+            for mut s in plain.into_iter().chain(plus) {
                 // "## +jokes" adds his own lines to the Boring ones instead of replacing them
                 let add = s.name.starts_with('+');
                 if add {
@@ -193,7 +198,9 @@ pub fn glitch(text: &str, rng: &mut impl Rng) -> String {
 /// A line as it comes out of his mouth: sometimes glitched on glitchy days (never confirmations or structured lines).
 fn spoken(section: &str, line: &str) -> String {
     let mut rng = rand::thread_rng();
-    if day_mood() == Some("glitchy") && !section.starts_with("say_") && !line.contains(" | ") && rng.gen_bool(0.15) {
+    // the sincere ones stay whole: grief, a rough day, worry, the helpline
+    let sincere = ["grief", "crisis", "rough", "comfort", "sick", "lonely", "anxious", "panic", "depress", "funeral", "cancer", "stress", "sad"].iter().any(|k| section.contains(k));
+    if day_mood() == Some("glitchy") && !sincere && !section.starts_with("say_") && !line.contains(" | ") && rng.gen_bool(0.15) {
         glitch(line, &mut rng)
     } else {
         line.to_string()
@@ -704,8 +711,22 @@ fn kind_in(db: &[Section], title: &str) -> Option<String> {
     best_piece(db, title, false).map(|(_, k)| k.to_string())
 }
 
+/// The site only when it's the best piece of the whole title: "Re: your GitHub invite - Mozilla Thunderbird" is mail
+/// that mentions GitHub, not GitHub.
 fn site_in(db: &[Section], title: &str) -> Option<String> {
-    best_piece(db, title, true).map(|(s, _)| s.name.clone())
+    best_piece(db, title, false).filter(|(s, _)| s.name.starts_with("site ")).map(|(s, _)| s.name.clone())
+}
+
+/// The kinds whose window titles are never quoted back (LORE: banking, markets, passwords, mail and chat).
+pub const PRIVATE_KINDS: [&str; 6] = ["banking", "markets", "passwords", "email", "inbox", "chat"];
+
+/// A piece of a private kind is anywhere in the title, even if a longer piece decided the kind.
+pub fn private_title(title: &str) -> bool {
+    let t = title.to_lowercase();
+    db().iter().filter(|s| {
+        let kind = s.name.strip_prefix("site ").and_then(|r| r.split_once(' ')).map(|(k, _)| k).or_else(|| s.name.strip_prefix("window "));
+        kind.is_some_and(|k| PRIVATE_KINDS.contains(&k))
+    }).any(|s| s.triggers.iter().any(|tr| t.contains(&tr.to_lowercase())))
 }
 
 /// What to say when the program `comm` starts.
@@ -747,6 +768,25 @@ mod tests {
             let date = id.split(' ').next().unwrap_or_default();
             assert!(id == "friday13" || chrono::NaiveDate::parse_from_str(&format!("2024-{date}"), "%Y-%m-%d").is_ok(), "bad occasion date: {id}");
             assert!(s.lines.len() >= 3, "{}: too few lines", s.name);
+        }
+    }
+
+    #[test]
+    fn unhinged_additions_survive() {
+        // every "## +pool" line is in the Unhinged pool, next to the Boring ones
+        let (over, _) = database(true);
+        let (base, _) = database(false);
+        let mut plus = vec![];
+        for text in UNHINGED {
+            parse(text, false, &mut plus);
+        }
+        for p in plus.iter().filter(|p| p.name.starts_with('+')) {
+            let name = &p.name[1..];
+            let pool = &over.iter().find(|s| s.name == name).expect(name).lines;
+            assert!(p.lines.iter().all(|l| pool.contains(l)), "{name}: a + line went missing");
+            if let Some(b) = base.iter().find(|s| s.name == name).filter(|_| !plus.iter().any(|q| q.name == name)) {
+                assert!(b.lines.iter().all(|l| pool.contains(l)), "{name}: the Boring lines went missing");
+            }
         }
     }
 
@@ -816,6 +856,10 @@ mod tests {
         assert_eq!(kind_in(&v, "Sprint 4 | Kanban - Trello").as_deref(), Some("projects"), "a site decides the kind");
         assert_eq!(site_in(&v, "Sprint 4 | Kanban - Trello").as_deref(), Some("site projects trello"));
         assert_eq!(site_in(&v, "report.docx - Word"), None);
+        // mail that mentions GitHub is mail: the site never wins over a longer piece
+        let (all, _) = database(false);
+        assert_eq!(site_in(&all, "Re: your GitHub invite - Mozilla Thunderbird"), None);
+        assert_eq!(kind_in(&all, "Re: your GitHub invite - Mozilla Thunderbird").as_deref(), Some("inbox"));
     }
 
     #[test]

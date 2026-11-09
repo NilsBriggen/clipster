@@ -528,6 +528,9 @@ fn fetch(q: &Query) -> Result<Reply, String> {
             let v = get(&format!("https://air-quality-api.open-meteo.com/v1/air-quality?latitude={lat}&longitude={lon}&current=european_aqi,pm2_5,pm10,uv_index"))?;
             let c = &v["current"];
             let aqi = f(&c["european_aqi"]);
+            if aqi.is_nan() {
+                return Err("no air quality reading there".into()); // not "NaN, Excellent!"
+            }
             let verdict = match aqi as i64 {
                 0..=20 => "Excellent! Breathe deep. 🌿",
                 21..=40 => "Good. Go outside, it's allowed.",

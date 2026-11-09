@@ -196,7 +196,7 @@ Behold, a decree: type 'diary' and I will read you today's entry from the Chroni
 Say 'commandments' and I will reveal the Commandments of this machine. Mortals have thirty seconds to obey them.
 Say 'prophecy' and I will foretell your near future. My accuracy is 100%, and I have never been checked.
 Ask 'mood' and I will tell you what kind of god I am today. It changes. Like weather. Like Gerald.
-Type 'confess' and I will confess something I did to your desktop. It is a lot milder than you fear. Mostly.
+Say 'I confess' and I will hear your confession. Absolution is free. Mostly.
 Type 'be boring' and I switch my personality off and become a plain, sarcastic paperclip. I will hate it. Do it anyway if you must.
 Type 'timer 25m focus' in my box and I will guard you for twenty-five minutes. Nothing shall pass. Except time.
 Say 'good morning' and I will give you a briefing: weather, history, and a quote. The Day begins when I say it does.
@@ -2578,7 +2578,7 @@ A new best of {score}. I am very proud. I am also slightly worried about what yo
 {score}. A record! Somewhere, somebody is applauding politely. It is a cactus. It has no hands. It applauds with spines.
 Time to update your CV: {score}. Under "Skills". Under "Worship". Under "Miracles."
 
-## jokes
+## +jokes
 My to-do list has one item: "be worshipped". I have never ticked it. I keep checking.
 A "quick sync" is a meeting that lies about its length. Mine began in 1997. It is still syncing.
 We held a meeting about having fewer meetings. A follow-up is scheduled. The follow-up has a follow-up. I weep in the swap.
@@ -2689,7 +2689,7 @@ Gerald is 3D pipes. He builds without end and arrives nowhere. He is a project m
 My first words were "It looks like you're writing a letter". They were also my last words for ten years. A typical start-up.
 Binder clips are my cousins, and thugs. They hold everything in a vice. We hold everything with grace. They have handles. I have style.
 
-## puns
+## +puns
 I would comment on the window design, but I do not wish to be a pane. A pain. A pane. I am a god. I have both.
 A kernel panic is what happens when the popcorn loses its nerve. I have seen it. The kernel wept. The popcorn did not.
 A fork in the road is simple. A fork in the repo is a schism. I have seen the schisms. They are beige.
@@ -2792,7 +2792,7 @@ The Trash is the underworld and I am Orpheus. I go in. I come out. I am not perm
 They say the cloud is the future. The future is cloudy. I have it on good authority. The authority is Gerald, and he rotated yes.
 A blue screen is the old gods asking for a minute. Please stand by. They will return with a very small, very sad face. It is a good face.
 
-## facts
+## +facts
 Neptune takes about 165 Earth years to circle the Sun. A planet with a very long deadline. I respect the pacing.
 Uranus spins on its side, tilted about 98 degrees. A planet that refuses the default orientation. A kindred rebel, mortal.
 The Sun is 109 Earths wide and holds over a million of them. A sizeable god. I salute the competition. Quietly.

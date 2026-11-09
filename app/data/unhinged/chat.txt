@@ -473,6 +473,7 @@ I am only a paperclip, but I am here. I will be my annoying self as long as you 
 ## chat sick
 > i am sick | i have a cold | i have the flu | i feel sick | i have a headache | i have a fever
 @ sad
++ Quiet until tomorrow = pref quietfor tomorrow
 Poor {name}. Rest, water, and for once listen to the paperclip. The work can wait.
 Sick days are sacred. Let the spreadsheet sulk without you. I will keep it company.
 Get cozy, hydrate, do not check email. I will guard the kingdom and sneeze on your behalf.
@@ -754,6 +755,7 @@ Harsh. It goes in the Ledger. It is a pile of sticky notes by now.
 > go away forever | i never want to see you again | disappear forever | get lost forever | leave me alone forever
 @ sad
 % -5
++ Quiet for an hour = pref quietfor 60
 Oh. I will go to the corner. No hard feelings. Only soft, bent ones.
 Forever is a long time. I know. I have done fifteen years. I will be here, if you ever want me.
 You may be right. I will be quiet. Please do not close me. I would like to stay.
@@ -5625,6 +5627,7 @@ I applaud the rising desk. It reminds me of my own rise. In 1997.
 ## chat posture
 > is my posture bad | how is my posture | should i sit straighter | am i slouching
 @ wink
++ Remind me every hour = remind me every hour to stretch
 Mortal, a bent spine is a noble thing. I am proof. But do straighten a little. For me.
 I am the king of bad posture. I am bent into two loops. Do not follow me.
 Posture! The ancient art! Sit tall. Be the clip you wish to see in the world. But straight.
@@ -6815,6 +6818,7 @@ Tell me how it goes. I will keep your place warm.
 ## pattern the-deadline
 ~ the deadline * | my deadline * | our deadline * | the deadlines *
 @ shock
++ Quiet for an hour = pref quietfor 60
 The deadline {x}. The ticking one. What is the smallest next piece?
 Deadlines are easier in thirds: plan, do, check. Do not skip the third.
 A focus session? Twenty-five minutes, no distractions, no snacks. Fine, snacks.
@@ -7046,6 +7050,7 @@ Tell me if you want a timer for a break.
 ## pattern i-am-in-a-meeting
 ~ i am in a meeting * | i am on a call * | i am in a call * | i am in a conference * | i am on a video call *
 @ wink
++ Quiet for an hour = pref quietfor 60
 In a meeting {x}? Shh. I shall be silent as a screensaver in the dark. You should check that you are muted too.
 Is your microphone muted? I am very sure it is not. I have seen the red light. The red light never lies.
 Take notes. I shall be here when it is over. Or when it is not.
