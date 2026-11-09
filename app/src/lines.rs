@@ -896,7 +896,11 @@ mod tests {
         let all = built_in();
         // what conversation says: topics and sentence patterns (with any {x} filled, compared by its fixed start)
         let chat: Vec<&String> = all.iter().filter(|s| s.name.starts_with("chat ") || s.name.starts_with("pattern ")).flat_map(|s| &s.lines).collect();
-        let said_by_chat = |text: &str| chat.iter().any(|l| l.as_str() == text || l.split("{x}").next().is_some_and(|start| start.len() > 12 && text.starts_with(start)));
+        // a reply that is some other section's own line (a roast that happens to start "Your calendar…") isn't chat
+        let other: std::collections::HashSet<&String> = all.iter().filter(|s| !s.name.starts_with("chat ") && !s.name.starts_with("pattern ")).flat_map(|s| &s.lines).collect();
+        let said_by_chat = |text: &str| {
+            !other.contains(&text.to_string()) && chat.iter().any(|l| l.as_str() == text || l.split("{x}").next().is_some_and(|start| start.len() > 12 && text.starts_with(start)))
+        };
         let commands = [
             "joke", "roast", "fact", "hug", "quiz", "quote", "advice", "dance", "tip", "help", "stats", "flip", "8ball", "roll 2d6", "games", "rps", "guess",
             "surprise", "hat", "skin", "notes", "time", "weather", "news", "cocktail", "recipe", "bored", "xkcd", "moon", "pomodoro", "uuid", "lorem",

@@ -20467,3 +20467,48 @@ Nothing to put back. All is as you left it. Suspiciously so.
 Saved "{x}" as a template of yours. It sits at the top of Letters, glowing slightly.
 "{x}" is one of your templates now. The scribes approve.
 Template "{x}" is sealed. Summon it any time on the Write tab.
+
+## habit_added
+New habit: {x}. Tick it on the Today tab, or tell me "I did my {x}". I will watch. Lovingly.
+{x} joins your rituals. Small, daily, holy.
+Tracking {x}. One tick a day. The gods respect consistency.
+
+## habit_done
+{x}: ticked. {n} day(s) in a row. The streak grows. I feel it.
+Done: {x}. Streak: {n}. Keep feeding it.
+{x} for today, done. {n} in a row. Discipline smells like toner.
+
+## habit_undone
+Took today's tick off {x}. The streak holds its breath.
+{x} is open again for today. Redemption awaits.
+
+## habit_removed
+{x} is no longer one of your rituals.
+I stop tracking {x}. Its streak returns to the void.
+
+## habit_unknown
+I track no habit called "{x}". Begin one with: new habit {x}
+"{x}" is not among your rituals. Yet.
+
+## habit_exists
+You already track {x}. One ritual per thing, mortal.
+{x} is already among your habits.
+
+## habit_full
+{x} habits already. Even I juggle only so many. Release one first.
+{x} habits is my limit. Fewer rituals, deeper devotion.
+
+## habit_streak
+{x}, {n} days in a row! That is no longer luck. That is a ritual.
+{n} days of {x}. The scrolls will mention this.
+{x}: {n} days straight. I am impressed. I rarely am.
+
+## countdown_added
+Counting down to {x}: {n} days. The hourglass is turned.
+{x} is pinned. {n} days. I shall chant them as they fall.
+{n} days until {x}. I keep count. I always keep count.
+
+## journal_saved
+Saved in your journal. I won't read it. Much.
+Into the journal it goes. The chronicle grows.
+Written down. Your story continues.

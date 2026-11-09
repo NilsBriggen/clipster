@@ -135,6 +135,59 @@ pub fn week_lines(w: &Week) -> Vec<String> {
     out
 }
 
+/// Something coming up, for the Today tab's strip.
+#[derive(Clone, Debug, PartialEq)]
+pub enum Upcoming {
+    Event { title: String, at: chrono::NaiveDateTime, join: Option<String>, key: String },
+    Reminder { id: u64, label: String, at: chrono::NaiveDateTime },
+    Birthday { name: String, days: i64, age: Option<i32>, email: bool },
+    Due { today: usize, overdue: usize },
+    Countdown { label: String, days: i64 },
+}
+
+/// What's next: the next meeting today or tomorrow, the next reminder within a day, birthdays within a week, what's
+/// due or overdue, and the countdowns you pinned. In that order, so the strip reads from "now" outwards.
+pub fn coming_up(events: &[crate::calendar::Event], timers: &[crate::timers::Timer], todos: &[Item], people: &[crate::people::Person], countdowns: &[(String, NaiveDate)], now: chrono::NaiveDateTime) -> Vec<Upcoming> {
+    let today = now.date();
+    let mut out = vec![];
+    if let Some(e) = events.iter().filter(|e| !e.all_day && e.start > now && e.start.date() <= today + Days::new(1)).min_by_key(|e| e.start) {
+        out.push(Upcoming::Event { title: e.title.clone(), at: e.start, join: e.join.clone(), key: e.key() });
+    }
+    if let Some(t) = timers.iter().filter(|t| t.when() > now && t.when() <= now + chrono::Duration::hours(24)).min_by_key(|t| t.at) {
+        out.push(Upcoming::Reminder { id: t.id, label: t.label.clone(), at: t.when() });
+    }
+    let mut soon: Vec<(i64, &crate::people::Person, Option<i32>)> = people.iter().filter_map(|p| p.next_birthday(today).map(|(d, age)| (d, p, age))).filter(|(d, _, _)| *d <= 7).collect();
+    soon.sort_by_key(|s| s.0);
+    for (days, p, age) in soon.into_iter().take(2) {
+        out.push(Upcoming::Birthday { name: p.name.clone(), days, age, email: p.email.is_some() });
+    }
+    let open = todos.iter().filter(|i| !i.done && i.list.is_none());
+    let (due_today, overdue) = open.fold((0, 0), |(t, o), i| match i.due {
+        Some(d) if d == today => (t + 1, o),
+        Some(d) if d < today => (t, o + 1),
+        _ => (t, o),
+    });
+    if due_today + overdue > 0 {
+        out.push(Upcoming::Due { today: due_today, overdue });
+    }
+    for (label, day) in countdowns {
+        let days = (*day - today).num_days();
+        if days >= 0 {
+            out.push(Upcoming::Countdown { label: label.clone(), days });
+        }
+    }
+    out
+}
+
+/// A countdown as words: "Italy · 23 days", "Report due · tomorrow", "Italy · today!".
+pub fn countdown_text(label: &str, days: i64) -> String {
+    match days {
+        0 => format!("{label} · today!"),
+        1 => format!("{label} · tomorrow"),
+        d => format!("{label} · {d} days"),
+    }
+}
+
 /// Which verdict pool fits the week.
 pub fn week_verdict(w: &Week) -> &'static str {
     match (w.focus / 60, w.finished) {
@@ -190,5 +243,24 @@ mod tests {
         assert_eq!(week_verdict(&w), "review_ok");
         assert_eq!(week_number(day(11, 9)), week_number(day(11, 15)), "Monday to Sunday is one week");
         assert_ne!(week_number(day(11, 15)), week_number(day(11, 16)));
+    }
+
+    #[test]
+    fn whats_coming_up() {
+        use chrono::NaiveDateTime;
+        let now = NaiveDate::from_ymd_opt(2026, 11, 9).unwrap().and_hms_opt(8, 40, 0).unwrap();
+        let at = |h: u32, m: u32| now.date().and_hms_opt(h, m, 0).unwrap();
+        let ev = |title: &str, start: NaiveDateTime, all_day: bool| crate::calendar::Event { uid: title.into(), start, end: start + chrono::Duration::hours(1), all_day, title: title.into(), place: String::new(), join: Some("https://meet.example".into()) };
+        let events = vec![ev("Lunch", at(12, 30), false), ev("Standup", at(9, 0), false), ev("Holiday", at(0, 0), true), ev("Old", at(7, 0), false)];
+        let timers = vec![crate::timers::Timer { id: 4, at: crate::timers::unix_of(at(12, 0)), label: "Plumber".into(), every: 0, rule: None }];
+        let people = vec![crate::people::Person { birthday: Some((Some(1990), 11, 12)), ..crate::people::Person::new("Anna") }];
+        let todos = crate::todo::parse("- [ ] report (due 2026-11-09)\n- [ ] licence (due 2026-11-01)\n- [ ] eggs (list shopping) (due 2026-11-01)\n");
+        let up = coming_up(&events, &timers, &todos, &people, &[("Italy".into(), NaiveDate::from_ymd_opt(2026, 12, 2).unwrap())], now);
+        assert!(matches!(&up[0], Upcoming::Event { title, .. } if title == "Standup"), "the next timed one: {up:?}");
+        assert!(matches!(&up[1], Upcoming::Reminder { id: 4, .. }));
+        assert!(matches!(&up[2], Upcoming::Birthday { days: 3, age: Some(36), .. }));
+        assert_eq!(up[3], Upcoming::Due { today: 1, overdue: 1 }, "lists don't count");
+        assert_eq!(up[4], Upcoming::Countdown { label: "Italy".into(), days: 23 });
+        assert_eq!(countdown_text("Italy", 23), "Italy · 23 days");
     }
 }

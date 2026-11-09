@@ -58,6 +58,9 @@ pub enum Effect {
     FocusExtend(u64),                // a few more minutes on the running session
     Snooze(u64),                     // the timer that rang last, again in this many seconds
     Undo,                            // put back what the last removal on the Desk took
+    Habit(String),                   // "add walk", "done walk", "undone walk", "remove walk"
+    Countdown(String),               // "add Italy|2 december", "remove 2", "list"
+    Journal(String),                 // "add <line>", "mood great", "day 2026-11-05|rough|<line>" (written to journal.txt)
     SaveTemplate(String, String),    // a letter template of your own: name, text (written to your lines file)
     ForgetTemplate(String),
     DeskNet(crate::net::Query, String), // a web question from the Desk: its answer goes onto its page (kind: "words", "files"…)
@@ -593,7 +596,13 @@ pub fn exact(input: &str) -> Option<Reply> {
         "uuid" | "guid" => return Some(crate::powers::uuid()),
         "lorem" => return Some(crate::powers::lorem()),
         "qr" => return Some(crate::powers::qr(&or_clipboard(rest))),
+        "countdown" if rest.starts_with("add ") || rest.starts_with("remove ") || rest == "list" => return Some(Reply::say("").effect(Effect::Countdown(rest.to_string()))),
+        "countdowns" => return Some(Reply::say("").effect(Effect::Countdown("list".into()))),
         "until" | "countdown" => return Some(crate::powers::until(rest)),
+        "habit" if ["add", "done", "undone", "remove"].contains(&rest.split(' ').next().unwrap_or("")) && rest.contains(' ') => return Some(Reply::say("").effect(Effect::Habit(rest.to_string()))),
+        "journal" if rest.starts_with("day ") || rest.starts_with("mood ") => return Some(Reply::say("").effect(Effect::Journal(rest.to_string()))),
+        "journal" if !rest.is_empty() => return Some(Reply::say("").effect(Effect::Journal(format!("add {}", rest.trim_start_matches(':').trim())))),
+        "journal" => return Some(Reply::say("").effect(Effect::OpenDesk("journal".into()))),
         "findfile" | "locate" if !rest.is_empty() => return Some(net(Query::Files(rest.into()), &lines::pick("find_searching").replace("{x}", rest))),
         "recent" if rest.is_empty() || rest == "files" => return Some(net(Query::Recent, "Checking what you opened lately...")),
         "cliphistory" => return Some(Reply::say("").effect(Effect::ClipHistory)),

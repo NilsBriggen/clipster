@@ -20210,3 +20210,48 @@ Nothing to put back. Everything is where you left it.
 Saved "{x}" as a template of yours. It's at the top of Letters.
 "{x}" is one of your templates now.
 Template "{x}" saved. Fill it in any time on the Write tab.
+
+## habit_added
+New habit: {x}. Tick it on the Today tab, or tell me "I did my {x}".
+{x} is on your habits now. Small and daily wins.
+Tracking {x}. One tick a day is all it takes.
+
+## habit_done
+{x}: ticked. That's {n} day(s) in a row.
+Done: {x}. Streak: {n}.
+{x} for today, done. {n} in a row.
+
+## habit_undone
+Took today's tick off {x}.
+{x} is open again for today.
+
+## habit_removed
+{x} is off your habits.
+No more tracking {x}. The streak goes with it.
+
+## habit_unknown
+I don't track a habit called "{x}". Start one with: new habit {x}
+"{x}" isn't one of your habits yet.
+
+## habit_exists
+You already track {x}.
+{x} is on your habits already.
+
+## habit_full
+That's {x} habits already. A few you keep beat many you don't. Remove one first.
+{x} habits is the most I'll track. Fewer, and they stick.
+
+## habit_streak
+{x}, {n} days in a row! That's not luck any more, that's a habit.
+{n} days of {x}. Look at you.
+{x}: {n} days straight. I'm impressed. Quietly. Mostly.
+
+## countdown_added
+Counting down to {x}: {n} days.
+{x} is pinned. {n} days to go.
+{n} days until {x}. I'll keep count.
+
+## journal_saved
+Saved in your journal.
+In your journal it goes.
+Written down. Your journal is a little longer.

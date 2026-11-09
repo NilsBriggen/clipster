@@ -7,6 +7,8 @@ mod calendar;
 mod people;
 mod desk;
 mod find;
+mod habits;
+mod journal;
 mod notes;
 mod timers;
 mod plan;
@@ -176,6 +178,8 @@ struct App {
     pins: Vec<String>, // clipboard snippets pinned on the Desk (saved; the history isn't)
     reading: Vec<(String, String)>, // the reading list: (link, the day it was saved), newest first
     people: Vec<people::Person>,    // birthdays, keeping in touch, email addresses
+    habits: Vec<habits::Habit>,     // a few daily ticks with streaks
+    countdowns: Vec<(String, chrono::NaiveDate)>, // pinned countdowns: "Italy", 2 December
     workday: Vec<String>,           // what "start my workday" opens: apps and links
     workday_ask: bool,              // offer it on weekday mornings
     window_text: String,            // the active window's title, for comments that quote it ({title})
@@ -543,6 +547,8 @@ impl App {
             pins: vec![],
             reading: vec![],
             people: vec![],
+            habits: vec![],
+            countdowns: vec![],
             workday: vec![],
             workday_ask: true,
             window_text: String::new(),
@@ -1421,6 +1427,12 @@ impl App {
         let today = chrono::Datelike::num_days_from_ce(&chrono::Local::now().date_naive()) as u64;
         self.stat(&format!("checkin_{answer}"), 1);
         self.checkin_days.insert(today_key(), answer.to_string());
+        // the journal keeps the mood for a year (the check-in history only two weeks)
+        if self.screenshot.is_none() {
+            let mut entries = journal::load();
+            journal::set(&mut entries, chrono::Local::now().date_naive(), Some(answer), None);
+            let _ = brain::write_atomic(&journal::path(), &journal::format(&entries));
+        }
         let (streak, rough) = checkin_streaks(&self.stats, today, answer == "rough");
         self.stats.extend([("checkin_last".into(), today), ("checkin_streak".into(), streak), ("rough_run".into(), rough)]);
         if answer == "rough" {
@@ -1806,7 +1818,7 @@ impl App {
     fn snapshot(&self) -> String {
         serde_json::json!({
             "tips_every": self.tips_every, "notice_clip": self.notice_clip, "notice_programs": self.notice_programs, "notice_windows": self.notice_windows, "checkin": self.checkin, "facts": self.facts, "kind_time": self.kind_time, "focus_log": self.focus_log, "desk_look": if self.desk_modern { "modern" } else { "classic" }, "desk_size": if self.desk_large { "large" } else { "normal" }, "checkin_days": self.checkin_days,
-            "pins": self.pins, "reading": self.reading, "calendars": self.calendars, "people": self.people.iter().map(|p| p.to_json()).collect::<Vec<_>>(), "workday": self.workday, "workday_ask": self.workday_ask, "welcome_seen": self.welcome_seen, "backup_sources": self.backup_sources, "backup_target": self.backup_target, "backup_last": self.backup_last, "backup_result": self.backup_result, "dnd_restore": self.dnd_restore, "dnd": self.dnd, "wrapup": self.wrapup, "upkeep_day": self.upkeep_day, "focus_goal": self.focus_goal, "budgets": self.budgets,
+            "pins": self.pins, "reading": self.reading, "calendars": self.calendars, "people": self.people.iter().map(|p| p.to_json()).collect::<Vec<_>>(), "habits": self.habits.iter().map(|h| h.to_json()).collect::<Vec<_>>(), "countdowns": self.countdowns.iter().map(|(l, d)| serde_json::json!([l, d.to_string()])).collect::<Vec<_>>(), "workday": self.workday, "workday_ask": self.workday_ask, "welcome_seen": self.welcome_seen, "backup_sources": self.backup_sources, "backup_target": self.backup_target, "backup_last": self.backup_last, "backup_result": self.backup_result, "dnd_restore": self.dnd_restore, "dnd": self.dnd, "wrapup": self.wrapup, "upkeep_day": self.upkeep_day, "focus_goal": self.focus_goal, "budgets": self.budgets,
             "notice_health": self.notice_health, "check_updates": self.check_updates, "update_told": self.update_told, "sounds": self.sounds, "breaks": self.breaks, "name": self.name,
             "hat": self.hat, "skin": self.skin, "friendship": self.friendship, "highscores": self.highscores, "birthday": self.birthday.map(|(m, d)| [m, d]), "stats": self.stats, "unlocked": self.unlocked, "explored": self.explored, "persona": if self.unhinged { "unhinged" } else { "boring" }, "anchor": self.anchor.or(self.saved_anchor).map(|a| [a.x, a.y]),
             "timers": self.timers.iter().map(|t| serde_json::json!([t.at, t.label, t.every, t.id, t.rule])).collect::<Vec<_>>(),
@@ -1914,6 +1926,9 @@ impl App {
         self.people = v["people"].as_array().into_iter().flatten().filter_map(people::Person::from_json).collect();
         people::set_names(&self.people);
         self.workday = strings("workday");
+        self.habits = v["habits"].as_array().into_iter().flatten().filter_map(habits::Habit::from_json).collect();
+        habits::set_names(&self.habits);
+        self.countdowns = v["countdowns"].as_array().into_iter().flatten().filter_map(|c| Some((c[0].as_str()?.to_string(), chrono::NaiveDate::parse_from_str(c[1].as_str()?, "%Y-%m-%d").ok()?))).collect();
         if v["backup_sources"].is_array() {
             self.backup_sources = strings("backup_sources");
         }
@@ -2099,6 +2114,56 @@ impl App {
                 }
             }
             Effect::Undo => r = self.undo_restore(),
+            Effect::Habit(cmd) => {
+                let today = chrono::Local::now().date_naive();
+                let (pool, name) = habits::change(&mut self.habits, &cmd, today);
+                habits::set_names(&self.habits);
+                let streak = habits::find(&self.habits, &name).map_or(0, |i| self.habits[i].streak(today));
+                let mut text = lines::pick(pool).replace("{x}", &name).replace("{n}", &streak.to_string());
+                if pool == "habit_done" && [7, 30, 100].contains(&streak) {
+                    text = lines::pick("habit_streak").replace("{x}", &name).replace("{n}", &streak.to_string());
+                    let best = self.stats.get("habit_best").copied().unwrap_or(0).max(streak as u64);
+                    self.stats.insert("habit_best".into(), best);
+                }
+                r = Reply::say(text).mood(if pool.ends_with("unknown") || pool.ends_with("full") || pool.ends_with("exists") { Mood::Think } else { Mood::Write });
+            }
+            Effect::Countdown(cmd) => {
+                let today = chrono::Local::now().date_naive();
+                let (verb, arg) = cmd.split_once(' ').unwrap_or((cmd.as_str(), ""));
+                r = match verb {
+                    "add" => {
+                        let (label, when) = arg.split_once('|').unwrap_or((arg, ""));
+                        match todo::parse_when(when, today).flatten().filter(|d| *d >= today) {
+                            Some(d) if !label.trim().is_empty() => {
+                                self.countdowns.retain(|(l, _)| !l.eq_ignore_ascii_case(label.trim()));
+                                self.countdowns.push((label.trim().to_string(), d));
+                                self.countdowns.sort_by_key(|c| c.1);
+                                self.countdowns.truncate(12);
+                                Reply::say(lines::pick("countdown_added").replace("{x}", label.trim()).replace("{n}", &(d - today).num_days().to_string())).mood(Mood::Party)
+                            }
+                            _ => Reply::say("To when? Try: count down to my holiday on 2 December").mood(Mood::Think),
+                        }
+                    }
+                    "remove" => match arg.trim_start_matches('#').parse::<usize>().ok().and_then(|n| n.checked_sub(1)).filter(|i| *i < self.countdowns.len()) {
+                        Some(i) => Reply::say(format!("No more countdown to {}.", self.countdowns.remove(i).0)).mood(Mood::Happy),
+                        None => Reply::say("There's no countdown with that number.").mood(Mood::Think),
+                    },
+                    _ => {
+                        let list: Vec<String> = self.countdowns.iter().map(|(l, d)| plan::countdown_text(l, (*d - today).num_days())).collect();
+                        if list.is_empty() { Reply::say("No countdowns yet. Try: count down to my holiday on 2 December") } else { Reply::say(format!("Counting down:\n{}", list.join("\n"))).mood(Mood::Party) }
+                    }
+                };
+            }
+            Effect::Journal(cmd) => {
+                let mut entries = journal::load();
+                r = match journal::change(&mut entries, &cmd, chrono::Local::now().date_naive()) {
+                    Some(pool) => match brain::write_atomic(&journal::path(), &journal::format(&entries)) {
+                        Ok(()) => Reply::say(lines::pick(pool)).mood(Mood::Write),
+                        Err(e) => Reply::say(format!("I couldn't write your journal: {e}")).mood(Mood::Sad),
+                    },
+                    None => Reply::say("What should go in your journal? Try: journal: finished the slides").mood(Mood::Think),
+                };
+            }
             Effect::SaveTemplate(name, text) => {
                 r = match lines::save_template(&name, &text.replace("\\n", "\n")) {
                     Ok(()) => Reply::say(lines::pick("template_saved").replace("{x}", &name)).mood(Mood::Write),

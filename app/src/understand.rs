@@ -1336,6 +1336,36 @@ fn notes(s: &str, raw: &str) -> Option<Reply> {
         // the to-do list only ever loses finished items, and both ask first
         return go(if about_todos { "todos clear" } else { "forget notes" }.into());
     }
+    // habits: "new habit stretch", "i did my stretch" (only for a habit he knows)
+    if let Some(h) = after(s, &["new habit ", "add a habit ", "add habit ", "track a habit called ", "start a habit ", "start tracking "]).filter(|h| !h.is_empty()) {
+        return go(format!("habit add {}", keep(raw, h)));
+    }
+    if let Some(h) = after(s, &["i did my ", "did my ", "done my ", "i have done my ", "i just did my ", "finished my "]) {
+        let h = h.trim_end_matches(" today").trim();
+        if crate::habits::known(h) {
+            return go(format!("habit done {h}"));
+        }
+    }
+    if let Some(h) = after(s, &["stop tracking ", "remove the habit ", "remove habit ", "delete the habit "]).filter(|h| crate::habits::known(h)) {
+        return go(format!("habit remove {h}"));
+    }
+    // countdowns: "count down to my holiday on 2 december", "countdown to the wedding on june 3"
+    if let Some(rest) = after(s, &["count down to ", "countdown to ", "start a countdown to ", "pin a countdown to "]) {
+        if let Some((what, when)) = rest.rsplit_once(" on ").or_else(|| rest.rsplit_once(" in ")).filter(|(_, w)| crate::todo::parse_when(w, chrono::Local::now().date_naive()).flatten().is_some()) {
+            let what = what.trim_start_matches("my ").trim_start_matches("the ");
+            return go(format!("countdown add {}|{when}", keep(raw, what)));
+        }
+    }
+    if ["my countdowns", "show my countdowns", "countdowns"].contains(&s) {
+        return go("countdowns".into());
+    }
+    // the journal: "journal: finished the slides", "for my journal: …"
+    if let Some(line) = after(s, &["journal ", "for my journal ", "write in my journal ", "add to my journal ", "dear journal "]).filter(|l| !l.is_empty()) {
+        return go(format!("journal {}", keep(raw, line)));
+    }
+    if ["my journal", "show my journal", "open my journal", "journal"].contains(&s) {
+        return go("journal".into());
+    }
     // rescheduling: "move call Anna to friday", "push the report to tomorrow", "the report has no deadline"
     let today = chrono::Local::now().date_naive();
     if let Some(rest) = after(s, &["move ", "push ", "reschedule ", "postpone ", "put off ", "delay ", "shift "]) {
