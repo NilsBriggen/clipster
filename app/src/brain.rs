@@ -91,6 +91,8 @@ pub enum Effect {
     UpkeepHide(String, bool),        // a checkup row that isn't for you: its id, hide (true) or bring back
     Space(String),                   // Upkeep's Space page: "scan", "trash 2,5" (asks first), "trash 2,5 confirmed"
     Data(String),                    // your files: "open", "export", "import <folder>" (asks first), "forget time" (asks first)
+    Pick(String),                    // a system folder or file dialog, for: backup-folder, backup-target, contacts, calendar, import
+    Print(String),                   // a page to print: "todos", "list shopping", "week", "agenda", "journal 2026-11"
     SaveStarter(String),             // keep this named list as one to start new lists from (written to your lines file)
     OpenDesk(String),                // Clipster's Desk, on this tab ("" = where it was): stats, to-dos, reminders, upkeep
     DeskLook(bool),                  // the Desk's look: true = modern, false = classic 98
@@ -421,6 +423,10 @@ pub fn exact(input: &str) -> Option<Reply> {
             return Some(Reply::say("").effect(Effect::UpkeepHide(id.trim().to_string(), verb == "hide")));
         }
         "space" if rest == "scan" || rest.starts_with("trash ") => return Some(Reply::say("").effect(Effect::Space(rest.to_string()))),
+        // Browse…: the system's own dialog, then the right command with what was picked
+        "pick" if ["backup-folder", "backup-target", "contacts", "calendar", "import"].contains(&rest) => return Some(Reply::say("").effect(Effect::Pick(rest.to_string()))),
+        // Print…: a clean page opened in the browser (print it there, or save it as PDF)
+        "print" if rest == "todos" || rest == "week" || rest == "agenda" || rest.starts_with("list ") || rest.starts_with("journal ") => return Some(Reply::say("").effect(Effect::Print(rest.to_string()))),
         // Settings → Your data: "data open", "data export", "data import <folder>", "data forget time"
         "data" if ["open", "export", "import", "forget"].contains(&rest.split(' ').next().unwrap_or("")) => return Some(Reply::say("").effect(Effect::Data(rest.to_string()))),
         "upkeep" if rest == "cleartemp" => {

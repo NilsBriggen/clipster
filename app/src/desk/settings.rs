@@ -438,7 +438,9 @@ impl Desk {
         y += 8.0;
         p.text(pos2(x0, y + ctl / 2.0), Align2::LEFT_CENTER, "Import from:", look.font(12.5), look.text());
         let go = Rect::from_min_size(pos2(x1 - 80.0, y), vec2(80.0, ctl));
-        let resp = look.input(ui, Rect::from_min_max(pos2(x0 + 100.0, y), pos2(go.min.x - 8.0, y + ctl)), Id::unique("set-import"), &mut self.import_text, if cfg!(windows) { "%USERPROFILE%\\Documents\\Clipster export 2026-11-09" } else { "~/Documents/Clipster export 2026-11-09" });
+        let bw = self.browse_w(ui, look);
+        self.browse(ui, look, pos2(go.min.x - bw, y), "import", out);
+        let resp = look.input(ui, Rect::from_min_max(pos2(x0 + 100.0, y), pos2(go.min.x - 8.0 - bw, y + ctl)), Id::unique("set-import"), &mut self.import_text, if cfg!(windows) { "%USERPROFILE%\\Documents\\Clipster export 2026-11-09" } else { "~/Documents/Clipster export 2026-11-09" });
         // a folder dropped on the page goes into the field
         if let Some(d) = ui.input(|i| i.raw.dropped_files.iter().map(|f| f.path().to_path_buf()).find(|p| p.is_dir())) {
             self.import_text = d.display().to_string();

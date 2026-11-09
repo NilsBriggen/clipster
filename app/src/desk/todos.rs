@@ -131,7 +131,18 @@ impl Desk {
             if let Some(i) = hit {
                 self.todo_filter = i;
             }
-            let field = Rect::from_min_max(pos2((seg.max.x + 12.0).max(c.max.x - 220.0), c.min.y), pos2(c.max.x, c.min.y + seg.height()));
+            let pw = btn_w(&p, look, "Print…");
+            let field = Rect::from_min_max(pos2((seg.max.x + 12.0).max(c.max.x - 220.0), c.min.y), pos2(c.max.x - pw - 6.0, c.min.y + seg.height()));
+            if look.button(ui, Rect::from_min_size(pos2(c.max.x - pw, c.min.y), vec2(pw, seg.height())), Id::unique("desk-todo-print"), "Print…", true).on_hover_text("A page for printing or saving as PDF").clicked() {
+                out.push("print todos".into());
+            }
+            // a file dropped on the list becomes a to-do with the file attached
+            let dropped: Vec<PathBuf> = ui.input(|i| i.raw.dropped_files.iter().map(|f| f.path().to_path_buf()).filter(|p| p.is_file()).collect());
+            for (k, d) in dropped.iter().enumerate() {
+                let line_no = self.files.todos.len() + 1 + k;
+                out.push(format!("todo Look at {}", d.file_name().unwrap_or_default().to_string_lossy()));
+                out.push(format!("todo #{line_no} link {}", d.display()));
+            }
             let resp = look.input(ui, field, Id::unique("desk-todo-search"), &mut self.todo_query, "Search, or #tag");
             if resp.has_focus() && ui.input(|i| i.key_pressed(egui::Key::Escape)) {
                 self.todo_query.clear();
@@ -164,6 +175,7 @@ impl Desk {
             if look.primary(ui, done, Id::unique("desk-plan-done"), "Done picking", true).clicked() {
                 out.push("planday done".into());
                 self.planning = false;
+                self.set_tab("today"); // back to where the day is planned from
             }
             if !ideas.is_empty() {
                 let names: Vec<String> = ideas.iter().map(|i| items[*i].text.clone()).collect();
@@ -304,6 +316,9 @@ impl Desk {
                     let (it, line_no) = (&items[*i], *i + 1);
                     let rowr = Rect::from_min_max(pos2(list.min.x, y), pos2(list.max.x, y + pitch));
                     let hover = ui.rect_contains_pointer(rowr) && self.popup.is_none();
+                    if hover && look == Look::Modern {
+                        p.rect_filled(rowr.shrink2(vec2(4.0, 1.0)), CornerRadius::same(4), tok::SECONDARY_HOVER);
+                    }
                     if self.lit(&it.text) {
                         p.rect_filled(rowr.shrink(2.0), CornerRadius::same(3), if look == Look::Modern { tok::ACCENT_SOFT } else { Color32::from_rgb(200, 210, 235) });
                     }
@@ -498,6 +513,7 @@ impl Desk {
             self.todo_text.clear();
             self.todo_due.clear();
             self.todo_filter = 0;
+            ui.memory_mut(|m| m.request_focus(Id::unique("desk-todo-text"))); // the next one can be typed at once
         }
     }
 
@@ -754,17 +770,18 @@ impl Desk {
         if look.button(ui, menu, Id::unique("desk-list-menu"), "List ▾", true).clicked() {
             self.toggle_popup("list-menu");
         }
-        let actions = ["Copy as text", "Email it", "Show as QR code", "Untick all", "Rename…", "Save as a list to start from", "Delete the list…"];
+        let actions = ["Copy as text", "Email it", "Show as QR code", "Print…", "Untick all", "Rename…", "Save as a list to start from", "Delete the list…"];
         if let Some(i) = self.popup(ui, look, "list-menu", menu, &actions.map(String::from)) {
             match i {
                 0 => out.push(format!("onlist {name} copy")),
                 1 => out.push(format!("onlist {name} mail")),
                 2 => out.push(format!("onlist {name} qr")),
-                3 => out.push(format!("onlist {name} reset")),
-                4 => {
+                3 => out.push(format!("print list {name}")),
+                4 => out.push(format!("onlist {name} reset")),
+                5 => {
                     self.renaming_list = Some(title.clone());
                 }
-                5 => out.push(format!("onlist {name} savestart")),
+                6 => out.push(format!("onlist {name} savestart")),
                 _ => out.push(format!("onlist {name} delete")),
             }
         }
@@ -792,6 +809,9 @@ impl Desk {
             let y = inner.min.y + n as f32 * pitch;
             let cy = y + pitch / 2.0;
             let row = Rect::from_min_max(pos2(list.min.x, y), pos2(list.max.x, y + pitch));
+            if look == Look::Modern && ui.rect_contains_pointer(row) {
+                p.rect_filled(row.shrink2(vec2(4.0, 1.0)), CornerRadius::same(4), tok::SECONDARY_HOVER);
+            }
             if self.lit(&it.text) {
                 p.rect_filled(row.shrink(2.0), CornerRadius::same(3), if look == Look::Modern { tok::ACCENT_SOFT } else { Color32::from_rgb(200, 210, 235) });
             }
@@ -850,6 +870,7 @@ impl Desk {
             out.push(format!("onlist {name} add {}", self.list_text.trim()));
             self.found_at = Some((things.join(", "), Instant::now()));
             self.list_text.clear();
+            ui.memory_mut(|m| m.request_focus(Id::unique("desk-list-text")));
         }
         let ticked = rows.iter().filter(|(_, i)| i.done).count();
         if look.button(ui, clear, Id::unique("desk-list-clear"), &format!("Clear ticked ({ticked})"), ticked > 0).on_hover_text("Untick all (List menu) keeps them for next time").clicked() {

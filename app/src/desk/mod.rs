@@ -365,6 +365,7 @@ pub struct Desk {
     settings_page: usize,              // Settings: General, My day, Focus and goals, Comments, Your data
     holiday_text: String,
     import_text: String,
+    can_pick: Option<bool>,            // the system has a folder/file dialog (asked once)
 }
 
 /// A card over the page with its own controls.
@@ -726,6 +727,25 @@ impl Desk {
         if look.button(ui, Rect::from_min_size(pos2(inner.max.x - 80.0, by), vec2(80.0, ctl)), Id::unique("desk-qr-close"), "Close", true).clicked() || ui.input(|i| i.key_pressed(egui::Key::Escape)) {
             self.card = None;
         }
+    }
+
+    /// "Browse…" (the system's folder or file dialog) at `r`, when this computer has one; returns its width (0 when not).
+    fn browse(&mut self, ui: &mut Ui, look: Look, at: Pos2, what: &str, out: &mut Vec<String>) -> f32 {
+        let can = *self.can_pick.get_or_insert_with(|| self.sample || crate::sys::can_pick());
+        if !can {
+            return 0.0;
+        }
+        let w = today::btn_w(ui.painter(), look, "Browse…");
+        if look.button(ui, Rect::from_min_size(at, vec2(w, look.ctl())), Id::unique(("desk-browse", what)), "Browse…", true).on_hover_text("Pick it with the system's own window").clicked() {
+            out.push(format!("pick {what}"));
+        }
+        w
+    }
+
+    /// How wide "Browse…" is plus its gap (0 when there's no system dialog), for laying out its row first.
+    fn browse_w(&mut self, ui: &Ui, look: Look) -> f32 {
+        let can = *self.can_pick.get_or_insert_with(|| self.sample || crate::sys::can_pick());
+        if can { today::btn_w(ui.painter(), look, "Browse…") + 6.0 } else { 0.0 }
     }
 
     /// Open or close a drop-down menu by its key.

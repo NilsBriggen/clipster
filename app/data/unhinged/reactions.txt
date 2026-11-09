@@ -20704,3 +20704,7 @@ Done: {n} files. I feel whole. Mostly.
 ## data_forgot_time
 Forgotten: every minute per app, every focus session. The ledger is blank. I miss it already.
 The time tracking is wiped. I didn't look. I always look. I didn't.
+
+## print_ready
+It's in your browser. Print it, or save it as a PDF. Paper. How quaint. How permanent.
+The page awaits in your browser. Print it for the archives. I approve of archives.

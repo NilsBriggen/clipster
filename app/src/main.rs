@@ -7,6 +7,7 @@ mod calendar;
 mod people;
 mod desk;
 mod find;
+mod print;
 mod habits;
 mod journal;
 mod notes;
@@ -1705,6 +1706,53 @@ impl App {
         Reply::say("") // from the Desk: its status bar says it
     }
 
+    /// Print…: a page for the browser (it prints, or saves a PDF) from a list, the to-dos, the week, the next seven
+    /// days or a month of the journal.
+    fn print_page(&mut self, what: &str) -> Reply {
+        let today = chrono::Local::now().date_naive();
+        let items = todo::load();
+        let (title, sections): (String, Vec<(String, Vec<print::Line>)>) = match what.split_once(' ').unwrap_or((what, "")) {
+            ("list", name) => (writing::cap_first(&name.replace('-', " ")), vec![(String::new(), items.iter().filter(|i| i.list.as_deref() == Some(name)).map(|i| (Some(i.done), i.text.clone())).collect())]),
+            ("todos", _) => {
+                let open: Vec<&todo::Item> = items.iter().filter(|i| !i.done && i.list.is_none() && !i.is_step()).collect();
+                let line = |i: &&todo::Item| (Some(false), format!("{}{}{}", if i.prio { "! " } else { "" }, i.text, i.due.map(|d| format!(" (due {})", d.format("%a %-d %b"))).unwrap_or_default()));
+                let today_ = open.iter().filter(|i| i.top_today(today) || i.due.is_some_and(|d| d <= today)).map(line).collect();
+                let later = open.iter().filter(|i| !(i.top_today(today) || i.due.is_some_and(|d| d <= today))).map(line).collect();
+                ("To-dos".into(), vec![("Today".into(), today_), ("Later".into(), later)])
+            }
+            ("week", _) => {
+                let finished = todo::finished_since(&items, today - chrono::Days::new(6));
+                let w = plan::week(&self.kind_time, &self.focus_log, &finished, &self.checkin_days, today);
+                let mut l = plan::week_lines(&w);
+                let head = l.remove(0);
+                (head, vec![(String::new(), l.into_iter().map(|x| (None, x)).collect())])
+            }
+            ("agenda", _) => {
+                let days = plan::week_ahead(&self.events, &self.timers, &items, &self.people, &self.countdowns, today, self.work_hours);
+                ("The next seven days".into(), days.iter().map(|d| (d.date.format("%A %-d %B").to_string(), d.items.iter().map(|it| match it {
+                    plan::Ahead::Event { at: Some(t), title } => (None, format!("{} {title}", brain::clock(*t))),
+                    plan::Ahead::Event { at: None, title } => (None, format!("{title} (all day)")),
+                    plan::Ahead::Reminder { at, label } => (None, format!("{} {label} (reminder)", brain::clock(*at))),
+                    plan::Ahead::Todo { text, done, .. } => (Some(*done), text.clone()),
+                    plan::Ahead::Birthday(n) => (None, format!("{n}'s birthday")),
+                    plan::Ahead::Countdown(l) => (None, l.clone()),
+                }).collect())).collect())
+            }
+            ("journal", month) => {
+                let entries = journal::load();
+                let lines = entries.iter().filter(|e| e.day.format("%Y-%m").to_string() == month).map(|e| (None, format!("{} · {}{}", e.day.format("%a %-d"), e.mood.clone().unwrap_or_else(|| "-".into()), if e.text.is_empty() { String::new() } else { format!(" · {}", e.text) }))).collect();
+                (format!("Journal, {month}"), vec![(String::new(), lines)])
+            }
+            _ => return Reply::say("I can print a list, the to-dos, the week, the next seven days or a journal month.").mood(Mood::Think),
+        };
+        let html = print::page(&title, &format!("Printed {}", today.format("%A %-d %B %Y")), &sections);
+        let file = dirs::cache_dir().unwrap_or_else(std::env::temp_dir).join("clipster").join("print.html");
+        match brain::write_atomic(&file, &html).map_err(|e| e.to_string()).and_then(|_| open(&file.to_string_lossy()).map_err(|e| e.to_string())) {
+            Ok(()) => Reply::say(lines::pick("print_ready")).mood(Mood::Write),
+            Err(e) => Reply::say(format!("I couldn't make the page: {e}")).mood(Mood::Sad),
+        }
+    }
+
     /// Your files, for moving to a new computer: (name in an export, where it lives).
     fn data_files() -> Vec<(&'static str, std::path::PathBuf)> {
         vec![("settings.json", Self::settings_path()), ("todo.txt", todo::path()), ("done.txt", todo::archive_path()), ("notes.txt", brain::notes_path()), ("journal.txt", journal::path()), ("lines.txt", lines::user_path())]
@@ -3044,6 +3092,27 @@ impl App {
             }
             Effect::Space(cmd) => r = self.space_command(ctx, &cmd, from_desk, &mut silent),
             Effect::Data(cmd) => r = self.data_command(&cmd),
+            Effect::Pick(what) => {
+                // the system's dialog waits for you on its own thread; the answer comes back as Event::Picked
+                if self.screenshot.is_none() {
+                    let (tx, ctx2, w) = (self.tx.clone(), ctx.clone(), what.clone());
+                    std::thread::spawn(move || {
+                        let (ext, title) = match w.as_str() {
+                            "contacts" => (Some("vcf"), "A contacts file"),
+                            "calendar" => (Some("ics"), "A calendar file"),
+                            "backup-target" => (None, "Where the backup goes"),
+                            "import" => (None, "A Clipster export"),
+                            _ => (None, "A folder to back up"),
+                        };
+                        if let Some(p) = sys::pick(ext, title) {
+                            let _ = tx.send(Event::Picked(w, p));
+                            ctx2.request_repaint();
+                        }
+                    });
+                }
+                silent = true;
+            }
+            Effect::Print(what) => r = self.print_page(&what),
             Effect::ShowQr(text) => {
                 // the code is drawn in a card on the Desk
                 if !self.desk.is_open() {
@@ -3961,6 +4030,18 @@ impl App {
                     self.show_calendars();
                 }
                 Event::Now(reading) => self.now_reading = Some(*reading),
+                Event::Picked(what, path) => {
+                    let p = path.display().to_string();
+                    let cmd = match what.as_str() {
+                        "backup-folder" => format!("backup add {p}"),
+                        "backup-target" => format!("backup target {p}"),
+                        "contacts" => format!("contacts import {p}"),
+                        "calendar" => format!("calendar add {p}"),
+                        _ => format!("data import {p}"),
+                    };
+                    self.literal = true; // a Desk command: strict, and answered in the status bar
+                    self.run(ctx, &cmd);
+                }
                 Event::Space(report) => {
                     self.space_running = false;
                     self.space = Some((Instant::now(), *report));

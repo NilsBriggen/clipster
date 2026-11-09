@@ -188,6 +188,44 @@ pub mod win {
     }
 }
 
+/// The system's own folder or file dialog is there (zenity or kdialog on Linux; always on Windows).
+pub fn can_pick() -> bool {
+    cfg!(windows) || in_path("zenity") || in_path("kdialog")
+}
+
+/// Ask with the system's own dialog for a folder (`ext` None) or a file of that type ("vcf", "ics"). Blocks until
+/// it's answered, so call it on a thread. None when cancelled or there's no dialog program.
+pub fn pick(ext: Option<&str>, title: &str) -> Option<std::path::PathBuf> {
+    let title = title.replace(['"', '\'', '`', '$'], "");
+    let out = if cfg!(windows) {
+        let script = match ext {
+            None => format!("Add-Type -AssemblyName System.Windows.Forms; $d = New-Object System.Windows.Forms.FolderBrowserDialog; $d.Description = '{title}'; if ($d.ShowDialog() -eq 'OK') {{ $d.SelectedPath }}"),
+            Some(x) => format!("Add-Type -AssemblyName System.Windows.Forms; $d = New-Object System.Windows.Forms.OpenFileDialog; $d.Title = '{title}'; $d.Filter = '{x} files (*.{x})|*.{x}'; if ($d.ShowDialog() -eq 'OK') {{ $d.FileName }}"),
+        };
+        shell(&script).output().ok()?
+    } else if in_path("zenity") {
+        let mut c = command("zenity");
+        c.args(["--file-selection", &format!("--title={title}")]);
+        match ext {
+            None => c.arg("--directory"),
+            Some(x) => c.arg(format!("--file-filter=*.{x}")),
+        };
+        c.output().ok()?
+    } else if in_path("kdialog") {
+        let home = dirs::home_dir().unwrap_or_default().to_string_lossy().into_owned();
+        let mut c = command("kdialog");
+        match ext {
+            None => c.args(["--getexistingdirectory", &home]),
+            Some(x) => c.args(["--getopenfilename", &home, &format!("*.{x}")]),
+        };
+        c.args(["--title", &title]).output().ok()?
+    } else {
+        return None;
+    };
+    let path = String::from_utf8_lossy(&out.stdout).lines().next().unwrap_or("").trim().to_string();
+    (!path.is_empty()).then(|| std::path::PathBuf::from(path))
+}
+
 /// The country of your language setting ("de_CH.UTF-8" or "de-CH" → "CH"), for the public holidays' default.
 /// Nothing is asked online.
 pub fn locale_region() -> Option<String> {

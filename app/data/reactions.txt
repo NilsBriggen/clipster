@@ -20465,3 +20465,7 @@ Done: {n} files imported. Your old ones are kept as .bak.
 ## data_forgot_time
 Forgotten: time per app, focus sessions and the weekly totals.
 The time tracking is cleared. A fresh start.
+
+## print_ready
+It's open in your browser. Print it from there, or save it as a PDF.
+The page is in your browser, ready to print or to save as a PDF.

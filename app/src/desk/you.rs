@@ -118,7 +118,13 @@ impl Desk {
         let taught = self.files.taught.clone();
         if taught.is_empty() {
             let g = p.layout(first_line("youme_no_phrases"), look.font(12.0), look.dim(), pr.width() - 24.0);
+            let gh = g.size().y;
             p.galley(pos2(x0, pr.min.y + 34.0), g, look.dim());
+            let label = "Teach me one";
+            if look.button(ui, Rect::from_min_size(pos2(x0, pr.min.y + 42.0 + gh), vec2(btn_w(&p, look, label), small + 4.0)), Id::unique("me-teach-example"), label, true).on_hover_text("Fills in an example to try").clicked() {
+                self.teach_say = "gm".into();
+                self.teach_reply = "Good morning, sunshine!".into();
+            }
         }
         let add_y = pr.max.y - ctl - 10.0;
         let area = Rect::from_min_max(pos2(pr.min.x, pr.min.y + 28.0), pos2(pr.max.x, add_y - 4.0));
@@ -379,12 +385,14 @@ impl Desk {
             self.found_at = Some((name, Instant::now()));
             self.person_name.clear();
             self.person_birthday.clear();
+            ui.memory_mut(|m| m.request_focus(Id::unique("person-name")));
         }
         let y2 = y + ctl + 10.0;
         let iw = btn_w(&p, look, "Import a .vcf file");
         if look.button(ui, Rect::from_min_size(pos2(c.min.x, y2), vec2(iw, ctl)), Id::unique("person-import"), "Import a .vcf file", true).on_hover_text("I look in Downloads, Documents and on the desktop. Or drop one onto this page.").clicked() {
             out.push("contacts import".into());
         }
+        let iw = iw + 6.0 + self.browse(ui, look, pos2(c.min.x + iw + 6.0, y2), "contacts", out);
         line(ui, pos2(c.min.x + iw + 12.0, y2 + ctl / 2.0), "Click a name for their card: birthday, email, phone, notes, present ideas.", look.font(11.0), look.dim(), c.width() - iw - 12.0);
     }
 
@@ -570,7 +578,11 @@ impl Desk {
         if look.button(ui, Rect::from_min_size(pos2(right.min.x + 12.0, by), vec2(cw, ctl)), Id::unique("journal-copy"), "Copy month as text", !month_text.is_empty()).clicked() {
             out.push(format!("copy {}\n{}", first.format("%B %Y"), month_text.join("\n")));
         }
-        line(ui, pos2(right.min.x + 12.0 + cw + 12.0, by + ctl / 2.0), "journal.txt, on this computer only.", look.font(11.0), look.dim(), right.max.x - right.min.x - cw - 36.0);
+        let pw = btn_w(&p, look, "Print…");
+        if look.button(ui, Rect::from_min_size(pos2(right.min.x + 12.0 + cw + 6.0, by), vec2(pw, ctl)), Id::unique("journal-print"), "Print…", !month_text.is_empty()).clicked() {
+            out.push(format!("print journal {}", first.format("%Y-%m")));
+        }
+        line(ui, pos2(right.min.x + 12.0 + cw + pw + 18.0, by + ctl / 2.0), "journal.txt, on this computer only.", look.font(11.0), look.dim(), right.max.x - right.min.x - cw - pw - 42.0);
     }
 
     /// One day of the journal: the mood and the line, for today or any past day.

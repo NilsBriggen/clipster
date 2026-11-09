@@ -92,7 +92,10 @@ impl Desk {
                 ui.interact(hover, Id::unique(("desk-week-bar", i)), Sense::hover()).on_hover_text(format!("{}: {}", ["Three weeks ago", "Two weeks ago", "Last week", "This week"][i], brain::fmt_dur(*secs)));
             }
         }
-        let copy = Rect::from_min_size(pos2(sx, side.max.y - 2.0 * ctl - 18.0), vec2(sw, ctl));
+        let copy = Rect::from_min_size(pos2(sx, side.max.y - 2.0 * ctl - 18.0), vec2(sw * 0.6, ctl));
+        if look.button(ui, Rect::from_min_max(pos2(copy.max.x + 6.0, copy.min.y), pos2(sx + sw, copy.max.y)), Id::unique("desk-review-print"), "Print…", tracked).on_hover_text("A page for printing or saving as PDF").clicked() {
+            out.push("print week".into());
+        }
         if look.button(ui, copy, Id::unique("desk-review-copy"), "Copy as text", tracked).on_hover_text(if tracked { "The week in words, for a report or a timesheet" } else { "Nothing to copy yet" }).clicked() {
             out.push("review copy".into());
         }

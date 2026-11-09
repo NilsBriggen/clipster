@@ -22,6 +22,7 @@ pub enum Event {
     Restored(Result<std::path::PathBuf, String>),            // a file copied back from the backup (where it went)
     Now(Box<crate::upkeep::Now>),                            // Upkeep's Right now: load, memory, battery, the top programs
     Space(Box<crate::upkeep::Space>),                        // Upkeep's Space: folders and the biggest files
+    Picked(String, std::path::PathBuf),                      // what the system dialog picked, and what for
     Weather(Option<String>),                                 // the Today tab's weather line (None: couldn't get it)
 }
 

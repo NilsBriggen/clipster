@@ -336,6 +336,7 @@ impl Desk {
             if (look.button(ui, add, Id::unique("desk-habit-add"), "Add", !text.is_empty()).clicked() || enter) && !text.is_empty() {
                 out.push(format!("habit add {text}"));
                 self.habit_text.clear();
+                ui.memory_mut(|m| m.request_focus(Id::unique("desk-habit-text")));
             }
         }
     }

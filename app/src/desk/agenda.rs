@@ -59,6 +59,10 @@ impl Desk {
             self.calendar_links(ui, left, view, look, out);
         } else {
             let mode = Rect::from_min_size(pos2(cal_btn.min.x - 6.0 - 64.0, left.min.y + 6.0), vec2(64.0, small));
+            let pw = btn_w(&p, look, "Print…");
+            if look.button(ui, Rect::from_min_size(pos2(mode.min.x - 6.0 - pw, mode.min.y), vec2(pw, small)), Id::unique("desk-agenda-print"), "Print…", true).on_hover_text("The next seven days, for printing or a PDF").clicked() {
+                out.push("print agenda".into());
+            }
             if look.button(ui, mode, Id::unique("desk-agenda-mode"), if self.agenda_month { "List" } else { "Month" }, true).on_hover_text(if self.agenda_month { "Day by day" } else { "A month at a glance" }).clicked() {
                 self.agenda_month = !self.agenda_month;
             }
@@ -186,8 +190,11 @@ impl Desk {
             rows.extend(items.into_iter().map(|(t, w)| Row::Item(t, w)));
         }
         if rows.len() <= 2 && view.calendars.is_empty() && view.timers.is_empty() {
-            let g = p.layout("Link your calendar with Calendars… to see your meetings here.".to_string(), look.font(12.0), look.dim(), area.width() - 40.0);
-            p.galley(pos2(x0, area.max.y - g.size().y - 4.0), g, look.dim());
+            let label = "Link my calendar…";
+            let w = btn_w(&p, look, label);
+            if look.button(ui, Rect::from_min_size(pos2(x0, area.max.y - ctl - 4.0), vec2(w, ctl)), Id::unique("agenda-link-cal"), label, true).on_hover_text("Your meetings show here; I only read the calendar").clicked() {
+                self.calendars_open = true;
+            }
         }
         let pitch = if look == Look::Modern { 27.0 } else { 23.0 };
         let fits = (area.height() / pitch).floor().max(1.0) as usize;
@@ -526,6 +533,7 @@ impl Desk {
             self.found_at = Some((self.note_text.trim().to_string(), Instant::now()));
             self.note_text.clear();
             self.notes_query.clear();
+            ui.memory_mut(|m| m.request_focus(Id::unique("desk-note-text")));
         }
     }
 
@@ -762,7 +770,12 @@ impl Desk {
         }
         let y = area.max.y + 6.0;
         let add = Rect::from_min_size(pos2(x1 - 54.0, y), vec2(54.0, ctl));
-        let r = look.input(ui, Rect::from_min_size(pos2(x0, y), vec2(add.min.x - 8.0 - x0, ctl)), Id::unique("desk-cal-text"), &mut self.calendar_text, "https://…/basic.ics or webcal://…");
+        let bw = self.browse_w(ui, look);
+        let r = look.input(ui, Rect::from_min_size(pos2(x0, y), vec2(add.min.x - 8.0 - x0 - bw, ctl)), Id::unique("desk-cal-text"), &mut self.calendar_text, "https://…/basic.ics or webcal://…");
+        self.browse(ui, look, pos2(add.min.x - bw, y), "calendar", out);
+        // an .ics file dropped here is linked
+        let dropped: Vec<PathBuf> = ui.input(|i| i.raw.dropped_files.iter().map(|f| f.path().to_path_buf()).filter(|p| p.extension().is_some_and(|x| x.eq_ignore_ascii_case("ics"))).collect());
+        out.extend(dropped.iter().map(|d| format!("calendar add {}", d.display())));
         let enter = r.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter));
         if (look.primary(ui, add, Id::unique("desk-cal-add"), "Add", !self.calendar_text.trim().is_empty()).clicked() || enter) && !self.calendar_text.trim().is_empty() {
             out.push(format!("calendar add {}", self.calendar_text.trim()));

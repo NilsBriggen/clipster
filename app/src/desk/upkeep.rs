@@ -118,7 +118,14 @@ impl Desk {
                 Level::Note => look.score(70),
                 Level::Needs => look.danger(),
             };
-            p.circle(pos2(c.min.x + 18.0, cy), 5.0, ink(light), Stroke::new(1.0, ink(light.gamma_multiply(0.7))));
+            // the level by shape too (✓ circle, ! triangle, ! square), not by colour alone
+            let _ = light;
+            look.light(&p, pos2(c.min.x + 18.0, cy), check.level);
+            ui.interact(Rect::from_center_size(pos2(c.min.x + 18.0, cy), vec2(16.0, 16.0)), Id::unique(("upkeep-light", check.id)), Sense::hover()).on_hover_text(match check.level {
+                Level::Good => "All good",
+                Level::Note => "Worth a look",
+                Level::Needs => "Needs you",
+            });
             p.text(pos2(c.min.x + 32.0, cy), Align2::LEFT_CENTER, check.title, look.bold(12.5), ink(look.text()));
             let mut right = c.max.x - 12.0;
             if let Some((label, cmd)) = &check.fix {
@@ -544,7 +551,9 @@ impl Desk {
         }
         let y = add_y + ctl + 8.0;
         let hint = if cfg!(windows) { "another folder: %USERPROFILE%\\Projects" } else { "another folder: ~/Projects" };
-        let resp = look.input(ui, Rect::from_min_size(pos2(x0, y), vec2(x1 - x0 - 62.0, ctl)), Id::unique("backup-path"), &mut self.backup_path, hint);
+        let bw = self.browse_w(ui, look);
+        let resp = look.input(ui, Rect::from_min_size(pos2(x0, y), vec2(x1 - x0 - 62.0 - bw, ctl)), Id::unique("backup-path"), &mut self.backup_path, hint);
+        self.browse(ui, look, pos2(x1 - 54.0 - bw, y), "backup-folder", out);
         let enter = resp.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter));
         if (look.button(ui, Rect::from_min_size(pos2(x1 - 54.0, y), vec2(54.0, ctl)), Id::unique("backup-add"), "Add", !self.backup_path.trim().is_empty()).clicked() || enter) && !self.backup_path.trim().is_empty() {
             out.push(format!("backup add {}", self.backup_path.trim()));
@@ -617,7 +626,9 @@ impl Desk {
         }
         let oy = right.max.y - ctl - 12.0;
         let hint = if cfg!(windows) { "or a folder: D:\\Backups or \\\\nas\\backups" } else { "or a folder: /mnt/nas/backups" };
-        let resp = look.input(ui, Rect::from_min_size(pos2(x0, oy), vec2(x1 - x0 - 62.0, ctl)), Id::unique("backup-other"), &mut self.backup_other, hint);
+        let bw = self.browse_w(ui, look);
+        let resp = look.input(ui, Rect::from_min_size(pos2(x0, oy), vec2(x1 - x0 - 62.0 - bw, ctl)), Id::unique("backup-other"), &mut self.backup_other, hint);
+        self.browse(ui, look, pos2(x1 - 54.0 - bw, oy), "backup-target", out);
         let enter = resp.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter));
         if (look.button(ui, Rect::from_min_size(pos2(x1 - 54.0, oy), vec2(54.0, ctl)), Id::unique("backup-set"), "Use", !self.backup_other.trim().is_empty()).clicked() || enter) && !self.backup_other.trim().is_empty() {
             out.push(format!("backup target {}", self.backup_other.trim()));

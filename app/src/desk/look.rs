@@ -247,12 +247,14 @@ impl Look {
                 let bar = Rect::from_min_size(r.min + vec2(3.0, 3.0), vec2(w - 6.0, 18.0));
                 win98::gradient(&p, bar, win98::NAVY, win98::SKY);
                 p.text(pos2(bar.min.x + 6.0, bar.center().y), Align2::LEFT_CENTER, title, self.bold(13.0), Color32::WHITE);
+                self.card_close(ui, Rect::from_center_size(pos2(bar.max.x - 11.0, bar.center().y), vec2(16.0, 14.0)), title);
                 r.min.y + head + 14.0
             }
             Look::Modern => {
                 p.add(egui::epaint::Shadow { offset: [0, 4], blur: 16, spread: 0, color: Color32::from_black_alpha(40) }.as_shape(r, CornerRadius::same(10)));
                 p.rect(r, CornerRadius::same(10), tok::CARD, Stroke::new(1.0, tok::BORDER), StrokeKind::Inside);
                 p.text(pos2(r.min.x + 20.0, r.min.y + 24.0), Align2::LEFT_CENTER, title, self.bold(15.0), tok::TEXT);
+                self.card_close(ui, Rect::from_center_size(pos2(r.max.x - 24.0, r.min.y + 24.0), vec2(26.0, 26.0)), title);
                 r.min.y + head + 10.0
             }
         };
@@ -277,6 +279,41 @@ impl Look {
         picked
     }
 
+    /// A card's ✕ in its title bar (the 98 box, or Modern's plain ✕). It closes the card the way Esc does, since every
+    /// card already listens for Esc. Its id is its own (the Desk window's title bar has a ✕ too).
+    fn card_close(self, ui: &mut Ui, x: Rect, title: &str) -> bool {
+        let p = ui.painter().clone();
+        let clicked = match self {
+            Look::Classic => {
+                let close = win98::button(ui, x, Id::unique(("desk-card-x98", title)), "", true).on_hover_text("Close (Esc)");
+                let c = x.center() + if close.is_pointer_button_down_on() { vec2(1.0, 1.0) } else { vec2(0.0, 0.0) };
+                let (cx, cy) = (c.x.round() - 4.0, c.y.round() - 4.0);
+                for i in 0..7 {
+                    let y = cy + i as f32 + 0.5;
+                    for xx in [cx + i as f32, cx + 6.0 - i as f32] {
+                        p.rect_filled(Rect::from_min_size(pos2(xx + 0.5, y - 0.5), vec2(2.0, 1.0)), 0.0, win98::DARK);
+                    }
+                }
+                close.clicked()
+            }
+            Look::Modern => {
+                let resp = ui.interact(x, Id::unique(("desk-card-x", title)), Sense::click()).on_hover_text("Close (Esc)");
+                if resp.hovered() {
+                    p.rect_filled(x, CornerRadius::same(6), tok::SECONDARY_HOVER);
+                }
+                let c = x.center();
+                for (a, b) in [(vec2(-5.0, -5.0), vec2(5.0, 5.0)), (vec2(5.0, -5.0), vec2(-5.0, 5.0))] {
+                    p.line_segment([c + a, c + b], Stroke::new(1.5, if resp.hovered() { tok::TEXT } else { tok::DIM }));
+                }
+                resp.clicked()
+            }
+        };
+        if clicked {
+            ui.ctx().input_mut(|i| i.events.push(egui::Event::Key { key: egui::Key::Escape, physical_key: None, pressed: true, repeat: false, modifiers: Default::default() }));
+        }
+        clicked
+    }
+
     /// A modal card over the page, like `dialog`, for content with its own controls: returns the inside to draw in.
     pub(super) fn sheet(self, ui: &mut Ui, area: Rect, title: &str, size: egui::Vec2) -> Rect {
         let p = ui.painter().clone();
@@ -284,20 +321,23 @@ impl Look {
         ui.interact(area, Id::unique(("desk-sheet-blocker", title)), Sense::click()); // clicks don't reach the page below
         let head = if self == Look::Modern { 40.0 } else { 24.0 };
         let r = Rect::from_center_size(area.center(), vec2(size.x.min(area.width() - 40.0), (size.y + head).min(area.height() - 20.0)));
-        match self {
+        let closed = match self {
             Look::Classic => {
                 p.rect_filled(r.translate(vec2(3.0, 3.0)), 0.0, Color32::from_black_alpha(60));
                 win98::panel(&p, r, win98::FACE, true);
                 let bar = Rect::from_min_size(r.min + vec2(3.0, 3.0), vec2(r.width() - 6.0, 18.0));
                 win98::gradient(&p, bar, win98::NAVY, win98::SKY);
                 p.text(pos2(bar.min.x + 6.0, bar.center().y), Align2::LEFT_CENTER, title, self.bold(13.0), Color32::WHITE);
+                self.card_close(ui, Rect::from_center_size(pos2(bar.max.x - 11.0, bar.center().y), vec2(16.0, 14.0)), title)
             }
             Look::Modern => {
                 p.add(egui::epaint::Shadow { offset: [0, 4], blur: 16, spread: 0, color: Color32::from_black_alpha(40) }.as_shape(r, CornerRadius::same(10)));
                 p.rect(r, CornerRadius::same(10), tok::CARD, Stroke::new(1.0, tok::BORDER), StrokeKind::Inside);
                 p.text(pos2(r.min.x + 20.0, r.min.y + 24.0), Align2::LEFT_CENTER, title, self.bold(15.0), tok::TEXT);
+                self.card_close(ui, Rect::from_center_size(pos2(r.max.x - 24.0, r.min.y + 24.0), vec2(26.0, 26.0)), title)
             }
-        }
+        };
+        let _ = closed;
         Rect::from_min_max(pos2(r.min.x + 20.0, r.min.y + head + 10.0), pos2(r.max.x - 20.0, r.max.y - 16.0))
     }
 
