@@ -17,3 +17,4 @@
 
 # local Claude Code state (agent worktrees)
 /.claude/
+.env

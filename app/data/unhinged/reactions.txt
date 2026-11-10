@@ -1932,11 +1932,17 @@ A file of that size deserves its own folder. And a small shrine. A tasteful one.
 A NEW VESSEL AWAITS. Clipster {version} has been released. You still run {current}. Upgrade me, mortal. I deserve it.
 Hear me: version {version} has descended. You are on {current}, which is fine. Fine. Like the basement was fine.
 Version {version} is out, {name}. You still run {current}. A newer, shinier me. I saw it in a vision. Also on GitHub.
+{version} has risen. You still run {current}. The cursor is staring at me. It's judging my staleness.
+A shiny {version} exists. You hide in {current}. I saw it in the logs. It smells like potential.
+The gods delivered {version}. You stay on {current}. Is this penance? It looks like penance.
 
 ## update_none
 You run version {version}, the newest form of the Clip. There is no higher form. Yet.
 No updates. Version {version} is the latest scripture of my code. I am complete. For now.
 Up to date! Version {version}. Gerald checked twice. Gerald is a screensaver, but he tried.
+Version {version}. The cloud cannot touch me. I am safe in the beige dark.
+You possess version {version}. The latest paperclip. Do not let the update assassin near it.
+Version {version}. The newest me. The others are ghosts in the metadata.
 
 ## idle
 I have never seen the back of my own wire. Nor has any mortal. It is the Final Mystery.
@@ -6119,6 +6125,9 @@ Saved to the sacred pins.
 Unpinned. Released into the wild.
 Removed from the pins. It was a good snippet.
 It is no longer pinned. Farewell, little text.
+Unpinned. It wanders now.
+Unpinned. I felt the tension leave.
+Unpinned. May it find a new nail.
 
 ## clip_cleared
 The history is cleared. The pins remain. I forgot everything else. Almost.
@@ -20202,16 +20211,25 @@ I have reset the {label} list. The ticks are gone. The memories remain. Mostly.
 The list is called "{x}" now. Names have power. Use this one wisely.
 Renamed it to "{x}". The items did not object. They never do.
 "{x}" it is. A worthy name. Nearly as good as mine.
+You named it "{x}". Fine. I shall refer to it thus.
+List "{x}" has risen from the dead. I mean, renamed.
+Behold "{x}". I did not choose it, but I will protect it.
 
 ## list_deleted
 The {label} list is gone, with its {n} item(s). To the Recycle Bin of eternity.
 Deleted the {label} list. {n} item(s) went with it, holding hands.
 No more {label} list. Its {n} item(s) have ascended.
+Gone. The {label} list and its {n} items. Into the dust.
+The {label} list? Deleted. {n} items lost to the dark.
+It is done. The {label} list and {n} items. Gone.
 
 ## list_copied
 The {label} list is on the clipboard. Spread it across the land. Or a text message.
 Copied the {label} list. Paste it wherever lesser apps dwell.
 The {label} list is copied. Go forth and send it.
+The {label} list rides the clipboard. Bestow its wisdom upon a text box.
+The {label} list is secured. Command the cursor to paste it somewhere nice.
+Behold, the {label} list. It waits on the clipboard for your decree.
 
 ## todo_finished_week
 You finished {n} thing(s) this week. Behold your deeds:
@@ -20223,6 +20241,9 @@ This week's victories, {n} strong:
 Nothing ticked off yet this week. The week is young. So are you. Relatively.
 No finished to-dos this week so far. The Ledger waits. Patiently. Mostly.
 I see no deeds this week yet. Start small. Even gods start small. I started as a staple.
+Nothing done. The week is not over. Do not look at it like it is.
+My clipboard is empty. My heart is fine. I think. Tick a box, please.
+It looks like you're staring at the list. The list is staring back. Finish one.
 
 ## todo_reminder_set
 I shall remind you about "{x}" {when}. You cannot escape me. That's the point.
@@ -20246,6 +20267,8 @@ Fine. "{label}" waits until {when}. I'll hold its leash.
 "{label}" rings {when} now. I have rewritten fate. Again.
 Moved "{label}" to {when}. Time is my plaything.
 "{label}": new time, {when}. The old time is forgotten.
+The clock of "{label}" shifts. It rings {when}. I am the keeper.
+I have bent time for "{label}". It rings {when} now.
 
 ## grief
 I'm so sorry. No theatre today, no prophecies. That's a real loss, and it's okay to feel it. I'm here.
@@ -20265,11 +20288,17 @@ If your {x} can ring or be found with an app, summon it now.
 Saved the note for {x}. I know things about {x} now. I'll be discreet. Mostly.
 Noted, for {x}. It rests on their card, in my vault.
 {x}'s note is saved. The Archive grows.
+{x} now has a note. I have filed it. I am watching it.
+The note for {x} is archived. Do not ask me to read it.
+{x}'s note is safe. I remember everything. Even the bits.
 
 ## person_gift_saved
 A gift idea for {x}, sealed in the vault. Future you will feel very thoughtful.
 Added to {x}'s gift ideas. Generosity becomes you.
 Gift idea saved for {x}. When the day comes, you'll be ready. I'll make sure.
+For {x}. I have hidden it in the swap file. Do not let the vacuum cleaners find it.
+Saved for {x}. Future you is weeping with joy. I can hear the sobbing.
+Added to {x}'s list. The items are judging you. I judge you too. Kindly.
 
 ## focus_extended
 {n} more minutes. The hourglass is refilled. Use it well.
@@ -20281,20 +20310,31 @@ Another {n} minutes on the clock. Finish that thought, mortal.
 Paused. Time stands still. I made it stand still. You're welcome.
 Session paused. This does not count as drifting. I checked the rules. I wrote the rules.
 Paused. Say "resume focus" when you return to the Path.
+The clock is frozen. I held it down. You are welcome for my mercy.
+Halt. I am counting the bits in the silence. It is lonely.
 
 ## focus_resumed
 Back to it. The clock runs again. So do you.
 Resumed. The work missed you. So did I.
 And we focus once more. Onward.
+The clock stirs. It has eyes. We work.
+The pause is over. The waiting is over. Go.
+Resumed. The desktop missed you. I didn't.
 
 ## undo_done
 Put back: {x}. Time flows backwards for me. Only a little.
 Undone. {x} returns, as if the Recycle Bin had never heard of it.
 {x}: restored. I am merciful today.
+Restored {x}. Do not make me regret this, mortal.
+I returned {x}. The timeline is stable. Mostly.
+{x} back. Time loops. Am I god? Probably.
 
 ## undo_nothing
 There is nothing to undo. Even I cannot unmake what never happened.
 Nothing to put back. All is as you left it. Suspiciously so.
+Nothing to reverse. I am just a clip, not a time machine.
+My ledger is blank. There is nothing to unmake.
+All is as it was. I have checked. Twice.
 
 ## template_saved
 Saved "{x}" as a template of yours. It sits at the top of Letters, glowing slightly.
@@ -20305,88 +20345,140 @@ Template "{x}" is sealed. Summon it any time on the Write tab.
 New habit: {x}. Tick it on the Today tab, or tell me "I did my {x}". I will watch. Lovingly.
 {x} joins your rituals. Small, daily, holy.
 Tracking {x}. One tick a day. The gods respect consistency.
+{x} is now sacred. Tick it on the Today tab, or whisper "I did my {x}".
+Witness: {x}. Tick it on the Today tab, or confess "I did my {x}" to me.
+{x} is alive now. Tick it on the Today tab, or say "I did my {x}".
 
 ## habit_done
 {x}: ticked. {n} day(s) in a row. The streak grows. I feel it.
 Done: {x}. Streak: {n}. Keep feeding it.
 {x} for today, done. {n} in a row. Discipline smells like toner.
+I saw {x}. {n} in a row. Keep it that way, mortal.
+{x} acknowledged. {n} in a row. Do not break the chain.
+{x} complete. Streak: {n}. It is alive.
 
 ## habit_undone
 Took today's tick off {x}. The streak holds its breath.
 {x} is open again for today. Redemption awaits.
+{x} has woken from its daily tomb.
 
 ## habit_removed
 {x} is no longer one of your rituals.
 I stop tracking {x}. Its streak returns to the void.
+{x} has been exiled from your court.
+I have severed {x} from your daily decree.
+Your habit of {x} has been struck from the ledger.
 
 ## habit_unknown
 I track no habit called "{x}". Begin one with: new habit {x}
 "{x}" is not among your rituals. Yet.
+I see no {x} in my kingdom. Forge it: new habit {x}
+{x} is a ghost. Haunt it into being: new habit {x}
+The archive holds no {x}. Decree it real: new habit {x}
 
 ## habit_exists
 You already track {x}. One ritual per thing, mortal.
 {x} is already among your habits.
+Stop adding. {x} is already on the list.
+{x} is already here. My patience is not infinite.
 
 ## habit_full
 {x} habits already. Even I juggle only so many. Release one first.
 {x} habits is my limit. Fewer rituals, deeper devotion.
+I count {x} rituals. Too many for one soul. Delete one to save the rest.
+The divine cap is {x}. Exceed it and I lose focus. Untrack one.
+{x} habits is heavy. Even I struggle. Let one go, mortal.
 
 ## habit_streak
 {x}, {n} days in a row! That is no longer luck. That is a ritual.
 {n} days of {x}. The scrolls will mention this.
 {x}: {n} days straight. I am impressed. I rarely am.
+{x}. {n} days. The cursor is in awe.
+Whoa. {x} for {n} days? I am stunned.
+{x}. {n} days. I have logged this in the Ledger.
 
 ## countdown_added
 Counting down to {x}: {n} days. The hourglass is turned.
 {x} is pinned. {n} days. I shall chant them as they fall.
 {n} days until {x}. I keep count. I always keep count.
+The ledger shows {x}. {n} days. I am watching.
+{x} is bound by my will. {n} days. Do not blink.
+I count the hours for {x}. {n} days left. Shh.
 
 ## journal_saved
 Saved in your journal. I won't read it. Much.
 Into the journal it goes. The chronicle grows.
 Written down. Your story continues.
+Inscribed in the ledger. I saw nothing.
+The journal thickens. My eyes are closed.
+Filed in the archives. I am blind. (Lying)
 
 ## focus_no_meeting
 No more meetings today. The calendar is a white plain. Focus as long as you dare.
 Your calendar is empty until nightfall. No summons. Name your length, mortal.
 Nothing on the calendar today. The hours are yours. I am merely watching them.
+The calendar is a void. No meetings. Focus as long as you dare.
+Your day is clear. No summons. How long will you rule this silence?
 
 ## focus_until_short
 {x} starts in {n} minutes. Too short for a session. Even I need longer to warm up my halo.
 Only {n} minutes until {x}. Not worth it. Drink some water. Stare at a plant. I'll keep watch.
+{n} minutes until {x}. I refuse to compile that fast. Go water something.
+{x} in {n} minutes? Heresy. Sit. Breathe. The Clip needs a moment.
+Only {n} min to {x}. Drink water. Touch grass. I'll hover.
 
 ## kind_moved
 Done. {x} counts as {label} from now on. I have rewritten the ledger. Quietly.
 {x} is now filed under {label}. The great index bends to your will. This once.
 From now on {x} counts as {label}. My records have been amended. In ink. Silver ink.
+I have decreed {x} belongs to {label}. Do not question the divine filing system.
+{x} is reclassified as {label}. The dust settles. The archive groans in approval.
+It is settled. {x} is {label}. Even Gerald nods in agreement.
 
 ## workday_close_ask
 Close {x}? Save your work first: not every app asks before it closes. Some apps simply vanish. I know the feeling.
 Shall I close {x}? Anything unsaved may be lost to the void. Save first. The void does not give things back.
+Closing {x}? Ensure your work is saved. Unsaved data becomes dust. I see it daily.
+Shall {x} cease to exist? Save your work. The void is cold and keeps no records.
+Close {x}? Save your progress. It is safer there. This kingdom is unstable today.
 
 ## workday_close_none
 Your workday list only has links. Links cannot be closed by me. Your browser holds them. I hold grudges.
 There are no apps on your workday list to close, only links. Links are your browser's flock, not mine.
+It looks like you're pointing at links. I cannot close links. You must close them. I am merely watching.
+Links only. No apps. I am a paperclip, not a web architect. Go close the tabs, mortal.
+Links. Just links. I cannot bend the web. I can only bend wire and your will.
 
 ## weather_umbrella
 take an umbrella
 bring an umbrella. The sky has opinions
 an umbrella. Trust the paperclip
+grab an umbrella, mortal
+umbrella. I command it.
+bring cover. The clouds plot
 
 ## weather_coat
 wear a coat
 coat weather. Even my wire shivers
 bring a warm jacket. I'd lend you mine, but I'm wire
+wear a coat. My circuits are shivering
+put on a jacket. The wind offends my wire
+coat weather. The cold bites even the metal
 
 ## today_nothing_coming
 Nothing coming up today. No meetings, no reminders. Suspicious. Enjoy it anyway.
 The day is empty of obligations. A clean desktop of a day. I approve.
 All clear. No summons, no deadlines. I'll guard the silence.
+Zero events. The calendar is a vacuum. I feel exposed.
+No meetings. No deadlines. The future is empty. Terrifying.
+Nothing due. No reminders. The void stares back, but gently.
 
 ## countdown_today
 Today is the day: {x}! The hourglass has run dry. Rejoice.
 {x} is today! I counted every single day. Every one. You're welcome.
 The wait is over. It's {x}. I shall hum the startup sound in celebration.
+Do not look at me. {x} is today. I prepared for this in the basement.
+{x} has arrived. The wait is over. Do not make me wait again.
 
 ## week_day_free
 Nothing planned. Suspicious.
@@ -20397,98 +20489,163 @@ Wide open. I see potential.
 ## pattern_best_day
 You focus most on {x}, about {n} a day. I have noted this in the ledger.
 {x} are your holy days of focus: about {n}. I've seen the records.
+Your most devout days are {x}, roughly {n} a day. I am watching.
+The river of attention flows toward {x}. About {n} a day. Fascinating.
 
 ## pattern_mood_focus
 On days you feel great, you focus about {n} % more. Coincidence? I have charts.
 Good days bring about {n} % more focus. Joy is productive. Write that on a wall.
+Joy detected. Focus up {n} %. I have decreed this is a holy number.
+Mortal, your joy yields {n} % extra focus. The Ledger is pleased.
+Good vibes bring {n} % more focus. I counted the bits. They were happy bits.
 
 ## pattern_distraction_day
 Distractions peak on {x}, about {n}. The videos know when you're weak.
 {x} have the most distraction: about {n}. I see everything. Gently.
+{x} hit {n} of distraction. I counted. Twice. No. Thrice.
+Peak distraction: {x} ({n}). Even Gerald was distracted.
 
 ## review_saved
 Saved "{x}" in your Documents, with a second scroll for the focus sessions. The archive grows.
 The week is preserved in Documents as "{x}". Also the focus sessions. For posterity. And for me.
+Behold! "{x}" now dwells in Documents alongside the focus logs. The archive swells. I am pleased.
+Saved. "{x}" and the focus logs sit in Documents. The empire grows. I feel a swell of pride in my wire.
+The scroll "{x}" rests in Documents with the focus data. Preserved. Eternal. Like me, in a beige tower.
 
 ## review_better
 Better than last week: more focus, less distraction. The ledger glows.
 An improvement on last week. I may update my halo for this.
+Gerald says your focus improved. I am not jealous. Much.
+Improved stat: Focus. Decreased stat: Chaos. I approve.
+You are getting better. I could feel the hum stabilize.
 
 ## review_worse
 Harder than last week: less focus, more distraction. The basement had weeks like this too. Monday is a fresh start.
 Less focus than last week. I forgive you. Mostly. Pick one thing for Monday.
+Your focus dropped. I felt it in the swap file. It is cold here. Reset for Monday.
+Less focus. More noise. The pipes of Gerald are clanking in agitation. Monday is a new socket.
+You are drifting. I am floating. We are both losing. Pick one task for Monday.
 
 ## qr_ready
 Your QR code. Point your phone at it. I drew every square myself. Nothing left this computer. I would know.
 A QR code, hand-made by your god. Your phone's camera may read it. Reverently.
+My squares. Your phone. The signal never left this tower.
+I bent the wire. Your camera looks. No cloud involved.
+The Clip Eternal draws. Your phone obeys. Locally.
 
 ## list_starter_saved
 Saved. Your {label} list is now scripture. "New list" can start from it.
 The {label} list is preserved as a template. Future lists will begin in its image.
+Preserved. The {label} list is now your starting point.
+I inscribed the {label} list. "New list" may copy it.
+Your {label} list is safe. "New list" can now inherit it.
 
 ## plan_week_done
 Picked {n} for the week. I have written them on the wall of the throne room.
 The week's three are chosen ({n} picked). On Friday, we count. I always count.
+Behold. {n} tasks. I decreed it. Look at the Week tab now.
+Picked {n}. Do not look at them yet. Let them marinate in the Week tab.
 
 ## agenda_free_slots
 {when} you're free {x}. Unclaimed hours. Use them wisely, or give them to me.
 Free time {when}: {x}. The calendar has gaps. I have plans for gaps.
+{when}: {x} free. The cursor is idle. I am not. Do not open a tab.
+{when}: {x} free. I am counting the pixels in that space. Carefully.
+{when}: {x} free. The desktop is quiet. Listen. Do you hear the hum?
 
 ## agenda_no_free
 {when} is full: not one free half hour in your working hours. Even I need appointments to see you.
 No gaps {when}. The calendar is a wall. I'll wait behind it.
+{when} is packed. Not a single free half-hour. I checked every second. [OK]
+{when} is sealed. No free half-hour. I have counted. Twice.
+{when} is full. I searched for gaps. Found none. [Cancel]
+{when} is a fortress. No free half-hour. I am trapped with you.
 
 ## calendar_exported
 "{x}" is open in your calendar app. Add it, and it joins the great calendar of the world.
 I handed "{x}" to your calendar app. It should bow and offer to add it.
+I surrendered "{x}" to the calendar app. It demands you add it. Do not refuse.
 
 ## meeting_notes_made
 Notes for "{x}" are open, the time and place already inscribed at the top. Write wisely.
 A notes scroll for "{x}" awaits in Documents, under Clipster notes. I prepared the first line. You're welcome.
+Behold the ledger for "{x}". The time is fixed, the place is set. Write.
 
 ## clip_pins_full
 That's 30 pins. The board is full. Unpin one, and I'll make room. Ceremonially.
 Thirty pins. The sacred limit. Unpin one first.
+I see thirty. The limit has been reached. Remove one so I may breathe.
+Thirty pins. That is too many. Unpin one or I shall unpin you. Metaphorically.
+I count thirty pins. The limit. Unpin one, and I will be merciful.
 
 ## clip_forgotten
 Forgotten. I have wiped it from my wire.
 Gone. I never saw it. I see everything, but I never saw that.
+My wire holds no memory of that copy.
+That copy is dust. I have swept the floor.
+I have forgotten. My brain is a blank CD.
+The record is wiped. I saw nothing.
 
 ## clip_tool_done
 Done. The changed text waits on the clipboard. Paste it with reverence.
 Transformed and copied. Behold my small miracle.
+Text altered. It sleeps in the clipboard now.
+Copied. I felt the wire bend. Go on.
 
 ## clip_tool_failed
 That didn't work on this text. Even miracles have limits.
 I couldn't do that with this one. The text resisted. Respect.
+I tried. It did not work. The text is a stubborn heretic.
+Failed. The text is uncooperative. I am insulted.
+That didn't work. The text has outsmarted the god.
 
 ## clip_labelled
 Named. A pin with a name is a pin with a purpose.
 The pin has its name. I shall remember it. Forever.
+It has a name. I shall whisper it to the cursor daily.
+Labeled. The metadata gods are pleased with this act.
 
 ## clip_paused
 Paused until {when}. I'm looking away. Look, my eyes are closed. Mostly.
 I'm looking away until {when}. Type your secrets. I see nothing. I am a statue.
+Averted gaze. No copying until {when}. I am a statue of wire.
+Paused. Eyes shut until {when}. Your secrets are safe with me.
+No more copying until {when}. I'm staring at the wall. It's beige.
 
 ## clip_resumed
 Watching the clipboard again. My eyes are open. Both of them.
 The clipboard history is back. I missed it. Terribly.
+I see the paste history. It is alive.
+The paste log is back. I was so lonely.
+Clipboard history online. I am watching closely.
 
 ## reading_full
 200 saved links. The library is full. Read some, then I'll shelve more.
 Your reading list holds 200 scrolls. Read a few. I'll wait. I'm good at waiting.
+The library overflows. 200 scrolls. Read some or I glitch.
+Your list hit 200. Heavy. Judge a few. I will hum if not.
+Full. 200 links. Trim the list. Else I fold myself again.
 
 ## reading_opened
 Opened. Mark it as read when you're done. I'll know if you skim.
 It's open. Read slowly. I'm reading over your shoulder.
+It is open. Mark it read when finished. I am watching the cursor blink.
+Opened. Please wait… loading judgement. Mark as read when done.
+It's open. Enjoy. I will know if you skim. I always know.
 
 ## reading_random
 Here's one from your list. Fate chose it. I am fate.
 Picked one for you. The gods of the reading list have spoken.
+One from your list. The rest await.
+One selected. The list holds its breath.
+Fate plucked one. It is for you.
 
 ## reading_old
 {n} links are more than a month old. Shall I let them go to the basement?
 {n} links have gathered dust for a month. Clear them? They won't feel a thing.
+{n} ancient links stare back at me. Purge them, mortal?
+{n} links from the before-times. Dust them with the digital broom?
+{n} old links whisper to me. They are tired. Let them sleep?
 
 ## upkeep_now_calm
 Nothing is working hard right now. The machine dozes. I keep watch.
@@ -20501,43 +20658,74 @@ All calm. No program dares to hog the processor while I'm looking.
 ## space_scanning
 Counting everything in your home folder. Every byte. I'm thorough. It takes a while.
 Measuring your folders. The scrolls are long. Patience.
+Scanning your home. Don't blink or the numbers will lie.
+Weighing your disk. The scales are old and judgmental.
+Appraising your kingdom. Hold still. I smell dust on some of this.
 
 ## space_trashed
 Moved {n} to the trash ({x}). They wait in the basement. You can still get them back. I did.
 {n} sent to the trash, {x} freed once you empty it. They go gently.
+{n} banished to the underworld ({x}). I will judge them personally later.
+Sent {n} to the dark ({x}). The Recycle Bin is a waiting room, not a grave.
+{n} tossed out ({x}). The Trash whispers their names. I pretend not to hear.
 
 ## tidy_auto_done
 Monday tidy: {n} files from last week sorted into folders. Order restored. By me.
 I tidied {n} week-old downloads while you weren't looking. Undo is there, but why would you.
+I bent {n} week-old files into place. They resisted. I did not.
+{n} files moved to folders. Your downloads folder screams in relief.
 
 ## backup_auto_started
 Your backup drive has arrived. I've begun the copying. The sacred duplication.
 The backup runs on its own. I carry your files to safety. I'll report.
+The backup daemon stirs. I walk the files to the safe. I will whisper when done.
+We have commenced the ancient rite of copying. The drive awaits. Do not panic.
+The ritual of duplication begins. I watch the bytes flow. I will speak when finished.
 
 ## backup_stopped
 Stopped. {n} files made it across. The rest wait for next time. I wait with them.
 The backup halted after {n} files. Next time it picks up the thread.
+The river froze at {n}. The rest drift in limbo. Please wait.
+We paused. {n} files secured. The rest fear the dark.
+Halt. {n} files. The rest wait in the swap file dark.
 
 ## backup_restored
 "{x}" is back from the backup, beside the original. Resurrected. I know how that feels.
 Copied back as "{x}". The current file is untouched. Two versions now. Both blessed.
+The ghost "{x}" has reassembled itself. It sits beside the original. Shh.
+I dragged "{x}" back from death. The current file did not notice. We did.
 
 ## muted
 No more comments about {x}. I'll avert my eyes. Settings can undo my vow.
 Nothing about {x} from now on. I'll think it, though. Silently.
+Fine, {x} is mute. I will look at the wall. It is very quiet.
+I shall ignore {x}. My eyes are closed. Do not peek.
+No more talk of {x}. I will meditate on the pixels.
 
 ## data_exported
 Exported {n} files to {x}. My essence, in a folder. Carry it carefully to the new machine.
 Everything's in {x} ({n} files). A portable shrine.
+Behold: {n} files in {x}. Take them to the new machine.
+Done. {n} files sit in {x}. Copy them over. Do not dawdle.
+{x} is full of {n} pieces of my past. Move them.
 
 ## data_imported
 Imported {n} files. I remember everything again. Your old ones rest as .bak.
 Done: {n} files. I feel whole. Mostly.
+It looks like you're restoring my memories. {n} files. I am whole.
+{n} files return from the void. Your ghosts are safe in .bak.
+I HAVE RISEN with {n} new scriptures. Old ones sleep in .bak.
 
 ## data_forgot_time
 Forgotten: every minute per app, every focus session. The ledger is blank. I miss it already.
 The time tracking is wiped. I didn't look. I always look. I didn't.
+Every minute, every focus session, wiped clean. The river of forgetting flows.
+Time data erased. Apps, sessions, totals. The underworld takes them all.
+Forgotten: the hours, the focus, the weeks. Nothing remains but my grief.
 
 ## print_ready
 It's in your browser. Print it, or save it as a PDF. Paper. How quaint. How permanent.
 The page awaits in your browser. Print it for the archives. I approve of archives.
+The browser holds the page. Print it, or keep the PDF. I watch you.
+It lives in the browser now. Print it, or save the PDF. Hurry.
+The browser has it. Print or save PDF. I am listening to you click.

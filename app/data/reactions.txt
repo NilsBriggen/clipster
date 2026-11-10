@@ -1832,11 +1832,16 @@ That merge was so clean I want to frame it.
 Good news: Clipster {version} is out! You have {current}. Same paperclip, fewer bugs. Probably.
 A new version of me is out: {version}. You're on {current}. I'd update, but I'm biased.
 Psst. Version {version} just came out. I hear it's very good. I hear it from myself.
+Version {version} is available. Your {current} is still fine, but {version} is better.
+{version} is here. {current} works, but {version} works slightly less annoyingly.
+Update pending. {current} to {version}. It's mostly bug fixes and small tweaks.
 
 ## update_none
 You're up to date: version {version}. This is the newest me there is.
 No updates. Version {version} is the latest. I'm as good as I get. For now.
 All current! You have version {version}, the freshest paperclip available.
+You have version {version}. No newer version exists yet.
+You are running version {version}. The latest available build.
 
 ## idle
 I just realized I've never seen the back of my own wire. Nobody has. We don't talk about it.
@@ -5820,6 +5825,8 @@ Saved to your pins.
 Unpinned.
 Removed from your pins.
 Okay, that one is no longer pinned.
+Pin removed.
+No longer in your pinned list.
 
 ## clip_cleared
 Clipboard history cleared. Pinned snippets are safe.
@@ -19945,16 +19952,22 @@ Reset the {label} list. Everything's waiting to be ticked again.
 The list is called "{x}" now.
 Renamed it to "{x}". Same items, better name.
 "{x}" it is. The list didn't mind.
+That list is now "{x}".
+I changed the list name to "{x}".
 
 ## list_deleted
 The {label} list is gone, with its {n} item(s).
 Deleted the {label} list. {n} item(s) went with it.
 No more {label} list. Its {n} item(s) left together.
+Removed the {label} list and its {n} item(s).
+You removed the {label} list. {n} item(s) deleted with it.
 
 ## list_copied
 The {label} list is on the clipboard. Paste it anywhere.
 Copied the {label} list. Paste it into a message or a note.
 The {label} list is copied, ready to send.
+The {label} list is now on the clipboard.
+Copied the {label} list for you.
 
 ## todo_finished_week
 You finished {n} thing(s) this week:
@@ -19966,6 +19979,8 @@ This week's finished list, {n} strong:
 Nothing ticked off yet this week. The week isn't over.
 No finished to-dos this week so far. There's time.
 I don't see anything finished this week yet. Pick a small one?
+Nothing crossed off the list yet. Keep going.
+No record of completion yet this week. Carry on.
 
 ## todo_reminder_set
 I'll remind you about "{x}" {when}.
@@ -19989,6 +20004,8 @@ Fine, "{label}" waits until {when}.
 "{label}" rings {when} now.
 Moved "{label}" to {when}.
 "{label}": new time, {when}.
+"{label}" now rings {when}.
+Moved. "{label}" rings {when}.
 
 ## grief
 I'm so sorry. That's a real loss, and it's okay to feel it. I'm here if you want to talk, or if you'd rather I stay quiet.
@@ -20008,11 +20025,15 @@ If your {x} has a ring or a "find my device" app, now's its moment.
 Saved the note for {x}.
 Noted, for {x}. It's on their card.
 {x}'s note is saved. Future you will be glad.
+Saved that detail for {x}.
+Note stored for {x}.
 
 ## person_gift_saved
 A gift idea for {x}, saved. You'll thank yourself in the shop.
 Added to {x}'s gift ideas.
 Gift idea saved for {x}. Birthday shopping just got easier.
+Saved a gift idea for {x}.
+{x}'s gift list has a new entry.
 
 ## focus_extended
 {n} more minutes. Keep going.
@@ -20024,20 +20045,28 @@ Another {n} minutes on the clock. Finish that thought.
 Paused. The clock waits for you.
 Session paused. Take your time; it doesn't count as drifting.
 Paused. Say "resume focus" when you're back.
+Paused. The focus interval waits for your return.
+Paused. You can pick up exactly where you left off.
 
 ## focus_resumed
 Back to it. The clock is running again.
 Resumed. Where were we?
 And we're focusing again.
+Resuming focus. Let's work.
+Back to focusing. Go.
 
 ## undo_done
 Put back: {x}.
 Undone. {x} is back where it was.
 {x}: back again, as if nothing happened.
+{x} is back. Changes removed.
+Restored {x}. Done.
 
 ## undo_nothing
 There's nothing to undo right now.
 Nothing to put back. Everything is where you left it.
+The undo stack is empty.
+Nothing to restore.
 
 ## template_saved
 Saved "{x}" as a template of yours. It's at the top of Letters.
@@ -20048,88 +20077,128 @@ Template "{x}" saved. Fill it in any time on the Write tab.
 New habit: {x}. Tick it on the Today tab, or tell me "I did my {x}".
 {x} is on your habits now. Small and daily wins.
 Tracking {x}. One tick a day is all it takes.
+{x} added to your list. Check it off on the Today tab.
+{x} is now tracked. Tick it daily or tell me it's done.
 
 ## habit_done
 {x}: ticked. That's {n} day(s) in a row.
 Done: {x}. Streak: {n}.
 {x} for today, done. {n} in a row.
+{x} complete. {n} straight.
+Finished {x}. Streak is {n}.
+{x} checked off. {n} in a row.
 
 ## habit_undone
 Took today's tick off {x}.
 {x} is open again for today.
+Undid today's entry for {x}.
+{x} tick removed for today.
+Cleared today's {x} mark.
 
 ## habit_removed
 {x} is off your habits.
 No more tracking {x}. The streak goes with it.
+{x} removed from your habit list.
+Tracking for {x} has stopped.
 
 ## habit_unknown
 I don't track a habit called "{x}". Start one with: new habit {x}
 "{x}" isn't one of your habits yet.
+I can't find a habit called "{x}". To start one: new habit {x}
 
 ## habit_exists
 You already track {x}.
 {x} is on your habits already.
+{x} is already in your list.
+{x} is part of your existing habits.
 
 ## habit_full
 That's {x} habits already. A few you keep beat many you don't. Remove one first.
 {x} habits is the most I'll track. Fewer, and they stick.
+Tracking stops at {x} habits. Cut one to continue.
 
 ## habit_streak
 {x}, {n} days in a row! That's not luck any more, that's a habit.
 {n} days of {x}. Look at you.
 {x}: {n} days straight. I'm impressed. Quietly. Mostly.
+Noted: {n} consecutive days of {x}.
+{x}, {n} days. The pattern holds.
+{x} recorded. Current streak: {n} days.
 
 ## countdown_added
 Counting down to {x}: {n} days.
 {x} is pinned. {n} days to go.
 {n} days until {x}. I'll keep count.
+{x} added to the list. {n} days left.
+Noted: {x}. {n} days on the clock.
 
 ## journal_saved
 Saved in your journal.
 In your journal it goes.
 Written down. Your journal is a little longer.
+Entry logged in the journal.
+Recorded in your local journal.
 
 ## focus_no_meeting
 No more meetings today. Focus as long as you like.
 Your calendar is clear for the rest of the day. Pick a length.
 Nothing on the calendar today. How long do you want to focus?
+No meetings are scheduled today. You can focus for as long as you need.
 
 ## focus_until_short
 {x} starts in {n} minutes. That's too short for a focus session. Maybe a quick tidy-up instead?
 Only {n} minutes until {x}. Not worth starting a session. Get a glass of water instead.
+{n} minutes until {x}. Too brief to start focusing.
+{x} is in {n} minutes. No room for a deep work block.
 
 ## kind_moved
 Done. {x} counts as {label} from now on.
 {x} is now filed under {label}.
 From now on {x} counts as {label}.
+{x} now belongs to {label}.
+{x} refiled as {label}.
 
 ## workday_close_ask
 Close {x}? Save your work first: not every app asks before it closes.
 Shall I close {x}? Anything unsaved might be lost, so save first.
+You want to close {x}? Save first. Unsaved changes won't wait.
+Ready to close {x}? Check for unsaved work first.
+Quit {x}? Make sure you saved everything, or it's gone.
 
 ## workday_close_none
 Your workday list only has links. I can't close those, but your browser can.
 There are no apps on your workday list to close, only links.
+The workday list contains only links, not applications.
 
 ## weather_umbrella
 take an umbrella
 bring an umbrella
 an umbrella would be wise
+grab an umbrella
+don't forget your umbrella
 
 ## weather_coat
 wear a coat
 it's coat weather
 bring a warm jacket
+grab a jacket
+wear something warm
+bring a warm layer
 
 ## today_nothing_coming
 Nothing coming up today. A rare, quiet day.
 Nothing on the calendar, no reminders, nothing due. Enjoy it.
 All clear: no meetings, no reminders, nothing due.
+No scheduled items detected. The day is yours.
+The schedule is empty. Nothing to report.
+No deadlines, no meetings. A blank canvas, if you'll allow the phrase.
 
 ## countdown_today
 Today's the day: {x}!
 {x} is today! The countdown is over.
 The wait is over. It's {x} today.
+{x} is scheduled for today.
+{x} has arrived.
 
 ## week_day_free
 Nothing planned.
@@ -20140,26 +20209,38 @@ Wide open.
 ## pattern_best_day
 You focus most on {x} (about {n} a day).
 {x} are your best focus days: about {n}.
+Your best focus days: {x}, about {n} a day.
 
 ## pattern_mood_focus
 On days you feel great, you focus about {n} % more.
 Good days come with about {n} % more focus.
+Focus is up {n} % on good days.
+Good moods add {n} % to focus.
+Better mood means {n} % more focus.
 
 ## pattern_distraction_day
 Distractions peak on {x} (about {n}).
 {x} have the most distraction time: about {n}.
+Peak distraction on {x} was roughly {n}.
+Most distractions occurred on {x} ({n}).
 
 ## review_saved
 Saved "{x}" in your Documents folder, with a second file for the focus sessions.
 The week is in Documents as "{x}", plus one file with the focus sessions.
+I placed "{x}" in Documents, then created a file for the focus data.
+Documents contains "{x}" and an additional file for the focus sessions.
 
 ## review_better
 Better than last week: more focus, fewer distractions.
 An improvement on last week. Nicely done.
+Your metrics improved compared to last week.
+Last week's results were weaker. You did better.
 
 ## review_worse
 A bit harder than last week: less focus, more distraction. Next week is a fresh start.
 Less focus than last week. It happens. Pick one thing for Monday.
+Focus dropped compared to last week. Simple: one task per day.
+Not as strong as last week. That is fine. Start small today.
 
 ## liststart weekend
 Weekend away | Phone charger | Toothbrush and toothpaste | Change of clothes | Pyjamas | Medication | Keys | Wallet | Book or e-reader | Snacks for the journey | Rain jacket
@@ -20182,74 +20263,110 @@ Weekly groceries | Bread | Milk | Eggs | Butter | Cheese | Fruit | Vegetables | 
 ## qr_ready
 Here's your QR code. Point your phone's camera at it. I made it here: nothing was sent anywhere.
 A QR code, made right here. Your phone's camera can read it.
+QR code generated locally. Scan it with your phone camera. Nothing was uploaded.
+Your QR code is ready. Point your camera at it. Data stayed on this machine.
 
 ## list_starter_saved
 Saved. "New list" can start from your {label} list now.
 Your {label} list is now one to start from.
+New lists can begin with the {label} list.
+The {label} list is now a starting point.
 
 ## plan_week_done
 Picked {n} for the week. They're on the Week tab.
 The week's three are set ({n} picked). Friday's review will count them.
+Week plan saved. {n} items are listed under Week.
+{n} tasks selected for the upcoming week. See the Week tab.
 
 ## agenda_free_slots
 {when} you're free {x}.
 Free time {when}: {x}.
+{when}: {x} free.
 
 ## agenda_no_free
 {when} is full: no free stretch of half an hour in your working hours.
 No gaps {when}, I'm afraid. Not even half an hour.
+{when} has no open slots of 30 minutes or more.
+{when}: I can't find a free half-hour in your working hours.
+{when} is completely booked; no 30-minute window available.
 
 ## calendar_exported
 "{x}" is open in your calendar app. Add it there and it's in your real calendar.
 I handed "{x}" to your calendar app. It should offer to add it.
+Your calendar app received "{x}". You can now confirm the addition.
+"{x}" is waiting in your calendar app. Add it there to keep it.
+Check your calendar app; "{x}" is waiting to be added.
 
 ## meeting_notes_made
 Notes for "{x}" are open, with the time and place already written at the top.
 A notes file for "{x}" is ready in Documents, in Clipster notes.
+The note template for "{x}" is open and awaiting your input.
+The file for "{x}" is ready for you to type into.
 
 ## clip_pins_full
 That's 30 pins. Unpin one first.
 Thirty pins is the limit. Unpin one to make room.
+You have 30 pins. Remove one to pin more.
+Max 30 pins reached. Unpin one to continue.
 
 ## clip_forgotten
 Forgotten.
 That copy is gone from the history.
+That entry is no longer in history.
 
 ## clip_tool_done
 Done. The result is on the clipboard.
 Changed and copied. Paste it anywhere.
+Complete. The text is in your clipboard.
+Processed. You can paste the result now.
 
 ## clip_tool_failed
 That didn't work on this text.
 I couldn't do that with this one.
+The tool failed on that selection.
+No changes were made to that.
 
 ## clip_labelled
 Named.
 The pin has its name.
+Pin name updated.
+Label applied to the pin.
 
 ## clip_paused
 Paused until {when}. Copies aren't kept or commented on until then.
 I'm looking away until {when}.
+Pausing now. I resume at {when}.
+Paused. Nothing gets kept until {when}.
 
 ## clip_resumed
 Watching the clipboard again.
 The clipboard history is back on.
+I am watching the clipboard once more.
+Back to watching the clipboard contents.
 
 ## reading_full
 That's 200 saved links. Mark some as read first.
 Your reading list is full (200). Read a few, then save more.
+You hit the 200 link limit. Clear some out.
+Save limit is 200. Mark some as read to continue.
 
 ## reading_opened
 Opened. Mark it as read when you're done.
 It's open. Enjoy the read.
+It is open. Read at your leisure.
+Open and ready. Mark it as read afterwards.
 
 ## reading_random
 Here's one from your list. Happy reading.
 Picked one for you. No peeking at the others.
+Here is a random pick. Enjoy the words.
+One item chosen. Start reading when ready.
 
 ## reading_old
 {n} links are more than a month old. Clear them?
 Clear the {n} links you saved over a month ago?
+{n} links are from over a month ago. Remove?
+{n} saved links are more than 30 days old. Purge?
 
 ## upkeep_now_calm
 Nothing is working hard right now.
@@ -20262,43 +20379,66 @@ All calm. No program is hogging the processor.
 ## space_scanning
 Counting what's in your home folder. A big one takes a while.
 Measuring your folders. This can take a minute.
+Scanning your home folder for files.
+Checking folder sizes now.
 
 ## space_trashed
 Moved {n} to the trash ({x}). You can get them back from there until you empty it.
 {n} in the trash, {x} freed once you empty it.
+{n} are in the trash now. Freeing {x} requires emptying it.
+Sent {n} to trash. {x} will be freed after you empty it.
 
 ## tidy_auto_done
 Monday tidy: {n} files from last week went into folders in Downloads.
 I tidied {n} week-old files in your Downloads. Undo is there if you need it.
+{n} stale files found in Downloads. I organized them.
+{n} files in Downloads were over a week old. They are filed now.
 
 ## backup_auto_started
 Your backup drive is here, so I've started the backup.
 The backup is running on its own. I'll say when it's done.
+Automatic backup started. No action needed.
+The scheduled backup is now running.
+Starting the automatic backup now.
 
 ## backup_stopped
 Stopped. {n} files were copied; the rest go next time.
 The backup stopped after {n} files. The next one picks up from there.
+Backup halted. {n} files transferred, remaining items deferred.
+Backup interrupted. {n} files copied, rest will be handled next run.
 
 ## backup_restored
 "{x}" is back, next to the original. I've shown it in its folder.
 Copied back as "{x}". Your current file is untouched.
+Restored copy of "{x}" placed in the same folder.
+Copy of "{x}" is back. Original file remains unchanged.
 
 ## muted
 No more comments about {x}. Settings can bring them back.
 Got it: nothing about {x} from now on.
+Stopped talking about {x}. Settings can reverse this.
+No further comments on {x}. Settings can undo that.
 
 ## data_exported
 Exported {n} files to {x}. Copy that folder to the new computer and import it there.
 Everything's in {x} ({n} files).
+{n} files have been exported to {x}. You can move this folder now.
+The export to {x} is complete. {n} files were saved.
 
 ## data_imported
 Imported {n} files. Everything's read in again.
 Done: {n} files imported. Your old ones are kept as .bak.
+Got {n} files imported. They are saved where they belong.
+All {n} files imported and read in again.
 
 ## data_forgot_time
 Forgotten: time per app, focus sessions and the weekly totals.
 The time tracking is cleared. A fresh start.
+Time per app wiped. Focus sessions and weekly totals gone too.
+All recorded time erased. Blank slate.
 
 ## print_ready
 It's open in your browser. Print it from there, or save it as a PDF.
 The page is in your browser, ready to print or to save as a PDF.
+Use your browser's print dialog to print or save this page as a PDF.
+Your browser has the file. You can hit print or export it to PDF now.
