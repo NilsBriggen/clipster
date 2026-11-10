@@ -667,6 +667,9 @@ impl Desk {
             p.text(pos2(x0, y), Align2::LEFT_CENTER, "Tomorrow's three: star up to three", look.font(12.0), look.dim());
             y += 14.0;
             for (n, text, on) in &picks {
+                if y + 24.0 > inner.max.y - ctl - 10.0 {
+                    break; // a short window: fewer picks, never over the buttons
+                }
                 let cy = y + 12.0;
                 let star = Rect::from_center_size(pos2(x0 + 8.0, cy), vec2(20.0, 20.0));
                 let resp = ui.interact(star.union(Rect::from_min_size(pos2(x0, y), vec2(x1 - x0, 24.0))), Id::unique(("desk-wrap-star", *n)), Sense::click()).on_hover_cursor(egui::CursorIcon::PointingHand);

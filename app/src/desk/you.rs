@@ -240,9 +240,14 @@ impl Desk {
         let mut links_row = |ui: &mut Ui, y: &mut f32, title: &str, items: Vec<(String, String, String)>| {
             let start = p.text(pos2(x0, *y + small / 2.0), Align2::LEFT_CENTER, title, look.font(12.0), look.dim()).max.x + 6.0;
             let mut lx = start;
+            let mut wrapped_once = false; // two lines at most, so his memories below keep their room
             for (k, (label, cmd, tip)) in items.iter().enumerate() {
                 let w = p.layout_no_wrap(label.clone(), look.font(12.0), look.accent()).size().x;
                 if lx + gap + w > x1 && lx > start {
+                    if wrapped_once {
+                        break;
+                    }
+                    wrapped_once = true;
                     lx = start;
                     *y += 18.0;
                 } else if k > 0 {

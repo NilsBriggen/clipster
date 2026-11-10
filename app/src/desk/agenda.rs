@@ -564,7 +564,9 @@ impl Desk {
         let first = self.rows(ui, look, "reminders", area, view.timers.len(), fits);
         let now = chrono::Local::now().naive_local();
         let snooze_w = btn_w(&p, look, "Snooze ▾");
-        for (n, tm) in view.timers.iter().skip(first).take(fits).enumerate() {
+        let mut timers: Vec<&crate::timers::Timer> = view.timers.iter().collect();
+        timers.sort_by_key(|t| t.when());
+        for (n, tm) in timers.into_iter().skip(first).take(fits).enumerate() {
             let cy = area.min.y + n as f32 * pitch + pitch / 2.0;
             let key = format!("reminder-more-{}", tm.id);
             let (hit, end) = self.row_menu(ui, look, x1, cy, small, &key, ("Snooze ▾", snooze_w), &["Edit…".to_string(), "Cancel it".to_string()]);

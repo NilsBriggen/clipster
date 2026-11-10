@@ -152,11 +152,13 @@ impl Desk {
             // his line, how time gets counted, and the switch right under it when it's off
             let off = !view.prefs.windows;
             let msg = format!("{}\n\n{}", daily("desk_empty_week", &view.name), if off { "Time counts only while window comments are on." } else { "Time per kind of app is counted from the active window's title, on this computer only." });
-            let g = p.layout(msg, look.font(12.0), look.dim(), (chart.width() - 80.0).min(380.0));
+            // left of today's column, which is lit
+            let (mx, mw) = (chart.min.x + 24.0, (slot * 6.0 - 40.0).min(380.0));
+            let g = p.layout(msg, look.font(12.0), look.dim(), mw);
             let top = chart.min.y + 48.0;
             let gh = g.size().y;
-            p.galley(pos2(chart.center().x - g.size().x / 2.0, top), g, look.dim());
-            if off && look.button(ui, Rect::from_center_size(pos2(chart.center().x, top + gh + 10.0 + ctl / 2.0), vec2(90.0, ctl)), Id::unique("desk-week-on"), "Turn on", true).clicked() {
+            p.galley(pos2(mx, top), g, look.dim());
+            if off && look.button(ui, Rect::from_min_size(pos2(mx, top + gh + 10.0), vec2(90.0, ctl)), Id::unique("desk-week-on"), "Turn on", true).clicked() {
                 out.push("pref windows on".into());
             }
         }
