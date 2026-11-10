@@ -600,6 +600,15 @@ impl Look {
     }
 
     pub(super) fn input(self, ui: &mut Ui, r: Rect, id: Id, text: &mut String, hint: &str) -> Response {
+        self.field(ui, r, id, text, hint, false)
+    }
+
+    /// A text box that shows dots (a password).
+    pub(super) fn secret(self, ui: &mut Ui, r: Rect, id: Id, text: &mut String, hint: &str) -> Response {
+        self.field(ui, r, id, text, hint, true)
+    }
+
+    fn field(self, ui: &mut Ui, r: Rect, id: Id, text: &mut String, hint: &str, password: bool) -> Response {
         let (size, margin) = match self {
             Look::Classic => {
                 ui.painter().rect_filled(r, 0.0, Color32::WHITE);
@@ -621,6 +630,7 @@ impl Look {
         };
         let edit = egui::TextEdit::singleline(text)
             .id(id)
+            .password(password)
             .frame(egui::Frame::NONE.inner_margin(margin)) // with a frame set, egui ignores .margin()
             .font(self.font(size))
             .text_color(self.text())

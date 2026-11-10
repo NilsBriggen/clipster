@@ -122,6 +122,7 @@ pub struct View<'a> {
     pub calendars: Vec<CalView>,              // the linked calendars, as the Calendars page shows them
     pub calendar_note: String,                // "Checked 3 min ago", or what went wrong
     pub calendar_problems: usize,             // calendars that couldn't be read
+    pub timetree: TimeTreeView,               // the TimeTree sign-in on the Calendars page
     pub answer: Option<&'a Answer>,           // a web or file answer meant for the Desk (words, files found…)
     pub name: String,                         // what he calls you (letters are signed with it)
     pub people: &'a [crate::people::Person],
@@ -155,6 +156,14 @@ pub struct CalView {
     pub show: bool,
     pub alert: bool,
     pub problem: Option<String>,
+}
+
+/// TimeTree on the Calendars page: who's signed in ("" = nobody), their calendars (id, name, shown here), signing in now.
+#[derive(Clone, Debug, Default)]
+pub struct TimeTreeView {
+    pub email: String,
+    pub calendars: Vec<(i64, String, bool)>,
+    pub busy: bool,
 }
 
 /// What the Backup page shows.
@@ -295,6 +304,8 @@ pub struct Desk {
     thing_name: String,
     thing_place: String,
     calendar_text: String,
+    tt_email: String, // the TimeTree sign-in; the password never leaves the Desk except to sign in
+    tt_password: String,
     list_text: String,
     forget_all: bool,                  // the You & me tab's "are you sure?"
     upkeep_page: usize,                // Checkup, Tidy, Backup
@@ -498,6 +509,11 @@ impl Desk {
     }
 
     /// You & me's data (achievements, facts, memories) is only built when something shows it: that tab, or a search.
+    /// The TimeTree email and password for signing in; the password is cleared here and then.
+    pub fn take_timetree_login(&mut self) -> (String, String) {
+        (self.tt_email.trim().to_string(), std::mem::take(&mut self.tt_password))
+    }
+
     pub fn needs_me(&self) -> bool {
         TABS[self.tab] == "You & me" || !self.query.trim().is_empty()
     }

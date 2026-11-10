@@ -20442,3 +20442,12 @@ It's open in your browser. Print it from there, or save it as a PDF.
 The page is in your browser, ready to print or to save as a PDF.
 Use your browser's print dialog to print or save this page as a PDF.
 Your browser has the file. You can hit print or export it to PDF now.
+
+## timetree_signed_in
+Signed in to TimeTree. You have {n} calendar(s) there: click one under TimeTree to show it here.
+TimeTree is connected ({n} calendar(s)). Pick the ones to show with the + buttons.
+I'm in. {n} TimeTree calendar(s) found. Add the ones you want, and I'll read them every 15 minutes.
+
+## timetree_signed_out
+Signed out of TimeTree. I've forgotten the session and stopped reading its calendars.
+TimeTree is disconnected. Its calendars are gone from here; nothing changed in TimeTree itself.

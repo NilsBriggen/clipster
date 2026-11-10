@@ -25,6 +25,8 @@ mod props;
 mod sys;
 mod renewals;
 mod things;
+mod timetree;
+mod when;
 mod tidy;
 mod todo;
 mod understand;
@@ -207,6 +209,8 @@ struct App {
     calendar_problems: Vec<(usize, String)>,                // calendars that couldn't be read: (place, why)
     calendar_names: Vec<String>,                            // each calendar's own name (X-WR-CALNAME), "" when none
     calendar_meta: std::collections::BTreeMap<String, calendar::CalMeta>, // your name, colour, show and heads-up per calendar
+    timetree: Option<timetree::Account>, // signed in to TimeTree (the session lives in timetree.json, never in settings)
+    timetree_busy: bool,                 // signing in right now
     events_all: Vec<calendar::Event>,                       // every event read; `events` leaves out the hidden calendars
     holiday_cc: String,                                     // public holidays for this country ("" = off)
     holidays: Vec<(chrono::NaiveDate, String)>,
@@ -652,6 +656,8 @@ impl App {
             calendar_problems: vec![],
             calendar_names: vec![],
             calendar_meta: Default::default(),
+            timetree: None,
+            timetree_busy: false,
             events_all: vec![],
             holiday_cc: String::new(),
             holidays: vec![],
@@ -700,7 +706,7 @@ impl App {
             sample_events: sample_events(),
             sample_people: sample_people(),
             sample_workday: ["firefox", "code ~/projects/report", "https://mail.example.com"].map(String::from).to_vec(),
-            sample_calendars: vec!["https://calendar.google.com/calendar/ical/you/private-x/basic.ics".into(), "https://calendar.google.com/calendar/ical/family/private-y/basic.ics".into()],
+            sample_calendars: vec!["https://calendar.google.com/calendar/ical/you/private-x/basic.ics".into(), "https://calendar.google.com/calendar/ical/family/private-y/basic.ics".into(), "timetree:1".into()],
             sample_reading: [("https://en.wikipedia.org/wiki/Paper_clip", "2026-11-07"), ("https://www.example.com/blog/how-to-run-a-meeting-that-ends-on-time?utm_source=news", "2026-11-05"), ("https://news.ycombinator.com/item?id=4711", "2026-11-02")].map(|(a, b)| (a.to_string(), b.to_string())).to_vec(),
             sample_clips: ["Printer code: 4711", "Meeting moved to 3 pm, room B", "https://example.com/quarterly-report", "Kind regards,\nSam", "SELECT * FROM paperclips WHERE bent = false;"].map(String::from).to_vec(),
             stopwatch: None,
@@ -879,6 +885,18 @@ impl App {
         let first_run = !Self::settings_path().exists();
         if app.screenshot.is_none() {
             app.load();
+            app.timetree = timetree::load();
+            // calendar files linked where they lay (a download that may get deleted): Clipster's own copy instead
+            for i in 0..app.calendars.len() {
+                if let Some(copy) = calendar::adopt(&app.calendars[i]) {
+                    let old = std::mem::replace(&mut app.calendars[i], copy.clone());
+                    if let Some(m) = app.calendar_meta.remove(&old) {
+                        app.calendar_meta.insert(copy, m);
+                    }
+                    app.settings_dirty = true;
+                }
+            }
+            app.calendars.dedup();
             // Clipster stopped during a focus session: put the notification setting back (at start only: an
             // imported settings.json holds another computer's)
             if let Some(m) = std::fs::read_to_string(Self::settings_path()).ok().and_then(|t| serde_json::from_str::<serde_json::Value>(&t).ok()).and_then(|v| v["dnd_restore"].as_str().map(String::from)) {
@@ -1111,11 +1129,11 @@ impl App {
         match &self.desk_sample {
             Some((t, k, f, c)) => {
                 let empty = desk::sample_variant() == "empty";
-                let view = desk::View { timers: t.clone(), kind_time: k, focus_log: f, focus_now: (!empty).then(|| ("the slides".into(), 18 * 60, 7 * 60, 40, false)), checkins: c, streaks: if empty { vec![] } else { vec![("Focus".into(), 4, 9), ("Goal met".into(), 2, 5), ("Check-ins".into(), 6, 12), ("Days with me".into(), 31, 31)] }, status, quip, prefs, clips: &self.sample_clips, pins: &self.sample_clips[..self.sample_clips.len().min(2)], reading: &self.sample_reading, me: if empty { about_me(&Default::default(), None, &Default::default(), &[], &Default::default(), 0, &Default::default(), true) } else { sample_me() }, upkeep: (!empty).then_some((&self.sample_upkeep, 120)), upkeep_running: false, backup_check: upkeep::backup_check(true, Some(backup::now() - 9 * 86_400), backup::now(), true), backup: desk::Backup { sources: &self.backup_sources, target: "/run/media/you/BACKUP", last: Some(backup::now() - 9 * 86_400), result: "214 copied (1.3 GB), 4120 unchanged", progress: None, skip: &self.backup_skip, auto: &self.backup_auto, history: &self.backup_history, found: self.backup_found.as_deref(), failed: false, here: true }, events: &events, calendars: self.sample_calendars.iter().enumerate().map(|(i, s)| desk::CalView { label: ["Work", "Family"].get(i).map_or_else(|| calendar::short(s), |n| n.to_string()), color: i as u8, show: true, alert: i == 0, ..Default::default() }).collect(), calendar_note: "Checked 4 min ago".into(), calendar_problems: 0, answer: self.desk_answer.as_ref(), name: "Sam".into(), people: &self.sample_people, renewals: &self.renewals, things: &self.things, workday: &self.sample_workday, habits: &self.habits, countdowns: &self.countdowns, sites, moved: &self.kind_moves, weather, day_totals, pin_labels: &self.pin_labels, clip_paused, reading_titles: &self.reading_titles, now: self.now_reading.as_ref(), space: self.space.as_ref().map(|(_, s)| s), space_running: self.space_running, upkeep_hide: &self.upkeep_hide, space_log: &self.space_log, tidy_auto: self.tidy_auto, mini: &mini };
+                let view = desk::View { timers: t.clone(), kind_time: k, focus_log: f, focus_now: (!empty).then(|| ("the slides".into(), 18 * 60, 7 * 60, 40, false)), checkins: c, streaks: if empty { vec![] } else { vec![("Focus".into(), 4, 9), ("Goal met".into(), 2, 5), ("Check-ins".into(), 6, 12), ("Days with me".into(), 31, 31)] }, status, quip, prefs, clips: &self.sample_clips, pins: &self.sample_clips[..self.sample_clips.len().min(2)], reading: &self.sample_reading, me: if empty { about_me(&Default::default(), None, &Default::default(), &[], &Default::default(), 0, &Default::default(), true) } else { sample_me() }, upkeep: (!empty).then_some((&self.sample_upkeep, 120)), upkeep_running: false, backup_check: upkeep::backup_check(true, Some(backup::now() - 9 * 86_400), backup::now(), true), backup: desk::Backup { sources: &self.backup_sources, target: "/run/media/you/BACKUP", last: Some(backup::now() - 9 * 86_400), result: "214 copied (1.3 GB), 4120 unchanged", progress: None, skip: &self.backup_skip, auto: &self.backup_auto, history: &self.backup_history, found: self.backup_found.as_deref(), failed: false, here: true }, events: &events, calendars: self.sample_calendars.iter().enumerate().map(|(i, s)| desk::CalView { label: ["Work", "Family", "Us two"].get(i).map_or_else(|| calendar::short(s), |n| n.to_string()), color: i as u8, show: true, alert: i == 0, ..Default::default() }).collect(), calendar_note: "Checked 4 min ago".into(), calendar_problems: 0, timetree: if empty { Default::default() } else { desk::TimeTreeView { email: "sam@example.com".into(), calendars: vec![(1, "Us two".into(), true), (2, "Sam".into(), false)], busy: false } }, answer: self.desk_answer.as_ref(), name: "Sam".into(), people: &self.sample_people, renewals: &self.renewals, things: &self.things, workday: &self.sample_workday, habits: &self.habits, countdowns: &self.countdowns, sites, moved: &self.kind_moves, weather, day_totals, pin_labels: &self.pin_labels, clip_paused, reading_titles: &self.reading_titles, now: self.now_reading.as_ref(), space: self.space.as_ref().map(|(_, s)| s), space_running: self.space_running, upkeep_hide: &self.upkeep_hide, space_log: &self.space_log, tidy_auto: self.tidy_auto, mini: &mini };
                 self.desk.show(ctx, &view, look, near)
             }
             None => {
-                let view = desk::View { timers, kind_time: &self.kind_time, focus_log: &self.focus_log, focus_now, checkins: &self.checkin_days, streaks, status, quip, prefs, clips: &self.clip_history, pins: &self.pins, reading: &self.reading, me: if self.desk.needs_me() { about_me(&self.facts, self.birthday, &self.stats, &self.unlocked, &self.highscores, self.friendship, &self.explored, self.unhinged) } else { desk::Me::default() }, upkeep: self.upkeep.as_ref().map(|(t, r)| (r, t.elapsed().as_secs())), upkeep_running: self.upkeep_running, backup_check: self.backup_check(), backup: desk::Backup { sources: &self.backup_sources, target: &self.backup_target, last: self.backup_last, result: &self.backup_result, progress: self.backup_progress, skip: &self.backup_skip, auto: &self.backup_auto, history: &self.backup_history, found: self.backup_found.as_deref(), failed: self.backup_history.first().is_some_and(|h| h[3] > 0) || !self.backup_result.is_empty() && !self.backup_result.contains("copied"), here: self.backup_here }, events: &events, calendars: cal_views, calendar_note: self.calendar_note(), calendar_problems: self.calendar_problems.len(), answer: self.desk_answer.as_ref(), name: self.name.clone(), people: &self.people, renewals: &self.renewals, things: &self.things, workday: &self.workday, habits: &self.habits, countdowns: &self.countdowns, sites, moved: &self.kind_moves, weather, day_totals, pin_labels: &self.pin_labels, clip_paused, reading_titles: &self.reading_titles, now: self.now_reading.as_ref(), space: self.space.as_ref().map(|(_, s)| s), space_running: self.space_running, upkeep_hide: &self.upkeep_hide, space_log: &self.space_log, tidy_auto: self.tidy_auto, mini: &mini };
+                let view = desk::View { timers, kind_time: &self.kind_time, focus_log: &self.focus_log, focus_now, checkins: &self.checkin_days, streaks, status, quip, prefs, clips: &self.clip_history, pins: &self.pins, reading: &self.reading, me: if self.desk.needs_me() { about_me(&self.facts, self.birthday, &self.stats, &self.unlocked, &self.highscores, self.friendship, &self.explored, self.unhinged) } else { desk::Me::default() }, upkeep: self.upkeep.as_ref().map(|(t, r)| (r, t.elapsed().as_secs())), upkeep_running: self.upkeep_running, backup_check: self.backup_check(), backup: desk::Backup { sources: &self.backup_sources, target: &self.backup_target, last: self.backup_last, result: &self.backup_result, progress: self.backup_progress, skip: &self.backup_skip, auto: &self.backup_auto, history: &self.backup_history, found: self.backup_found.as_deref(), failed: self.backup_history.first().is_some_and(|h| h[3] > 0) || !self.backup_result.is_empty() && !self.backup_result.contains("copied"), here: self.backup_here }, events: &events, calendars: cal_views, calendar_note: self.calendar_note(), calendar_problems: self.calendar_problems.len(), timetree: desk::TimeTreeView { email: self.timetree.as_ref().map(|a| a.email.clone()).unwrap_or_default(), calendars: self.timetree.as_ref().map(|a| a.calendars.iter().map(|(id, n)| (*id, n.clone(), self.calendars.contains(&format!("timetree:{id}")))).collect()).unwrap_or_default(), busy: self.timetree_busy }, answer: self.desk_answer.as_ref(), name: self.name.clone(), people: &self.people, renewals: &self.renewals, things: &self.things, workday: &self.workday, habits: &self.habits, countdowns: &self.countdowns, sites, moved: &self.kind_moves, weather, day_totals, pin_labels: &self.pin_labels, clip_paused, reading_titles: &self.reading_titles, now: self.now_reading.as_ref(), space: self.space.as_ref().map(|(_, s)| s), space_running: self.space_running, upkeep_hide: &self.upkeep_hide, space_log: &self.space_log, tidy_auto: self.tidy_auto, mini: &mini };
                 self.desk.show(ctx, &view, look, near)
             }
         }
@@ -1713,6 +1731,45 @@ impl App {
         self.timers.iter().filter(|t| t.every == 0).map(|t| (t.when(), t.label.clone())).collect()
     }
 
+    /// TimeTree: "signin" takes the email and password from the Desk's fields (the password is cleared there and
+    /// never stored) and signs in on a thread; "signout" forgets the session and stops reading its calendars.
+    fn timetree_command(&mut self, ctx: &egui::Context, cmd: &str) -> Reply {
+        match cmd {
+            "signin" => {
+                let (email, password) = self.desk.take_timetree_login();
+                if self.screenshot.is_some() || self.timetree_busy || !email.contains('@') || password.is_empty() {
+                    return Reply::say("Type your TimeTree email and password first.").mood(Mood::Think);
+                }
+                self.timetree_busy = true;
+                let (tx, ctx) = (self.tx.clone(), ctx.clone());
+                std::thread::spawn(move || {
+                    let result = timetree::signin(&email, &password);
+                    let _ = tx.send(Event::TimeTree(result));
+                    ctx.request_repaint();
+                });
+                Reply::say("Signing in to TimeTree...").mood(Mood::Search)
+            }
+            _ => {
+                timetree::forget();
+                self.timetree = None;
+                let before = self.calendars.len();
+                self.calendars.retain(|c| !c.starts_with("timetree:"));
+                self.calendar_meta.retain(|k, _| !k.starts_with("timetree:"));
+                if self.calendars.len() != before {
+                    self.calendar_gen += 1;
+                    self.calendar_running = false;
+                    if self.calendars.is_empty() {
+                        self.events.clear();
+                        calendar::set_cache(&[]);
+                    } else {
+                        self.fetch_calendars(ctx);
+                    }
+                }
+                Reply::say(lines::pick("timetree_signed_out")).mood(Mood::Happy)
+            }
+        }
+    }
+
     /// "calendar add <link>", "remove 2", "refresh", "today", "tomorrow", "day 2026-11-13", "next", "free <unix time>".
     fn calendar_command(&mut self, ctx: &egui::Context, cmd: &str) -> Reply {
         let (verb, arg) = cmd.split_once(' ').unwrap_or((cmd, ""));
@@ -1720,9 +1777,20 @@ impl App {
         let today = chrono::Local::now().date_naive();
         let linked = !self.calendars.is_empty();
         match verb {
-            "add" => match calendar::source(arg) {
-                Some(src) if self.calendars.contains(&src) => Reply::say("That calendar is linked already.").mood(Mood::Wink),
-                Some(src) => {
+            "add" => match calendar::source(arg).map(|src| if src.starts_with("http") || src.starts_with("timetree:") { Ok((src, false)) } else { calendar::import(&src) }) {
+                Some(Err(e)) => Reply::say(e).mood(Mood::Sad),
+                // an invitation went into the Imported calendar: read it again
+                Some(Ok((src, true))) => {
+                    if !self.calendars.contains(&src) {
+                        self.calendars.push(src);
+                    }
+                    self.calendar_running = false;
+                    self.calendar_gen += 1;
+                    self.fetch_calendars(ctx);
+                    Reply::say("Imported. It's in your Imported calendar now, and the file can go.").mood(Mood::Write).run("Show my agenda", "calendar")
+                }
+                Some(Ok((src, false))) if self.calendars.contains(&src) => Reply::say("That calendar is linked already.").mood(Mood::Wink),
+                Some(Ok((src, _))) => {
                     self.calendars.push(src);
                     self.calendar_running = false;
                     self.calendar_gen += 1;
@@ -1733,7 +1801,11 @@ impl App {
             },
             "remove" => match arg.trim_start_matches('#').parse::<usize>().ok().and_then(|n| n.checked_sub(1)).filter(|i| *i < self.calendars.len()) {
                 Some(i) => {
-                    self.calendars.remove(i);
+                    let src = self.calendars.remove(i);
+                    // Clipster's own copy goes with it
+                    if calendar::is_imported(&src) {
+                        let _ = std::fs::remove_file(&src);
+                    }
                     self.calendar_running = false;
                     self.calendar_gen += 1;
                     if self.calendars.is_empty() {
@@ -1963,9 +2035,60 @@ impl App {
 
     /// Print…: a page for the browser (it prints, or saves a PDF) from a list, the to-dos, the week, the next seven
     /// days or a month of the journal.
+    /// What's on a day, for the prints: events (all-day first, holidays too) with times, places and their calendar's
+    /// colour, reminders, to-dos due (today also the overdue ones), birthdays and countdowns.
+    fn day_entries(&self, date: chrono::NaiveDate, events: &[calendar::Event], items: &[todo::Item], today: chrono::NaiveDate) -> Vec<print::Entry> {
+        use print::{Entry, Kind};
+        let plain = |kind: Kind, time: String, title: String| Entry { kind, time, title, place: String::new(), color: 0 };
+        let mut day: Vec<&calendar::Event> = events.iter().filter(|e| if e.all_day { e.start.date() <= date && (e.end.date() > date || e.end.date() == e.start.date() && e.start.date() == date) } else { e.start.date() == date }).collect();
+        day.sort_by_key(|e| (!e.all_day, e.start));
+        let mut out: Vec<Entry> = day
+            .iter()
+            .map(|e| {
+                let holiday = e.cal == calendar::HOLIDAY;
+                let kind = if holiday { Kind::Holiday } else if e.all_day { Kind::AllDay } else { Kind::Event };
+                let time = if e.all_day { String::new() } else if e.end > e.start && e.end.date() == e.start.date() { format!("{}–{}", brain::clock(e.start), brain::clock(e.end)) } else { brain::clock(e.start) };
+                Entry { kind, time, title: e.title.clone(), place: e.place.clone(), color: if holiday { 0 } else { self.cal_meta(e.cal).color as usize } }
+            })
+            .collect();
+        let mut rings: Vec<&timers::Timer> = self.timers.iter().filter(|t| t.when().date() == date).collect();
+        rings.sort_by_key(|t| t.at);
+        out.extend(rings.iter().map(|t| plain(Kind::Reminder, brain::clock(t.when()), timers::shown_label(&t.label))));
+        for i in items.iter().filter(|i| i.list.is_none() && !i.is_step()) {
+            let due = i.due.is_some_and(|d| d == date || date == today && d < date && !i.done);
+            if due && (!i.done || i.done_on == Some(date)) {
+                out.push(plain(Kind::Todo(i.done), i.at.map(brain::clock).unwrap_or_default(), i.text.clone()));
+            }
+        }
+        let ahead = (date - today).num_days();
+        out.extend(self.people.iter().filter(|p| p.next_birthday(today).is_some_and(|(d, _)| d == ahead)).map(|p| plain(Kind::Birthday, String::new(), format!("{}'s birthday", p.name))));
+        out.extend(self.countdowns.iter().filter(|(_, d)| *d == date).map(|(l, _)| plain(Kind::Countdown, String::new(), l.clone())));
+        out
+    }
+
     fn print_page(&mut self, what: &str) -> Reply {
         let today = chrono::Local::now().date_naive();
         let items = todo::load();
+        let printed = format!("Printed {}", today.format("%A %-d %B %Y"));
+        let mut events = self.events.clone();
+        events.extend(self.holidays.iter().map(|(d, name)| calendar::Event { uid: format!("holiday-{d}"), start: d.and_hms_opt(0, 0, 0).unwrap_or_default(), end: (*d + chrono::Days::new(1)).and_hms_opt(0, 0, 0).unwrap_or_default(), all_day: true, title: name.clone(), cal: calendar::HOLIDAY, ..Default::default() }));
+        let html = match what.split_once(' ').unwrap_or((what, "")) {
+            ("agenda", _) => {
+                let days: Vec<_> = (0..7).map(|n| today + chrono::Days::new(n)).map(|d| (d, self.day_entries(d, &events, &items, today))).collect();
+                Some(print::agenda("The next seven days", &printed, &days, today))
+            }
+            // "month 2026-12": the month the Agenda shows
+            ("month", ym) => {
+                let (y, m) = ym.split_once('-').and_then(|(y, m)| Some((y.parse().ok()?, m.parse().ok()?))).unwrap_or((chrono::Datelike::year(&today), chrono::Datelike::month(&today)));
+                let first = chrono::NaiveDate::from_ymd_opt(y, m, 1).unwrap_or(today);
+                let grid = journal::month_grid_from(y, m, brain::week_sunday());
+                Some(print::month(&first.format("%B %Y").to_string(), &printed, &grid, &|d| self.day_entries(d, &events, &items, today), today, brain::week_sunday()))
+            }
+            _ => None,
+        };
+        if let Some(html) = html {
+            return self.print_open(&html);
+        }
         let (title, sections): (String, Vec<(String, Vec<print::Line>)>) = match what.split_once(' ').unwrap_or((what, "")) {
             ("list", name) => (writing::cap_first(&name.replace('-', " ")), vec![(String::new(), items.iter().filter(|i| i.list.as_deref() == Some(name)).map(|i| (Some(i.done), i.text.clone())).collect())]),
             ("todos", _) => {
@@ -1982,27 +2105,21 @@ impl App {
                 let head = l.remove(0);
                 (head, vec![(String::new(), l.into_iter().map(|x| (None, x)).collect())])
             }
-            ("agenda", _) => {
-                let days = plan::week_ahead(&self.events, &self.timers, &items, &self.people, &self.countdowns, today, self.work_hours);
-                ("The next seven days".into(), days.iter().map(|d| (d.date.format("%A %-d %B").to_string(), d.items.iter().map(|it| match it {
-                    plan::Ahead::Event { at: Some(t), title } => (None, format!("{} {title}", brain::clock(*t))),
-                    plan::Ahead::Event { at: None, title } => (None, format!("{title} (all day)")),
-                    plan::Ahead::Reminder { at, label } => (None, format!("{} {label} (reminder)", brain::clock(*at))),
-                    plan::Ahead::Todo { text, done, .. } => (Some(*done), text.clone()),
-                    plan::Ahead::Birthday(n) => (None, format!("{n}'s birthday")),
-                    plan::Ahead::Countdown(l) => (None, l.clone()),
-                }).collect())).collect())
-            }
             ("journal", month) => {
                 let entries = journal::load();
                 let lines = entries.iter().filter(|e| e.day.format("%Y-%m").to_string() == month).map(|e| (None, format!("{} · {}{}", e.day.format("%a %-d"), e.mood.clone().unwrap_or_else(|| "-".into()), if e.text.is_empty() { String::new() } else { format!(" · {}", e.text) }))).collect();
                 (format!("Journal, {month}"), vec![(String::new(), lines)])
             }
-            _ => return Reply::say("I can print a list, the to-dos, the week, the next seven days or a journal month.").mood(Mood::Think),
+            _ => return Reply::say("I can print a list, the to-dos, the week, the next seven days, a month or a journal month.").mood(Mood::Think),
         };
-        let html = print::page(&title, &format!("Printed {}", today.format("%A %-d %B %Y")), &sections);
+        let html = print::page(&title, &printed, &sections);
+        self.print_open(&html)
+    }
+
+    /// The page written to the cache folder and opened in the browser.
+    fn print_open(&self, html: &str) -> Reply {
         let file = dirs::cache_dir().unwrap_or_else(std::env::temp_dir).join("clipster").join("print.html");
-        match brain::write_atomic(&file, &html).map_err(|e| e.to_string()).and_then(|_| open(&file.to_string_lossy()).map_err(|e| e.to_string())) {
+        match brain::write_atomic(&file, html).map_err(|e| e.to_string()).and_then(|_| open(&file.to_string_lossy()).map_err(|e| e.to_string())) {
             Ok(()) => Reply::say(lines::pick("print_ready")).mood(Mood::Write),
             Err(e) => Reply::say(format!("I couldn't make the page: {e}")).mood(Mood::Sad),
         }
@@ -2035,7 +2152,12 @@ impl App {
                     return Reply::say(format!("I couldn't make the folder: {e}")).mood(Mood::Sad);
                 }
                 self.save_if_changed();
-                let copied = Self::data_files().iter().filter(|(_, from)| from.exists()).filter(|(n, from)| std::fs::copy(from, dest.join(n)).is_ok()).count();
+                let mut copied = Self::data_files().iter().filter(|(_, from)| from.exists()).filter(|(n, from)| std::fs::copy(from, dest.join(n)).is_ok()).count();
+                // the imported calendars too
+                if let Ok(files) = std::fs::read_dir(calendar::import_dir()) {
+                    let _ = std::fs::create_dir_all(dest.join("calendars"));
+                    copied += files.flatten().filter(|f| std::fs::copy(f.path(), dest.join("calendars").join(f.file_name())).is_ok()).count();
+                }
                 let _ = open(&dest.to_string_lossy());
                 Reply::say(lines::pick("data_exported").replace("{x}", &find::tilde(&dest)).replace("{n}", &copied.to_string())).mood(Mood::Happy)
             }
@@ -2067,6 +2189,10 @@ impl App {
                     if std::fs::copy(folder.join(n), to).is_ok() {
                         done += 1;
                     }
+                }
+                if let Ok(files) = std::fs::read_dir(folder.join("calendars")) {
+                    let _ = std::fs::create_dir_all(calendar::import_dir());
+                    done += files.flatten().filter(|f| std::fs::copy(f.path(), calendar::import_dir().join(f.file_name())).is_ok()).count();
                 }
                 // read it all in again (the holidays too: the country may be another one)
                 self.load();
@@ -3128,6 +3254,13 @@ impl App {
                     self.stats.insert("habit_best".into(), best);
                 }
                 r = Reply::say(text).mood(if pool.ends_with("unknown") || pool.ends_with("full") || pool.ends_with("exists") { Mood::Think } else { Mood::Write });
+            }
+            Effect::TimeTree(cmd) => {
+                r = self.timetree_command(ctx, &cmd);
+                if from_desk {
+                    self.set_status(r.text.clone());
+                    silent = true;
+                }
             }
             Effect::Things(cmd) => r = self.things_command(&cmd),
             Effect::Renewal(cmd) => r = self.renewal_command(&cmd),
@@ -4614,6 +4747,22 @@ impl App {
                     }
                     Err(e) => self.set_status(format!("! I couldn't copy it back: {e}")),
                 },
+                Event::TimeTree(result) => {
+                    self.timetree_busy = false;
+                    let r = match result {
+                        Ok(a) => {
+                            let r = Reply::say(lines::pick("timetree_signed_in").replace("{n}", &a.calendars.len().to_string())).mood(Mood::Party);
+                            self.timetree = Some(a);
+                            r
+                        }
+                        Err(e) => Reply::say(e).mood(Mood::Sad),
+                    };
+                    if self.desk.is_open() {
+                        self.set_status(r.text);
+                    } else {
+                        self.show(r.run("Open Calendars", "desk calendars"));
+                    }
+                }
                 Event::BackupDone(result) => {
                     self.backup_progress = None;
                     if let Ok(s) = &result {

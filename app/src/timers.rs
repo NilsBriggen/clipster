@@ -186,13 +186,17 @@ pub fn parse_rule(s: &str) -> Option<(String, String)> {
 /// "morning …" -> 8:00 and the rest; also afternoon, evening and night.
 fn part_of_day(s: &str) -> Option<((u32, u32), &str)> {
     let (w, rest) = s.split_once(' ').unwrap_or((s, ""));
-    let t = match w.trim_end_matches(',').trim_end_matches('s') {
-        "morning" => (8, 0),
-        "afternoon" => (15, 0),
-        "evening" | "night" => (19, 0),
+    use crate::when::Part;
+    // the one table of parts of the day (`when.rs`)
+    let part = match w.trim_end_matches(',').trim_end_matches('s') {
+        "morning" => Part::Morning,
+        "afternoon" => Part::Afternoon,
+        "evening" => Part::Evening,
+        "night" => Part::Night,
         _ => return None,
     };
-    Some((t, rest.trim()))
+    let t = chrono::Timelike::hour(&part.time()?);
+    Some(((t, 0), rest.trim()))
 }
 
 /// "at 8 to take my pills" after a rule -> the time and what's left; without "at" it's `default`. Without am/pm,

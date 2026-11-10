@@ -388,18 +388,29 @@ pub fn parse_when(s: &str, today: NaiveDate) -> Option<Option<NaiveDate>> {
                 }
                 .map(Some);
             }
-            // "24.12", "24.12.", "24.12.2026": the next 24 December, as people write it in Switzerland and Germany
-            let parts: Vec<&str> = s.trim_end_matches('.').split('.').collect();
-            if (2..=3).contains(&parts.len()) && parts.iter().all(|p| !p.is_empty() && p.bytes().all(|b| b.is_ascii_digit())) {
-                let (d, m) = (parts[0].parse().ok()?, parts[1].parse().ok()?);
-                let year = |y: i32| NaiveDate::from_ymd_opt(y, m, d);
-                return match parts.get(2) {
-                    Some(y) => year(y.parse::<i32>().ok().map(|y| if y < 100 { 2000 + y } else { y })?).map(Some),
-                    None => year(today.year()).filter(|x| *x >= today).or_else(|| year(today.year() + 1)).map(Some),
-                };
+            if let Some(d) = dotted(&s, today) {
+                return Some(Some(d));
+            }
+            // "friday in two weeks", "end of the month", "the friday after next": the whole field is a day
+            if let Some(f) = crate::when::find(&s, today.and_hms_opt(12, 0, 0)?, false).filter(|f| f.date.is_some() && crate::when::cut(&s, f).is_empty()) {
+                return Some(f.date);
             }
             crate::powers::parse_day(&s, today).map(|(d, _)| Some(d))
         }
+    }
+}
+
+/// "24.12", "24.12.", "24.12.2026": the next 24 December, as people write it in Switzerland and Germany.
+pub fn dotted(s: &str, today: NaiveDate) -> Option<NaiveDate> {
+    let parts: Vec<&str> = s.trim_end_matches('.').split('.').collect();
+    if !(2..=3).contains(&parts.len()) || !parts.iter().all(|p| !p.is_empty() && p.len() <= 4 && p.bytes().all(|b| b.is_ascii_digit())) {
+        return None;
+    }
+    let (d, m) = (parts[0].parse().ok()?, parts[1].parse().ok()?);
+    let year = |y: i32| NaiveDate::from_ymd_opt(y, m, d);
+    match parts.get(2) {
+        Some(y) => year(y.parse::<i32>().ok().map(|y| if y < 100 { 2000 + y } else { y })?),
+        None => year(today.year()).filter(|x| *x >= today).or_else(|| year(today.year() + 1)),
     }
 }
 
@@ -492,8 +503,17 @@ fn new_item(text: &str, today: NaiveDate) -> Item {
         Some(t) => (t.to_string(), true),
         None => (text.trim().to_string(), false),
     };
-    let (text, at) = split_at(&text);
-    let (text, due) = split_due(&text, today);
+    // the day and time in plain words ("friday in two weeks", "tomorrow evening", "on friday the whole day"); "every
+    // monday" isn't a date, it's left for the repeat; "by someday" (no date) is still read the old way
+    let now = today.and_time(Local::now().time());
+    let (text, due, at) = match crate::when::find(&text, now, true) {
+        Some(f) => (crate::when::cut(&text, &f), f.date, f.time),
+        None => {
+            let (text, at) = split_at(&text);
+            let (text, due) = split_due(&text, today);
+            (text, due, at)
+        }
+    };
     let (text, repeat) = split_every(&text, today);
     // "call Anna at 3 every monday": the time shows up at the end once the date and the repeat are gone
     let (text, at) = if at.is_none() { split_at(&text) } else { (text, at) };
@@ -1258,6 +1278,30 @@ mod tests {
         assert!(text.contains("(note number: 044 123 \\(ask for Ben\\) \\\\ not after 5)"));
         assert_eq!(parse("- [ ] call office (waiting for a reply)\n")[0].waiting, None, "\"waiting for…\" in brackets is text");
         assert_eq!(parse("- [ ] lunch (at noon)\n")[0].text, "lunch (at noon)");
+    }
+
+    #[test]
+    fn dates_in_plain_words() {
+        let today = NaiveDate::from_ymd_opt(2026, 11, 10).unwrap(); // a Tuesday
+        let d = |m: u32, day: u32| NaiveDate::from_ymd_opt(2026, m, day);
+        let t = |h: u32| NaiveTime::from_hms_opt(h, 0, 0);
+        let it = |s: &str| {
+            let i = new_item(s, today);
+            (i.text, i.due, i.at, i.every)
+        };
+        assert_eq!(it("call Anna friday in two weeks"), ("call Anna".into(), d(11, 27), None, None));
+        assert_eq!(it("call Anna friday evening"), ("call Anna".into(), d(11, 13), t(19), None));
+        assert_eq!(it("call Anna friday all day"), ("call Anna".into(), d(11, 13), None, None));
+        assert_eq!(it("call Anna on friday the whole day"), ("call Anna".into(), d(11, 13), None, None));
+        assert_eq!(it("call Anna the friday after next"), ("call Anna".into(), d(11, 20), None, None));
+        assert_eq!(it("Friday morning: call Anna"), ("call Anna".into(), d(11, 13), t(8), None), "a colon after the day goes too");
+        assert_eq!(it("call Anna by friday at 3"), ("call Anna".into(), d(11, 13), t(15), None), "as before");
+        assert_eq!(it("send it in 3 days"), ("send it".into(), d(11, 13), None, None));
+        assert_eq!(it("pay rent by the end of the month"), ("pay rent".into(), d(11, 30), None, None));
+        assert_eq!(it("call mum every monday at 9"), ("call mum".into(), d(11, 16), t(9), Some("monday".into())), "a repeat isn't a date");
+        assert_eq!(it("buy the sunday paper"), ("buy the sunday paper".into(), None, None, None));
+        assert_eq!(it("send the cards by 24.12."), ("send the cards".into(), d(12, 24), None, None));
+        assert_eq!(it("water the plants by someday").1, None, "no date, the old way");
     }
 
     #[test]

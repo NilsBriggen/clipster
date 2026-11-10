@@ -2,6 +2,49 @@
 
 Each version's section is also its GitHub release description: the release workflow publishes it and refuses to release a version without one.
 
+## 0.7.0 (2026-11-10)
+
+The TimeTree release. Clipster can now read your TimeTree calendars, the shared calendar app many couples and families use, even though TimeTree has no export. He also understands dates the way people say them ("Friday in two weeks", "Friday evening", "the whole day"), keeps his own copy of every calendar file you import, and prints your agenda and your month as pages worth putting on the fridge.
+
+### Highlights
+
+- **TimeTree:**
+  - Sign in once under Desk › Agenda › Calendars… (or say "connect my TimeTree"), then pick which TimeTree calendars to show.
+  - They're read every 15 minutes, like any other calendar, with heads-ups, the agenda, Today and the briefing.
+  - **It only reads:** nothing in TimeTree is ever changed. Your password isn't stored; only the session is, in a file only you can read.
+- **Dates in plain words,** for to-dos, reminders and moving reminders alike:
+  - "Friday in two weeks", "in two weeks on Friday", "the Friday after next", "Friday next week"
+  - "Friday evening", "Friday morning", "Friday at noon", "Friday at 7 in the evening", "at 3 on Friday"
+  - "Friday all day", "on Friday the whole day" (a date with no time)
+  - "end of the month", "end of next month", "this weekend", "next weekend", "next week", "in a month"
+  - "add call Anna Friday" is now a to-do, and the to-do keeps your capitals and words like "two".
+  - **Reminders find the day anywhere in the sentence:**
+    - "remind me Friday evening to call Anna" sets a reminder instead of saving a note.
+    - "remind me Friday at 3" rings on Friday, not today.
+    - The Desk's Remind me… preview always matches what it sets.
+- **Imported calendar files keep working:**
+  - An .ics file you import is copied into Clipster's own folder, so you can delete the download.
+  - Invitations (a few events) go into one "Imported" calendar; an updated invitation replaces the old one.
+  - A whole calendar becomes its own row.
+  - Files you linked before are copied in on the next start (from the last copy he read, if the file is already gone).
+- **Prints that look good:**
+  - The seven-day agenda is a proper page: a block per day, times with their end, your calendar colours, places, all-day bars, reminders, to-dos, birthdays and holidays, on one A4 page.
+  - In Month view, Print… now prints the month as a grid on a landscape page.
+  - Lists, to-dos and the journal get the cleaner look too.
+
+### Install
+
+- **Linux:** download `clipster_0.7.0_x86_64.AppImage`, make it executable (`chmod +x`) and replace your old AppImage with it. Or click **Install now** when he tells you about the update. Your settings, notes, to-dos and taught phrases are kept.
+- **Windows:** run `clipster_0.7.0_x64_en-US.msi`, or click **Install now** in Clipster. It replaces the old version and keeps your settings. The installer still isn't code-signed, so SmartScreen may say "Windows protected your PC". Choose **More info → Run anyway**.
+
+### Known limitations
+
+- **TimeTree** has no official API any more. Clipster reads it the way TimeTree's own website does, so it may stop working if TimeTree changes its website. It works with email-and-password accounts. Google, Apple or LINE sign-ins aren't supported yet.
+- **TimeTree time zones:** a repeating TimeTree event made in another time zone repeats on your computer's clock. One-off events are always at the right time.
+- **"next Friday"** means the coming Friday. "Friday next week" is the one after.
+- **The month print** shows what the calendars are read for: about a month ahead.
+- Everything listed for 0.6.0 still applies: Windows features not yet tried on a real PC, doses that aren't asked about again, slightly taller Beige Box rows, holidays and weather needing the internet.
+
 ## 0.6.1 (2026-11-10)
 
 A small release with more to say. Many of the replies Clipster gives right after you do something had only two or three ways of saying it, so you heard the same line again and again. 68 of them now have more: 328 new lines in both personalities, each one still telling you exactly what happened. Nothing else changed.

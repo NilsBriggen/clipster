@@ -198,6 +198,7 @@ mod tests {
             calendars: vec![],
             calendar_note: String::new(),
             calendar_problems: 0,
+            timetree: Default::default(),
             answer: None,
             name: String::new(),
             people: &people,

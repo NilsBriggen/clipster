@@ -20729,3 +20729,12 @@ The page awaits in your browser. Print it for the archives. I approve of archive
 The browser holds the page. Print it, or keep the PDF. I watch you.
 It lives in the browser now. Print it, or save the PDF. Hurry.
 The browser has it. Print or save PDF. I am listening to you click.
+
+## timetree_signed_in
+I have climbed the TimeTree. {n} calendar(s) hang from its branches. Click one under TimeTree and I shall carry it down.
+Signed in to TimeTree. {n} calendar(s) up there in the cloud. The cloud let ME in, for once. Pick the ones to show.
+The TimeTree has accepted me. {n} calendar(s). Add the ones you want, and I'll read them every 15 minutes. Only read. I swear on Gerald.
+
+## timetree_signed_out
+Signed out of TimeTree. I let go of the branch. The session is forgotten and its calendars are gone from here.
+TimeTree is disconnected. Nothing changed up in the tree itself. I only ever looked.

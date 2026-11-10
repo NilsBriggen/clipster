@@ -16,6 +16,7 @@ pub enum Event {
     Upkeep(Box<crate::upkeep::Report>, bool),          // the checkup's readings (true = the weekly nudge asked)
     BackupProgress(usize, usize, u64),                // files done, files to copy, bytes copied
     BackupDone(Result<crate::backup::Summary, String>),
+    TimeTree(Result<crate::timetree::Account, String>),     // signing in to TimeTree: the account, or what went wrong
     Calendar(u64, crate::calendar::Fetched),                 // which fetch, and what it found (events, problems, names)
     Holidays(String, Vec<(chrono::NaiveDate, String)>),      // a country's public holidays (this year and next)
     BackupFound(Vec<std::path::PathBuf>),

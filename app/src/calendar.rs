@@ -443,8 +443,109 @@ pub fn source(s: &str) -> Option<String> {
     if s.starts_with("https://") || s.starts_with("http://") {
         return Some(s.to_string());
     }
+    // a TimeTree calendar, read through its website (`timetree.rs`)
+    if s.strip_prefix("timetree:").is_some_and(|id| !id.is_empty() && id.bytes().all(|b| b.is_ascii_digit())) {
+        return Some(s.to_string());
+    }
     let path = crate::brain::expand_home(s);
     (path.extension().is_some_and(|x| x.eq_ignore_ascii_case("ics")) && path.is_file()).then(|| path.to_string_lossy().into_owned())
+}
+
+/// Where imported .ics files are kept: Clipster's own copies, so deleting the download changes nothing.
+pub fn import_dir() -> std::path::PathBuf {
+    crate::brain::data_dir().join("calendars")
+}
+
+/// Is this source one of Clipster's own copies?
+pub fn is_imported(src: &str) -> bool {
+    std::path::Path::new(src).starts_with(import_dir())
+}
+
+/// The VEVENT blocks of iCal text (lines unfolded), each with its key: UID and RECURRENCE-ID.
+fn vevents(ics: &str) -> Vec<(String, String)> {
+    let mut out = vec![];
+    let mut cur: Option<Vec<String>> = None;
+    let mut last: Vec<String> = vec![];
+    for l in ics.trim_start_matches('\u{feff}').lines().map(|l| l.trim_end_matches('\r')) {
+        // keep folded lines folded, but read keys from the unfolded ones
+        if (l.starts_with(' ') || l.starts_with('\t')) && !last.is_empty() {
+            if let Some(c) = cur.as_mut() {
+                c.push(l.to_string());
+            }
+            continue;
+        }
+        last = vec![l.to_string()];
+        if l == "BEGIN:VEVENT" {
+            cur = Some(vec![l.to_string()]);
+        } else if let Some(mut c) = cur.take() {
+            c.push(l.to_string());
+            if l == "END:VEVENT" {
+                let block = c.join("\r\n");
+                let val = |k: &str| c.iter().find(|x| x.starts_with(&format!("{k}:")) || x.starts_with(&format!("{k};"))).and_then(|x| x.split_once(':')).map(|x| x.1.to_string()).unwrap_or_default();
+                out.push((format!("{}|{}", val("UID"), val("RECURRENCE-ID")), block));
+            } else {
+                cur = Some(c);
+            }
+        }
+    }
+    out
+}
+
+/// The Imported calendar's events with the new ones in: the same event again (UID) replaces the old copy.
+pub fn merge(old: &str, new: &str) -> String {
+    let mut events = vevents(old);
+    for (key, block) in vevents(new) {
+        match events.iter_mut().find(|(k, _)| *k == key && !key.starts_with('|')) {
+            Some(e) => e.1 = block,
+            None => events.push((key, block)),
+        }
+    }
+    let mut out = String::from("BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Clipster//Imported//EN\r\nX-WR-CALNAME:Imported\r\n");
+    for (_, b) in events {
+        out += &b;
+        out += "\r\n";
+    }
+    out + "END:VCALENDAR\r\n"
+}
+
+/// An .ics file being added, as text: an invitation (no calendar name, at most 5 events) goes into the Imported
+/// calendar; a whole calendar becomes a copy of its own. Returns the copy to link, and whether it was merged.
+pub fn import_text(text: &str, name: &str) -> Result<(String, bool), String> {
+    if !text.contains("BEGIN:VCALENDAR") {
+        return Err(format!("{name} isn't a calendar file"));
+    }
+    let dir = import_dir();
+    std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+    if cal_name(text).is_none() && text.matches("BEGIN:VEVENT").count() <= 5 {
+        let file = dir.join("imported.ics");
+        let old = std::fs::read_to_string(&file).unwrap_or_default();
+        crate::brain::write_atomic(&file, &merge(&old, text)).map_err(|e| e.to_string())?;
+        return Ok((file.to_string_lossy().into_owned(), true));
+    }
+    let stem: String = cal_name(text).unwrap_or_else(|| name.trim_end_matches(".ics").to_string()).chars().map(|c| if c.is_alphanumeric() || " -_".contains(c) { c } else { '_' }).take(60).collect();
+    let stem = if stem.trim().is_empty() || stem == "imported" { "calendar".to_string() } else { stem.trim().to_string() };
+    let file = (1..).map(|i| dir.join(if i == 1 { format!("{stem}.ics") } else { format!("{stem} ({i}).ics") })).find(|f| !f.exists()).unwrap_or_else(|| dir.join("calendar.ics"));
+    crate::brain::write_atomic(&file, text).map_err(|e| e.to_string())?;
+    Ok((file.to_string_lossy().into_owned(), false))
+}
+
+/// A local .ics file added: Clipster keeps its own copy (one already in the folder stays as it is).
+pub fn import(path: &str) -> Result<(String, bool), String> {
+    if is_imported(path) {
+        return Ok((path.to_string(), false));
+    }
+    let text = std::fs::read_to_string(path).map_err(|e| format!("I couldn't read it: {e}"))?;
+    import_text(&text, &short(path))
+}
+
+/// A calendar file linked where it lay (before copies were kept): copied in, from the file or, if it's gone, from
+/// the last copy read. None when there's nothing to copy.
+pub fn adopt(src: &str) -> Option<String> {
+    if src.starts_with("http") || src.starts_with("timetree:") || is_imported(src) {
+        return None;
+    }
+    let text = std::fs::read_to_string(src).ok().or_else(|| cache_file(src).and_then(|c| std::fs::read_to_string(c).ok()))?;
+    import_text(&text, &short(src)).ok().map(|r| r.0)
 }
 
 /// Where a source's last good copy is kept.
@@ -469,7 +570,11 @@ pub fn fetch(sources: &[String]) -> Fetched {
     let today = Local::now().date_naive();
     let (mut events, mut problems, mut names) = (vec![], vec![], vec![]);
     for (n, src) in sources.iter().enumerate() {
-        let text = if src.starts_with("http") { crate::net::get_calendar(src) } else { std::fs::read_to_string(src).map_err(|e| e.to_string()) };
+        let text = match src.strip_prefix("timetree:").and_then(|id| id.parse().ok()) {
+            Some(id) => crate::timetree::ics(id),
+            None if src.starts_with("http") => crate::net::get_calendar(src),
+            None => std::fs::read_to_string(src).map_err(|e| e.to_string()),
+        };
         let cache = cache_file(src);
         let text = match text {
             Ok(t) if t.contains("BEGIN:VCALENDAR") => {
@@ -516,7 +621,9 @@ pub fn to_ics(title: &str, start: NaiveDateTime, end: NaiveDateTime, all_day: bo
 
 /// A source for showing: the host of a link (never its secret path), or a file's name.
 pub fn short(src: &str) -> String {
-    if src.starts_with("http") {
+    if src.starts_with("timetree:") {
+        "TimeTree".into()
+    } else if src.starts_with("http") {
         src.split('/').nth(2).unwrap_or(src).to_string()
     } else {
         std::path::Path::new(src).file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_else(|| src.to_string())
@@ -677,6 +784,37 @@ BEGIN:VEVENT\r\nDTSTART;TZID=Europe/Zurich:20261110T140000\r\nDTEND;TZID=Europe/
         assert_eq!(plants, vec![d(2026, 11, 9), d(2026, 11, 11), d(2026, 11, 13), d(2026, 11, 15)]);
         assert_eq!(ev.iter().find(|e| e.uid == "a1").unwrap().end - t(2026, 11, 9, 18, 0), Duration::minutes(10));
         assert_eq!(ev.iter().filter(|e| e.uid == "b2").map(|e| e.start.date()).collect::<Vec<_>>(), vec![d(2027, 2, 15)], "a birthday from 1990, once a year");
+    }
+
+    #[test]
+    fn imports_keep_their_own_copy() {
+        let dir = std::env::temp_dir().join(format!("clipster-import-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let invite = |summary: &str| format!("BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nUID:lunch-1\r\nDTSTART:20261113T120000\r\nSUMMARY:{summary}\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n");
+        let f = dir.join("invite.ics");
+        std::fs::write(&f, invite("Lunch")).unwrap();
+        let (src, merged) = import(&f.to_string_lossy()).unwrap();
+        assert!(merged && is_imported(&src) && src.ends_with("imported.ics"));
+        std::fs::remove_file(&f).unwrap();
+        let read = || parse(&std::fs::read_to_string(&src).unwrap(), NaiveDate::from_ymd_opt(2026, 11, 10).unwrap(), 10);
+        assert_eq!(read().iter().map(|e| e.title.clone()).collect::<Vec<_>>(), ["Lunch"], "the download is gone, the event isn't");
+        // the updated invitation replaces it; another one joins it
+        import_text(&invite("Lunch (moved)"), "invite.ics").unwrap();
+        import_text(&invite("x").replace("lunch-1", "dinner").replace("SUMMARY:x", "SUMMARY:Dinner"), "b.ics").unwrap();
+        let mut titles: Vec<String> = read().into_iter().map(|e| e.title).collect();
+        titles.sort();
+        assert_eq!(titles, ["Dinner", "Lunch (moved)"]);
+        assert_eq!(cal_name(&std::fs::read_to_string(&src).unwrap()).as_deref(), Some("Imported"));
+        // a whole calendar is a copy of its own, and a link to a file that's gone is copied from the cache
+        let whole = "BEGIN:VCALENDAR\r\nX-WR-CALNAME:Work\r\nEND:VCALENDAR\r\n";
+        let (src, merged) = import_text(whole, "work.ics").unwrap();
+        assert!(!merged && src.ends_with("Work.ics"));
+        assert!(import_text("not a calendar", "x.ics").is_err());
+        let gone = dir.join("gone.ics").to_string_lossy().into_owned();
+        crate::brain::write_atomic(&cache_file(&gone).unwrap(), whole).unwrap();
+        assert!(adopt(&gone).is_some_and(|s| is_imported(&s)));
+        assert_eq!(adopt("https://example.com/x.ics"), None);
+        let _ = std::fs::remove_dir_all(&dir);
     }
 
     #[test]

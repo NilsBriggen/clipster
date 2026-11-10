@@ -60,8 +60,11 @@ impl Desk {
         } else {
             let mode = Rect::from_min_size(pos2(cal_btn.min.x - 6.0 - 64.0, left.min.y + 6.0), vec2(64.0, small));
             let pw = btn_w(&p, look, "Print…");
-            if look.button(ui, Rect::from_min_size(pos2(mode.min.x - 6.0 - pw, mode.min.y), vec2(pw, small)), Id::unique("desk-agenda-print"), "Print…", true).on_hover_text("The next seven days, for printing or a PDF").clicked() {
-                out.push("print agenda".into());
+            let hint = if self.agenda_month { "This month, for printing or a PDF" } else { "The next seven days, for printing or a PDF" };
+            if look.button(ui, Rect::from_min_size(pos2(mode.min.x - 6.0 - pw, mode.min.y), vec2(pw, small)), Id::unique("desk-agenda-print"), "Print…", true).on_hover_text(hint).clicked() {
+                let today = chrono::Local::now().date_naive();
+                let (y, m) = self.month_shown.unwrap_or((today.year(), today.month()));
+                out.push(if self.agenda_month { format!("print month {y}-{m:02}") } else { "print agenda".into() });
             }
             if look.button(ui, mode, Id::unique("desk-agenda-mode"), if self.agenda_month { "List" } else { "Month" }, true).on_hover_text(if self.agenda_month { "Day by day" } else { "A month at a glance" }).clicked() {
                 self.agenda_month = !self.agenda_month;
@@ -781,7 +784,8 @@ impl Desk {
         p.galley(pos2(x0, y), g, look.dim());
         y += gh + 10.0;
         let row = ctl + 8.0;
-        let fits = (((card.max.y - ctl * 2.0 - 40.0) - y) / row).floor().max(1.0) as usize;
+        let tt_h = ctl + 40.0; // TimeTree at the bottom
+        let fits = (((card.max.y - ctl * 2.0 - 40.0 - tt_h) - y) / row).floor().max(1.0) as usize;
         let area = Rect::from_min_max(pos2(card.min.x, y), pos2(card.max.x, y + fits as f32 * row));
         let first = self.rows(ui, look, "calendars", area, view.calendars.len(), fits);
         for (i, cal) in view.calendars.iter().enumerate().skip(first).take(fits) {
@@ -853,6 +857,52 @@ impl Desk {
                 out.push("calendar refresh".into());
             }
             line(ui, pos2(again.max.x + 10.0, again.center().y), &view.calendar_note, look.font(11.5), if view.calendar_problems > 0 { look.danger() } else { look.dim() }, x1 - again.max.x - 10.0);
+        }
+        self.timetree_rows(ui, look, Rect::from_min_max(pos2(x0, card.max.y - tt_h), pos2(x1, card.max.y - 8.0)), &view.timetree, out);
+    }
+
+    /// TimeTree: signed out, an email, a password and Sign in; signed in, a button for each calendar that isn't
+    /// shown yet (once shown it's a calendar row like any other) and Sign out.
+    fn timetree_rows(&mut self, ui: &mut Ui, look: Look, r: Rect, tt: &TimeTreeView, out: &mut Vec<String>) {
+        let p = ui.painter().clone();
+        let ctl = look.ctl();
+        look.divider(&p, r.min.x, r.max.x, r.min.y);
+        let head = p.text(pos2(r.min.x, r.min.y + 14.0), Align2::LEFT_CENTER, "TimeTree", look.bold(12.5), look.text());
+        let note = if tt.email.is_empty() { "Only reads it. Your password isn't kept.".to_string() } else { format!("Signed in as {}", tt.email) };
+        line(ui, pos2(head.max.x + 10.0, head.center().y), &note, look.font(11.0), look.dim(), r.max.x - head.max.x - 10.0);
+        let y = r.max.y - ctl;
+        if tt.email.is_empty() {
+            let bw = btn_w(&p, look, "Sign in").max(72.0);
+            let w = ((r.width() - bw - 16.0) / 2.0).floor();
+            look.input(ui, Rect::from_min_size(pos2(r.min.x, y), vec2(w, ctl)), Id::unique("desk-tt-email"), &mut self.tt_email, "Email");
+            let pw = look.secret(ui, Rect::from_min_size(pos2(r.min.x + w + 8.0, y), vec2(w, ctl)), Id::unique("desk-tt-password"), &mut self.tt_password, "Password");
+            let ready = !tt.busy && self.tt_email.contains('@') && !self.tt_password.is_empty();
+            let enter = pw.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter));
+            if (look.primary(ui, Rect::from_min_size(pos2(r.max.x - bw, y), vec2(bw, ctl)), Id::unique("desk-tt-signin"), if tt.busy { "…" } else { "Sign in" }, ready).clicked() || enter) && ready {
+                out.push("timetree signin".into());
+            }
+            return;
+        }
+        let ow = btn_w(&p, look, "Sign out");
+        let mut x = r.min.x;
+        for (id, name, shown) in tt.calendars.iter().filter(|c| !c.2) {
+            let short: String = name.chars().take(18).collect();
+            let label = format!("+ {short}");
+            let w = btn_w(&p, look, &label);
+            if x + w > r.max.x - ow - 8.0 {
+                break;
+            }
+            if look.button(ui, Rect::from_min_size(pos2(x, y), vec2(w, ctl)), Id::unique(("desk-tt-add", *id, *shown)), &label, true).on_hover_text(format!("Show \u{201c}{name}\u{201d} here")).clicked() {
+                out.push(format!("calendar add timetree:{id}"));
+            }
+            x += w + 6.0;
+        }
+        if x == r.min.x {
+            let all = if tt.calendars.is_empty() { "No calendars in this TimeTree account." } else { "All your TimeTree calendars are in the list above." };
+            line(ui, pos2(r.min.x, y + ctl / 2.0), all, look.font(11.5), look.dim(), r.width() - ow - 8.0);
+        }
+        if look.button(ui, Rect::from_min_size(pos2(r.max.x - ow, y), vec2(ow, ctl)), Id::unique("desk-tt-signout"), "Sign out", true).on_hover_text("Forget the session and stop reading TimeTree").clicked() {
+            out.push("timetree signout".into());
         }
     }
 }
