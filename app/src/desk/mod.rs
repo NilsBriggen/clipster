@@ -1004,10 +1004,13 @@ impl Desk {
         let page = Rect::from_min_max(pos2(inner.min.x + 6.0, tabs_y + 24.0), pos2(inner.max.x - 6.0, status.min.y - 6.0));
         p.rect_filled(page, 0.0, win98::FACE);
         win98::bevel(&p, page, true);
-        let field = Rect::from_min_max(status.min, pos2(status.max.x - 92.0, status.max.y));
+        // the look's pane, as wide as its label
+        let look_label = if self.large { "Classic 98 · large" } else { "Classic 98" };
+        let pane = (p.layout_no_wrap(look_label.to_string(), win98::font(12.5), win98::TEXT).size().x + 16.0).max(88.0);
+        let field = Rect::from_min_max(status.min, pos2(status.max.x - pane - 4.0, status.max.y));
         win98::status_bar(&p, field, "");
         self.status_text(&p, field.shrink2(vec2(7.0, 2.0)), view, look);
-        win98::status_bar(&p, Rect::from_min_max(pos2(status.max.x - 88.0, status.min.y), status.max), if self.large { "Classic 98 · large" } else { "Classic 98" });
+        win98::status_bar(&p, Rect::from_min_max(pos2(status.max.x - pane, status.min.y), status.max), look_label);
         self.status_rect = Some(field.shrink2(vec2(3.0, 3.0)));
         (page.shrink(12.0), close, Some(label))
     }
