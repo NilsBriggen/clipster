@@ -5146,7 +5146,7 @@ Jokes, quizzes, games and little rituals: I'm also in charge of mild entertainme
 Say "joke", "quiz" or "games" for a break from the grind. You've earned a short one.
 Fun lives here: jokes, puns, riddles, arcade games. All of it work-adjacent, technically.
 
-## help_me
+## help_aboutme
 Teach me phrases, set your name, birthday or favourites: the more I know you, the better I get.
 Say "my name is ..." or "when I say X, say Y". I'm trainable, like a very small dog.
 I can remember things about you. Tell me, and I'll try not to get it wrong.
@@ -19837,7 +19837,7 @@ I can fetch the weather, headlines and word meanings. Just ask: "weather", "news
 Questions go out to the web and come back with answers. I'm the middle paperclip.
 If I don't know something, I'll try the web. No guessing. Okay, a bit of guessing.
 
-## help_me
+## help_aboutme
 The more you tell me, the better I get: your name, your city, your pet, your favourite biscuit.
 Say "forget everything" if you ever want to wipe my notes about you. It's your file; you're in charge.
 Teach me a phrase with "when I say X, say Y". I'm a fast learner, if a slightly literal one.

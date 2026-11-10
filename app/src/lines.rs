@@ -373,7 +373,9 @@ fn to_reply_from(s: &Section, words: &Section) -> Reply {
 
 /// Like `to_reply_from`, filling `{x}` with `x`. Without an `x`, or with a long one, lines that don't use it are preferred.
 fn to_reply_x(s: &Section, words: &Section, x: Option<&str>) -> Reply {
-    let fits = x.is_some_and(|x| (1..=6).contains(&x.split_whitespace().count()));
+    // never quote what looks like a command or data ("timerat 1700000000|tea", "todo #3 done"): the plain lines
+    let machine = |x: &str| x.contains(['|', '#', '`', '$', '{', '}']) || x.split(|c: char| !c.is_ascii_digit()).any(|d| d.len() >= 6);
+    let fits = x.is_some_and(|x| (1..=6).contains(&x.split_whitespace().count()) && !machine(x));
     let plain: Vec<&String> = words.lines.iter().filter(|l| !l.contains("{x}")).collect();
     let line = if fits || plain.is_empty() { words.lines.choose(&mut rand::thread_rng()) } else { plain.choose(&mut rand::thread_rng()).copied() };
     // glitch the line first, then put their words in: what they said is never garbled
@@ -760,6 +762,15 @@ pub fn program(comm: &str) -> Option<Reply> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn commands_are_never_quoted_back() {
+        for _ in 0..30 {
+            for x in ["timerat 1700000000|tea", "todo #3 done", "run `ls`"] {
+                assert!(!reply_with("unknown_statement", x).text.contains(x), "{x}");
+            }
+        }
+    }
 
     /// The database the app uses by default (Unhinged), checked to parse cleanly.
     fn built_in() -> Vec<Section> {

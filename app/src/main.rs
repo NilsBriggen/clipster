@@ -296,6 +296,7 @@ struct App {
     notice_programs: bool,
     facts: std::collections::BTreeMap<String, String>, // what you told him: "pet", "city", "fav_food"…
     last_cmd: Option<String>,               // the last command worth repeating ("again", "another one")
+    last_strict: bool,                      // it came from a button: "again" runs it strictly too
     waiting: Option<(String, Instant)>,     // he asked you something (`## ask <id>`): your next line is the answer
     quit_at: Option<Instant>,               // close then (to restart into an update)
     focus: Option<Focus>,
@@ -476,6 +477,44 @@ fn relaunch() {
 }
 
 /// "again", "another one", "one more": the current balloon's own "Another…" button, else the last command.
+/// A typed reply to the balloon's buttons ("yes", "2", "the second one", "Paris", "another"): the button it means,
+/// so typing an answer doesn't start a new conversation (or a web search) about the word.
+fn typed_button(typed: &str, balloon: Option<&Reply>) -> Option<Act> {
+    let b = balloon.filter(|b| !b.buttons.is_empty())?;
+    let norm = |t: &str| t.to_lowercase().chars().map(|c| if c.is_alphanumeric() || c == '\'' { c } else { ' ' }).collect::<String>().split_whitespace().collect::<Vec<_>>().join(" ");
+    let w = norm(typed);
+    if w.is_empty() || w.split(' ').count() > 6 {
+        return None;
+    }
+    let labels: Vec<(String, &Act)> = b.buttons.iter().map(|(l, a)| (norm(l), a)).collect();
+    let one = |found: Vec<&Act>| (found.len() == 1).then(|| found[0].clone());
+    // a number or an ordinal: that button
+    const ORD: [&str; 6] = ["first", "second", "third", "fourth", "fifth", "sixth"];
+    let n = w.trim_start_matches("the ").trim_end_matches(" one").trim_start_matches("number ");
+    if let Some(i) = n.parse::<usize>().ok().filter(|i| (1..=labels.len()).contains(i)).or_else(|| ORD.iter().position(|o| *o == n).map(|i| i + 1).filter(|i| *i <= labels.len())) {
+        return Some(labels[i - 1].1.clone());
+    }
+    if let Some(found) = one(labels.iter().filter(|(l, _)| *l == w).map(|(_, a)| *a).collect()) {
+        return Some(found);
+    }
+    // yes and no: the button that says so
+    const YES: &[&str] = &["yes", "yeah", "yep", "yup", "sure", "ok", "okay", "y", "do it", "go ahead", "please", "yes please", "of course", "absolutely"];
+    const NO: &[&str] = &["no", "nope", "nah", "n", "no thanks", "no thank you", "never mind", "nevermind", "cancel", "don't", "dont", "not now", "stop"];
+    let starts = |l: &str, words: &[&str]| words.iter().any(|y| l == *y || l.starts_with(&format!("{y} ")));
+    if YES.contains(&w.as_str()) {
+        return one(labels.iter().filter(|(l, _)| starts(l, &["yes", "yeah", "sure", "ok", "okay", "do it", "go ahead", "please"])).map(|(_, a)| *a).collect());
+    }
+    if NO.contains(&w.as_str()) {
+        let no = one(labels.iter().filter(|(l, _)| starts(l, &["no", "nope", "not", "cancel", "never", "don't", "leave", "keep", "nah", "stop"])).map(|(_, a)| *a).collect());
+        return no.or_else(|| labels.iter().any(|(l, _)| starts(l, &["yes"])).then_some(Act::Hide));
+    }
+    // the start of one label ("pari" for Paris, "remind me in" for "Remind me in 10 min"), at least 3 letters
+    if w.chars().count() >= 3 {
+        return one(labels.iter().filter(|(l, _)| l.starts_with(&w) && l.chars().nth(w.chars().count()).is_none_or(|c| c == ' ')).map(|(_, a)| *a).collect());
+    }
+    None
+}
+
 fn repeat_command(typed: &str, balloon: Option<&Reply>, last: Option<&str>) -> Option<String> {
     const AGAIN: &[&str] = &["again", "another", "another 1", "1 more", "more", "do it again", "once more", "1 more time", "next", "again please", "more please", "another please"];
     if !AGAIN.contains(&understand::tidy_words(typed).trim_end_matches(['.', ',']).trim()) {
@@ -750,6 +789,7 @@ impl App {
             checkin: true,
             facts: Default::default(),
             last_cmd: None,
+            last_strict: false,
             waiting: None,
             quit_at: None,
             focus: None,
@@ -2533,6 +2573,10 @@ impl App {
         }
         let r = match o {
             Sound(_) => return,
+            Level(..) => {
+                self.settings_dirty = true; // `arcade.levels` is saved as game_levels
+                return;
+            }
             Start(g) => {
                 self.stat("games", 1);
                 self.announce_unlocks();
@@ -2836,7 +2880,7 @@ impl App {
             "tips_every": self.tips_every, "notice_clip": self.notice_clip, "notice_programs": self.notice_programs, "notice_windows": self.notice_windows, "checkin": self.checkin, "facts": self.facts, "kind_time": self.kind_time, "focus_log": self.focus_log, "desk_look": if self.desk_modern { "modern" } else { "classic" }, "desk_size": if self.desk_large { "large" } else { "normal" }, "checkin_days": self.checkin_days,
             "pins": self.pins, "reading": self.reading, "calendars": self.calendars, "calendar_meta": self.calendar_meta.iter().map(|(s, m)| (s.clone(), m.to_json())).collect::<serde_json::Map<_, _>>(), "holidays": self.holiday_cc, "pin_labels": self.pin_labels, "reading_titles": self.reading_titles, "people": self.people.iter().map(|p| p.to_json()).collect::<Vec<_>>(), "habits": self.habits.iter().map(|h| h.to_json()).collect::<Vec<_>>(), "countdowns": self.countdowns.iter().map(|(l, d)| serde_json::json!([l, d.to_string()])).collect::<Vec<_>>(), "things": self.things, "renewals": self.renewals.iter().map(|r| r.to_json()).collect::<Vec<_>>(), "gift_lead": self.gift_lead, "habit_nudge": self.habit_nudge, "after_meeting": self.after_meeting, "site_time": self.site_time, "kind_moves": self.kind_moves, "weather": self.weather_on, "work_hours": [self.work_hours.0, self.work_hours.1], "day_totals": plan::history_merge(&self.day_totals, &self.kind_time, &self.focus_log, chrono::Local::now().date_naive()), "workday": self.workday, "workday_ask": self.workday_ask, "welcome_seen": self.welcome_seen, "backup_sources": self.backup_sources, "backup_target": self.backup_target, "backup_last": self.backup_last, "backup_result": self.backup_result, "backup_skip": self.backup_skip, "backup_auto": self.backup_auto, "backup_history": self.backup_history, "upkeep_hide": self.upkeep_hide, "space_log": self.space_log, "tidy_targets": self.tidy_targets, "tidy_auto": self.tidy_auto, "work_days": self.work_days, "clock12": brain::clock12(), "week_sunday": brain::week_sunday(), "quiet_after": self.quiet_after, "quiet_until": self.quiet_until.filter(|q| *q > timers::unix_now()), "quiet_weekend": self.quiet_weekend, "quiet_meetings": self.quiet_meetings, "headsup": self.headsup_min, "break_every": self.break_every, "alarm_sound": self.alarm_sound, "muted": self.muted, "desk_morning": self.desk_morning, "dnd_restore": self.dnd_restore, "dnd": self.dnd, "wrapup": self.wrapup, "upkeep_day": self.upkeep_day, "focus_goal": self.focus_goal, "budgets": self.budgets,
             "notice_health": self.notice_health, "check_updates": self.check_updates, "update_told": self.update_told, "sounds": self.sounds, "breaks": self.breaks, "name": self.name,
-            "hat": self.hat, "skin": self.skin, "friendship": self.friendship, "highscores": self.highscores, "birthday": self.birthday.map(|(m, d)| [m, d]), "stats": self.stats, "unlocked": self.unlocked, "explored": self.explored, "persona": if self.unhinged { "unhinged" } else { "boring" }, "anchor": self.anchor.or(self.saved_anchor).map(|a| [a.x, a.y]),
+            "hat": self.hat, "skin": self.skin, "friendship": self.friendship, "highscores": self.highscores, "game_levels": self.arcade.levels, "birthday": self.birthday.map(|(m, d)| [m, d]), "stats": self.stats, "unlocked": self.unlocked, "explored": self.explored, "persona": if self.unhinged { "unhinged" } else { "boring" }, "anchor": self.anchor.or(self.saved_anchor).map(|a| [a.x, a.y]),
             "timers": self.timers.iter().map(|t| serde_json::json!([t.at, t.label, t.every, t.id, t.rule])).collect::<Vec<_>>(),
         })
         .to_string()
@@ -2930,6 +2974,7 @@ impl App {
         }
         self.unlocked = v["unlocked"].as_array().into_iter().flatten().filter_map(|x| x.as_str().map(String::from)).collect();
         self.explored = v["explored"].as_array().into_iter().flatten().filter_map(|x| x.as_str().map(String::from)).collect();
+        self.arcade.levels = v["game_levels"].as_object().into_iter().flatten().filter_map(|(g, l)| Some((g.clone(), (l.get(0)?.as_u64()? as usize, l.get(1)?.as_u64()? as usize)))).collect();
         for (game, best) in v["highscores"].as_object().into_iter().flatten() {
             self.highscores.insert(game.clone(), best.as_u64().unwrap_or(0) as u32);
         }
@@ -3080,8 +3125,13 @@ impl App {
             false => brain::respond(cmd),
         };
         let first = cmd.split_whitespace().next().unwrap_or("").to_lowercase();
+        // a button that runs a shell line ("Yes, restart"): a plain "Done", never the command itself
+        if button && first == "run" && matches!(r.effect, Effect::Shell(_)) {
+            r.text = format!("{}\n(working on it...)", lines::pick("say_ran"));
+        }
         if matches!(r.effect, Effect::None | Effect::Net(_)) && !["answer", "answer-to", "window", "checkin"].contains(&first.as_str()) {
             self.last_cmd = Some(cmd.to_string()); // harmless to do again
+            self.last_strict = from_desk || button;
         }
         if r.friend != 0 {
             self.friendship = (self.friendship + r.friend as i32).clamp(-100, 100);
@@ -5181,11 +5231,21 @@ impl App {
             }
             self.hist_idx = self.history.len();
             // during setup, the first thing typed is the user's name
-            let cmd = match self.waiting.take() {
-                Some((id, at)) if at.elapsed() < Duration::from_secs(120) => format!("answer-to {id} {cmd}"),
-                _ => repeat_command(&cmd, self.balloon.as_ref(), self.last_cmd.as_deref()).unwrap_or(cmd),
-            };
-            self.run(ctx, &cmd);
+            let waiting = self.waiting.take().filter(|(_, at)| at.elapsed() < Duration::from_secs(120));
+            let pressed = if waiting.is_none() { typed_button(&cmd, self.balloon.as_ref()) } else { None };
+            match (waiting, pressed) {
+                (Some((id, _)), _) => self.run(ctx, &format!("answer-to {id} {cmd}")),
+                // a typed answer to the balloon's buttons is that button, so the conversation goes on
+                (None, Some(act)) => self.act(ctx, act),
+                (None, None) => match repeat_command(&cmd, self.balloon.as_ref(), self.last_cmd.as_deref()) {
+                    // "again": a button's command again, read strictly like the click, never as a sentence
+                    Some(again) => {
+                        self.from_button = self.last_strict || self.balloon.as_ref().is_some_and(|b| b.buttons.iter().any(|(_, a)| matches!(a, Act::Run(c) if *c == again)));
+                        self.run(ctx, &again);
+                    }
+                    None => self.run(ctx, &cmd),
+                },
+            }
             self.focus_input = !self.arcade.wants_focus(); // a game just opened: the keyboard is the game's
         }
         if let Some(a) = clicked {
@@ -6303,6 +6363,28 @@ mod tests {
         assert_eq!(checkin_streaks(&s, 100, true), (7, 3), "a week, and the third rough day running");
         assert_eq!(checkin_streaks(&s, 100, false), (7, 0), "a good day ends the rough run");
         assert_eq!(checkin_streaks(&s, 105, true), (1, 1), "a gap starts over");
+    }
+
+    #[test]
+    fn typed_answers_press_the_button() {
+        let run = |a: Option<Act>| match a {
+            Some(Act::Run(c)) => c,
+            Some(Act::Hide) => "hide".into(),
+            _ => String::new(),
+        };
+        let ask = Reply::say("Forget it all?").run("Yes, forget it all", "forgetfact all").btn("No, keep it", Act::Hide);
+        assert_eq!(run(typed_button("yes", Some(&ask))), "forgetfact all");
+        assert_eq!(run(typed_button("Nope.", Some(&ask))), "hide");
+        assert_eq!(run(typed_button("2", Some(&ask))), "hide");
+        let quiz = Reply::say("Capital of France?").run("Paris", "answer 1|Paris|quiz").run("Lyon", "answer 0|Lyon|quiz").run("Nice", "answer 0|Nice|quiz");
+        assert_eq!(run(typed_button("paris", Some(&quiz))), "answer 1|Paris|quiz");
+        assert_eq!(run(typed_button("the second one", Some(&quiz))), "answer 0|Lyon|quiz");
+        assert_eq!(run(typed_button("yes", Some(&quiz))), "", "no yes button: not a guess");
+        let web = Reply::say("Search the web?").run("🔍 Search the web", "search cats").run("Something else", "help");
+        assert_eq!(run(typed_button("search", Some(&web))), "search cats");
+        assert_eq!(run(typed_button("what's the weather in Rome", Some(&web))), "", "a new sentence stays a new sentence");
+        assert_eq!(run(typed_button("so", Some(&web))), "", "too short to mean a button");
+        assert_eq!(run(typed_button("yes", None)), "", "no balloon, no button");
     }
 
     #[test]

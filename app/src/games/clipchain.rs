@@ -11,6 +11,7 @@ pub const COLS: i32 = 24;
 pub const ROWS: i32 = 18;
 const CELL: f32 = 18.0;
 const LEVELS: &[&str] = &["Easy", "Normal", "Hard"];
+const KEYS: [&str; 3] = ["clipchain-easy", "clipchain", "clipchain-hard"]; // where each speed's best is kept
 const TICK: [f32; 3] = [0.17, 0.125, 0.09]; // seconds per move at the start, per level
 const LONG: usize = 25; // a chain this long gets a comment
 // coated paperclips: the colours of the loose clips (0 is plain steel)
@@ -128,7 +129,7 @@ impl Chain {
             self.state = State::Over;
             self.since = 0.0;
             out.push(Outcome::Lost("clipchain"));
-            out.push(Outcome::Score("clipchain", self.score));
+            out.push(Outcome::Score(KEYS[self.level], self.score));
             return;
         }
         self.cells.push_front(next);
@@ -143,7 +144,7 @@ impl Chain {
                 self.state = State::Won;
                 self.since = 0.0;
                 out.push(Outcome::Won("clipchain"));
-                out.push(Outcome::Score("clipchain", self.score));
+                out.push(Outcome::Score(KEYS[self.level], self.score));
             }
         } else {
             self.cells.pop_back();
@@ -285,6 +286,10 @@ impl Game for Chain {
     fn level(&self) -> usize {
         self.level
     }
+    /// A best per speed; Normal keeps the old key, so a best from before stays.
+    fn best_key(&self, _name: &str) -> String {
+        KEYS[self.level].to_string()
+    }
 
     fn set_level(&mut self, i: usize) {
         self.level = i.min(LEVELS.len() - 1);
@@ -295,7 +300,7 @@ impl Game for Chain {
         let best = self.best.map_or(String::from("none yet"), |b| b.to_string());
         let clips = if self.score == 1 { String::from("1 clip") } else { format!("{} clips", self.score) };
         match self.state {
-            State::Ready => "Arrow keys or WASD to start. Don't run into your own chain!".into(),
+            State::Ready => format!("{} · Arrow keys or WASD to start. Don't run into your own chain!", LEVELS[self.level]),
             State::Running => format!("Clips: {}   ·   Best: {best}", self.score),
             State::Over => format!("Tangled! {clips}. Any key or click to go again."),
             State::Won => format!("The whole desk! {clips}. Any key or click to go again."),
@@ -307,7 +312,7 @@ impl Game for Chain {
     }
 
     fn abandon(&mut self) -> Option<Outcome> {
-        (!self.finished() && self.score > 0).then_some(Outcome::Score("clipchain", self.score))
+        (!self.finished() && self.score > 0).then_some(Outcome::Score(KEYS[self.level], self.score))
     }
 
     fn live(&self) -> bool {
@@ -457,7 +462,7 @@ mod tests {
             g.step(&mut out);
         }
         assert_eq!(g.state, State::Over);
-        assert_eq!(out, vec![Outcome::Lost("clipchain"), Outcome::Score("clipchain", 0)]);
+        assert_eq!(out, vec![Outcome::Lost("clipchain"), Outcome::Score("clipchain", 0)], "Normal keeps the old key");
     }
 
     #[test]

@@ -25,6 +25,7 @@ pub enum Outcome {
     Lost(&'static str),
     Time(String, u32), // a finished round's time in seconds, under a best-time key like "bughunt-expert" (lower is better)
     Moment(&'static str, &'static str), // something worth a comment mid-game: (game, what), e.g. ("paperjam", "quad")
+    Level(&'static str, usize, usize), // the Difficulty menu changed: (game, level, side), to remember for next time
     Sound(&'static str), // a short arcade sound: drop, clear, merge, flap, point, flag, tick (win/lose come with Won/Lost)
 }
 
@@ -92,6 +93,14 @@ trait Game {
         0
     }
     fn set_level(&mut self, _i: usize) {}
+    /// A second group in the Difficulty menu, like Chess's sides (none = no group).
+    fn sides(&self) -> &'static [&'static str] {
+        &[]
+    }
+    fn side(&self) -> usize {
+        0
+    }
+    fn set_side(&mut self, _i: usize) {}
     fn status(&self) -> String;
     /// The round is decided (won, lost, game over): any key or click starts the next one.
     fn finished(&self) -> bool;
@@ -130,6 +139,9 @@ fn make(name: &str) -> Box<dyn Game> {
 pub struct Arcade {
     open: Option<(&'static str, Box<dyn Game>)>,
     menu: bool,
+    diff: bool, // the Difficulty menu is open
+    /// Each game's last difficulty: (level, side). `App` saves it as `game_levels`.
+    pub levels: BTreeMap<String, (usize, usize)>,
     pending: Vec<Outcome>,
     sent: Vec2,
     done: Option<f64>, // game time when the open game's round ended
@@ -143,12 +155,27 @@ pub struct Arcade {
 }
 
 impl Arcade {
-    /// Open a game by its command name. `false` = no such game.
-    pub fn open(&mut self, name: &str) -> bool {
+    /// Open a game by its command name, at its remembered difficulty, or the one named after it
+    /// ("chess hard", "clipchain easy", "chess black"). `false` = no such game.
+    pub fn open(&mut self, spec: &str) -> bool {
+        let (name, want) = spec.split_once(' ').map_or((spec, ""), |(n, w)| (n, w.trim()));
         match NAMES.iter().find(|(n, _)| *n == name) {
             Some((n, _)) => {
-                self.open = Some((n, make(n)));
+                let mut game = make(n);
+                if let Some(&(level, side)) = self.levels.get(*n) {
+                    game.set_level(level);
+                    game.set_side(side);
+                }
+                if let Some((level, side)) = pick_level(want, game.levels(), game.sides()) {
+                    level.into_iter().for_each(|i| game.set_level(i));
+                    side.into_iter().for_each(|i| game.set_side(i));
+                    self.levels.insert(n.to_string(), (game.level(), game.side()));
+                    self.pending.push(Outcome::Level(n, game.level(), game.side()));
+                }
+                self.open = Some((n, game));
                 self.menu = false;
+                // screenshots of the menu: CLIPSTER_ARCADE_MENU=difficulty
+                self.diff = std::env::var("CLIPSTER_ARCADE_MENU").is_ok_and(|m| m == "difficulty");
                 self.done = None;
                 self.paused = false;
                 self.focused = false;
@@ -196,14 +223,14 @@ impl Arcade {
         }
         let fresh = std::mem::take(&mut self.fresh);
         let since_open = self.opened.map_or(9.0, |t| now.duration_since(t).as_secs_f32());
-        let mut state = State { menu: &mut self.menu, done: &mut self.done, paused: &mut self.paused, focused: &mut self.focused, time: &mut self.time, real, since_open, fresh, embedded };
+        let mut state = State { menu: &mut self.menu, diff: &mut self.diff, done: &mut self.done, paused: &mut self.paused, focused: &mut self.focused, time: &mut self.time, real, since_open, fresh, embedded };
         let key = game.best_key(name);
         let best = best.get(&key).copied();
         let close = if embedded {
             // screenshot mode: draw the window straight onto the picture, without egui's own window frame
             egui::Area::new(egui::Id::unique("clipster-arcade-embedded"))
                 .fixed_pos(pos2(0.0, 0.0))
-                .show(ctx, |ui| window(ui, title, size, game.as_mut(), &mut state, best, &mut out))
+                .show(ctx, |ui| window(ui, name, title, size, game.as_mut(), &mut state, best, &mut out))
                 .inner
         } else {
             let mut builder = egui::ViewportBuilder::default().with_title(title).with_inner_size(size).with_decorations(false).with_resizable(false);
@@ -217,7 +244,7 @@ impl Arcade {
                 if fresh {
                     ui.ctx().send_viewport_cmd(egui::ViewportCommand::Focus); // keys go to the game, not to Clipster
                 }
-                let close = window(ui, title, size, game.as_mut(), &mut state, best, &mut out) || ui.input(|i| i.viewport().close_requested());
+                let close = window(ui, name, title, size, game.as_mut(), &mut state, best, &mut out) || ui.input(|i| i.viewport().close_requested());
                 if game.live() && !*state.paused {
                     ui.ctx().request_repaint(); // this window's own frames: without it egui's timing in here is wrong
                 }
@@ -226,6 +253,11 @@ impl Arcade {
         };
         if game.live() {
             ctx.request_repaint();
+        }
+        for o in &out {
+            if let Outcome::Level(n, level, side) = o {
+                self.levels.insert(n.to_string(), (*level, *side));
+            }
         }
         if close {
             // closing mid-round still counts for the high score
@@ -241,6 +273,7 @@ impl Arcade {
 /// The arcade's per-window state, lent to `window` for one frame.
 struct State<'a> {
     menu: &'a mut bool,
+    diff: &'a mut bool,
     done: &'a mut Option<f64>,
     paused: &'a mut bool,
     focused: &'a mut bool,
@@ -251,8 +284,9 @@ struct State<'a> {
     embedded: bool,
 }
 
-/// The 98 window: title bar, Game menu, the game itself, status bar. Returns true when it should close.
-fn window(ui: &mut Ui, title: &str, size: Vec2, game: &mut dyn Game, st: &mut State, best: Option<u32>, out: &mut Vec<Outcome>) -> bool {
+/// The 98 window: title bar, Game and Difficulty menus, the game itself, status bar. Returns true when it should close.
+#[allow(clippy::too_many_arguments)]
+fn window(ui: &mut Ui, name: &'static str, title: &str, size: Vec2, game: &mut dyn Game, st: &mut State, best: Option<u32>, out: &mut Vec<Outcome>) -> bool {
     if !st.embedded {
         ui.painter().rect_filled(ui.max_rect(), 0.0, win98::FACE);
     }
@@ -264,6 +298,11 @@ fn window(ui: &mut Ui, title: &str, size: Vec2, game: &mut dyn Game, st: &mut St
     let row = Rect::from_min_size(pos2(inner.min.x, bar.max.y), vec2(inner.width(), MENU_H));
     let label = win98::menu_label(ui, row.min + vec2(2.0, 1.0), "Game", *st.menu);
     let toggled = label.clicked();
+    // games with levels get their own Difficulty menu, where people look for it
+    let (levels, sides) = (game.levels(), game.sides());
+    let diff_label = (!levels.is_empty()).then(|| win98::menu_label(ui, pos2(label.rect.max.x + 2.0, row.min.y + 1.0), "Difficulty", *st.diff));
+    let diff_toggled = diff_label.as_ref().is_some_and(|l| l.clicked());
+    let menus = *st.menu || *st.diff;
     let area = Rect::from_min_size(pos2(inner.min.x + PAD, row.max.y + PAD), game.size());
 
     // focus: wait for it after opening (so the countdown doesn't run while the keys still go elsewhere),
@@ -275,19 +314,19 @@ fn window(ui: &mut Ui, title: &str, size: Vec2, game: &mut dyn Game, st: &mut St
     }
     *st.focused = has_focus;
     let pause_key = ui.input(|i| i.key_pressed(egui::Key::Escape) || (!game.takes_text() && i.key_pressed(egui::Key::P)));
-    if pause_key && !*st.menu && game.live() && !game.finished() {
+    if pause_key && !menus && game.live() && !game.finished() {
         *st.paused = !*st.paused;
     }
     if !game.live() {
         *st.paused = false; // nothing runs on its own: nothing to pause
     }
-    let running = !*st.menu && !*st.paused && !waiting;
+    let running = !menus && !*st.paused && !waiting;
     let dt = if running { st.real } else { 0.0 };
     *st.time += dt as f64;
-    let mut f = Frame { input: !*st.menu && !*st.paused, dt, time: *st.time, best, out };
+    let mut f = Frame { input: !menus && !*st.paused, dt, time: *st.time, best, out };
     game.ui(ui, area, &mut f);
     // a new round (F2, New game, New, another level) keeps the score of the one you leave, like closing does
-    if !*st.menu && !*st.paused && ui.input(|i| i.key_pressed(egui::Key::F2)) {
+    if !menus && !*st.paused && ui.input(|i| i.key_pressed(egui::Key::F2)) {
         f.out.extend(game.abandon());
         game.new_round();
     }
@@ -298,7 +337,7 @@ fn window(ui: &mut Ui, title: &str, size: Vec2, game: &mut dyn Game, st: &mut St
             i.events.iter().any(|e| matches!(e, Event::Key { pressed: true, repeat: false, key, .. } if *key != egui::Key::Escape))
                 || (i.pointer.any_click() && i.pointer.interact_pos().is_some_and(|p| area.contains(p)))
         });
-        if !*st.menu && pressed && *st.time - since > 0.8 {
+        if !menus && pressed && *st.time - since > 0.8 {
             game.new_round();
             *st.done = None;
         }
@@ -318,14 +357,16 @@ fn window(ui: &mut Ui, title: &str, size: Vec2, game: &mut dyn Game, st: &mut St
             None => {}
         }
     }
-    win98::status_bar(ui.painter(), Rect::from_min_max(pos2(inner.min.x, inner.max.y - STATUS_H), inner.max), &game.status());
+    // just opened: say which difficulty this is and where to change it
+    let status = match levels.get(game.level()) {
+        Some(l) if st.since_open < 6.0 && !game.finished() => format!("{l} · change it in the Difficulty menu"),
+        _ => game.status(),
+    };
+    win98::status_bar(ui.painter(), Rect::from_min_max(pos2(inner.min.x, inner.max.y - STATUS_H), inner.max), &status);
+    let h = 20.0;
 
     if *st.menu {
-        let levels = game.levels();
-        let h = 20.0;
-        let rows = 2.0 + levels.len() as f32;
-        let gaps = if levels.is_empty() { 1.0 } else { 2.0 };
-        let drop = Rect::from_min_size(pos2(label.rect.min.x, row.max.y - 1.0), vec2(170.0, rows * h + gaps * 6.0 + 6.0));
+        let drop = Rect::from_min_size(pos2(label.rect.min.x, row.max.y - 1.0), vec2(170.0, 2.0 * h + 6.0 + 6.0));
         win98::panel(ui.painter(), drop, win98::FACE, true);
         let mut y = drop.min.y + 3.0;
         let item = |ui: &mut Ui, text: &str, key: &str, on: bool, y: &mut f32| {
@@ -341,18 +382,6 @@ fn window(ui: &mut Ui, title: &str, size: Vec2, game: &mut dyn Game, st: &mut St
         }
         win98::separator(ui.painter(), y + 2.0, drop.min.x + 3.0, drop.max.x - 3.0);
         y += 6.0;
-        if !levels.is_empty() {
-            let now = game.level();
-            for (i, l) in levels.iter().enumerate() {
-                if item(ui, l, "", i == now, &mut y) {
-                    f.out.extend(game.abandon());
-                    game.set_level(i);
-                    picked = true;
-                }
-            }
-            win98::separator(ui.painter(), y + 2.0, drop.min.x + 3.0, drop.max.x - 3.0);
-            y += 6.0;
-        }
         if item(ui, "Close", "", false, &mut y) {
             close = true;
         }
@@ -361,9 +390,52 @@ fn window(ui: &mut Ui, title: &str, size: Vec2, game: &mut dyn Game, st: &mut St
             *st.menu = false;
         }
     } else if toggled {
-        *st.menu = true;
+        (*st.menu, *st.diff) = (true, false);
+    }
+
+    if let (true, Some(dl)) = (*st.diff, diff_label.as_ref()) {
+        let gap = if sides.is_empty() { 0.0 } else { 6.0 };
+        let drop = Rect::from_min_size(pos2(dl.rect.min.x, row.max.y - 1.0), vec2(170.0, (levels.len() + sides.len()) as f32 * h + gap + 6.0));
+        win98::panel(ui.painter(), drop, win98::FACE, true);
+        let mut y = drop.min.y + 3.0;
+        let mut picked = false;
+        let (now_level, now_side) = (game.level(), game.side());
+        for (group, list) in [(0, levels), (1, sides)] {
+            if group == 1 && !list.is_empty() {
+                win98::separator(ui.painter(), y + 2.0, drop.min.x + 3.0, drop.max.x - 3.0);
+                y += 6.0;
+            }
+            for (i, l) in list.iter().enumerate() {
+                let on = i == if group == 0 { now_level } else { now_side };
+                if win98::menu_item(ui, Rect::from_min_size(pos2(drop.min.x + 3.0, y), vec2(drop.width() - 6.0, h)), l, "", on) {
+                    f.out.extend(game.abandon());
+                    if group == 0 { game.set_level(i) } else { game.set_side(i) }
+                    f.out.push(Outcome::Level(name, game.level(), game.side()));
+                    picked = true;
+                }
+                y += h;
+            }
+        }
+        let clicked_away = ui.input(|i| i.pointer.primary_clicked() || i.key_pressed(egui::Key::Escape));
+        if picked || (clicked_away && !diff_toggled) {
+            *st.diff = false;
+        }
+    } else if diff_toggled {
+        (*st.diff, *st.menu) = (true, false);
     }
     close
+}
+
+/// The level and side named in `want` ("hard", "on easy", "as black", "two players"), by the names in the menus.
+fn pick_level(want: &str, levels: &[&str], sides: &[&str]) -> Option<(Option<usize>, Option<usize>)> {
+    let words: Vec<String> = want.to_lowercase().split(|c: char| !c.is_alphanumeric()).filter(|w| !w.is_empty()).map(|w| if w == "2" { "two".into() } else { w.to_string() }).collect();
+    let find = |list: &[&str]| list.iter().position(|l| {
+        let l = l.to_lowercase();
+        let lw: Vec<&str> = l.split(|c: char| !c.is_alphanumeric()).filter(|w| !w.is_empty() && !["play", "as"].contains(w)).collect();
+        !lw.is_empty() && lw.iter().all(|w| words.iter().any(|x| x == w))
+    });
+    let (level, side) = (find(levels), find(sides));
+    (level.is_some() || side.is_some()).then_some((level, side))
 }
 
 /// Clipster's wire, as a polyline in clip units (about 36 wide, centred on 0,0).
@@ -391,6 +463,23 @@ pub(crate) fn wire(open: [f32; 3]) -> Vec<Vec2> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn games_open_at_the_named_or_remembered_level() {
+        let mut a = Arcade::default();
+        assert!(a.open("chess hard as black"));
+        let g = &a.open.as_ref().unwrap().1;
+        assert_eq!((g.level(), g.side()), (3, 1));
+        assert!(a.pending.contains(&Outcome::Level("chess", 3, 1)), "remembered for next time");
+        assert!(a.open("chess"));
+        let g = &a.open.as_ref().unwrap().1;
+        assert_eq!((g.level(), g.side()), (3, 1), "the remembered level");
+        assert!(a.open("clipchain easy"));
+        assert_eq!(a.open.as_ref().unwrap().1.level(), 0);
+        assert!(a.open("chess two players"));
+        assert_eq!(a.open.as_ref().unwrap().1.side(), 2);
+        assert!(!a.open("tetris hard"));
+    }
 
     #[test]
     fn wire_closes_into_a_clip_and_straightens() {

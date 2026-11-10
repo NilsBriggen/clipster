@@ -2,6 +2,39 @@
 
 Each version's section is also its GitHub release description: the release workflow publishes it and refuses to release a version without one.
 
+## 0.7.2 (2026-11-10)
+
+Fixes and game polish. Help buttons go where they say, typed answers count as clicks, he stops reading out his own commands, and the arcade gets difficulty levels you can actually find and a Desk Merge that doesn't drag on.
+
+### Highlights
+
+- **Help buttons fixed:** five of the topics under "what can you do" (Timers, Me and you, Agenda, People, Upkeep) opened the wrong thing. Every button now opens its own topic.
+- **Typing instead of clicking:** with a balloon open, typing "yes", "no", "2", "the second one" or the start of a button's words presses that button. Before, he forgot the question and sometimes searched the web for your answer.
+- **No more command text in his replies:**
+  - "Yes, restart" and similar buttons say "Done" instead of showing the raw shell line.
+  - "again" after a button repeats it exactly, not as a sentence.
+  - "I didn't get that" replies never quote internal commands back.
+- **A Difficulty menu:**
+  - Chess, Clip Chain and Bug Hunt have a Difficulty menu in the window's menu bar.
+  - The status bar says which level is on, and your choice is remembered.
+  - Say "play chess on hard", "play snake on easy" or "chess as black" to open at a level.
+- **Chess:** five strengths (Beginner, Easy, Medium, Hard, Expert). White, Black or two players is a separate choice.
+- **Clip Chain:** a best score for each speed. Your old best counts as Normal.
+- **Desk Merge:**
+  - Bigger pieces (the Computer is now half the drawer wide), so the drawer fills up and games are about half as long.
+  - Merges pop and shove the pile, round things roll into gaps, and quick merges in a row are a chain worth ×2, ×3…
+
+### Install
+
+- **Linux:** download `clipster_0.7.2_x86_64.AppImage`, make it executable (`chmod +x`) and replace your old AppImage with it. Or click **Install now** when he tells you about the update. Your settings, notes, to-dos and taught phrases are kept.
+- **Windows:** run `clipster_0.7.2_x64_en-US.msi`, or click **Install now** in Clipster. It replaces the old version and keeps your settings. The installer still isn't code-signed, so SmartScreen may say "Windows protected your PC". Choose **More info → Run anyway**.
+
+### Known limitations
+
+- **Desk Merge's best scores** from before aren't comparable: the bigger pieces make games shorter.
+- **Typed answers** only count while the balloon with the buttons is still open, and only when they clearly mean one button. Anything else is a new request.
+- **Chess Expert** thinks for up to 4 seconds a move.
+
 ## 0.7.1 (2026-11-10)
 
 A small fix release. The Desk's "What made up Everything else" card used to show one unhelpful line ("Other pages and apps"). Now it shows what the time actually went to, and lets you file it where it belongs.

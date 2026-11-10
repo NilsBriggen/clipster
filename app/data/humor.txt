@@ -1670,6 +1670,11 @@ Fine. I'll be quiet for an hour. I'll just... sit here. Silently. Judging.
 ## say_stopwatch
 ⏱ Stopwatch started! Click below or say "stop the stopwatch" when you're done.
 
+## say_ran
+Done.
+On it.
+Doing it now.
+
 ## say_close
 Close {app}? I'll ask it nicely. Anything unsaved in it may be lost.
 
@@ -2641,6 +2646,13 @@ Next level! More paper, more speed, more fun. Said no one in an office, ever.
 Level up. The paper is getting bolder. Be bolder than the paper.
 You've reached a new level. The paper has noticed.
 Faster paper ahead. Stay calm. Papers can smell fear.
+
+## game_moment_deskmerge_chain
+A chain! One merge set off the next. That's what we call synergy in the office.
+Look at it go: merge, merge, merge. The drawer is reorganising itself.
+Three in a row! The supplies are doing your filing for you.
+A chain reaction. I'd call that a productive meeting.
+Merges setting off merges. If only my to-do list worked like that.
 
 ## game_moment_deskmerge_big
 A big merge! The desk just got a little more important.

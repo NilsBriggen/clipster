@@ -607,6 +607,11 @@ enum End {
     Draw(&'static str),
 }
 
+/// Clipster's strengths, weakest first.
+const LEVELS: [&str; 5] = ["Beginner", "Easy", "Medium", "Hard", "Expert"];
+/// Per strength: (deepest search in plies, seconds to think, random wobble in centipawns, chance of any legal move).
+const STRENGTHS: [(i32, f32, i32, f32); 5] = [(1, 0.3, 120, 0.25), (2, 0.5, 30, 0.0), (4, 0.8, 12, 0.0), (8, 1.5, 4, 0.0), (12, 4.0, 0, 0.0)];
+
 pub struct Chess {
     pub pos: Pos,
     legal: Vec<Move>,
@@ -615,7 +620,8 @@ pub struct Chess {
     drag: Option<usize>,
     promo: Option<(u8, u8)>,
     slide: Option<Slide>,
-    mode: usize, // see `levels`
+    strength: usize, // see `levels`: Beginner … Expert
+    side: usize,     // see `sides`: you play White, Black, or two players share the board
     flip: bool,
     think: Option<Thinking>,
     searches: u64,
@@ -639,7 +645,8 @@ impl Chess {
             drag: None,
             promo: None,
             slide: None,
-            mode: 0,
+            strength: 1,
+            side: 0,
             flip: false,
             think: None,
             searches: 0,
@@ -654,16 +661,12 @@ impl Chess {
     }
 
     fn vs_clipster(&self) -> bool {
-        self.mode < 4
-    }
-
-    fn hard(&self) -> bool {
-        self.mode == 1 || self.mode == 3
+        self.side < 2
     }
 
     /// The colour at the bottom of the board, the player's own against Clipster.
     fn you_white(&self) -> bool {
-        self.mode != 2 && self.mode != 3
+        self.side != 1
     }
 
     fn clipster_to_move(&self) -> bool {
@@ -822,10 +825,14 @@ impl Chess {
         let stop = Arc::new(AtomicBool::new(false));
         let (pos, id, halt, ctx) = (self.pos.clone(), self.searches, stop.clone(), ctx.clone());
         let seen: Vec<u64> = self.played.iter().map(|p| p.before.key()).collect();
-        let (depth, secs, wobble) = if self.hard() { (8, 1.5, 4) } else { (2, 0.5, 30) };
+        let (depth, secs, wobble, random) = STRENGTHS[self.strength];
         std::thread::spawn(move || {
             let start = Instant::now();
-            let m = best_move(&pos, &seen, depth, secs, wobble, &halt);
+            // Beginner now and then plays any legal move: a real first opponent hangs pieces
+            let m = match rand::random::<f32>() < random {
+                true => rand::seq::SliceRandom::choose(pos.legal().as_slice(), &mut rand::thread_rng()).copied(),
+                false => best_move(&pos, &seen, depth, secs, wobble, &halt),
+            };
             // never answer instantly: let the player watch their own move land first
             std::thread::sleep(THINK_MIN.saturating_sub(start.elapsed()));
             if tx.send((id, m)).is_ok() {
@@ -1125,19 +1132,29 @@ impl Game for Chess {
     }
 
     fn new_round(&mut self) {
-        let (mode, flip, searches) = (self.mode, self.flip, self.searches);
+        let (strength, side, flip, searches) = (self.strength, self.side, self.flip, self.searches);
         *self = Chess::new(); // dropping a running search calls it off
-        (self.mode, self.flip, self.searches) = (mode, flip, searches);
+        (self.strength, self.side, self.flip, self.searches) = (strength, side, flip, searches);
     }
 
     fn levels(&self) -> &'static [&'static str] {
-        &["vs Clipster (easy)", "vs Clipster (hard)", "As Black (easy)", "As Black (hard)", "Two players"]
+        &LEVELS
     }
     fn level(&self) -> usize {
-        self.mode
+        self.strength
     }
     fn set_level(&mut self, i: usize) {
-        self.mode = i.min(4);
+        self.strength = i.min(LEVELS.len() - 1);
+        self.new_round();
+    }
+    fn sides(&self) -> &'static [&'static str] {
+        &["Play as White", "Play as Black", "Two players"]
+    }
+    fn side(&self) -> usize {
+        self.side
+    }
+    fn set_side(&mut self, i: usize) {
+        self.side = i.min(2);
         self.flip = false;
         self.new_round();
     }
@@ -1149,7 +1166,7 @@ impl Game for Chess {
         }
         let check = if self.pos.in_check(self.pos.white) { "Check! " } else { "" };
         if self.think.is_some() || self.clipster_to_move() {
-            format!("{check}Clipster is thinking…")
+            format!("{check}Clipster ({}) is thinking…", LEVELS[self.strength])
         } else if self.vs_clipster() {
             let last = self.played.last().map_or(String::new(), |p| format!("Clipster played {}. ", p.san));
             format!("{check}{last}Your move: you play {}.", if self.you_white() { "White" } else { "Black" })
@@ -1310,9 +1327,9 @@ mod tests {
 
     #[test]
     fn threefold_repetition_is_a_quiet_draw() {
-        for mode in [0, 4] {
+        for side in [0, 2] {
             let mut c = Chess::new();
-            c.mode = mode;
+            c.side = side;
             let mut out = Vec::new();
             play(&mut c, "g1f3 g8f6 f3g1 f6g8 g1f3 g8f6 f3g1", &mut out);
             assert_eq!(c.end, None, "twice isn't enough");
@@ -1321,6 +1338,18 @@ mod tests {
             assert_eq!(c.end, Some(End::Draw("The same position came up three times.")));
             assert!(!decided(&out), "a draw is neither won nor lost: {out:?}");
         }
+    }
+
+    #[test]
+    fn five_strengths_get_stronger_and_survive_a_new_game() {
+        assert!(STRENGTHS.windows(2).all(|w| w[0].0 < w[1].0 && w[0].1 < w[1].1 && w[0].2 >= w[1].2), "deeper, longer, steadier");
+        assert!(STRENGTHS[0].3 > 0.0 && STRENGTHS[1..].iter().all(|s| s.3 == 0.0), "only Beginner plays random moves");
+        let mut c = Chess::new();
+        c.set_level(4);
+        c.set_side(1);
+        c.new_round();
+        assert_eq!((c.level(), c.side()), (4, 1));
+        assert!(c.status().contains("Expert"), "{}", c.status());
     }
 
     #[test]
@@ -1338,19 +1367,19 @@ mod tests {
     fn only_games_against_clipster_are_won_or_lost() {
         let fools = "f2f3 e7e5 g2g4 d8h4";
         let scholars = "e2e4 e7e5 f1c4 b8c6 d1h5 g8f6 h5f7";
-        let result = |mode: usize, moves: &str| {
+        let result = |side: usize, moves: &str| {
             let mut c = Chess::new();
-            c.mode = mode;
+            c.side = side;
             let mut out = Vec::new();
             play(&mut c, moves, &mut out);
             assert!(matches!(c.end, Some(End::Mate { .. })));
             out.into_iter().filter(|o| matches!(o, Outcome::Won(_) | Outcome::Lost(_))).collect::<Vec<_>>()
         };
-        assert_eq!(result(4, fools), vec![], "two players: nobody beat Clipster");
-        assert_eq!(result(4, scholars), vec![]);
+        assert_eq!(result(2, fools), vec![], "two players: nobody beat Clipster");
+        assert_eq!(result(2, scholars), vec![]);
         assert_eq!(result(0, scholars), vec![Outcome::Won("chess")]);
         assert_eq!(result(0, fools), vec![Outcome::Lost("chess")]);
-        assert_eq!(result(2, fools), vec![Outcome::Won("chess")], "playing Black, you mated Clipster");
+        assert_eq!(result(1, fools), vec![Outcome::Won("chess")], "playing Black, you mated Clipster");
     }
 
     #[test]
@@ -1372,7 +1401,7 @@ mod tests {
         assert_eq!(c.pos, Pos::start());
         assert!(!c.can_undo());
         // playing Black, Clipster's opening move alone can't be taken back
-        c.mode = 2;
+        c.side = 1;
         play(&mut c, "e2e4", &mut out);
         assert!(!c.can_undo());
     }

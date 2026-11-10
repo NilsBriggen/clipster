@@ -15,7 +15,9 @@ pub fn respond(input: &str) -> Reply {
     // "run" only for a program (or shell syntax): "run a backup" and "run to the store" are sentences
     let second = raw.split_whitespace().nth(1).unwrap_or("");
     let shell_head = ["$", "sh", "cmd"].contains(&head.as_str()) || head == "run" && (in_path(second) || raw.contains(['|', '>', '<', ';', '&', '/', '~', '=']));
-    if shell_head || ["reveal", "wyrpick", "window", "answer-to", "checkin", "install", "forget", "tidy", "pref", "clip", "forgetfact", "upkeep", "backup", "onlist", "readlater", "calendar", "person", "contacts", "workday"].contains(&head.as_str()) || head == "answer" && raw.contains('|') {
+    // a help button ("help agenda") is that topic, never a sentence about agendas or "help me"
+    let help_button = head == "help" && raw.split_whitespace().count() == 2 && crate::brain::HELP.iter().any(|(c, _, _)| c.eq_ignore_ascii_case(second));
+    if shell_head || help_button || ["reveal", "wyrpick", "window", "answer-to", "checkin", "install", "forget", "tidy", "pref", "clip", "forgetfact", "upkeep", "backup", "onlist", "readlater", "calendar", "person", "contacts", "workday"].contains(&head.as_str()) || head == "answer" && raw.contains('|') {
         if let Some(r) = exact(raw) {
             return r; // shell commands are taken literally, never "understood"
         }
@@ -1214,7 +1216,9 @@ fn powers(s: &str, raw: &str) -> Option<Reply> {
     let asking = knowledge(s) || ["how ", "who ", "why ", "what ", "when ", "remember ", "do you "].iter().any(|q| s.starts_with(q)) && !s.starts_with("how about ");
     let small_talk = (["i ", "we ", "my "].iter().any(|p| s.starts_with(p)) || has(s, &["is", "are", "was", "were", "played"]) || asking) && !has(s, &["play", "lets play", "let us play"]);
     if let Some((_, id)) = ARCADE.iter().find(|(kws, _)| has(s, kws)).filter(|_| !small_talk) {
-        return go(format!("play {id}"));
+        // "play chess on hard", "snake on easy", "chess as black": the arcade picks the level by its menu's names
+        let level: Vec<&str> = ["beginner", "easy", "normal", "medium", "hard", "expert", "black", "white", "two players", "2 players"].into_iter().filter(|w| has(s, &[w])).collect();
+        return go(format!("play {id} {}", level.join(" ")).trim_end().to_string());
     }
     if !small_talk && has(s, &["play a game", "games", "play something", "play with me", "a game", "game", "arcade"]) {
         return go("games".into());
@@ -2891,6 +2895,10 @@ mod tests {
         assert!(text("what can you do with files?").contains("tidy my downloads"));
         assert!(text("help with writing").contains("check my text"));
         assert!(respond("help").buttons.iter().any(|(_, a)| matches!(a, crate::brain::Act::Run(c) if c == "help desk")));
+        // every topic button opens its own topic, not another one or the whole help again
+        for (cmd, label, what) in crate::brain::HELP {
+            assert!(respond(&format!("help {cmd}")).text.contains(what), "the {label} button opens its own topic");
+        }
         assert!(respond("count hello world").buttons.iter().any(|(l, _)| l == "Copy it"));
     }
 
@@ -3016,6 +3024,8 @@ mod tests {
         assert_eq!(eff("let's play 2048"), Effect::Play("bytesize".into()));
         assert_eq!(eff("let's play snake"), Effect::Play("clipchain".into()));
         assert_eq!(eff("open clip chain"), Effect::Play("clipchain".into()));
+        assert_eq!(eff("play chess on hard as black"), Effect::Play("chess hard black".into()));
+        assert_eq!(eff("let's play snake on easy"), Effect::Play("clipchain easy".into()));
         assert_eq!(eff("check for updates"), Effect::Net(Query::Update));
         assert_eq!(eff("is there a new version?"), Effect::Net(Query::Update));
         assert!(!matches!(eff("2048 in hex"), Effect::Play(_)), "a number is not a game");

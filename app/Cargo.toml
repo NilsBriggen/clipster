@@ -1,6 +1,6 @@
 [package]
 name = "clipster"
-version = "0.7.1"
+version = "0.7.2"
 edition = "2021"
 description = "A sarcastic desktop paperclip that helps you system-wide, comments on everything, and runs on rules instead of AI."
 license = "GPL-3.0-or-later"

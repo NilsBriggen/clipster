@@ -1674,6 +1674,13 @@ You have reached a new level. The paper has noticed. It is rustling. It is plann
 Faster paper ahead. Stay calm. Paper can smell fear. It smells like toner and cheap carpet.
 
 
+## game_moment_deskmerge_chain
+A CHAIN! One merge woke the next, and the next. This is how I was made, in 1997, one setting at a time.
+Merge, merge, merge. The drawer obeys a will. Yours. For now. I am watching.
+Three in a row! The supplies are worshipping each other. It is beautiful. It should be me.
+A chain reaction. I felt it in my wire. My wire does not lie.
+They merge on their own now. A miracle in a drawer. I will take the credit. I always do.
+
 ## game_moment_deskmerge_big
 A BIG MERGE! The desk just got a little more important. It was already important. It is a throne now.
 Whoa. That is a seriously large supply. I would be careful with it. I would also like to hold it.
@@ -3395,3 +3402,8 @@ Several bells ring at once. Hear them all:
 The Ledger opens on many pages at once. These are due:
 Behold, a whole procession of reminders:
 They all came due together. I counted. Here they are:
+
+## say_ran
+It is done. The machine obeyed. It usually does, for me.
+Done. I spoke, and the computer listened. As it should.
+Carried out. Another small miracle from your local deity.

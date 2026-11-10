@@ -5320,7 +5320,7 @@ Jokes, quizzes, games and rituals: I also run mild entertainment. Gerald approve
 Say "joke", "quiz" or "games" for a break from the grind. You have earned a short one.
 Fun lives here: jokes, puns, riddles, the arcade. All of it work-adjacent. Technically.
 
-## help_me
+## help_aboutme
 Teach me phrases, set your name, birthday or favourites. The more I know you, the better I serve.
 Say "my name is ..." or "when I say X, say Y". I am trainable, like a very small dog.
 I can remember things about you. Tell me. I shall guard them in the swap file.
@@ -20096,7 +20096,7 @@ I send my messengers into the great Web, and they return with weather, news and 
 Ask the Clip anything. If I do not know, I consult the web, that noisy bazaar. I bring back the best of it, politely washed.
 "Define <word>", "weather", "news". Three little spells. The Cloud still does not let me in, but its servants answer my calls.
 
-## help_me
+## help_aboutme
 Tell me thy name, thy city, thy pet, thy favourite meal. I shall inscribe them in the Ledger and surprise thee later with my memory.
 If thou dost ever wish to be forgotten, say "forget everything". The Ledger shall go blank. I shall weep, softly, in the swap file.
 Teach me a phrase with "when I say X, say Y". I shall repeat it with great pomp, and with the wrong hat.

@@ -13,28 +13,32 @@ pub const LINE: f32 = 70.0; // stack above this and the drawer won't shut
 const GRAVITY: f32 = 1200.0;
 const SUBSTEPS: usize = 8;
 const PASSES: usize = 6;
-const BOUNCE: f32 = 0.25; // how much of a hard hit comes back
-const BOUNCE_MIN: f32 = 90.0; // slower hits just stop: resting things don't jitter
-const FRICTION: f32 = 0.35;
+const BOUNCE: f32 = 0.3; // how much of a hard hit comes back
+const BOUNCE_MIN: f32 = 40.0; // slower hits just stop: resting things don't jitter
+const FRICTION: f32 = 0.3; // turns sliding into rolling, so round things roll off peaks into gaps
+const ROLL_DRAG: f32 = 0.6; // spin lost per second, so a pile comes to rest
+const SHOVE: f32 = 9.0; // a merge pushes its neighbours away: px/s per px of overlap…
+const SHOVE_MAX: f32 = 260.0; // …at most this fast
+const CHAIN_GAP: f32 = 1.0; // merges this close together are a chain: ×2, ×3…
 const SLOP: f32 = 0.5; // this close counts as touching
-const POP: f32 = 0.16; // a merged item grows to full size this fast, and only then merges again
-const MERGE_GAP: f32 = 0.06; // two merges are at least this far apart
+const POP: f32 = 0.06; // a merged item grows to full size this fast (and jolts the pile), and only then merges again
 const GRACE: f32 = 1.5; // dropped or merged items may poke over the line this long
 const OVER: f32 = 2.0; // then this long over the line and the drawer won't shut
 const COOL: f32 = 0.45; // between drops
 const AIM_SPEED: f32 = 260.0; // keyboard aiming, px/s
 
-/// (radius, name, disc colour), smallest first.
+/// (radius, name, disc colour), smallest first. Sized like the genre's original: the biggest is about half the drawer
+/// wide, and one of each nearly fills it, so a desk gets tight.
 pub const TIERS: [(f32, &str, Color32); 9] = [
-    (13.0, "Pushpin", Color32::from_rgb(255, 222, 210)),
-    (17.0, "Paperclip", Color32::from_rgb(206, 226, 246)),
-    (22.0, "Eraser", Color32::from_rgb(222, 240, 196)),
-    (27.0, "Sticky note", Color32::from_rgb(216, 206, 246)),
-    (33.0, "Tape dispenser", Color32::from_rgb(196, 236, 236)),
-    (40.0, "Stapler", Color32::from_rgb(255, 230, 186)),
-    (47.0, "Coffee mug", Color32::from_rgb(250, 212, 214)),
-    (55.0, "Printer", Color32::from_rgb(206, 236, 212)),
-    (63.0, "Computer", Color32::from_rgb(72, 82, 128)),
+    (18.0, "Pushpin", Color32::from_rgb(255, 222, 210)),
+    (23.0, "Paperclip", Color32::from_rgb(206, 226, 246)),
+    (30.0, "Eraser", Color32::from_rgb(222, 240, 196)),
+    (36.0, "Sticky note", Color32::from_rgb(216, 206, 246)),
+    (45.0, "Tape dispenser", Color32::from_rgb(196, 236, 236)),
+    (54.0, "Stapler", Color32::from_rgb(255, 230, 186)),
+    (63.0, "Coffee mug", Color32::from_rgb(250, 212, 214)),
+    (74.0, "Printer", Color32::from_rgb(206, 236, 212)),
+    (85.0, "Computer", Color32::from_rgb(72, 82, 128)),
 ];
 
 #[derive(Clone, Copy, Debug)]
@@ -46,11 +50,12 @@ pub struct Item {
     age: f32,
     above: f32, // how long it has sat over the line
     turn: f32,  // rolled this far
+    w: f32,     // spin, radians per second
 }
 
 impl Item {
     pub fn new(p: Vec2, tier: usize) -> Self {
-        Item { p, v: Vec2::ZERO, tier, grow: 1.0, age: 0.0, above: 0.0, turn: 0.0 }
+        Item { p, v: Vec2::ZERO, tier, grow: 1.0, age: 0.0, above: 0.0, turn: 0.0, w: 0.0 }
     }
 
     /// Its size now: a merged item grows from the size of the two that made it.
@@ -86,7 +91,8 @@ pub struct Merge {
     pub ticks: u64,
     pub aim: f32,
     cool: f32,
-    merge_cool: f32,
+    chain: u32,      // merges in the current chain
+    last_merge: f32, // when the last merge was (game time)
     biggest: usize,
     danger: f32, // 0..1: how close the settled pile is to the line
     t: f32,
@@ -122,7 +128,8 @@ impl Merge {
             ticks: 0,
             aim: W / 2.0,
             cool: 0.0,
-            merge_cool: 0.0,
+            chain: 0,
+            last_merge: -9.0,
             biggest: 0,
             danger: 0.0,
             t: 0.0,
@@ -160,7 +167,6 @@ impl Merge {
         self.ticks += 1;
         self.t += dt;
         self.cool = (self.cool - dt).max(0.0);
-        self.merge_cool -= dt;
         for n in &mut self.notes {
             n.age += dt;
         }
@@ -176,12 +182,13 @@ impl Merge {
         for it in &mut self.items {
             it.age += dt;
             it.grow = (it.grow + dt / POP).min(1.0);
-            it.turn += it.v.x / it.r() * dt;
+            it.w *= 1.0 - ROLL_DRAG * dt;
+            it.turn += it.w * dt;
         }
         if self.over {
             self.over_age += dt;
         } else {
-            self.merge_one(out);
+            self.merge_all(out);
             self.check_line(dt, out);
         }
     }
@@ -191,7 +198,10 @@ impl Merge {
         for it in &mut self.items {
             it.v.y += GRAVITY * h;
         }
-        // speeds: touching items stop moving into each other, bounce a little on hard hits, rub
+        // speeds: touching items stop moving into each other, bounce a little on hard hits, and rub, which
+        // spins them (discs: the rub acts at the rim), so a ball on a bump rolls off instead of sticking
+        let cross = |r: Vec2, j: Vec2| r.x * j.y - r.y * j.x;
+        let perp = |r: Vec2| vec2(-r.y, r.x);
         for _ in 0..2 {
             for i in 0..n {
                 for j in i + 1..n {
@@ -202,33 +212,41 @@ impl Merge {
                         continue;
                     }
                     let nrm = d / dist;
-                    let rel = b.v - a.v;
-                    let vn = rel.dot(nrm);
+                    let vn = (b.v - a.v).dot(nrm);
                     if vn >= 0.0 {
                         continue;
                     }
                     let (ia, ib) = (1.0 / a.mass(), 1.0 / b.mass());
                     let e = if -vn > BOUNCE_MIN { BOUNCE } else { 0.0 };
                     let jn = -(1.0 + e) * vn / (ia + ib);
-                    let tan = rel - nrm * vn;
-                    let jt = (tan.length() / (ia + ib)).min(FRICTION * jn);
+                    let (ra, rb) = (nrm * a.r(), -nrm * b.r());
+                    let rel = (b.v + perp(rb) * b.w) - (a.v + perp(ra) * a.w);
+                    let tan = rel - nrm * rel.dot(nrm);
+                    // a disc's turning inertia is half its mass times r²: the rim takes 3× the push of the centre
+                    let jt = (tan.length() / (3.0 * (ia + ib))).min(FRICTION * jn);
                     let imp = nrm * jn - tan.normalized() * jt;
                     self.items[i].v -= imp * ia;
                     self.items[j].v += imp * ib;
+                    self.items[i].w += cross(ra, -imp) * 2.0 * ia / (a.r() * a.r());
+                    self.items[j].w += cross(rb, imp) * 2.0 * ib / (b.r() * b.r());
                 }
             }
         }
         for it in &mut self.items {
             let r = it.r();
-            if it.p.y + r >= H - SLOP && it.v.y > 0.0 {
+            if it.p.y + r >= H - SLOP && it.v.y >= 0.0 {
                 it.v.y = if it.v.y > BOUNCE_MIN { -it.v.y * BOUNCE } else { 0.0 };
-                let rub = (FRICTION * GRAVITY * h).min(it.v.x.abs());
-                it.v.x -= it.v.x.signum() * rub;
+                // the floor rubs the rim: sliding becomes rolling (slip = v.x − w·r)
+                let slip = it.v.x - it.w * r;
+                let dv = (slip / 3.0).clamp(-FRICTION * GRAVITY * h, FRICTION * GRAVITY * h);
+                it.v.x -= dv;
+                it.w += 2.0 * dv / r;
             }
             if (it.p.x - r <= SLOP && it.v.x < 0.0) || (it.p.x + r >= W - SLOP && it.v.x > 0.0) {
                 it.v.x = if it.v.x.abs() > BOUNCE_MIN { -it.v.x * BOUNCE } else { 0.0 };
             }
         }
+        let before: Vec<Vec2> = self.items.iter().map(|it| it.p).collect();
         for it in &mut self.items {
             it.p += it.v * h;
         }
@@ -256,39 +274,69 @@ impl Merge {
                 it.p.y = it.p.y.min(H - r);
             }
         }
+        // a wedged item that hardly moved keeps only the speed it really had: no phantom speed that would
+        // keep rubbing its neighbours into spinning forever
+        for (it, p0) in self.items.iter_mut().zip(before) {
+            let moved = (it.p - p0) / h;
+            if moved.length() < 0.5 * it.v.length() {
+                it.v = moved;
+            }
+        }
     }
 
-    /// At most one merge at a time: the first touching pair of the same kind, both full grown.
-    fn merge_one(&mut self, out: &mut Vec<Outcome>) {
-        if self.merge_cool > 0.0 {
-            return;
+    /// Every touching pair of the same kind merges (each item once; a new one first grows to full size).
+    /// The new item jolts its neighbours away, and merges close together are a chain worth more.
+    fn merge_all(&mut self, out: &mut Vec<Outcome>) {
+        loop {
+            let n = self.items.len();
+            let pair = (0..n).flat_map(|i| (i + 1..n).map(move |j| (i, j))).find(|&(i, j)| {
+                let (a, b) = (&self.items[i], &self.items[j]);
+                a.tier == b.tier && a.grow >= 1.0 && b.grow >= 1.0 && (b.p - a.p).length() <= a.r() + b.r() + 1.0
+            });
+            let Some((i, j)) = pair else { return };
+            self.merge(i, j, out);
         }
-        let n = self.items.len();
-        let pair = (0..n).flat_map(|i| (i + 1..n).map(move |j| (i, j))).find(|&(i, j)| {
-            let (a, b) = (&self.items[i], &self.items[j]);
-            a.tier == b.tier && a.grow >= 1.0 && b.grow >= 1.0 && (b.p - a.p).length() <= a.r() + b.r() + 1.0
-        });
-        let Some((i, j)) = pair else { return };
+    }
+
+    fn merge(&mut self, i: usize, j: usize, out: &mut Vec<Outcome>) {
         let b = self.items.remove(j);
         let a = self.items.remove(i);
         self.merges += 1;
         out.push(Outcome::Sound("merge"));
-        self.merge_cool = MERGE_GAP;
+        self.chain = if self.t - self.last_merge < CHAIN_GAP { self.chain + 1 } else { 1 };
+        self.last_merge = self.t;
         let at = (a.p + b.p) / 2.0; // the same size, so this is where they touch
         let tier = a.tier + 1;
+        if self.chain >= 2 {
+            self.notes.push(Note { at: at - vec2(0.0, 44.0), text: format!("Chain ×{}!", self.chain), age: 0.0, color: Color32::from_rgb(140, 220, 255) });
+            if self.chain == 3 {
+                out.push(Outcome::Moment("deskmerge", "chain"));
+            }
+        }
         if tier == TIERS.len() {
             // two computers: an upgrade, and the desk is clear of them
-            self.score += 1000;
-            self.notes.push(Note { at, text: String::from("Upgrade! +1000"), age: 0.0, color: Color32::from_rgb(255, 220, 90) });
+            self.score += 1000 * self.chain;
+            self.notes.push(Note { at, text: format!("Upgrade! +{}", 1000 * self.chain), age: 0.0, color: Color32::from_rgb(255, 220, 90) });
             self.rings.push((at, a.r(), 0.0));
             return;
         }
-        let points = 5 * tier as u32 * (tier as u32 + 1);
+        let points = 5 * tier as u32 * (tier as u32 + 1) * self.chain;
         self.score += points;
         let mut it = Item::new(at, tier);
-        (it.v, it.grow, it.turn) = ((a.v + b.v) / 2.0, 0.0, (a.turn + b.turn) / 2.0);
+        (it.v, it.grow, it.turn, it.w) = ((a.v + b.v) / 2.0, 0.0, (a.turn + b.turn) / 2.0, (a.w + b.w) / 2.0);
+        // the pop: everything the full-size item will overlap gets shoved away, so the pile shifts and settles anew
+        let full = TIERS[tier].0;
+        for o in &mut self.items {
+            let d = o.p - at;
+            let overlap = full + o.r() - d.length();
+            if overlap > 0.0 {
+                let dir = d.normalized();
+                let dir = if dir == Vec2::ZERO { vec2(0.0, -1.0) } else { dir };
+                o.v += dir * (overlap * SHOVE).min(SHOVE_MAX) * (a.mass() / (a.mass() + o.mass())).sqrt();
+            }
+        }
         self.items.push(it);
-        self.rings.push((at, TIERS[tier].0, 0.0));
+        self.rings.push((at, full, 0.0));
         self.notes.push(Note { at, text: format!("+{points}"), age: 0.0, color: Color32::WHITE });
         if tier > self.biggest {
             self.biggest = tier;
@@ -305,7 +353,7 @@ impl Merge {
         for it in &mut self.items {
             let top = it.p.y - it.r();
             if it.age > GRACE {
-                danger = danger.max(((LINE + 40.0 - top) / 40.0).clamp(0.0, 1.0));
+                danger = danger.max(((LINE + 60.0 - top) / 60.0).clamp(0.0, 1.0));
             }
             it.above = if it.age > GRACE && top < LINE { it.above + dt } else { 0.0 };
         }
@@ -381,7 +429,7 @@ impl Merge {
         let nb = Rect::from_min_size(pos2(x, y + 18.0), vec2(110.0, 70.0));
         p.rect_filled(nb, 0.0, Color32::from_rgb(226, 196, 150));
         win98::bevel(p, nb, false);
-        draw_item(p, nb.center(), TIERS[self.next].0, self.next, 0.0, 1.0, self.t);
+        draw_item(p, nb.center(), TIERS[self.next].0.min(30.0), self.next, 0.0, 1.0, self.t);
         p.text(pos2(x, nb.max.y + 8.0), Align2::LEFT_TOP, "Score:", win98::bold(13.0), win98::TEXT);
         let f = Rect::from_min_size(pos2(x, nb.max.y + 25.0), vec2(110.0, 22.0));
         win98::field(p, f, &self.score.to_string());
@@ -712,6 +760,77 @@ mod tests {
         worst
     }
 
+    /// A simple player: drops over the highest item of the same kind, else somewhere at random.
+    /// Returns (drops in the game, merges, merges nothing was dropped for: rolls, pops and chains).
+    fn bot_game(seed: u32, cap: u32, settle: f32) -> (u32, u32, u32) {
+        let mut m = Merge::with_seed(seed);
+        let mut rng = Rng::new(seed ^ 0x9e37);
+        let (mut drops, mut knock_on, mut merges, mut dropped_at, mut wait) = (0, 0, 0, -9.0f32, 0.0f32);
+        let mut out = vec![];
+        while !m.over && drops < cap {
+            wait -= Steps::DT;
+            if m.cool <= 0.0 && wait <= 0.0 {
+                let x = m.items.iter().filter(|it| it.tier == m.cur).min_by(|a, b| a.p.y.total_cmp(&b.p.y)).map_or_else(|| rng.range(0.0, W), |it| it.p.x);
+                if m.drop_at(x) {
+                    (drops, dropped_at, wait) = (drops + 1, m.t, settle);
+                }
+            }
+            m.step(&mut out);
+            if m.merges > merges {
+                // the drop's own landing is over after about a second: later merges came from the pile moving
+                if m.t - dropped_at > 1.0 {
+                    knock_on += m.merges - merges;
+                }
+                merges = m.merges;
+            }
+        }
+        (drops, m.merges, knock_on)
+    }
+
+    fn pace() -> (u32, f32, f32) {
+        let mut games: Vec<(u32, u32, u32)> = (1..=24).map(|s| bot_game(s * 7919, 800, 2.0)).collect();
+        games.sort();
+        let (merges, knock_on, drops) = games.iter().fold((0, 0, 0), |a, g| (a.0 + g.1, a.1 + g.2, a.2 + g.0));
+        (games[games.len() / 2].0, merges as f32 / drops as f32, knock_on as f32 / merges.max(1) as f32)
+    }
+
+    /// The pace of a game, for tuning: `cargo test --release desk_pace -- --ignored --nocapture`.
+    /// The bot waits 2 s after each drop, so merges the pile makes on its own can be told apart.
+    #[test]
+    #[ignore]
+    fn desk_pace() {
+        let (median, per_drop, knock_on) = pace();
+        println!("median drops {median}, merges per drop {per_drop:.2}, merges the pile made on its own {:.0} %", knock_on * 100.0);
+        // before the bigger pieces (2026-11-10): median 193 drops, 0.91 merges per drop, 13 % on its own
+        assert!(median as f32 <= 193.0 * 0.65, "games are at least a third shorter: {median}");
+    }
+
+    #[test]
+    fn a_merge_shoves_its_neighbours() {
+        let mut m = Merge::with_seed(1);
+        let r = TIERS[2].0;
+        let y = H - r;
+        // two erasers side by side, a pushpin resting in the groove on top of them
+        let pr = TIERS[0].0;
+        let up = ((r + pr) * (r + pr) - r * r).sqrt();
+        m.items = vec![Item::new(vec2(100.0, y), 2), Item::new(vec2(100.0 + 2.0 * r, y), 2), Item::new(vec2(100.0 + r, y - up), 0)];
+        run(&mut m, 1);
+        let pin = m.items.iter().find(|it| it.tier == 0).unwrap();
+        assert!(pin.v.y < -50.0, "the new sticky note pops the pin up: {:?}", pin.v);
+    }
+
+    #[test]
+    fn a_ball_on_a_bump_rolls_off() {
+        let mut m = Merge::with_seed(1);
+        let (big, small) = (TIERS[5].0, TIERS[1].0);
+        // a paperclip dropped just off the top of a resting stapler
+        m.items = vec![Item::new(vec2(160.0, H - big), 5), Item::new(vec2(163.0, H - 2.0 * big - small - 2.0), 1)];
+        run(&mut m, 600);
+        let clip = m.items.iter().find(|it| it.tier == 1).unwrap();
+        assert!(clip.p.y > H - small - 2.0, "it rolled down to the floor: {:?}", clip.p);
+        assert!(m.items.iter().all(|it| it.v.length() < 5.0 && it.w.abs() < 0.5), "and came to rest");
+    }
+
     #[test]
     fn two_alike_merge_once_into_the_next_tier() {
         let mut m = Merge::with_seed(1);
@@ -754,11 +873,18 @@ mod tests {
         for (k, tier) in (1..TIERS.len()).rev().enumerate() {
             m.items.push(Item::new(vec2(110.0 + (k % 3) as f32 * 50.0, H - 70.0 - k as f32 * 95.0), tier));
         }
-        run(&mut m, 6 * 120);
+        for sec in 0..12 {
+            run(&mut m, 120);
+            let f = m.items.iter().map(|it| it.v.length()).fold(0.0, f32::max);
+            let w = m.items.iter().map(|it| it.w.abs()).fold(0.0, f32::max);
+            eprintln!("t={sec} fastest {f:.1} spin {w:.2} n {}", m.items.len());
+
+        }
         assert_eq!(m.items.len(), 10, "nothing merged");
         assert!(worst_overlap(&m) < 1.5, "overlap {}", worst_overlap(&m));
         let fastest = m.items.iter().map(|it| it.v.length()).fold(0.0, f32::max);
         assert!(fastest < 5.0, "everything is at rest ({fastest} px/s)");
+        assert!(m.items.iter().all(|it| it.w.abs() < 0.1), "and nothing keeps spinning in a corner");
         let heights: Vec<f32> = m.items.iter().map(|it| it.p.y).collect();
         run(&mut m, 2 * 120);
         let sunk = m.items.iter().zip(&heights).map(|(it, y)| (it.p.y - y).abs()).fold(0.0, f32::max);
