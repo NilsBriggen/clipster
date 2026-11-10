@@ -2,6 +2,34 @@
 
 Each version's section is also its GitHub release description: the release workflow publishes it and refuses to release a version without one.
 
+## 0.6.1 (2026-11-10)
+
+A small release with more to say. Many of the replies Clipster gives right after you do something had only two or three ways of saying it, so you heard the same line again and again. 68 of them now have more: 328 new lines in both personalities, each one still telling you exactly what happened. Nothing else changed.
+
+### Highlights
+
+- **More variety where you hear it most:**
+  - ticking off, undoing, adding and removing habits, and streaks
+  - pausing and resuming the clipboard, naming and unpinning pins
+  - copying, renaming and deleting lists, and saving a list as a starter
+  - moving a reminder, countdowns, the plan for the week, and nothing coming up today
+  - pausing, resuming and the too-short gap before a meeting in focus mode
+  - free time and full days on the agenda
+  - backups starting by themselves, stopping and getting a file back
+  - reading later, printing, QR codes, Space and the Monday tidy, exports and imports
+  - updates, the weather's coat and umbrella, and closing your work apps
+- **Unhinged** gets two or three new lines in each of them, Boring one or two plainer ones.
+
+### Install
+
+- **Linux:** download `clipster_0.6.1_x86_64.AppImage`, make it executable (`chmod +x`) and replace your old AppImage with it. Or click **Install now** when he tells you about the update. Your settings, notes, to-dos and taught phrases are kept.
+- **Windows:** run `clipster_0.6.1_x64_en-US.msi`, or click **Install now** in Clipster. It replaces the old version and keeps your settings. The installer still isn't code-signed, so SmartScreen may say "Windows protected your PC". Choose **More info → Run anyway**.
+
+### Known limitations
+
+- Everything listed for 0.6.0 still applies: Windows features not yet tried on a real PC, doses that aren't asked about again, "take a break at 3 and 5" and "what's in my calendar today", slightly taller Beige Box rows, calendar time zones, and holidays and weather needing the internet.
+- A few empty-page notes on the Desk (an empty clipboard, no pins, Right now on Upkeep) always show the same line. They didn't get new ones.
+
 ## 0.6.0 (2026-11-10)
 
 The assistant-for-real release. Clipster now keeps track of the things a real assistant would: when your passport runs out, where you put the spare key, whether you took your pills, what you're still waiting on and from whom. He builds your morning from what's on your computer, without the internet. The Modern look is new: Beige Box, the 1997 tower he was compiled in. Over a hundred bugs were fixed after a full bug hunt and a review, and the Desk got tidier throughout.
