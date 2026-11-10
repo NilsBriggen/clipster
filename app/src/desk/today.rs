@@ -313,12 +313,31 @@ impl Desk {
         for (n, hb) in view.habits.iter().take(shown).enumerate() {
             let cy = y + hrow / 2.0;
             let done = hb.done_on(today);
-            if look.checkbox(ui, Rect::from_center_size(pos2(tx + s / 2.0, cy), vec2(s, s)), done, Id::unique(("desk-habit", n))).clicked() {
-                out.push(format!("habit {} {}", if done { "undone" } else { "done" }, hb.name));
-            }
+            let tick = Rect::from_center_size(pos2(tx + s / 2.0, cy), vec2(s, s));
+            // a counting habit gets "+" and "3/8"; doses tick the next one and show "1/2"
+            let name = match (hb.target, hb.times.len()) {
+                (Some(t), _) => {
+                    if look.button(ui, tick.expand(2.0), Id::unique(("desk-habit-plus", n)), "+", true).on_hover_text("One more").clicked() {
+                        out.push(format!("habit count {}", hb.name));
+                    }
+                    format!("{} {}/{t}", hb.name, hb.count_on(today))
+                }
+                (None, k) if k > 0 => {
+                    if look.checkbox(ui, tick, done, Id::unique(("desk-habit", n))).on_hover_text(hb.times.iter().map(|t| format!("{}: {}", crate::brain::clock(*t), hb.taken_on(today, *t).map_or("not yet".to_string(), |a| format!("taken at {}", crate::brain::clock(a))))).collect::<Vec<_>>().join("\n")).clicked() {
+                        out.push(if done { format!("habit undone {}", hb.name) } else { format!("habit dose {}", hb.name) });
+                    }
+                    format!("{} {}/{k}", hb.name, hb.times.iter().filter(|t| hb.taken_on(today, **t).is_some()).count())
+                }
+                _ => {
+                    if look.checkbox(ui, tick, done, Id::unique(("desk-habit", n))).clicked() {
+                        out.push(format!("habit {} {}", if done { "undone" } else { "done" }, hb.name));
+                    }
+                    hb.name.clone()
+                }
+            };
             let dots = tx + tw - 6.0 * 9.0 - 3.0;
             let streak = hb.streak(today);
-            line(ui, pos2(tx + s + 8.0, cy), &hb.name, look.font(12.5), look.text(), dots - 26.0 - tx - s - 8.0);
+            line(ui, pos2(tx + s + 8.0, cy), &name, look.font(12.5), look.text(), dots - 26.0 - tx - s - 8.0);
             if streak > 0 {
                 let rr = p.text(pos2(dots - 8.0, cy), Align2::RIGHT_CENTER, streak.to_string(), look.bold(11.5), look.dim());
                 ui.interact(rr, Id::unique(("desk-habit-streak", n)), Sense::hover()).on_hover_text(format!("{} in a row (best: {})", plural(streak as u64, "day"), plural(hb.best() as u64, "day")));

@@ -201,6 +201,8 @@ mod tests {
             answer: None,
             name: String::new(),
             people: &people,
+            renewals: &[],
+            things: &Default::default(),
             workday: &[],
             habits: &[],
             countdowns: &[],

@@ -13,7 +13,7 @@ const FACT_CHOICES: [(&str, &str); 10] = [("city", "City"), ("job", "Job"), ("pe
 impl Desk {
     pub(super) fn you_and_me(&mut self, ui: &mut Ui, c: Rect, view: &View, look: Look, out: &mut Vec<String>) {
         let label = format!("People ({})", view.people.len());
-        let (hit, seg) = look.segments(ui, c.min, &["You", label.as_str(), "Journal"], self.me_page, "me-page");
+        let (hit, seg) = look.segments(ui, c.min, &["You", label.as_str(), "Journal", "Papers & things"], self.me_page, "me-page");
         if let Some(i) = hit {
             self.me_page = i;
         }
@@ -21,6 +21,7 @@ impl Desk {
         match self.me_page {
             1 => self.people_page(ui, page, view, look, out),
             2 => self.journal_page(ui, page, view, look, out),
+            3 => self.papers_page(ui, page, view, look, out),
             _ => self.you_page(ui, page, view, look, out),
         }
         match self.card.clone() {
@@ -298,6 +299,94 @@ impl Desk {
     }
 
     /// People: soonest birthday first; fixed slots for ✕, Email and Talked today; a click on a name opens their card.
+    /// Papers & things: renewals and expiry dates (soonest first) on the left, where things are on the right; each
+    /// with its add row at the bottom.
+    fn papers_page(&mut self, ui: &mut Ui, c: Rect, view: &View, look: Look, out: &mut Vec<String>) {
+        let p = ui.painter().clone();
+        let ctl = look.ctl();
+        let small = ctl - 4.0;
+        let today = chrono::Local::now().date_naive();
+        let half = ((c.width() - 12.0) / 2.0).round();
+        let pitch = ctl + 8.0;
+        // left: renewals
+        let left = Rect::from_min_size(c.min, vec2(half, c.height() - ctl - 14.0));
+        look.group(&p, left, "Renewals & expiry dates");
+        let area = Rect::from_min_max(pos2(left.min.x + 12.0, left.min.y + 28.0), pos2(left.max.x - 14.0, left.max.y - 6.0));
+        if view.renewals.is_empty() {
+            let g = p.layout("The passport, the car insurance, a subscription, a warranty: tell me the date and I'll tell you in time. Try: my passport expires on 3 March 2027.".to_string(), look.font(12.0), look.dim(), area.width());
+            p.galley(area.min, g, look.dim());
+        }
+        let fits = (area.height() / pitch).floor().max(1.0) as usize;
+        let first = self.rows(ui, look, "renewals", left, view.renewals.len(), fits);
+        let w_main = btn_w(&p, look, "Renewed");
+        for (n, r) in view.renewals.iter().enumerate().skip(first).take(fits) {
+            let cy = area.min.y + (n - first) as f32 * pitch + pitch / 2.0;
+            let days = (r.date - today).num_days();
+            let more = vec!["To-do: renew it".to_string(), format!("Forget {}", r.what)];
+            let (hit, bx) = self.row_menu(ui, look, area.max.x, cy, small, &format!("renewal-{n}"), (if r.every.is_some() { "Renewed" } else { "" }, w_main), &more);
+            match hit {
+                Some(0) => out.push(format!("renewal renewed {}", r.what)),
+                Some(1) => out.push(format!("todo Renew the {} by {}", r.what.to_lowercase(), (today + chrono::Days::new((days / 2).max(0) as u64)).format("%Y-%m-%d"))),
+                Some(2) => out.push(format!("renewal remove {}", r.what)),
+                _ => {}
+            }
+            let when = match days {
+                d if d < 0 => format!("{} days ago", -d),
+                0 => "today".into(),
+                1 => "tomorrow".into(),
+                d => format!("in {d} days"),
+            };
+            let soon = days <= r.lead as i64;
+            line(ui, pos2(area.min.x, cy - 7.0), &r.what, look.font(12.5), look.text(), bx - area.min.x - 6.0);
+            let detail = format!("{} {} · {when}{}{}", r.verb(), r.date.format("%-d %b %Y"), r.every.as_deref().map(|e| format!(" · every {e}")).unwrap_or_default(), r.amount.as_deref().map(|a| format!(" · {a}")).unwrap_or_default());
+            line(ui, pos2(area.min.x, cy + 8.0), &detail, look.font(11.0), if soon { look.accent() } else { look.dim() }, bx - area.min.x - 6.0);
+        }
+        // right: where things are
+        let right = Rect::from_min_size(pos2(c.min.x + half + 12.0, c.min.y), vec2(c.width() - half - 12.0, c.height() - ctl - 14.0));
+        look.group(&p, right, "Where things are");
+        let area = Rect::from_min_max(pos2(right.min.x + 12.0, right.min.y + 28.0), pos2(right.max.x - 14.0, right.max.y - 6.0));
+        if view.things.is_empty() {
+            let g = p.layout("Where you keep what you only need now and then. Try: my passport is in the top drawer, or I put the charger in the blue bag.".to_string(), look.font(12.0), look.dim(), area.width());
+            p.galley(area.min, g, look.dim());
+        }
+        let rows: Vec<(&String, &(String, String))> = view.things.iter().collect();
+        let fits = (area.height() / (ctl + 2.0)).floor().max(1.0) as usize;
+        let first = self.rows(ui, look, "things", right, rows.len(), fits);
+        for (n, (thing, (place, _))) in rows.iter().enumerate().skip(first).take(fits) {
+            let cy = area.min.y + (n - first) as f32 * (ctl + 2.0) + (ctl + 2.0) / 2.0;
+            if self.remove_btn(ui, look, Rect::from_center_size(pos2(area.max.x - 11.0, cy), vec2(22.0, small)), Id::unique(("thing-forget", n)), "Forget where it is") {
+                out.push(format!("thing forget {thing}"));
+            }
+            let w = p.text(pos2(area.min.x, cy), Align2::LEFT_CENTER, crate::writing::cap_first(thing), look.bold(12.5), look.text()).width();
+            line(ui, pos2(area.min.x + w + 8.0, cy), place, look.font(12.5), look.dim(), area.max.x - 30.0 - area.min.x - w - 8.0);
+        }
+        // the add rows under each group
+        let y = c.max.y - ctl;
+        let w_what = (half - 12.0 - 120.0 - 64.0 - 12.0).max(80.0);
+        look.input(ui, Rect::from_min_size(pos2(c.min.x, y), vec2(w_what, ctl)), Id::unique("renewal-what"), &mut self.renewal_what, "passport, car insurance…");
+        let when_r = Rect::from_min_size(pos2(c.min.x + w_what + 6.0, y), vec2(120.0, ctl));
+        let wresp = look.input(ui, when_r, Id::unique("renewal-when"), &mut self.renewal_when, "3 March 2027");
+        let ready = !self.renewal_what.trim().is_empty() && !self.renewal_when.trim().is_empty();
+        let enter = wresp.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter));
+        if (look.button(ui, Rect::from_min_size(pos2(when_r.max.x + 6.0, y), vec2(64.0, ctl)), Id::unique("renewal-add"), "Add", ready).clicked() || enter) && ready {
+            out.push(format!("renewal add {}|{}|-|-", self.renewal_what.trim(), self.renewal_when.trim()));
+            self.renewal_what.clear();
+            self.renewal_when.clear();
+        }
+        let x0 = right.min.x;
+        let w_thing = ((right.width() - 64.0 - 12.0) * 0.4).round();
+        look.input(ui, Rect::from_min_size(pos2(x0, y), vec2(w_thing, ctl)), Id::unique("thing-name"), &mut self.thing_name, "passport");
+        let place_r = Rect::from_min_size(pos2(x0 + w_thing + 6.0, y), vec2(right.width() - w_thing - 64.0 - 12.0, ctl));
+        let presp = look.input(ui, place_r, Id::unique("thing-place"), &mut self.thing_place, "in the top drawer");
+        let ready = !self.thing_name.trim().is_empty() && !self.thing_place.trim().is_empty();
+        let enter = presp.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter));
+        if (look.button(ui, Rect::from_min_size(pos2(place_r.max.x + 6.0, y), vec2(64.0, ctl)), Id::unique("thing-add"), "Keep", ready).clicked() || enter) && ready {
+            out.push(format!("thing set {}|{}", self.thing_name.trim(), self.thing_place.trim()));
+            self.thing_name.clear();
+            self.thing_place.clear();
+        }
+    }
+
     pub(super) fn people_page(&mut self, ui: &mut Ui, c: Rect, view: &View, look: Look, out: &mut Vec<String>) {
         let p = ui.painter().clone();
         let ctl = look.ctl();

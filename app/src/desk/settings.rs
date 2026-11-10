@@ -305,7 +305,7 @@ impl Desk {
         }
         // the computer
         let rx = c.min.x + half + 12.0;
-        let g3 = self.settings_group(&p, look, rx, c.min.y, c.max.x - rx, 1.0, ctl, "Meetings");
+        let g3 = self.settings_group(&p, look, rx, c.min.y, c.max.x - rx, 2.6, ctl, "Meetings");
         p.text(pos2(g3.min.x + 12.0, g3.min.y + 30.0 + 8.0), Align2::LEFT_CENTER, "Heads-up before each one, in minutes:", look.font(12.0), look.dim());
         let heads = [0u32, 5, 10, 15, 30];
         let active = heads.iter().position(|m| *m == s.headsup).unwrap_or(2);
@@ -313,9 +313,20 @@ impl Desk {
         if let Some(i) = hit {
             cmds.push(format!("pref headsup {}", heads[i]));
         }
+        if toggle(ui, look, pos2(g3.min.x + 12.0, g3.min.y + 52.0 + ctl + 10.0), "Ask how it went afterwards", s.after_meeting, "set-aftermeeting") {
+            cmds.push(format!("pref aftermeeting {}", if s.after_meeting { "off" } else { "on" }));
+        }
         let g6 = self.settings_group(&p, look, rx, g3.max.y + 10.0, c.max.x - rx, 1.0, 0.0, "The computer");
         if toggle(ui, look, pos2(g6.min.x + 12.0, g6.min.y + 30.0), "Tell me when it needs care (weekly)", s.upkeep_day, "upkeepday") {
             cmds.push(format!("pref upkeepday {}", if s.upkeep_day { "off" } else { "on" }));
+        }
+        let g7 = self.settings_group(&p, look, rx, g6.max.y + 10.0, c.max.x - rx, 2.0, 0.0, "People and habits");
+        let lead_on = s.gift_lead > 0;
+        if toggle(ui, look, pos2(g7.min.x + 12.0, g7.min.y + 30.0), "Birthdays ten days ahead, with my present ideas", lead_on, "set-giftlead") {
+            cmds.push(format!("pref giftlead {}", if lead_on { 0 } else { 10 }));
+        }
+        if toggle(ui, look, pos2(g7.min.x + 12.0, g7.min.y + 52.0), "An evening word before a habit streak breaks", s.habit_nudge, "set-habitnudge") {
+            cmds.push(format!("pref habitnudge {}", if s.habit_nudge { "off" } else { "on" }));
         }
         out.extend(cmds);
     }

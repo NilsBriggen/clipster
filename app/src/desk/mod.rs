@@ -43,7 +43,7 @@ pub fn tab(name: &str) -> Option<usize> {
         t if t.starts_with("list ") => "todo".to_string(), // "list shopping": a named list on the To-do tab
         "links" | "files" => "clipboard".to_string(),      // the saved links and files pages
         "reminders" | "notes" | "calendar" | "calendars" | "month" | "event" => "agenda".to_string(),
-        "people" | "journal" | "jot" => "you".to_string(),
+        "people" | "journal" | "jot" | "papers" | "renewals" | "things" => "you".to_string(),
         t if t.starts_with("person ") => "you".to_string(),
         "next7" | "nextweek" | "focuslog" => "week".to_string(),
         "proofread" | "letters" | "letter" => "write".to_string(),
@@ -125,6 +125,8 @@ pub struct View<'a> {
     pub answer: Option<&'a Answer>,           // a web or file answer meant for the Desk (words, files found…)
     pub name: String,                         // what he calls you (letters are signed with it)
     pub people: &'a [crate::people::Person],
+    pub renewals: &'a [crate::renewals::Renewal],
+    pub things: &'a crate::things::Things,
     pub workday: &'a [String], // what "start my workday" opens
     pub habits: &'a [crate::habits::Habit],
     pub countdowns: &'a [(String, chrono::NaiveDate)],
@@ -221,6 +223,9 @@ pub struct Prefs {
     pub quiet_weekend: bool,
     pub quiet_meetings: bool,
     pub headsup: u32,
+    pub after_meeting: bool,
+    pub habit_nudge: bool,
+    pub gift_lead: u32,
     pub break_every: u32,
     pub alarm_sound: bool,
     pub muted: Vec<String>,
@@ -285,6 +290,10 @@ pub struct Desk {
     workday_text: String,
     person_name: String,
     person_birthday: String,
+    renewal_what: String, // Papers & things: the add rows
+    renewal_when: String,
+    thing_name: String,
+    thing_place: String,
     calendar_text: String,
     list_text: String,
     forget_all: bool,                  // the You & me tab's "are you sure?"
@@ -443,6 +452,9 @@ impl Desk {
         // boxes drawn only on their own page would block every tab once that page is gone
         self.forget_all = false;
         self.renaming_list = None;
+        if ["papers", "renewals", "things"].contains(&name) {
+            self.me_page = 3;
+        }
         if let Some(page) = ["you", "people", "journal", "jot"].iter().position(|p| *p == name).map(|p| p.min(2)) {
             self.me_page = page;
         }
