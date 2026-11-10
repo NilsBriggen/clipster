@@ -85,9 +85,13 @@ impl Desk {
         rows.extend(all.iter().filter(|(k, _)| k == "other").cloned());
         let (x0, x1) = (r.min.x + 12.0, r.max.x - 12.0);
         if rows.is_empty() {
-            let (text, off) = if view.prefs.windows { ("Nothing tracked yet today.", false) } else { ("Time counts only while\nwindow comments are on.", true) };
-            p.text(r.center() - vec2(0.0, if off { 18.0 } else { 0.0 }), Align2::CENTER_CENTER, text, look.font(12.0), look.dim());
-            if off && look.button(ui, Rect::from_center_size(r.center() + vec2(0.0, 22.0), vec2(90.0, look.ctl())), Id::unique("desk-time-on"), "Turn on", true).clicked() {
+            // how time gets counted, and the switch right under it when it's off
+            let off = !view.prefs.windows;
+            let text = if off { "Time counts only while window comments are on: I go by the active window's title, and it never leaves this computer." } else { "Nothing tracked yet today. I count the time per kind of app from the active window's title; it never leaves this computer." };
+            let g = p.layout(text.to_string(), look.font(12.0), look.dim(), x1 - x0);
+            let gh = g.size().y;
+            p.galley(pos2(x0, r.min.y + 32.0), g, look.dim());
+            if off && look.button(ui, Rect::from_min_size(pos2(x0, r.min.y + 42.0 + gh), vec2(90.0, look.ctl())), Id::unique("desk-time-on"), "Turn on", true).clicked() {
                 out.push("pref windows on".into());
             }
             return;
@@ -213,7 +217,7 @@ impl Desk {
             let done = crate::plan::focus_today(view.focus_log, today, running);
             let (text, color) = match done {
                 0 => (format!("Goal: {} a day, not started", brain::fmt_dur(goal)), look.dim()),
-                d if d >= goal => (format!("Goal met: {} of {}", brain::fmt_dur(d), brain::fmt_dur(goal)), look.score(100)),
+                d if d >= goal => (format!("Goal met: {} of {}", brain::fmt_dur(d), brain::fmt_dur(goal)), look.score_text(100)),
                 d => (format!("Goal: {} of {}", brain::fmt_dur(d), brain::fmt_dur(goal)), look.dim()),
             };
             p.text(pos2(fx, y), Align2::LEFT_CENTER, text, look.font(11.5), color);
@@ -251,12 +255,14 @@ impl Desk {
         let tops: Vec<(usize, todo::Item)> = self.files.todos.iter().enumerate().filter(|(_, i)| i.top == Some(today)).map(|(i, it)| (i, it.clone())).collect();
         if tops.is_empty() {
             let any = self.files.todos.iter().any(|i| !i.done && i.list.is_none() && !i.is_step());
-            line(ui, pos2(tx, y + 9.0), if any { "Nothing picked for today." } else { "No to-dos yet." }, look.font(12.0), look.dim(), tw);
+            // no to-dos at all: his line for an empty day, in two lines at most
+            let text = if any { "Nothing picked for today.".to_string() } else { daily("desk_empty_today", &view.name) };
+            let h = wrapped(ui, pos2(tx, y + 2.0), &[(text.as_str(), look.font(12.0), look.dim())], tw, 2);
             let (label, cmd) = if any { ("Pick from my to-dos", "desk plan") } else { ("Add a to-do", "desk todo") };
-            if look.button(ui, Rect::from_min_size(pos2(tx, y + 22.0), vec2(btn_w(&p, look, label).min(tw), ctl - 2.0)), Id::unique("desk-top-pick"), label, true).clicked() {
+            if look.button(ui, Rect::from_min_size(pos2(tx, y + h + 8.0), vec2(btn_w(&p, look, label).min(tw), ctl - 2.0)), Id::unique("desk-top-pick"), label, true).clicked() {
                 out.push(cmd.into());
             }
-            y += 22.0 + ctl + 4.0;
+            y += h + 8.0 + ctl + 4.0;
         }
         for (i, it) in &tops {
             let cy = y + row / 2.0;
@@ -299,7 +305,9 @@ impl Desk {
         let fits = ((bottom - y) / hrow).floor().max(0.0) as usize;
         if view.habits.is_empty() && fits > 0 {
             let g = p.layout("A few daily ticks, like a walk, water or reading.".to_string(), look.font(12.0), look.dim(), tw);
+            let gh = g.size().y;
             p.galley(pos2(tx, y + 2.0), g, look.dim());
+            y += gh + 2.0; // the field comes right under the line
         }
         let shown = if view.habits.len() > fits { fits.saturating_sub(1) } else { view.habits.len() };
         for (n, hb) in view.habits.iter().take(shown).enumerate() {
@@ -327,9 +335,11 @@ impl Desk {
         }
         if view.habits.len() > shown {
             p.text(pos2(tx + s + 8.0, y + hrow / 2.0), Align2::LEFT_CENTER, format!("+{} more", view.habits.len() - shown), look.font(11.5), look.dim());
+            y += hrow;
         }
         if can_add {
-            let add = Rect::from_min_size(pos2(tx + tw - 50.0, r.max.y - 10.0 - ctl), vec2(50.0, ctl));
+            // right under the last habit, not pinned to the card's bottom
+            let add = Rect::from_min_size(pos2(tx + tw - 50.0, (y + 8.0).min(r.max.y - 10.0 - ctl)), vec2(50.0, ctl));
             let resp = look.input(ui, Rect::from_min_max(pos2(tx, add.min.y), pos2(add.min.x - 6.0, add.max.y)), Id::unique("desk-habit-text"), &mut self.habit_text, "New habit");
             let enter = resp.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter));
             let text = self.habit_text.trim().to_string();
@@ -348,35 +358,38 @@ impl Desk {
         let p = ui.painter().clone();
         let ctl = look.ctl();
         look.group(&p, r, "Coming up");
-        let side = 178.0;
-        let bx = r.max.x - 12.0 - side;
-        let mut by = r.min.y + 26.0;
+        // one main button for this time of day (start the workday in the morning, plan, wrap up after 4 pm), the rest in …
         let evening = now.hour() >= 16;
-        let (label, cmd) = if evening { ("Wrap up my day", "wrapup") } else { ("Plan my day", "planday") };
-        if look.button(ui, Rect::from_min_size(pos2(bx, by), vec2(side, ctl)), Id::unique("desk-day"), label, true).clicked() {
-            out.push(cmd.into());
+        let main = if evening { "Wrap up my day" } else if now.hour() < 12 && !view.workday.is_empty() { "Start my workday" } else { "Plan my day" };
+        let mw = ["Wrap up my day", "Start my workday", "Plan my day"].iter().map(|l| btn_w(&p, look, l)).fold(0.0, f32::max);
+        let more_r = Rect::from_min_size(pos2(r.max.x - 12.0 - 28.0, r.min.y + 26.0), vec2(28.0, ctl));
+        let bx = more_r.min.x - 6.0 - mw;
+        let mut day_cmd = None;
+        if look.primary(ui, Rect::from_min_size(pos2(bx, more_r.min.y), vec2(mw, ctl)), Id::unique("desk-day"), main, true).clicked() {
+            day_cmd = Some(main);
         }
-        by += ctl + 6.0;
-        if evening {
-            if look.button(ui, Rect::from_min_size(pos2(bx, by), vec2(side, ctl)), Id::unique("desk-workday-edit"), "Edit my workday…", true).clicked() {
-                self.workday_open = true;
-            }
-        } else {
-            let ww = side - 64.0;
-            if look.button(ui, Rect::from_min_size(pos2(bx, by), vec2(ww, ctl)), Id::unique("desk-workday"), "Start my workday", true).on_hover_text("Opens your work apps and links").clicked() {
-                if view.workday.is_empty() {
-                    self.workday_open = true;
-                } else {
-                    out.push("workday".into());
-                }
-            }
-            if look.button(ui, Rect::from_min_size(pos2(bx + ww + 6.0, by), vec2(58.0, ctl)), Id::unique("desk-workday-edit"), "Edit…", true).on_hover_text("What it opens").clicked() {
-                self.workday_open = true;
-            }
+        let mut more: Vec<&str> = ["Plan my day", "Start my workday", "Wrap up my day"].into_iter().filter(|l| *l != main).collect();
+        more.extend(["Edit my workday…", "+ Countdown…"]);
+        let more: Vec<String> = more.into_iter().map(String::from).collect();
+        if look.button(ui, more_r, Id::unique("desk-day-more"), "…", true).on_hover_text(more.join(" · ")).clicked() {
+            self.toggle_popup("desk-day-more");
         }
-        by += ctl + 6.0;
-        if look.button(ui, Rect::from_min_size(pos2(bx, by), vec2(side, ctl)), Id::unique("desk-countdown-new"), "+ Countdown", true).clicked() {
-            self.card = Some(Card::Countdown);
+        if let Some(k) = self.popup(ui, look, "desk-day-more", more_r, &more) {
+            day_cmd = Some(match more[k].as_str() {
+                "Plan my day" => "Plan my day",
+                "Start my workday" => "Start my workday",
+                "Wrap up my day" => "Wrap up my day",
+                "Edit my workday…" => "edit",
+                _ => "countdown",
+            });
+        }
+        match day_cmd {
+            Some("Wrap up my day") => out.push("wrapup".into()),
+            Some("Plan my day") => out.push("planday".into()),
+            Some("Start my workday") if !view.workday.is_empty() => out.push("workday".into()),
+            Some("countdown") => self.card = Some(Card::Countdown),
+            Some(_) => self.workday_open = true, // Edit, or a workday with nothing in it yet
+            None => {}
         }
         // the rows: text, and its buttons (label, command)
         let mut list: Vec<(String, Vec<(String, String)>)> = vec![];
@@ -634,7 +647,7 @@ impl Desk {
         let picks: Vec<(usize, String, bool)> = picks.into_iter().take(5).map(|(n, i)| (n, i.text.clone(), i.top == Some(tomorrow))).collect();
         let apps = view.workday.iter().any(|w| !w.contains("://") && !w.starts_with("www."));
         let lines_h = 22.0 * (1 + summary.len() + usize::from(first.is_some())) as f32;
-        let h = lines_h + 26.0 + ctl + 14.0 + if picks.is_empty() { 0.0 } else { 22.0 + picks.len() as f32 * 24.0 } + ctl + 18.0;
+        let h = lines_h + 26.0 + ctl + 14.0 + if picks.is_empty() { 0.0 } else { 22.0 + picks.len() as f32 * 24.0 } + ctl + 26.0;
         let inner = look.sheet(ui, c.expand(12.0), "Wrapping up", vec2(500.0, h));
         let p = ui.painter().clone();
         let (x0, x1) = (inner.min.x, inner.max.x);
@@ -654,6 +667,9 @@ impl Desk {
             p.text(pos2(x0, y), Align2::LEFT_CENTER, "Tomorrow's three: star up to three", look.font(12.0), look.dim());
             y += 14.0;
             for (n, text, on) in &picks {
+                if y + 24.0 > inner.max.y - ctl - 10.0 {
+                    break; // a short window: fewer picks, never over the buttons
+                }
                 let cy = y + 12.0;
                 let star = Rect::from_center_size(pos2(x0 + 8.0, cy), vec2(20.0, 20.0));
                 let resp = ui.interact(star.union(Rect::from_min_size(pos2(x0, y), vec2(x1 - x0, 24.0))), Id::unique(("desk-wrap-star", *n)), Sense::click()).on_hover_cursor(egui::CursorIcon::PointingHand);
@@ -668,23 +684,26 @@ impl Desk {
                 y += 24.0;
             }
         }
-        // the buttons: the journal line goes in with whichever ends the day
+        // the buttons: what ends the day after "Then:" on the left, Done alone on the right; the journal line goes in
+        // with whichever is clicked
         let by = inner.max.y - ctl;
+        let mut picked = None;
+        let done_w = btn_w(&p, look, "Done") + 16.0;
+        if look.primary(ui, Rect::from_min_size(pos2(x1 - done_w, by), vec2(done_w, ctl)), Id::unique(("desk-wrap", "Done")), "Done", true).clicked() {
+            picked = Some("wrapup bye");
+        }
+        let mut x = p.text(pos2(x0, by + ctl / 2.0), Align2::LEFT_CENTER, "Then:", look.font(12.0), look.dim()).max.x + 8.0;
         let mut buttons: Vec<(&str, &str)> = vec![];
         if apps {
             buttons.push(("Close my work apps", "workday close"));
         }
-        buttons.extend([("Lock", "lock"), ("Shut down", "shutdown"), ("Done", "wrapup bye")]);
-        let widths: Vec<f32> = buttons.iter().map(|(l, _)| btn_w(&p, look, l)).collect();
-        let mut x = x1 - widths.iter().sum::<f32>() - 8.0 * (buttons.len() - 1) as f32;
-        let mut picked = None;
-        for ((label, cmd), w) in buttons.iter().zip(&widths) {
-            let br = Rect::from_min_size(pos2(x, by), vec2(*w, ctl));
-            let resp = if *label == "Done" { look.primary(ui, br, Id::unique(("desk-wrap", *label)), label, true) } else { look.button(ui, br, Id::unique(("desk-wrap", *label)), label, true) };
-            if resp.clicked() {
-                picked = Some(*cmd);
+        buttons.extend([("Lock", "lock"), ("Shut down", "shutdown")]);
+        for (label, cmd) in buttons {
+            let w = btn_w(&p, look, label);
+            if look.button(ui, Rect::from_min_size(pos2(x, by), vec2(w, ctl)), Id::unique(("desk-wrap", label)), label, true).clicked() {
+                picked = Some(cmd);
             }
-            x += w + 8.0;
+            x += w + 6.0;
         }
         let escaped = ui.input(|i| i.key_pressed(egui::Key::Escape));
         if escaped {

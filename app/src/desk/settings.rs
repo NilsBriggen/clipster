@@ -379,42 +379,54 @@ impl Desk {
         if toggle(ui, look, pos2(x, y + 46.0), "No chatter during calendar events", s.quiet_meetings, "set-quietmeetings") {
             cmds.push(format!("pref quietmeetings {}", if s.quiet_meetings { "off" } else { "on" }));
         }
-        // right: muted apps and sites, hidden checks
+        // right: muted apps and sites and hidden checks in one group, as tall as its rows (then it scrolls)
         let rx = c.min.x + half + 12.0;
         let w = c.max.x - rx;
-        let mh = 30.0 + (s.muted.len().max(1) as f32) * 24.0 + 24.0;
-        let g3 = Rect::from_min_size(pos2(rx, c.min.y), vec2(w, mh.min(c.height() * 0.55)));
-        look.group(&p, g3, "Never about these");
+        enum Row<'a> {
+            Head(&'static str),
+            Empty(&'static str),
+            Muted(usize, &'a String),
+            Hidden(usize, &'a String),
+        }
+        let mut rows = vec![Row::Head("Never about these")];
         if s.muted.is_empty() {
-            let g = p.layout("Nothing muted. \u{201c}Not about this\u{201d} on one of my comments adds it here.".to_string(), look.font(12.0), look.dim(), w - 24.0);
-            p.galley(pos2(rx + 12.0, g3.min.y + 30.0), g, look.dim());
+            rows.push(Row::Empty("Nothing muted. \u{201c}Not about this\u{201d} on a comment adds it."));
         }
-        // both lists scroll by whole rows when they're longer than their box
-        let area3 = Rect::from_min_max(pos2(rx, g3.min.y + 28.0), pos2(g3.max.x, g3.max.y - 4.0));
-        let fits3 = (area3.height() / 24.0).floor().max(1.0) as usize;
-        let first3 = self.rows(ui, look, "muted", area3, s.muted.len(), fits3);
-        for (i, m) in s.muted.iter().enumerate().skip(first3).take(fits3) {
-            let cy = area3.min.y + 12.0 + (i - first3) as f32 * 24.0;
-            if self.remove_btn(ui, look, Rect::from_center_size(pos2(g3.max.x - 23.0, cy), vec2(22.0, ctl - 6.0)), Id::unique(("set-unmute", i)), "Comment on it again") {
-                cmds.push(format!("pref unmute {m}"));
-            }
-            line(ui, pos2(rx + 12.0, cy), &brain::site_name(m), look.font(12.5), look.text(), w - 50.0);
-        }
-        let g4 = Rect::from_min_max(pos2(rx, g3.max.y + 10.0), pos2(c.max.x, c.max.y));
-        look.group(&p, g4, "Hidden checks");
+        rows.extend(s.muted.iter().enumerate().map(|(i, m)| Row::Muted(i, m)));
+        rows.push(Row::Head("Hidden checks"));
         if view.upkeep_hide.is_empty() {
-            line(ui, pos2(rx + 12.0, g4.min.y + 36.0), "None. \u{201c}Not for me\u{201d} on a checkup row hides it.", look.font(12.0), look.dim(), w - 24.0);
+            rows.push(Row::Empty("None. \u{201c}Not for me\u{201d} on a checkup row hides one."));
         }
-        let area4 = Rect::from_min_max(pos2(rx, g4.min.y + 28.0), pos2(g4.max.x, g4.max.y - 4.0));
-        let fits4 = (area4.height() / 24.0).floor().max(1.0) as usize;
-        let first4 = self.rows(ui, look, "hidden-checks", area4, view.upkeep_hide.len(), fits4);
-        for (i, id) in view.upkeep_hide.iter().enumerate().skip(first4).take(fits4) {
-            let cy = area4.min.y + 12.0 + (i - first4) as f32 * 24.0;
-            let bw = btn_w(&p, look, "Bring back");
-            if look.button(ui, Rect::from_min_size(pos2(g4.max.x - 12.0 - bw, cy - (ctl - 6.0) / 2.0), vec2(bw, ctl - 6.0)), Id::unique(("set-unhide", i)), "Bring back", true).clicked() {
-                cmds.push(format!("upkeep unhide {id}"));
+        rows.extend(view.upkeep_hide.iter().enumerate().map(|(i, id)| Row::Hidden(i, id)));
+        let pitch = 24.0;
+        let g3 = Rect::from_min_size(pos2(rx, c.min.y), vec2(w, (32.0 + rows.len() as f32 * pitch + 6.0).min(c.height())));
+        look.group(&p, g3, "Muted and hidden");
+        let area = Rect::from_min_max(pos2(rx, g3.min.y + 28.0), pos2(g3.max.x, g3.max.y - 4.0));
+        let fits = (area.height() / pitch).floor().max(1.0) as usize;
+        let first = self.rows(ui, look, "muted-hidden", area, rows.len(), fits);
+        let bw = btn_w(&p, look, "Bring back");
+        for (n, row) in rows.iter().skip(first).take(fits).enumerate() {
+            let cy = area.min.y + 12.0 + n as f32 * pitch;
+            match row {
+                Row::Head(t) => {
+                    p.text(pos2(rx + 12.0, cy + 2.0), Align2::LEFT_CENTER, *t, look.bold(11.5), look.dim());
+                }
+                Row::Empty(t) => {
+                    line(ui, pos2(rx + 12.0, cy), t, look.font(12.0), look.dim(), w - 30.0);
+                }
+                Row::Muted(i, m) => {
+                    if self.remove_btn(ui, look, Rect::from_center_size(pos2(g3.max.x - 23.0, cy), vec2(22.0, ctl - 6.0)), Id::unique(("set-unmute", *i)), "Comment on it again") {
+                        cmds.push(format!("pref unmute {m}"));
+                    }
+                    line(ui, pos2(rx + 12.0, cy), &brain::site_name(m), look.font(12.5), look.text(), w - 50.0);
+                }
+                Row::Hidden(i, id) => {
+                    if look.button(ui, Rect::from_min_size(pos2(g3.max.x - 12.0 - bw, cy - (ctl - 6.0) / 2.0), vec2(bw, ctl - 6.0)), Id::unique(("set-unhide", *i)), "Bring back", true).clicked() {
+                        cmds.push(format!("upkeep unhide {id}"));
+                    }
+                    line(ui, pos2(rx + 12.0, cy), &crate::writing::cap_first(id), look.font(12.5), look.text(), w - bw - 36.0);
+                }
             }
-            line(ui, pos2(rx + 12.0, cy), &crate::writing::cap_first(id), look.font(12.5), look.text(), w - bw - 36.0);
         }
         out.extend(cmds);
     }

@@ -59,9 +59,28 @@ impl Desk {
             }
             x += w + 8.0;
         }
-        // what I'd change
+        // what I'd change gets the height; the words panel below is as tall as what it holds
         let right = Rect::from_min_max(pos2(left.max.x + 12.0, c.min.y), c.max);
-        let issues_card = Rect::from_min_max(right.min, pos2(right.max.x, right.min.y + (right.height() * 0.56).round()));
+        let answer = view.answer.filter(|a| a.kind == "words");
+        let inner_w = right.width() - 24.0;
+        let answer_h = match answer {
+            Some(a) if !a.items.is_empty() => {
+                let (mut cx, mut lines_) = (0.0, 1.0_f32);
+                for item in a.items.iter().take(12) {
+                    let tw = p.layout_no_wrap(item.clone(), look.font(12.0), look.text()).size().x + 16.0;
+                    if cx + tw > inner_w && cx > 0.0 {
+                        cx = 0.0;
+                        lines_ += 1.0;
+                    }
+                    cx += tw + 4.0;
+                }
+                lines_.min(4.0) * ctl
+            }
+            Some(a) => p.layout(a.text.clone(), look.font(12.0), look.text(), inner_w).size().y.min(140.0) + 4.0,
+            None => 0.0,
+        };
+        let words_h = 30.0 + 2.0 * (ctl + 6.0) + answer_h + 4.0;
+        let issues_card = Rect::from_min_max(right.min, pos2(right.max.x, right.max.y - words_h - 10.0));
         look.group(&p, issues_card, "What I'd change");
         let (x0, x1) = (issues_card.min.x + 12.0, issues_card.max.x - 12.0);
         let words = text.split_whitespace().count();
@@ -114,7 +133,7 @@ impl Desk {
             bx += bw + 6.0;
         }
         yy += ctl + 6.0;
-        if let Some(a) = view.answer.filter(|a| a.kind == "words") {
+        if let Some(a) = answer {
             // other words: a click puts one in place of the word in your text
             if !a.items.is_empty() {
                 let mut cx = x0;
@@ -138,7 +157,7 @@ impl Desk {
                 }
             } else {
                 let g = p.layout(a.text.clone(), look.font(12.0), look.text(), x1 - x0);
-                p.galley(pos2(x0, yy), g, look.text());
+                p.with_clip_rect(words_card.shrink(2.0)).galley(pos2(x0, yy), g, look.text());
             }
         }
     }

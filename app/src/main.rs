@@ -834,6 +834,34 @@ impl App {
                 app.backup_history = vec![[backup::now() as u64 - 9 * 86_400, 214, 1_300_000_000, 0], [backup::now() as u64 - 23 * 86_400, 1820, 9_400_000_000, 2]];
                 app.reading_titles.insert("https://en.wikipedia.org/wiki/Paper_clip".into(), "Paper clip - Wikipedia".into());
                 app.budgets.insert("video".into(), 30);
+                // CLIPSTER_SAMPLE=empty: a new install; crowded: long names and many rows
+                match desk::sample_variant().as_str() {
+                    "empty" => {
+                        app.sample_events.clear();
+                        app.sample_people.clear();
+                        app.sample_clips.clear();
+                        app.sample_reading.clear();
+                        app.sample_calendars.clear();
+                        app.sample_workday.clear();
+                        app.backup_sources.clear();
+                        app.backup_history.clear();
+                        app.holidays.clear();
+                        app.weather_on = false;
+                        app.focus_goal = 0;
+                        app.budgets.clear();
+                    }
+                    "crowded" => {
+                        let today = chrono::Local::now().date_naive();
+                        for n in 0..14u32 {
+                            let start = (today + chrono::Days::new(u64::from(n % 5))).and_hms_opt(8 + n % 9, 15 * (n % 4), 0).unwrap_or_default();
+                            app.sample_events.push(calendar::Event { uid: format!("crowd-{n}"), start, end: start + chrono::Duration::minutes(45), title: format!("Weekly sync about the sync meetings, part {n} (please read the agenda first)"), place: "Building C, 4th floor, the room with the broken projector".into(), cal: (n % 2) as usize, ..Default::default() });
+                        }
+                        app.sample_people.extend(["Anna-Katharina Brönnimann-Oberholzer", "Dr. Bartholomew Featherstonehaugh", "Gerald", "Lin", "Mo", "Priya Ramanathan-Venkataraman", "Zoë", "Uncle Bob from the allotment"].map(|n| people::Person { every: Some(21), last: Some(today - chrono::Days::new(30)), ..people::Person::new(n) }));
+                        app.sample_clips.extend((0..20).map(|n| format!("Copied thing number {n}: a rather long sentence someone pasted from an email thread that went on for far too long")));
+                        app.sample_reading.extend((0..10).map(|n| (format!("https://www.example.com/articles/2026/11/a-very-long-article-slug-that-goes-on-and-on-{n}?utm_source=newsletter"), "2026-11-01".to_string())));
+                    }
+                    _ => {}
+                }
             }
         } else if let Some(game) = play.clone().filter(|g| g != "welcome") {
             app.arcade.open(&game);
@@ -1071,7 +1099,8 @@ impl App {
         let weather = self.weather.as_ref().filter(|_| self.weather_on).map(|(_, w)| w.clone());
         match &self.desk_sample {
             Some((t, k, f, c)) => {
-                let view = desk::View { timers: t.clone(), kind_time: k, focus_log: f, focus_now: Some(("the slides".into(), 18 * 60, 7 * 60, 40, false)), checkins: c, streaks: vec![("Focus".into(), 4, 9), ("Goal met".into(), 2, 5), ("Check-ins".into(), 6, 12), ("Days with me".into(), 31, 31)], status, quip, prefs, clips: &self.sample_clips, pins: &self.sample_clips[..2], reading: &self.sample_reading, me: sample_me(), upkeep: Some((&self.sample_upkeep, 120)), upkeep_running: false, backup_check: upkeep::backup_check(true, Some(backup::now() - 9 * 86_400), backup::now(), true), backup: desk::Backup { sources: &self.backup_sources, target: "/run/media/you/BACKUP", last: Some(backup::now() - 9 * 86_400), result: "214 copied (1.3 GB), 4120 unchanged", progress: None, skip: &self.backup_skip, auto: &self.backup_auto, history: &self.backup_history, found: self.backup_found.as_deref(), failed: false, here: true }, events: &events, calendars: self.sample_calendars.iter().enumerate().map(|(i, s)| desk::CalView { label: ["Work", "Family"].get(i).map_or_else(|| calendar::short(s), |n| n.to_string()), color: i as u8, show: true, alert: i == 0, ..Default::default() }).collect(), calendar_note: "Checked 4 min ago".into(), calendar_problems: 0, answer: self.desk_answer.as_ref(), name: "Sam".into(), people: &self.sample_people, workday: &self.sample_workday, habits: &self.habits, countdowns: &self.countdowns, sites, moved: &self.kind_moves, weather, day_totals, pin_labels: &self.pin_labels, clip_paused, reading_titles: &self.reading_titles, now: self.now_reading.as_ref(), space: self.space.as_ref().map(|(_, s)| s), space_running: self.space_running, upkeep_hide: &self.upkeep_hide, space_log: &self.space_log, tidy_auto: self.tidy_auto, mini: &mini };
+                let empty = desk::sample_variant() == "empty";
+                let view = desk::View { timers: t.clone(), kind_time: k, focus_log: f, focus_now: (!empty).then(|| ("the slides".into(), 18 * 60, 7 * 60, 40, false)), checkins: c, streaks: if empty { vec![] } else { vec![("Focus".into(), 4, 9), ("Goal met".into(), 2, 5), ("Check-ins".into(), 6, 12), ("Days with me".into(), 31, 31)] }, status, quip, prefs, clips: &self.sample_clips, pins: &self.sample_clips[..self.sample_clips.len().min(2)], reading: &self.sample_reading, me: if empty { about_me(&Default::default(), None, &Default::default(), &[], &Default::default(), 0, &Default::default(), true) } else { sample_me() }, upkeep: (!empty).then_some((&self.sample_upkeep, 120)), upkeep_running: false, backup_check: upkeep::backup_check(true, Some(backup::now() - 9 * 86_400), backup::now(), true), backup: desk::Backup { sources: &self.backup_sources, target: "/run/media/you/BACKUP", last: Some(backup::now() - 9 * 86_400), result: "214 copied (1.3 GB), 4120 unchanged", progress: None, skip: &self.backup_skip, auto: &self.backup_auto, history: &self.backup_history, found: self.backup_found.as_deref(), failed: false, here: true }, events: &events, calendars: self.sample_calendars.iter().enumerate().map(|(i, s)| desk::CalView { label: ["Work", "Family"].get(i).map_or_else(|| calendar::short(s), |n| n.to_string()), color: i as u8, show: true, alert: i == 0, ..Default::default() }).collect(), calendar_note: "Checked 4 min ago".into(), calendar_problems: 0, answer: self.desk_answer.as_ref(), name: "Sam".into(), people: &self.sample_people, workday: &self.sample_workday, habits: &self.habits, countdowns: &self.countdowns, sites, moved: &self.kind_moves, weather, day_totals, pin_labels: &self.pin_labels, clip_paused, reading_titles: &self.reading_titles, now: self.now_reading.as_ref(), space: self.space.as_ref().map(|(_, s)| s), space_running: self.space_running, upkeep_hide: &self.upkeep_hide, space_log: &self.space_log, tidy_auto: self.tidy_auto, mini: &mini };
                 self.desk.show(ctx, &view, look, near)
             }
             None => {
@@ -4802,36 +4831,75 @@ impl App {
         let inner = Rect::from_min_max(pos2(left + pad, top + pad), pos2(right - pad, 2000.0));
         let mut clicked: Option<Act> = None;
         let mut search = false;
+        // Options and Close: two small icons in the top-right corner, so a short answer isn't mostly buttons
+        let icons = [("⚙", "Options", Act::Options), ("✕", "Close", Act::Hide)];
+        let icon_w = 46.0;
+        for (k, (glyph, tip, act)) in icons.iter().enumerate() {
+            let r = Rect::from_center_size(pos2(right - pad - 9.0 - (1 - k) as f32 * 23.0, top + pad + 8.0), vec2(21.0, 19.0));
+            let resp = ui.interact(r, egui::Id::unique(("balloon-icon", k)), Sense::click()).on_hover_text(*tip);
+            if resp.hovered() {
+                ui.painter().rect_filled(r, CornerRadius::same(4), Color32::from_black_alpha(28));
+            }
+            ui.painter().text(r.center(), egui::Align2::CENTER_CENTER, *glyph, FontId::proportional(13.0), INK);
+            if resp.clicked() {
+                clicked = Some(act.clone());
+            }
+        }
         let resp = ui.scope_builder(egui::UiBuilder::new().max_rect(inner), |ui| {
             ui.spacing_mut().item_spacing.y = 6.0;
             let reply = self.balloon.clone().unwrap();
+            let font = egui::TextStyle::Body.resolve(ui.style());
             if !reply.text.is_empty() {
+                // the text keeps clear of the corner icons: narrower only when its first line would reach them
+                let first_w = ui.painter().layout(reply.text.clone(), font.clone(), INK, inner.width()).rows.first().map_or(0.0, |r| r.rect().width());
+                let text_w = if first_w > inner.width() - icon_w { inner.width() - icon_w } else { inner.width() };
                 egui::ScrollArea::vertical().max_height(320.0).auto_shrink([false, true]).show(ui, |ui| {
+                    ui.set_max_width(text_w);
                     // the classic letter-by-letter reveal; unrevealed text is laid out but invisible so the balloon doesn't jump
                     let shown = if self.screenshot.is_some() { usize::MAX } else { ((self.t() - self.reveal_t0) * 90.0).max(0.0) as usize };
                     let cut = reply.text.char_indices().nth(shown).map_or(reply.text.len(), |(i, _)| i);
-                    let font = egui::TextStyle::Body.resolve(ui.style());
                     let mut job = egui::text::LayoutJob::default();
                     job.append(&reply.text[..cut], 0.0, egui::TextFormat::simple(font.clone(), INK));
-                    job.append(&reply.text[cut..], 0.0, egui::TextFormat::simple(font, Color32::TRANSPARENT));
+                    job.append(&reply.text[cut..], 0.0, egui::TextFormat::simple(font.clone(), Color32::TRANSPARENT));
                     if ui.add(egui::Label::new(job).wrap().sense(Sense::click())).clicked() {
                         self.reveal_t0 = -1e6; // click to see it all at once
                     }
                 });
+            } else {
+                ui.add_space(14.0); // the buttons start under the corner icons
             }
-            for (label, a) in &reply.buttons {
-                if bullet(ui, label) {
-                    clicked = Some(a.clone());
+            // many short buttons (help's topics) go in two columns, down the first and then the second
+            let half = (inner.width() - 8.0) / 2.0;
+            // (two labels may wrap onto a second line; more and it reads worse than one column)
+            let long = reply.buttons.iter().filter(|(l, _)| ui.painter().layout_no_wrap(l.clone(), FontId::proportional(13.0), INK).size().x + 24.0 > half).count();
+            let short = long <= 2;
+            if reply.buttons.len() > 6 && short {
+                let rows = reply.buttons.len().div_ceil(2);
+                ui.columns(2, |cols| {
+                    for (i, (label, a)) in reply.buttons.iter().enumerate() {
+                        cols[i / rows].spacing_mut().item_spacing.y = 6.0;
+                        if bullet(&mut cols[i / rows], label) {
+                            clicked = Some(a.clone());
+                        }
+                    }
+                });
+            } else {
+                for (label, a) in &reply.buttons {
+                    if bullet(ui, label) {
+                        clicked = Some(a.clone());
+                    }
                 }
             }
+            let n = self.timers.len();
             if reply.ask {
                 ui.add_space(2.0);
-                ui.label(egui::RichText::new("What would you like to do?").strong());
                 ui.horizontal(|ui| {
+                    // the running timers and stopwatch as small links at the end of the row
+                    let links = if self.stopwatch.is_some() { 26.0 } else { 0.0 } + if n > 0 { 40.0 } else { 0.0 };
                     let te = ui.add(
                         egui::TextEdit::singleline(&mut self.input)
-                            .hint_text("Type here, then click Search")
-                            .desired_width(ui.available_width() - 64.0),
+                            .hint_text("What would you like to do?")
+                            .desired_width(ui.available_width() - 46.0 - links),
                     );
                     if self.focus_input {
                         te.request_focus();
@@ -4848,28 +4916,27 @@ impl App {
                     if te.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter)) {
                         search = true;
                     }
-                    if ui.add(egui::Button::new("Search").min_size(vec2(58.0, 22.0))).clicked() {
+                    // "Go", not "Search": what you type is a command or a question, not only a search
+                    if ui.add(egui::Button::new("Go").min_size(vec2(40.0, 22.0))).on_hover_text("Or press Enter").clicked() {
                         search = true;
+                    }
+                    if self.stopwatch.is_some() && ui.link("⏱").on_hover_text("The stopwatch").clicked() {
+                        clicked = Some(Act::Run("stopwatch".into()));
+                    }
+                    if n > 0 && ui.link(format!("⏰ {n}")).on_hover_text(format!("{n} timer{} running", if n == 1 { "" } else { "s" })).clicked() {
+                        clicked = Some(Act::Run("timers".into()));
+                    }
+                });
+            } else if n > 0 || self.stopwatch.is_some() {
+                ui.horizontal(|ui| {
+                    if self.stopwatch.is_some() && ui.link("⏱ stopwatch").clicked() {
+                        clicked = Some(Act::Run("stopwatch".into()));
+                    }
+                    if n > 0 && ui.link(format!("⏰ {n} timer{}", if n == 1 { "" } else { "s" })).clicked() {
+                        clicked = Some(Act::Run("timers".into()));
                     }
                 });
             }
-            ui.horizontal(|ui| {
-                if ui.add(egui::Button::new("Options").min_size(vec2(70.0, 22.0))).clicked() {
-                    clicked = Some(Act::Options);
-                }
-                let n = self.timers.len();
-                if self.stopwatch.is_some() && ui.link("⏱ stopwatch").clicked() {
-                    clicked = Some(Act::Run("stopwatch".into()));
-                }
-                if n > 0 && ui.link(format!("⏰ {n} timer{}", if n == 1 { "" } else { "s" })).clicked() {
-                    clicked = Some(Act::Run("timers".into()));
-                }
-                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                    if ui.add(egui::Button::new("Close").min_size(vec2(70.0, 22.0))).clicked() {
-                        clicked = Some(Act::Hide);
-                    }
-                });
-            });
         });
         let content = resp.response.rect;
         let rect = Rect::from_min_max(pos2(left, top), pos2(right, content.bottom() + pad));
@@ -5125,7 +5192,8 @@ fn menu_reply() -> Reply {
     for (label, cmd) in [("Open my desk", "desk"), ("Show me around", "tour"), ("Tell me a joke", "joke"), ("Roast me", "roast"), ("Fun fact", "fact"), ("Quiz me!", "quiz"), ("Do a dance!", "dance"), ("What can you do?", "help"), ("Be quiet for an hour", "quiet")] {
         r = r.run(label, cmd);
     }
-    r = r.btn("Options", Act::Options).btn("Hide balloon", Act::Hide).run("Goodbye, Clipster", "bye");
+    // Options is the ⚙ in the balloon's corner, so it isn't listed twice here
+    r = r.btn("Hide balloon", Act::Hide).run("Goodbye, Clipster", "bye");
     r.ask = false;
     r
 }
@@ -5948,6 +6016,8 @@ fn main() -> eframe::Result {
     let args: Vec<String> = std::env::args().collect();
     let arg = |name: &str| args.iter().position(|a| a == name).and_then(|i| args.get(i + 1).cloned());
     let (screenshot, say, play) = (arg("--screenshot"), arg("--say"), arg("--play")); // --say "timer 5m tea" starts with a command; --play chess opens a game
+    // Options opens the Desk's Settings, its own window: a screenshot of it is one of the Desk (made-up data, drawn inside)
+    let play = if screenshot.is_some() && say.as_deref() == Some("options") && play.is_none() { Some("desk".to_string()) } else { play };
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_title("Clipster")

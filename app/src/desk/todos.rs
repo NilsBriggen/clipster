@@ -59,7 +59,8 @@ impl Desk {
     pub(super) fn todos(&mut self, ui: &mut Ui, c: Rect, view: &View, look: Look, out: &mut Vec<String>) {
         let p = ui.painter().clone();
         let (today, ctl) = (chrono::Local::now().date_naive(), look.ctl());
-        // the chips: My to-dos, each named list (cut to 14 letters), More ▾ for the ones that don't fit, + New list
+        // the lists as one row of segments: My to-dos, each named list (cut to 14 letters), More ▾ for the ones that
+        // don't fit; + New list is a plain button
         let names = todo::lists(&self.files.todos);
         if self.list_tab.as_ref().is_some_and(|l| !names.contains(l)) {
             self.list_tab = None;
@@ -68,29 +69,36 @@ impl Desk {
             let n = writing_cap(&n.replace('-', " "));
             if n.chars().count() > 14 { format!("{}…", n.chars().take(13).collect::<String>()) } else { n }
         };
+        let seg_w = |t: &str| p.layout_no_wrap(t.to_string(), look.bold(12.0), look.text()).size().x + 22.0; // as `segments` measures
         let new_w = btn_w(&p, look, "+ New list");
-        let more_w = btn_w(&p, look, "More ▾");
-        let mut x = c.min.x;
+        let room = c.max.x - new_w - 16.0;
+        let mut shown: Vec<Option<String>> = vec![None];
         let mut hidden: Vec<String> = vec![];
-        for (i, name) in std::iter::once(None).chain(names.iter().map(Some)).enumerate() {
-            let text = name.map_or("My to-dos".to_string(), |n| label(n));
-            let w = p.layout_no_wrap(text.clone(), look.bold(12.5), look.text()).size().x + 28.0;
-            let room = c.max.x - new_w - 6.0 - if i < names.len() { more_w + 6.0 } else { 0.0 };
-            if x + w > room && name.is_some() {
-                hidden.extend(name.cloned());
-                continue;
+        let mut used = seg_w("My to-dos");
+        for (i, n) in names.iter().enumerate() {
+            let w = seg_w(&label(n));
+            let more = if i + 1 < names.len() { seg_w("More ▾") } else { 0.0 };
+            if hidden.is_empty() && used + w + more <= room {
+                shown.push(Some(n.clone()));
+                used += w;
+            } else {
+                hidden.push(n.clone());
             }
-            let r = Rect::from_min_size(pos2(x, c.min.y), vec2(w, look.tab_h()));
-            let resp = look.tab(ui, r, &text, self.list_tab.as_ref() == name);
-            let resp = if let Some(n) = name.filter(|n| label(n) != writing_cap(&n.replace('-', " "))) { resp.on_hover_text(n.replace('-', " ")) } else { resp };
-            if resp.clicked() {
-                self.list_tab = name.cloned();
-            }
-            x += w + 6.0;
+        }
+        let mut labels: Vec<String> = shown.iter().map(|n| n.as_deref().map_or("My to-dos".to_string(), label)).collect();
+        if !hidden.is_empty() {
+            labels.push("More ▾".into());
+        }
+        let active = shown.iter().position(|n| *n == self.list_tab).unwrap_or(labels.len() - 1);
+        let refs: Vec<&str> = labels.iter().map(String::as_str).collect();
+        let (hit, seg) = look.segments(ui, c.min, &refs, active, "todo-lists");
+        if let Some(i) = hit.filter(|i| *i < shown.len()) {
+            self.list_tab = shown[i].clone();
         }
         if !hidden.is_empty() {
-            let r = Rect::from_min_size(pos2(x, c.min.y), vec2(more_w, look.tab_h()));
-            if look.tab(ui, r, "More ▾", hidden.contains(self.list_tab.as_ref().unwrap_or(&String::new()))).clicked() {
+            // More ▾ opens its menu even while one of its lists is the one shown
+            let r = Rect::from_min_max(pos2(seg.max.x - seg_w("More ▾") - if look == Look::Modern { 2.0 } else { 0.0 }, seg.min.y), seg.max);
+            if ui.interact(r, Id::unique("todo-more-hit"), Sense::click()).clicked() {
                 self.toggle_popup("todo-more");
             }
             let items: Vec<String> = hidden.iter().map(|n| writing_cap(&n.replace('-', " "))).collect();
@@ -98,10 +106,10 @@ impl Desk {
                 self.list_tab = hidden.get(i).cloned();
             }
         }
-        if look.tab(ui, Rect::from_min_size(pos2(c.max.x - new_w, c.min.y), vec2(new_w, look.tab_h())), "+ New list", false).clicked() {
+        if look.button(ui, Rect::from_min_size(pos2(c.max.x - new_w, c.min.y), vec2(new_w, seg.height())), Id::unique("todo-new-list"), "+ New list", true).clicked() {
             self.card = Some(Card::NewList);
         }
-        let c = Rect::from_min_max(pos2(c.min.x, c.min.y + look.tab_h() + 10.0), c.max);
+        let c = Rect::from_min_max(pos2(c.min.x, seg.max.y + 10.0), c.max);
         if let Some(name) = self.list_tab.clone() {
             self.named_list(ui, c, look, &name, out);
         } else {
@@ -163,7 +171,8 @@ impl Desk {
             let meetings: Vec<&crate::calendar::Event> = view.events.iter().filter(|e| !e.all_day && e.start.date() == today && e.end > now).collect();
             let busy: i64 = meetings.iter().map(|e| (e.end - e.start.max(now)).num_minutes()).sum();
             let free: i64 = crate::plan::free_slots(view.events, now, view.prefs.work_hours).iter().map(|(a, b)| (*b - *a).num_minutes()).sum();
-            let day = format!("Meetings left today: {} ({}). Free in your working hours: {}.", meetings.len(), brain::fmt_dur(busy.max(0) as u64 * 60), brain::fmt_dur(free.max(0) as u64 * 60));
+            let left = if meetings.is_empty() { "No meetings left today".to_string() } else { format!("Meetings left today: {} ({})", meetings.len(), brain::fmt_dur(busy.max(0) as u64 * 60)) };
+            let day = format!("{left}. Free in your working hours: {}.", brain::fmt_dur(free.max(0) as u64 * 60));
             let w = line(ui, pos2(bx, banner.min.y + 52.0), &day, look.font(12.0), look.dim(), bw - 130.0);
             let now_unix = crate::timers::unix_now();
             let to_midnight = (today.and_hms_opt(23, 59, 59).unwrap_or_default() - now).num_seconds().max(0) as u64;
@@ -266,8 +275,25 @@ impl Desk {
         let pitch = if look == Look::Modern { 28.0 } else { 23.0 };
         let inner = list.shrink2(vec2(0.0, 6.0));
         let fits = (inner.height() / pitch).floor().max(1.0) as usize;
-        if rows.is_empty() {
-            let msg = if items.iter().all(|i| i.list.is_some()) { "Nothing on your list. Add something below." } else if picking { "Nothing left to pick. Everything open is starred or waiting." } else { "Nothing matches." };
+        if rows.is_empty() && items.iter().all(|i| i.list.is_some()) && !picking {
+            // a first to-do: his line, then three to click, which fill the field and show what it understands
+            let g = p.layout(daily("desk_empty_todo", &view.name), look.font(12.5), look.dim(), (list.width() - 60.0).min(440.0));
+            let top = list.center().y - 40.0;
+            let gh = g.size().y;
+            p.galley(pos2(list.center().x - g.size().x / 2.0, top), g, look.dim());
+            let mut y = top + gh + 14.0;
+            p.text(pos2(list.center().x, y), Align2::CENTER_CENTER, "Try one:", look.font(12.0), look.dim());
+            for (i, ex) in ["call Anna by friday", "water the plants every monday", "! renew my passport"].iter().enumerate() {
+                y += 22.0;
+                let w = p.layout_no_wrap(ex.to_string(), look.font(12.5), look.accent()).size().x;
+                if link(ui, look, pos2(list.center().x - w / 2.0, y), ex, look.font(12.5), &format!("todo-example-{i}")).clicked() {
+                    self.todo_text = ex.to_string();
+                    self.todo_due.clear();
+                    ui.memory_mut(|m| m.request_focus(Id::unique("desk-todo-text")));
+                }
+            }
+        } else if rows.is_empty() {
+            let msg = if picking { "Nothing left to pick. Everything open is starred or waiting." } else { "Nothing matches." };
             p.text(list.center(), Align2::CENTER_CENTER, msg, look.font(12.5), look.dim());
         }
         // a row that was just added or found: scroll it into view
@@ -338,15 +364,20 @@ impl Desk {
                             (false, true) => "In today's top 3 (click to take it out)",
                             (false, false) => "Put it in today's top 3",
                         };
+                        // only the ones that are set show; the hollow ones come with the pointer (picking, they always show)
                         if ui.interact(star, Id::unique(("desk-star", line_no)), Sense::click()).on_hover_text(tip).clicked() {
                             out.push(if week_mode { format!("todo #{line_no} weekstar{}", if next { " next" } else { "" }) } else { format!("todo #{line_no} star") });
                         }
-                        p.text(star.center(), Align2::CENTER_CENTER, if topped { "★" } else { "☆" }, look.font(14.0), if topped { look.accent() } else { look.dim().gamma_multiply(0.6) });
+                        if topped || hover || picking {
+                            p.text(star.center(), Align2::CENTER_CENTER, if topped { "★" } else { "☆" }, look.font(14.0), if topped { look.accent() } else { look.dim() });
+                        }
                         let bang = Rect::from_center_size(pos2(tx + 24.0, cy), vec2(12.0, 18.0));
                         if ui.interact(bang, Id::unique(("desk-prio", line_no)), Sense::click()).on_hover_text(if it.prio { "Important (click to unmark)" } else { "Mark it important" }).clicked() {
                             out.push(format!("todo #{line_no} prio"));
                         }
-                        p.text(bang.center(), Align2::CENTER_CENTER, "!", look.bold(13.0), if it.prio { look.danger() } else { look.dim().gamma_multiply(0.35) });
+                        if it.prio || hover {
+                            p.text(bang.center(), Align2::CENTER_CENTER, "!", look.bold(13.0), if it.prio { look.danger() } else { look.dim() });
+                        }
                         tx += 36.0;
                     }
                     // on the right: ✕ and … on hover, the date chip, then what it carries (steps, waiting, link, note)
@@ -646,7 +677,13 @@ impl Desk {
         let steps_line = (!steps.is_empty()).then(|| format!("Steps: {} of {} done ({})", steps.iter().filter(|(_, s)| s.done).count(), steps.len(), steps.iter().map(|(_, s)| s.text.as_str()).collect::<Vec<_>>().join(", ")));
         // the buttons
         let by = inner.max.y - ctl;
+        // Delete on its own at the left, away from the everyday buttons
         let mut bx = inner.min.x;
+        if look.danger_btn(ui, Rect::from_min_size(pos2(bx, by), vec2(80.0, ctl)), Id::unique("desk-todo-card-delete"), "Delete", true).on_hover_text("Undo in the status bar brings it back").clicked() {
+            out.push(format!("{n} remove"));
+            self.card = None;
+        }
+        bx += 80.0 + 24.0;
         let focus_label = format!("Focus on this ({} min)", 25);
         let fw = btn_w(&p, look, &focus_label);
         if look.button(ui, Rect::from_min_size(pos2(bx, by), vec2(fw, ctl)), Id::unique("desk-todo-card-focus"), &focus_label, view.focus_now.is_none() && !it.done).clicked() {
@@ -654,11 +691,6 @@ impl Desk {
             self.card = None;
         }
         bx += fw + 8.0;
-        if look.danger_btn(ui, Rect::from_min_size(pos2(bx, by), vec2(80.0, ctl)), Id::unique("desk-todo-card-delete"), "Delete", true).on_hover_text("Undo in the status bar brings it back").clicked() {
-            out.push(format!("{n} remove"));
-            self.card = None;
-        }
-        bx += 88.0;
         if it.due.is_some() {
             let cw = btn_w(&p, look, "Add to my calendar");
             if look.button(ui, Rect::from_min_size(pos2(bx, by), vec2(cw, ctl)), Id::unique("desk-todo-card-ics"), "Add to my calendar", true).on_hover_text("Opens it in your calendar app, which offers to add it").clicked() {

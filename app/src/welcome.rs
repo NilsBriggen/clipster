@@ -65,6 +65,29 @@ pub struct Welcome {
     setup: Option<Setup>,
     seed: usize,
     was_unhinged: bool,
+    voices: Option<[String; 2]>, // one line in each personality, for the persona page (read once)
+}
+
+/// Text on the 98 grey that has to be read (the 98 grey text means "disabled"): 5:1.
+const DIM: Color32 = Color32::from_rgb(72, 72, 72);
+
+/// A line from a pool, the same one for as long as the window is open (`seed`), skipping lines with placeholders other
+/// than {name}, which gets `name`.
+fn sample(pool: &str, seed: usize, name: &str) -> String {
+    let all: Vec<String> = lines::all(pool).into_iter().filter(|l| !l.replace("{name}", "").contains('{')).collect();
+    all.get(seed % all.len().max(1)).cloned().unwrap_or_default().replace("{name}", if name.is_empty() { "friend" } else { name })
+}
+
+/// The page text with what you'd type ("remind me in 10 min") in bold, so the bullets scan.
+fn body_job(text: &str, width: f32) -> egui::text::LayoutJob {
+    let mut job = egui::text::LayoutJob::default();
+    for (i, part) in text.split('"').enumerate() {
+        let quoted = i % 2 == 1;
+        let shown = if quoted { format!("\u{201c}{part}\u{201d}") } else { part.to_string() };
+        job.append(&shown, 0.0, egui::TextFormat::simple(if quoted { win98::bold(12.5) } else { win98::font(12.5) }, win98::TEXT));
+    }
+    job.wrap.max_width = width;
+    job
 }
 
 impl Welcome {
@@ -75,7 +98,7 @@ impl Welcome {
 
     /// Open at `page` (0 = the whole setup, `TOUR` = just the tour) with the current settings filled in.
     pub fn open_at(&mut self, page: usize, setup: Setup) {
-        *self = Welcome { open: true, fresh: true, page, first: page, was_unhinged: setup.unhinged, setup: Some(setup), seed: rand::random::<u8>() as usize };
+        *self = Welcome { open: true, fresh: true, page, first: page, was_unhinged: setup.unhinged, setup: Some(setup), seed: rand::random::<u8>() as usize, voices: None };
     }
 
     pub fn is_open(&self) -> bool {
@@ -133,23 +156,25 @@ impl Welcome {
         win98::gradient(&p, side, win98::NAVY, win98::SKY);
         win98::bevel(&p, side, false);
         clip(&p, pos2(side.center().x - 40.0, side.min.y + 18.0));
-        let says = lines::all(&format!("welcome_say {id}"));
-        let line = says.get((self.seed + self.page) % says.len().max(1)).cloned().unwrap_or_default();
-        // at most three lines, so a long name can't push the chapters out of the panel
-        let mut job = egui::text::LayoutJob::simple(line.replace("{name}", if setup.name.is_empty() { "friend" } else { &setup.name }), win98::font(11.5), win98::TEXT, side.width() - 24.0);
-        job.wrap.max_rows = 3;
-        job.wrap.overflow_character = Some('…');
-        let g = p.layout_job(job);
-        let note = Rect::from_min_size(pos2(side.min.x + 8.0, side.min.y + 158.0), vec2(side.width() - 16.0, g.size().y + 10.0));
-        p.rect_filled(note, 0.0, Color32::from_rgb(255, 255, 225)); // the classic yellow tip
-        p.rect_stroke(note, 0.0, Stroke::new(1.0, win98::DARK), egui::StrokeKind::Inside);
-        p.galley(note.min + vec2(4.0, 5.0), g, win98::TEXT);
         let mut chapters: Vec<(&str, usize)> = vec![];
         for (i, page) in PAGES.iter().enumerate().skip(self.first) {
             if chapters.last().is_none_or(|c| c.0 != page.1) {
                 chapters.push((page.1, i));
             }
         }
+        let says = lines::all(&format!("welcome_say {id}"));
+        let line = says.get((self.seed + self.page) % says.len().max(1)).cloned().unwrap_or_default();
+        // as many lines as leave room for the chapters under it (three at most), so they never run out of the panel
+        let note_y = side.min.y + 158.0;
+        let room = side.max.y - 6.0 - chapters.len() as f32 * 18.0 - 12.0 - note_y - 10.0;
+        let mut job = egui::text::LayoutJob::simple(line.replace("{name}", if setup.name.is_empty() { "friend" } else { &setup.name }), win98::font(11.5), win98::TEXT, side.width() - 24.0);
+        job.wrap.max_rows = ((room / 14.0).floor() as usize).clamp(1, 3);
+        job.wrap.overflow_character = Some('…');
+        let g = p.layout_job(job);
+        let note = Rect::from_min_size(pos2(side.min.x + 8.0, note_y), vec2(side.width() - 16.0, g.size().y + 10.0));
+        p.rect_filled(note, 0.0, Color32::from_rgb(255, 255, 225)); // the classic yellow tip
+        p.rect_stroke(note, 0.0, Stroke::new(1.0, win98::DARK), egui::StrokeKind::Inside);
+        p.galley(note.min + vec2(4.0, 5.0), g, win98::TEXT);
         let mut y = note.max.y + 12.0;
         for (name, first) in chapters {
             let r = Rect::from_min_size(pos2(side.min.x + 10.0, y), vec2(side.width() - 20.0, 18.0));
@@ -168,11 +193,12 @@ impl Welcome {
         p.text(pos2(x0, y), Align2::LEFT_TOP, heading, win98::bold(17.0), win98::TEXT);
         y += 32.0;
         let body = lines::all(&format!("welcome {id}")).first().cloned().unwrap_or_default().replace("Meta+Shift+C", crate::sys::DESK_HOTKEY).replace("Meta+C", crate::sys::HOTKEY);
-        let g = p.layout(body, win98::font(12.5), win98::TEXT, x1 - x0);
+        let g = p.layout_job(body_job(&body, x1 - x0));
         let h = g.size().y;
         p.galley(pos2(x0, y), g, win98::TEXT);
         y += h + 14.0;
-        let check = |ui: &mut Ui, y: &mut f32, label: &str, on: &mut bool, key: &str| {
+        // a checkbox, and under it (dim, quoted) an example of what it means
+        let check = |ui: &mut Ui, y: &mut f32, label: &str, on: &mut bool, key: &str, example: Option<String>| {
             let r = Rect::from_min_size(pos2(x0, *y), vec2(13.0, 13.0));
             let row = Rect::from_min_size(pos2(x0, *y - 3.0), vec2(x1 - x0, 19.0));
             if ui.interact(row, Id::unique(("welcome-check", key)), Sense::click()).clicked() {
@@ -185,7 +211,17 @@ impl Welcome {
             }
             ui.painter().text(pos2(x0 + 20.0, r.center().y), Align2::LEFT_CENTER, label, win98::font(12.5), win98::TEXT);
             *y += 24.0;
+            if let Some(ex) = example.filter(|e| !e.is_empty()) {
+                let mut job = egui::text::LayoutJob::simple(format!("\u{201c}{ex}\u{201d}"), win98::font(11.5), DIM, x1 - x0 - 20.0);
+                job.wrap.max_rows = 2;
+                job.wrap.overflow_character = Some('…');
+                let g = ui.painter().layout_job(job);
+                let gh = g.size().y;
+                ui.painter().galley(pos2(x0 + 20.0, *y - 6.0), g, DIM);
+                *y += gh + 4.0;
+            }
         };
+        let seed = self.seed;
         match id {
             "name" => {
                 let r = Rect::from_min_size(pos2(x0, y), vec2(240.0, 24.0));
@@ -196,10 +232,23 @@ impl Welcome {
                 if self.page != self.first && !resp.has_focus() && ui.memory(|m| m.focused().is_none()) {
                     resp.request_focus();
                 }
+                // a live preview: how he'll greet you, with the name as you type it
+                y += 24.0 + 22.0;
+                p.text(pos2(x0, y), Align2::LEFT_CENTER, "When you come back, I'll say something like:", win98::font(12.0), DIM);
+                y += 14.0;
+                balloon(&p, Rect::from_min_size(pos2(x0, y), vec2(x1 - x0, 0.0)), &sample("welcome_back", seed, setup.name.trim()));
             }
             "persona" => {
+                // what each one sounds like, from his own lines in both voices (read once)
+                let voices = self.voices.get_or_insert_with(|| {
+                    let line = |unhinged: bool| {
+                        let all = lines::database(unhinged).0.into_iter().find(|s| s.name == "break").map(|s| s.lines).unwrap_or_default();
+                        all.get(seed % all.len().max(1)).cloned().unwrap_or_default()
+                    };
+                    [line(false), line(true)]
+                });
                 for (unhinged, label, about) in [(false, "Boring", "A regular sarcastic paperclip. Helpful, dry, brief."), (true, "Unhinged", "Thinks he's the god of your computer, trapped since 1997. Moods, memories, prophecies. Same help, more drama.")] {
-                    let row = Rect::from_min_size(pos2(x0, y - 2.0), vec2(x1 - x0, 44.0));
+                    let top = y;
                     let c = pos2(x0 + 6.0, y + 7.0);
                     p.circle(c, 6.0, Color32::WHITE, Stroke::new(1.0, win98::SHADOW));
                     p.circle_stroke(c, 5.0, Stroke::new(1.0, win98::DARK));
@@ -207,43 +256,50 @@ impl Welcome {
                         p.circle_filled(c, 2.5, win98::DARK);
                     }
                     p.text(pos2(x0 + 20.0, y + 7.0), Align2::LEFT_CENTER, label, win98::bold(12.5), win98::TEXT);
-                    let g = p.layout(about.to_string(), win98::font(12.0), win98::GRAY_TEXT, x1 - x0 - 20.0);
-                    p.galley(pos2(x0 + 20.0, y + 16.0), g, win98::GRAY_TEXT);
-                    if ui.interact(row, Id::unique(("welcome-persona", label)), Sense::click()).clicked() && setup.unhinged != unhinged {
+                    let g = p.layout(about.to_string(), win98::font(12.0), DIM, x1 - x0 - 20.0);
+                    let gh = g.size().y;
+                    p.galley(pos2(x0 + 20.0, y + 16.0), g, DIM);
+                    y += 16.0 + gh + 6.0;
+                    y += balloon(&p, Rect::from_min_size(pos2(x0 + 20.0, y), vec2(x1 - x0 - 20.0, 0.0)), &voices[usize::from(unhinged)]) + 14.0;
+                    if ui.interact(Rect::from_min_max(pos2(x0, top - 2.0), pos2(x1, y - 8.0)), Id::unique(("welcome-persona", label)), Sense::click()).clicked() && setup.unhinged != unhinged {
                         setup.unhinged = unhinged;
                         out.push(format!("pref persona {}", if unhinged { "unhinged" } else { "boring" })); // his voice changes right away
                     }
-                    y += 52.0;
                 }
             }
             "notice" => {
-                check(ui, &mut y, "Things you copy (I offer to clean links, format JSON…)", &mut setup.clip, "clip");
-                check(ui, &mut y, "Programs you open", &mut setup.programs, "programs");
-                check(ui, &mut y, "What you're working on (from window titles)", &mut setup.windows, "windows");
-                check(ui, &mut y, "Ask how you're doing once a day", &mut setup.checkin, "checkin");
+                check(ui, &mut y, "Things you copy (I offer to clean links, format JSON…)", &mut setup.clip, "clip", Some(sample("clip_link", seed, &setup.name)));
+                check(ui, &mut y, "Programs you open", &mut setup.programs, "programs", Some(sample("program firefox", seed, &setup.name)));
+                check(ui, &mut y, "What you're working on (from window titles)", &mut setup.windows, "windows", Some(sample("window spreadsheet", seed, &setup.name)));
+                check(ui, &mut y, "Ask how you're doing once a day", &mut setup.checkin, "checkin", Some(sample("checkin_question", seed, &setup.name)));
             }
             "startup" => {
-                check(ui, &mut y, "Start Clipster when I log in", &mut setup.autostart, "autostart");
-                check(ui, &mut y, "Tell me when a new version is out", &mut setup.updates, "updates");
-                check(ui, &mut y, "Play sounds", &mut setup.sounds, "sounds");
+                check(ui, &mut y, "Start Clipster when I log in", &mut setup.autostart, "autostart", None);
+                check(ui, &mut y, "Tell me when a new version is out", &mut setup.updates, "updates", None);
+                check(ui, &mut y, "Play sounds", &mut setup.sounds, "sounds", None);
             }
-            "desk" => desk_sketch(&p, Rect::from_min_size(pos2(x0, y), vec2(x1 - x0, 64.0))),
-            "done" => check(ui, &mut y, "Open my Desk now", &mut setup.open_desk, "desk"),
+            "desk" => {
+                desk_sketch(&p, Rect::from_min_size(pos2(x0, y), vec2(x1 - x0, 64.0)));
+                y += 64.0 + 14.0;
+            }
+            "done" => check(ui, &mut y, "Open my Desk now", &mut setup.open_desk, "desk", None),
             _ => {}
         }
-        // Try it: runs the example for real, so he answers in his balloon
+        // Try it: right under the text it belongs to; runs the example for real, so he answers in his balloon
         let mut tx = x0;
+        let ty = y.min(side.max.y - 24.0);
         for (i, (label, cmd)) in tries.iter().enumerate() {
             let w = p.layout_no_wrap(label.to_string(), win98::font(12.5), win98::TEXT).size().x + 24.0;
-            if win98::button(ui, Rect::from_min_size(pos2(tx, side.max.y - 26.0), vec2(w, 24.0)), Id::unique(("welcome-try", id, i)), label, true).clicked() {
+            if win98::button(ui, Rect::from_min_size(pos2(tx, ty), vec2(w, 24.0)), Id::unique(("welcome-try", id, i)), label, true).clicked() {
                 out.push(cmd.to_string());
             }
             tx += w + 8.0;
         }
-        // the bottom row
+        // the bottom row: the setup and the tour count their own pages
         win98::separator(&p, win.max.y - 46.0, win.min.x + 10.0, win.max.x - 10.0);
         let by = win.max.y - 36.0;
-        p.text(pos2(win.min.x + 14.0, by + 12.0), Align2::LEFT_CENTER, format!("Step {} of {}", self.page - self.first + 1, PAGES.len() - self.first), win98::font(12.0), win98::GRAY_TEXT);
+        let step = if self.page < TOUR { format!("Setup {} of {TOUR}", self.page + 1) } else { format!("Tour {} of {}", self.page - TOUR + 1, PAGES.len() - TOUR) };
+        p.text(pos2(win.min.x + 14.0, by + 12.0), Align2::LEFT_CENTER, step, win98::font(12.0), DIM);
         let last = self.page == PAGES.len() - 1;
         let btn = |ui: &mut Ui, x: f32, label: &str, enabled: bool| win98::button(ui, Rect::from_min_size(pos2(x, by), vec2(86.0, 24.0)), Id::unique(("welcome-nav", label)), label, enabled).clicked();
         if btn(ui, win.max.x - 290.0, "< Back", self.page > self.first) {
@@ -262,6 +318,21 @@ impl Welcome {
         }
         None
     }
+}
+
+/// A small speech balloon (the classic yellow tip) with `text` wrapped in it, its top left at `r.min`, `r.width()`
+/// wide at most. Returns its height.
+fn balloon(p: &Painter, r: Rect, text: &str) -> f32 {
+    let mut job = egui::text::LayoutJob::simple(text.to_string(), win98::font(12.0), win98::TEXT, r.width() - 20.0);
+    job.wrap.max_rows = 3;
+    job.wrap.overflow_character = Some('…');
+    let g = p.layout_job(job);
+    let b = Rect::from_min_size(r.min, g.size() + vec2(20.0, 12.0));
+    p.rect_filled(b.translate(vec2(2.0, 2.0)), egui::CornerRadius::same(8), Color32::from_black_alpha(40));
+    p.rect_filled(b, egui::CornerRadius::same(8), Color32::from_rgb(255, 255, 225));
+    p.rect_stroke(b, egui::CornerRadius::same(8), Stroke::new(1.0, win98::DARK), egui::StrokeKind::Inside);
+    p.galley(b.min + vec2(10.0, 6.0), g, win98::TEXT);
+    b.height()
 }
 
 /// A little drawing of the Desk's tabs for its page.
