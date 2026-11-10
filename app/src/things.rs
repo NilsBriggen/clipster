@@ -8,7 +8,9 @@ use std::collections::BTreeMap;
 pub type Things = BTreeMap<String, (String, String)>;
 
 /// Words that make a thing a secret: kept in a password manager, not here.
-const SECRETS: &[&str] = &["pin", "password", "passcode", "passwort", "puk", "combination", "safe code", "door code", "alarm code"];
+const SECRETS: &[&str] = &["pin", "pin code", "password", "passcode", "passwort", "puk", "combination", "safe code", "door code", "alarm code"];
+/// "pin" is a secret only on its own or with these ("bank pin"), not "rolling pin"
+const PIN_OWNERS: &[&str] = &["bank", "card", "phone", "sim", "atm", "debit", "credit"];
 
 /// "my passport", "The spare key" -> "passport", "spare key".
 pub fn key(thing: &str) -> String {
@@ -18,7 +20,9 @@ pub fn key(thing: &str) -> String {
 
 pub fn secret(thing: &str) -> bool {
     let t = key(thing);
-    SECRETS.iter().any(|s| t == *s || t.ends_with(&format!(" {s}")) || t.starts_with(&format!("{s} ")))
+    let words: Vec<&str> = t.split_whitespace().collect();
+    let pin = words.iter().position(|w| *w == "pin").is_some_and(|i| words.len() == 1 || i > 0 && PIN_OWNERS.contains(&words[i - 1]) || words.get(i + 1) == Some(&"code"));
+    pin || SECRETS.iter().filter(|s| **s != "pin").any(|s| t == *s || t.ends_with(&format!(" {s}")) || t.starts_with(&format!("{s} ")))
 }
 
 /// "set <thing>|<place>" or "forget <thing>": what to say, and the command that undoes it.
@@ -51,7 +55,16 @@ pub fn change(things: &mut Things, cmd: &str, today: &str) -> (String, Option<St
 pub fn find<'a>(things: &'a Things, thing: &str) -> Option<(&'a String, &'a (String, String))> {
     let k = key(thing);
     things.get_key_value(&k).or_else(|| {
-        let hits: Vec<_> = things.iter().filter(|(t, _)| k.split_whitespace().all(|w| t.contains(w)) || t.split_whitespace().all(|w| k.contains(w))).collect();
+        // whole words ("key" finds "spare key", "monkey" doesn't)
+        let words = |s: &str| s.split_whitespace().map(String::from).collect::<Vec<_>>();
+        let kw = words(&k);
+        let hits: Vec<_> = things
+            .iter()
+            .filter(|(t, _)| {
+                let tw = words(t);
+                kw.iter().all(|w| tw.contains(w)) || tw.iter().all(|w| kw.contains(w))
+            })
+            .collect();
         (hits.len() == 1).then(|| hits[0])
     })
 }
@@ -78,5 +91,8 @@ mod tests {
         assert_eq!(in_place(&t, "the blue bag"), vec!["charger"]);
         assert!(change(&mut t, "set bank PIN|1234", "2026-11-10").0.contains("password manager") && !t.contains_key("bank pin"), "never secrets");
         assert!(change(&mut t, "forget the charger", "2026-11-10").1.is_some() && find(&t, "charger").is_none());
+        assert!(change(&mut t, "set rolling pin|in the drawer", "2026-11-10").0.starts_with("Got it"), "a rolling pin isn't a secret");
+        assert!(secret("pin") && secret("bank pin") && secret("pin code"));
+        assert!(find(&t, "monkey").is_none(), "whole words only");
     }
 }

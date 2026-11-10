@@ -176,7 +176,7 @@ impl Desk {
             let w = line(ui, pos2(bx, banner.min.y + 52.0), &day, look.font(12.0), look.dim(), bw - 130.0);
             let now_unix = crate::timers::unix_now();
             let to_midnight = (today.and_hms_opt(23, 59, 59).unwrap_or_default() - now).num_seconds().max(0) as u64;
-            let reminders: Vec<String> = view.timers.iter().filter(|t| t.left(now_unix) <= to_midnight).take(4).map(|t| format!("{} at {}", if t.label.is_empty() { "Timer" } else { &t.label }, brain::clock(t.when()))).collect();
+            let reminders: Vec<String> = view.timers.iter().filter(|t| t.left(now_unix) <= to_midnight).take(4).map(|t| format!("{} at {}", if t.label.is_empty() { "Timer".to_string() } else { crate::timers::shown_label(&t.label) }, brain::clock(t.when()))).collect();
             if !reminders.is_empty() {
                 ui.interact(Rect::from_min_size(pos2(bx, banner.min.y + 44.0), vec2(w, 16.0)), Id::unique("desk-plan-reminders"), Sense::hover()).on_hover_text(format!("Reminders today: {}", reminders.join(", ")));
             }

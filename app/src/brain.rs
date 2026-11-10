@@ -61,6 +61,7 @@ pub enum Effect {
     Undo,                            // put back what the last removal on the Desk took
     Habit(String),                   // "add walk", "done walk", "undone walk", "remove walk"
     Countdown(String),               // "add Italy|2 december", "remove 2", "list"
+    CancelAsk,                       // "cancel all timers": ask first, with the count
     Briefing(bool),                  // the day from what's on the computer (true: the weekend instead)
     Renewal(String),                 // "add passport|2027-03-03|-|-", "renewed netflix", "date …|…", "remove …", "list"
     Things(String),                  // where things are: "set passport|top drawer", "forget passport", "where passport", "in blue bag", "list"
@@ -757,11 +758,13 @@ pub fn exact(input: &str) -> Option<Reply> {
         "timers" => return Some(Reply::say("").effect(Effect::ListTimers)),
         "cancel" if rest == "all confirmed" => return Some(Reply::say(lines::pick("say_cancel")).effect(Effect::CancelTimers)),
         // every reminder at once, the repeating ones too: ask first, like the other things that can't be taken back
-        "cancel" | "stop" if rest.is_empty() || rest == "all" => return Some(Reply::say("Cancel every timer and reminder, the repeating ones too?").mood(Mood::Think).run("Yes, cancel them all", "cancel all confirmed").run("Show them first", "timers").btn("Keep them", Act::Hide)),
+        // every reminder at once: the app asks first, with how many (and says so when there are none)
+        "cancel" | "stop" if rest.is_empty() || rest == "all" => return Some(Reply::say("").effect(Effect::CancelAsk)),
         "cancel" => return Some(Reply::say(lines::pick("say_timer_cancelled").replace("{label}", rest)).effect(Effect::CancelTimer(rest.to_string()))),
         // "note #3 edit …", "note #3 pin", "note #3 remove", "note #3 copy" (the Desk); anything else is a new note
         "note" if note_op(rest).is_some() => return Some(Reply::say("").effect(Effect::Note(note_op(rest).unwrap_or_default()))),
-        "note" if rest.starts_with("drop ") => return Some(Reply::say("").effect(Effect::Note(rest.to_string()))),
+        // one note by its words (its own head: "note drop off the parcel" is a note to save)
+        "notedrop" if !rest.is_empty() => return Some(Reply::say("").effect(Effect::Note(format!("drop {rest}")))),
         "note" | "remember" if rest.is_empty() => return Some(Reply::say("Note what? Try: note call grandma")),
         // "remember me?", "remember when we…" are questions, not notes
         "remember" if ["me", "me?", "us", "us?", "this", "that"].contains(&rest) || ["when ", "how ", "what ", "who ", "the time ", "if "].iter().any(|p| rest.starts_with(p)) => return None,
@@ -869,8 +872,14 @@ pub fn exact(input: &str) -> Option<Reply> {
         "todos" if rest == "waiting" => return Some(crate::todo::waiting_reply()),
         "todos" if rest.starts_with("gotfrom ") => {
             let items = crate::todo::load();
-            let n = crate::todo::waiting_on(&items, rest[8..].trim())?;
+            let (who, sent) = rest[8..].split_once('|').unwrap_or((&rest[8..], ""));
+            let n = crate::todo::waiting_on(&items, who.trim())?;
             let what = items[n - 1].text.clone();
+            // "replied" says nothing about what; otherwise a word of the to-do must be in what came
+            let words: Vec<String> = what.to_lowercase().split_whitespace().filter(|w| w.len() >= 4).map(String::from).collect();
+            if !sent.trim().is_empty() && !words.iter().any(|w| sent.to_lowercase().contains(w.trim_end_matches('s'))) {
+                return None;
+            }
             return Some(Reply::say(format!("Ticked off: {what}. One less thing to chase.")).mood(Mood::Happy).effect(Effect::Todo(crate::todo::Op::DoneAt(n))).run("Undo", "undo"));
         }
         "todos" if rest == "done week" || rest == "done today" => return Some(crate::todo::finished_reply(rest.trim_start_matches("done "))),

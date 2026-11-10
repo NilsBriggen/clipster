@@ -66,6 +66,9 @@ const DOUBLES: &[&str] = &["had", "that", "is", "ha", "bye", "no", "very", "so",
 /// Everything that looks off in `text`, most useful first.
 pub fn proofread(text: &str, wrong: &HashMap<String, String>) -> Vec<Issue> {
     let mut out = vec![];
+    // indented lines (code, lists) are left as they are by the fixer, so they aren't checked either
+    let plain: String = text.lines().filter(|l| !l.starts_with([' ', '\t'])).collect::<Vec<_>>().join("\n");
+    let text = plain.as_str();
     let words: Vec<&str> = text.split_whitespace().collect();
     for pair in words.windows(2) {
         let (a, b) = (bare(pair[0]), bare(pair[1]));
@@ -170,8 +173,8 @@ fn fix_these(text: &str, wrong: &HashMap<String, String>, kinds: Fixes) -> Strin
     let mut cap = true;
     for line in text.split('\n') {
         let indent = &line[..line.len() - line.trim_start().len()]; // code, lists and poems keep their indentation
-        if !indent.is_empty() && wrong.is_empty() {
-            out.push(line.to_string()); // an indented line (code) keeps its spacing and its words
+        if !indent.is_empty() {
+            out.push(line.to_string()); // an indented line (code, a list) keeps its spacing and its words
             continue;
         }
         let mut fixed: Vec<String> = vec![];

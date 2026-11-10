@@ -183,7 +183,7 @@ mod kwin {
 #[cfg(windows)]
 mod windows {
     use super::{Shared, Tracker};
-    use crate::sys::win::{GetAsyncKeyState, GetCursorPos, Msg, PeekMessageW, Point, RegisterHotKey};
+    use crate::sys::win::{GetAsyncKeyState, GetCursorPos, Point};
     use std::sync::atomic::{AtomicBool, Ordering};
     use std::sync::Arc;
 
@@ -191,36 +191,22 @@ mod windows {
         let (pos, summoned, desk, stop) = (Shared::default(), Arc::new(AtomicBool::new(false)), Arc::new(AtomicBool::new(false)), Arc::new(AtomicBool::new(false)));
         let (p, s, d, st, ctx) = (pos.clone(), summoned.clone(), desk.clone(), stop.clone(), ctx.clone());
         std::thread::spawn(move || {
-            // real hot keys, so the keystroke doesn't also reach the app in front (Word would type ©); on this thread,
-            // whose messages we read below. 1 = Ctrl+Alt+C, 2 = with Shift. If another program has them, we watch the keys.
-            const ALT: u32 = 1;
-            const CTRL: u32 = 2;
-            const SHIFT: u32 = 4;
-            const NOREPEAT: u32 = 0x4000;
-            const WM_HOTKEY: u32 = 0x0312;
-            let hotkeys = unsafe { RegisterHotKey(0, 1, CTRL | ALT | NOREPEAT, 0x43) != 0 && RegisterHotKey(0, 2, CTRL | ALT | SHIFT | NOREPEAT, 0x43) != 0 };
+            // the keys are watched, not registered as a hot key: RegisterHotKey can't tell AltGr from Ctrl+Alt, so it
+            // would swallow AltGr+C (ć on Polish keyboards, & on Czech ones). Ctrl + left Alt + C only.
             let mut held = false;
             while !st.load(Ordering::Relaxed) {
                 let mut pt = Point::default();
                 if unsafe { GetCursorPos(&mut pt) } != 0 {
                     super::moved_to(&p, pt.x as f32, pt.y as f32, &ctx);
                 }
-                if hotkeys {
-                    let mut msg = Msg::default();
-                    while unsafe { PeekMessageW(&mut msg, 0, WM_HOTKEY, WM_HOTKEY, 1) } != 0 {
-                        (if msg.wparam == 2 { &d } else { &s }).store(true, Ordering::Relaxed);
-                        ctx.request_repaint();
-                    }
-                } else {
-                    let down = |key: i32| unsafe { GetAsyncKeyState(key) } as u16 & 0x8000 != 0;
-                    let combo = down(0x11) && down(0xA4) && down(0x43); // Ctrl + left Alt + C (right Alt is AltGr: "ć" on a Polish keyboard)
-                    if combo && !held {
-                        // with Shift it opens the Desk, without it calls Clipster
-                        (if down(0x10) { &d } else { &s }).store(true, Ordering::Relaxed);
-                        ctx.request_repaint();
-                    }
-                    held = combo;
+                let down = |key: i32| unsafe { GetAsyncKeyState(key) } as u16 & 0x8000 != 0;
+                let combo = down(0x11) && down(0xA4) && down(0x43);
+                if combo && !held {
+                    // with Shift it opens the Desk, without it calls Clipster
+                    (if down(0x10) { &d } else { &s }).store(true, Ordering::Relaxed);
+                    ctx.request_repaint();
                 }
+                held = combo;
                 std::thread::sleep(std::time::Duration::from_millis(40));
             }
         });

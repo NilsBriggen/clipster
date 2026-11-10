@@ -170,7 +170,7 @@ pub fn briefing(events: &[crate::calendar::Event], timers: &[crate::timers::Time
     }
     let rings: Vec<&crate::timers::Timer> = timers.iter().filter(|t| t.when() > now && t.when().date() == today).collect();
     if !rings.is_empty() {
-        out.push(format!("⏰ {}", rings.iter().take(3).map(|t| format!("{} {}", clock(t.when()), t.label)).collect::<Vec<_>>().join(" · ")));
+        out.push(format!("⏰ {}", rings.iter().take(3).map(|t| format!("{} {}", clock(t.when()), crate::timers::shown_label(&t.label))).collect::<Vec<_>>().join(" · ")));
     }
     let top: Vec<&str> = todos.iter().filter(|i| i.top_today(today)).map(|i| i.text.as_str()).collect();
     if !top.is_empty() {
@@ -217,7 +217,7 @@ pub fn coming_up(events: &[crate::calendar::Event], timers: &[crate::timers::Tim
         out.push(Upcoming::Event { title: e.title.clone(), at: e.start, join: e.join.clone(), key: e.key() });
     }
     if let Some(t) = timers.iter().filter(|t| t.when() > now && t.when() <= now + chrono::Duration::hours(24)).min_by_key(|t| t.at) {
-        out.push(Upcoming::Reminder { id: t.id, label: t.label.clone(), at: t.when() });
+        out.push(Upcoming::Reminder { id: t.id, label: crate::timers::shown_label(&t.label), at: t.when() });
     }
     let mut soon: Vec<(i64, &crate::people::Person, Option<i32>)> = people.iter().filter_map(|p| p.next_birthday(today).map(|(d, age)| (d, p, age))).filter(|(d, _, _)| *d <= 7).collect();
     soon.sort_by_key(|s| s.0);
@@ -394,7 +394,7 @@ pub fn week_ahead(events: &[crate::calendar::Event], timers: &[crate::timers::Ti
             items.extend(day.iter().map(|e| Ahead::Event { at: (!e.all_day).then(|| e.start.time()), title: e.title.clone() }));
             let mut rings: Vec<&crate::timers::Timer> = timers.iter().filter(|t| t.when().date() == date).collect();
             rings.sort_by_key(|t| t.at);
-            items.extend(rings.iter().map(|t| Ahead::Reminder { at: t.when().time(), label: t.label.clone() }));
+            items.extend(rings.iter().map(|t| Ahead::Reminder { at: t.when().time(), label: crate::timers::shown_label(&t.label) }));
             for (line, i) in todos.iter().enumerate().filter(|(_, i)| i.list.is_none() && !i.is_step()) {
                 let due = i.due.is_some_and(|d| d == date || n == 0 && d < date && !i.done);
                 if due && (!i.done || i.done_on == Some(date)) {

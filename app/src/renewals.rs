@@ -13,6 +13,7 @@ pub struct Renewal {
     pub lead: u32,             // days of heads-up
     pub amount: Option<String>,
     pub note: Option<String>,
+    pub day: u32, // the day of the month it's on (the 31st stays the 31st, or the month's last day)
 }
 
 const ID_PAPERS: &[&str] = &["passport", "id card", "identity card", "id", "licence", "license", "driving licence", "driver's license", "visa", "residence permit"];
@@ -25,7 +26,7 @@ pub fn lead_for(what: &str) -> u32 {
 
 impl Renewal {
     pub fn to_json(&self) -> Value {
-        json!({ "what": self.what, "date": self.date.to_string(), "every": self.every, "lead": self.lead, "amount": self.amount, "note": self.note })
+        json!({ "what": self.what, "date": self.date.to_string(), "every": self.every, "lead": self.lead, "amount": self.amount, "note": self.note, "day": self.day })
     }
 
     pub fn from_json(v: &Value) -> Option<Self> {
@@ -33,22 +34,42 @@ impl Renewal {
         let date = NaiveDate::parse_from_str(v["date"].as_str()?, "%Y-%m-%d").ok()?;
         let every = v["every"].as_str().filter(|e| ["month", "year"].contains(e)).map(String::from);
         let lead = v["lead"].as_u64().map_or_else(|| lead_for(&what), |l| l.min(365) as u32);
-        (!what.is_empty()).then(|| Renewal { what, date, every, lead, amount: v["amount"].as_str().map(String::from), note: v["note"].as_str().map(String::from) })
+        let day = v["day"].as_u64().map_or(date.day(), |d| d.clamp(1, 31) as u32);
+        (!what.is_empty()).then(|| Renewal { what, date, every, lead, amount: v["amount"].as_str().map(String::from), note: v["note"].as_str().map(String::from), day })
     }
 
     /// The next date after a renewal: a month or a year on (the 31st becomes the month's last day).
     pub fn next(&self) -> Option<NaiveDate> {
-        match self.every.as_deref() {
+        let n = match self.every.as_deref() {
             Some("month") => self.date.checked_add_months(Months::new(1)),
             Some("year") => self.date.checked_add_months(Months::new(12)),
             _ => None,
-        }
+        }?;
+        // its own day again where the month has it (28 Feb, then 31 Mar)
+        let day = if self.day == 0 { self.date.day() } else { self.day };
+        (1..=day).rev().find_map(|d| n.with_day(d))
     }
 
-    /// "runs out" for papers and warranties, "renews" for things that repeat.
+    /// "renews", "runs out", "is due for service": how it reads in a sentence.
     pub fn verb(&self) -> &'static str {
         if self.every.is_some() { "renews" } else { "runs out" }
     }
+
+}
+
+// The renewals' names, for the chat ("I paid the rent" only counts for one you keep), like habits'.
+thread_local! {
+    static NAMES: std::cell::RefCell<Vec<String>> = const { std::cell::RefCell::new(Vec::new()) };
+}
+
+pub fn set_names(list: &[Renewal]) {
+    NAMES.with_borrow_mut(|n| *n = list.iter().map(|r| r.what.to_lowercase()).collect());
+}
+
+pub fn known(what: &str) -> bool {
+    let w = what.trim().to_lowercase();
+    let w = w.trim_start_matches("my ").trim_start_matches("the ").trim_end_matches(" renewal").trim_end_matches(" bill").trim().to_string();
+    !w.is_empty() && NAMES.with_borrow(|n| n.iter().any(|x| *x == w || x.contains(&w) || w.contains(x.as_str())))
 }
 
 fn find(list: &[Renewal], what: &str) -> Option<usize> {
@@ -89,7 +110,10 @@ pub fn change(list: &mut Vec<Renewal>, cmd: &str, today: NaiveDate) -> String {
             let amount = parts.get(3).filter(|a| !a.is_empty() && **a != "-").map(|a| a.to_string());
             let what = crate::writing::cap_first(what.trim_start_matches("my ").trim_start_matches("the "));
             list.retain(|r| r.what.to_lowercase() != what.to_lowercase());
-            let r = Renewal { lead: lead_for(&what), what, date, every, amount, note: None };
+            if date < today {
+                return format!("{} has passed already. When is the next one?", date.format("%-d %B %Y"));
+            }
+            let r = Renewal { lead: lead_for(&what), what, date, every, amount, note: None, day: date.day() };
             let days = (r.date - today).num_days();
             let text = format!("Noted: {} {} on {} ({}). I'll remind you {} days ahead.", r.what, r.verb(), r.date.format("%-d %B %Y"), if days == 0 { "today".to_string() } else { format!("in {days} days") }, r.lead);
             list.push(r);
@@ -126,9 +150,28 @@ pub fn change(list: &mut Vec<Renewal>, cmd: &str, today: NaiveDate) -> String {
     }
 }
 
-/// Those within their heads-up (or past), soonest first: (renewal, days left).
+/// Repeating ones whose date has gone by move on by themselves (a subscription renews whether you say so or not).
+/// True when something changed.
+pub fn advance(list: &mut [Renewal], today: NaiveDate) -> bool {
+    let mut changed = false;
+    for r in list.iter_mut().filter(|r| r.every.is_some()) {
+        let mut guard = 0;
+        while r.date < today && guard < 600 {
+            match r.next() {
+                Some(n) => r.date = n,
+                None => break,
+            }
+            guard += 1;
+            changed = true;
+        }
+    }
+    list.sort_by_key(|r| r.date);
+    changed
+}
+
+/// Those within their heads-up (and one-offs that ran out in the last week), soonest first: (renewal, days left).
 pub fn due_soon(list: &[Renewal], today: NaiveDate) -> Vec<(&Renewal, i64)> {
-    let mut v: Vec<(&Renewal, i64)> = list.iter().map(|r| (r, (r.date - today).num_days())).filter(|(r, d)| *d <= r.lead as i64).collect();
+    let mut v: Vec<(&Renewal, i64)> = list.iter().map(|r| (r, (r.date - today).num_days())).filter(|(r, d)| *d <= r.lead as i64 && *d >= -7).collect();
     v.sort_by_key(|(_, d)| *d);
     v
 }
@@ -155,6 +198,16 @@ mod tests {
         assert!(change(&mut l, "renewed netflix", d(2026, 11, 16)).contains("15 December 2026"));
         assert!(change(&mut l, "renewed the passport", today).contains("When does the new passport"));
         assert!(change(&mut l, "remove the car insurance renewal", today).starts_with("Forgotten"));
+        // the 31st every month stays the 31st where there is one
+        let mut rent = vec![Renewal { what: "Rent".into(), date: d(2027, 1, 31), every: Some("month".into()), lead: 30, amount: None, note: None, day: 31 }];
+        change(&mut rent, "renewed rent", d(2027, 2, 1));
+        assert_eq!(rent[0].date, d(2027, 2, 28));
+        change(&mut rent, "renewed rent", d(2027, 3, 1));
+        assert_eq!(rent[0].date, d(2027, 3, 31));
+        // a subscription moves on by itself
+        let mut subs = vec![Renewal { what: "Netflix".into(), date: d(2026, 10, 15), every: Some("month".into()), lead: 30, amount: None, note: None, day: 15 }];
+        assert!(advance(&mut subs, today) && subs[0].date == d(2026, 11, 15));
+        assert!(change(&mut l, "add old pass|3 march 2020|-|-", today).contains("passed already"));
         let back = Renewal::from_json(&l[0].to_json()).unwrap();
         assert_eq!(back, l[0]);
     }

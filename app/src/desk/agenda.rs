@@ -316,7 +316,7 @@ impl Desk {
                                 (None, e) if e > 0 => format!(" · every {}", brain::fmt_dur(e)),
                                 _ => String::new(),
                             };
-                            let wt = line(ui, pos2(tx, cy), &format!("{}{again}", if tm.label.is_empty() { "Timer" } else { &tm.label }), look.font(12.5), look.text(), right - tx);
+                            let wt = line(ui, pos2(tx, cy), &format!("{}{again}", if tm.label.is_empty() { "Timer".to_string() } else { crate::timers::shown_label(&tm.label) }), look.font(12.5), look.text(), right - tx);
                             if ui.interact(Rect::from_min_size(pos2(x0, y), vec2(tx - x0 + wt, pitch)), Id::unique(("agenda-timer", tm.id, first + n)), Sense::click()).on_hover_text("Move, rename or cancel it").on_hover_cursor(egui::CursorIcon::PointingHand).clicked() {
                                 self.card = Some(Card::Timer(tm.id));
                                 self.timer_when.clear();
@@ -412,7 +412,7 @@ impl Desk {
                 // what's on: the first thing's title (with its colour) under the day, and "+2" for the rest: meetings
                 // (their calendar's colour), reminders, to-dos due, birthdays and countdowns
                 let mut on: Vec<(String, Color32)> = view.events.iter().filter(|e| e.start.date() == *d || e.all_day && e.start.date() <= *d && e.end.date() > *d).map(|e| (e.title.clone(), if e.cal == crate::calendar::HOLIDAY { look.danger() } else { cal_color(look, view.calendars.get(e.cal).map_or(0, |c| c.color)) })).collect();
-                on.extend(view.timers.iter().filter(|t| t.when().date() == *d).map(|t| (if t.label.is_empty() { "Timer".to_string() } else { t.label.clone() }, look.score(70))));
+                on.extend(view.timers.iter().filter(|t| t.when().date() == *d).map(|t| (if t.label.is_empty() { "Timer".to_string() } else { crate::timers::shown_label(&t.label) }, look.score(70))));
                 on.extend(self.files.todos.iter().filter(|t| !t.done && t.list.is_none() && t.due == Some(*d)).map(|t| (t.text.clone(), look.dim())));
                 if birthdays.contains(d) {
                     on.push(("🎂 Birthday".to_string(), look.score(100)));
@@ -595,7 +595,7 @@ impl Desk {
                 (None, e) if e > 0 => format!(" · every {}", brain::fmt_dur(e)),
                 _ => String::new(),
             };
-            line(ui, pos2(x0 + tw + 8.0, cy), &format!("{}{again}", if tm.label.is_empty() { "Timer" } else { &tm.label }), look.font(12.5), look.text(), end - x0 - tw - 10.0);
+            line(ui, pos2(x0 + tw + 8.0, cy), &format!("{}{again}", if tm.label.is_empty() { "Timer".to_string() } else { crate::timers::shown_label(&tm.label) }), look.font(12.5), look.text(), end - x0 - tw - 10.0);
         }
     }
 

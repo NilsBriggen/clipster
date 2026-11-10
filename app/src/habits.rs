@@ -142,6 +142,11 @@ pub fn change(habits: &mut Vec<Habit>, cmd: &str, today: NaiveDate) -> (&'static
             habits[i].target = Some(n);
             ("habit_target", habits[i].name.clone())
         }
+        // "+1 walk" on a habit that doesn't count: it's ticked, not set to "1 of nothing"
+        ("count", Some(i)) if habits[i].target.is_none() => {
+            tick(&mut habits[i], today);
+            ("habit_done", habits[i].name.clone())
+        }
         ("count", Some(i)) => {
             let n = match value.parse::<u8>() {
                 Ok(n) => n,
@@ -177,11 +182,15 @@ pub fn change(habits: &mut Vec<Habit>, cmd: &str, today: NaiveDate) -> (&'static
             let mut parts = value.split_whitespace();
             let slot = parts.next().and_then(|t| NaiveTime::parse_from_str(t, "%H:%M").ok());
             let now = parts.next().and_then(|t| NaiveTime::parse_from_str(t, "%H:%M").ok()).unwrap_or(NaiveTime::MIN);
-            // no slot named: the nearest open one ("I took my pills")
-            let slot = slot.or_else(|| habits[i].times.iter().filter(|s| habits[i].taken_on(today, **s).is_none()).min_by_key(|s| (s.signed_duration_since(now)).num_minutes().abs()).copied());
+            // no slot named: the nearest open one within three hours ("I took my pills"); a dose hours away isn't it
+            let near = |s: &NaiveTime| s.signed_duration_since(now).num_minutes().abs();
+            let slot = slot.or_else(|| habits[i].times.iter().filter(|s| habits[i].taken_on(today, **s).is_none() && near(s) <= 180).min_by_key(|s| near(s)).copied());
             let Some(slot) = slot else {
-                tick(&mut habits[i], today);
-                return ("habit_done", habits[i].name.clone());
+                if habits[i].times.is_empty() {
+                    tick(&mut habits[i], today);
+                    return ("habit_done", habits[i].name.clone());
+                }
+                return ("habit_dose_none", habits[i].name.clone());
             };
             habits[i].taken.retain(|(d, s, _)| !(*d == today && *s == slot) && *d + Days::new(90) > today);
             habits[i].taken.push((today, slot, now));
@@ -259,8 +268,12 @@ mod tests {
         change(&mut h, "dose pills|08:00 08:04", d(9));
         assert_eq!(h[1].taken_on(d(9), t("08:00")), Some(t("08:04")));
         assert!(!h[1].done_on(d(9)));
+        assert_eq!(change(&mut h, "dose pills|- 13:00", d(9)).0, "habit_dose_none", "20:00 is hours away: not that one");
         change(&mut h, "dose pills|- 19:50", d(9)); // "I took my pills" in the evening: the open dose nearest now
         assert!(h[1].taken_on(d(9), t("20:00")).is_some() && h[1].done_on(d(9)));
+        change(&mut h, "add walk", d(9));
+        assert_eq!(change(&mut h, "count walk", d(9)).0, "habit_done", "+1 on a plain habit ticks it");
+        assert!(h[2].done_on(d(9)));
         let back = Habit::from_json(&h[1].to_json()).unwrap();
         assert_eq!(back, h[1], "doses survive a save");
     }

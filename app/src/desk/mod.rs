@@ -408,13 +408,16 @@ impl Desk {
         self.forget_all = false;
         self.renaming_list = None;
         self.files.at = None;
-        // a fresh start: no day picked earlier, no question or card left open from last time with a live Yes
-        self.agenda_day = None;
-        self.confirming = None;
-        self.wrapping = false;
-        self.workday_open = false;
-        self.card = None;
-        self.popup = None;
+        // a fresh start: no day picked earlier, no question or card left open from last time with a live Yes (only
+        // when it was closed: Meta+Shift+C while it's open keeps the card you're typing in)
+        if !self.open {
+            self.agenda_day = None;
+            self.confirming = None;
+            self.wrapping = false;
+            self.workday_open = false;
+            self.card = None;
+            self.popup = None;
+        }
     }
 
     pub fn is_open(&self) -> bool {

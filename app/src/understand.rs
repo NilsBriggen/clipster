@@ -255,8 +255,9 @@ fn followup(raw: &str) -> Option<Reply> {
 /// What you typed after he asked you something (`## ask <id>`): his reaction, and the fact if it was a fact question
 /// (the ids "city", "job", "pet", "fav_food", "fav_music" are also fact keys).
 pub fn answer_to(id: &str, text: &str) -> Reply {
-    // "timer 5m tea" typed while he waited for your city is a command, not your city
-    if exact(text).or_else(|| exact(&clean(text))).is_some() {
+    // "timer 5m tea" typed while he waited for your city is a command, not your city; a single word ("cat", "music",
+    // "silence") is an answer, even when it's also a command
+    if text.split_whitespace().count() >= 2 && exact(text).or_else(|| exact(&clean(text))).is_some() {
         return respond(text);
     }
     let t = tidy_words(text);
@@ -509,10 +510,20 @@ fn grief(s: &str) -> Option<Reply> {
 /// plain repeating reminder), "add a medicine called vitamin d at 9". Before the timers, which would read only the 8.
 fn doses(s: &str, raw: &str) -> Option<Reply> {
     // doses: "remind me to take my pills every day at 8 and 20", "add a medicine called vitamin d at 9"
-    if let Some((what, times)) = after(s, &["remind me to take my ", "remind me to take "]).and_then(|r| r.split_once(" every day at ").or_else(|| r.split_once(" daily at ")).or_else(|| r.split_once(" at "))) {
+    // only medicine ("take a break at 3 and 5" isn't a dose)
+    const MEDS: &[&str] = &["pill", "pills", "tablet", "tablets", "medicine", "medicines", "medication", "meds", "vitamin", "vitamins", "drops", "insulin", "inhaler", "antibiotics", "dose", "capsule", "capsules", "iron", "magnesium", "supplement", "supplements"];
+    if let Some((what, times)) = after(s, &["remind me to take my ", "remind me to take "]).and_then(|r| r.split_once(" every day at ").or_else(|| r.split_once(" daily at ")).or_else(|| r.split_once(" at "))).filter(|(w, _)| w.split_whitespace().any(|x| MEDS.contains(&x))) {
+        // without am/pm a time is read like a reminder's (1–6 is the afternoon), and a later dose is never earlier
+        // than the one before ("at 9 and 5" is 9:00 and 17:00)
+        let mut last = 0;
         let slots: Vec<String> = times.split(" and ").flat_map(|t| t.split(", ")).filter_map(|t| {
             let (hours, m, _) = hm(t.trim())?;
-            Some(format!("{:02}:{m:02}", hours[0]))
+            let mut h = if hours.len() == 2 && hours[0] < 7 { hours[1] } else { hours[0] };
+            if hours.len() == 2 && h < last {
+                h = hours[1];
+            }
+            last = h;
+            Some(format!("{h:02}:{m:02}"))
         }).collect();
         if slots.len() >= 2 {
             return go(format!("habit times {}|{}", keep(raw, what), slots.join(",")));
@@ -537,7 +548,8 @@ fn renewal_talk(s: &str, raw: &str) -> Option<Reply> {
     if ["my renewals", "show my renewals", "list my renewals", "renewals", "my subscriptions", "my contracts"].contains(&s) {
         return go("renewals".into());
     }
-    if let Some(w) = after(s, &["renewed the ", "renewed my ", "i renewed the ", "i renewed my ", "i paid the ", "paid my "]) {
+    // only for one you keep ("I paid the waiter" is just a sentence)
+    if let Some(w) = after(s, &["renewed the ", "renewed my ", "i renewed the ", "i renewed my ", "i paid the ", "i paid my ", "paid my ", "paid the "]).map(|w| w.trim_end_matches(" today")).filter(|w| crate::renewals::known(w)) {
         return go(format!("renewal renewed {}", keep(raw, w)));
     }
     if let Some(w) = after(s, &["forget the ", "forget my ", "remove the ", "remove my ", "delete the "]).and_then(|w| w.strip_suffix(" renewal").or_else(|| w.strip_suffix(" subscription"))) {
@@ -563,9 +575,19 @@ fn renewal_talk(s: &str, raw: &str) -> Option<Reply> {
     let date = crate::todo::parse_when(&when, today).flatten().or_else(|| crate::renewals::month_end(&when, today))?;
     let days = (date - today).num_days();
     let cmd = format!("renewal add {}|{}|{}|{}", keep(raw, what), date, every.unwrap_or("-"), amount.map(|a| keep(raw, a)).unwrap_or_else(|| "-".into()));
+    if days < 0 && every.is_none() {
+        return Some(Reply::say(format!("{} has passed already. When is the next one?", date.format("%-d %B %Y"))).mood(Mood::Think));
+    }
     // "the milk expires tomorrow": soon and once is a to-do, not a renewal
     if days < 14 && every.is_none() {
-        return Some(Reply::say(format!("{} {}{}. A to-do for it?", crate::writing::cap_first(&keep(raw, what)), verb.trim().split_whitespace().next().unwrap_or("expires"), match days { d if d <= 0 => " today".to_string(), 1 => " tomorrow".to_string(), d => format!(" in {d} days") })).mood(Mood::Think).run("Yes, a to-do", &format!("todo {} by {date}", keep(raw, what))).run("Keep it as a renewal", &cmd).btn("No", Act::Hide));
+        // the verb as said, without its "on"/"in": "runs out", "is due for service"
+        let said = verb.trim().trim_end_matches(" on").trim_end_matches(" in").trim_end_matches(" every");
+        let when = match days {
+            0 => " today".to_string(),
+            1 => " tomorrow".to_string(),
+            d => format!(" in {d} days"),
+        };
+        return Some(Reply::say(format!("{} {said}{when}. A to-do for it?", crate::writing::cap_first(&keep(raw, what)))).mood(Mood::Think).run("Yes, a to-do", &format!("todo {} by {date}", keep(raw, what))).run("Keep it as a renewal", &cmd).btn("No", Act::Hide));
     }
     go(cmd)
 }
@@ -578,6 +600,10 @@ fn appointment(s: &str, raw: &str) -> Option<Reply> {
         "checkup", "check up", "massage", "optician", "lawyer", "meeting", "call", "lunch", "dinner", "date", "party", "flight", "train", "exam",
         "class", "lesson", "gym", "yoga", "concert", "match", "game", "visit", "mechanic", "garage", "delivery", "pickup", "parents evening", "rehearsal", "practice",
     ];
+    // "todo call the dentist tomorrow at 10", "note dentist on tuesday at 10": what you asked for, not a question
+    if adding_todo(s) || ["note ", "note: ", "journal", "add ", "put ", "todo ", "to do "].iter().any(|p| s.starts_with(p)) || exact(raw).is_some() {
+        return None;
+    }
     let words: Vec<&str> = s.split_whitespace().collect();
     // short, about an appointment, and not something that already happened
     if words.len() > 9 || !has(s, KINDS) || has(s, &["was", "were", "had", "went", "did", "cancelled", "canceled", "every", "remind", "timer", "how", "what", "when", "why", "should"]) {
@@ -597,6 +623,17 @@ fn appointment(s: &str, raw: &str) -> Option<Reply> {
     if !timed || ["move ", "push ", "reschedule ", "postpone ", "put off "].iter().any(|p| s.starts_with(p)) {
         return None;
     }
+    // dinner, a party, a concert at "8": the evening (written as 20:00 so dated reads it that way)
+    let evening = has(s, &["dinner", "party", "concert", "date", "match", "game", "drinks", "show", "movie", "cinema", "theatre", "theater"]);
+    let with_at = if evening {
+        let w: Vec<&str> = with_at.split_whitespace().collect();
+        w.iter().enumerate().map(|(i, x)| match (i > 0 && w[i - 1] == "at", x.parse::<u32>()) {
+            (true, Ok(h)) if (7..=11).contains(&h) => format!("{}:00", h + 12),
+            _ => x.to_string(),
+        }).collect::<Vec<_>>().join(" ")
+    } else {
+        with_at
+    };
     let (secs, _, when) = dated(&with_at)?;
     // what it is: the words that aren't the day or the time ("i have a dentist appointment" -> "dentist appointment")
     let skip = ["on", "at", "next", "tomorrow", "tonight", "this", "morning", "afternoon", "evening", "i", "have", "a", "an", "my", "the", "got", "is", "there", "s"];
@@ -631,7 +668,7 @@ fn appointment(s: &str, raw: &str) -> Option<Reply> {
 /// Saying and asking where a thing is. Only for things: not people or pets ("my mum is in Rome"), not feelings or
 /// idioms ("my head is in the clouds"), and never a code or password (things.rs refuses those).
 fn where_things(s: &str, raw: &str) -> Option<Reply> {
-    const NOT_THINGS: &[&str] = &["head", "heart", "mind", "money", "ball", "life", "soul", "love", "focus", "attention", "faith", "trust", "hope", "mood", "brain", "stomach", "back", "leg", "arm", "foot", "hand", "eye", "eyes", "work", "job", "boss", "wife", "husband", "partner", "mum", "mom", "dad", "mother", "father", "son", "daughter", "kid", "kids", "child", "children", "brother", "sister", "friend", "family", "girlfriend", "boyfriend", "grandma", "grandpa", "dog", "cat", "pet", "car insurance", "flight", "train", "meeting", "birthday", "name", "favorite", "favourite", "phone number", "email", "address"];
+    const NOT_THINGS: &[&str] = &["exam", "wedding", "holiday", "holidays", "vacation", "appointment", "party", "interview", "problem", "bug", "issue", "error", "office", "company", "school", "class", "concert", "game", "match", "trip", "flight", "head", "heart", "mind", "money", "ball", "life", "soul", "love", "focus", "attention", "faith", "trust", "hope", "mood", "brain", "stomach", "back", "leg", "arm", "foot", "hand", "eye", "eyes", "work", "job", "boss", "wife", "husband", "partner", "mum", "mom", "dad", "mother", "father", "son", "daughter", "kid", "kids", "child", "children", "brother", "sister", "friend", "family", "girlfriend", "boyfriend", "grandma", "grandpa", "dog", "cat", "pet", "car insurance", "flight", "train", "meeting", "birthday", "name", "favorite", "favourite", "phone number", "email", "address"];
     let thingy = |t: &str| {
         let k = crate::things::key(t);
         !k.is_empty() && k.split_whitespace().count() <= 3 && !NOT_THINGS.contains(&k.as_str()) && !NOT_THINGS.iter().any(|n| k.ends_with(&format!(" {n}"))) && !crate::people::known(&k) && !PETS.iter().any(|p| k == *p)
@@ -648,7 +685,9 @@ fn where_things(s: &str, raw: &str) -> Option<Reply> {
         }
     }
     if let Some(place) = after(s, &["what is in my ", "what is in the ", "what did i put in the ", "what did i put in my ", "what is inside my "]).filter(|p| p.split_whitespace().count() <= 4) {
-        if !["news", "weather", "calendar", "agenda", "list", "notes", "to do list", "diary", "journal", "trash", "bin", "recycle bin", "inbox", "clipboard", "downloads", "cloud"].contains(&crate::things::key(place).as_str()) {
+        // "what's in my calendar today", "what is in my downloads folder": not a place in the house
+        let first = crate::things::key(place).split_whitespace().next().unwrap_or("").to_string();
+        if !["news", "weather", "calendar", "agenda", "list", "notes", "to", "diary", "journal", "trash", "bin", "recycle", "inbox", "clipboard", "downloads", "documents", "desktop", "cloud", "email", "mail", "folder", "files", "head", "mind", "schedule", "plan", "plans"].contains(&first.as_str()) {
             return go(format!("thing in {}", keep(raw, place)));
         }
     }
@@ -662,7 +701,7 @@ fn where_things(s: &str, raw: &str) -> Option<Reply> {
     let put = after(s, &["i put my ", "i put the ", "i moved my ", "i moved the ", "i keep my ", "i keep the ", "i hid my ", "i hid the "]).and_then(|r| [" in ", " on ", " under ", " with ", " at ", " behind ", " inside ", " to "].iter().find_map(|p| r.split_once(p).map(|(t, pl)| (t, format!("{}{pl}", if *p == " to " { "in " } else { &p[1..] })))));
     if let Some((thing, place)) = said.or(put) {
         // "my mum is in Rome", "my head is in the clouds", "my dog is in heaven", "the meeting is at 3": not a thing's place
-        let days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday", "today", "tomorrow", "tonight", "the weekend"];
+        let days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday", "today", "tomorrow", "tonight", "weekend", "january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december", "spring", "summer", "autumn", "winter", "silent", "mute", "charge", "speaker", "fire", "sale"];
         let past_or_time = place.split_whitespace().any(|w| w.chars().all(|c| c.is_ascii_digit() || c == ':') || days.contains(&w))
             || ["heaven", "hospital", "the past", "trouble", "love", "pain", "a meeting", "cloud", "fire", "a language", "danger", "a hurry", "a mess", "pieces", "tears", "shock", "the way", "progress", "the mail", "the post"].iter().any(|w| place.contains(w));
         if thingy(thing) && !past_or_time && place.split_whitespace().count() <= 8 {
@@ -773,10 +812,22 @@ fn timers(s: &str, raw: &str) -> Option<Reply> {
     if !has(s, TIMER_WORDS) && s.starts_with("in ") && s.split_whitespace().nth(2).is_some_and(|u| u.starts_with("year") || u.starts_with("month")) {
         return None;
     }
-    // counting days, weeks, months or years: "every 3 days", "every other week", "every year on 3 march"
-    if let Some(i) = s.find("every ") {
-        if let Some((rule, rest)) = crate::timers::parse_interval(&s[i + 6..], chrono::Local::now().date_naive()) {
+    // a day of the month: "on the 15th of every month", "every month on the 31st" (m31 keeps the month's last day)
+    if let Some(i) = ["on the ", "every month on ", "each month on "].iter().filter_map(|p| s.find(p)).min() {
+        if let Some((rule, rest)) = crate::timers::parse_monthly(&s[i..]) {
             return go(format!("everyat {rule}|{}", keep(raw, &label(&s[..i], &rest))));
+        }
+    }
+    // "on 3 march every year": the day said first is read as if it came after ("every year on 3 march")
+    let moved: Option<String> = ["every year", "each year"].iter().find_map(|y| s.find(y)).and_then(|i| {
+        let j = s[..i].rfind(" on ")?;
+        Some(format!("{} every year on {} {}", &s[..j], s[j + 4..i].trim(), s[i + 10..].trim()))
+    });
+    let s2 = moved.as_deref().unwrap_or(s);
+    // counting days, weeks, months or years: "every 3 days", "every other week", "every year on 3 march"
+    if let Some(i) = s2.find("every ") {
+        if let Some((rule, rest)) = crate::timers::parse_interval(&s2[i + 6..], chrono::Local::now().date_naive()) {
+            return go(format!("everyat {rule}|{}", keep(raw, &label(&s2[..i], &rest))));
         }
     }
     // by the calendar: "remind me every weekday at 8 to take my pills", "on the 1st of every month pay rent"
@@ -1559,7 +1610,9 @@ fn people_talk(s: &str, raw: &str) -> Option<Reply> {
     }
     for verb in [" would like ", " wants ", " would love "] {
         if let Some((name, idea)) = s.split_once(verb) {
-            if let Some(n) = known(name).filter(|_| idea.split_whitespace().count() <= 6) {
+            // a thing ("a scarf", "the dune book"), not something to do ("to go to the cinema", "me to call her")
+            let a_thing = !["to ", "me ", "you ", "us ", "him ", "her ", "them ", "it ", "that ", "this "].iter().any(|p| idea.starts_with(p)) && idea != "to";
+            if let Some(n) = known(name).filter(|_| a_thing && idea.split_whitespace().count() <= 6) {
                 return go(format!("person gift {n}|{}", keep(raw, idea.trim_start_matches("a ").trim_start_matches("an "))));
             }
         }
@@ -1668,7 +1721,7 @@ fn notes(s: &str, raw: &str) -> Option<Reply> {
     }
     // "delete the note about milk": that one note, not all of them
     if let Some(x) = after(s, &["delete the note about ", "remove the note about ", "forget the note about ", "delete my note about ", "remove my note about ", "delete the note ", "remove the note "]).filter(|x| !x.is_empty()) {
-        return go(format!("note drop {}", keep(raw, x)));
+        return go(format!("notedrop {}", keep(raw, x)));
     }
     // "remove call Anna from my list": that one item (clearing below only ever takes the finished ones)
     let from_list = [" from my to do list", " from the to do list", " from my todo list", " from my list", " from the list", " off my list", " off my to do list", " off the list", " from my tasks"];
@@ -1857,7 +1910,9 @@ fn notes(s: &str, raw: &str) -> Option<Reply> {
     // "Ben sent the numbers", "got the slides from Anna": ticks the one thing you were waiting on from them
     let from = s.split_once(" sent ").map(|(w, _)| w).or_else(|| s.split_once(" replied").map(|(w, _)| w)).or_else(|| s.split_once(" got back to me").map(|(w, _)| w)).or_else(|| s.strip_prefix("got ").and_then(|r| r.rsplit_once(" from ")).map(|(_, w)| w));
     if let Some(who) = from.filter(|w| !w.is_empty() && w.split_whitespace().count() <= 2 && !["i", "you", "he", "she", "they", "it", "we", "someone"].contains(w)) {
-        if let Some(r) = go(format!("todos gotfrom {}", keep(raw, who))) {
+        // what came: it must be what you waited for ("Ben sent me a funny video" isn't the numbers)
+        let what = s.split_once(" sent ").map(|(_, w)| w).or_else(|| s.strip_prefix("got ").and_then(|r| r.rsplit_once(" from ")).map(|(w, _)| w)).unwrap_or("");
+        if let Some(r) = go(format!("todos gotfrom {}|{what}", keep(raw, who))) {
             return Some(r);
         }
     }
@@ -2876,7 +2931,7 @@ mod tests {
         assert!(timer("remind me on june 3 to send the report").is_some());
         assert!(matches!(eff("remind me in 10 minutes to stretch"), Effect::Timer(600, _)), "plain timers still work");
         assert_eq!(eff("cancel the tea timer"), Effect::CancelTimer("tea".into()));
-        assert!(respond("cancel all timers").buttons.iter().any(|b| b.1 == Act::Run("cancel all confirmed".into())), "asks first");
+        assert_eq!(eff("cancel all timers"), Effect::CancelAsk, "asks first, in the app (with the count)");
         assert_eq!(eff("cancel all confirmed"), Effect::CancelTimers);
     }
 
@@ -2926,7 +2981,7 @@ mod tests {
         assert_eq!(eff("start a 15 minute timer for pasta"), Effect::Timer(900, "pasta".into()));
         assert_eq!(eff("wake me up in half an hour"), Effect::Timer(1800, "Time's up!".into()));
         assert!(matches!(eff("remind me at 5pm to leave"), Effect::Timer(s, l) if s <= 86400 && l == "leave"));
-        assert!(respond("delete my reminders").buttons.iter().any(|b| b.1 == Act::Run("cancel all confirmed".into())), "asks first");
+        assert_eq!(eff("delete my reminders"), Effect::CancelAsk, "asks first");
         assert_eq!(eff("set a tiemr for 5 minuts"), Effect::Timer(300, "Time's up!".into()));
     }
 
@@ -3099,6 +3154,9 @@ mod tests {
         assert_eq!(rule("remind me every 3 days to water the plants"), ("n3 09:00".into(), "water the plants".into()), "days, not minutes");
         assert_eq!(rule("remind me to take out the bins every wednesday evening"), ("wednesday 19:00".into(), "take out the bins".into()));
         assert_eq!(rule("remind me every year on 3 March to renew the car insurance"), ("y03-03 09:00".into(), "renew the car insurance".into()));
+        assert_eq!(rule("remind me on 3 march every year to renew the insurance"), ("y03-03 09:00".into(), "renew the insurance".into()), "the day said first");
+        assert_eq!(rule("remind me on the 15th of every month to water the cactus"), ("m15 09:00".into(), "water the cactus".into()));
+        assert_eq!(rule("remind me every month on the 31st to pay rent"), ("m31 09:00".into(), "pay rent".into()), "the 31st, or the month's last day");
         assert_eq!(rule("remind me every other week to clean the fridge"), ("n14 09:00".into(), "clean the fridge".into()));
         assert_eq!(rule("every 2 months change the filter"), ("M2 09:00".into(), "change the filter".into()));
         let timer = |t: &str| match eff(t) {
@@ -3126,6 +3184,8 @@ mod tests {
     fn counting_habits_and_doses_in_the_chat() {
         assert_eq!(eff("8 glasses of water a day"), Effect::Habit("target water|8".into()));
         assert_eq!(eff("remind me to take my pills every day at 8 and 20"), Effect::Habit("times pills|08:00,20:00".into()));
+        assert_eq!(eff("remind me to take my pills at 9 and 5"), Effect::Habit("times pills|09:00,17:00".into()), "the later one in the afternoon");
+        assert!(!matches!(eff("remind me to take a break at 3 and 5"), Effect::Habit(_)), "not a medicine");
         assert_eq!(eff("add a medicine called vitamin D at 9"), Effect::Habit("times vitamin D|09:00".into()));
         assert!(matches!(eff("remind me every day at 8 to take my pills"), Effect::RepeatAt(..)), "one time stays a reminder");
         crate::habits::set_names(&[crate::habits::Habit { name: "Water".into(), ..Default::default() }, crate::habits::Habit { name: "Pills".into(), ..Default::default() }]);
@@ -3146,7 +3206,11 @@ mod tests {
         assert!(matches!(eff("netflix renews on the 15th every month for 12.99"), Effect::Renewal(c) if c.ends_with("|month|12.99")));
         assert!(matches!(eff("my laptop warranty ends in June 2030"), Effect::Renewal(c) if c == "add laptop warranty|2030-06-30|-|-"));
         assert_eq!(eff("what's expiring soon"), Effect::Renewal("soon".into()));
+        crate::renewals::set_names(&[crate::renewals::Renewal { what: "Car insurance".into(), date: today, every: Some("year".into()), lead: 30, amount: None, note: None, day: 1 }]);
         assert_eq!(eff("renewed the car insurance"), Effect::Renewal("renewed car insurance".into()));
+        assert!(!matches!(eff("i paid the waiter"), Effect::Renewal(_)), "only renewals he keeps");
+        assert!(respond("the milk runs out tomorrow").text.starts_with("Milk runs out tomorrow"));
+        assert!(respond("my passport expires on 3 march 2020").text.contains("passed already"));
         assert_eq!(eff("forget the netflix renewal"), Effect::Renewal("remove netflix".into()));
         let milk = respond("the milk expires tomorrow");
         assert!(milk.effect == Effect::None && milk.text.contains("tomorrow") && milk.buttons.iter().any(|b| matches!(&b.1, Act::Run(c) if c.starts_with("todo milk by "))), "soon is a to-do offer");
@@ -3180,7 +3244,7 @@ mod tests {
         assert_eq!(t("where is my passport"), "where passport");
         assert_eq!(t("where's the spare key"), "where spare key");
         assert_eq!(t("what's in my blue bag"), "in blue bag");
-        for not in ["my head is in the clouds", "my mum is in Rome", "the meeting is at 3", "where is bern", "what's in the news"] {
+        for not in ["my head is in the clouds", "my mum is in Rome", "the meeting is at 3", "where is bern", "what's in the news", "my exam is in june", "the bug is in the login page", "my phone is on silent", "what's in my calendar today", "what is in my downloads folder"] {
             assert!(!matches!(eff(not), Effect::Things(_)), "{not}");
         }
         assert!(lines::all("grief").contains(&respond("my dog is in heaven").text) || lines::all("grief").is_empty());
@@ -3203,6 +3267,9 @@ mod tests {
         assert_eq!(p("invite Ben to dinner"), "letter invitation|ben");
         assert!(matches!(eff("who is Ada Lovelace"), Effect::Net(_)), "strangers go to the encyclopedia");
         assert!(!matches!(eff("the weather would like a word"), Effect::People(_)));
+        for not in ["anna wants to go to the cinema", "ben would like to talk to you", "anna wants me to call her"] {
+            assert!(!matches!(eff(not), Effect::People(c) if c.starts_with("gift")), "{not}");
+        }
     }
 
     #[test]
@@ -3226,6 +3293,7 @@ mod tests {
         assert_eq!(eff("remove call Anna from my list"), Effect::Todo(Op::RemoveFrom(String::new(), "call Anna".into())));
         assert_eq!(eff("add buy milk to my todo list by tomorrow"), Effect::Todo(Op::Add("buy milk by tomorrow".into())));
         assert_eq!(eff("delete the note about milk"), Effect::Note("drop milk".into()));
+        assert_eq!(eff("note drop off the parcel"), Effect::Note("add drop off the parcel".into()), "a note to save, not one to delete");
         assert_eq!(eff("add a habit: walk"), Effect::Habit("add walk".into()));
         assert_eq!(eff("move the overdue to-dos to today"), Effect::Todo(Op::OverdueToToday));
         assert_eq!(exact("todo #2 remove the old shed").map(|r| r.effect), Some(Effect::Todo(Op::Add("#2 remove the old shed".into()))), "never delete line 2");

@@ -28,6 +28,14 @@ impl Timer {
     }
 }
 
+/// A label as people read it: a dose ("habit:Pills@08:00") becomes "Pills (8:00)".
+pub fn shown_label(label: &str) -> String {
+    match label.strip_prefix("habit:").and_then(|r| r.split_once('@')) {
+        Some((name, slot)) => format!("{name} ({})", NaiveTime::parse_from_str(slot, "%H:%M").map(crate::brain::clock).unwrap_or_else(|_| slot.to_string())),
+        None => label.to_string(),
+    }
+}
+
 pub fn unix_now() -> i64 {
     std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs() as i64).unwrap_or(0)
 }

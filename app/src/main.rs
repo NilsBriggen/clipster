@@ -823,7 +823,7 @@ impl App {
                 app.sample_upkeep.checks = upkeep::judge(&upkeep::Readings { disk: Some((175_000_000_000, 752_000_000_000)), trash: Some((2_400_000_000, 31)), temp: 43_000_000, uptime: 9 * 86_400, updates: Some(5), battery: Some(82), startup, loose: 24 });
                 app.focus_goal = 120; // so the pictures show a goal and a limit
                 let today = chrono::Local::now().date_naive();
-                let r = |what: &str, days: u64, every: Option<&str>, amount: Option<&str>| renewals::Renewal { what: what.into(), date: today + chrono::Days::new(days), every: every.map(String::from), lead: renewals::lead_for(what), amount: amount.map(String::from), note: None };
+                let r = |what: &str, days: u64, every: Option<&str>, amount: Option<&str>| renewals::Renewal { what: what.into(), date: today + chrono::Days::new(days), every: every.map(String::from), lead: renewals::lead_for(what), amount: amount.map(String::from), note: None, day: chrono::Datelike::day(&(today + chrono::Days::new(days))) };
                 app.renewals = vec![r("Netflix", 5, Some("month"), Some("12.99")), r("Car insurance", 24, Some("year"), Some("640.–")), r("Passport", 110, None, None), r("Laptop warranty", 230, None, None)];
                 for (t, place) in [("passport", "in the top drawer"), ("spare key", "with Anna next door"), ("charger", "in the blue bag"), ("warranty papers", "in the folder on the shelf")] {
                     app.things.insert(t.into(), (place.into(), today.to_string()));
@@ -960,6 +960,8 @@ impl App {
     fn show(&mut self, mut r: Reply) {
         // another balloon replaces his question (a reminder rang, you clicked something): the next line isn't its answer
         self.waiting = None;
+        // a reminder rang, a nudge was said (its day stamped): saved within 2 s like a command, so it doesn't come twice
+        self.settings_dirty = true;
         r.text = self.fill(&r.text);
         // letter templates sign with your name (or leave a blank to fill in)
         let signed = if self.name.is_empty() { "[Your name]".to_string() } else { self.name.clone() };
@@ -1250,10 +1252,12 @@ impl App {
             // Saturday and Sunday: their meetings, reminders and what's due
             let today = now.date();
             let sat = (0..7).map(|n| today + chrono::Days::new(n)).find(|d| chrono::Datelike::weekday(d) == chrono::Weekday::Sat).unwrap_or(today);
+            // on a Sunday the weekend is today
+            let days = if chrono::Datelike::weekday(&today) == chrono::Weekday::Sun { vec![today] } else { vec![sat, sat + chrono::Days::new(1)] };
             let mut text = String::from("This weekend:");
-            for d in [sat, sat + chrono::Days::new(1)] {
+            for d in days {
                 let mut parts: Vec<String> = self.events.iter().filter(|e| e.start.date() == d).map(|e| if e.all_day { e.title.clone() } else { format!("{} {}", brain::clock(e.start), e.title) }).collect();
-                parts.extend(self.timers.iter().filter(|t| t.when().date() == d).map(|t| format!("⏰ {} {}", brain::clock(t.when()), t.label)));
+                parts.extend(self.timers.iter().filter(|t| t.when().date() == d).map(|t| format!("⏰ {} {}", brain::clock(t.when()), timers::shown_label(&t.label))));
                 parts.extend(todo::load().iter().filter(|i| !i.done && i.list.is_none() && i.due == Some(d)).map(|i| format!("✅ {}", i.text)));
                 parts.extend(self.people.iter().filter(|p| p.next_birthday(today).is_some_and(|(n, _)| today + chrono::Days::new(n as u64) == d)).map(|p| format!("🎂 {}", p.name)));
                 text += &format!("\n{}: {}", d.format("%A"), if parts.is_empty() { "nothing planned".to_string() } else { parts.join(" · ") });
@@ -1277,7 +1281,11 @@ impl App {
         let todos = todo::load();
         lines.extend(plan::briefing(&self.events, &self.timers, &todos, &self.people, &self.countdowns, &self.habits, now, self.work_hours));
         for (r, days) in renewals::due_soon(&self.renewals, now.date()).into_iter().filter(|(_, d)| *d <= 14).take(2) {
-            lines.push(format!("📄 {} {} {}.", r.what, r.verb(), if days <= 0 { "today".to_string() } else { format!("in {days} days") }));
+            lines.push(match days {
+                d if d < 0 => format!("📄 {} ran out {} days ago.", r.what, -d),
+                0 => format!("📄 {} {} today.", r.what, r.verb()),
+                d => format!("📄 {} {} in {d} days.", r.what, r.verb()),
+            });
         }
         let all = lines.join("\n");
         let mut r = Reply::say(all.clone()).mood(Mood::Happy);
@@ -1313,6 +1321,7 @@ impl App {
             }
             _ => {
                 let text = renewals::change(&mut self.renewals, cmd, today);
+                renewals::set_names(&self.renewals);
                 Reply::say(text).mood(Mood::Write).run("My renewals", "renewals")
             }
         }
@@ -2821,6 +2830,7 @@ impl App {
         self.habit_nudge = v["habit_nudge"].as_bool().unwrap_or(true);
         self.after_meeting = v["after_meeting"].as_bool().unwrap_or(true);
         self.renewals = v["renewals"].as_array().into_iter().flatten().filter_map(renewals::Renewal::from_json).collect();
+        renewals::set_names(&self.renewals);
         self.things = v["things"].as_object().into_iter().flatten().filter_map(|(k, e)| Some((k.clone(), (e[0].as_str()?.to_string(), e[1].as_str().unwrap_or_default().to_string())))).collect();
         self.countdowns = v["countdowns"].as_array().into_iter().flatten().filter_map(|c| Some((c[0].as_str()?.to_string(), chrono::NaiveDate::parse_from_str(c[1].as_str()?, "%Y-%m-%d").ok()?))).filter(|c| c.1 >= today).collect();
         if v["backup_sources"].is_array() {
@@ -3103,6 +3113,10 @@ impl App {
                     "habit_counted" => h.as_ref().map(|h| format!("{}: {} of {} today.{}", h.name, h.count_on(today), h.target.unwrap_or(0), if h.done_on(today) { " Done for today." } else { "" })),
                     "habit_times" => h.as_ref().map(|h| format!("{}: I'll ask at {} every day.", h.name, h.times.iter().map(|t| brain::clock(*t)).collect::<Vec<_>>().join(" and "))),
                     "habit_dose" => h.as_ref().map(|h| format!("Noted: {} taken at {}.", h.name.to_lowercase(), brain::clock(chrono::Local::now()))),
+                    "habit_dose_none" => h.as_ref().map(|h| {
+                        let next = h.times.iter().find(|t| h.taken_on(today, **t).is_none()).map(|t| format!(" The next one is at {}.", brain::clock(*t))).unwrap_or_default();
+                        format!("No {} dose is due around now: the nearest is noted already.{next}", h.name.to_lowercase())
+                    }),
                     _ => None,
                 };
                 habits::set_names(&self.habits);
@@ -3118,6 +3132,17 @@ impl App {
             Effect::Things(cmd) => r = self.things_command(&cmd),
             Effect::Renewal(cmd) => r = self.renewal_command(&cmd),
             Effect::Briefing(weekend) => r = self.briefing(weekend),
+            Effect::CancelAsk => {
+                let (n, repeating) = (self.timers.len(), self.timers.iter().filter(|t| t.every > 0 || t.rule.is_some()).count());
+                r = match n {
+                    0 => Reply::say("No timers or reminders are running.").mood(Mood::Think),
+                    _ => Reply::say(format!("Cancel {} {}{}?", if n == 1 { "the one".to_string() } else { format!("all {n}") }, if n == 1 { "timer or reminder" } else { "timers and reminders" }, if repeating > 0 { format!(", {repeating} of them repeating") } else { String::new() }))
+                        .mood(Mood::Think)
+                        .run("Yes, cancel them", "cancel all confirmed")
+                        .run("Show them first", "timers")
+                        .btn("Keep them", Act::Hide),
+                };
+            }
             Effect::Countdown(cmd) => {
                 let today = chrono::Local::now().date_naive();
                 let (verb, arg) = cmd.split_once(' ').unwrap_or((cmd.as_str(), ""));
@@ -3972,7 +3997,7 @@ impl App {
                                 (None, e) if e > 0 => format!(" (every {})", brain::fmt_dur(e)),
                                 _ => String::new(),
                             };
-                            format!("• {} — {} left{again}\n", if t.label.is_empty() { "Timer" } else { &t.label }, brain::fmt_dur(t.left(now)))
+                            format!("• {} — {} left{again}\n", if t.label.is_empty() { "Timer".to_string() } else { timers::shown_label(&t.label) }, brain::fmt_dur(t.left(now)))
                         })
                         .collect();
                     format!("Your timers:\n{rows}")
@@ -4170,12 +4195,18 @@ impl App {
                 sys::play_sound("alarm-clock-elapsed");
             }
             for l in &labels {
-                sys::notify(l);
+                sys::notify(&timers::shown_label(l));
             }
             ctx.send_viewport_cmd(egui::ViewportCommand::RequestUserAttention(egui::UserAttentionType::Critical));
             // a dose ("habit:Pills@08:00"): its own plain balloon with Taken, In 15 minutes, Skip today
             if let [one] = labels.as_slice() {
                 if let Some((name, slot)) = one.strip_prefix("habit:").and_then(|r| r.split_once('@')) {
+                    // taken already ("I took my pills" a bit early): no need to ask
+                    let today = chrono::Local::now().date_naive();
+                    let taken = chrono::NaiveTime::parse_from_str(slot, "%H:%M").ok().is_some_and(|t| habits::find(&self.habits, name).is_some_and(|i| self.habits[i].taken_on(today, t).is_some()));
+                    if taken {
+                        return;
+                    }
                     let shown = chrono::NaiveTime::parse_from_str(slot, "%H:%M").map(brain::clock).unwrap_or_else(|_| slot.to_string());
                     self.last_rung = vec![one.clone()]; // snoozed, it comes back as a dose (with Taken)
                     self.show(Reply::say(format!("⏰ {name} ({shown})")).mood(Mood::Alarm).run("Taken", &format!("habit dose {name}|{slot}")).run("In 15 min", "snooze 15m").btn("Skip today", Act::Hide));
@@ -4263,15 +4294,24 @@ impl App {
         // renewals: once a day after 8, on the heads-up day, a week before and on the day
         if can_nudge && chrono::Timelike::hour(&local) >= 8 && t > 150.0 && self.stats.get("renewal_day") != Some(&day_num) {
             let today = local.date_naive();
-            if let Some((r, days)) = renewals::due_soon(&self.renewals, today).into_iter().find(|(r, d)| *d == r.lead as i64 || *d == 7 || *d == 0).map(|(r, d)| (r.clone(), d)) {
-                self.stats.insert("renewal_day".into(), day_num);
-                let when = if days == 0 { "today".to_string() } else { format!("in {days} days") };
-                let papers = renewals::lead_for(&r.what) > 30 && days > 7;
-                let text = format!("Your {} {} {when}.{}", r.what.to_lowercase(), r.verb(), if papers { " Renewing can take weeks." } else { "" });
-                let half = today + chrono::Days::new((days / 2).max(0) as u64);
-                let mut reply = Reply::say(text).mood(Mood::Think).run("To-do: renew it", &format!("todo Renew the {} by {}", r.what.to_lowercase(), half.format("%Y-%m-%d")));
-                if r.every.is_some() {
-                    reply = reply.run("Renewed", &format!("renewal renewed {}", r.what));
+            // subscriptions that renewed by themselves move on first
+            renewals::advance(&mut self.renewals, today);
+            // every one that hits a heads-up day today, in one balloon
+            let due: Vec<(renewals::Renewal, i64)> = renewals::due_soon(&self.renewals, today).into_iter().filter(|(r, d)| *d == r.lead as i64 || *d == 7 || *d == 0).map(|(r, d)| (r.clone(), d)).collect();
+            self.stats.insert("renewal_day".into(), day_num);
+            if !due.is_empty() {
+                let text = due.iter().map(|(r, days)| {
+                    let when = if *days == 0 { "today".to_string() } else { format!("in {days} days") };
+                    let papers = renewals::lead_for(&r.what) > 30 && *days > 7;
+                    format!("Your {} {} {when}.{}", r.what.to_lowercase(), r.verb(), if papers { " Renewing can take weeks." } else { "" })
+                }).collect::<Vec<_>>().join("\n");
+                let mut reply = Reply::say(text).mood(Mood::Think);
+                for (r, days) in due.iter().take(2) {
+                    let half = today + chrono::Days::new((*days / 2).max(0) as u64);
+                    reply = reply.run(&format!("To-do: renew the {}", r.what.to_lowercase()), &format!("todo Renew the {} by {}", r.what.to_lowercase(), half.format("%Y-%m-%d")));
+                    if r.every.is_some() {
+                        reply = reply.run(&format!("{} renewed", r.what), &format!("renewal renewed {}", r.what));
+                    }
                 }
                 self.pipe_up(reply.btn("Later", Act::Hide));
                 can_nudge = false;
@@ -4370,7 +4410,8 @@ impl App {
         let asked = if asked_today { self.stats.get("after_meeting_count").copied().unwrap_or(0) } else { 0 };
         if self.after_meeting && asked < 3 && self.balloon.is_none() && !self.quiet() && self.screenshot.is_none() && self.focus.is_none() {
             let ended = self.events.iter().find(|e| !e.all_day && e.end <= wall && wall - e.end <= chrono::Duration::minutes(15) && (e.end - e.start) >= chrono::Duration::minutes(15) && self.cal_meta(e.cal).alert && !self.told_events.contains(&format!("after {}", e.key()))).cloned();
-            let next_soon = self.events.iter().any(|n| !n.all_day && n.start > wall && n.start - wall < chrono::Duration::minutes(10));
+            // not when the next one starts within 10 minutes, nor during another one that's still going
+            let next_soon = self.events.iter().any(|n| !n.all_day && n.start > wall && n.start - wall < chrono::Duration::minutes(10)) || calendar::busy_at(&self.events, wall).is_some_and(|e| !e.all_day);
             if let Some(e) = ended.filter(|_| !next_soon) {
                 self.told_events.insert(format!("after {}", e.key()));
                 self.stats.insert("after_meeting_day".into(), day_num_now());
@@ -4992,6 +5033,11 @@ impl App {
 impl eframe::App for App {
     fn clear_color(&self, _: &egui::Visuals) -> [f32; 4] {
         [0.0; 4]
+    }
+
+    // closed by the window manager or a logout: what changed since the last save goes now
+    fn on_exit(&mut self) {
+        self.save_if_changed();
     }
 
     fn ui(&mut self, ui: &mut Ui, _frame: &mut eframe::Frame) {

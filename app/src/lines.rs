@@ -33,7 +33,24 @@ const BUILT_IN: [&str; 3] = [include_str!("../data/humor.txt"), include_str!("..
 pub fn real_word(w: &str) -> bool {
     static WORDS: std::sync::OnceLock<std::collections::HashSet<String>> = std::sync::OnceLock::new();
     WORDS
-        .get_or_init(|| BUILT_IN.iter().flat_map(|t| t.split(|c: char| !c.is_ascii_alphabetic())).filter(|w| w.len() >= 3).map(str::to_ascii_lowercase).collect())
+        .get_or_init(|| {
+            // his own sentences (humor and chat; reactions.txt has cut-off program names like "launc"), minus the
+            // misspellings pool's wrong spellings, which are in there on purpose ("tommorow | tomorrow")
+            let mut words: std::collections::HashSet<String> = BUILT_IN[..2].iter().flat_map(|t| t.split(|c: char| !c.is_ascii_alphabetic())).filter(|w| w.len() >= 3).map(str::to_ascii_lowercase).collect();
+            for t in BUILT_IN[..2].iter() {
+                let mut in_misspellings = false;
+                for l in t.lines() {
+                    if let Some(name) = l.strip_prefix("## ") {
+                        in_misspellings = name.trim() == "misspellings";
+                    } else if in_misspellings {
+                        if let Some((wrong, _)) = l.split_once(" | ") {
+                            words.remove(&wrong.trim().to_ascii_lowercase());
+                        }
+                    }
+                }
+            }
+            words
+        })
         .contains(w)
 }
 const UNHINGED: [&str; 4] = [

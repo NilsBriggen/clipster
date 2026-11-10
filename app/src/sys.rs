@@ -197,22 +197,8 @@ pub mod win {
             ProcessEntry { size: 0, usage: 0, pid: 0, heap: 0, module: 0, threads: 0, parent: 0, priority: 0, flags: 0, exe: [0; 260] }
         }
     }
-    /// A window message (for the hot keys).
-    #[repr(C)]
-    #[derive(Default)]
-    pub struct Msg {
-        pub hwnd: isize,
-        pub message: u32,
-        pub wparam: usize,
-        pub lparam: isize,
-        pub time: u32,
-        pub pt: Point,
-        pub private: u32,
-    }
     #[link(name = "user32")]
     extern "system" {
-        pub fn RegisterHotKey(hwnd: isize, id: i32, modifiers: u32, key: u32) -> i32; // 0 = taken by another program
-        pub fn PeekMessageW(msg: *mut Msg, hwnd: isize, min: u32, max: u32, remove: u32) -> i32;
         pub fn GetCursorPos(p: *mut Point) -> i32;
         pub fn GetAsyncKeyState(key: i32) -> i16;
         pub fn GetForegroundWindow() -> isize;
@@ -793,9 +779,10 @@ pub fn run_for(mut cmd: Command, secs: u64) -> Option<(Option<i32>, String)> {
     let mut child = cmd.stdout(std::process::Stdio::piped()).stderr(std::process::Stdio::null()).spawn().ok()?;
     let mut out = child.stdout.take()?;
     let reader = std::thread::spawn(move || {
-        let mut s = String::new();
-        let _ = out.read_to_string(&mut s);
-        s
+        // bytes, then lossy: one non-UTF-8 name (PowerShell writes the OEM code page) mustn't empty everything
+        let mut b = vec![];
+        let _ = out.read_to_end(&mut b);
+        String::from_utf8_lossy(&b).into_owned()
     });
     let until = std::time::Instant::now() + std::time::Duration::from_secs(secs);
     let code = loop {

@@ -46,7 +46,7 @@ pub(super) fn search(query: &str, view: &View, files: &Files) -> Vec<Hit> {
         add("Event", &e.title, "agenda".into(), &mut out);
     }
     for t in &view.timers {
-        add("Reminder", &t.label, "agenda".into(), &mut out);
+        add("Reminder", &crate::timers::shown_label(&t.label), "agenda".into(), &mut out);
     }
     for (link, _, title) in view.reading.iter().map(|(l, d)| (l, d, crate::brain::short_link(l))) {
         add("Saved link", &format!("{title} {link}").chars().take(160).collect::<String>(), "links".into(), &mut out);
