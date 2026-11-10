@@ -4488,36 +4488,75 @@ impl App {
         let inner = Rect::from_min_max(pos2(left + pad, top + pad), pos2(right - pad, 2000.0));
         let mut clicked: Option<Act> = None;
         let mut search = false;
+        // Options and Close: two small icons in the top-right corner, so a short answer isn't mostly buttons
+        let icons = [("⚙", "Options", Act::Options), ("✕", "Close", Act::Hide)];
+        let icon_w = 46.0;
+        for (k, (glyph, tip, act)) in icons.iter().enumerate() {
+            let r = Rect::from_center_size(pos2(right - pad - 9.0 - (1 - k) as f32 * 23.0, top + pad + 8.0), vec2(21.0, 19.0));
+            let resp = ui.interact(r, egui::Id::unique(("balloon-icon", k)), Sense::click()).on_hover_text(*tip);
+            if resp.hovered() {
+                ui.painter().rect_filled(r, CornerRadius::same(4), Color32::from_black_alpha(28));
+            }
+            ui.painter().text(r.center(), egui::Align2::CENTER_CENTER, *glyph, FontId::proportional(13.0), INK);
+            if resp.clicked() {
+                clicked = Some(act.clone());
+            }
+        }
         let resp = ui.scope_builder(egui::UiBuilder::new().max_rect(inner), |ui| {
             ui.spacing_mut().item_spacing.y = 6.0;
             let reply = self.balloon.clone().unwrap();
+            let font = egui::TextStyle::Body.resolve(ui.style());
             if !reply.text.is_empty() {
+                // the text keeps clear of the corner icons: narrower only when its first line would reach them
+                let first_w = ui.painter().layout(reply.text.clone(), font.clone(), INK, inner.width()).rows.first().map_or(0.0, |r| r.rect().width());
+                let text_w = if first_w > inner.width() - icon_w { inner.width() - icon_w } else { inner.width() };
                 egui::ScrollArea::vertical().max_height(320.0).auto_shrink([false, true]).show(ui, |ui| {
+                    ui.set_max_width(text_w);
                     // the classic letter-by-letter reveal; unrevealed text is laid out but invisible so the balloon doesn't jump
                     let shown = if self.screenshot.is_some() { usize::MAX } else { ((self.t() - self.reveal_t0) * 90.0).max(0.0) as usize };
                     let cut = reply.text.char_indices().nth(shown).map_or(reply.text.len(), |(i, _)| i);
-                    let font = egui::TextStyle::Body.resolve(ui.style());
                     let mut job = egui::text::LayoutJob::default();
                     job.append(&reply.text[..cut], 0.0, egui::TextFormat::simple(font.clone(), INK));
-                    job.append(&reply.text[cut..], 0.0, egui::TextFormat::simple(font, Color32::TRANSPARENT));
+                    job.append(&reply.text[cut..], 0.0, egui::TextFormat::simple(font.clone(), Color32::TRANSPARENT));
                     if ui.add(egui::Label::new(job).wrap().sense(Sense::click())).clicked() {
                         self.reveal_t0 = -1e6; // click to see it all at once
                     }
                 });
+            } else {
+                ui.add_space(14.0); // the buttons start under the corner icons
             }
-            for (label, a) in &reply.buttons {
-                if bullet(ui, label) {
-                    clicked = Some(a.clone());
+            // many short buttons (help's topics) go in two columns, down the first and then the second
+            let half = (inner.width() - 8.0) / 2.0;
+            // (two labels may wrap onto a second line; more and it reads worse than one column)
+            let long = reply.buttons.iter().filter(|(l, _)| ui.painter().layout_no_wrap(l.clone(), FontId::proportional(13.0), INK).size().x + 24.0 > half).count();
+            let short = long <= 2;
+            if reply.buttons.len() > 6 && short {
+                let rows = reply.buttons.len().div_ceil(2);
+                ui.columns(2, |cols| {
+                    for (i, (label, a)) in reply.buttons.iter().enumerate() {
+                        cols[i / rows].spacing_mut().item_spacing.y = 6.0;
+                        if bullet(&mut cols[i / rows], label) {
+                            clicked = Some(a.clone());
+                        }
+                    }
+                });
+            } else {
+                for (label, a) in &reply.buttons {
+                    if bullet(ui, label) {
+                        clicked = Some(a.clone());
+                    }
                 }
             }
+            let n = self.timers.len();
             if reply.ask {
                 ui.add_space(2.0);
-                ui.label(egui::RichText::new("What would you like to do?").strong());
                 ui.horizontal(|ui| {
+                    // the running timers and stopwatch as small links at the end of the row
+                    let links = if self.stopwatch.is_some() { 26.0 } else { 0.0 } + if n > 0 { 40.0 } else { 0.0 };
                     let te = ui.add(
                         egui::TextEdit::singleline(&mut self.input)
-                            .hint_text("Type here, then click Search")
-                            .desired_width(ui.available_width() - 64.0),
+                            .hint_text("What would you like to do?")
+                            .desired_width(ui.available_width() - 46.0 - links),
                     );
                     if self.focus_input {
                         te.request_focus();
@@ -4534,28 +4573,27 @@ impl App {
                     if te.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter)) {
                         search = true;
                     }
-                    if ui.add(egui::Button::new("Search").min_size(vec2(58.0, 22.0))).clicked() {
+                    // "Go", not "Search": what you type is a command or a question, not only a search
+                    if ui.add(egui::Button::new("Go").min_size(vec2(40.0, 22.0))).on_hover_text("Or press Enter").clicked() {
                         search = true;
+                    }
+                    if self.stopwatch.is_some() && ui.link("⏱").on_hover_text("The stopwatch").clicked() {
+                        clicked = Some(Act::Run("stopwatch".into()));
+                    }
+                    if n > 0 && ui.link(format!("⏰ {n}")).on_hover_text(format!("{n} timer{} running", if n == 1 { "" } else { "s" })).clicked() {
+                        clicked = Some(Act::Run("timers".into()));
+                    }
+                });
+            } else if n > 0 || self.stopwatch.is_some() {
+                ui.horizontal(|ui| {
+                    if self.stopwatch.is_some() && ui.link("⏱ stopwatch").clicked() {
+                        clicked = Some(Act::Run("stopwatch".into()));
+                    }
+                    if n > 0 && ui.link(format!("⏰ {n} timer{}", if n == 1 { "" } else { "s" })).clicked() {
+                        clicked = Some(Act::Run("timers".into()));
                     }
                 });
             }
-            ui.horizontal(|ui| {
-                if ui.add(egui::Button::new("Options").min_size(vec2(70.0, 22.0))).clicked() {
-                    clicked = Some(Act::Options);
-                }
-                let n = self.timers.len();
-                if self.stopwatch.is_some() && ui.link("⏱ stopwatch").clicked() {
-                    clicked = Some(Act::Run("stopwatch".into()));
-                }
-                if n > 0 && ui.link(format!("⏰ {n} timer{}", if n == 1 { "" } else { "s" })).clicked() {
-                    clicked = Some(Act::Run("timers".into()));
-                }
-                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                    if ui.add(egui::Button::new("Close").min_size(vec2(70.0, 22.0))).clicked() {
-                        clicked = Some(Act::Hide);
-                    }
-                });
-            });
         });
         let content = resp.response.rect;
         let rect = Rect::from_min_max(pos2(left, top), pos2(right, content.bottom() + pad));
@@ -4811,7 +4849,8 @@ fn menu_reply() -> Reply {
     for (label, cmd) in [("Open my desk", "desk"), ("Show me around", "tour"), ("Tell me a joke", "joke"), ("Roast me", "roast"), ("Fun fact", "fact"), ("Quiz me!", "quiz"), ("Do a dance!", "dance"), ("What can you do?", "help"), ("Be quiet for an hour", "quiet")] {
         r = r.run(label, cmd);
     }
-    r = r.btn("Options", Act::Options).btn("Hide balloon", Act::Hide).run("Goodbye, Clipster", "bye");
+    // Options is the ⚙ in the balloon's corner, so it isn't listed twice here
+    r = r.btn("Hide balloon", Act::Hide).run("Goodbye, Clipster", "bye");
     r.ask = false;
     r
 }
