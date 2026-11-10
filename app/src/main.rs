@@ -307,6 +307,7 @@ struct App {
     window_kind: Option<String>,               // the active window's kind (`## window <kind>`), and since when
     window_since: Instant,
     window_site: Option<String>, // the active window's `## site …` section, when one matches
+    window_app: Option<(String, String)>, // otherwise its short app name (`brain::app_id`) and the kind it came as
     window_said: std::collections::HashMap<String, Instant>, // when each kind last got a comment
     window_last: Option<Instant>,                             // when any window comment was last made
     tipped: std::collections::HashMap<String, String>,        // window kind -> the day he last offered a tip for it
@@ -758,6 +759,7 @@ impl App {
             window_kind: None,
             window_since: Instant::now(),
             window_site: None,
+            window_app: None,
             window_said: Default::default(),
             window_last: None,
             tipped: Default::default(),
@@ -1123,7 +1125,14 @@ impl App {
             skin: self.skin.clone(),
         };
         // today's time per site, with the kind each counts as now; the weather line while it's on
-        let mut sites: Vec<(String, String, u64)> = self.site_time.get(&today_key()).into_iter().flatten().filter_map(|(id, s)| Some((id.clone(), self.kind_moves.get(id).cloned().or_else(|| lines::site_kind(id))?, *s))).collect();
+        let mut merged: std::collections::BTreeMap<(String, String), u64> = Default::default();
+        for (key, secs) in self.site_time.get(&today_key()).into_iter().flatten() {
+            let (id, came) = key.split_once('@').map_or((key.as_str(), None), |(i, k)| (i, Some(k.to_string())));
+            if let Some(kind) = self.kind_moves.get(id).cloned().or(came).or_else(|| lines::site_kind(id)) {
+                *merged.entry((id.to_string(), kind)).or_insert(0) += secs;
+            }
+        }
+        let mut sites: Vec<(String, String, u64)> = merged.into_iter().map(|((id, k), s)| (id, k, s)).collect();
         sites.sort_by_key(|s| std::cmp::Reverse(s.2));
         let weather = self.weather.as_ref().filter(|_| self.weather_on).map(|(_, w)| w.clone());
         match &self.desk_sample {
@@ -1159,8 +1168,10 @@ impl App {
         }
         let kind = self.window_kind.clone().unwrap_or_else(|| "other".into());
         *self.kind_time.entry(today_key()).or_default().entry(kind.clone()).or_insert(0) += secs;
-        if let Some(site) = self.window_site.as_deref().and_then(site_id) {
-            *self.site_time.entry(today_key()).or_default().entry(site.to_string()).or_insert(0) += secs;
+        // a known site by its id; any other app as "app-kate@other", with the kind it came as (for "Put back")
+        let key = self.window_site.as_deref().and_then(site_id).map(String::from).or_else(|| self.window_app.as_ref().map(|(id, k)| format!("{id}@{k}")));
+        if let Some(key) = key {
+            *self.site_time.entry(today_key()).or_default().entry(key).or_insert(0) += secs;
         }
         if let Some(f) = self.focus.as_mut().filter(|f| f.paused_at.is_none()) {
             if brain::DISTRACTIONS.contains(&kind.as_str()) {
@@ -2445,7 +2456,7 @@ impl App {
         }
         // a saved link was just opened: this browser title is the page's, kept as the link's title
         if let Some((link, at)) = self.reading_opened.clone() {
-            let browser = ["Firefox", "Chrome", "Chromium", "Brave", "Edge", "Vivaldi", "Opera", "LibreWolf", "Safari", "Epiphany", "Falkon"].iter().any(|b| title.contains(b));
+            let browser = brain::BROWSERS.iter().any(|b| title.contains(b));
             if at.elapsed() < Duration::from_secs(15) && browser {
                 self.reading_titles.insert(link, brain::page_title(title));
                 self.reading_opened = None;
@@ -2457,16 +2468,20 @@ impl App {
         }
         // a site you moved on the Desk ("Count as work") counts as that kind
         let site = lines::window_site(title);
-        let moved = site.as_deref().and_then(site_id).and_then(|id| self.kind_moves.get(id)).cloned();
-        let kind = moved.or_else(|| lines::window_kind(title)).or_else(|| Some("other".into()));
+        // no site he knows: a short app name, so Everything else isn't one lump (never for private titles)
+        let base = lines::window_kind(title).unwrap_or_else(|| "other".into());
+        let app = if site.is_none() && !lines::private_title(title) { brain::app_id(title).map(|id| (id, base.clone())) } else { None };
+        let moved = site.as_deref().and_then(site_id).or(app.as_ref().map(|a| a.0.as_str())).and_then(|id| self.kind_moves.get(id)).cloned();
+        let kind = Some(moved.unwrap_or(base));
         self.window_text = title.to_string();
-        if kind != self.window_kind || site != self.window_site {
+        if kind != self.window_kind || site != self.window_site || app != self.window_app {
             self.account_time(); // the time so far belongs to the window you just left
             if kind != self.window_kind {
                 (self.window_kind, self.window_since) = (kind.clone(), Instant::now());
             }
         }
         self.window_site = site;
+        self.window_app = app;
         if let Some(k) = kind.filter(|k| !brain::TIME_SINKS.contains(&k.as_str()) && k != "other") {
             self.window_comment(&k);
         }

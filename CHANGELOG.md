@@ -2,6 +2,29 @@
 
 Each version's section is also its GitHub release description: the release workflow publishes it and refuses to release a version without one.
 
+## 0.7.1 (2026-11-10)
+
+A small fix release. The Desk's "What made up Everything else" card used to show one unhelpful line ("Other pages and apps"). Now it shows what the time actually went to, and lets you file it where it belongs.
+
+### Highlights
+
+- **Everything else, by name:** the card lists the eight biggest apps and sites of the day, each with its time.
+  - **Apps** are named by the name at the end of the window title ("notes.txt — Kate" is Kate).
+  - **In a browser,** the site before the browser's name ("… - Wikipedia — Mozilla Firefox" is Wikipedia).
+  - Only a short name is kept, never the page title. Banking, mail and chat windows get no name.
+- **Count as…** now works for these too: file Steam under Games or a work tool under Code, and it counts that way from then on. **Put back** undoes it.
+
+### Install
+
+- **Linux:** download `clipster_0.7.1_x86_64.AppImage`, make it executable (`chmod +x`) and replace your old AppImage with it. Or click **Install now** when he tells you about the update. Your settings, notes, to-dos and taught phrases are kept.
+- **Windows:** run `clipster_0.7.1_x64_en-US.msi`, or click **Install now** in Clipster. It replaces the old version and keeps your settings. The installer still isn't code-signed, so SmartScreen may say "Windows protected your PC". Choose **More info → Run anyway**.
+
+### Known limitations
+
+- **Only from now on:** time from before this version stays in the "Other pages and apps" line.
+- **Some apps have no name to give:** an app whose window title doesn't end in its name, a long title on its own, or a name in a non-Latin script stays under "Other pages and apps".
+- **Short visits:** more than eight apps, or visits under 30 seconds, also stay in that line.
+
 ## 0.7.0 (2026-11-10)
 
 The TimeTree release. Clipster can now read your TimeTree calendars, the shared calendar app many couples and families use, even though TimeTree has no export. He also understands dates the way people say them ("Friday in two weeks", "Friday evening", "the whole day"), keeps his own copy of every calendar file you import, and prints your agenda and your month as pages worth putting on the fridge.

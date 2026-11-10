@@ -145,7 +145,7 @@ pub fn sample_extras() -> (Vec<crate::habits::Habit>, Vec<(String, chrono::Naive
         crate::habits::Habit { name: "Read 10 pages".into(), days: vec![ago(5), ago(3)], ..Default::default() },
     ];
     let mut countdowns = vec![("Italy".to_string(), today + chrono::Days::new(23))];
-    let mut sites = BTreeMap::from([("youtube".to_string(), 21 * 60), ("netflix".to_string(), 6 * 60), ("github".to_string(), 48 * 60)]);
+    let mut sites = BTreeMap::from([("youtube".to_string(), 21 * 60), ("netflix".to_string(), 6 * 60), ("github".to_string(), 48 * 60), ("app-steam@other".to_string(), 9 * 60), ("app-wikipedia@other".to_string(), 7 * 60), ("app-dolphin@other".to_string(), 4 * 60)]);
     if variant() == "crowded" {
         habits.extend(["Stretch for ten minutes before lunch", "No phone in bed", "Practise the ukulele", "Floss", "Journal"].map(|n| crate::habits::Habit { name: n.into(), days: vec![ago(1), today], ..Default::default() }));
         countdowns.extend([("The extremely long-awaited family reunion in Lugano", 40), ("Christmas", 46), ("Tax deadline", 120), ("Anna's wedding", 200)].map(|(n, d)| (n.to_string(), today + chrono::Days::new(d))));

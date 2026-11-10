@@ -499,7 +499,8 @@ impl Desk {
     fn kind_card(&mut self, ui: &mut Ui, c: Rect, view: &View, look: Look, out: &mut Vec<String>, kind: &str, today: NaiveDate) {
         let ctl = look.ctl();
         let total = view.kind_time.get(&today.format("%Y-%m-%d").to_string()).and_then(|d| d.get(kind)).copied().unwrap_or(0);
-        let sites: Vec<&(String, String, u64)> = view.sites.iter().filter(|s| s.1 == kind && s.2 >= 30).collect();
+        // the biggest eight by name; the rest (and short visits) stay "Other pages and apps"
+        let sites: Vec<&(String, String, u64)> = view.sites.iter().filter(|s| s.1 == kind && s.2 >= 30).take(8).collect();
         let rest = total.saturating_sub(sites.iter().map(|s| s.2).sum());
         let choosing = self.count_as.clone();
         let h = match &choosing {
@@ -528,7 +529,7 @@ impl Desk {
             }
             return;
         }
-        let g = p.layout("Sites and apps he knows by name. Only the name is kept, never the page title.".to_string(), look.font(11.5), look.dim(), x1 - x0);
+        let g = p.layout("The biggest sites and apps today. Only the name is kept, never the page title. Count as… files one under another kind.".to_string(), look.font(11.5), look.dim(), x1 - x0);
         let gh = g.size().y;
         p.galley(pos2(x0, y), g, look.dim());
         y += gh + 10.0;

@@ -1137,9 +1137,38 @@ pub fn kind_group(kind: &str) -> usize {
 
 const WORK_KINDS: &[&str] = &["code", "writing", "letter", "spreadsheet", "slides", "email", "inbox", "terminal", "pdf", "calendar", "meeting", "git", "qa", "jobhunt", "taxes", "learning", "files", "print", "notes", "design", "editing", "database", "diagrams", "remote", "projects", "translate", "docs", "cloud"];
 
-/// A site's id as a name: "youtube" → "Youtube", "google_docs" → "Google docs".
+/// A site's id as a name: "youtube" → "Youtube", "google_docs" → "Google docs", "app-steam" → "Steam".
 pub fn site_name(id: &str) -> String {
-    crate::writing::cap_first(&id.replace(['_', '-'], " "))
+    crate::writing::cap_first(&id.strip_prefix("app-").unwrap_or(id).replace(['_', '-'], " "))
+}
+
+/// Browsers, as they sign their window titles.
+pub const BROWSERS: [&str; 11] = ["Firefox", "Chrome", "Chromium", "Brave", "Edge", "Vivaldi", "Opera", "LibreWolf", "Safari", "Epiphany", "Falkon"];
+
+/// An id for a window no `## site` knows ("app-kate"), so its time isn't one lump: the app that signs the end of
+/// the title ("notes.txt — Kate"), or in a browser the site before it ("Some page - Wikipedia - Mozilla Firefox").
+/// Only a short name is kept (up to three words), never the page's own words; anything else gets none.
+pub fn app_id(title: &str) -> Option<String> {
+    let t = [" — ", " – ", " | ", " · "].iter().fold(title.to_string(), |t, sep| t.replace(sep, " - "));
+    let parts: Vec<&str> = t.split(" - ").map(str::trim).filter(|p| !p.is_empty()).collect();
+    let last = *parts.last()?;
+    let short = |p: &str, words: usize| p.split_whitespace().count() <= words && p.chars().count() <= 24 && p.chars().any(char::is_alphabetic);
+    let name = match BROWSERS.iter().find(|b| last.contains(*b)) {
+        Some(b) => parts.len().checked_sub(2).filter(|_| parts.len() >= 3).map(|i| parts[i]).filter(|p| short(p, 3)).unwrap_or(b),
+        None if parts.len() >= 2 && short(last, 3) => last,
+        None if parts.len() == 1 && short(last, 2) => last,
+        None => return None,
+    };
+    let mut slug = String::new();
+    for c in name.to_lowercase().chars() {
+        if c.is_ascii_alphanumeric() {
+            slug.push(c);
+        } else if !slug.is_empty() && !slug.ends_with('_') {
+            slug.push('_');
+        }
+    }
+    let slug = slug.trim_end_matches('_');
+    (slug.len() >= 2).then(|| format!("app-{slug}"))
 }
 
 // How times and weeks are shown (Settings → My day): 2:30 pm or 14:30, weeks from Sunday or Monday.
@@ -2006,6 +2035,20 @@ pub fn url_encode(s: &str) -> String {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn apps_get_a_short_name() {
+        let id = |t: &str| super::app_id(t);
+        assert_eq!(id("notes.txt — Kate").as_deref(), Some("app-kate"));
+        assert_eq!(id("Steam").as_deref(), Some("app-steam"));
+        assert_eq!(id("Rust (programming language) - Wikipedia — Mozilla Firefox").as_deref(), Some("app-wikipedia"));
+        assert_eq!(id("A long article about something - Mozilla Firefox").as_deref(), Some("app-firefox"), "a browser page without a site name: the browser");
+        assert_eq!(id("My plans for the surprise party next week").as_deref(), None, "a long title on its own is the page's words");
+        assert_eq!(id("Home | Proton Mail - Google Chrome").as_deref(), Some("app-proton_mail"));
+        assert_eq!(id("draft — LibreOffice Writer").as_deref(), Some("app-libreoffice_writer"));
+        assert_eq!(id("Текст").as_deref(), None);
+        assert_eq!(super::site_name("app-proton_mail"), "Proton mail");
+    }
+
     #[test]
     fn focus_and_time_reports() {
         assert_eq!(super::focus_score(45 * 60, 50 * 60), ("focus_end_great", 90));
