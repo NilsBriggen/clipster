@@ -5629,6 +5629,8 @@ fn main() -> eframe::Result {
     let args: Vec<String> = std::env::args().collect();
     let arg = |name: &str| args.iter().position(|a| a == name).and_then(|i| args.get(i + 1).cloned());
     let (screenshot, say, play) = (arg("--screenshot"), arg("--say"), arg("--play")); // --say "timer 5m tea" starts with a command; --play chess opens a game
+    // Options opens the Desk's Settings, its own window: a screenshot of it is one of the Desk (made-up data, drawn inside)
+    let play = if screenshot.is_some() && say.as_deref() == Some("options") && play.is_none() { Some("desk".to_string()) } else { play };
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_title("Clipster")

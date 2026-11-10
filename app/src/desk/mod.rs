@@ -446,6 +446,14 @@ impl Desk {
         if let Some(page) = ["you", "people", "journal", "jot"].iter().position(|p| *p == name).map(|p| p.min(2)) {
             self.me_page = page;
         }
+        if name.starts_with("person ") {
+            self.me_page = 1; // their card opens over People
+        }
+        match name {
+            "proofread" => self.write_page = 0,
+            "letters" | "letter" => self.write_page = 1,
+            _ => {}
+        }
         if let Some(page) = ["clipboard", "links", "files"].iter().position(|p| *p == name) {
             self.clip_page = page;
             self.files.at = None; // the Files page reads its lists now
