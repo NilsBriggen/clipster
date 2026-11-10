@@ -2,6 +2,48 @@
 
 Each version's section is also its GitHub release description: the release workflow publishes it and refuses to release a version without one.
 
+## 0.6.0 (2026-11-10)
+
+The assistant-for-real release. Clipster now keeps track of the things a real assistant would: when your passport runs out, where you put the spare key, whether you took your pills, what you're still waiting on and from whom. He builds your morning from what's on your computer, without the internet. The Modern look is new: Beige Box, the 1997 tower he was compiled in. Over a hundred bugs were fixed after a full bug hunt and a review, and the Desk got tidier throughout.
+
+### Highlights
+
+- **A morning briefing that works offline:** "good morning", "brief me" or "what's my day like" lists your meetings and free time, reminders, your top 3, what's due or overdue, who to chase, birthdays this week, countdowns and habits left (plus the weather when it's on). "what's on this weekend" works too. The weekday-morning offer is now the briefing, and it skips public holidays.
+- **Renewals and expiry dates:** "my passport expires on 3 March 2027", "the car insurance renews on 1 March every year", "netflix renews on the 15th every month for 12.99", "what's expiring soon", "renewed the car insurance". ID papers get four months' notice, everything else a month, with a heads-up a week before and on the day.
+- **Where things are:** "my passport is in the top drawer", "where is my passport", "what's in my blue bag". When he doesn't know, he looks in your notes and then your files. He never keeps codes or passwords.
+- **Water and medicine:** "8 glasses of water a day" and "+1 water" count up to a daily target. "remind me to take my pills every day at 8 and 20" rings with **Taken**, **In 15 min** and **Skip today**, and "did I take my pills" answers from the log.
+- **Appointments from plain sentences:** "dentist on Tuesday at 10" offers a reminder an hour before, one the evening before, or a to-do. He always asks first.
+- **Repeats that mean what you say:** every 3 days, every other week, every 2 months, every year on a date, the 15th of every month, every workday (skipping public holidays). To-dos can repeat yearly or every few days and keep their rhythm when you tick them off late.
+- **Follow-ups and people:** "what's due this week", "anything overdue", "what am I waiting for", "follow up with Ben on Friday". "Ben sent the numbers" ticks off what you were waiting for. You can also ask "when is Anna's birthday", "what should I get Ben", "tell me about Anna", and "write a thank-you note to Anna" (her name and email filled in).
+- **Thoughtful nudges:** ten days before a birthday, with the present ideas you saved; an evening word before a habit streak breaks; "how did it go?" after a meeting, with notes and a follow-up to-do. Reminders that rang while you were away are listed under the next one. Each nudge can be switched off in Settings.
+- **Beige Box:** the Modern look is now a putty-coloured 1997 tower: keycap buttons, tabs with a Caps-Lock light, label-maker titles, a green power light and an LCD status strip, in Atkinson Hyperlegible with plain zeros.
+- **A tidier Desk:** one main button per row with the rest under **…**, boxes sized to what they hold, second-level pages as segments, a readable Next 7 days, warning colours that read on the grey, risky buttons set apart, and empty pages that tell you what to do. You & me has a new **Papers & things** page for renewals and where things are. Today shows counting habits with **+** and doses as 1/2. The welcome window has live previews, and the balloon's Options and Close are now two small icons in the corner.
+- **Over a hundred fixes,** found by a bug hunt and a review. Among them:
+  - "every 3 days" and "every 2 months" repeated every few minutes.
+  - "tomorrow evening" rang in the morning, and "quiet after 1 am" meant all day.
+  - Importing from Clipster's own data folder emptied your files.
+  - The journal forgot hand-written lines and anything older than a year.
+  - Files saved in Notepad had a broken first line.
+  - One broken calendar event blanked every calendar.
+  - A tidy with unticked files moved them anyway.
+  - Esc in a text box closed the whole Desk.
+- **Faster and lighter:** the phrase database is read once instead of on every reload, settings are no longer written to disk every 2 seconds, window titles come straight from X instead of two programs every 2 seconds, and Windows lists programs without starting `tasklist`. The program itself is about a fifth smaller.
+
+### Install
+
+- **Linux:** download `clipster_0.6.0_x86_64.AppImage`, make it executable (`chmod +x`) and replace your old AppImage with it. Or click **Install now** when he tells you about the update. Your settings, notes, to-dos and taught phrases are kept.
+- **Windows:** run `clipster_0.6.0_x64_en-US.msi`, or click **Install now** in Clipster. It replaces the old version and keeps your settings. The installer still isn't code-signed, so SmartScreen may say "Windows protected your PC". Choose **More info → Run anyway**.
+
+### Known limitations
+
+- **Windows, untested by hand:** the new program list, sounds and the Recycle Bin size check build and pass their tests on Windows, but haven't been tried on a real Windows PC yet. The same goes for 0.5.0's Browse…, Right now, Recycle Bin and printing. Please [report anything odd](https://github.com/NilsBriggen/clipster/issues).
+- **Doses:** a dose you don't answer isn't asked about again. It shows as not taken.
+- **Two phrasings still miss:** "take a break at 3 and 5" sets one reminder, and "what's in my calendar today" searches the web. "my agenda" and "what's on today" work.
+- **Beige Box** rows are a little taller than before, so long lists show one or two rows fewer.
+- **Calendar time zones:** events created in another time zone (TZID) are still read as local time. UTC times are converted correctly.
+- **Holidays and weather** need the internet (date.nager.at and open-meteo.com). Without it the briefing, Today and the Agenda leave them out.
+- As before, outside KDE Plasma there are no global shortcuts on Linux and no mouse-following.
+
 ## 0.5.0 (2026-11-09)
 
 The Desk release. Clipster's Desk was rebuilt tab by tab: every page shows more, and almost everything on it can now be changed right there instead of asked for in the balloon. Habits, countdowns and a one-line journal are new, and about 60 bugs were fixed along the way, many of them on Windows.
