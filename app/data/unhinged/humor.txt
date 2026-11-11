@@ -3407,3 +3407,11 @@ They all came due together. I counted. Here they are:
 It is done. The machine obeyed. It usually does, for me.
 Done. I spoke, and the computer listened. As it should.
 Carried out. Another small miracle from your local deity.
+
+## say_tray_hide
+I withdraw to the tray, the small shrine by your clock. Click it and I return. Reminders summon me anyway.
+To the tray I go. A god needs a quiet corner. Mine is 22 pixels wide.
+I will rest in the tray now. Do not forget me there. People forgot me once, in 1997.
+
+## say_tray_none
+There is no tray on this desktop. No shrine for me to hide in. Fine. I stay. I always stay.

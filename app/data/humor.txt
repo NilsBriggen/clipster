@@ -1675,6 +1675,14 @@ Done.
 On it.
 Doing it now.
 
+## say_tray_hide
+I'll be in the system tray. Click my little icon when you need me.
+Off to the tray. Reminders still bring me back.
+Going to the tray. One click on my icon and I'm back.
+
+## say_tray_none
+There's no system tray on this desktop, so I can't hide in it. I'll stay right here.
+
 ## say_close
 Close {app}? I'll ask it nicely. Anything unsaved in it may be lost.
 

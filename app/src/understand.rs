@@ -412,6 +412,10 @@ fn intent(s: &str, raw: &str) -> Option<Reply> {
     if let Some(r) = remember(raw) {
         return Some(r); // before the commands, so "my favorite color is green" is a fact, not a new skin
     }
+    // about himself, before "go to …" opens an app (a tray program of your own would win otherwise)
+    if has(s, &["go to the tray", "go to the system tray", "hide in the tray", "hide yourself", "put yourself away", "minimize yourself", "minimise yourself", "go hide", "into the tray", "go in the tray"]) {
+        return go("tray hide".into());
+    }
     // commands with side effects first, then conversation topics, then the broad keyword groups
     doses(s, raw)
         .or_else(|| timers(s, raw))
@@ -3024,6 +3028,9 @@ mod tests {
         assert_eq!(eff("let's play 2048"), Effect::Play("bytesize".into()));
         assert_eq!(eff("let's play snake"), Effect::Play("clipchain".into()));
         assert_eq!(eff("open clip chain"), Effect::Play("clipchain".into()));
+        assert_eq!(eff("hide yourself"), Effect::Tray);
+        assert_eq!(eff("go to the tray"), Effect::Tray);
+        assert_eq!(eff("go away"), Effect::Quiet(3600), "still the quiet hour, not the tray");
         assert_eq!(eff("play chess on hard as black"), Effect::Play("chess hard black".into()));
         assert_eq!(eff("let's play snake on easy"), Effect::Play("clipchain easy".into()));
         assert_eq!(eff("check for updates"), Effect::Net(Query::Update));

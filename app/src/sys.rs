@@ -291,6 +291,40 @@ pub fn active_title() -> Option<String> {
     }
 }
 
+/// Take Clipster's own window (this process, titled "Clipster") off the taskbar and the pager, by asking the window
+/// manager (X11 and XWayland; on KDE the KWin script does it). True once it's done; false while the window isn't
+/// there yet, or there's no X server.
+#[cfg(target_os = "linux")]
+pub fn skip_taskbar() -> bool {
+    use x11rb::connection::Connection;
+    use x11rb::protocol::xproto::{AtomEnum, ClientMessageEvent, ConnectionExt, EventMask};
+    let Ok((conn, screen)) = x11rb::connect(None) else { return false };
+    let Some(root) = conn.setup().roots.get(screen).map(|s| s.root) else { return false };
+    let atom = |n: &str| conn.intern_atom(false, n.as_bytes()).ok().and_then(|c| c.reply().ok()).map(|r| r.atom);
+    let (Some(list), Some(pid), Some(name), Some(utf8), Some(state), Some(no_bar), Some(no_pager)) =
+        (atom("_NET_CLIENT_LIST"), atom("_NET_WM_PID"), atom("_NET_WM_NAME"), atom("UTF8_STRING"), atom("_NET_WM_STATE"), atom("_NET_WM_STATE_SKIP_TASKBAR"), atom("_NET_WM_STATE_SKIP_PAGER"))
+    else {
+        return false;
+    };
+    let Some(wins) = conn.get_property(false, root, list, AtomEnum::WINDOW, 0, 4096).ok().and_then(|c| c.reply().ok()) else { return false };
+    let me = std::process::id();
+    let ours = wins.value32().into_iter().flatten().find(|&w| {
+        let p = conn.get_property(false, w, pid, AtomEnum::CARDINAL, 0, 1).ok().and_then(|c| c.reply().ok()).and_then(|r| r.value32().and_then(|mut v| v.next()));
+        let t = conn.get_property(false, w, name, utf8, 0, 64).ok().and_then(|c| c.reply().ok()).map(|r| r.value);
+        p == Some(me) && t.as_deref() == Some(b"Clipster".as_slice())
+    });
+    let Some(w) = ours else { return false };
+    // 1 = add both states, the last 1 = the request comes from an application
+    let ev = ClientMessageEvent::new(32, w, state, [1, no_bar, no_pager, 1, 0]);
+    conn.send_event(false, root, EventMask::SUBSTRUCTURE_REDIRECT | EventMask::SUBSTRUCTURE_NOTIFY, ev).is_ok() && conn.flush().is_ok()
+}
+
+/// Windows: the window is made without a taskbar button (`with_taskbar(false)` in `main`).
+#[cfg(not(target_os = "linux"))]
+pub fn skip_taskbar() -> bool {
+    true
+}
+
 /// `_NET_WM_NAME` of `_NET_ACTIVE_WINDOW`, over one X connection kept open (no X server: None).
 #[cfg(target_os = "linux")]
 fn x11_title() -> Option<String> {

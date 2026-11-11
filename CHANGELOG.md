@@ -2,6 +2,31 @@
 
 Each version's section is also its GitHub release description: the release workflow publishes it and refuses to release a version without one.
 
+## 0.7.3 (2026-11-11)
+
+Clipster moves out of the taskbar and into the system tray.
+
+### Highlights
+
+- **A tray icon:**
+  - Left click puts Clipster away or brings him back.
+  - Middle click opens the Desk.
+  - Right click opens a menu: Hide/Show Clipster, Open my Desk, Be quiet for an hour, Settings…, Quit Clipster.
+- **No taskbar button for the pet itself** when there's a tray. The Desk keeps its own button.
+- **Putting him away:** he disappears from the screen and stays quiet. Reminders, timers, meeting heads-ups, Meta+C or anything you ask bring him back on their own. He stays put away after a restart.
+- **Say "go to the tray" or "hide yourself"**, or pick "Hide in the tray" in his right-click menu.
+
+### Install
+
+- **Linux:** download `clipster_0.7.3_x86_64.AppImage`, make it executable (`chmod +x`) and replace your old AppImage with it. Or click **Install now** when he tells you about the update. Your settings, notes, to-dos and taught phrases are kept.
+- **Windows:** run `clipster_0.7.3_x64_en-US.msi`, or click **Install now** in Clipster. It replaces the old version and keeps your settings. The installer still isn't code-signed, so SmartScreen may say "Windows protected your PC". Choose **More info → Run anyway**.
+
+### Known limitations
+
+- **GNOME** shows tray icons only with the AppIndicator extension. Without it, Clipster keeps his taskbar button.
+- **Windows:** the tray icon is new and has only been build-checked, not tried by hand. If it ever doesn't appear, Clipster stays on screen but without a taskbar button.
+- **On KDE**, the taskbar button goes away through Clipster's own KDE script. If his pointer tracking is off, the button stays.
+
 ## 0.7.2 (2026-11-10)
 
 Fixes and game polish. Help buttons go where they say, typed answers count as clicks, he stops reading out his own commands, and the arcade gets difficulty levels you can actually find and a Desk Merge that doesn't drag on.

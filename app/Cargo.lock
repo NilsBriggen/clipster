@@ -620,7 +620,7 @@ dependencies = [
 
 [[package]]
 name = "clipster"
-version = "0.7.2"
+version = "0.7.3"
 dependencies = [
  "arboard",
  "chrono",
@@ -630,6 +630,7 @@ dependencies = [
  "qrcode",
  "rand",
  "ring",
+ "serde",
  "serde_json",
  "ureq",
  "x11rb",

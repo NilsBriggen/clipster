@@ -1,5 +1,5 @@
 #![cfg_attr(all(windows, not(debug_assertions)), windows_subsystem = "windows")] // no console window behind him
-#![recursion_limit = "256"] // the settings snapshot is one big json! literal
+#![recursion_limit = "512"] // the settings snapshot is one big json! literal
 
 mod brain;
 mod backup;
@@ -28,6 +28,7 @@ mod things;
 mod timetree;
 mod when;
 mod tidy;
+mod tray;
 mod todo;
 mod understand;
 mod writing;
@@ -338,6 +339,10 @@ struct App {
     anchor: Option<Pos2>, // where the clip's corner sits on the screen
     settle: u32,          // frames to wait for the window manager after we move the window
     tracker: Option<pointer::Tracker>,
+    tray: Option<tray::Tray>, // his icon in the system tray (None: no tray here, he keeps his taskbar button)
+    hidden: bool,             // put away in the tray: a 1×1 see-through window, quiet until something rings
+    skip_tries: u32,
+    hide_at: Option<Instant>, // "go to the tray": he goes once he's said goodbye          // X11 outside KDE: asks left to take the window off the taskbar once it exists
     screenshot: Option<String>,
     say: Option<String>,
     frames: u32,
@@ -637,7 +642,15 @@ impl App {
     fn new(cc: &eframe::CreationContext, screenshot: Option<String>, say: Option<String>, play: Option<String>) -> Self {
         setup_style(&cc.egui_ctx);
         let (tx, rx) = channel();
-        let tracker = if screenshot.is_none() { pointer::start(&cc.egui_ctx) } else { None };
+        // the tray first: with a tray icon he leaves the taskbar (the KWin script does that on KDE)
+        let tray = if screenshot.is_none() {
+            let ctx = cc.egui_ctx.clone();
+            tray::start(false, move || ctx.request_repaint())
+        } else {
+            None
+        };
+        let tracker = if screenshot.is_none() { pointer::start(&cc.egui_ctx, tray.is_some()) } else { None };
+        let skip_tries = if cfg!(target_os = "linux") && tray.is_some() && tracker.is_none() { 30 } else { 0 };
         if screenshot.is_none() {
             // the KWin script reports window titles on KDE; everywhere else the watcher asks for them
             watch::spawn(tx.clone(), cc.egui_ctx.clone(), cfg!(windows) || tracker.is_none());
@@ -838,6 +851,10 @@ impl App {
             anchor: None,
             settle: 0,
             tracker,
+            tray,
+            hidden: false,
+            skip_tries,
+            hide_at: None,
             screenshot,
             say,
             frames: 0,
@@ -990,7 +1007,50 @@ impl App {
 
     /// No chatter now: "be quiet for …", after your quiet hour (until 6 in the morning), at weekends, or during a
     /// calendar event. Reminders, heads-ups and answers still come.
+    /// Put him away in the tray, or bring him back; the tray's menu and tooltip follow.
+    fn set_hidden(&mut self, hidden: bool) {
+        if self.hidden != hidden {
+            self.settings_dirty = true;
+        }
+        self.hidden = hidden;
+        if hidden {
+            self.balloon = None;
+        }
+        if let Some(t) = &self.tray {
+            t.set_hidden(hidden);
+        }
+    }
+
+    /// Clicks on the tray icon and its menu.
+    fn tray_events(&mut self, ctx: &egui::Context) {
+        let events = self.tray.as_ref().map(|t| t.take_events()).unwrap_or_default();
+        for e in events {
+            match e {
+                tray::TrayEvent::Toggle if self.hidden => {
+                    self.set_hidden(false);
+                    ctx.send_viewport_cmd(egui::ViewportCommand::Focus);
+                }
+                tray::TrayEvent::Toggle => self.set_hidden(true),
+                tray::TrayEvent::Desk => self.run(ctx, "desk"),
+                tray::TrayEvent::Quiet => self.run(ctx, "quiet"),
+                tray::TrayEvent::Settings => self.run(ctx, "desk settings"),
+                tray::TrayEvent::Quit => self.run(ctx, "bye"),
+            }
+        }
+        if self.hide_at.is_some_and(|t| Instant::now() >= t) {
+            self.hide_at = None;
+            self.set_hidden(true);
+        }
+        // X11 outside KDE: once the window exists, the window manager is asked to leave it off the taskbar
+        if self.skip_tries > 0 && self.frames % 30 == 10 {
+            self.skip_tries = if sys::skip_taskbar() { 0 } else { self.skip_tries - 1 };
+        }
+    }
+
     fn quiet(&self) -> bool {
+        if self.hidden {
+            return true; // put away: only reminders, heads-ups and what you ask bring him back (they use `show`)
+        }
         if self.quiet_until.is_some_and(|q| timers::unix_now() < q) {
             return true;
         }
@@ -1018,6 +1078,7 @@ impl App {
     }
 
     fn show(&mut self, mut r: Reply) {
+        self.set_hidden(false); // anything he has to say brings him back from the tray
         // another balloon replaces his question (a reminder rang, you clicked something): the next line isn't its answer
         self.waiting = None;
         // a reminder rang, a nudge was said (its day stamped): saved within 2 s like a command, so it doesn't come twice
@@ -2878,7 +2939,7 @@ impl App {
     fn snapshot(&self) -> String {
         serde_json::json!({
             "tips_every": self.tips_every, "notice_clip": self.notice_clip, "notice_programs": self.notice_programs, "notice_windows": self.notice_windows, "checkin": self.checkin, "facts": self.facts, "kind_time": self.kind_time, "focus_log": self.focus_log, "desk_look": if self.desk_modern { "modern" } else { "classic" }, "desk_size": if self.desk_large { "large" } else { "normal" }, "checkin_days": self.checkin_days,
-            "pins": self.pins, "reading": self.reading, "calendars": self.calendars, "calendar_meta": self.calendar_meta.iter().map(|(s, m)| (s.clone(), m.to_json())).collect::<serde_json::Map<_, _>>(), "holidays": self.holiday_cc, "pin_labels": self.pin_labels, "reading_titles": self.reading_titles, "people": self.people.iter().map(|p| p.to_json()).collect::<Vec<_>>(), "habits": self.habits.iter().map(|h| h.to_json()).collect::<Vec<_>>(), "countdowns": self.countdowns.iter().map(|(l, d)| serde_json::json!([l, d.to_string()])).collect::<Vec<_>>(), "things": self.things, "renewals": self.renewals.iter().map(|r| r.to_json()).collect::<Vec<_>>(), "gift_lead": self.gift_lead, "habit_nudge": self.habit_nudge, "after_meeting": self.after_meeting, "site_time": self.site_time, "kind_moves": self.kind_moves, "weather": self.weather_on, "work_hours": [self.work_hours.0, self.work_hours.1], "day_totals": plan::history_merge(&self.day_totals, &self.kind_time, &self.focus_log, chrono::Local::now().date_naive()), "workday": self.workday, "workday_ask": self.workday_ask, "welcome_seen": self.welcome_seen, "backup_sources": self.backup_sources, "backup_target": self.backup_target, "backup_last": self.backup_last, "backup_result": self.backup_result, "backup_skip": self.backup_skip, "backup_auto": self.backup_auto, "backup_history": self.backup_history, "upkeep_hide": self.upkeep_hide, "space_log": self.space_log, "tidy_targets": self.tidy_targets, "tidy_auto": self.tidy_auto, "work_days": self.work_days, "clock12": brain::clock12(), "week_sunday": brain::week_sunday(), "quiet_after": self.quiet_after, "quiet_until": self.quiet_until.filter(|q| *q > timers::unix_now()), "quiet_weekend": self.quiet_weekend, "quiet_meetings": self.quiet_meetings, "headsup": self.headsup_min, "break_every": self.break_every, "alarm_sound": self.alarm_sound, "muted": self.muted, "desk_morning": self.desk_morning, "dnd_restore": self.dnd_restore, "dnd": self.dnd, "wrapup": self.wrapup, "upkeep_day": self.upkeep_day, "focus_goal": self.focus_goal, "budgets": self.budgets,
+            "pins": self.pins, "reading": self.reading, "calendars": self.calendars, "calendar_meta": self.calendar_meta.iter().map(|(s, m)| (s.clone(), m.to_json())).collect::<serde_json::Map<_, _>>(), "holidays": self.holiday_cc, "pin_labels": self.pin_labels, "reading_titles": self.reading_titles, "people": self.people.iter().map(|p| p.to_json()).collect::<Vec<_>>(), "habits": self.habits.iter().map(|h| h.to_json()).collect::<Vec<_>>(), "countdowns": self.countdowns.iter().map(|(l, d)| serde_json::json!([l, d.to_string()])).collect::<Vec<_>>(), "things": self.things, "renewals": self.renewals.iter().map(|r| r.to_json()).collect::<Vec<_>>(), "gift_lead": self.gift_lead, "habit_nudge": self.habit_nudge, "after_meeting": self.after_meeting, "site_time": self.site_time, "kind_moves": self.kind_moves, "weather": self.weather_on, "work_hours": [self.work_hours.0, self.work_hours.1], "day_totals": plan::history_merge(&self.day_totals, &self.kind_time, &self.focus_log, chrono::Local::now().date_naive()), "workday": self.workday, "workday_ask": self.workday_ask, "welcome_seen": self.welcome_seen, "backup_sources": self.backup_sources, "backup_target": self.backup_target, "backup_last": self.backup_last, "backup_result": self.backup_result, "backup_skip": self.backup_skip, "backup_auto": self.backup_auto, "backup_history": self.backup_history, "upkeep_hide": self.upkeep_hide, "space_log": self.space_log, "tidy_targets": self.tidy_targets, "tidy_auto": self.tidy_auto, "hidden": self.hidden, "work_days": self.work_days, "clock12": brain::clock12(), "week_sunday": brain::week_sunday(), "quiet_after": self.quiet_after, "quiet_until": self.quiet_until.filter(|q| *q > timers::unix_now()), "quiet_weekend": self.quiet_weekend, "quiet_meetings": self.quiet_meetings, "headsup": self.headsup_min, "break_every": self.break_every, "alarm_sound": self.alarm_sound, "muted": self.muted, "desk_morning": self.desk_morning, "dnd_restore": self.dnd_restore, "dnd": self.dnd, "wrapup": self.wrapup, "upkeep_day": self.upkeep_day, "focus_goal": self.focus_goal, "budgets": self.budgets,
             "notice_health": self.notice_health, "check_updates": self.check_updates, "update_told": self.update_told, "sounds": self.sounds, "breaks": self.breaks, "name": self.name,
             "hat": self.hat, "skin": self.skin, "friendship": self.friendship, "highscores": self.highscores, "game_levels": self.arcade.levels, "birthday": self.birthday.map(|(m, d)| [m, d]), "stats": self.stats, "unlocked": self.unlocked, "explored": self.explored, "persona": if self.unhinged { "unhinged" } else { "boring" }, "anchor": self.anchor.or(self.saved_anchor).map(|a| [a.x, a.y]),
             "timers": self.timers.iter().map(|t| serde_json::json!([t.at, t.label, t.every, t.id, t.rule])).collect::<Vec<_>>(),
@@ -3028,6 +3089,8 @@ impl App {
         self.tidy_targets = v["tidy_targets"].as_array().into_iter().flatten().filter_map(|e| Some((e[0].as_str()?.to_string(), e[1].as_str()?.to_string()))).collect();
         tidy::set_targets(&self.tidy_targets.iter().map(|(c, p)| (c.clone(), std::path::PathBuf::from(p))).collect::<Vec<_>>());
         self.tidy_auto = v["tidy_auto"].as_bool().unwrap_or(false);
+        // put away last time: stays in the tray, but only if there is one to click
+        self.set_hidden(v["hidden"].as_bool().unwrap_or(false) && self.tray.is_some());
         if let Some(days) = v["work_days"].as_array() {
             self.work_days = days.iter().filter_map(|d| d.as_u64()).filter(|d| (1..=7).contains(d)).map(|d| d as u32).collect();
         }
@@ -4258,6 +4321,9 @@ impl App {
                     }
                 };
             }
+            Effect::Tray if self.tray.is_none() => r = Reply::say(lines::pick("say_tray_none")).mood(Mood::Think),
+            // he says so first, then goes (`show` would bring him straight back)
+            Effect::Tray => self.hide_at = Some(Instant::now() + Duration::from_millis(1800)),
             Effect::Exit => {
                 self.save_if_changed();
                 ctx.send_viewport_cmd(egui::ViewportCommand::Close);
@@ -5270,11 +5336,12 @@ impl eframe::App for App {
             match cmd.as_str() {
                 "options" => self.act(&ctx, Act::Options),
                 "hide" => self.balloon = None,
-                "menu" => self.show(menu_reply()),
+                "menu" => self.show(menu_reply(self.tray.is_some())),
                 _ => self.run(&ctx, &cmd),
             }
         }
         self.tick(&ctx);
+        self.tray_events(&ctx);
         let t = self.t() as f32;
         if self.screenshot.is_some() {
             // a classic teal desktop behind the transparent window, so the picture isn't see-through
@@ -5318,6 +5385,26 @@ impl eframe::App for App {
                 self.frames += 1; // --play desk with --screenshot: just the Desk
                 return self.take_screenshot(&ctx);
             }
+        }
+
+        // ---- put away in the tray: a 1×1 see-through window at his spot, so reminders and timers keep ticking
+        // (a hidden window gets no frames on X11) ----
+        if self.hidden && self.screenshot.is_none() {
+            if self.anchor.is_none() {
+                self.anchor = self.saved_anchor;
+            }
+            if self.sent_size != vec2(1.0, 1.0) {
+                ctx.send_viewport_cmd(egui::ViewportCommand::MousePassthrough(true));
+                ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(vec2(1.0, 1.0)));
+                self.sent_size = vec2(1.0, 1.0);
+            }
+            self.frames += 1;
+            ctx.request_repaint_after(Duration::from_millis(250));
+            return;
+        }
+        if self.sent_size == vec2(1.0, 1.0) {
+            ctx.send_viewport_cmd(egui::ViewportCommand::MousePassthrough(false)); // back from the tray
+            self.settle = 0;
         }
 
         // ---- where everything goes: balloon beside/above the clip, flipped away from screen edges ----
@@ -5401,7 +5488,7 @@ impl eframe::App for App {
             }
         }
         if resp.secondary_clicked() {
-            self.show(menu_reply());
+            self.show(menu_reply(self.tray.is_some()));
         }
 
         let pointer = ctx.input(|i| i.pointer.latest_pos());
@@ -5466,13 +5553,17 @@ impl App {
 }
 
 /// The right-click menu lives in the balloon, so it always has room.
-fn menu_reply() -> Reply {
+fn menu_reply(tray: bool) -> Reply {
     let mut r = Reply::say("What shall we do?");
     for (label, cmd) in [("Open my desk", "desk"), ("Show me around", "tour"), ("Tell me a joke", "joke"), ("Roast me", "roast"), ("Fun fact", "fact"), ("Quiz me!", "quiz"), ("Do a dance!", "dance"), ("What can you do?", "help"), ("Be quiet for an hour", "quiet")] {
         r = r.run(label, cmd);
     }
     // Options is the ⚙ in the balloon's corner, so it isn't listed twice here
-    r = r.btn("Hide balloon", Act::Hide).run("Goodbye, Clipster", "bye");
+    r = r.btn("Hide balloon", Act::Hide);
+    if tray {
+        r = r.run("Hide in the tray", "tray hide");
+    }
+    r = r.run("Goodbye, Clipster", "bye");
     r.ask = false;
     r
 }
@@ -6311,6 +6402,7 @@ fn main() -> eframe::Result {
             .with_transparent(true)
             .with_decorations(false)
             .with_always_on_top()
+            .with_taskbar(!cfg!(windows)) // Windows: he lives in the notification area (Linux leaves it to the tray, see `tray`)
             .with_icon(eframe::icon_data::from_png_bytes(include_bytes!("../assets/clipster.png")).unwrap_or_default()),
         ..Default::default()
     };

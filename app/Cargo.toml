@@ -1,6 +1,6 @@
 [package]
 name = "clipster"
-version = "0.7.2"
+version = "0.7.3"
 edition = "2021"
 description = "A sarcastic desktop paperclip that helps you system-wide, comments on everything, and runs on rules instead of AI."
 license = "GPL-3.0-or-later"
@@ -33,6 +33,7 @@ strip = true
 
 [target.'cfg(target_os = "linux")'.dependencies]
 zbus = "5"
+serde = { version = "1", features = ["derive"] } # already built for zbus; the tray menu's layout type needs its derive
 x11rb = "0.13" # the active window's title straight from X (already built for winit), not two xprop processes every 2 s
 
 [package.metadata.packager]

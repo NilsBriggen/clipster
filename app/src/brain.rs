@@ -26,6 +26,7 @@ pub enum Effect {
     CancelTimers,
     CancelTimer(String), // the timers whose label contains this
     Exit,
+    Tray, // put him away in the system tray (after he's said so)
     Net(crate::net::Query),
     ClipHistory,
     Stopwatch(&'static str), // "start", "stop" or "show"
@@ -904,6 +905,7 @@ pub fn exact(input: &str) -> Option<Reply> {
         "upper" | "lower" | "reverse" | "mock" | "title" => return Some(transform(&head, rest)),
         "mute" if rest.is_empty() => return Some(crate::powers::volume("mute")), // the sound; "be quiet" quiets him
         "quiet" | "shh" | "shush" | "silence" | "mute" => return Some(quiet()),
+        "tray" if rest == "hide" => return Some(Reply::say(lines::pick("say_tray_hide")).mood(Mood::Wink).effect(Effect::Tray)),
         "bye" | "quit" | "exit" | "goodbye" => return Some(Reply::say(lines::pick("goodbye")).effect(Effect::Exit).mood(Mood::Spin)),
         "birthday" | "bday" => {
             use chrono::Datelike;

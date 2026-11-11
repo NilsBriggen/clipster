@@ -84,6 +84,8 @@ On first start Clipster walks you through a short setup: your name, his personal
 
 **Call him from anywhere:** Meta+C on KDE Plasma, Ctrl+Alt+C on Windows. Drag him anywhere, right-click for his menu, double-click for a trick.
 
+**He lives in the system tray**, not the taskbar. Click his tray icon to put him away or bring him back (reminders and heads-ups bring him back on their own). Right-click it for the Desk, a quiet hour, Settings or Quit. On GNOME the tray needs the AppIndicator extension; without a tray he keeps his taskbar button.
+
 ### Platform notes
 
 Clipster is developed on Linux with KDE Plasma, where everything works, including following the mouse and keeping him above other windows. On other Linux desktops the global shortcut and mouse-following are off. On Windows nearly everything works: volume and media go through the keyboard's media keys, brightness works on laptop screens, and for Wi-Fi and Bluetooth he opens the right Settings page, because Windows doesn't let apps flip those switches. CPU temperature isn't available on Windows. The Desk opens with Ctrl+Alt+Shift+C there (Meta+Shift+C on KDE). During focus sessions he silences notifications on KDE, GNOME, Cinnamon and XFCE; Windows doesn't let apps switch Do Not Disturb, so there he opens the Focus settings for you.

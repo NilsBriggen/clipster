@@ -58,7 +58,7 @@ pub use kwin::start;
 #[cfg(windows)]
 pub use windows::start;
 #[cfg(not(any(target_os = "linux", windows)))]
-pub fn start(_ctx: &eframe::egui::Context) -> Option<Tracker> {
+pub fn start(_ctx: &eframe::egui::Context, _skip_taskbar: bool) -> Option<Tracker> {
     None
 }
 
@@ -114,6 +114,8 @@ mod kwin {
     // keep Clipster above every other window, on every virtual desktop
     function pin(w) {
         if (!w || w.resourceClass != "clipster") return;
+        // he lives in the system tray: no taskbar button for the pet itself (the Desk keeps its own)
+        if (SKIP_TASKBAR && w.caption == "Clipster") { w.skipTaskbar = true; w.skipPager = true; }
         w.keepAbove = true;
         w.onAllDesktops = true;
         w.keepAboveChanged.connect(function () { if (!w.keepAbove) w.keepAbove = true; });
@@ -153,7 +155,7 @@ mod kwin {
         let _ = conn.call_method(Some("org.kde.KWin"), "/Scripting", Some("org.kde.kwin.Scripting"), "unloadScript", &(NAME,));
     }
 
-    pub fn start(ctx: &eframe::egui::Context) -> Option<Tracker> {
+    pub fn start(ctx: &eframe::egui::Context, skip_taskbar: bool) -> Option<Tracker> {
         let pos: Shared = Default::default();
         let (summoned, desk) = (Arc::new(AtomicBool::new(false)), Arc::new(AtomicBool::new(false)));
         let title = Arc::new(Mutex::new(None));
@@ -167,7 +169,7 @@ mod kwin {
             .ok()?;
         // a private folder: whatever file sits here gets run inside the window manager
         let path = dirs::runtime_dir().or_else(dirs::cache_dir)?.join(format!("{NAME}.js"));
-        std::fs::write(&path, SCRIPT).ok()?;
+        std::fs::write(&path, format!("const SKIP_TASKBAR = {skip_taskbar};\n{SCRIPT}")).ok()?;
         unload(&conn); // left over from a crash
         let id: i32 = conn
             .call_method(Some("org.kde.KWin"), "/Scripting", Some("org.kde.kwin.Scripting"), "loadScript", &(path.to_string_lossy().as_ref(), NAME))
@@ -187,7 +189,7 @@ mod windows {
     use std::sync::atomic::{AtomicBool, Ordering};
     use std::sync::Arc;
 
-    pub fn start(ctx: &eframe::egui::Context) -> Option<Tracker> {
+    pub fn start(ctx: &eframe::egui::Context, _skip_taskbar: bool) -> Option<Tracker> {
         let (pos, summoned, desk, stop) = (Shared::default(), Arc::new(AtomicBool::new(false)), Arc::new(AtomicBool::new(false)), Arc::new(AtomicBool::new(false)));
         let (p, s, d, st, ctx) = (pos.clone(), summoned.clone(), desk.clone(), stop.clone(), ctx.clone());
         std::thread::spawn(move || {
